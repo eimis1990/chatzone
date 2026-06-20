@@ -13,16 +13,17 @@ export function SuggestedQuestions({
   onSelect,
   disabled = false,
 }: SuggestedQuestionsProps) {
-  if (questions.length === 0) return null
+  const visible = questions.filter(Boolean).slice(0, 4)
+  if (visible.length === 0) return null
 
   return (
-    <div className="flex flex-wrap gap-2 px-4 pb-3">
-      {questions.map((q) => (
+    <div className="flex flex-wrap gap-1.5 px-4 pt-2 pb-1 border-t border-gray-100">
+      {visible.map((q) => (
         <button
           key={q}
           onClick={() => onSelect(q)}
           disabled={disabled}
-          className="text-sm px-3 py-1.5 rounded-full border border-current transition-opacity hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed text-left"
+          className="text-xs px-3 py-1.5 rounded-full border border-current transition-opacity hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed text-left leading-normal"
           style={{ color: primaryColor, borderColor: primaryColor }}
         >
           {q}
