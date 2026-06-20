@@ -1,5 +1,5 @@
 /**
- * ChatbotZone Widget Loader
+ * Chatzone Widget Loader
  *
  * Plain vanilla JS — NO build step, NO imports.
  * Customers paste:

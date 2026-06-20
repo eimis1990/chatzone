@@ -104,7 +104,7 @@ export function ChatPreview({ config }: ChatPreviewProps) {
           </button>
         </div>
         <p className="mt-1.5 text-center text-[10px] text-muted-foreground/60">
-          Powered by ChatbotZone
+          Powered by Chatzone
         </p>
       </div>
     </div>
