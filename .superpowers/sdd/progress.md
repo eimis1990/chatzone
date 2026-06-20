@@ -19,3 +19,11 @@ Task 5.2/5.3/5.4: complete (parsers, embeddings, pipeline + /api/ingest, storage
 Task 6.1/6.2: complete (retrieval, prompt, /api/chat streaming) + 9.1 rate limiter
 PHASES 5 & 6 backend COMPLETE (UI 5.5 + widget pending)
 Task 2.3/2.4: complete (login, reset, invites API+accept, owner seed script) — via subagent, reviewed
+Task 3.1/3.2/3.3: complete (owner panel) — subagent, verified in browser
+Task 4.1/4.3: complete (portal shell + configurator) — subagent
+Task 5.5: complete (KB manager UI) — subagent
+Task 7.1/7.2/7.3/7.4: complete (widget config, embed UI, loader, snippet) — subagent
+Task 8.1/8.2/8.3: complete (conversations, leads+CSV, analytics) — subagent
+Task 9.1/9.2/9.3: complete (rate limits, E2E, README/DEPLOY)
+PHASE 2-9 COMPLETE. Owner login + invite flow verified live in browser. RAG verified live.
+CYCLE 1 COMPLETE.
