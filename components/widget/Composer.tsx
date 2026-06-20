@@ -15,9 +15,11 @@ interface ComposerProps {
   primaryColor: string
   voice?: VoiceConfig
   publicKey?: string
+  /** Active visitor language — forwarded to VoiceCallButton so calls start in the right language. */
+  language?: 'en' | 'lt'
 }
 
-export function Composer({ onSend, disabled = false, primaryColor, voice, publicKey }: ComposerProps) {
+export function Composer({ onSend, disabled = false, primaryColor, voice, publicKey, language }: ComposerProps) {
   const [value, setValue] = useState('')
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -92,6 +94,7 @@ export function Composer({ onSend, disabled = false, primaryColor, voice, public
             appearance="compact"
             getToken={getToken}
             primaryColor={primaryColor}
+            language={language}
           />
         )}
 
