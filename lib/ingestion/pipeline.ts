@@ -72,7 +72,7 @@ export async function ingestSource(
     const chunks = full.chunk(text)
     if (chunks.length === 0) {
       await full.repo.replaceChunks(source.bot_id, sourceId, [])
-      await full.repo.setStatus(sourceId, 'ready', { error_message: null, chunk_count: 0 })
+      await full.repo.setStatus(sourceId, 'ready', { error_message: null })
       return
     }
     const embeddings = await full.embed(chunks.map((c) => c.content))
@@ -83,7 +83,7 @@ export async function ingestSource(
       token_count: Math.ceil(c.content.length / 4),
     }))
     await full.repo.replaceChunks(source.bot_id, sourceId, rows)
-    await full.repo.setStatus(sourceId, 'ready', { error_message: null, chunk_count: rows.length })
+    await full.repo.setStatus(sourceId, 'ready', { error_message: null })
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)
     await full.repo.setStatus(sourceId, 'error', { error_message: message })
@@ -98,7 +98,8 @@ export function makeServiceRepo(db: SupabaseClient): IngestRepo {
       return (data as KnowledgeSource) ?? null
     },
     async setStatus(id, status, patch = {}) {
-      await db.from('knowledge_sources').update({ status, ...patch }).eq('id', id)
+      const { error } = await db.from('knowledge_sources').update({ status, ...patch }).eq('id', id)
+      if (error) throw new Error(`setStatus failed: ${error.message}`)
     },
     async downloadFile(path) {
       const { data, error } = await db.storage.from(STORAGE_BUCKET).download(path)
@@ -108,9 +109,10 @@ export function makeServiceRepo(db: SupabaseClient): IngestRepo {
     async replaceChunks(botId, sourceId, rows) {
       await db.from('document_chunks').delete().eq('source_id', sourceId)
       if (rows.length === 0) return
-      await db
+      const { error } = await db
         .from('document_chunks')
         .insert(rows.map((r) => ({ bot_id: botId, source_id: sourceId, ...r })))
+      if (error) throw new Error(`chunk insert failed: ${error.message}`)
     },
   }
 }
