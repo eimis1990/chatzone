@@ -29,6 +29,7 @@ const fullConfig: BotConfig = {
     ],
   },
   allowedDomains: ['acme.com', 'acme.io'],
+  language: 'en',
   voice: {
     enabled: true,
     ttsEnabled: true,

@@ -44,6 +44,7 @@ export const botConfigSchema = z.object({
     })
     .default({ enabled: false, trigger: 'on_fallback', fields: [] }),
   allowedDomains: z.array(z.string()).default([]),
+  language: z.enum(['en', 'lt']).default('en'),
   voice: z
     .object({
       enabled: z.boolean().default(false),

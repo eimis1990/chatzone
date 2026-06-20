@@ -47,4 +47,15 @@ describe('buildMessages', () => {
     const msgs = buildMessages(config, [], [], 'q')
     expect(msgs[0].content.toLowerCase()).toContain('not')
   })
+
+  it('instructs English by default', () => {
+    const msgs = buildMessages(config, [], [], 'q')
+    expect(msgs[0].content).toContain('respond in English')
+  })
+
+  it('instructs Lithuanian when language is lt', () => {
+    const ltConfig = { ...config, language: 'lt' as const }
+    const msgs = buildMessages(ltConfig, [], [], 'q')
+    expect(msgs[0].content).toContain('respond in Lithuanian')
+  })
 })

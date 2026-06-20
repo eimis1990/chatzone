@@ -133,7 +133,7 @@
       iframe = document.createElement('iframe')
       iframe.setAttribute('data-cbz-iframe', '')
       iframe.setAttribute('title', 'Chat')
-      iframe.setAttribute('allow', 'clipboard-write')
+      iframe.setAttribute('allow', 'clipboard-write; microphone; autoplay')
       iframe.setAttribute(
         'src',
         appUrl + '/embed/' + encodeURIComponent(botKey)
