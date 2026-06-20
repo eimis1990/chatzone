@@ -411,7 +411,7 @@ export function TestChat({ botId, config }: TestChatProps) {
 
       {/* Suggested questions — pinned just above input, visible until first user message */}
       {suggestedVisible && suggestedQuestions.length > 0 && (
-        <div className="px-4 pt-2 pb-1 flex flex-wrap gap-1.5 border-t border-border/50">
+        <div className="px-4 pt-2 pb-1 flex flex-wrap gap-1.5">
           {suggestedQuestions.slice(0, 4).map((q, i) => (
             <button
               key={i}

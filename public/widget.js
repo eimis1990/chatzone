@@ -12,7 +12,7 @@
  *  2. Injects a floating launcher <button> into the page.
  *  3. On first click, lazy-creates an <iframe> pointed at /embed/{key}.
  *  4. Toggles open/close on subsequent launcher clicks.
- *  5. When open: renders a down-chevron close button + "Powered by Chatzone" link below the iframe.
+ *  5. When open: renders a "Powered by Chatzone" link below the iframe.
  */
 ;(function () {
   'use strict'
@@ -134,39 +134,12 @@
     overflow: 'hidden',
   })
 
-  // ── Close button (down-chevron, below the iframe) ─────────────────────────
-  var closeBtn = document.createElement('button')
-  closeBtn.setAttribute('data-cbz-close', '')
-  closeBtn.setAttribute('type', 'button')
-  closeBtn.setAttribute('aria-label', 'Close chat')
-  // Down-chevron SVG
-  closeBtn.innerHTML =
-    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="20" height="20" aria-hidden="true">' +
-    '<polyline points="6 9 12 15 18 9" />' +
-    '</svg>'
-  css(closeBtn, {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    margin: '8px auto 0',
-    width: '36px',
-    height: '36px',
-    borderRadius: '50%',
-    border: 'none',
-    cursor: 'pointer',
-    backgroundColor: '#ffffff',
-    color: '#374151',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-    transition: 'box-shadow 0.15s ease, background-color 0.15s ease',
-    padding: '0',
-    lineHeight: '1',
-  })
-
-  // ── Powered-by link (below close button, right-aligned) ───────────────────
+  // ── Powered-by link (below the iframe, right-aligned) ─────────────────────
+  // No separate close button: the launcher bubble toggles open/close.
   var poweredBy = document.createElement('div')
   css(poweredBy, {
     textAlign: 'right',
-    marginTop: '6px',
+    marginTop: '8px',
     paddingRight: '2px',
     fontSize: '10px',
     color: 'rgba(0,0,0,0.35)',
@@ -178,7 +151,6 @@
     'style="color:rgba(0,0,0,0.5);text-decoration:underline;font-family:inherit;">Chatzone</a>'
 
   wrapper.appendChild(iframeContainer)
-  wrapper.appendChild(closeBtn)
   wrapper.appendChild(poweredBy)
 
   var iframe = null
@@ -221,10 +193,6 @@
     } else {
       openWidget()
     }
-  })
-
-  closeBtn.addEventListener('click', function () {
-    closeWidget()
   })
 
   // Keyboard: close on Escape when widget is open

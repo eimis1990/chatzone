@@ -17,7 +17,7 @@ export function SuggestedQuestions({
   if (visible.length === 0) return null
 
   return (
-    <div className="flex flex-wrap gap-1.5 px-4 pt-2 pb-1 border-t border-gray-100">
+    <div className="flex flex-wrap gap-1.5 px-4 pt-2 pb-1">
       {visible.map((q) => (
         <button
           key={q}
