@@ -18,3 +18,4 @@ Task 5.1: complete (chunker, unit tested)
 Task 5.2/5.3/5.4: complete (parsers, embeddings, pipeline + /api/ingest, storage bucket)
 Task 6.1/6.2: complete (retrieval, prompt, /api/chat streaming) + 9.1 rate limiter
 PHASES 5 & 6 backend COMPLETE (UI 5.5 + widget pending)
+Task 2.3/2.4: complete (login, reset, invites API+accept, owner seed script) — via subagent, reviewed
