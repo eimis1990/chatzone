@@ -21,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { ChatPreview } from '@/components/widget/ChatPreview'
+import { TestChat } from '@/components/client/TestChat'
 import { VoiceSection } from '@/components/client/VoiceSection'
 
 interface ConfigFormProps {
@@ -50,13 +50,37 @@ export function ConfigForm({ botId, initialConfig }: ConfigFormProps) {
     formState: { errors, isSubmitting },
   } = form
 
-  // Watch values used by the live preview
-  const previewConfig = watch(['displayName', 'greeting', 'suggestedQuestions', 'theme'])
+  // Watch all values needed by the live TestChat preview.
+  // Using `watch()` with no args subscribes to the full form; slice below.
+  const watchedValues = watch([
+    'displayName',
+    'greeting',
+    'suggestedQuestions',
+    'theme',
+    'voice',
+    'fallbackMessage',
+    'model',
+    'temperature',
+    'systemPrompt',
+    'persona',
+    'leadCapture',
+    'allowedDomains',
+    'avatarUrl',
+  ])
   const liveConfig = {
-    displayName: previewConfig[0],
-    greeting: previewConfig[1],
-    suggestedQuestions: previewConfig[2],
-    theme: previewConfig[3],
+    displayName: watchedValues[0],
+    greeting: watchedValues[1],
+    suggestedQuestions: watchedValues[2],
+    theme: watchedValues[3],
+    voice: watchedValues[4],
+    fallbackMessage: watchedValues[5],
+    model: watchedValues[6],
+    temperature: watchedValues[7],
+    systemPrompt: watchedValues[8],
+    persona: watchedValues[9],
+    leadCapture: watchedValues[10],
+    allowedDomains: watchedValues[11],
+    avatarUrl: watchedValues[12],
   }
 
   // Dynamic list for suggested questions
@@ -505,12 +529,12 @@ export function ConfigForm({ botId, initialConfig }: ConfigFormProps) {
         </div>
       </form>
 
-      {/* ── Live Preview ── */}
+      {/* ── Live Preview (interactive TestChat) ── */}
       <aside className="hidden lg:block">
         <div className="sticky top-20 space-y-3">
           <p className="text-sm font-medium text-muted-foreground">Live preview</p>
           <div className="h-[520px]">
-            <ChatPreview config={liveConfig} />
+            <TestChat botId={botId} config={liveConfig} />
           </div>
         </div>
       </aside>
