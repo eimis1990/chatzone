@@ -13,6 +13,8 @@ export interface PublicBotConfig {
     primaryColor: string
     position: 'bottom-right' | 'bottom-left'
     bubbleIcon?: string
+    cornerRadius: number
+    bubbleRadius: number
   }
   greeting: string
   suggestedQuestions: string[]
@@ -46,6 +48,8 @@ export function publicBotConfig(config: BotConfig): PublicBotConfig {
     theme: {
       primaryColor: config.theme.primaryColor,
       position: config.theme.position,
+      cornerRadius: config.theme.cornerRadius ?? 16,
+      bubbleRadius: config.theme.bubbleRadius ?? 16,
       ...(config.theme.bubbleIcon !== undefined && { bubbleIcon: config.theme.bubbleIcon }),
     },
     greeting: config.greeting,

@@ -507,6 +507,8 @@ function buildFullConfig(config: LiveConfig): BotConfig {
       primaryColor: config.theme?.primaryColor ?? '#4f46e5',
       position: config.theme?.position ?? 'bottom-right',
       bubbleIcon: config.theme?.bubbleIcon,
+      cornerRadius: config.theme?.cornerRadius ?? 16,
+      bubbleRadius: config.theme?.bubbleRadius ?? 16,
     },
     voice: {
       enabled: config.voice?.enabled ?? false,

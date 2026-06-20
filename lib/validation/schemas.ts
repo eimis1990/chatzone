@@ -12,14 +12,21 @@ export const leadFieldSchema = z.object({
 
 export const botConfigSchema = z.object({
   displayName: z.string().min(1).max(60),
-  avatarUrl: z.string().url().optional(),
+  avatarUrl: z.string().url().optional().or(z.literal('')),
   theme: z
     .object({
       primaryColor: z.string().default('#4f46e5'),
       position: z.enum(['bottom-right', 'bottom-left']).default('bottom-right'),
       bubbleIcon: z.string().optional(),
+      cornerRadius: z.number().min(0).max(32).default(16),
+      bubbleRadius: z.number().min(0).max(24).default(16),
     })
-    .default({ primaryColor: '#4f46e5', position: 'bottom-right' }),
+    .default({
+      primaryColor: '#4f46e5',
+      position: 'bottom-right',
+      cornerRadius: 16,
+      bubbleRadius: 16,
+    }),
   greeting: z.string().min(1).max(300),
   systemPrompt: z.string().min(1).max(8000),
   persona: z
@@ -30,7 +37,7 @@ export const botConfigSchema = z.object({
     .default({ tone: 'friendly', verbosity: 'balanced' }),
   model: z.string().default('gpt-4o-mini'),
   temperature: z.number().min(0).max(2).default(0.3),
-  suggestedQuestions: z.array(z.string().min(1)).max(6).default([]),
+  suggestedQuestions: z.array(z.string().min(1)).max(4).default([]),
   fallbackMessage: z
     .string()
     .min(1)

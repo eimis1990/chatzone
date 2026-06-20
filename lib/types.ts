@@ -86,6 +86,8 @@ export interface BotConfig {
     primaryColor: string
     position: 'bottom-right' | 'bottom-left'
     bubbleIcon?: string
+    cornerRadius: number
+    bubbleRadius: number
   }
   voice: VoiceConfig
   language: BotLanguage
