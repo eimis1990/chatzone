@@ -9,11 +9,12 @@
  * Features:
  *  - Streams bot replies from POST /api/preview/chat
  *  - TTS (🔊) per bot message via POST /api/preview/tts when voice.ttsEnabled
- *  - Live voice call via ElevenLabs WebRTC (VoiceCallButton) when voice.enabled
+ *  - Live voice call via ElevenLabs WebRTC (VoiceCallButton, compact) in composer
  *  - Suggested question chips pinned above input, hidden after first message
  *  - Start over button restores suggested questions
  *  - Live theming from config.theme (primaryColor, cornerRadius, bubbleRadius)
  *  - Avatar from config.avatarUrl (falls back to BotIcon)
+ *  - "Powered by Chatzone" footer link
  */
 
 import { useState, useRef, useCallback, type KeyboardEvent, type FormEvent } from 'react'
@@ -27,6 +28,7 @@ import {
 } from 'lucide-react'
 import type { BotConfig } from '@/lib/types'
 import { VoiceCallButton } from '@/components/voice/VoiceCallButton'
+import { POWERED_BY_URL } from '@/lib/utils'
 
 // Partial form values — fields may be undefined mid-edit.
 // leadCapture.fields uses `required?: boolean` from Zod input type, so we keep it loose.
@@ -337,32 +339,6 @@ export function TestChat({ botId, config }: TestChatProps) {
           <p className="text-xs opacity-80">Online</p>
         </div>
 
-        {/* Live voice call button — shown only when voice is enabled */}
-        {voiceEnabled && (
-          <div className="flex-shrink-0">
-            <VoiceCallButton
-              primaryColor="#ffffff"
-              getToken={async () => {
-                const res = await fetch('/api/preview/voice-token', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ botId }),
-                })
-                if (!res.ok) {
-                  const data = (await res.json().catch(() => ({}))) as { error?: string }
-                  throw new Error(
-                    res.status === 503
-                      ? 'Voice calling unavailable'
-                      : (data.error ?? 'Token request failed'),
-                  )
-                }
-                const data = (await res.json()) as { token: string }
-                return data.token
-              }}
-            />
-          </div>
-        )}
-
         <button
           type="button"
           onClick={handleStartOver}
@@ -468,20 +444,62 @@ export function TestChat({ botId, config }: TestChatProps) {
             style={{ maxHeight: '120px' }}
           />
 
+          {/* Voice call button — compact circle, only when voice is enabled */}
+          {voiceEnabled && (
+            <VoiceCallButton
+              appearance="compact"
+              primaryColor={primaryColor}
+              getToken={async () => {
+                const res = await fetch('/api/preview/voice-token', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ botId }),
+                })
+                if (!res.ok) {
+                  const data = (await res.json().catch(() => ({}))) as { error?: string }
+                  throw new Error(
+                    res.status === 503
+                      ? 'Voice calling unavailable'
+                      : (data.error ?? 'Token request failed'),
+                  )
+                }
+                const data = (await res.json()) as { token: string }
+                return data.token
+              }}
+            />
+          )}
+
           <button
             type="submit"
             disabled={streaming || !inputValue.trim()}
             aria-label="Send message"
-            className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-white transition-opacity hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed"
+            className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 text-white transition-opacity hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed"
             style={{ backgroundColor: primaryColor }}
           >
-            <SendIcon className="size-3.5" aria-hidden="true" />
+            {streaming ? (
+              <LoaderCircleIcon className="size-3.5 animate-spin" aria-hidden="true" />
+            ) : (
+              <SendIcon className="size-3.5" aria-hidden="true" />
+            )}
           </button>
         </form>
 
-        <p className="mt-1.5 text-center text-[10px] text-muted-foreground/60">
-          Test mode — not saved or logged
-        </p>
+        <div className="mt-1.5 text-center space-y-0.5">
+          <p className="text-[10px] text-muted-foreground/60">
+            Test mode — not saved or logged
+          </p>
+          <p className="text-[10px] text-muted-foreground/50">
+            Powered by{' '}
+            <a
+              href={POWERED_BY_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline hover:text-muted-foreground transition-colors"
+            >
+              Chatzone
+            </a>
+          </p>
+        </div>
       </div>
     </div>
   )
