@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { useForm, useFieldArray, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
@@ -55,18 +55,26 @@ export function ConfigForm({ botId, initialConfig }: ConfigFormProps) {
   // Persisted to localStorage keyed by botId so it survives refresh.
   const lsKey = `cbz_cfg_lang_${botId}`
 
-  const [activeLang, setActiveLang] = useState<BotLanguage>(() => {
-    // Initial value comes from localStorage if available and that language is
-    // in the bot's enabled languages; otherwise default to first enabled language.
+  // Start from the bot's default language on both server and first client render
+  // (reading localStorage here would cause a hydration mismatch). The saved
+  // language is applied in a mount effect below.
+  const [activeLang, setActiveLang] = useState<BotLanguage>(
+    (initialConfig.languages?.[0] as BotLanguage) ?? 'en',
+  )
+  const langHydratedRef = useRef(false)
+
+  // After mount: restore the persisted language if it's still enabled.
+  useEffect(() => {
     const enabled = (initialConfig.languages ?? ['en']) as BotLanguage[]
     try {
       const stored = localStorage.getItem(lsKey) as BotLanguage | null
-      if (stored && enabled.includes(stored)) return stored
+      if (stored && enabled.includes(stored)) setActiveLang(stored)
     } catch {
-      // localStorage unavailable (SSR / private browsing)
+      // localStorage unavailable
     }
-    return enabled[0] ?? 'en'
-  })
+    langHydratedRef.current = true
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const form = useForm<FormValues>({
     resolver: zodResolver(botConfigFormSchema),
@@ -87,8 +95,10 @@ export function ConfigForm({ botId, initialConfig }: ConfigFormProps) {
   const watchedLanguages = watch('languages') ?? ['en']
   const ltEnabled = watchedLanguages.includes('lt')
 
-  // Persist activeLang to localStorage whenever it changes
+  // Persist activeLang to localStorage whenever it changes (after the initial
+  // restore, so we don't clobber the saved value before reading it).
   useEffect(() => {
+    if (!langHydratedRef.current) return
     try {
       localStorage.setItem(lsKey, activeLang)
     } catch {
