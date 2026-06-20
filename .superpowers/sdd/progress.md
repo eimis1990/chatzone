@@ -6,3 +6,6 @@ Branch: feat/cycle1-foundation
 ## Tasks
 (none complete yet)
 Task 0.1: complete (commit a4e8f6a, scaffold + vitest)
+Task 0.2: complete (commit, shadcn)
+Task 0.3: complete (commit, env + supabase clients)
+PHASE 0 COMPLETE
