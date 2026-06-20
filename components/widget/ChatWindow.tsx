@@ -311,6 +311,7 @@ export function ChatWindow({ publicKey, config }: ChatWindowProps) {
         primaryColor={primaryColor}
         voice={config.voice}
         publicKey={publicKey}
+        language={activeLang}
       />
     </div>
   )
