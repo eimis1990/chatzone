@@ -67,6 +67,7 @@ export function ConfigForm({ botId, initialConfig }: ConfigFormProps) {
     'leadCapture',
     'allowedDomains',
     'avatarUrl',
+    'language',
   ])
   const liveConfig = {
     displayName: watchedValues[0],
@@ -82,6 +83,7 @@ export function ConfigForm({ botId, initialConfig }: ConfigFormProps) {
     leadCapture: watchedValues[10],
     allowedDomains: watchedValues[11],
     avatarUrl: watchedValues[12],
+    language: watchedValues[13],
   }
 
   // Dynamic list for suggested questions

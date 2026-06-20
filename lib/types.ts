@@ -60,6 +60,7 @@ export interface LeadField {
 export type LeadTrigger = 'on_fallback' | 'after_n_messages' | 'manual'
 
 export type VoiceGender = 'male' | 'female'
+export type BotLanguage = 'en' | 'lt'
 
 export interface PlatformVoice {
   id: string
@@ -87,6 +88,7 @@ export interface BotConfig {
     bubbleIcon?: string
   }
   voice: VoiceConfig
+  language: BotLanguage
   greeting: string
   systemPrompt: string
   persona: {
@@ -113,6 +115,8 @@ export interface Bot {
   status: BotStatus
   public_key: string
   config: BotConfig
+  elevenlabs_agent_id: string | null
+  elevenlabs_agent_hash: string | null
   created_at: string
   updated_at: string
 }

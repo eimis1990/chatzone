@@ -48,6 +48,7 @@ type LiveConfig = {
   }
   allowedDomains?: string[]
   avatarUrl?: string
+  language?: BotConfig['language']
 }
 
 interface ChatMessage {
@@ -644,5 +645,6 @@ function buildFullConfig(config: LiveConfig): BotConfig {
       })),
     },
     allowedDomains: config.allowedDomains ?? [],
+    language: config.language ?? 'en',
   }
 }
