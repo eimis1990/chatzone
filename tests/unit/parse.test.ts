@@ -18,9 +18,9 @@ describe('parseFile', () => {
 })
 
 describe('extractReadableText', () => {
-  it('strips HTML tags and returns body text', () => {
+  it('strips HTML tags and returns body text', async () => {
     const html = `<html><head><title>T</title></head><body><article><h1>Heading</h1><p>First paragraph of content here that is reasonably long.</p><p>Second paragraph also has a fair amount of words.</p></article></body></html>`
-    const text = extractReadableText(html, 'https://example.com')
+    const text = await extractReadableText(html, 'https://example.com')
     expect(text).toContain('First paragraph')
     expect(text).not.toContain('<p>')
   })

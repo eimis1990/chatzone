@@ -1,8 +1,9 @@
-import { JSDOM } from 'jsdom'
-import { Readability } from '@mozilla/readability'
-
 /** Extracts the main readable text from an HTML string. */
-export function extractReadableText(html: string, url: string): string {
+export async function extractReadableText(html: string, url: string): Promise<string> {
+  // Dynamic imports keep jsdom (ESM-only in recent versions) out of the
+  // module graph at build time, avoiding the require()-of-ESM error.
+  const { JSDOM } = await import('jsdom')
+  const { Readability } = await import('@mozilla/readability')
   const dom = new JSDOM(html, { url })
   const reader = new Readability(dom.window.document)
   const article = reader.parse()
@@ -40,5 +41,5 @@ export async function parseUrl(url: string, fetchImpl: typeof fetch = fetch): Pr
   const res = await fetchImpl(url)
   if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`)
   const html = await res.text()
-  return extractReadableText(html, url)
+  return await extractReadableText(html, url)
 }
