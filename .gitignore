@@ -9,3 +9,4 @@ dist/
 
 .playwright-mcp/
 test-results/
+next-env.d.ts
