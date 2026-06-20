@@ -44,6 +44,15 @@ export interface AgentConfig {
     }
     language_presets: Record<string, { overrides: { agent: { first_message: string } } }>
   }
+  // Allow the client SDK to set the conversation language at session start
+  // (so a visitor who picked Lithuanian starts the call in Lithuanian).
+  platform_settings: {
+    overrides: {
+      conversation_config_override: {
+        agent: { language: boolean }
+      }
+    }
+  }
 }
 
 const LANG_NAME: Record<string, string> = { en: 'English', lt: 'Lithuanian' }
@@ -103,6 +112,9 @@ export function buildAgentConfig(bot: Bot, appUrl: string, secretId: string): Ag
       },
       language_presets: languagePresets,
     },
+    platform_settings: {
+      overrides: { conversation_config_override: { agent: { language: true } } },
+    },
   }
 }
 
@@ -110,6 +122,7 @@ export function buildAgentConfig(bot: Bot, appUrl: string, secretId: string): Ag
 export function agentConfigHash(bot: Bot, appUrl: string): string {
   const cfg = bot.config
   const material = JSON.stringify([
+    'v2-overrides', // bump to force re-sync when the agent payload shape changes
     cfg.languages,
     cfg.content,
     cfg.voice?.voices,

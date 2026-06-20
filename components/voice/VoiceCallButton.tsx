@@ -24,6 +24,8 @@ interface VoiceCallButtonProps {
   getToken: () => Promise<string>
   primaryColor?: string
   appearance?: 'full' | 'compact'
+  /** Conversation language — starts the agent in this language (en/lt). */
+  language?: 'en' | 'lt'
   className?: string
 }
 
@@ -33,9 +35,10 @@ interface InnerProps {
   getToken: () => Promise<string>
   primaryColor: string
   appearance: 'full' | 'compact'
+  language?: 'en' | 'lt'
 }
 
-function VoiceCallInner({ getToken, primaryColor, appearance }: InnerProps) {
+function VoiceCallInner({ getToken, primaryColor, appearance, language }: InnerProps) {
   const [callError, setCallError] = useState<string | null>(null)
   const [micDenied, setMicDenied] = useState(false)
   const [unavailable, setUnavailable] = useState(false)
@@ -83,7 +86,10 @@ function VoiceCallInner({ getToken, primaryColor, appearance }: InnerProps) {
     }
 
     try {
-      await startSession({ conversationToken: token })
+      await startSession({
+        conversationToken: token,
+        ...(language ? { overrides: { agent: { language } } } : {}),
+      })
     } catch (err: unknown) {
       const isUnavailable =
         err instanceof Error &&
@@ -95,7 +101,7 @@ function VoiceCallInner({ getToken, primaryColor, appearance }: InnerProps) {
       }
       setCallError('Could not connect — please try again.')
     }
-  }, [getToken, startSession])
+  }, [getToken, startSession, language])
 
   const handleEnd = useCallback(async () => {
     await endSession()
@@ -236,12 +242,18 @@ export function VoiceCallButton({
   getToken,
   primaryColor = '#4f46e5',
   appearance = 'full',
+  language,
   className,
 }: VoiceCallButtonProps) {
   return (
     <div className={className}>
       <ConversationProvider>
-        <VoiceCallInner getToken={getToken} primaryColor={primaryColor} appearance={appearance} />
+        <VoiceCallInner
+          getToken={getToken}
+          primaryColor={primaryColor}
+          appearance={appearance}
+          language={language}
+        />
       </ConversationProvider>
     </div>
   )
