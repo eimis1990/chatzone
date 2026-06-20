@@ -127,7 +127,7 @@ export function ConfigForm({ botId, initialConfig }: ConfigFormProps) {
   const suggestedCount = suggestedQuestionsField.fields.length
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
+    <div className="grid gap-8 lg:grid-cols-[1fr_400px]">
       {/* ── Form ── */}
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
 

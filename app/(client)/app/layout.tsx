@@ -19,7 +19,7 @@ export default async function ClientLayout({
           className="flex items-center gap-2 font-semibold text-foreground"
         >
           <BotIcon className="size-5 text-primary" />
-          <span>ChatbotZone</span>
+          <span>Chatzone</span>
         </Link>
 
         <nav className="flex items-center gap-1 ml-4">

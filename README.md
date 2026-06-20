@@ -1,4 +1,4 @@
-# ChatbotZone
+# Chatzone
 
 A multi-tenant chatbot SaaS. As the **owner** you onboard **client** businesses; each client
 configures an AI chatbot, trains it on a knowledge base, and embeds it on their website via a
