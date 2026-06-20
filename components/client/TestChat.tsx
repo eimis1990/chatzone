@@ -20,6 +20,7 @@
  */
 
 import { useState, useRef, useCallback, type KeyboardEvent, type FormEvent } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
 import {
   BotIcon,
   RotateCcwIcon,
@@ -344,19 +345,26 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
   const msgBubbleRadius = `${bubbleRadius}px`
 
   // -------------------------------------------------------------------------
-  // The preview panel: floating bottom-right widget
+  // The preview panel: floating bottom-right widget (fixed overlay)
   // -------------------------------------------------------------------------
   return (
-    <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-xl bg-muted/30">
-      {/* Chat Card — floating above the bubble */}
-      {isOpen && (
-        <div
-          className="absolute bottom-[72px] right-4 w-[360px] max-w-[calc(100%-2rem)] flex flex-col bg-background border shadow-2xl pointer-events-auto overflow-hidden"
+    <div className="relative pointer-events-none select-none">
+      {/* Chat Card — floats above the launcher bubble */}
+      <AnimatePresence>
+        {isOpen && (
+        <motion.div
+          key="chat-card"
+          initial={{ opacity: 0, scale: 0.92, y: 12 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.92, y: 12 }}
+          transition={{ duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
           style={{
+            transformOrigin: 'bottom right',
             borderRadius: `${cornerRadius}px`,
-            maxHeight: 'calc(100% - 88px)',
             height: '520px',
+            width: '360px',
           }}
+          className="absolute bottom-[72px] right-0 flex flex-col bg-background border shadow-2xl pointer-events-auto overflow-hidden"
         >
           {/* Header */}
           <div
@@ -491,6 +499,7 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
                 <VoiceCallButton
                   appearance="compact"
                   primaryColor={primaryColor}
+                  language={activeLang}
                   getToken={async () => {
                     const res = await fetch('/api/preview/voice-token', {
                       method: 'POST',
@@ -532,45 +541,71 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
               </p>
             </div>
           </div>
-        </div>
-      )}
+        </motion.div>
+        )}
+      </AnimatePresence>
 
-      {/* Powered by — below the bubble */}
-      {isOpen && (
-        <div className="absolute bottom-[20px] right-4 text-center pointer-events-auto">
-          <p className="text-[10px] text-muted-foreground/50">
-            Powered by{' '}
-            <a
-              href={POWERED_BY_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline hover:text-muted-foreground transition-colors"
-            >
-              Chatzone
-            </a>
-          </p>
-        </div>
-      )}
+      {/* Powered by — below the bubble, visible when open */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            key="powered-by"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="absolute bottom-[76px] right-0 text-center pointer-events-auto"
+          >
+            <p className="text-[10px] text-muted-foreground/50">
+              Powered by{' '}
+              <a
+                href={POWERED_BY_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline hover:text-muted-foreground transition-colors"
+              >
+                Chatzone
+              </a>
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Launcher bubble */}
       <button
         type="button"
         onClick={() => setIsOpen((v) => !v)}
         aria-label={isOpen ? 'Close chat preview' : 'Open chat preview'}
-        className="absolute bottom-8 right-4 w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-all hover:scale-105 active:scale-95 pointer-events-auto"
+        className="w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-transform hover:scale-105 active:scale-95 pointer-events-auto overflow-hidden"
         style={{ backgroundColor: primaryColor }}
       >
-        {isOpen ? (
-          <XIcon className="size-6 text-white" aria-hidden="true" />
-        ) : (
-          <>
-            {avatarUrl ? (
-              <img src={avatarUrl} alt={displayName} className="w-full h-full object-cover rounded-full" />
-            ) : (
-              <MessageCircleIcon className="size-7 text-white" aria-hidden="true" />
-            )}
-          </>
-        )}
+        <AnimatePresence mode="wait" initial={false}>
+          {isOpen ? (
+            <motion.span
+              key="x"
+              initial={{ rotate: -90, opacity: 0 }}
+              animate={{ rotate: 0, opacity: 1 }}
+              exit={{ rotate: 90, opacity: 0 }}
+              transition={{ duration: 0.15 }}
+            >
+              <XIcon className="size-6 text-white" aria-hidden="true" />
+            </motion.span>
+          ) : (
+            <motion.span
+              key="chat"
+              initial={{ rotate: 90, opacity: 0 }}
+              animate={{ rotate: 0, opacity: 1 }}
+              exit={{ rotate: -90, opacity: 0 }}
+              transition={{ duration: 0.15 }}
+            >
+              {avatarUrl ? (
+                <img src={avatarUrl} alt={displayName} className="w-14 h-14 object-cover rounded-full" />
+              ) : (
+                <MessageCircleIcon className="size-7 text-white" aria-hidden="true" />
+              )}
+            </motion.span>
+          )}
+        </AnimatePresence>
       </button>
     </div>
   )
