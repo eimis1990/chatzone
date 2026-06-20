@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/select'
 import { TestChat } from '@/components/client/TestChat'
 import { VoiceSection } from '@/components/client/VoiceSection'
+import { LogoUpload } from '@/components/client/LogoUpload'
 
 interface ConfigFormProps {
   botId: string
@@ -34,6 +35,8 @@ interface ConfigFormProps {
 // the time handleSubmit fires the values satisfy the output type.
 type FormValues = z.input<typeof botConfigSchema>
 type ParsedValues = z.output<typeof botConfigSchema>
+
+const MAX_SUGGESTED_QUESTIONS = 4
 
 export function ConfigForm({ botId, initialConfig }: ConfigFormProps) {
   const form = useForm<FormValues>({
@@ -121,6 +124,7 @@ export function ConfigForm({ botId, initialConfig }: ConfigFormProps) {
   )
 
   const leadCaptureEnabled = watch('leadCapture.enabled')
+  const suggestedCount = suggestedQuestionsField.fields.length
 
   return (
     <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
@@ -155,6 +159,9 @@ export function ConfigForm({ botId, initialConfig }: ConfigFormProps) {
               <p className="text-xs text-destructive">{errors.greeting.message}</p>
             )}
           </div>
+
+          {/* Logo upload */}
+          <LogoUpload botId={botId} control={control} setValue={setValue} />
         </section>
 
         {/* Theme */}
@@ -162,21 +169,33 @@ export function ConfigForm({ botId, initialConfig }: ConfigFormProps) {
           <h2 className="text-base font-semibold border-b pb-2">Theme</h2>
 
           <div className="grid gap-4 sm:grid-cols-2">
+            {/* Primary color — single source of truth via Controller */}
             <div className="space-y-1.5">
               <Label htmlFor="primaryColor">Primary color</Label>
-              <div className="flex items-center gap-2">
-                <input
-                  id="primaryColor"
-                  type="color"
-                  {...register('theme.primaryColor')}
-                  className="h-8 w-10 cursor-pointer rounded border border-input bg-transparent p-0.5"
-                />
-                <Input
-                  {...register('theme.primaryColor')}
-                  placeholder="#4f46e5"
-                  className="flex-1 font-mono text-sm"
-                />
-              </div>
+              <Controller
+                name="theme.primaryColor"
+                control={control}
+                render={({ field }) => (
+                  <div className="flex items-center gap-2">
+                    <input
+                      id="primaryColor"
+                      type="color"
+                      value={field.value ?? '#4f46e5'}
+                      onChange={(e) => field.onChange(e.target.value)}
+                      className="h-8 w-10 cursor-pointer rounded border border-input bg-transparent p-0.5 flex-shrink-0"
+                      aria-label="Pick primary color"
+                    />
+                    <Input
+                      value={field.value ?? ''}
+                      onChange={(e) => field.onChange(e.target.value)}
+                      onBlur={field.onBlur}
+                      placeholder="#4f46e5"
+                      className="flex-1 font-mono text-sm"
+                      aria-label="Primary color hex value"
+                    />
+                  </div>
+                )}
+              />
             </div>
 
             <div className="space-y-1.5">
@@ -196,6 +215,53 @@ export function ConfigForm({ botId, initialConfig }: ConfigFormProps) {
                   </Select>
                 )}
               />
+            </div>
+          </div>
+
+          {/* Radius sliders */}
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="cornerRadius">
+                Chat window roundness{' '}
+                <span className="text-muted-foreground font-normal">
+                  ({watch('theme.cornerRadius') ?? 16}px)
+                </span>
+              </Label>
+              <input
+                id="cornerRadius"
+                type="range"
+                min={0}
+                max={32}
+                step={1}
+                {...register('theme.cornerRadius', { valueAsNumber: true })}
+                className="w-full accent-primary"
+              />
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>Square</span>
+                <span>Rounded</span>
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="bubbleRadius">
+                Bubble roundness{' '}
+                <span className="text-muted-foreground font-normal">
+                  ({watch('theme.bubbleRadius') ?? 16}px)
+                </span>
+              </Label>
+              <input
+                id="bubbleRadius"
+                type="range"
+                min={0}
+                max={24}
+                step={1}
+                {...register('theme.bubbleRadius', { valueAsNumber: true })}
+                className="w-full accent-primary"
+              />
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>Square</span>
+                <span>Pill</span>
+              </div>
             </div>
           </div>
         </section>
@@ -302,7 +368,7 @@ export function ConfigForm({ botId, initialConfig }: ConfigFormProps) {
             <div className="space-y-1.5">
               <Label htmlFor="temperature">
                 Temperature{' '}
-                <span className="text-muted-foreground">
+                <span className="text-muted-foreground font-normal">
                   ({watch('temperature')?.toFixed(1) ?? '0.3'})
                 </span>
               </Label>
@@ -344,18 +410,24 @@ export function ConfigForm({ botId, initialConfig }: ConfigFormProps) {
                 </Button>
               </div>
             ))}
-            {suggestedQuestionsField.fields.length < 6 && (
+            <div className="flex items-center gap-3">
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
+                disabled={suggestedCount >= MAX_SUGGESTED_QUESTIONS}
                 // @ts-expect-error — FieldArray append for string[] is fine at runtime
                 onClick={() => suggestedQuestionsField.append('')}
               >
                 <PlusIcon />
                 Add question
               </Button>
-            )}
+              {suggestedCount >= MAX_SUGGESTED_QUESTIONS && (
+                <p className="text-xs text-muted-foreground">
+                  Maximum {MAX_SUGGESTED_QUESTIONS} questions allowed
+                </p>
+              )}
+            </div>
           </div>
         </section>
 

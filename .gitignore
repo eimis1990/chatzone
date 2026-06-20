@@ -11,3 +11,4 @@ dist/
 test-results/
 next-env.d.ts
 *.tsbuildinfo
+cycle*.png

@@ -25,6 +25,8 @@ export function ChatWindow({ publicKey, config }: ChatWindowProps) {
   const [suggestedVisible, setSuggestedVisible] = useState(true)
   const visitorIdRef = useRef<string>('')
   const primaryColor = config.theme.primaryColor
+  const cornerRadius = config.theme.cornerRadius ?? 16
+  const bubbleRadius = config.theme.bubbleRadius ?? 16
 
   // Restore/generate visitorId from localStorage on mount
   useEffect(() => {
@@ -177,21 +179,29 @@ export function ChatWindow({ publicKey, config }: ChatWindowProps) {
     [publicKey, conversationId]
   )
 
+  const headerBorderRadius = `${cornerRadius}px ${cornerRadius}px 0 0`
+
   return (
-    <div className="flex flex-col h-full bg-white font-sans">
+    <div
+      className="flex flex-col h-full bg-white font-sans overflow-hidden"
+      style={{ borderRadius: `${cornerRadius}px` }}
+    >
       {/* Header */}
       <div
         className="flex items-center gap-3 px-4 py-3 text-white flex-shrink-0"
-        style={{ backgroundColor: primaryColor }}
+        style={{ backgroundColor: primaryColor, borderRadius: headerBorderRadius }}
       >
         {config.avatarUrl ? (
           <img
             src={config.avatarUrl}
             alt={config.displayName}
-            className="w-8 h-8 rounded-full object-cover"
+            className="w-8 h-8 rounded-full object-cover flex-shrink-0"
           />
         ) : (
-          <div className="w-8 h-8 rounded-full bg-white/30 flex items-center justify-center text-sm font-bold" aria-hidden="true">
+          <div
+            className="w-8 h-8 rounded-full bg-white/30 flex items-center justify-center text-sm font-bold flex-shrink-0"
+            aria-hidden="true"
+          >
             {config.displayName.charAt(0).toUpperCase()}
           </div>
         )}
@@ -206,6 +216,7 @@ export function ChatWindow({ publicKey, config }: ChatWindowProps) {
       <MessageList
         messages={messages}
         primaryColor={primaryColor}
+        bubbleRadius={bubbleRadius}
         greeting={config.greeting}
         displayName={config.displayName}
         avatarUrl={config.avatarUrl}
@@ -213,7 +224,7 @@ export function ChatWindow({ publicKey, config }: ChatWindowProps) {
         publicKey={publicKey}
       />
 
-      {/* Suggested Questions (shown until first message is sent) */}
+      {/* Suggested Questions — pinned just above input, visible until first message */}
       {suggestedVisible && config.suggestedQuestions.length > 0 && (
         <SuggestedQuestions
           questions={config.suggestedQuestions}

@@ -19,6 +19,7 @@ interface VoiceConfig {
 interface MessageListProps {
   messages: ChatMessage[]
   primaryColor: string
+  bubbleRadius?: number
   greeting: string
   displayName: string
   avatarUrl?: string
@@ -139,6 +140,7 @@ function TtsButton({ messageId, publicKey, primaryColor, activeRef, onStateChang
 export function MessageList({
   messages,
   primaryColor,
+  bubbleRadius = 16,
   greeting,
   displayName,
   avatarUrl,
@@ -152,6 +154,7 @@ export function MessageList({
   const activeAudioRef = useRef<{ id: string; audio: HTMLAudioElement } | null>(null)
 
   const showTts = Boolean(voice?.enabled && voice?.ttsEnabled && publicKey)
+  const msgBubbleRadius = `${bubbleRadius}px`
 
   const handleTtsStateChange = useCallback((id: string, state: TtsState) => {
     setTtsStates((prev) => ({ ...prev, [id]: state }))
@@ -193,7 +196,12 @@ export function MessageList({
       {/* Greeting message always shown first */}
       <div className="flex items-start gap-2">
         {renderAvatar(displayName)}
-        <div className="max-w-[80%] rounded-2xl rounded-tl-sm px-3 py-2 bg-gray-100 text-gray-900 text-sm">
+        <div
+          className="max-w-[80%] px-3 py-2 bg-gray-100 text-gray-900 text-sm"
+          style={{
+            borderRadius: `${msgBubbleRadius} ${msgBubbleRadius} ${msgBubbleRadius} 2px`,
+          }}
+        >
           {greeting}
         </div>
       </div>
@@ -206,12 +214,17 @@ export function MessageList({
           {msg.role === 'assistant' && renderAvatar(displayName)}
           <div className="flex flex-col gap-1 max-w-[80%]">
             <div
-              className={`rounded-2xl px-3 py-2 text-sm whitespace-pre-wrap ${
+              className={`px-3 py-2 text-sm whitespace-pre-wrap ${
                 msg.role === 'user'
-                  ? 'text-white rounded-tr-sm'
-                  : 'bg-gray-100 text-gray-900 rounded-tl-sm'
+                  ? 'text-white'
+                  : 'bg-gray-100 text-gray-900'
               }`}
-              style={msg.role === 'user' ? { backgroundColor: primaryColor } : undefined}
+              style={{
+                borderRadius: msg.role === 'user'
+                  ? `${msgBubbleRadius} ${msgBubbleRadius} 2px ${msgBubbleRadius}`
+                  : `${msgBubbleRadius} ${msgBubbleRadius} ${msgBubbleRadius} 2px`,
+                ...(msg.role === 'user' ? { backgroundColor: primaryColor } : {}),
+              }}
             >
               {msg.content}
               {msg.streaming && (

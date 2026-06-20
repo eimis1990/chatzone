@@ -20,8 +20,21 @@ describe('botConfigSchema', () => {
     expect(parsed.model).toBe('gpt-4o-mini')
     expect(parsed.temperature).toBe(0.3)
     expect(parsed.theme.position).toBe('bottom-right')
+    expect(parsed.theme.cornerRadius).toBe(16)
+    expect(parsed.theme.bubbleRadius).toBe(16)
     expect(parsed.leadCapture.enabled).toBe(false)
     expect(parsed.allowedDomains).toEqual([])
+  })
+
+  it('caps suggested questions at 4', () => {
+    expect(() =>
+      botConfigSchema.parse({
+        displayName: 'B',
+        greeting: 'h',
+        systemPrompt: 's',
+        suggestedQuestions: ['1', '2', '3', '4', '5'],
+      }),
+    ).toThrow()
   })
 
   it('applies voice defaults (off by default)', () => {
