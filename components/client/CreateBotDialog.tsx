@@ -1,0 +1,117 @@
+'use client'
+
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { PlusIcon } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from '@/components/ui/dialog'
+import { createBrowserClient } from '@/lib/supabase/browser'
+import { defaultBotConfig } from '@/lib/validation/schemas'
+
+interface CreateBotDialogProps {
+  orgId: string
+}
+
+export function CreateBotDialog({ orgId }: CreateBotDialogProps) {
+  const router = useRouter()
+  const [open, setOpen] = useState(false)
+  const [name, setName] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    if (!name.trim()) return
+
+    setError(null)
+    setLoading(true)
+
+    const supabase = createBrowserClient()
+
+    const { data, error: insertError } = await supabase
+      .from('bots')
+      .insert({
+        org_id: orgId,
+        name: name.trim(),
+        config: defaultBotConfig(name.trim()),
+      })
+      .select('id')
+      .single<{ id: string }>()
+
+    if (insertError || !data) {
+      setError(insertError?.message ?? 'Failed to create bot. Please try again.')
+      setLoading(false)
+      return
+    }
+
+    setOpen(false)
+    setName('')
+    router.push(`/app/bots/${data.id}/configure`)
+    router.refresh()
+  }
+
+  function handleOpenChange(next: boolean) {
+    if (!loading) {
+      setOpen(next)
+      if (!next) {
+        setName('')
+        setError(null)
+      }
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogTrigger
+        render={
+          <Button>
+            <PlusIcon />
+            Create bot
+          </Button>
+        }
+      />
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Create a new bot</DialogTitle>
+        </DialogHeader>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-1.5">
+            <Label htmlFor="bot-name">Bot name</Label>
+            <Input
+              id="bot-name"
+              type="text"
+              placeholder="e.g. Acme Support Assistant"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              disabled={loading}
+              autoFocus
+            />
+          </div>
+
+          {error && (
+            <p role="alert" className="text-sm text-destructive">
+              {error}
+            </p>
+          )}
+
+          <DialogFooter>
+            <Button type="submit" disabled={loading || !name.trim()}>
+              {loading ? 'Creating…' : 'Create bot'}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  )
+}
