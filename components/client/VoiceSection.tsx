@@ -78,13 +78,14 @@ export function VoiceSection({ control, watch }: VoiceSectionProps) {
   )
   const audioRef = useRef<HTMLAudioElement | null>(null)
 
-  // Fetch curated voices from platform-voices when enabled.
+  // Fetch curated voices once when voice is enabled. Depend ONLY on
+  // voiceEnabled — including loadState.status here would re-run the effect on
+  // the idle→loading transition, whose cleanup cancels the in-flight request.
   useEffect(() => {
     if (!voiceEnabled) {
       dispatch({ type: 'RESET' })
       return
     }
-    if (loadState.status !== 'idle') return
 
     let cancelled = false
     dispatch({ type: 'FETCH_START' })
@@ -92,11 +93,11 @@ export function VoiceSection({ control, watch }: VoiceSectionProps) {
     fetch('/api/platform-voices')
       .then(async (res) => {
         if (cancelled) return
-        const data = (await res.json()) as { male?: VoiceOption[]; female?: VoiceOption[] }
         if (!res.ok) {
           dispatch({ type: 'FETCH_FAIL' })
           return
         }
+        const data = (await res.json()) as { male?: VoiceOption[]; female?: VoiceOption[] }
         const male = data.male ?? []
         const female = data.female ?? []
         if (male.length === 0 && female.length === 0) {
@@ -109,15 +110,15 @@ export function VoiceSection({ control, watch }: VoiceSectionProps) {
         if (!cancelled) dispatch({ type: 'FETCH_FAIL' })
       })
 
-    return () => { cancelled = true }
-  }, [voiceEnabled, loadState.status])
+    return () => {
+      cancelled = true
+    }
+  }, [voiceEnabled])
 
   // Stop preview when voice section is disabled.
   useEffect(() => {
     if (!voiceEnabled) stopPreview()
-    // stopPreview is defined below and stable — intentional omission.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [voiceEnabled])
+  }, [voiceEnabled]) // stopPreview is a stable local function — dep omission is intentional
 
   function stopPreview() {
     if (audioRef.current) {
@@ -152,8 +153,7 @@ export function VoiceSection({ control, watch }: VoiceSectionProps) {
     } catch {
       dispatchPreview('idle')
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedVoice, previewStatus])
+  }, [selectedVoice, previewStatus]) // stopPreview is a stable local function
 
   return (
     <section className="space-y-4">
