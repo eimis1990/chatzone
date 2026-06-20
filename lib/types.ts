@@ -59,6 +59,18 @@ export interface LeadField {
 
 export type LeadTrigger = 'on_fallback' | 'after_n_messages' | 'manual'
 
+export type VoiceGender = 'male' | 'female'
+
+export interface PlatformVoice {
+  id: string
+  voice_id: string
+  name: string
+  gender: VoiceGender
+  preview_url: string | null
+  sort_order: number
+  created_at: string
+}
+
 export interface VoiceConfig {
   enabled: boolean
   ttsEnabled: boolean

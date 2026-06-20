@@ -85,5 +85,34 @@ export const chatRequestSchema = z.object({
   message: z.string().min(1).max(4000),
 })
 
+// ---------------------------------------------------------------------------
+// Owner-curated voices
+// ---------------------------------------------------------------------------
+export const ownerVoiceSchema = z.object({
+  voiceId: z.string().min(1),
+  name: z.string().min(1).max(120),
+  gender: z.enum(['male', 'female']),
+  previewUrl: z.string().url().optional(),
+})
+
+// ---------------------------------------------------------------------------
+// Preview (test playground) chat — authenticated, ephemeral
+// ---------------------------------------------------------------------------
+export const previewChatSchema = z.object({
+  botId: z.string().uuid(),
+  config: botConfigSchema,
+  history: z
+    .array(z.object({ role: z.enum(['user', 'assistant']), content: z.string() }))
+    .default([]),
+  message: z.string().min(1).max(4000),
+})
+
+export const previewTtsSchema = z.object({
+  text: z.string().min(1).max(4000),
+  voiceId: z.string().min(1),
+})
+
 export type ChatRequest = z.infer<typeof chatRequestSchema>
 export type CreateInviteInput = z.infer<typeof createInviteSchema>
+export type OwnerVoiceInput = z.infer<typeof ownerVoiceSchema>
+export type PreviewChatInput = z.infer<typeof previewChatSchema>

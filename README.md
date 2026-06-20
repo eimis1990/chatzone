@@ -24,6 +24,12 @@ copy-paste widget. Visitors get streaming, RAG-grounded answers.
 can speak (OpenAI Whisper STT, mic in the widget). Voice is opt-in per bot; the client picks a
 voice in the configurator. Requires `ELEVENLABS_API_KEY` (degrades to text-only without it).
 
+**Cycle 2.5 — Curated voices + test playground:** the owner manages a curated voice catalog at
+`/owner/voices` (each tagged male/female); clients pick from a fast Men/Women grouped list. The
+configurator's preview is an interactive **test chat** — talk to the bot using the current
+(unsaved) config against its knowledge base, with text + voice (TTS/STT) and a Start-over button;
+test chats are ephemeral (never logged).
+
 > Deferred to later cycles: Stripe billing, human handoff, self-serve signup.
 
 ## Setup
