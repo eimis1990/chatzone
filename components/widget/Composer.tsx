@@ -2,6 +2,7 @@
 
 import { useRef, useState, useCallback, type KeyboardEvent, type FormEvent } from 'react'
 import { VoiceCallButton } from '@/components/voice/VoiceCallButton'
+import { POWERED_BY_URL } from '@/lib/utils'
 
 interface VoiceConfig {
   enabled: boolean
@@ -68,16 +69,6 @@ export function Composer({ onSend, disabled = false, primaryColor, voice, public
 
   return (
     <div className="border-t border-gray-200 bg-white">
-      {/* Voice call row — shown when voice is enabled */}
-      {showCallButton && (
-        <div className="px-4 pt-3 pb-1">
-          <VoiceCallButton
-            getToken={getToken}
-            primaryColor={primaryColor}
-          />
-        </div>
-      )}
-
       <form
         onSubmit={handleSubmit}
         className="flex items-end gap-2 px-4 py-3"
@@ -95,6 +86,17 @@ export function Composer({ onSend, disabled = false, primaryColor, voice, public
           className="flex-1 resize-none rounded-xl border border-gray-200 px-3 py-2 text-sm leading-5 focus:outline-none focus:ring-2 focus:ring-offset-0 disabled:opacity-50 overflow-hidden"
           style={{ maxHeight: '120px', '--tw-ring-color': primaryColor } as React.CSSProperties}
         />
+
+        {/* Voice call button — compact circle, only when voice is enabled */}
+        {showCallButton && (
+          <VoiceCallButton
+            appearance="compact"
+            getToken={getToken}
+            primaryColor={primaryColor}
+          />
+        )}
+
+        {/* Send button */}
         <button
           type="submit"
           disabled={disabled || !value.trim()}
@@ -107,6 +109,19 @@ export function Composer({ onSend, disabled = false, primaryColor, voice, public
           </svg>
         </button>
       </form>
+
+      {/* Powered by footer */}
+      <p className="pb-2.5 text-center text-[10px] text-gray-400">
+        Powered by{' '}
+        <a
+          href={POWERED_BY_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline hover:text-gray-600 transition-colors"
+        >
+          Chatzone
+        </a>
+      </p>
     </div>
   )
 }
