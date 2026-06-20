@@ -548,7 +548,7 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
-            className="absolute bottom-[20px] right-0 w-[360px] text-left pl-1 pointer-events-auto"
+            className="absolute bottom-[52px] right-0 w-[360px] text-left pl-1 pointer-events-auto"
           >
             <p className="text-[10px] text-muted-foreground/60">
               Powered by{' '}

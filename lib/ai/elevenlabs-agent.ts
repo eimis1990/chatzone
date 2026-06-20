@@ -194,24 +194,36 @@ export async function ensureAgent(db: SupabaseClient, bot: Bot, appUrl: string):
 
   const { secretId } = await ensureLlmAuth(db)
   const config = buildAgentConfig(bot, appUrl, secretId)
+  const headers = { 'xi-api-key': apiKey(), 'Content-Type': 'application/json' }
 
-  let agentId = bot.elevenlabs_agent_id ?? ''
-  if (!agentId) {
+  const createAgent = async (): Promise<string> => {
     const res = await fetch(`${API}/convai/agents/create`, {
       method: 'POST',
-      headers: { 'xi-api-key': apiKey(), 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify(config),
     })
     if (!res.ok) throw new Error(`Failed to create agent: HTTP ${res.status}`)
     const data = (await res.json()) as { agent_id: string }
-    agentId = data.agent_id
+    return data.agent_id
+  }
+
+  let agentId = bot.elevenlabs_agent_id ?? ''
+  if (!agentId) {
+    agentId = await createAgent()
   } else {
     const res = await fetch(`${API}/convai/agents/${agentId}`, {
       method: 'PATCH',
-      headers: { 'xi-api-key': apiKey(), 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify(config),
     })
-    if (!res.ok) throw new Error(`Failed to update agent: HTTP ${res.status}`)
+    if (!res.ok) {
+      // The stored agent was deleted/invalid → recreate instead of failing.
+      if (res.status === 404 || res.status === 422) {
+        agentId = await createAgent()
+      } else {
+        throw new Error(`Failed to update agent: HTTP ${res.status}`)
+      }
+    }
   }
 
   await db
