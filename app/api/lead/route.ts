@@ -1,7 +1,11 @@
 import { z } from 'zod'
 import { createServiceClient } from '@/lib/supabase/service'
 import { isOriginAllowed, corsHeaders } from '@/lib/widget-auth'
+import { createRateLimiter } from '@/lib/ratelimit'
 import type { Bot } from '@/lib/types'
+
+// ~5 lead submissions/min per bot, small burst.
+const leadLimiter = createRateLimiter({ capacity: 5, refillPerSec: 0.083 })
 
 const leadRequestSchema = z.object({
   publicKey: z.string().min(1),
@@ -46,6 +50,10 @@ export async function POST(req: Request) {
 
   if (!isOriginAllowed(origin, bot.config.allowedDomains ?? [])) {
     return json({ error: 'Origin not allowed' }, 403)
+  }
+
+  if (!leadLimiter.check(bot.id)) {
+    return json({ error: 'Rate limit exceeded' }, 429)
   }
 
   const { data: lead, error } = await svc

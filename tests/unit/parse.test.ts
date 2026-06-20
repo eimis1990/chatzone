@@ -12,8 +12,18 @@ describe('parseFile', () => {
     expect(await parseFile(buf, 'text/markdown')).toContain('Title')
   })
 
-  it('throws on an unsupported mime type', async () => {
+  it('throws on an unsupported binary mime type', async () => {
     await expect(parseFile(Buffer.from('x'), 'image/png')).rejects.toThrow(/unsupported/i)
+  })
+
+  it('falls back to text for empty mime when bytes look textual', async () => {
+    const buf = Buffer.from('# Markdown\n\nNo mime was sent.', 'utf8')
+    expect(await parseFile(buf, '')).toContain('Markdown')
+  })
+
+  it('does not treat binary octet-stream with NUL bytes as text', async () => {
+    const buf = Buffer.from([0x00, 0x01, 0x02])
+    await expect(parseFile(buf, 'application/octet-stream')).rejects.toThrow(/unsupported/i)
   })
 })
 

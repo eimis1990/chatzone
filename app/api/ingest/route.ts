@@ -3,11 +3,15 @@ import { z } from 'zod'
 import { createServerClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { ingestSource, makeServiceRepo } from '@/lib/ingestion/pipeline'
+import { createRateLimiter } from '@/lib/ratelimit'
 
 // Ingestion (parse + embed) can take a while for large files.
 export const maxDuration = 300
 
 const bodySchema = z.object({ sourceId: z.string().uuid() })
+
+// ~20 ingestion triggers/min per user, modest burst.
+const ingestLimiter = createRateLimiter({ capacity: 8, refillPerSec: 0.33 })
 
 export async function POST(req: Request) {
   const body = await req.json().catch(() => null)
@@ -22,6 +26,10 @@ export async function POST(req: Request) {
     data: { user },
   } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  if (!ingestLimiter.check(user.id)) {
+    return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 })
+  }
 
   // RLS ensures the user can only see sources for bots in their own org;
   // a missing row means they don't own it.

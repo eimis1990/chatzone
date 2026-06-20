@@ -16,7 +16,12 @@ export async function extractReadableText(html: string, url: string): Promise<st
  * Supports text/markdown directly, PDF via pdf-parse, DOCX via mammoth.
  */
 export async function parseFile(buffer: Buffer, mime: string): Promise<string> {
-  if (mime === 'text/plain' || mime === 'text/markdown' || mime === 'text/x-markdown') {
+  if (
+    mime === 'text/plain' ||
+    mime === 'text/markdown' ||
+    mime === 'text/x-markdown' ||
+    mime.startsWith('text/')
+  ) {
     return buffer.toString('utf8').trim()
   }
   if (mime === 'application/pdf') {
@@ -32,6 +37,11 @@ export async function parseFile(buffer: Buffer, mime: string): Promise<string> {
     const mammoth = await import('mammoth')
     const result = await mammoth.extractRawText({ buffer })
     return result.value.trim()
+  }
+  // Fallback: some browsers send an empty/generic MIME for .md/.txt uploads.
+  // If the bytes look like UTF-8 text (no NUL), treat them as plain text.
+  if ((mime === '' || mime === 'application/octet-stream') && !buffer.includes(0)) {
+    return buffer.toString('utf8').trim()
   }
   throw new Error(`Unsupported file type: ${mime}`)
 }

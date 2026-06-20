@@ -3,7 +3,10 @@ import { updateSession } from '@/lib/supabase/middleware'
 import { routeDecision } from '@/lib/auth/roles'
 import type { UserRole } from '@/lib/types'
 
-export async function middleware(request: NextRequest) {
+// Next.js 16 "proxy" convention (formerly middleware). Refreshes the Supabase
+// session and enforces role-based route protection via the pure routeDecision
+// policy (unit-tested in lib/auth/roles.ts).
+export async function proxy(request: NextRequest) {
   const { supabase, response, user } = await updateSession(request)
 
   let role: UserRole | null = null
