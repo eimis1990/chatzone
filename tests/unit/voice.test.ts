@@ -19,9 +19,14 @@ describe('synthesizeSpeech (ElevenLabs TTS)', () => {
   })
 
   it('throws MissingVoiceKeyError when no API key is configured', async () => {
-    await expect(synthesizeSpeech('hi', 'v', { apiKey: undefined })).rejects.toBeInstanceOf(
-      MissingVoiceKeyError,
-    )
+    vi.stubEnv('ELEVENLABS_API_KEY', '')
+    const noNetwork = vi.fn(async () => {
+      throw new Error('should not be called')
+    })
+    await expect(
+      synthesizeSpeech('hi', 'v', { apiKey: undefined, fetchImpl: noNetwork as unknown as typeof fetch }),
+    ).rejects.toBeInstanceOf(MissingVoiceKeyError)
+    vi.unstubAllEnvs()
   })
 
   it('throws on a non-ok response', async () => {
@@ -60,6 +65,13 @@ describe('listVoices (ElevenLabs)', () => {
   })
 
   it('throws MissingVoiceKeyError without an API key', async () => {
-    await expect(listVoices({ apiKey: undefined })).rejects.toBeInstanceOf(MissingVoiceKeyError)
+    vi.stubEnv('ELEVENLABS_API_KEY', '')
+    const noNetwork = vi.fn(async () => {
+      throw new Error('should not be called')
+    })
+    await expect(
+      listVoices({ apiKey: undefined, fetchImpl: noNetwork as unknown as typeof fetch }),
+    ).rejects.toBeInstanceOf(MissingVoiceKeyError)
+    vi.unstubAllEnvs()
   })
 })
