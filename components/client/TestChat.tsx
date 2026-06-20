@@ -96,6 +96,7 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
   const langContent = config.content?.[activeLang]
   const greeting = langContent?.greeting || (activeLang === 'lt' ? 'Sveiki! Kaip galiu padėti?' : 'Hi! How can I help you today?')
   const suggestedQuestions = (langContent?.suggestedQuestions ?? []).filter(Boolean)
+  const inputPlaceholder = activeLang === 'lt' ? 'Rašykite žinutę…' : 'Type a message…'
 
   const voiceEnabled = config.voice?.enabled ?? false
   const ttsEnabled = voiceEnabled && (config.voice?.ttsEnabled ?? true)
@@ -394,10 +395,9 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
               onClick={handleStartOver}
               title="Start over"
               aria-label="Start over — clear test conversation"
-              className="flex items-center gap-1.5 text-xs opacity-80 hover:opacity-100 transition-opacity rounded px-2 py-1 hover:bg-white/10"
+              className="flex items-center justify-center size-8 rounded-lg bg-white/15 hover:bg-white/25 transition-colors text-white"
             >
-              <RotateCcwIcon className="size-3.5" aria-hidden="true" />
-              <span className="hidden sm:inline">Start over</span>
+              <RotateCcwIcon className="size-4" aria-hidden="true" />
             </button>
           </div>
 
@@ -486,7 +486,7 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyDown={handleKeyDown}
                 onInput={handleInput}
-                placeholder="Type a message…"
+                placeholder={inputPlaceholder}
                 disabled={streaming}
                 rows={1}
                 aria-label="Test message input"
@@ -534,18 +534,12 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
                 )}
               </button>
             </form>
-
-            <div className="mt-1.5 text-center">
-              <p className="text-[10px] text-muted-foreground/60">
-                Test mode — not saved or logged
-              </p>
-            </div>
           </div>
         </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Powered by — below the bubble, visible when open */}
+      {/* Powered by — below the card, bottom-left (close button is bottom-right) */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -554,9 +548,9 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
-            className="absolute bottom-[76px] right-0 text-center pointer-events-auto"
+            className="absolute bottom-[20px] right-0 w-[360px] text-left pl-1 pointer-events-auto"
           >
-            <p className="text-[10px] text-muted-foreground/50">
+            <p className="text-[10px] text-muted-foreground/60">
               Powered by{' '}
               <a
                 href={POWERED_BY_URL}

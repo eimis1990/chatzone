@@ -80,7 +80,7 @@ export function Composer({ onSend, disabled = false, primaryColor, voice, public
           onChange={(e) => setValue(e.target.value)}
           onKeyDown={handleKeyDown}
           onInput={handleInput}
-          placeholder="Type a message…"
+          placeholder={language === 'lt' ? 'Rašykite žinutę…' : 'Type a message…'}
           disabled={disabled}
           rows={1}
           aria-label="Message input"
