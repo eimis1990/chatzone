@@ -7,12 +7,9 @@
  *  - Master enable toggle (voice.enabled)
  *  - TTS toggle (voice.ttsEnabled)
  *  - STT toggle (voice.sttEnabled)
- *  - Voice picker (voice.voiceId) built from GET /api/platform-voices
+ *  - Per-language voice picker (voice.voices.<lang>) for each enabled language
  *    → two <optgroup> sections: Men / Women
- *  - Preview ▶ button that plays the selected voice's previewUrl
- *
- * When no curated voices are configured the picker shows an informational notice.
- * When ELEVENLABS_API_KEY is absent the notice indicates the key is missing.
+ *  - Preview ▶ button per language
  */
 
 import { useEffect, useRef, useReducer, useCallback } from 'react'
@@ -21,10 +18,12 @@ import { PlayIcon, SquareIcon, LoaderCircleIcon, AlertCircleIcon } from 'lucide-
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import type { BotLanguage } from '@/lib/types'
 import type { z } from 'zod'
-import type { botConfigSchema } from '@/lib/validation/schemas'
+import type { botConfigFormSchema } from '@/lib/validation/schemas'
 
-type FormValues = z.input<typeof botConfigSchema>
+type FormValues = z.input<typeof botConfigFormSchema>
 
 interface VoiceOption {
   id: string
@@ -41,8 +40,8 @@ type LoadState =
   | { status: 'idle' }
   | { status: 'loading' }
   | { status: 'ready'; grouped: GroupedVoices }
-  | { status: 'empty' }       // curated list is empty
-  | { status: 'unavailable' } // key missing or fetch error
+  | { status: 'empty' }
+  | { status: 'unavailable' }
 
 type LoadAction =
   | { type: 'FETCH_START' }
@@ -53,28 +52,32 @@ type LoadAction =
 
 function reducer(state: LoadState, action: LoadAction): LoadState {
   switch (action.type) {
-    case 'FETCH_START':    return { status: 'loading' }
-    case 'FETCH_SUCCESS':  return { status: 'ready', grouped: action.grouped }
-    case 'FETCH_EMPTY':    return { status: 'empty' }
-    case 'FETCH_FAIL':     return { status: 'unavailable' }
-    case 'RESET':          return { status: 'idle' }
-    default:               return state
+    case 'FETCH_START':   return { status: 'loading' }
+    case 'FETCH_SUCCESS': return { status: 'ready', grouped: action.grouped }
+    case 'FETCH_EMPTY':   return { status: 'empty' }
+    case 'FETCH_FAIL':    return { status: 'unavailable' }
+    case 'RESET':         return { status: 'idle' }
+    default:              return state
   }
+}
+
+const LANG_LABELS: Record<BotLanguage, string> = {
+  en: 'English',
+  lt: 'Lithuanian',
 }
 
 interface VoiceSectionProps {
   control: Control<FormValues>
   watch: UseFormWatch<FormValues>
   setValue: UseFormSetValue<FormValues>
+  activeLang: BotLanguage
+  enabledLanguages: BotLanguage[]
 }
 
-export function VoiceSection({ control, watch, setValue }: VoiceSectionProps) {
+export function VoiceSection({ control, watch, setValue, activeLang, enabledLanguages }: VoiceSectionProps) {
   const voiceEnabled = watch('voice.enabled')
-  const selectedVoiceId = watch('voice.voiceId')
 
   // When voice is turned on, make sure the sub-flags have real boolean values
-  // (an older bot's config may omit them, leaving the test chat unable to show
-  // the voice controls even though the toggles appear on).
   useEffect(() => {
     if (!voiceEnabled) return
     if (watch('voice.ttsEnabled') === undefined) {
@@ -86,15 +89,8 @@ export function VoiceSection({ control, watch, setValue }: VoiceSectionProps) {
   }, [voiceEnabled, watch, setValue])
 
   const [loadState, dispatch] = useReducer(reducer, { status: 'idle' })
-  const [previewStatus, dispatchPreview] = useReducer(
-    (_s: 'idle' | 'loading' | 'playing', a: 'idle' | 'loading' | 'playing') => a,
-    'idle',
-  )
-  const audioRef = useRef<HTMLAudioElement | null>(null)
 
-  // Fetch curated voices once when voice is enabled. Depend ONLY on
-  // voiceEnabled — including loadState.status here would re-run the effect on
-  // the idle→loading transition, whose cleanup cancels the in-flight request.
+  // Fetch curated voices once when voice is enabled.
   useEffect(() => {
     if (!voiceEnabled) {
       dispatch({ type: 'RESET' })
@@ -129,10 +125,158 @@ export function VoiceSection({ control, watch, setValue }: VoiceSectionProps) {
     }
   }, [voiceEnabled])
 
-  // Stop preview when voice section is disabled.
+  const allVoices: VoiceOption[] =
+    loadState.status === 'ready'
+      ? [...loadState.grouped.male, ...loadState.grouped.female]
+      : []
+
+  // Auto-select first available voice for each language if none set
   useEffect(() => {
-    if (!voiceEnabled) stopPreview()
-  }, [voiceEnabled]) // stopPreview is a stable local function — dep omission is intentional
+    if (loadState.status !== 'ready' || allVoices.length === 0) return
+    for (const lang of enabledLanguages) {
+      const current = watch(`voice.voices.${lang}` as keyof FormValues)
+      if (!allVoices.some((v) => v.id === current)) {
+        setValue(`voice.voices.${lang}` as keyof FormValues, allVoices[0].id as never, { shouldDirty: false })
+      }
+    }
+  }, [loadState.status, allVoices, enabledLanguages, watch, setValue])
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Voice</CardTitle>
+        <CardDescription>TTS, STT, and per-language voice settings.</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {/* Master toggle */}
+        <div className="flex items-center gap-3">
+          <Controller
+            name="voice.enabled"
+            control={control}
+            render={({ field }) => (
+              <Switch
+                checked={field.value ?? false}
+                onCheckedChange={field.onChange}
+                id="voiceEnabled"
+              />
+            )}
+          />
+          <Label htmlFor="voiceEnabled">Enable voice</Label>
+        </div>
+
+        {voiceEnabled && (
+          <div className="space-y-5 rounded-lg border p-4">
+            {/* TTS toggle */}
+            <div className="flex items-center gap-3">
+              <Controller
+                name="voice.ttsEnabled"
+                control={control}
+                render={({ field }) => (
+                  <Switch
+                    checked={field.value ?? true}
+                    onCheckedChange={field.onChange}
+                    id="ttsEnabled"
+                  />
+                )}
+              />
+              <Label htmlFor="ttsEnabled">Text-to-speech (bot speaks replies)</Label>
+            </div>
+
+            {/* STT toggle */}
+            <div className="flex items-center gap-3">
+              <Controller
+                name="voice.sttEnabled"
+                control={control}
+                render={({ field }) => (
+                  <Switch
+                    checked={field.value ?? true}
+                    onCheckedChange={field.onChange}
+                    id="sttEnabled"
+                  />
+                )}
+              />
+              <Label htmlFor="sttEnabled">Speech-to-text (visitor speaks questions)</Label>
+            </div>
+
+            {/* Voice status messages */}
+            {loadState.status === 'unavailable' && (
+              <div className="flex items-start gap-2 rounded-md bg-amber-50 border border-amber-200 px-3 py-2 text-sm text-amber-800">
+                <AlertCircleIcon className="w-4 h-4 mt-0.5 flex-shrink-0" aria-hidden="true" />
+                <span>
+                  Add{' '}
+                  <code className="font-mono text-xs bg-amber-100 px-1 rounded">
+                    ELEVENLABS_API_KEY
+                  </code>{' '}
+                  to your environment to enable voice selection.
+                </span>
+              </div>
+            )}
+            {loadState.status === 'empty' && (
+              <div className="flex items-start gap-2 rounded-md bg-muted border px-3 py-2 text-sm text-muted-foreground">
+                <AlertCircleIcon className="w-4 h-4 mt-0.5 flex-shrink-0" aria-hidden="true" />
+                <span>No voices available yet — ask the platform owner to add voices.</span>
+              </div>
+            )}
+            {loadState.status === 'loading' && (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <LoaderCircleIcon className="w-4 h-4 animate-spin" aria-hidden="true" />
+                Loading voices…
+              </div>
+            )}
+
+            {/* Per-language voice pickers */}
+            {loadState.status === 'ready' && (
+              <div className="space-y-4">
+                <Label className="text-sm font-medium">Voice per language</Label>
+                {enabledLanguages.map((lang) => (
+                  <LanguageVoicePicker
+                    key={lang}
+                    lang={lang}
+                    label={LANG_LABELS[lang]}
+                    control={control}
+                    watch={watch}
+                    grouped={loadState.grouped}
+                    allVoices={allVoices}
+                    isActive={lang === activeLang}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  )
+}
+
+// ── Per-language voice picker ──────────────────────────────────────────────
+interface LanguageVoicePickerProps {
+  lang: BotLanguage
+  label: string
+  control: Control<FormValues>
+  watch: UseFormWatch<FormValues>
+  grouped: GroupedVoices
+  allVoices: VoiceOption[]
+  isActive: boolean
+}
+
+function LanguageVoicePicker({
+  lang,
+  label,
+  control,
+  watch,
+  grouped,
+  allVoices,
+  isActive,
+}: LanguageVoicePickerProps) {
+  const selectedVoiceId = watch(`voice.voices.${lang}` as keyof FormValues) as string | undefined
+  const selectedVoice = allVoices.find((v) => v.id === selectedVoiceId)
+
+  const [previewStatus, dispatchPreview] = useReducer(
+    (_s: 'idle' | 'loading' | 'playing', a: 'idle' | 'loading' | 'playing') => a,
+    'idle',
+  )
+  const audioRef = useRef<HTMLAudioElement | null>(null)
 
   function stopPreview() {
     if (audioRef.current) {
@@ -141,23 +285,6 @@ export function VoiceSection({ control, watch, setValue }: VoiceSectionProps) {
     }
     dispatchPreview('idle')
   }
-
-  // Find selected voice in grouped data for preview URL lookup.
-  const allVoices: VoiceOption[] =
-    loadState.status === 'ready'
-      ? [...loadState.grouped.male, ...loadState.grouped.female]
-      : []
-  const selectedVoice = allVoices.find((v) => v.id === selectedVoiceId)
-
-  // If the configured voice isn't in the curated catalog (e.g. the old default
-  // voice, or none chosen), auto-select the first available one so the picker
-  // and the saved value always agree and TTS uses a real curated voice.
-  useEffect(() => {
-    if (loadState.status !== 'ready' || allVoices.length === 0) return
-    if (!allVoices.some((v) => v.id === selectedVoiceId)) {
-      setValue('voice.voiceId', allVoices[0].id, { shouldDirty: false })
-    }
-  }, [loadState.status, allVoices, selectedVoiceId, setValue])
 
   const handlePreview = useCallback(async () => {
     if (!selectedVoice?.previewUrl) return
@@ -177,152 +304,64 @@ export function VoiceSection({ control, watch, setValue }: VoiceSectionProps) {
     } catch {
       dispatchPreview('idle')
     }
-  }, [selectedVoice, previewStatus]) // stopPreview is a stable local function
+  }, [selectedVoice, previewStatus])
 
   return (
-    <section className="space-y-4">
-      <h2 className="text-base font-semibold border-b pb-2">Voice</h2>
-
-      {/* Master toggle */}
-      <div className="flex items-center gap-3">
+    <div className={`space-y-1.5 p-3 rounded-lg border ${isActive ? 'border-primary/30 bg-primary/5' : ''}`}>
+      <Label htmlFor={`voice-${lang}`} className="text-sm flex items-center gap-1.5">
+        {label}
+        {isActive && (
+          <span className="text-xs text-primary font-normal">(active in preview)</span>
+        )}
+      </Label>
+      <div className="flex items-center gap-2">
         <Controller
-          name="voice.enabled"
+          name={`voice.voices.${lang}` as keyof FormValues}
           control={control}
           render={({ field }) => (
-            <Switch
-              checked={field.value ?? false}
-              onCheckedChange={field.onChange}
-              id="voiceEnabled"
-            />
+            <select
+              id={`voice-${lang}`}
+              value={(field.value as string) ?? ''}
+              onChange={(e) => field.onChange(e.target.value)}
+              className="flex-1 h-9 rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+              aria-label={`Select ${label} voice`}
+            >
+              <option value="" disabled>Select a voice…</option>
+              {grouped.male.length > 0 && (
+                <optgroup label="Men">
+                  {grouped.male.map((v) => (
+                    <option key={v.id} value={v.id}>{v.name}</option>
+                  ))}
+                </optgroup>
+              )}
+              {grouped.female.length > 0 && (
+                <optgroup label="Women">
+                  {grouped.female.map((v) => (
+                    <option key={v.id} value={v.id}>{v.name}</option>
+                  ))}
+                </optgroup>
+              )}
+            </select>
           )}
         />
-        <Label htmlFor="voiceEnabled">Enable voice</Label>
+
+        <Button
+          type="button"
+          variant="outline"
+          size="icon-sm"
+          onClick={handlePreview}
+          disabled={!selectedVoice?.previewUrl || previewStatus === 'loading'}
+          aria-label={previewStatus === 'playing' ? 'Stop preview' : 'Preview voice'}
+        >
+          {previewStatus === 'loading' ? (
+            <LoaderCircleIcon className="w-4 h-4 animate-spin" aria-hidden="true" />
+          ) : previewStatus === 'playing' ? (
+            <SquareIcon className="w-4 h-4" aria-hidden="true" />
+          ) : (
+            <PlayIcon className="w-4 h-4" aria-hidden="true" />
+          )}
+        </Button>
       </div>
-
-      {voiceEnabled && (
-        <div className="space-y-4 rounded-lg border p-4">
-          {/* TTS toggle */}
-          <div className="flex items-center gap-3">
-            <Controller
-              name="voice.ttsEnabled"
-              control={control}
-              render={({ field }) => (
-                <Switch
-                  checked={field.value ?? true}
-                  onCheckedChange={field.onChange}
-                  id="ttsEnabled"
-                />
-              )}
-            />
-            <Label htmlFor="ttsEnabled">Text-to-speech (bot speaks replies)</Label>
-          </div>
-
-          {/* STT toggle */}
-          <div className="flex items-center gap-3">
-            <Controller
-              name="voice.sttEnabled"
-              control={control}
-              render={({ field }) => (
-                <Switch
-                  checked={field.value ?? true}
-                  onCheckedChange={field.onChange}
-                  id="sttEnabled"
-                />
-              )}
-            />
-            <Label htmlFor="sttEnabled">Speech-to-text (visitor speaks questions)</Label>
-          </div>
-
-          {/* Voice picker */}
-          <div className="space-y-1.5">
-            <Label htmlFor="voiceId">Bot voice</Label>
-
-            {/* Unavailable: API key missing or fetch error */}
-            {loadState.status === 'unavailable' && (
-              <div className="flex items-start gap-2 rounded-md bg-amber-50 border border-amber-200 px-3 py-2 text-sm text-amber-800">
-                <AlertCircleIcon className="w-4 h-4 mt-0.5 flex-shrink-0" aria-hidden="true" />
-                <span>
-                  Add{' '}
-                  <code className="font-mono text-xs bg-amber-100 px-1 rounded">
-                    ELEVENLABS_API_KEY
-                  </code>{' '}
-                  to your environment to enable voice selection.
-                </span>
-              </div>
-            )}
-
-            {/* Empty: curated list has no voices yet */}
-            {loadState.status === 'empty' && (
-              <div className="flex items-start gap-2 rounded-md bg-muted border px-3 py-2 text-sm text-muted-foreground">
-                <AlertCircleIcon className="w-4 h-4 mt-0.5 flex-shrink-0" aria-hidden="true" />
-                <span>
-                  No voices available yet — ask the platform owner to add voices.
-                </span>
-              </div>
-            )}
-
-            {/* Loading spinner */}
-            {loadState.status === 'loading' && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <LoaderCircleIcon className="w-4 h-4 animate-spin" aria-hidden="true" />
-                Loading voices…
-              </div>
-            )}
-
-            {/* Grouped select + preview button */}
-            {loadState.status === 'ready' && (
-              <div className="flex items-center gap-2">
-                <Controller
-                  name="voice.voiceId"
-                  control={control}
-                  render={({ field }) => (
-                    <select
-                      id="voiceId"
-                      value={field.value ?? ''}
-                      onChange={(e) => field.onChange(e.target.value)}
-                      className="flex-1 h-9 rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-                      aria-label="Select a voice"
-                    >
-                      <option value="" disabled>Select a voice…</option>
-                      {loadState.grouped.male.length > 0 && (
-                        <optgroup label="Men">
-                          {loadState.grouped.male.map((v) => (
-                            <option key={v.id} value={v.id}>{v.name}</option>
-                          ))}
-                        </optgroup>
-                      )}
-                      {loadState.grouped.female.length > 0 && (
-                        <optgroup label="Women">
-                          {loadState.grouped.female.map((v) => (
-                            <option key={v.id} value={v.id}>{v.name}</option>
-                          ))}
-                        </optgroup>
-                      )}
-                    </select>
-                  )}
-                />
-
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon-sm"
-                  onClick={handlePreview}
-                  disabled={!selectedVoice?.previewUrl || previewStatus === 'loading'}
-                  aria-label={previewStatus === 'playing' ? 'Stop preview' : 'Preview voice'}
-                >
-                  {previewStatus === 'loading' ? (
-                    <LoaderCircleIcon className="w-4 h-4 animate-spin" aria-hidden="true" />
-                  ) : previewStatus === 'playing' ? (
-                    <SquareIcon className="w-4 h-4" aria-hidden="true" />
-                  ) : (
-                    <PlayIcon className="w-4 h-4" aria-hidden="true" />
-                  )}
-                </Button>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-    </section>
+    </div>
   )
 }
