@@ -10,6 +10,7 @@
  *  - getToken: async function that returns the conversation token string.
  *    Should throw (or return undefined) when unavailable.
  *  - primaryColor: theme color for the button + status pill.
+ *  - appearance: 'full' (default, labeled button) | 'compact' (icon-only circle for composer).
  *  - className: optional extra class on the root element.
  */
 
@@ -22,6 +23,7 @@ import { PhoneIcon, PhoneOffIcon, LoaderCircleIcon } from 'lucide-react'
 interface VoiceCallButtonProps {
   getToken: () => Promise<string>
   primaryColor?: string
+  appearance?: 'full' | 'compact'
   className?: string
 }
 
@@ -30,11 +32,13 @@ interface VoiceCallButtonProps {
 interface InnerProps {
   getToken: () => Promise<string>
   primaryColor: string
+  appearance: 'full' | 'compact'
 }
 
-function VoiceCallInner({ getToken, primaryColor }: InnerProps) {
+function VoiceCallInner({ getToken, primaryColor, appearance }: InnerProps) {
   const [callError, setCallError] = useState<string | null>(null)
   const [micDenied, setMicDenied] = useState(false)
+  const [unavailable, setUnavailable] = useState(false)
 
   const conv = useConversation({
     onError: (msg: string) => {
@@ -52,6 +56,7 @@ function VoiceCallInner({ getToken, primaryColor }: InnerProps) {
   const handleStart = useCallback(async () => {
     setCallError(null)
     setMicDenied(false)
+    setUnavailable(false)
 
     // Request mic permission first — surface denial before even fetching token.
     try {
@@ -65,26 +70,30 @@ function VoiceCallInner({ getToken, primaryColor }: InnerProps) {
     try {
       token = await getToken()
     } catch (err: unknown) {
-      const msg =
+      const isUnavailable =
         err instanceof Error &&
         (err.message.toLowerCase().includes('503') ||
           err.message.toLowerCase().includes('unavailable'))
-          ? 'Voice calling isn\'t available right now.'
-          : 'Could not start call — please try again.'
-      setCallError(msg)
+      if (isUnavailable) {
+        setUnavailable(true)
+        return
+      }
+      setCallError('Could not start call — please try again.')
       return
     }
 
     try {
       await startSession({ conversationToken: token })
     } catch (err: unknown) {
-      const msg =
+      const isUnavailable =
         err instanceof Error &&
         (err.message.toLowerCase().includes('503') ||
           err.message.toLowerCase().includes('unavailable'))
-          ? 'Voice calling isn\'t available right now.'
-          : 'Could not connect — please try again.'
-      setCallError(msg)
+      if (isUnavailable) {
+        setUnavailable(true)
+        return
+      }
+      setCallError('Could not connect — please try again.')
     }
   }, [getToken, startSession])
 
@@ -93,6 +102,54 @@ function VoiceCallInner({ getToken, primaryColor }: InnerProps) {
     setCallError(null)
   }, [endSession])
 
+  // When voice calling is unavailable, hide the button entirely in compact mode.
+  if (unavailable && appearance === 'compact') return null
+
+  // ── Compact (icon-only) appearance ──────────────────────────────────────────
+  if (appearance === 'compact') {
+    if (isConnecting) {
+      return (
+        <button
+          type="button"
+          disabled
+          aria-label="Connecting voice call…"
+          className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 border transition-opacity"
+          style={{ borderColor: primaryColor, color: primaryColor }}
+        >
+          <LoaderCircleIcon className="size-4 animate-spin" aria-hidden="true" />
+        </button>
+      )
+    }
+
+    if (isConnected) {
+      return (
+        <button
+          type="button"
+          onClick={handleEnd}
+          aria-label={`End voice call${isSpeaking ? ' — bot is speaking' : ''}`}
+          className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 text-white transition-opacity hover:opacity-80"
+          style={{ backgroundColor: '#ef4444' }}
+        >
+          <PhoneOffIcon className="size-4" aria-hidden="true" />
+        </button>
+      )
+    }
+
+    return (
+      <button
+        type="button"
+        onClick={handleStart}
+        aria-label="Start voice call"
+        title={micDenied ? 'Microphone access denied' : callError ?? 'Start voice call'}
+        className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 border transition-opacity hover:opacity-80"
+        style={{ borderColor: primaryColor, color: primaryColor }}
+      >
+        <PhoneIcon className="size-4" aria-hidden="true" />
+      </button>
+    )
+  }
+
+  // ── Full (labeled) appearance ────────────────────────────────────────────────
   // Status label shown while a call is active.
   const statusLabel = (() => {
     if (isConnecting) return 'Connecting…'
@@ -136,29 +193,38 @@ function VoiceCallInner({ getToken, primaryColor }: InnerProps) {
         </span>
       )}
 
+      {/* Unavailable message */}
+      {unavailable && (
+        <span className="text-xs text-muted-foreground" role="alert">
+          Voice calling isn&apos;t available right now.
+        </span>
+      )}
+
       {/* Main button — phone/end call */}
-      {isActive ? (
-        <button
-          type="button"
-          onClick={handleEnd}
-          aria-label="End voice call"
-          className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-white transition-opacity hover:opacity-80"
-          style={{ backgroundColor: '#ef4444' }}
-        >
-          <PhoneOffIcon className="size-3.5" aria-hidden="true" />
-          End call
-        </button>
-      ) : (
-        <button
-          type="button"
-          onClick={handleStart}
-          aria-label="Start voice call"
-          className="flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-opacity hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
-          style={{ borderColor: primaryColor, color: primaryColor }}
-        >
-          <PhoneIcon className="size-3.5" aria-hidden="true" />
-          Call
-        </button>
+      {!unavailable && (
+        isActive ? (
+          <button
+            type="button"
+            onClick={handleEnd}
+            aria-label="End voice call"
+            className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-white transition-opacity hover:opacity-80"
+            style={{ backgroundColor: '#ef4444' }}
+          >
+            <PhoneOffIcon className="size-3.5" aria-hidden="true" />
+            End call
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={handleStart}
+            aria-label="Start voice call"
+            className="flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-opacity hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{ borderColor: primaryColor, color: primaryColor }}
+          >
+            <PhoneIcon className="size-3.5" aria-hidden="true" />
+            Call
+          </button>
+        )
       )}
     </div>
   )
@@ -169,12 +235,13 @@ function VoiceCallInner({ getToken, primaryColor }: InnerProps) {
 export function VoiceCallButton({
   getToken,
   primaryColor = '#4f46e5',
+  appearance = 'full',
   className,
 }: VoiceCallButtonProps) {
   return (
     <div className={className}>
       <ConversationProvider>
-        <VoiceCallInner getToken={getToken} primaryColor={primaryColor} />
+        <VoiceCallInner getToken={getToken} primaryColor={primaryColor} appearance={appearance} />
       </ConversationProvider>
     </div>
   )
