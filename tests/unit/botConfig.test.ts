@@ -24,6 +24,14 @@ describe('botConfigSchema', () => {
     expect(parsed.allowedDomains).toEqual([])
   })
 
+  it('applies voice defaults (off by default)', () => {
+    const parsed = botConfigSchema.parse({ displayName: 'Bot', greeting: 'Hi', systemPrompt: 's' })
+    expect(parsed.voice.enabled).toBe(false)
+    expect(parsed.voice.ttsEnabled).toBe(true)
+    expect(parsed.voice.sttEnabled).toBe(true)
+    expect(parsed.voice.voiceId).toBeTruthy()
+  })
+
   it('rejects a temperature above 2', () => {
     expect(() => botConfigSchema.parse({ displayName: 'B', greeting: 'h', systemPrompt: 's', temperature: 3 })).toThrow()
   })

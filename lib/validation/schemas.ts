@@ -44,6 +44,15 @@ export const botConfigSchema = z.object({
     })
     .default({ enabled: false, trigger: 'on_fallback', fields: [] }),
   allowedDomains: z.array(z.string()).default([]),
+  voice: z
+    .object({
+      enabled: z.boolean().default(false),
+      ttsEnabled: z.boolean().default(true),
+      sttEnabled: z.boolean().default(true),
+      // ElevenLabs default voice ("Rachel").
+      voiceId: z.string().default('21m00Tcm4TlvDq8ikWAM'),
+    })
+    .default({ enabled: false, ttsEnabled: true, sttEnabled: true, voiceId: '21m00Tcm4TlvDq8ikWAM' }),
 })
 
 /** A sensible starter config for a freshly-created bot. */

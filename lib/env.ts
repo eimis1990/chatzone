@@ -14,6 +14,9 @@ const envSchema = z.object({
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
   OPENAI_API_KEY: z.string().min(1),
   NEXT_PUBLIC_APP_URL: z.string().url(),
+  // Optional: enables ElevenLabs text-to-speech. Voice features degrade
+  // gracefully (503) when this is absent.
+  ELEVENLABS_API_KEY: z.string().min(1).optional(),
 })
 
 export type Env = z.infer<typeof envSchema>

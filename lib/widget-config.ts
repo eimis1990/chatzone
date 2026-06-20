@@ -21,6 +21,11 @@ export interface PublicBotConfig {
     trigger: LeadTrigger
     fields: LeadField[]
   }
+  voice: {
+    enabled: boolean
+    ttsEnabled: boolean
+    sttEnabled: boolean
+  }
 }
 
 /**
@@ -49,6 +54,12 @@ export function publicBotConfig(config: BotConfig): PublicBotConfig {
       enabled: config.leadCapture.enabled,
       trigger: config.leadCapture.trigger,
       fields: config.leadCapture.fields,
+    },
+    // Only flags — never the raw voiceId (TTS runs server-side).
+    voice: {
+      enabled: config.voice?.enabled ?? false,
+      ttsEnabled: config.voice?.ttsEnabled ?? false,
+      sttEnabled: config.voice?.sttEnabled ?? false,
     },
   }
 
