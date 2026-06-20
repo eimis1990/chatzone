@@ -42,7 +42,46 @@ describe('botConfigSchema', () => {
     expect(parsed.voice.enabled).toBe(false)
     expect(parsed.voice.ttsEnabled).toBe(true)
     expect(parsed.voice.sttEnabled).toBe(true)
-    expect(parsed.voice.voiceId).toBeTruthy()
+    expect(parsed.voice.voices.en).toBeTruthy()
+  })
+
+  it('normalizes a legacy (flat) config into per-language content', () => {
+    const parsed = botConfigSchema.parse({
+      displayName: 'Bot',
+      greeting: 'Legacy hi',
+      suggestedQuestions: ['q1'],
+      fallbackMessage: 'no idea',
+      systemPrompt: 's',
+      voice: { voiceId: 'v123' },
+    })
+    expect(parsed.languages).toEqual(['en'])
+    expect(parsed.content.en.greeting).toBe('Legacy hi')
+    expect(parsed.content.en.suggestedQuestions).toEqual(['q1'])
+    expect(parsed.voice.voices.en).toBe('v123')
+  })
+
+  it('requires content for every enabled language', () => {
+    expect(() =>
+      botConfigSchema.parse({
+        displayName: 'Bot',
+        systemPrompt: 's',
+        languages: ['en', 'lt'],
+        content: { en: { greeting: 'Hi', suggestedQuestions: [], fallbackMessage: 'x' } },
+      }),
+    ).toThrow()
+  })
+
+  it('accepts a bilingual config with both contents', () => {
+    const parsed = botConfigSchema.parse({
+      displayName: 'Bot',
+      systemPrompt: 's',
+      languages: ['en', 'lt'],
+      content: {
+        en: { greeting: 'Hi', suggestedQuestions: [], fallbackMessage: 'x' },
+        lt: { greeting: 'Sveiki', suggestedQuestions: [], fallbackMessage: 'nezinau' },
+      },
+    })
+    expect(parsed.content.lt?.greeting).toBe('Sveiki')
   })
 
   it('rejects a temperature above 2', () => {

@@ -10,7 +10,50 @@ export const leadFieldSchema = z.object({
   required: z.boolean().default(false),
 })
 
-export const botConfigSchema = z.object({
+export const DEFAULT_VOICE_ID = '21m00Tcm4TlvDq8ikWAM' // ElevenLabs "Rachel"
+const DEFAULT_FALLBACK =
+  "I'm not sure about that — let me take your details so someone can follow up."
+
+export const languageContentSchema = z.object({
+  greeting: z.string().min(1).max(300),
+  suggestedQuestions: z.array(z.string().min(1)).max(4).default([]),
+  fallbackMessage: z.string().min(1).default(DEFAULT_FALLBACK),
+})
+
+/**
+ * Upgrades a stored config from the pre-multilanguage shape (top-level
+ * greeting/suggestedQuestions/fallbackMessage/language, voice.voiceId) to the
+ * per-language shape (content.{lang}, languages[], voice.voices). Idempotent.
+ */
+export function normalizeBotConfig(input: unknown): unknown {
+  if (!input || typeof input !== 'object') return input
+  const raw = { ...(input as Record<string, unknown>) }
+
+  if (!raw.content) {
+    const lang = (raw.language as string) === 'lt' ? 'lt' : 'en'
+    const legacy = {
+      greeting: (raw.greeting as string) ?? 'Hi! How can I help you today?',
+      suggestedQuestions: (raw.suggestedQuestions as string[]) ?? [],
+      fallbackMessage: (raw.fallbackMessage as string) ?? DEFAULT_FALLBACK,
+    }
+    raw.content = lang === 'lt' ? { en: legacy, lt: legacy } : { en: legacy }
+  }
+  if (!raw.languages) {
+    raw.languages = (raw.language as string) === 'lt' ? ['en', 'lt'] : ['en']
+  }
+  if (raw.voice && typeof raw.voice === 'object') {
+    const v = raw.voice as Record<string, unknown>
+    if (!v.voices) v.voices = { en: (v.voiceId as string) ?? DEFAULT_VOICE_ID }
+  }
+  delete raw.greeting
+  delete raw.suggestedQuestions
+  delete raw.fallbackMessage
+  delete raw.language
+  return raw
+}
+
+/** Plain object schema (no preprocessing) — use for the configurator form (RHF). */
+export const botConfigFormSchema = z.object({
   displayName: z.string().min(1).max(60),
   avatarUrl: z.string().url().optional().or(z.literal('')),
   theme: z
@@ -21,13 +64,12 @@ export const botConfigSchema = z.object({
       cornerRadius: z.number().min(0).max(32).default(16),
       bubbleRadius: z.number().min(0).max(24).default(16),
     })
-    .default({
-      primaryColor: '#4f46e5',
-      position: 'bottom-right',
-      cornerRadius: 16,
-      bubbleRadius: 16,
-    }),
-  greeting: z.string().min(1).max(300),
+    .default({ primaryColor: '#4f46e5', position: 'bottom-right', cornerRadius: 16, bubbleRadius: 16 }),
+  languages: z.array(z.enum(['en', 'lt'])).min(1).default(['en']),
+  content: z.object({
+    en: languageContentSchema,
+    lt: languageContentSchema.optional(),
+  }),
   systemPrompt: z.string().min(1).max(8000),
   persona: z
     .object({
@@ -37,11 +79,6 @@ export const botConfigSchema = z.object({
     .default({ tone: 'friendly', verbosity: 'balanced' }),
   model: z.string().default('gpt-4o-mini'),
   temperature: z.number().min(0).max(2).default(0.3),
-  suggestedQuestions: z.array(z.string().min(1)).max(4).default([]),
-  fallbackMessage: z
-    .string()
-    .min(1)
-    .default("I'm not sure about that — let me take your details so someone can follow up."),
   leadCapture: z
     .object({
       enabled: z.boolean().default(false),
@@ -51,28 +88,49 @@ export const botConfigSchema = z.object({
     })
     .default({ enabled: false, trigger: 'on_fallback', fields: [] }),
   allowedDomains: z.array(z.string()).default([]),
-  language: z.enum(['en', 'lt']).default('en'),
   voice: z
     .object({
       enabled: z.boolean().default(false),
       ttsEnabled: z.boolean().default(true),
       sttEnabled: z.boolean().default(true),
-      // ElevenLabs default voice ("Rachel").
-      voiceId: z.string().default('21m00Tcm4TlvDq8ikWAM'),
+      voices: z
+        .object({ en: z.string().default(DEFAULT_VOICE_ID), lt: z.string().optional() })
+        .default({ en: DEFAULT_VOICE_ID }),
     })
-    .default({ enabled: false, ttsEnabled: true, sttEnabled: true, voiceId: '21m00Tcm4TlvDq8ikWAM' }),
+    .default({ enabled: false, ttsEnabled: true, sttEnabled: true, voices: { en: DEFAULT_VOICE_ID } }),
 })
 
-/** A sensible starter config for a freshly-created bot. */
+export const botConfigSchema = z
+  .preprocess(normalizeBotConfig, botConfigFormSchema)
+  .superRefine((cfg, ctx) => {
+    // Every enabled language must have content.
+    for (const lang of cfg.languages) {
+      if (!cfg.content[lang]) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `Missing ${lang === 'lt' ? 'Lithuanian' : 'English'} content for an enabled language`,
+          path: ['content', lang],
+        })
+      }
+    }
+  })
+
+/** A sensible starter config for a freshly-created bot (English only). */
 export function defaultBotConfig(displayName: string): BotConfig {
   return botConfigSchema.parse({
     displayName,
-    greeting: `Hi! I'm ${displayName}. How can I help you today?`,
+    languages: ['en'],
+    content: {
+      en: {
+        greeting: `Hi! I'm ${displayName}. How can I help you today?`,
+        suggestedQuestions: [],
+        fallbackMessage: DEFAULT_FALLBACK,
+      },
+    },
     systemPrompt:
       'You are a helpful, friendly assistant. Answer using only the provided context. ' +
       'If the answer is not in the context, say you are not sure.',
-    suggestedQuestions: [],
-  })
+  }) as BotConfig
 }
 
 // ---------------------------------------------------------------------------
@@ -91,6 +149,7 @@ export const chatRequestSchema = z.object({
   visitorId: z.string().min(1),
   conversationId: z.string().uuid().optional(),
   message: z.string().min(1).max(4000),
+  language: z.enum(['en', 'lt']).optional(),
 })
 
 // ---------------------------------------------------------------------------
@@ -113,11 +172,13 @@ export const previewChatSchema = z.object({
     .array(z.object({ role: z.enum(['user', 'assistant']), content: z.string() }))
     .default([]),
   message: z.string().min(1).max(4000),
+  language: z.enum(['en', 'lt']).optional(),
 })
 
 export const previewTtsSchema = z.object({
   text: z.string().min(1).max(4000),
   voiceId: z.string().min(1),
+  language: z.enum(['en', 'lt']).optional(),
 })
 
 export type ChatRequest = z.infer<typeof chatRequestSchema>

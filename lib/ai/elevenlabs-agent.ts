@@ -1,11 +1,23 @@
 import { createHash, randomBytes } from 'node:crypto'
 import type { SupabaseClient } from '@supabase/supabase-js'
-import type { Bot } from '@/lib/types'
+import type { Bot, BotLanguage } from '@/lib/types'
 import { MissingVoiceKeyError } from '@/lib/ai/tts'
 
 const API = 'https://api.elevenlabs.io/v1'
 const SETTING_TOKEN = 'cbz_llm_token'
 const SETTING_SECRET_ID = 'elevenlabs_llm_secret_id'
+
+// ElevenLabs "V3 Conversational" — the only model family that supports the full
+// language set (incl. Lithuanian) for real-time agents.
+const AGENT_TTS_MODEL = 'eleven_v3_conversational'
+const DEFAULT_VOICE_ID = '21m00Tcm4TlvDq8ikWAM'
+
+interface SupportedVoice {
+  label: string
+  voice_id: string
+  language: string
+  description: string
+}
 
 export interface AgentConfig {
   name: string
@@ -24,23 +36,54 @@ export interface AgentConfig {
         }
       }
     }
-    tts: { voice_id: string; model_id: string }
+    tts: {
+      voice_id: string
+      model_id: string
+      expressive_mode: boolean
+      supported_voices: SupportedVoice[]
+    }
+    language_presets: Record<string, { overrides: { agent: { first_message: string } } }>
   }
 }
 
-/** Maps a bot + deployment URL + workspace secret to an ElevenLabs agent config. */
+const LANG_NAME: Record<string, string> = { en: 'English', lt: 'Lithuanian' }
+
+/**
+ * Maps a bot to a single multilingual ElevenLabs agent: V3 Conversational with
+ * a default language + `language_presets` (per-language first message) and
+ * `supported_voices` (per-language voice override).
+ */
 export function buildAgentConfig(bot: Bot, appUrl: string, secretId: string): AgentConfig {
   const cfg = bot.config
-  const language = cfg.language ?? 'en'
-  // ElevenLabs requires English agents to use a v2 TTS model; non-English needs
-  // a multilingual model (v2.5).
-  const ttsModel = language === 'en' ? 'eleven_turbo_v2' : 'eleven_turbo_v2_5'
+  const languages: BotLanguage[] = cfg.languages?.length ? cfg.languages : ['en']
+  const defaultLang = languages[0]
+  const enContent = cfg.content?.en
+  const defaultContent = cfg.content?.[defaultLang] ?? enContent
+  const voices = cfg.voice?.voices ?? { en: DEFAULT_VOICE_ID }
+  const defaultVoice = voices[defaultLang] ?? voices.en ?? DEFAULT_VOICE_ID
+
+  const supportedVoices: SupportedVoice[] = []
+  const languagePresets: AgentConfig['conversation_config']['language_presets'] = {}
+  for (const lang of languages) {
+    if (lang === defaultLang) continue
+    const content = cfg.content?.[lang]
+    languagePresets[lang] = {
+      overrides: { agent: { first_message: content?.greeting ?? defaultContent?.greeting ?? '' } },
+    }
+    supportedVoices.push({
+      label: LANG_NAME[lang] ?? lang,
+      voice_id: voices[lang] ?? defaultVoice,
+      language: lang,
+      description: `Use this when speaking ${LANG_NAME[lang] ?? lang}`,
+    })
+  }
+
   return {
     name: `cbz-${bot.id}`,
     conversation_config: {
       agent: {
-        first_message: cfg.greeting,
-        language,
+        first_message: defaultContent?.greeting ?? '',
+        language: defaultLang,
         prompt: {
           prompt: cfg.systemPrompt,
           llm: 'custom-llm',
@@ -52,7 +95,13 @@ export function buildAgentConfig(bot: Bot, appUrl: string, secretId: string): Ag
           },
         },
       },
-      tts: { voice_id: cfg.voice?.voiceId ?? '', model_id: ttsModel },
+      tts: {
+        voice_id: defaultVoice,
+        model_id: AGENT_TTS_MODEL,
+        expressive_mode: true,
+        supported_voices: supportedVoices,
+      },
+      language_presets: languagePresets,
     },
   }
 }
@@ -61,9 +110,9 @@ export function buildAgentConfig(bot: Bot, appUrl: string, secretId: string): Ag
 export function agentConfigHash(bot: Bot, appUrl: string): string {
   const cfg = bot.config
   const material = JSON.stringify([
-    cfg.greeting,
-    cfg.language ?? 'en',
-    cfg.voice?.voiceId ?? '',
+    cfg.languages,
+    cfg.content,
+    cfg.voice?.voices,
     cfg.model ?? '',
     cfg.systemPrompt,
     bot.public_key,

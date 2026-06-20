@@ -4,7 +4,7 @@ import { createServiceClient } from '@/lib/supabase/service'
 import { chatRequestSchema } from '@/lib/validation/schemas'
 import { isOriginAllowed, corsHeaders } from '@/lib/widget-auth'
 import { retrieveContext, serviceRetrievalDeps } from '@/lib/ai/retrieval'
-import { buildMessages, type ChatMessage } from '@/lib/ai/prompt'
+import { buildMessages, contentFor, defaultLanguage, type ChatMessage } from '@/lib/ai/prompt'
 import { createRateLimiter } from '@/lib/ratelimit'
 import type { Bot, Citation } from '@/lib/types'
 
@@ -40,6 +40,12 @@ export async function POST(req: Request) {
     .eq('public_key', publicKey)
     .single<Bot>()
   if (!bot || bot.status !== 'active') return json({ error: 'Bot not available' }, 404)
+
+  // Active language: requested (if enabled) else the bot default.
+  const lang =
+    parsed.data.language && bot.config.languages?.includes(parsed.data.language)
+      ? parsed.data.language
+      : defaultLanguage(bot.config)
 
   // Origin allowlist + rate limit.
   if (!isOriginAllowed(origin, bot.config.allowedDomains ?? [])) {
@@ -95,7 +101,7 @@ export async function POST(req: Request) {
 
   // Weak retrieval → answer with the configured fallback and signal lead capture.
   if (retrieval.isWeak) {
-    const fallback = bot.config.fallbackMessage
+    const fallback = contentFor(bot.config, lang).fallbackMessage
     await svc.from('messages').insert({
       conversation_id: convId,
       role: 'assistant',
@@ -108,7 +114,7 @@ export async function POST(req: Request) {
     })
   }
 
-  const messages = buildMessages(bot.config, retrieval.chunks, history, message) as ModelMessage[]
+  const messages = buildMessages(bot.config, retrieval.chunks, history, message, lang) as ModelMessage[]
   const citations: Citation[] = retrieval.matched.map((m) => ({
     source_id: m.source_id,
     snippet: m.content.slice(0, 160),

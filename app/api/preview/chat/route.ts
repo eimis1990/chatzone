@@ -4,7 +4,8 @@ import { createServerClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { previewChatSchema } from '@/lib/validation/schemas'
 import { retrieveContext, serviceRetrievalDeps } from '@/lib/ai/retrieval'
-import { buildMessages, type ChatMessage } from '@/lib/ai/prompt'
+import { buildMessages, contentFor, defaultLanguage, type ChatMessage } from '@/lib/ai/prompt'
+import type { BotConfig } from '@/lib/types'
 import { createRateLimiter } from '@/lib/ratelimit'
 
 export const maxDuration = 60
@@ -20,7 +21,12 @@ export async function POST(req: Request) {
   const body = await req.json().catch(() => null)
   const parsed = previewChatSchema.safeParse(body)
   if (!parsed.success) return json({ error: 'Invalid request' }, 400)
-  const { botId, config, history, message } = parsed.data
+  const { botId, history, message } = parsed.data
+  const config = parsed.data.config as BotConfig
+  const lang =
+    parsed.data.language && config.languages?.includes(parsed.data.language)
+      ? parsed.data.language
+      : defaultLanguage(config)
 
   // Auth + ownership (RLS: the bot is only visible if it's in the user's org).
   const supabase = await createServerClient()
@@ -37,7 +43,7 @@ export async function POST(req: Request) {
   const retrieval = await retrieveContext(botId, message, {}, serviceRetrievalDeps(svc))
 
   if (retrieval.isWeak) {
-    return new Response(config.fallbackMessage, {
+    return new Response(contentFor(config, lang).fallbackMessage, {
       headers: { 'Content-Type': 'text/plain; charset=utf-8', 'x-weak': '1' },
     })
   }
@@ -47,6 +53,7 @@ export async function POST(req: Request) {
     retrieval.chunks,
     history as ChatMessage[],
     message,
+    lang,
   ) as ModelMessage[]
 
   const result = streamText({

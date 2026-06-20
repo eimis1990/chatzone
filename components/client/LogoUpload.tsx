@@ -8,9 +8,9 @@ import { createBrowserClient } from '@/lib/supabase/browser'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import type { z } from 'zod'
-import type { botConfigSchema } from '@/lib/validation/schemas'
+import type { botConfigFormSchema } from '@/lib/validation/schemas'
 
-type FormValues = z.input<typeof botConfigSchema>
+type FormValues = z.input<typeof botConfigFormSchema>
 
 interface LogoUploadProps {
   botId: string

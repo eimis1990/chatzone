@@ -1,10 +1,16 @@
-import type { BotConfig, LeadField, LeadTrigger } from '@/lib/types'
+import type { BotConfig, BotLanguage, LeadField, LeadTrigger } from '@/lib/types'
+
+/** Per-language browser-safe content (no fallback — server streams that). */
+export interface PublicLanguageContent {
+  greeting: string
+  suggestedQuestions: string[]
+}
 
 /**
  * The subset of BotConfig that is safe to send to the browser.
  *
  * MUST NOT include: systemPrompt, model, temperature, allowedDomains,
- * persona, fallbackMessage — those are server-only operational details.
+ * persona, fallbackMessage, voice ids — those are server-only details.
  */
 export interface PublicBotConfig {
   displayName: string
@@ -16,8 +22,8 @@ export interface PublicBotConfig {
     cornerRadius: number
     bubbleRadius: number
   }
-  greeting: string
-  suggestedQuestions: string[]
+  languages: BotLanguage[]
+  content: Partial<Record<BotLanguage, PublicLanguageContent>>
   leadCapture: {
     enabled: boolean
     trigger: LeadTrigger
@@ -43,6 +49,12 @@ export interface PublicBotConfig {
  *  - fallbackMessage — not needed client-side (server streams it)
  */
 export function publicBotConfig(config: BotConfig): PublicBotConfig {
+  const content: Partial<Record<BotLanguage, PublicLanguageContent>> = {}
+  for (const lang of config.languages ?? ['en']) {
+    const c = config.content?.[lang]
+    if (c) content[lang] = { greeting: c.greeting, suggestedQuestions: c.suggestedQuestions }
+  }
+
   const result: PublicBotConfig = {
     displayName: config.displayName,
     theme: {
@@ -52,8 +64,8 @@ export function publicBotConfig(config: BotConfig): PublicBotConfig {
       bubbleRadius: config.theme.bubbleRadius ?? 16,
       ...(config.theme.bubbleIcon !== undefined && { bubbleIcon: config.theme.bubbleIcon }),
     },
-    greeting: config.greeting,
-    suggestedQuestions: config.suggestedQuestions,
+    languages: config.languages ?? ['en'],
+    content,
     leadCapture: {
       enabled: config.leadCapture.enabled,
       trigger: config.leadCapture.trigger,

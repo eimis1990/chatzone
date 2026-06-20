@@ -2,7 +2,7 @@ import { z } from 'zod'
 import { createServiceClient } from '@/lib/supabase/service'
 import { isOriginAllowed, corsHeaders } from '@/lib/widget-auth'
 import { createRateLimiter } from '@/lib/ratelimit'
-import { synthesizeSpeech, MissingVoiceKeyError } from '@/lib/ai/tts'
+import { synthesizeSpeech, ttsModelForLanguage, MissingVoiceKeyError } from '@/lib/ai/tts'
 import type { Bot } from '@/lib/types'
 
 export const maxDuration = 30
@@ -12,6 +12,7 @@ const ttsLimiter = createRateLimiter({ capacity: 10, refillPerSec: 0.5 })
 const bodySchema = z.object({
   publicKey: z.string().min(1),
   messageId: z.string().uuid(),
+  language: z.enum(['en', 'lt']).optional(),
 })
 
 export async function OPTIONS(req: Request) {
@@ -54,8 +55,14 @@ export async function POST(req: Request) {
     .single<{ bot_id: string }>()
   if (!conv || conv.bot_id !== bot.id) return json({ error: 'Forbidden' }, 403)
 
+  const lang =
+    parsed.data.language && bot.config.languages?.includes(parsed.data.language)
+      ? parsed.data.language
+      : (bot.config.languages?.[0] ?? 'en')
+  const voiceId = bot.config.voice.voices?.[lang] ?? bot.config.voice.voices?.en ?? ''
+
   try {
-    const audio = await synthesizeSpeech(msg.content, bot.config.voice.voiceId)
+    const audio = await synthesizeSpeech(msg.content, voiceId, { model: ttsModelForLanguage(lang) })
     return new Response(audio, {
       headers: { ...cors, 'Content-Type': 'audio/mpeg', 'Cache-Control': 'no-store' },
     })
