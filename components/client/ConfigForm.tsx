@@ -262,6 +262,25 @@ export function ConfigForm({ botId, initialConfig }: ConfigFormProps) {
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
+              <Label>Language</Label>
+              <Controller
+                name="language"
+                control={control}
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="en">English</SelectItem>
+                      <SelectItem value="lt">Lithuanian</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </div>
+
+            <div className="space-y-1.5">
               <Label>Model</Label>
               <Controller
                 name="model"
