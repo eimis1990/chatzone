@@ -7,63 +7,58 @@
  *  - Master enable toggle (voice.enabled)
  *  - TTS toggle (voice.ttsEnabled)
  *  - STT toggle (voice.sttEnabled)
- *  - Voice picker for voice.voiceId, fetched from GET /api/voices
- *  - Preview button that plays the selected voice's previewUrl
+ *  - Voice picker (voice.voiceId) built from GET /api/platform-voices
+ *    → two <optgroup> sections: Men / Women
+ *  - Preview ▶ button that plays the selected voice's previewUrl
  *
- * When ELEVENLABS_API_KEY is absent the GET /api/voices endpoint returns 503;
- * in that case the picker is disabled and an inline notice is shown.
+ * When no curated voices are configured the picker shows an informational notice.
+ * When ELEVENLABS_API_KEY is absent the notice indicates the key is missing.
  */
 
 import { useEffect, useRef, useReducer, useCallback } from 'react'
 import { Controller, type Control, type UseFormWatch } from 'react-hook-form'
-import { PlayIcon, LoaderCircleIcon, AlertCircleIcon } from 'lucide-react'
+import { PlayIcon, SquareIcon, LoaderCircleIcon, AlertCircleIcon } from 'lucide-react'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
 import type { z } from 'zod'
 import type { botConfigSchema } from '@/lib/validation/schemas'
 
 type FormValues = z.input<typeof botConfigSchema>
 
-interface Voice {
+interface VoiceOption {
   id: string
   name: string
   previewUrl?: string
 }
 
-type VoiceLoadState =
+interface GroupedVoices {
+  male: VoiceOption[]
+  female: VoiceOption[]
+}
+
+type LoadState =
   | { status: 'idle' }
   | { status: 'loading' }
-  | { status: 'ready'; voices: Voice[] }
-  | { status: 'unavailable' }
+  | { status: 'ready'; grouped: GroupedVoices }
+  | { status: 'empty' }       // curated list is empty
+  | { status: 'unavailable' } // key missing or fetch error
 
-type VoiceLoadAction =
+type LoadAction =
   | { type: 'FETCH_START' }
-  | { type: 'FETCH_SUCCESS'; voices: Voice[] }
+  | { type: 'FETCH_SUCCESS'; grouped: GroupedVoices }
+  | { type: 'FETCH_EMPTY' }
   | { type: 'FETCH_FAIL' }
   | { type: 'RESET' }
 
-function voiceLoadReducer(state: VoiceLoadState, action: VoiceLoadAction): VoiceLoadState {
+function reducer(state: LoadState, action: LoadAction): LoadState {
   switch (action.type) {
-    case 'FETCH_START':
-      return { status: 'loading' }
-    case 'FETCH_SUCCESS':
-      return action.voices.length > 0
-        ? { status: 'ready', voices: action.voices }
-        : { status: 'unavailable' }
-    case 'FETCH_FAIL':
-      return { status: 'unavailable' }
-    case 'RESET':
-      return { status: 'idle' }
-    default:
-      return state
+    case 'FETCH_START':    return { status: 'loading' }
+    case 'FETCH_SUCCESS':  return { status: 'ready', grouped: action.grouped }
+    case 'FETCH_EMPTY':    return { status: 'empty' }
+    case 'FETCH_FAIL':     return { status: 'unavailable' }
+    case 'RESET':          return { status: 'idle' }
+    default:               return state
   }
 }
 
@@ -76,14 +71,14 @@ export function VoiceSection({ control, watch }: VoiceSectionProps) {
   const voiceEnabled = watch('voice.enabled')
   const selectedVoiceId = watch('voice.voiceId')
 
-  const [loadState, dispatch] = useReducer(voiceLoadReducer, { status: 'idle' })
+  const [loadState, dispatch] = useReducer(reducer, { status: 'idle' })
   const [previewStatus, dispatchPreview] = useReducer(
-    (s: 'idle' | 'loading' | 'playing', a: 'idle' | 'loading' | 'playing') => a,
+    (_s: 'idle' | 'loading' | 'playing', a: 'idle' | 'loading' | 'playing') => a,
     'idle',
   )
   const audioRef = useRef<HTMLAudioElement | null>(null)
 
-  // Fetch voices or reset when voiceEnabled changes.
+  // Fetch curated voices from platform-voices when enabled.
   useEffect(() => {
     if (!voiceEnabled) {
       dispatch({ type: 'RESET' })
@@ -94,32 +89,34 @@ export function VoiceSection({ control, watch }: VoiceSectionProps) {
     let cancelled = false
     dispatch({ type: 'FETCH_START' })
 
-    fetch('/api/voices')
+    fetch('/api/platform-voices')
       .then(async (res) => {
-        const data = (await res.json()) as { voices?: Voice[] }
         if (cancelled) return
-        if (!res.ok || !data.voices) {
+        const data = (await res.json()) as { male?: VoiceOption[]; female?: VoiceOption[] }
+        if (!res.ok) {
           dispatch({ type: 'FETCH_FAIL' })
+          return
+        }
+        const male = data.male ?? []
+        const female = data.female ?? []
+        if (male.length === 0 && female.length === 0) {
+          dispatch({ type: 'FETCH_EMPTY' })
         } else {
-          dispatch({ type: 'FETCH_SUCCESS', voices: data.voices })
+          dispatch({ type: 'FETCH_SUCCESS', grouped: { male, female } })
         }
       })
       .catch(() => {
         if (!cancelled) dispatch({ type: 'FETCH_FAIL' })
       })
 
-    return () => {
-      cancelled = true
-    }
+    return () => { cancelled = true }
   }, [voiceEnabled, loadState.status])
 
-  // Stop preview when section is disabled.
+  // Stop preview when voice section is disabled.
   useEffect(() => {
-    if (!voiceEnabled) {
-      stopPreview()
-    }
-  // stopPreview is defined inline and stable — omitting from deps is intentional.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    if (!voiceEnabled) stopPreview()
+    // stopPreview is defined below and stable — intentional omission.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [voiceEnabled])
 
   function stopPreview() {
@@ -130,22 +127,22 @@ export function VoiceSection({ control, watch }: VoiceSectionProps) {
     dispatchPreview('idle')
   }
 
-  const voices = loadState.status === 'ready' ? loadState.voices : []
-  const selectedVoice = voices.find((v) => v.id === selectedVoiceId)
+  // Find selected voice in grouped data for preview URL lookup.
+  const allVoices: VoiceOption[] =
+    loadState.status === 'ready'
+      ? [...loadState.grouped.male, ...loadState.grouped.female]
+      : []
+  const selectedVoice = allVoices.find((v) => v.id === selectedVoiceId)
 
   const handlePreview = useCallback(async () => {
     if (!selectedVoice?.previewUrl) return
-    if (previewStatus === 'playing') {
-      stopPreview()
-      return
-    }
+    if (previewStatus === 'playing') { stopPreview(); return }
 
     dispatchPreview('loading')
     stopPreview()
 
     const audio = new Audio(selectedVoice.previewUrl)
     audioRef.current = audio
-
     audio.onended = () => dispatchPreview('idle')
     audio.onerror = () => dispatchPreview('idle')
 
@@ -155,6 +152,7 @@ export function VoiceSection({ control, watch }: VoiceSectionProps) {
     } catch {
       dispatchPreview('idle')
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedVoice, previewStatus])
 
   return (
@@ -213,8 +211,9 @@ export function VoiceSection({ control, watch }: VoiceSectionProps) {
 
           {/* Voice picker */}
           <div className="space-y-1.5">
-            <Label>Bot voice</Label>
+            <Label htmlFor="voiceId">Bot voice</Label>
 
+            {/* Unavailable: API key missing or fetch error */}
             {loadState.status === 'unavailable' && (
               <div className="flex items-start gap-2 rounded-md bg-amber-50 border border-amber-200 px-3 py-2 text-sm text-amber-800">
                 <AlertCircleIcon className="w-4 h-4 mt-0.5 flex-shrink-0" aria-hidden="true" />
@@ -228,6 +227,17 @@ export function VoiceSection({ control, watch }: VoiceSectionProps) {
               </div>
             )}
 
+            {/* Empty: curated list has no voices yet */}
+            {loadState.status === 'empty' && (
+              <div className="flex items-start gap-2 rounded-md bg-muted border px-3 py-2 text-sm text-muted-foreground">
+                <AlertCircleIcon className="w-4 h-4 mt-0.5 flex-shrink-0" aria-hidden="true" />
+                <span>
+                  No voices available yet — ask the platform owner to add voices.
+                </span>
+              </div>
+            )}
+
+            {/* Loading spinner */}
             {loadState.status === 'loading' && (
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <LoaderCircleIcon className="w-4 h-4 animate-spin" aria-hidden="true" />
@@ -235,28 +245,36 @@ export function VoiceSection({ control, watch }: VoiceSectionProps) {
               </div>
             )}
 
-            {(loadState.status === 'ready' || loadState.status === 'idle') && (
+            {/* Grouped select + preview button */}
+            {loadState.status === 'ready' && (
               <div className="flex items-center gap-2">
                 <Controller
                   name="voice.voiceId"
                   control={control}
                   render={({ field }) => (
-                    <Select
-                      value={field.value}
-                      onValueChange={field.onChange}
-                      disabled={loadState.status !== 'ready'}
+                    <select
+                      id="voiceId"
+                      value={field.value ?? ''}
+                      onChange={(e) => field.onChange(e.target.value)}
+                      className="flex-1 h-9 rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                      aria-label="Select a voice"
                     >
-                      <SelectTrigger className="flex-1">
-                        <SelectValue placeholder="Select a voice…" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {voices.map((v) => (
-                          <SelectItem key={v.id} value={v.id}>
-                            {v.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                      <option value="" disabled>Select a voice…</option>
+                      {loadState.grouped.male.length > 0 && (
+                        <optgroup label="Men">
+                          {loadState.grouped.male.map((v) => (
+                            <option key={v.id} value={v.id}>{v.name}</option>
+                          ))}
+                        </optgroup>
+                      )}
+                      {loadState.grouped.female.length > 0 && (
+                        <optgroup label="Women">
+                          {loadState.grouped.female.map((v) => (
+                            <option key={v.id} value={v.id}>{v.name}</option>
+                          ))}
+                        </optgroup>
+                      )}
+                    </select>
                   )}
                 />
 
@@ -265,11 +283,13 @@ export function VoiceSection({ control, watch }: VoiceSectionProps) {
                   variant="outline"
                   size="icon-sm"
                   onClick={handlePreview}
-                  disabled={!selectedVoice?.previewUrl || loadState.status !== 'ready'}
+                  disabled={!selectedVoice?.previewUrl || previewStatus === 'loading'}
                   aria-label={previewStatus === 'playing' ? 'Stop preview' : 'Preview voice'}
                 >
                   {previewStatus === 'loading' ? (
                     <LoaderCircleIcon className="w-4 h-4 animate-spin" aria-hidden="true" />
+                  ) : previewStatus === 'playing' ? (
+                    <SquareIcon className="w-4 h-4" aria-hidden="true" />
                   ) : (
                     <PlayIcon className="w-4 h-4" aria-hidden="true" />
                   )}
