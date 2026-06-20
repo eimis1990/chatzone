@@ -2,7 +2,6 @@
 
 import { useRef, useState, useCallback, type KeyboardEvent, type FormEvent } from 'react'
 import { VoiceCallButton } from '@/components/voice/VoiceCallButton'
-import { POWERED_BY_URL } from '@/lib/utils'
 
 interface VoiceConfig {
   enabled: boolean
@@ -109,19 +108,8 @@ export function Composer({ onSend, disabled = false, primaryColor, voice, public
           </svg>
         </button>
       </form>
-
-      {/* Powered by footer */}
-      <p className="pb-2.5 text-center text-[10px] text-gray-400">
-        Powered by{' '}
-        <a
-          href={POWERED_BY_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="underline hover:text-gray-600 transition-colors"
-        >
-          Chatzone
-        </a>
-      </p>
+      {/* "Powered by Chatzone" is rendered by the widget loader chrome (widget.js),
+         below the close button — matching the reference layout. */}
     </div>
   )
 }
