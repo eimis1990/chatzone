@@ -12,6 +12,7 @@
  *  2. Injects a floating launcher <button> into the page.
  *  3. On first click, lazy-creates an <iframe> pointed at /embed/{key}.
  *  4. Toggles open/close on subsequent launcher clicks.
+ *  5. When open: renders a down-chevron close button + "Powered by Chatzone" link below the iframe.
  */
 ;(function () {
   'use strict'
@@ -46,10 +47,11 @@
 
   // ── Styles ────────────────────────────────────────────────────────────────
   var LAUNCHER_SIZE = 56
-  var IFRAME_WIDTH = 380
+  var IFRAME_WIDTH = 400
   var IFRAME_HEIGHT = 600
   var OFFSET = 20
   var Z_INDEX = 2147483647 // max z-index
+  var POWERED_BY_URL = 'https://chatzone.app'
 
   var isRight = position !== 'bottom-left'
 
@@ -108,15 +110,9 @@
   wrapper.setAttribute('data-cbz-wrapper', '')
   css(wrapper, {
     position: 'fixed',
-    bottom: LAUNCHER_SIZE + OFFSET + 8 + 'px',
     zIndex: Z_INDEX,
     width: IFRAME_WIDTH + 'px',
-    height: IFRAME_HEIGHT + 'px',
-    borderRadius: '16px',
-    boxShadow: '0 8px 40px rgba(0,0,0,0.18)',
-    overflow: 'hidden',
     display: 'none', // hidden until first open
-    transition: 'opacity 0.15s ease, transform 0.15s ease',
   })
 
   if (isRight) {
@@ -124,6 +120,66 @@
   } else {
     wrapper.style.left = OFFSET + 'px'
   }
+
+  // Position wrapper bottom so it sits above the launcher
+  wrapper.style.bottom = (LAUNCHER_SIZE + OFFSET + 8) + 'px'
+
+  // ── Iframe container ──────────────────────────────────────────────────────
+  var iframeContainer = document.createElement('div')
+  css(iframeContainer, {
+    width: '100%',
+    height: IFRAME_HEIGHT + 'px',
+    borderRadius: '16px',
+    boxShadow: '0 8px 40px rgba(0,0,0,0.18)',
+    overflow: 'hidden',
+  })
+
+  // ── Close button (down-chevron, below the iframe) ─────────────────────────
+  var closeBtn = document.createElement('button')
+  closeBtn.setAttribute('data-cbz-close', '')
+  closeBtn.setAttribute('type', 'button')
+  closeBtn.setAttribute('aria-label', 'Close chat')
+  // Down-chevron SVG
+  closeBtn.innerHTML =
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="20" height="20" aria-hidden="true">' +
+    '<polyline points="6 9 12 15 18 9" />' +
+    '</svg>'
+  css(closeBtn, {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    margin: '8px auto 0',
+    width: '36px',
+    height: '36px',
+    borderRadius: '50%',
+    border: 'none',
+    cursor: 'pointer',
+    backgroundColor: '#ffffff',
+    color: '#374151',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+    transition: 'box-shadow 0.15s ease, background-color 0.15s ease',
+    padding: '0',
+    lineHeight: '1',
+  })
+
+  // ── Powered-by link (below close button, right-aligned) ───────────────────
+  var poweredBy = document.createElement('div')
+  css(poweredBy, {
+    textAlign: 'right',
+    marginTop: '6px',
+    paddingRight: '2px',
+    fontSize: '10px',
+    color: 'rgba(0,0,0,0.35)',
+    lineHeight: '1.4',
+    fontFamily: 'system-ui, -apple-system, sans-serif',
+  })
+  poweredBy.innerHTML =
+    'Powered by <a href="' + POWERED_BY_URL + '" target="_blank" rel="noopener noreferrer" ' +
+    'style="color:rgba(0,0,0,0.5);text-decoration:underline;font-family:inherit;">Chatzone</a>'
+
+  wrapper.appendChild(iframeContainer)
+  wrapper.appendChild(closeBtn)
+  wrapper.appendChild(poweredBy)
 
   var iframe = null
   var isOpen = false
@@ -144,7 +200,7 @@
         border: 'none',
         display: 'block',
       })
-      wrapper.appendChild(iframe)
+      iframeContainer.appendChild(iframe)
     }
     wrapper.style.display = 'block'
     isOpen = true
@@ -165,6 +221,10 @@
     } else {
       openWidget()
     }
+  })
+
+  closeBtn.addEventListener('click', function () {
+    closeWidget()
   })
 
   // Keyboard: close on Escape when widget is open
