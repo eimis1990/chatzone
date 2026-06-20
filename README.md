@@ -30,6 +30,17 @@ configurator's preview is an interactive **test chat** — talk to the bot using
 (unsaved) config against its knowledge base, with text + voice (TTS/STT) and a Start-over button;
 test chats are ephemeral (never logged).
 
+**Cycle 3 — Real-time voice + language:** a live **"voice call"** (ElevenLabs Agents, WebRTC,
+barge-in) in both the test playground and the widget — the agent uses the bot's voice and answers
+from the knowledge base via a custom-LLM callback into our RAG. Per-bot **language** (English or
+Lithuanian) steers text chat, ASR, and TTS. A short-lived conversation token is minted server-side
+(`/api/{preview,widget}/voice-token`); the agent's brain is `/api/llm/[publicKey]`.
+
+> **Live-call requirement:** ElevenLabs calls the custom-LLM endpoint server-to-server, so the live
+> voice call only answers from the knowledge base when the app is **publicly reachable**
+> (`NEXT_PUBLIC_APP_URL` = a deployed URL or a tunnel). On plain `localhost` the call connects and
+> audio flows but the agent can't reach the LLM endpoint. Text chat + read-aloud TTS work locally.
+
 > Deferred to later cycles: Stripe billing, human handoff, self-serve signup.
 
 ## Setup
