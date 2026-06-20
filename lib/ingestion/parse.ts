@@ -19,9 +19,9 @@ export async function parseFile(buffer: Buffer, mime: string): Promise<string> {
     return buffer.toString('utf8').trim()
   }
   if (mime === 'application/pdf') {
-    // Import the lib entry directly to avoid pdf-parse's debug harness.
-    const pdfParse = (await import('pdf-parse')).default
-    const result = await pdfParse(buffer)
+    const { PDFParse } = await import('pdf-parse')
+    const parser = new PDFParse({ data: new Uint8Array(buffer) })
+    const result = await parser.getText()
     return result.text.trim()
   }
   if (
