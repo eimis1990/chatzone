@@ -1,36 +1,109 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ChatbotZone
 
-## Getting Started
+A multi-tenant chatbot SaaS. As the **owner** you onboard **client** businesses; each client
+configures an AI chatbot, trains it on a knowledge base, and embeds it on their website via a
+copy-paste widget. Visitors get streaming, RAG-grounded answers.
 
-First, run the development server:
+## Stack
+
+- **Next.js 16** (App Router, TypeScript strict) + **Tailwind v4** + **shadcn/ui**
+- **Supabase** — Postgres, Auth, Storage, Row-Level Security, `pgvector`
+- **OpenAI** via the **Vercel AI SDK** — `gpt-4o-mini` chat + `text-embedding-3-small`
+- **Vitest** (unit + DB integration) and **Playwright** (E2E)
+
+## Features (Cycle 1)
+
+- Owner admin panel: clients, invites, platform + per-client stats
+- Invite-only client portal: bot configurator with live preview
+- Knowledge base ingestion: file upload (PDF/DOCX/TXT/MD), URL crawl, Q&A pairs, text paste
+- RAG chat API with streaming, citations, configurable fallback + lead capture
+- Embeddable widget (`<script>` loader → isolated iframe), domain allowlist, rate limiting
+- Conversations/transcripts, leads with CSV export, analytics charts
+
+> Deferred to later cycles: voice (ElevenLabs/Whisper), Stripe billing, human handoff, self-serve signup.
+
+## Setup
+
+### 1. Install
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npx playwright install chromium   # only if you'll run E2E
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Configure environment
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Copy `.env.example` to `.env.local` and fill in your Supabase + OpenAI values:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+NEXT_PUBLIC_SUPABASE_URL=...
+NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+SUPABASE_SERVICE_ROLE_KEY=...
+OPENAI_API_KEY=...
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+```
 
-## Learn More
+### 3. Apply database migrations
 
-To learn more about Next.js, take a look at the following resources:
+Link the Supabase CLI to your project and push:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+export SUPABASE_ACCESS_TOKEN=<personal access token>
+npx supabase link --project-ref <your-project-ref> --password <db password>
+npx supabase db push
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+This creates all tables, RLS policies, the `match_chunks` RPC, the stats views, and the
+`knowledge` storage bucket.
 
-## Deploy on Vercel
+### 4. Seed your owner account
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+node --env-file=.env.local scripts/seed-owner.mjs you@example.com 'a-strong-password'
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### 5. Run
+
+```bash
+npm run dev      # http://localhost:3000
+```
+
+Log in at `/login` with the owner credentials → you land on `/owner`.
+
+## How it works
+
+1. **Owner** creates a client at `/owner/clients` → gets an invite link to send.
+2. **Client** opens the link, sets a password, and lands in `/app`.
+3. Client creates a bot, configures it (`/app/bots/<id>/configure`), and adds knowledge
+   (`/app/bots/<id>/knowledge`). Ingestion parses → chunks → embeds into `pgvector`.
+4. Client copies the embed snippet (`/app/bots/<id>/embed`) into their site:
+   ```html
+   <script src="https://your-app/widget.js" data-bot-key="PUBLIC_KEY" async></script>
+   ```
+5. Visitors chat; `/api/chat` retrieves relevant chunks and streams a grounded answer.
+
+## Testing
+
+```bash
+npm run test          # unit + DB integration (integration skips without .env.local)
+npm run typecheck
+RUN_LIVE_AI=1 npm run test -- tests/integration/rag.test.ts   # live OpenAI RAG check
+E2E_OWNER_EMAIL=you@example.com E2E_OWNER_PASSWORD='...' npx playwright test
+```
+
+## Project structure
+
+```
+app/(auth|owner|client)   route groups (auth pages, owner panel, client portal)
+app/embed/[publicKey]      widget chat UI (iframe content)
+app/api/{chat,ingest,widget-config,lead,invites}   API routes
+public/widget.js           embeddable loader script
+lib/ai                     embeddings, retrieval, prompt assembly
+lib/ingestion              parsers, chunker, ingestion pipeline
+lib/supabase               server/browser/service clients + proxy session
+lib/auth                   role guards + route policy
+supabase/migrations        schema, RLS, RPC, storage
+docs/superpowers           design spec + implementation plan
+```
+
+See [docs/DEPLOY.md](docs/DEPLOY.md) for production deployment.
