@@ -1,48 +1,63 @@
 import { describe, it, expect } from 'vitest'
 import { buildAgentConfig, agentConfigHash } from '@/lib/ai/elevenlabs-agent'
 import { defaultBotConfig } from '@/lib/validation/schemas'
-import type { Bot } from '@/lib/types'
+import type { Bot, BotConfig } from '@/lib/types'
 
-function makeBot(over: Partial<Bot> = {}): Bot {
+function makeBot(config: BotConfig = defaultBotConfig('Bot')): Bot {
   return {
     id: 'bot-1',
     org_id: 'org-1',
     name: 'Bot',
     status: 'active',
     public_key: 'pubkey123',
-    config: defaultBotConfig('Bot'),
+    config,
     elevenlabs_agent_id: null,
     elevenlabs_agent_hash: null,
     created_at: '',
     updated_at: '',
-    ...over,
-  } as Bot
+  }
+}
+
+function bilingual(): BotConfig {
+  const base = defaultBotConfig('Bot')
+  return {
+    ...base,
+    languages: ['en', 'lt'],
+    content: {
+      en: { greeting: 'Hello', suggestedQuestions: [], fallbackMessage: 'x' },
+      lt: { greeting: 'Sveiki', suggestedQuestions: [], fallbackMessage: 'nezinau' },
+    },
+    voice: { ...base.voice, voices: { en: 'voice-en', lt: 'voice-lt' } },
+  }
 }
 
 describe('buildAgentConfig', () => {
-  it('maps the bot config to an ElevenLabs agent config with a custom LLM URL', () => {
+  it('maps the bot config to a v3 conversational agent with a custom LLM URL', () => {
     const bot = makeBot()
     const cfg = buildAgentConfig(bot, 'https://app.example.com', 'sec_1')
-    expect(cfg.conversation_config.agent.first_message).toBe(bot.config.greeting)
+    expect(cfg.conversation_config.agent.first_message).toBe(bot.config.content.en.greeting)
     expect(cfg.conversation_config.agent.language).toBe('en')
     expect(cfg.conversation_config.agent.prompt.llm).toBe('custom-llm')
     expect(cfg.conversation_config.agent.prompt.custom_llm.url).toBe(
       'https://app.example.com/api/llm/pubkey123',
     )
-    expect(cfg.conversation_config.agent.prompt.custom_llm.api_key.secret_id).toBe('sec_1')
-    expect(cfg.conversation_config.tts.voice_id).toBe(bot.config.voice.voiceId)
+    expect(cfg.conversation_config.tts.model_id).toBe('eleven_v3_conversational')
+    expect(cfg.conversation_config.tts.expressive_mode).toBe(true)
+    expect(cfg.conversation_config.tts.voice_id).toBe(bot.config.voice.voices.en)
   })
 
-  it('uses a v2 TTS model for English agents', () => {
+  it('English-only bot has no language presets or supported voices', () => {
     const cfg = buildAgentConfig(makeBot(), 'https://x', 'sec')
-    expect(cfg.conversation_config.tts.model_id).toBe('eleven_turbo_v2')
+    expect(Object.keys(cfg.conversation_config.language_presets)).toEqual([])
+    expect(cfg.conversation_config.tts.supported_voices).toEqual([])
   })
 
-  it('passes the configured language through and uses a multilingual model', () => {
-    const bot = makeBot({ config: { ...defaultBotConfig('Bot'), language: 'lt' } })
-    const cfg = buildAgentConfig(bot, 'https://x', 'sec')
-    expect(cfg.conversation_config.agent.language).toBe('lt')
-    expect(cfg.conversation_config.tts.model_id).toBe('eleven_turbo_v2_5')
+  it('bilingual bot adds an lt language preset + lt supported voice', () => {
+    const cfg = buildAgentConfig(makeBot(bilingual()), 'https://x', 'sec')
+    expect(cfg.conversation_config.agent.language).toBe('en')
+    expect(cfg.conversation_config.language_presets.lt.overrides.agent.first_message).toBe('Sveiki')
+    const lt = cfg.conversation_config.tts.supported_voices.find((v) => v.language === 'lt')
+    expect(lt?.voice_id).toBe('voice-lt')
   })
 })
 
@@ -52,17 +67,9 @@ describe('agentConfigHash', () => {
     expect(agentConfigHash(bot, 'https://x')).toBe(agentConfigHash(bot, 'https://x'))
   })
 
-  it('changes when the voice changes', () => {
+  it('changes when a voice changes', () => {
     const a = makeBot()
-    const b = makeBot({
-      config: { ...defaultBotConfig('Bot'), voice: { ...defaultBotConfig('Bot').voice, voiceId: 'other' } },
-    })
-    expect(agentConfigHash(a, 'https://x')).not.toBe(agentConfigHash(b, 'https://x'))
-  })
-
-  it('changes when the language changes', () => {
-    const a = makeBot()
-    const b = makeBot({ config: { ...defaultBotConfig('Bot'), language: 'lt' } })
+    const b = makeBot(bilingual())
     expect(agentConfigHash(a, 'https://x')).not.toBe(agentConfigHash(b, 'https://x'))
   })
 

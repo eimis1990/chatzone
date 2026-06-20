@@ -15,6 +15,14 @@ export interface TtsDeps {
 const ELEVENLABS_TTS_URL = 'https://api.elevenlabs.io/v1/text-to-speech'
 
 /**
+ * The TTS model to use for read-aloud per language. Lithuanian is only
+ * supported by eleven_v3; other languages use the fast multilingual turbo model.
+ */
+export function ttsModelForLanguage(lang: string): string {
+  return lang === 'lt' ? 'eleven_v3' : 'eleven_turbo_v2_5'
+}
+
+/**
  * Synthesizes speech from text using ElevenLabs, returning MP3 audio bytes.
  * `deps` are injectable for testing.
  */

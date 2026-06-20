@@ -74,7 +74,7 @@ export default async function BotsPage() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-xs text-muted-foreground line-clamp-2">
-                    {bot.config.greeting}
+                    {bot.config.content?.en?.greeting ?? ''}
                   </p>
                 </CardContent>
               </Card>

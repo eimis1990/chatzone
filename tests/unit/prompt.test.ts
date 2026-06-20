@@ -53,9 +53,8 @@ describe('buildMessages', () => {
     expect(msgs[0].content).toContain('respond in English')
   })
 
-  it('instructs Lithuanian when language is lt', () => {
-    const ltConfig = { ...config, language: 'lt' as const }
-    const msgs = buildMessages(ltConfig, [], [], 'q')
+  it('instructs Lithuanian when lang is lt', () => {
+    const msgs = buildMessages(config, [], [], 'q', 'lt')
     expect(msgs[0].content).toContain('respond in Lithuanian')
   })
 })

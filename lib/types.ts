@@ -76,7 +76,15 @@ export interface VoiceConfig {
   enabled: boolean
   ttsEnabled: boolean
   sttEnabled: boolean
-  voiceId: string
+  /** Per-language voice ids. `en` is required; others optional. */
+  voices: Partial<Record<BotLanguage, string>> & { en: string }
+}
+
+/** Visitor-facing content that differs per language. */
+export interface LanguageContent {
+  greeting: string
+  suggestedQuestions: string[]
+  fallbackMessage: string
 }
 
 export interface BotConfig {
@@ -90,8 +98,10 @@ export interface BotConfig {
     bubbleRadius: number
   }
   voice: VoiceConfig
-  language: BotLanguage
-  greeting: string
+  /** Enabled languages. Always includes 'en'; the first entry is the default. */
+  languages: BotLanguage[]
+  /** Per-language content. `en` is always present. */
+  content: Partial<Record<BotLanguage, LanguageContent>> & { en: LanguageContent }
   systemPrompt: string
   persona: {
     tone: string
@@ -99,8 +109,6 @@ export interface BotConfig {
   }
   model: string
   temperature: number
-  suggestedQuestions: string[]
-  fallbackMessage: string
   leadCapture: {
     enabled: boolean
     trigger: LeadTrigger

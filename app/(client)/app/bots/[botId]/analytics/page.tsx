@@ -134,11 +134,14 @@ export default async function AnalyticsPage({
     .map(([status, count]) => ({ status, count }))
     .filter((d) => d.count > 0)
 
-  // Fallback rate: % of assistant messages whose content matches fallbackMessage
-  const fallbackMsg = bot.config.fallbackMessage?.trim() ?? ''
+  // Fallback rate: % of assistant messages whose content matches any language's
+  // fallback message.
+  const fallbackMsgs = Object.values(bot.config.content ?? {})
+    .map((c) => c?.fallbackMessage?.trim())
+    .filter((m): m is string => !!m)
   const assistantMsgs = typedMsgs.filter((m) => m.role === 'assistant')
-  const fallbackCount = fallbackMsg
-    ? assistantMsgs.filter((m) => m.content.trim() === fallbackMsg).length
+  const fallbackCount = fallbackMsgs.length
+    ? assistantMsgs.filter((m) => fallbackMsgs.includes(m.content.trim())).length
     : 0
   const fallbackRate =
     assistantMsgs.length > 0
