@@ -59,6 +59,13 @@ export interface LeadField {
 
 export type LeadTrigger = 'on_fallback' | 'after_n_messages' | 'manual'
 
+export interface VoiceConfig {
+  enabled: boolean
+  ttsEnabled: boolean
+  sttEnabled: boolean
+  voiceId: string
+}
+
 export interface BotConfig {
   displayName: string
   avatarUrl?: string
@@ -67,6 +74,7 @@ export interface BotConfig {
     position: 'bottom-right' | 'bottom-left'
     bubbleIcon?: string
   }
+  voice: VoiceConfig
   greeting: string
   systemPrompt: string
   persona: {

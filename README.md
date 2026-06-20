@@ -20,7 +20,11 @@ copy-paste widget. Visitors get streaming, RAG-grounded answers.
 - Embeddable widget (`<script>` loader → isolated iframe), domain allowlist, rate limiting
 - Conversations/transcripts, leads with CSV export, analytics charts
 
-> Deferred to later cycles: voice (ElevenLabs/Whisper), Stripe billing, human handoff, self-serve signup.
+**Cycle 2 — Voice:** bots can speak replies (ElevenLabs TTS, play button per message) and visitors
+can speak (OpenAI Whisper STT, mic in the widget). Voice is opt-in per bot; the client picks a
+voice in the configurator. Requires `ELEVENLABS_API_KEY` (degrades to text-only without it).
+
+> Deferred to later cycles: Stripe billing, human handoff, self-serve signup.
 
 ## Setup
 
@@ -40,6 +44,7 @@ NEXT_PUBLIC_SUPABASE_URL=...
 NEXT_PUBLIC_SUPABASE_ANON_KEY=...
 SUPABASE_SERVICE_ROLE_KEY=...
 OPENAI_API_KEY=...
+ELEVENLABS_API_KEY=...        # optional — enables voice (TTS); STT uses OpenAI Whisper
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 

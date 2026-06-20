@@ -29,6 +29,12 @@ const fullConfig: BotConfig = {
     ],
   },
   allowedDomains: ['acme.com', 'acme.io'],
+  voice: {
+    enabled: true,
+    ttsEnabled: true,
+    sttEnabled: true,
+    voiceId: 'secret-voice-id',
+  },
 }
 
 describe('publicBotConfig', () => {
@@ -78,6 +84,12 @@ describe('publicBotConfig', () => {
   it('MUST NOT expose fallbackMessage', () => {
     const pub = publicBotConfig(fullConfig)
     expect('fallbackMessage' in pub).toBe(false)
+  })
+
+  it('exposes voice flags but NOT the raw voiceId', () => {
+    const pub = publicBotConfig(fullConfig)
+    expect(pub.voice).toEqual({ enabled: true, ttsEnabled: true, sttEnabled: true })
+    expect('voiceId' in pub.voice).toBe(false)
   })
 
   it('works without optional avatarUrl', () => {
