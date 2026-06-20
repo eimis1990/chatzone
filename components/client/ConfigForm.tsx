@@ -22,6 +22,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { ChatPreview } from '@/components/widget/ChatPreview'
+import { VoiceSection } from '@/components/client/VoiceSection'
 
 interface ConfigFormProps {
   botId: string
@@ -455,6 +456,9 @@ export function ConfigForm({ botId, initialConfig }: ConfigFormProps) {
             </div>
           )}
         </section>
+
+        {/* Voice */}
+        <VoiceSection control={control} watch={watch} />
 
         {/* Allowed domains */}
         <section className="space-y-4">
