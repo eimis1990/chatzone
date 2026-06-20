@@ -10,9 +10,10 @@
  *  - Streams bot replies from POST /api/preview/chat
  *  - TTS (🔊) per bot message via POST /api/preview/tts when voice.ttsEnabled
  *  - Live voice call via ElevenLabs WebRTC (VoiceCallButton) when voice.enabled
- *  - Suggested question chips
- *  - Start over button
- *  - Live theming from config.theme.primaryColor / config.displayName
+ *  - Suggested question chips pinned above input, hidden after first message
+ *  - Start over button restores suggested questions
+ *  - Live theming from config.theme (primaryColor, cornerRadius, bubbleRadius)
+ *  - Avatar from config.avatarUrl (falls back to BotIcon)
  */
 
 import { useState, useRef, useCallback, type KeyboardEvent, type FormEvent } from 'react'
@@ -71,9 +72,12 @@ interface TestChatProps {
 
 export function TestChat({ botId, config }: TestChatProps) {
   const primaryColor = config.theme?.primaryColor ?? '#4f46e5'
+  const cornerRadius = config.theme?.cornerRadius ?? 16
+  const bubbleRadius = config.theme?.bubbleRadius ?? 16
   const displayName = config.displayName || 'Your Bot'
   const greeting = config.greeting || 'Hi! How can I help you today?'
-  const suggestedQuestions = config.suggestedQuestions ?? []
+  const suggestedQuestions = (config.suggestedQuestions ?? []).filter(Boolean)
+  const avatarUrl = config.avatarUrl
 
   // Default TTS to true when voice is on, matching the configurator switches.
   const voiceEnabled = config.voice?.enabled ?? false
@@ -289,27 +293,44 @@ export function TestChat({ botId, config }: TestChatProps) {
   // -------------------------------------------------------------------------
   const renderAvatar = () => (
     <div
-      className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-white text-xs font-bold"
-      style={{ backgroundColor: primaryColor }}
+      className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-white text-xs font-bold overflow-hidden"
+      style={{ backgroundColor: avatarUrl ? 'transparent' : primaryColor }}
       aria-hidden="true"
     >
-      {config.avatarUrl ? (
-        <img src={config.avatarUrl} alt={displayName} className="w-full h-full rounded-full object-cover" />
+      {avatarUrl ? (
+        <img src={avatarUrl} alt={displayName} className="w-full h-full object-cover" />
       ) : (
         <BotIcon className="size-3.5" />
       )}
     </div>
   )
 
+  // Bubble border-radius: full pill when max (24px), else bubbleRadius
+  const msgBubbleRadius = `${bubbleRadius}px`
+
   return (
-    <div className="flex flex-col h-full rounded-xl border bg-background overflow-hidden shadow-lg">
+    <div
+      className="flex flex-col h-full border bg-background overflow-hidden shadow-lg"
+      style={{ borderRadius: `${cornerRadius}px` }}
+    >
       {/* Header */}
       <div
         className="flex items-center gap-3 px-4 py-3 text-white flex-shrink-0"
-        style={{ backgroundColor: primaryColor }}
+        style={{
+          backgroundColor: primaryColor,
+          borderRadius: `${cornerRadius}px ${cornerRadius}px 0 0`,
+        }}
       >
-        <div className="flex size-8 items-center justify-center rounded-full bg-white/20">
-          <BotIcon className="size-4" />
+        {/* Header avatar */}
+        <div
+          className="flex size-8 items-center justify-center rounded-full overflow-hidden"
+          style={{ backgroundColor: avatarUrl ? 'transparent' : 'rgba(255,255,255,0.2)' }}
+        >
+          {avatarUrl ? (
+            <img src={avatarUrl} alt={displayName} className="w-full h-full object-cover" />
+          ) : (
+            <BotIcon className="size-4" />
+          )}
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium leading-tight truncate">{displayName}</p>
@@ -369,12 +390,17 @@ export function TestChat({ botId, config }: TestChatProps) {
             {msg.role === 'assistant' && renderAvatar()}
             <div className="flex flex-col gap-1 max-w-[80%]">
               <div
-                className={`rounded-2xl px-3 py-2 text-sm whitespace-pre-wrap ${
+                className={`px-3 py-2 text-sm whitespace-pre-wrap ${
                   msg.role === 'user'
-                    ? 'text-white rounded-tr-sm'
-                    : 'bg-muted text-foreground rounded-tl-sm'
+                    ? 'text-white'
+                    : 'bg-muted text-foreground'
                 }`}
-                style={msg.role === 'user' ? { backgroundColor: primaryColor } : undefined}
+                style={{
+                  borderRadius: msg.role === 'user'
+                    ? `${msgBubbleRadius} ${msgBubbleRadius} 2px ${msgBubbleRadius}`
+                    : `${msgBubbleRadius} ${msgBubbleRadius} ${msgBubbleRadius} 2px`,
+                  ...(msg.role === 'user' ? { backgroundColor: primaryColor } : {}),
+                }}
               >
                 {msg.content}
                 {msg.streaming && (
@@ -407,16 +433,16 @@ export function TestChat({ botId, config }: TestChatProps) {
         <div ref={bottomRef} />
       </div>
 
-      {/* Suggested questions — shown until first message */}
+      {/* Suggested questions — pinned just above input, visible until first user message */}
       {suggestedVisible && suggestedQuestions.length > 0 && (
-        <div className="px-4 pb-2 flex flex-wrap gap-2">
+        <div className="px-4 pt-2 pb-1 flex flex-wrap gap-1.5 border-t border-border/50">
           {suggestedQuestions.slice(0, 4).map((q, i) => (
             <button
               key={i}
               type="button"
               onClick={() => sendMessage(q)}
               disabled={streaming}
-              className="rounded-full border px-3 py-1 text-xs hover:bg-muted transition-colors disabled:opacity-50"
+              className="rounded-full border px-3 py-1 text-xs hover:bg-muted transition-colors disabled:opacity-50 text-left leading-normal"
               style={{ borderColor: primaryColor, color: primaryColor }}
             >
               {q}
