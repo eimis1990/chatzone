@@ -47,6 +47,7 @@ export function ConfigForm({ botId, initialConfig }: ConfigFormProps) {
     control,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors, isSubmitting },
   } = form
 
@@ -482,7 +483,7 @@ export function ConfigForm({ botId, initialConfig }: ConfigFormProps) {
         </section>
 
         {/* Voice */}
-        <VoiceSection control={control} watch={watch} />
+        <VoiceSection control={control} watch={watch} setValue={setValue} />
 
         {/* Allowed domains */}
         <section className="space-y-4">

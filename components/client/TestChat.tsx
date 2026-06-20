@@ -75,9 +75,12 @@ export function TestChat({ botId, config }: TestChatProps) {
   const greeting = config.greeting || 'Hi! How can I help you today?'
   const suggestedQuestions = config.suggestedQuestions ?? []
 
+  // Default TTS/STT to true when voice is on, matching the configurator
+  // switches (which render `?? true`). This avoids a state where the toggles
+  // look on but the controls are hidden.
   const voiceEnabled = config.voice?.enabled ?? false
-  const ttsEnabled = voiceEnabled && (config.voice?.ttsEnabled ?? false)
-  const sttEnabled = voiceEnabled && (config.voice?.sttEnabled ?? false)
+  const ttsEnabled = voiceEnabled && (config.voice?.ttsEnabled ?? true)
+  const sttEnabled = voiceEnabled && (config.voice?.sttEnabled ?? true)
   const voiceId = config.voice?.voiceId ?? ''
 
   // Message state — starts with just the greeting

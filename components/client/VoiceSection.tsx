@@ -16,7 +16,7 @@
  */
 
 import { useEffect, useRef, useReducer, useCallback } from 'react'
-import { Controller, type Control, type UseFormWatch } from 'react-hook-form'
+import { Controller, type Control, type UseFormWatch, type UseFormSetValue } from 'react-hook-form'
 import { PlayIcon, SquareIcon, LoaderCircleIcon, AlertCircleIcon } from 'lucide-react'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
@@ -65,11 +65,25 @@ function reducer(state: LoadState, action: LoadAction): LoadState {
 interface VoiceSectionProps {
   control: Control<FormValues>
   watch: UseFormWatch<FormValues>
+  setValue: UseFormSetValue<FormValues>
 }
 
-export function VoiceSection({ control, watch }: VoiceSectionProps) {
+export function VoiceSection({ control, watch, setValue }: VoiceSectionProps) {
   const voiceEnabled = watch('voice.enabled')
   const selectedVoiceId = watch('voice.voiceId')
+
+  // When voice is turned on, make sure the sub-flags have real boolean values
+  // (an older bot's config may omit them, leaving the test chat unable to show
+  // the voice controls even though the toggles appear on).
+  useEffect(() => {
+    if (!voiceEnabled) return
+    if (watch('voice.ttsEnabled') === undefined) {
+      setValue('voice.ttsEnabled', true, { shouldDirty: false })
+    }
+    if (watch('voice.sttEnabled') === undefined) {
+      setValue('voice.sttEnabled', true, { shouldDirty: false })
+    }
+  }, [voiceEnabled, watch, setValue])
 
   const [loadState, dispatch] = useReducer(reducer, { status: 'idle' })
   const [previewStatus, dispatchPreview] = useReducer(
@@ -134,6 +148,16 @@ export function VoiceSection({ control, watch }: VoiceSectionProps) {
       ? [...loadState.grouped.male, ...loadState.grouped.female]
       : []
   const selectedVoice = allVoices.find((v) => v.id === selectedVoiceId)
+
+  // If the configured voice isn't in the curated catalog (e.g. the old default
+  // voice, or none chosen), auto-select the first available one so the picker
+  // and the saved value always agree and TTS uses a real curated voice.
+  useEffect(() => {
+    if (loadState.status !== 'ready' || allVoices.length === 0) return
+    if (!allVoices.some((v) => v.id === selectedVoiceId)) {
+      setValue('voice.voiceId', allVoices[0].id, { shouldDirty: false })
+    }
+  }, [loadState.status, allVoices, selectedVoiceId, setValue])
 
   const handlePreview = useCallback(async () => {
     if (!selectedVoice?.previewUrl) return
