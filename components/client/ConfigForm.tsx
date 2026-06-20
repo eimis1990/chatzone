@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useForm, useFieldArray, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
@@ -52,7 +52,21 @@ const LANG_LABELS: Record<BotLanguage, string> = {
 
 export function ConfigForm({ botId, initialConfig }: ConfigFormProps) {
   // Active language tab — drives which content.<lang> fields are shown + live preview.
-  const [activeLang, setActiveLang] = useState<BotLanguage>('en')
+  // Persisted to localStorage keyed by botId so it survives refresh.
+  const lsKey = `cbz_cfg_lang_${botId}`
+
+  const [activeLang, setActiveLang] = useState<BotLanguage>(() => {
+    // Initial value comes from localStorage if available and that language is
+    // in the bot's enabled languages; otherwise default to first enabled language.
+    const enabled = (initialConfig.languages ?? ['en']) as BotLanguage[]
+    try {
+      const stored = localStorage.getItem(lsKey) as BotLanguage | null
+      if (stored && enabled.includes(stored)) return stored
+    } catch {
+      // localStorage unavailable (SSR / private browsing)
+    }
+    return enabled[0] ?? 'en'
+  })
 
   const form = useForm<FormValues>({
     resolver: zodResolver(botConfigFormSchema),
@@ -72,6 +86,22 @@ export function ConfigForm({ botId, initialConfig }: ConfigFormProps) {
   // Watch languages to control LT enable toggle
   const watchedLanguages = watch('languages') ?? ['en']
   const ltEnabled = watchedLanguages.includes('lt')
+
+  // Persist activeLang to localStorage whenever it changes
+  useEffect(() => {
+    try {
+      localStorage.setItem(lsKey, activeLang)
+    } catch {
+      // ignore
+    }
+  }, [activeLang, lsKey])
+
+  // If Lithuanian gets disabled while it's active, fall back to 'en'
+  useEffect(() => {
+    if (!ltEnabled && activeLang === 'lt') {
+      setActiveLang('en')
+    }
+  }, [ltEnabled, activeLang])
 
   // Watch all values for the live preview
   const watchedValues = watch()
@@ -169,9 +199,9 @@ export function ConfigForm({ botId, initialConfig }: ConfigFormProps) {
   }
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[1fr_420px]">
-      {/* ── Form ── */}
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+    <div className="relative">
+      {/* ── Form — full-width, readable max-width ── */}
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 max-w-3xl">
 
         {/* ── Display ── */}
         <Card>
@@ -758,15 +788,14 @@ export function ConfigForm({ botId, initialConfig }: ConfigFormProps) {
         </div>
       </form>
 
-      {/* ── Live Preview ── */}
-      <aside className="hidden lg:block">
-        <div className="sticky top-20 space-y-3">
-          <p className="text-sm font-medium text-muted-foreground">Live preview</p>
-          <div className="h-[600px] relative">
-            <TestChat botId={botId} config={liveConfig} activeLang={activeLang} />
-          </div>
-        </div>
-      </aside>
+      {/* ── Live Preview — fixed overlay, bottom-right, like the real embed widget ── */}
+      <div
+        className="fixed bottom-6 right-6 z-50 pointer-events-none"
+        aria-label="Live preview"
+        role="complementary"
+      >
+        <TestChat botId={botId} config={liveConfig} activeLang={activeLang} />
+      </div>
     </div>
   )
 }
