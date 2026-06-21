@@ -78,18 +78,47 @@ export function ChatWindow({ publicKey, config }: ChatWindowProps) {
     setCallState(s)
   }, [])
 
-  // Voice utterances (visitor + agent) flow into the chat transcript.
+  // Voice utterances (visitor + agent) flow into the chat transcript. The agent
+  // wraps replies in language tags (<Lithuanian>…</Lithuanian>) for TTS — strip
+  // them for display.
   const handleVoiceTranscript = useCallback((role: 'user' | 'assistant', text: string) => {
+    const clean = text.replace(/<\/?[A-Za-z][\w-]*>/g, '').trim()
+    if (!clean) return
     setMessages((prev) => {
       const last = prev[prev.length - 1]
-      if (last && last.role === role && last.content === text) return prev
-      return [...prev, { id: generateId(), role, content: text }]
+      if (last && last.role === role && last.content === clean) return prev
+      return [...prev, { id: generateId(), role, content: clean }]
     })
   }, [])
 
   const handleVoiceReady = useCallback((c: { end: () => void }) => {
     endVoiceRef.current = c.end
   }, [])
+
+  // The agent's `search_products` client tool: fetch products, show them as cards
+  // in the chat, and return a short summary for the agent to speak.
+  const handleVoiceSearch = useCallback(
+    async (query: string): Promise<string> => {
+      try {
+        const res = await fetch('/api/widget/search', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ publicKey, query }),
+        })
+        const data = (await res.json()) as { products?: CommerceProduct[]; summary?: string }
+        if (data.products?.length) {
+          setMessages((prev) => [
+            ...prev,
+            { id: generateId(), role: 'assistant', content: '', products: data.products },
+          ])
+        }
+        return data.summary ?? 'Here are a few options.'
+      } catch {
+        return 'The product search is temporarily unavailable.'
+      }
+    },
+    [publicKey],
+  )
   const primaryColor = config.theme.primaryColor
   const cornerRadius = config.theme.cornerRadius ?? 16
   const bubbleRadius = config.theme.bubbleRadius ?? 16
@@ -392,6 +421,7 @@ export function ChatWindow({ publicKey, config }: ChatWindowProps) {
             onStateChange={handleCallState}
             onTranscript={handleVoiceTranscript}
             onReady={handleVoiceReady}
+            onSearch={handleVoiceSearch}
             className="flex-shrink-0 ml-1"
           />
         )}

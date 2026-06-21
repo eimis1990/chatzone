@@ -35,6 +35,9 @@ interface VoiceCallButtonProps {
   onTranscript?: (role: 'user' | 'assistant', text: string) => void
   /** Hands the host an `end()` so it can hang up (e.g. when the visitor types). */
   onReady?: (controls: { end: () => void }) => void
+  /** Implements the agent's `search_products` client tool — return a short
+   *  spoken summary; the host renders the product cards in the chat. */
+  onSearch?: (query: string) => Promise<string>
   className?: string
 }
 
@@ -48,6 +51,7 @@ interface InnerProps {
   onStateChange?: (state: CallState) => void
   onTranscript?: (role: 'user' | 'assistant', text: string) => void
   onReady?: (controls: { end: () => void }) => void
+  onSearch?: (query: string) => Promise<string>
 }
 
 function VoiceCallInner({
@@ -58,6 +62,7 @@ function VoiceCallInner({
   onStateChange,
   onTranscript,
   onReady,
+  onSearch,
 }: InnerProps) {
   const [callError, setCallError] = useState<string | null>(null)
   const [micDenied, setMicDenied] = useState(false)
@@ -72,6 +77,19 @@ function VoiceCallInner({
       const text = m?.message?.trim()
       if (!text) return
       onTranscript?.(m.source === 'user' ? 'user' : 'assistant', text)
+    },
+    clientTools: {
+      // The agent calls this; the host fetches + renders product cards and we
+      // return a short summary for the agent to speak.
+      search_products: async (params: { query?: string }) => {
+        const q = params?.query?.trim()
+        if (!q || !onSearch) return 'No results found.'
+        try {
+          return await onSearch(q)
+        } catch {
+          return 'The product search is temporarily unavailable.'
+        }
+      },
     },
   })
 
@@ -301,6 +319,7 @@ export function VoiceCallButton({
   onStateChange,
   onTranscript,
   onReady,
+  onSearch,
   className,
 }: VoiceCallButtonProps) {
   return (
@@ -314,6 +333,7 @@ export function VoiceCallButton({
           onStateChange={onStateChange}
           onTranscript={onTranscript}
           onReady={onReady}
+          onSearch={onSearch}
         />
       </ConversationProvider>
     </div>
