@@ -1,11 +1,13 @@
-import { streamText, type ModelMessage } from 'ai'
+import { type ModelMessage } from 'ai'
 import { openai } from '@ai-sdk/openai'
 import { createServerClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { previewChatSchema } from '@/lib/validation/schemas'
 import { retrieveContext, serviceRetrievalDeps } from '@/lib/ai/retrieval'
 import { buildMessages, contentFor, defaultLanguage, type ChatMessage } from '@/lib/ai/prompt'
+import { commerceEnabled, makeProductSearchTool, ndjsonChatResponse, ndjsonText } from '@/lib/ai/commerce-tool'
 import type { BotConfig } from '@/lib/types'
+import type { CommerceProduct } from '@/lib/commerce/types'
 import { createRateLimiter } from '@/lib/ratelimit'
 
 export const maxDuration = 60
@@ -40,12 +42,11 @@ export async function POST(req: Request) {
   if (!bot) return json({ error: 'Bot not found' }, 404)
 
   const svc = createServiceClient()
+  const commerce = commerceEnabled(config)
   const retrieval = await retrieveContext(botId, message, {}, serviceRetrievalDeps(svc))
 
-  if (retrieval.isWeak) {
-    return new Response(contentFor(config, lang).fallbackMessage, {
-      headers: { 'Content-Type': 'text/plain; charset=utf-8', 'x-weak': '1' },
-    })
+  if (retrieval.isWeak && !commerce) {
+    return ndjsonText(contentFor(config, lang).fallbackMessage, { 'x-weak': '1' })
   }
 
   const messages = buildMessages(
@@ -55,13 +56,12 @@ export async function POST(req: Request) {
     message,
     lang,
   ) as ModelMessage[]
+  const productSink: CommerceProduct[] = []
 
-  const result = streamText({
-    model: openai(config.model || 'gpt-4o-mini'),
-    messages,
+  return ndjsonChatResponse(openai(config.model || 'gpt-4o-mini'), messages, {
     temperature: config.temperature ?? 0.3,
-  })
-  return result.toTextStreamResponse({
-    headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+    headers: {},
+    tools: commerce ? makeProductSearchTool(config, productSink) : undefined,
+    productSink,
   })
 }

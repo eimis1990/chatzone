@@ -116,6 +116,12 @@ export interface BotConfig {
     fields: LeadField[]
   }
   allowedDomains: string[]
+  /** Live product search (e-commerce). */
+  commerce: {
+    enabled: boolean
+    provider: 'woocommerce'
+    storeUrl: string
+  }
 }
 
 export interface Bot {

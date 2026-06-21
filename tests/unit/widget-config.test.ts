@@ -36,6 +36,7 @@ const fullConfig: BotConfig = {
     ],
   },
   allowedDomains: ['acme.com', 'acme.io'],
+  commerce: { enabled: false, provider: 'woocommerce', storeUrl: '' },
   voice: {
     enabled: true,
     ttsEnabled: true,

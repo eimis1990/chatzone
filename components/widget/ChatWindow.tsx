@@ -7,6 +7,7 @@ import { LeadForm } from './LeadForm'
 import { SuggestedQuestions } from './SuggestedQuestions'
 import type { PublicBotConfig } from '@/lib/widget-config'
 import type { BotLanguage } from '@/lib/types'
+import type { CommerceProduct } from '@/lib/commerce/types'
 
 interface ChatWindowProps {
   publicKey: string
@@ -162,23 +163,63 @@ export function ChatWindow({ publicKey, config }: ChatWindowProps) {
 
         const reader = res.body.getReader()
         const decoder = new TextDecoder()
-        let accumulated = ''
+        // NDJSON line buffer — a network chunk may contain partial lines
+        let lineBuffer = ''
+        let accumulatedText = ''
+        let accumulatedProducts: CommerceProduct[] = []
 
         while (true) {
           const { done, value } = await reader.read()
           if (done) break
-          accumulated += decoder.decode(value, { stream: true })
-          const chunk = accumulated
-          setMessages((prev) =>
-            prev.map((m) =>
-              m.id === assistantMsg.id ? { ...m, content: chunk, streaming: true } : m
-            )
-          )
+          lineBuffer += decoder.decode(value, { stream: true })
+          const lines = lineBuffer.split('\n')
+          lineBuffer = lines.pop() ?? ''
+          for (const line of lines) {
+            const trimmed = line.trim()
+            if (!trimmed) continue
+            try {
+              const event = JSON.parse(trimmed) as { t: string; v: unknown }
+              if (event.t === 'text' && typeof event.v === 'string') {
+                accumulatedText += event.v
+                setMessages((prev) =>
+                  prev.map((m) =>
+                    m.id === assistantMsg.id
+                      ? { ...m, content: accumulatedText, streaming: true }
+                      : m
+                  )
+                )
+              } else if (event.t === 'products' && Array.isArray(event.v)) {
+                accumulatedProducts = event.v as CommerceProduct[]
+              }
+            } catch {
+              // Malformed NDJSON line — skip
+            }
+          }
+        }
+        // Process any remaining buffered bytes
+        if (lineBuffer.trim()) {
+          try {
+            const event = JSON.parse(lineBuffer.trim()) as { t: string; v: unknown }
+            if (event.t === 'text' && typeof event.v === 'string') {
+              accumulatedText += event.v
+            } else if (event.t === 'products' && Array.isArray(event.v)) {
+              accumulatedProducts = event.v as CommerceProduct[]
+            }
+          } catch {
+            // skip
+          }
         }
 
         setMessages((prev) =>
           prev.map((m) =>
-            m.id === assistantMsg.id ? { ...m, content: accumulated, streaming: false } : m
+            m.id === assistantMsg.id
+              ? {
+                  ...m,
+                  content: accumulatedText,
+                  streaming: false,
+                  products: accumulatedProducts.length > 0 ? accumulatedProducts : undefined,
+                }
+              : m
           )
         )
 
@@ -279,6 +320,7 @@ export function ChatWindow({ publicKey, config }: ChatWindowProps) {
         avatarUrl={config.avatarUrl}
         voice={config.voice}
         publicKey={publicKey}
+        activeLang={activeLang}
       />
 
       {/* Suggested Questions — pinned just above input, visible until first message */}

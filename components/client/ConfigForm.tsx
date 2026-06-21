@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useCallback, useEffect, useRef } from 'react'
-import { useForm, useFieldArray, Controller } from 'react-hook-form'
+import { useState, useCallback, useEffect, useRef, type ReactNode } from 'react'
+import { useForm, useFieldArray, Controller, type Control, type UseFormWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
 import { PlusIcon, TrashIcon } from 'lucide-react'
@@ -42,6 +42,13 @@ interface ConfigFormProps {
 // Use botConfigFormSchema (plain, no preprocessing) for the RHF resolver.
 // FormValues = what RHF stores (Zod input type, with optionals).
 type FormValues = z.input<typeof botConfigFormSchema>
+
+// Commerce validation result state
+type CommerceTestState =
+  | { status: 'idle' }
+  | { status: 'loading' }
+  | { status: 'ok'; count: number }
+  | { status: 'error'; message: string }
 
 const MAX_SUGGESTED_QUESTIONS = 4
 
@@ -206,6 +213,7 @@ export function ConfigForm({ botId, initialConfig }: ConfigFormProps) {
     avatarUrl: watchedValues.avatarUrl,
     languages: watchedValues.languages,
     content: watchedValues.content,
+    commerce: watchedValues.commerce,
   }
 
   return (
@@ -748,6 +756,9 @@ export function ConfigForm({ botId, initialConfig }: ConfigFormProps) {
           </CardContent>
         </Card>
 
+        {/* ── Store / Products ── */}
+        <CommerceSection control={control} watch={watch} />
+
         {/* ── Allowed Domains (Advanced) ── */}
         <Card>
           <CardHeader>
@@ -807,5 +818,156 @@ export function ConfigForm({ botId, initialConfig }: ConfigFormProps) {
         <TestChat botId={botId} config={liveConfig} activeLang={activeLang} />
       </div>
     </div>
+  )
+}
+
+// -------------------------------------------------------------------------
+// CommerceSection — "Store / products" card
+// -------------------------------------------------------------------------
+interface CommerceSectionProps {
+  control: Control<FormValues>
+  watch: UseFormWatch<FormValues>
+}
+
+function CommerceSection({ control, watch }: CommerceSectionProps) {
+  const commerceEnabled = watch('commerce.enabled')
+  const storeUrl = watch('commerce.storeUrl') ?? ''
+  const [testState, setTestState] = useState<CommerceTestState>({ status: 'idle' })
+
+  const handleTest = useCallback(async () => {
+    if (!storeUrl.trim()) {
+      setTestState({ status: 'error', message: 'Enter a store URL first.' })
+      return
+    }
+    setTestState({ status: 'loading' })
+    try {
+      const res = await fetch('/api/commerce/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ provider: 'woocommerce', storeUrl: storeUrl.trim() }),
+      })
+      const data = (await res.json()) as { ok: boolean; error?: string; sampleCount?: number }
+      if (data.ok) {
+        setTestState({ status: 'ok', count: data.sampleCount ?? 0 })
+      } else {
+        setTestState({ status: 'error', message: data.error ?? 'Connection failed.' })
+      }
+    } catch {
+      setTestState({ status: 'error', message: 'Network error — please try again.' })
+    }
+  }, [storeUrl])
+
+  // Reset test state when URL changes
+  const prevUrlRef = useRef(storeUrl)
+  if (prevUrlRef.current !== storeUrl) {
+    prevUrlRef.current = storeUrl
+    if (testState.status !== 'idle') setTestState({ status: 'idle' })
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Store / products</CardTitle>
+        <CardDescription>
+          Connect your WooCommerce store so the bot can search your catalog and show product cards.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex items-center gap-3">
+          <Controller
+            name="commerce.enabled"
+            control={control}
+            render={({ field }) => (
+              <Switch
+                checked={field.value ?? false}
+                onCheckedChange={field.onChange}
+                id="commerceEnabled"
+              />
+            )}
+          />
+          <Label htmlFor="commerceEnabled">Enable store integration</Label>
+        </div>
+
+        {commerceEnabled && (
+          <div className="space-y-4 rounded-lg border p-4">
+            {/* Provider — read-only single option */}
+            <div className="space-y-1.5">
+              <Label>Provider</Label>
+              <Select disabled value="woocommerce">
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="woocommerce">WooCommerce</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                WooCommerce is auto-detected from your store URL.
+              </p>
+            </div>
+
+            {/* Store URL */}
+            <div className="space-y-1.5">
+              <Label htmlFor="commerceStoreUrl">Store URL</Label>
+              <Controller
+                name="commerce.storeUrl"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    id="commerceStoreUrl"
+                    {...field}
+                    placeholder="https://yourstore.com"
+                    autoComplete="url"
+                    inputMode="url"
+                  />
+                )}
+              />
+            </div>
+
+            {/* Test connection button + result */}
+            <div className="flex items-center gap-3 flex-wrap">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={testState.status === 'loading' || !storeUrl.trim()}
+                onClick={handleTest}
+              >
+                {testState.status === 'loading' ? 'Testing…' : 'Test connection'}
+              </Button>
+
+              {testState.status === 'ok' && (
+                <TestBadge variant="ok">
+                  Connected — found {testState.count} product{testState.count !== 1 ? 's' : ''}
+                </TestBadge>
+              )}
+              {testState.status === 'error' && (
+                <TestBadge variant="error">{testState.message}</TestBadge>
+              )}
+            </div>
+
+            <p className="text-xs text-muted-foreground bg-muted/50 rounded-md px-3 py-2">
+              Your bot will search this store&apos;s catalog live and show product cards in chat.
+            </p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  )
+}
+
+function TestBadge({ variant, children }: { variant: 'ok' | 'error'; children: ReactNode }) {
+  return (
+    <span
+      className={cn(
+        'inline-flex items-center gap-1.5 text-xs font-medium rounded-full px-2.5 py-1',
+        variant === 'ok'
+          ? 'bg-green-50 text-green-700 border border-green-200'
+          : 'bg-red-50 text-red-700 border border-red-200',
+      )}
+      role="status"
+    >
+      {variant === 'ok' ? '✓' : '✗'} {children}
+    </span>
   )
 }
