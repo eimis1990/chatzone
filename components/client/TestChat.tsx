@@ -64,6 +64,7 @@ type LiveConfig = {
     suggestedQuestions?: string[]
     fallbackMessage?: string
   }>>
+  commerce?: { enabled?: boolean; provider?: 'woocommerce'; storeUrl?: string }
 }
 
 interface ChatMessage {
@@ -702,5 +703,10 @@ function buildFullConfig(config: LiveConfig): BotConfig {
       })),
     },
     allowedDomains: config.allowedDomains ?? [],
+    commerce: {
+      enabled: config.commerce?.enabled ?? false,
+      provider: 'woocommerce',
+      storeUrl: config.commerce?.storeUrl ?? '',
+    },
   }
 }

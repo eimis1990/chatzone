@@ -88,6 +88,13 @@ export const botConfigFormSchema = z.object({
     })
     .default({ enabled: false, trigger: 'on_fallback', fields: [] }),
   allowedDomains: z.array(z.string()).default([]),
+  commerce: z
+    .object({
+      enabled: z.boolean().default(false),
+      provider: z.literal('woocommerce').default('woocommerce'),
+      storeUrl: z.string().default(''),
+    })
+    .default({ enabled: false, provider: 'woocommerce', storeUrl: '' }),
   voice: z
     .object({
       enabled: z.boolean().default(false),

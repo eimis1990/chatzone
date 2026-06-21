@@ -1,12 +1,14 @@
-import { streamText, type ModelMessage } from 'ai'
+import { type ModelMessage } from 'ai'
 import { openai } from '@ai-sdk/openai'
 import { createServiceClient } from '@/lib/supabase/service'
 import { chatRequestSchema } from '@/lib/validation/schemas'
 import { isOriginAllowed, corsHeaders } from '@/lib/widget-auth'
 import { retrieveContext, serviceRetrievalDeps } from '@/lib/ai/retrieval'
 import { buildMessages, contentFor, defaultLanguage, type ChatMessage } from '@/lib/ai/prompt'
+import { commerceEnabled, makeProductSearchTool, ndjsonChatResponse, ndjsonText } from '@/lib/ai/commerce-tool'
 import { createRateLimiter } from '@/lib/ratelimit'
 import type { Bot, Citation } from '@/lib/types'
+import type { CommerceProduct } from '@/lib/commerce/types'
 
 export const maxDuration = 60
 
@@ -93,14 +95,11 @@ export async function POST(req: Request) {
   // Retrieve grounding context.
   const retrieval = await retrieveContext(bot.id, message, {}, serviceRetrievalDeps(svc))
 
-  const baseHeaders = {
-    ...cors,
-    'Content-Type': 'text/plain; charset=utf-8',
-    'x-conversation-id': convId,
-  }
+  const commerce = commerceEnabled(bot.config)
+  const baseHeaders = { ...cors, 'x-conversation-id': convId }
 
-  // Weak retrieval → answer with the configured fallback and signal lead capture.
-  if (retrieval.isWeak) {
+  // Weak retrieval with no product search → fallback + lead-capture signal.
+  if (retrieval.isWeak && !commerce) {
     const fallback = contentFor(bot.config, lang).fallbackMessage
     await svc.from('messages').insert({
       conversation_id: convId,
@@ -109,9 +108,7 @@ export async function POST(req: Request) {
       citations: [],
     })
     const leadTrigger = bot.config.leadCapture?.enabled && bot.config.leadCapture.trigger === 'on_fallback'
-    return new Response(fallback, {
-      headers: { ...baseHeaders, 'x-lead-capture': leadTrigger ? '1' : '0' },
-    })
+    return ndjsonText(fallback, { ...baseHeaders, 'x-lead-capture': leadTrigger ? '1' : '0' })
   }
 
   const messages = buildMessages(bot.config, retrieval.chunks, history, message, lang) as ModelMessage[]
@@ -119,12 +116,14 @@ export async function POST(req: Request) {
     source_id: m.source_id,
     snippet: m.content.slice(0, 160),
   }))
+  const productSink: CommerceProduct[] = []
 
-  const result = streamText({
-    model: openai(bot.config.model || 'gpt-4o-mini'),
-    messages,
+  return ndjsonChatResponse(openai(bot.config.model || 'gpt-4o-mini'), messages, {
     temperature: bot.config.temperature ?? 0.3,
-    onFinish: async ({ text }) => {
+    headers: baseHeaders,
+    tools: commerce ? makeProductSearchTool(bot.config, productSink) : undefined,
+    productSink,
+    onText: async (text) => {
       await svc.from('messages').insert({
         conversation_id: convId,
         role: 'assistant',
@@ -137,6 +136,4 @@ export async function POST(req: Request) {
         .eq('id', convId)
     },
   })
-
-  return result.toTextStreamResponse({ headers: baseHeaders })
 }
