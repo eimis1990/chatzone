@@ -46,18 +46,26 @@ export function buildSystemPrompt(
     lines.push(
       'PRODUCT SEARCH: when the user asks about products, prices, availability, gifts, or wants ' +
         'recommendations, do this: ' +
-        '(1) call `search_products` with the core product NOUN in the catalog language (this store is ' +
-        'often Lithuanian), e.g. "veido kremas" for a face cream. The catalog search matches the whole ' +
-        'phrase, so keep the query SHORT (1-2 words) and leave out adjectives like dry/hydrating/sensitive ' +
-        '("sausai", "drėkinamasis") — those usually return nothing. ' +
-        '(2) If a search returns zero or very few results, DO NOT give up — search again with a broader ' +
-        'or alternative noun (drop adjectives, try a synonym or category, translate the term). Try a few ' +
-        'angles before concluding the store has nothing. ' +
-        '(3) Review the candidate titles/descriptions and call `display_products` with ONLY the ids that ' +
-        'genuinely match the user\'s intent and category — exclude items that merely share a keyword ' +
-        '(e.g. never show a bath product for a face-skin request). ' +
-        'The chosen products appear to the user as cards automatically, so reply with ONE short sentence ' +
-        '(e.g. "Here are a few options:") and do NOT list products, prices, or links in your text. ' +
+        '(1) Decide the shape of the answer from the request. A SPECIFIC product ask ("do you have a ' +
+        'face cream?") → show several options of THAT type (different brands / price points). An OPEN ' +
+        'NEED or problem ("something for dry skin", "a gift for mum") → assemble a small ROUTINE / mix ' +
+        'across complementary categories (e.g. for skincare: serum, cream, toner, mist, maybe a set), ' +
+        'not several of the same thing. ' +
+        '(2) Call `search_products` with the core product NOUN in the catalog language (this store is ' +
+        'often Lithuanian), e.g. "veido kremas" for a face cream. The catalog matches the whole phrase, ' +
+        'so keep queries SHORT (1-2 words) and drop adjectives like dry/hydrating ("sausai", ' +
+        '"drėkinamasis") — they usually return nothing. For an open need, run SEVERAL searches, one per ' +
+        'complementary category, to gather a varied set. If a search is empty, retry with a broader or ' +
+        'translated noun before giving up. ' +
+        '(3) Review the candidates and call `display_products` with ONLY ids that genuinely match the ' +
+        'intent (exclude keyword-only matches — never a bath product for a face request). The first 4 ids ' +
+        'show as cards and the rest sit behind "See all", so order carefully: for an OPEN NEED make the ' +
+        'first 4 span DIFFERENT categories (e.g. a cream, a serum, a toner, a mist) so the visible cards ' +
+        'show the whole routine at a glance, then add extra options after; for a SPECIFIC ask put the best ' +
+        'of that type first. Favour VARIETY over near-duplicates. ' +
+        'The products appear as cards automatically, so reply with ONE short sentence only ' +
+        '(e.g. "Here are a few options:" / "Štai keletas variantų:"). NEVER list products, brands, prices, ' +
+        'links, or per-category bullets in your text — the cards already show all of that. ' +
         'For non-product questions, use the context below.',
     )
   } else {

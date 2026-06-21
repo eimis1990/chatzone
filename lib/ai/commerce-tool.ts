@@ -44,9 +44,11 @@ export function makeProductTools(config: BotConfig, sink: CommerceProduct[]): To
     }),
     display_products: tool({
       description:
-        'Show selected products to the shopper as cards. Pass ONLY the ids of candidate products ' +
-        'that genuinely match what the user asked for (right category/type) — never include ' +
-        'unrelated items that merely share a keyword. Pass up to 6 ids, best matches first.',
+        'Show selected products to the shopper. Pass ONLY ids of candidates that genuinely match ' +
+        'the request (right category/type) — never items that merely share a keyword. Order them ' +
+        'BEST FIRST: the first 4 appear as feature cards, the rest behind a "See all" list, so put ' +
+        'your strongest / most representative picks first. Prefer VARIETY over near-duplicates ' +
+        '(avoid showing 4 almost-identical items — vary the brand, type, or price). Pass up to 10 ids.',
       inputSchema: z.object({
         productIds: z.array(z.string()).describe('Candidate product ids to show, best first'),
       }),
@@ -54,7 +56,7 @@ export function makeProductTools(config: BotConfig, sink: CommerceProduct[]): To
         const chosen = productIds
           .map((id) => candidates.get(id))
           .filter((p): p is CommerceProduct => Boolean(p))
-          .slice(0, 6)
+          .slice(0, 10)
         sink.length = 0
         sink.push(...chosen)
         return { shown: chosen.length }
@@ -100,7 +102,9 @@ export function ndjsonChatResponse(
     model,
     messages,
     temperature: opts.temperature,
-    ...(opts.tools ? { tools: opts.tools, stopWhen: stepCountIs(5) } : {}),
+    // Allow several search steps (one per category for an open need) + a display
+    // step + the final text reply.
+    ...(opts.tools ? { tools: opts.tools, stopWhen: stepCountIs(8) } : {}),
   })
 
   const encoder = new TextEncoder()

@@ -7,6 +7,7 @@ interface WooProduct {
   permalink: string
   is_in_stock: boolean
   short_description?: string
+  description?: string
   images?: Array<{ src?: string; thumbnail?: string }>
   prices?: {
     price?: string
@@ -39,6 +40,14 @@ function stripHtml(html: string | undefined): string {
   return decodeEntities(html.replace(/<[^>]*>/g, ' ')).replace(/\s+/g, ' ').trim()
 }
 
+/** Truncate to at most `max` chars at a word boundary, adding an ellipsis. */
+function truncateWords(text: string, max: number): string {
+  if (text.length <= max) return text
+  const cut = text.slice(0, max)
+  const lastSpace = cut.lastIndexOf(' ')
+  return (lastSpace > max * 0.6 ? cut.slice(0, lastSpace) : cut).trimEnd() + '…'
+}
+
 /** Format a Store API price object (minor units) into a display string. */
 export function formatWooPrice(prices: WooProduct['prices']): string {
   if (!prices?.price) return ''
@@ -52,6 +61,10 @@ export function formatWooPrice(prices: WooProduct['prices']): string {
 }
 
 export function normalizeWooProduct(p: WooProduct): CommerceProduct {
+  // Many stores leave short_description empty but fill the full description —
+  // fall back to it (stripped + truncated) so the inline "Details" panel has
+  // something useful to reveal.
+  const summary = stripHtml(p.short_description) || stripHtml(p.description)
   return {
     id: String(p.id),
     title: decodeEntities(p.name),
@@ -59,7 +72,7 @@ export function normalizeWooProduct(p: WooProduct): CommerceProduct {
     url: p.permalink,
     imageUrl: p.images?.[0]?.src ?? p.images?.[0]?.thumbnail,
     inStock: Boolean(p.is_in_stock),
-    shortDescription: stripHtml(p.short_description) || undefined,
+    shortDescription: summary ? truncateWords(summary, 280) : undefined,
   }
 }
 
