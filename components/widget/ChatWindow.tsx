@@ -323,11 +323,11 @@ export function ChatWindow({ publicKey, config }: ChatWindowProps) {
     [publicKey, conversationId]
   )
 
-  const getVoiceToken = useCallback(async (): Promise<string> => {
+  const getVoiceToken = useCallback(async (): Promise<{ token: string; voiceId?: string }> => {
     const res = await fetch('/api/widget/voice-token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ publicKey }),
+      body: JSON.stringify({ publicKey, language: activeLang }),
     })
     if (!res.ok) {
       const data = (await res.json().catch(() => ({}))) as { error?: string }
@@ -335,9 +335,9 @@ export function ChatWindow({ publicKey, config }: ChatWindowProps) {
         res.status === 503 ? 'Voice calling unavailable' : (data.error ?? 'Token request failed'),
       )
     }
-    const data = (await res.json()) as { token: string }
-    return data.token
-  }, [publicKey])
+    const data = (await res.json()) as { token: string; voiceId?: string }
+    return { token: data.token, voiceId: data.voiceId }
+  }, [publicKey, activeLang])
 
   const voiceEnabled = Boolean(config.voice?.enabled)
   const headerBorderRadius = `${cornerRadius}px ${cornerRadius}px 0 0`

@@ -450,7 +450,7 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
                   const res = await fetch('/api/preview/voice-token', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ botId }),
+                    body: JSON.stringify({ botId, language: activeLang }),
                   })
                   if (!res.ok) {
                     const data = (await res.json().catch(() => ({}))) as { error?: string }
@@ -460,8 +460,8 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
                         : (data.error ?? 'Token request failed'),
                     )
                   }
-                  const data = (await res.json()) as { token: string }
-                  return data.token
+                  const data = (await res.json()) as { token: string; voiceId?: string }
+                  return { token: data.token, voiceId: data.voiceId }
                 }}
               />
             )}

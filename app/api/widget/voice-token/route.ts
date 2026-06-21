@@ -8,7 +8,10 @@ import type { Bot } from '@/lib/types'
 
 export const maxDuration = 30
 const limiter = createRateLimiter({ capacity: 5, refillPerSec: 0.2 })
-const bodySchema = z.object({ publicKey: z.string().min(1) })
+const bodySchema = z.object({
+  publicKey: z.string().min(1),
+  language: z.enum(['en', 'lt']).optional(),
+})
 
 export async function OPTIONS(req: Request) {
   return new Response(null, { status: 204, headers: corsHeaders(req.headers.get('origin')) })
@@ -41,7 +44,11 @@ export async function POST(req: Request) {
   try {
     const agentId = await ensureAgent(svc, bot)
     const token = await getConversationToken(agentId)
-    return json({ token, agentId })
+    // Voice for the requested language (overrides the call's voice client-side).
+    const voices = bot.config.voice?.voices ?? {}
+    const lang = parsed.data.language ?? 'en'
+    const voiceId = voices[lang] ?? voices.en
+    return json({ token, agentId, voiceId })
   } catch (err) {
     if (err instanceof MissingVoiceKeyError) return json({ error: 'Voice calling unavailable' }, 503)
     return json({ error: 'Failed to start voice call' }, 502)

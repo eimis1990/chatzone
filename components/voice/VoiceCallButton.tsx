@@ -24,7 +24,8 @@ import { PhoneIcon, PhoneOffIcon, LoaderCircleIcon } from 'lucide-react'
 export type CallState = 'idle' | 'connecting' | 'listening' | 'speaking'
 
 interface VoiceCallButtonProps {
-  getToken: () => Promise<string>
+  /** Mints a conversation token + the voice id to use for the active language. */
+  getToken: () => Promise<{ token: string; voiceId?: string }>
   primaryColor?: string
   appearance?: 'full' | 'compact'
   /** Conversation language — starts the agent in this language (en/lt). */
@@ -44,7 +45,7 @@ interface VoiceCallButtonProps {
 // ─── Inner component — must live inside <ConversationProvider> ────────────────
 
 interface InnerProps {
-  getToken: () => Promise<string>
+  getToken: () => Promise<{ token: string; voiceId?: string }>
   primaryColor: string
   appearance: 'full' | 'compact'
   language?: 'en' | 'lt'
@@ -130,8 +131,11 @@ function VoiceCallInner({
     }
 
     let token: string
+    let voiceId: string | undefined
     try {
-      token = await getToken()
+      const res = await getToken()
+      token = res.token
+      voiceId = res.voiceId
     } catch (err: unknown) {
       const isUnavailable =
         err instanceof Error &&
@@ -146,9 +150,16 @@ function VoiceCallInner({
     }
 
     try {
+      // Override the language + voice for this call so e.g. a Lithuanian visitor
+      // hears the Lithuanian voice (ElevenLabs can't set per-language voice for
+      // `lt` via language_presets, so we override per session).
+      const agentOv = language ? { language } : undefined
+      const ttsOv = voiceId ? { voiceId } : undefined
+      const overrides =
+        agentOv || ttsOv ? { ...(agentOv ? { agent: agentOv } : {}), ...(ttsOv ? { tts: ttsOv } : {}) } : undefined
       await startSession({
         conversationToken: token,
-        ...(language ? { overrides: { agent: { language } } } : {}),
+        ...(overrides ? { overrides } : {}),
       })
     } catch (err: unknown) {
       const isUnavailable =
