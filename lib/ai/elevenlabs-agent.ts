@@ -44,12 +44,16 @@ export interface AgentConfig {
     }
     language_presets: Record<string, { overrides: { agent: { first_message: string } } }>
   }
-  // Allow the client SDK to set the conversation language at session start
-  // (so a visitor who picked Lithuanian starts the call in Lithuanian).
+  // Allow the client SDK to set the conversation language AND the TTS voice at
+  // session start, so a visitor who picked Lithuanian starts the call in
+  // Lithuanian with the Lithuanian voice. (Per-language voice can't go in
+  // language_presets — ElevenLabs doesn't allow `lt` there — so we override the
+  // voice per session instead.)
   platform_settings: {
     overrides: {
       conversation_config_override: {
         agent: { language: boolean }
+        tts: { voice_id: boolean }
       }
     }
   }
@@ -118,7 +122,7 @@ export function buildAgentConfig(bot: Bot, toolIds: string[] = []): AgentConfig 
       language_presets: languagePresets,
     },
     platform_settings: {
-      overrides: { conversation_config_override: { agent: { language: true } } },
+      overrides: { conversation_config_override: { agent: { language: true }, tts: { voice_id: true } } },
     },
   }
 }
@@ -127,7 +131,7 @@ export function buildAgentConfig(bot: Bot, toolIds: string[] = []): AgentConfig 
 export function agentConfigHash(bot: Bot, toolIds: string[] = []): string {
   const cfg = bot.config
   const material = JSON.stringify([
-    'v6-client-tool', // bump to force re-sync when the agent payload shape changes
+    'v7-voice-override', // bump to force re-sync when the agent payload shape changes
     cfg.languages,
     cfg.content,
     cfg.voice?.voices,

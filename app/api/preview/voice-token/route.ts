@@ -7,7 +7,7 @@ import { MissingVoiceKeyError } from '@/lib/ai/tts'
 import type { Bot } from '@/lib/types'
 
 export const maxDuration = 30
-const bodySchema = z.object({ botId: z.string().uuid() })
+const bodySchema = z.object({ botId: z.string().uuid(), language: z.enum(['en', 'lt']).optional() })
 
 // Authenticated: mints a live-call conversation token for the test playground.
 export async function POST(req: Request) {
@@ -35,7 +35,10 @@ export async function POST(req: Request) {
   try {
     const agentId = await ensureAgent(svc, bot)
     const token = await getConversationToken(agentId)
-    return NextResponse.json({ token, agentId })
+    const voices = bot.config.voice?.voices ?? {}
+    const lang = parsed.data.language ?? 'en'
+    const voiceId = voices[lang] ?? voices.en
+    return NextResponse.json({ token, agentId, voiceId })
   } catch (err) {
     if (err instanceof MissingVoiceKeyError) {
       return NextResponse.json({ error: 'Voice calling unavailable' }, { status: 503 })
