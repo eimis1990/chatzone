@@ -54,7 +54,7 @@ export async function POST(req: Request, ctx: { params: Promise<{ publicKey: str
   const lastUser = [...body.messages].reverse().find((m) => m.role === 'user')?.content ?? ''
   const retrieval = await Promise.race([
     retrieveContext(bot.id, lastUser, {}, serviceRetrievalDeps(svc)).catch(() => null),
-    new Promise<null>((resolve) => setTimeout(() => resolve(null), 2000)),
+    new Promise<null>((resolve) => setTimeout(() => resolve(null), 1200)),
   ])
   const system = buildSystemPrompt(bot.config, retrieval?.chunks ?? [])
 
