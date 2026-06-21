@@ -1,11 +1,14 @@
 import { createServiceClient } from '@/lib/supabase/service'
 import { getEnv } from '@/lib/env'
-import { getLlmToken } from '@/lib/ai/elevenlabs-agent'
+import { getLlmToken } from '@/lib/ai/llm-auth'
 import { retrieveContext, serviceRetrievalDeps } from '@/lib/ai/retrieval'
 import { buildSystemPrompt } from '@/lib/ai/prompt'
 import type { Bot } from '@/lib/types'
 
-export const maxDuration = 60
+// Edge runtime: near-zero cold start + true response streaming. The Node
+// runtime buffered this proxied SSE, so ElevenLabs saw no tokens until the whole
+// completion finished and aborted the turn ("custom_llm generation failed").
+export const runtime = 'edge'
 
 /**
  * OpenAI chat/completions-compatible endpoint that ElevenLabs Agents call as a

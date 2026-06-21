@@ -2,9 +2,14 @@ import { createHash, randomBytes } from 'node:crypto'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Bot, BotLanguage } from '@/lib/types'
 import { MissingVoiceKeyError } from '@/lib/ai/tts'
+import { LLM_TOKEN_SETTING } from '@/lib/ai/llm-auth'
+
+// Re-export the Edge-safe token reader so existing voice-token route imports
+// (`from '@/lib/ai/elevenlabs-agent'`) keep working.
+export { getLlmToken } from '@/lib/ai/llm-auth'
 
 const API = 'https://api.elevenlabs.io/v1'
-const SETTING_TOKEN = 'cbz_llm_token'
+const SETTING_TOKEN = LLM_TOKEN_SETTING
 const SETTING_SECRET_ID = 'elevenlabs_llm_secret_id'
 
 // ElevenLabs "V3 Conversational" — the only model family that supports the full
@@ -175,11 +180,6 @@ export async function ensureLlmAuth(
     await setSetting(db, SETTING_SECRET_ID, secretId)
   }
   return { token, secretId }
-}
-
-/** The shared custom-LLM bearer token (for the /api/llm endpoint to verify). */
-export async function getLlmToken(db: SupabaseClient): Promise<string | null> {
-  return getSetting(db, SETTING_TOKEN)
 }
 
 /**
