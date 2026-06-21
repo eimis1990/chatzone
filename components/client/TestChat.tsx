@@ -34,6 +34,8 @@ import {
 import type { BotConfig, BotLanguage } from '@/lib/types'
 import { VoiceCallButton } from '@/components/voice/VoiceCallButton'
 import { POWERED_BY_URL } from '@/lib/utils'
+import { ProductCards } from '@/components/widget/ProductCards'
+import type { CommerceProduct } from '@/lib/commerce/types'
 
 // Partial form values — fields may be undefined mid-edit.
 // voice.voices is kept as a loose Record to accommodate RHF partial types (en may be undefined).
@@ -72,6 +74,7 @@ interface ChatMessage {
   role: 'user' | 'assistant'
   content: string
   streaming?: boolean
+  products?: CommerceProduct[]
 }
 
 type TtsState = 'idle' | 'loading' | 'playing'
@@ -191,24 +194,66 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
 
         const reader = res.body.getReader()
         const decoder = new TextDecoder()
-        let accumulated = ''
+        // Buffer for partial NDJSON lines across network chunks
+        let lineBuffer = ''
+        let accumulatedText = ''
+        let accumulatedProducts: CommerceProduct[] = []
 
         while (true) {
           const { done, value } = await reader.read()
           if (done) break
-          accumulated += decoder.decode(value, { stream: true })
-          const chunk = accumulated
-          setMessages((prev) =>
-            prev.map((m) =>
-              m.id === assistantMsg.id ? { ...m, content: chunk, streaming: true } : m,
-            ),
-          )
-          scrollBottom()
+          lineBuffer += decoder.decode(value, { stream: true })
+          // Split on newlines; the last element may be a partial line
+          const lines = lineBuffer.split('\n')
+          // Keep the trailing partial line for the next iteration
+          lineBuffer = lines.pop() ?? ''
+          for (const line of lines) {
+            const trimmed = line.trim()
+            if (!trimmed) continue
+            try {
+              const event = JSON.parse(trimmed) as { t: string; v: unknown }
+              if (event.t === 'text' && typeof event.v === 'string') {
+                accumulatedText += event.v
+                setMessages((prev) =>
+                  prev.map((m) =>
+                    m.id === assistantMsg.id
+                      ? { ...m, content: accumulatedText, streaming: true }
+                      : m,
+                  ),
+                )
+                scrollBottom()
+              } else if (event.t === 'products' && Array.isArray(event.v)) {
+                accumulatedProducts = event.v as CommerceProduct[]
+              }
+            } catch {
+              // Malformed line — skip
+            }
+          }
+        }
+        // Process any remaining buffered line
+        if (lineBuffer.trim()) {
+          try {
+            const event = JSON.parse(lineBuffer.trim()) as { t: string; v: unknown }
+            if (event.t === 'text' && typeof event.v === 'string') {
+              accumulatedText += event.v
+            } else if (event.t === 'products' && Array.isArray(event.v)) {
+              accumulatedProducts = event.v as CommerceProduct[]
+            }
+          } catch {
+            // Malformed trailing line — skip
+          }
         }
 
         setMessages((prev) =>
           prev.map((m) =>
-            m.id === assistantMsg.id ? { ...m, content: accumulated, streaming: false } : m,
+            m.id === assistantMsg.id
+              ? {
+                  ...m,
+                  content: accumulatedText,
+                  streaming: false,
+                  products: accumulatedProducts.length > 0 ? accumulatedProducts : undefined,
+                }
+              : m,
           ),
         )
       } catch {
@@ -453,6 +498,19 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
                           onPlay={handleTts}
                         />
                       </div>
+                    )}
+
+                  {/* Product cards — rendered under completed assistant messages */}
+                  {msg.role === 'assistant' &&
+                    !msg.streaming &&
+                    msg.products &&
+                    msg.products.length > 0 && (
+                      <ProductCards
+                        products={msg.products}
+                        bubbleRadius={bubbleRadius}
+                        primaryColor={primaryColor}
+                        language={activeLang}
+                      />
                     )}
                 </div>
               </div>

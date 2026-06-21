@@ -2,12 +2,15 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { Volume2Icon, LoaderCircleIcon, SquareIcon } from 'lucide-react'
+import { ProductCards } from './ProductCards'
+import type { CommerceProduct } from '@/lib/commerce/types'
 
 export interface ChatMessage {
   id: string
   role: 'user' | 'assistant'
   content: string
   streaming?: boolean
+  products?: CommerceProduct[]
 }
 
 interface VoiceConfig {
@@ -25,6 +28,7 @@ interface MessageListProps {
   avatarUrl?: string
   voice?: VoiceConfig
   publicKey?: string
+  activeLang?: 'en' | 'lt'
 }
 
 /**
@@ -146,6 +150,7 @@ export function MessageList({
   avatarUrl,
   voice,
   publicKey,
+  activeLang = 'en',
 }: MessageListProps) {
   const bottomRef = useRef<HTMLDivElement>(null)
   // Map of messageId → TtsState for all assistant messages.
@@ -248,6 +253,19 @@ export function MessageList({
                     state={ttsStates[msg.id] ?? 'idle'}
                   />
                 </div>
+              )}
+
+            {/* Product cards — rendered under completed assistant messages */}
+            {msg.role === 'assistant' &&
+              !msg.streaming &&
+              msg.products &&
+              msg.products.length > 0 && (
+                <ProductCards
+                  products={msg.products}
+                  bubbleRadius={bubbleRadius}
+                  primaryColor={primaryColor}
+                  language={activeLang}
+                />
               )}
           </div>
         </div>
