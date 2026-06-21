@@ -36,6 +36,7 @@ import { VoiceCallButton } from '@/components/voice/VoiceCallButton'
 import { POWERED_BY_URL } from '@/lib/utils'
 import { ProductCards, ProductListView } from '@/components/widget/ProductCards'
 import type { CommerceProduct } from '@/lib/commerce/types'
+import { fontStack } from '@/lib/fonts'
 
 // Partial form values — fields may be undefined mid-edit.
 // voice.voices is kept as a loose Record to accommodate RHF partial types (en may be undefined).
@@ -93,6 +94,7 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
   const primaryColor = config.theme?.primaryColor ?? '#4f46e5'
   const cornerRadius = config.theme?.cornerRadius ?? 16
   const bubbleRadius = config.theme?.bubbleRadius ?? 16
+  const chatFont = fontStack(config.theme?.fontFamily)
   const displayName = config.displayName || 'Your Bot'
   const avatarUrl = config.avatarUrl
 
@@ -413,6 +415,7 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
             borderRadius: `${cornerRadius}px`,
             height: '630px',
             width: '420px',
+            fontFamily: chatFont,
           }}
           className="absolute bottom-[72px] right-0 flex flex-col bg-background border shadow-2xl pointer-events-auto overflow-hidden"
         >

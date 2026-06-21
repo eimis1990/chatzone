@@ -10,6 +10,7 @@ import { SuggestedQuestions } from './SuggestedQuestions'
 import type { PublicBotConfig } from '@/lib/widget-config'
 import type { BotLanguage } from '@/lib/types'
 import type { CommerceProduct } from '@/lib/commerce/types'
+import { fontStack } from '@/lib/fonts'
 
 interface ChatWindowProps {
   publicKey: string
@@ -263,8 +264,8 @@ export function ChatWindow({ publicKey, config }: ChatWindowProps) {
 
   return (
     <div
-      className="flex flex-col h-full bg-white font-sans overflow-hidden"
-      style={{ borderRadius: `${cornerRadius}px` }}
+      className="flex flex-col h-full bg-white overflow-hidden"
+      style={{ borderRadius: `${cornerRadius}px`, fontFamily: fontStack(config.theme.fontFamily) }}
     >
       {/* Header */}
       <div

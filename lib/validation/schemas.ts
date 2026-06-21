@@ -63,8 +63,15 @@ export const botConfigFormSchema = z.object({
       bubbleIcon: z.string().optional(),
       cornerRadius: z.number().min(0).max(32).default(16),
       bubbleRadius: z.number().min(0).max(24).default(16),
+      fontFamily: z.string().default('geist'),
     })
-    .default({ primaryColor: '#4f46e5', position: 'bottom-right', cornerRadius: 16, bubbleRadius: 16 }),
+    .default({
+      primaryColor: '#4f46e5',
+      position: 'bottom-right',
+      cornerRadius: 16,
+      bubbleRadius: 16,
+      fontFamily: 'geist',
+    }),
   languages: z.array(z.enum(['en', 'lt'])).min(1).default(['en']),
   content: z.object({
     en: languageContentSchema,

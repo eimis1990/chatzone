@@ -21,6 +21,7 @@ export interface PublicBotConfig {
     bubbleIcon?: string
     cornerRadius: number
     bubbleRadius: number
+    fontFamily?: string
   }
   languages: BotLanguage[]
   content: Partial<Record<BotLanguage, PublicLanguageContent>>
@@ -62,6 +63,7 @@ export function publicBotConfig(config: BotConfig): PublicBotConfig {
       position: config.theme.position,
       cornerRadius: config.theme.cornerRadius ?? 16,
       bubbleRadius: config.theme.bubbleRadius ?? 16,
+      fontFamily: config.theme.fontFamily ?? 'geist',
       ...(config.theme.bubbleIcon !== undefined && { bubbleIcon: config.theme.bubbleIcon }),
     },
     languages: config.languages ?? ['en'],
