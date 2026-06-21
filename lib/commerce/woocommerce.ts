@@ -112,18 +112,23 @@ export async function searchWooProducts(
   return data.map(normalizeWooProduct)
 }
 
-/** Validate that a URL is a reachable WooCommerce Store API. */
+/**
+ * Validate a WooCommerce Store API and return the total product count.
+ * The Store API reports the total in the `x-wp-total` response header.
+ */
 export async function validateWooStore(
   storeUrl: string,
   deps: CommerceDeps = {},
-): Promise<boolean> {
+): Promise<{ ok: boolean; total: number }> {
   const fetchImpl = deps.fetchImpl ?? fetch
   try {
     const res = await fetchImpl(`${storeOrigin(storeUrl)}/wp-json/wc/store/v1/products?per_page=1`)
-    if (!res.ok) return false
+    if (!res.ok) return { ok: false, total: 0 }
     const data = await res.json()
-    return Array.isArray(data)
+    if (!Array.isArray(data)) return { ok: false, total: 0 }
+    const total = Number(res.headers.get('x-wp-total') ?? data.length)
+    return { ok: true, total: Number.isFinite(total) ? total : data.length }
   } catch {
-    return false
+    return { ok: false, total: 0 }
   }
 }

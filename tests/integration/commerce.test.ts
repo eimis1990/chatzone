@@ -8,8 +8,10 @@ const d = live ? describe : describe.skip
 const STORE = process.env.LIVE_STORE_URL ?? 'https://homebynb.lt'
 
 d('WooCommerce live store', () => {
-  it('validates the store', async () => {
-    expect(await validateWooStore(STORE)).toBe(true)
+  it('validates the store and reports a catalog total', async () => {
+    const { ok, total } = await validateWooStore(STORE)
+    expect(ok).toBe(true)
+    expect(total).toBeGreaterThan(0)
   })
 
   it('searches products with a price filter', async () => {

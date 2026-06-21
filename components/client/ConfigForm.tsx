@@ -846,9 +846,9 @@ function CommerceSection({ control, watch }: CommerceSectionProps) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ provider: 'woocommerce', storeUrl: storeUrl.trim() }),
       })
-      const data = (await res.json()) as { ok: boolean; error?: string; sampleCount?: number }
+      const data = (await res.json()) as { ok: boolean; error?: string; total?: number }
       if (data.ok) {
-        setTestState({ status: 'ok', count: data.sampleCount ?? 0 })
+        setTestState({ status: 'ok', count: data.total ?? 0 })
       } else {
         setTestState({ status: 'error', message: data.error ?? 'Connection failed.' })
       }
@@ -915,7 +915,11 @@ function CommerceSection({ control, watch }: CommerceSectionProps) {
                 render={({ field }) => (
                   <Input
                     id="commerceStoreUrl"
-                    {...field}
+                    name={field.name}
+                    ref={field.ref}
+                    value={field.value ?? ''}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
                     placeholder="https://yourstore.com"
                     autoComplete="url"
                     inputMode="url"
@@ -938,7 +942,8 @@ function CommerceSection({ control, watch }: CommerceSectionProps) {
 
               {testState.status === 'ok' && (
                 <TestBadge variant="ok">
-                  Connected — found {testState.count} product{testState.count !== 1 ? 's' : ''}
+                  Connected — {testState.count.toLocaleString()} product
+                  {testState.count !== 1 ? 's' : ''} in catalog
                 </TestBadge>
               )}
               {testState.status === 'error' && (

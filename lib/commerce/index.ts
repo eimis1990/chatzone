@@ -22,17 +22,17 @@ export async function searchStore(
   }
 }
 
-/** Validate a store connection for the configured provider. */
+/** Validate a store connection and return the catalog size for the provider. */
 export async function validateStore(
   provider: CommerceConfig['provider'],
   storeUrl: string,
   deps: CommerceDeps = {},
-): Promise<boolean> {
+): Promise<{ ok: boolean; total: number }> {
   switch (provider) {
     case 'woocommerce':
       return validateWooStore(storeUrl, deps)
     default:
-      return false
+      return { ok: false, total: 0 }
   }
 }
 

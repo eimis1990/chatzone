@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createServerClient } from '@/lib/supabase/server'
-import { validateStore, searchStore } from '@/lib/commerce'
+import { validateStore } from '@/lib/commerce'
 
 export const maxDuration = 20
 
@@ -22,16 +22,12 @@ export async function POST(req: Request) {
   const parsed = bodySchema.safeParse(body)
   if (!parsed.success) return NextResponse.json({ ok: false, error: 'Invalid request' }, { status: 400 })
 
-  const ok = await validateStore(parsed.data.provider, parsed.data.storeUrl)
+  const { ok, total } = await validateStore(parsed.data.provider, parsed.data.storeUrl)
   if (!ok) {
     return NextResponse.json({
       ok: false,
       error: 'Could not reach the WooCommerce Store API at that URL.',
     })
   }
-  const sample = await searchStore(
-    { enabled: true, provider: parsed.data.provider, storeUrl: parsed.data.storeUrl },
-    { query: '', limit: 3 },
-  ).catch(() => [])
-  return NextResponse.json({ ok: true, sampleCount: sample.length, sample })
+  return NextResponse.json({ ok: true, total })
 }
