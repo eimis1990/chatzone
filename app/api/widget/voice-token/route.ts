@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { createServiceClient } from '@/lib/supabase/service'
+import { getEnv } from '@/lib/env'
 import { isOriginAllowed, corsHeaders } from '@/lib/widget-auth'
 import { createRateLimiter } from '@/lib/ratelimit'
 import { ensureAgent, getConversationToken } from '@/lib/ai/elevenlabs-agent'
@@ -39,7 +40,7 @@ export async function POST(req: Request) {
   if (!limiter.check(bot.id)) return json({ error: 'Rate limit exceeded' }, 429)
 
   try {
-    const agentId = await ensureAgent(svc, bot)
+    const agentId = await ensureAgent(svc, bot, getEnv().NEXT_PUBLIC_APP_URL)
     const token = await getConversationToken(agentId)
     return json({ token, agentId })
   } catch (err) {

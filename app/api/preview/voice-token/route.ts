@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createServerClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
+import { getEnv } from '@/lib/env'
 import { ensureAgent, getConversationToken } from '@/lib/ai/elevenlabs-agent'
 import { MissingVoiceKeyError } from '@/lib/ai/tts'
 import type { Bot } from '@/lib/types'
@@ -33,7 +34,7 @@ export async function POST(req: Request) {
   }
 
   try {
-    const agentId = await ensureAgent(svc, bot)
+    const agentId = await ensureAgent(svc, bot, getEnv().NEXT_PUBLIC_APP_URL)
     const token = await getConversationToken(agentId)
     return NextResponse.json({ token, agentId })
   } catch (err) {

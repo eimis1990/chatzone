@@ -10,7 +10,6 @@ export { getLlmToken } from '@/lib/ai/llm-auth'
 
 const API = 'https://api.elevenlabs.io/v1'
 const SETTING_TOKEN = LLM_TOKEN_SETTING
-const SETTING_SECRET_ID = 'elevenlabs_llm_secret_id'
 
 // ElevenLabs "V3 Conversational" — the only model family that supports the full
 // language set (incl. Lithuanian) for real-time agents.
@@ -38,6 +37,8 @@ export interface AgentConfig {
         // custom_llm on a PATCH (ElevenLabs merges; it rejects llm≠CUSTOM_LLM
         // while a custom_llm object is still present).
         custom_llm: null
+        // Standalone tools (created via /v1/convai/tools) the agent may call.
+        tool_ids: string[]
       }
     }
     tts: {
@@ -66,7 +67,7 @@ const LANG_NAME: Record<string, string> = { en: 'English', lt: 'Lithuanian' }
  * a default language + `language_presets` (per-language first message) and
  * `supported_voices` (per-language voice override).
  */
-export function buildAgentConfig(bot: Bot): AgentConfig {
+export function buildAgentConfig(bot: Bot, toolIds: string[] = []): AgentConfig {
   const cfg = bot.config
   const llm = cfg.voice?.llmModel || 'gpt-4o-mini'
   const languages: BotLanguage[] = cfg.languages?.length ? cfg.languages : ['en']
@@ -99,9 +100,12 @@ export function buildAgentConfig(bot: Bot): AgentConfig {
         first_message: defaultContent?.greeting ?? '',
         language: defaultLang,
         prompt: {
-          prompt: cfg.systemPrompt,
+          prompt: toolIds.length
+            ? `${cfg.systemPrompt}\n\nWhen the user asks about products, prices, availability, recommendations, or anything about the store or its information, call the \`search\` tool with a concise query and answer naturally from its results. Keep spoken answers short.`
+            : cfg.systemPrompt,
           llm,
           custom_llm: null,
+          tool_ids: toolIds,
         },
       },
       tts: {
@@ -119,16 +123,17 @@ export function buildAgentConfig(bot: Bot): AgentConfig {
 }
 
 /** Stable hash of the bot fields that require re-syncing the agent when changed. */
-export function agentConfigHash(bot: Bot): string {
+export function agentConfigHash(bot: Bot, toolIds: string[] = []): string {
   const cfg = bot.config
   const material = JSON.stringify([
-    'v3-builtin-llm', // bump to force re-sync when the agent payload shape changes
+    'v4-tools', // bump to force re-sync when the agent payload shape changes
     cfg.languages,
     cfg.content,
     cfg.voice?.voices,
     cfg.voice?.llmModel ?? 'gpt-4o-mini',
     cfg.systemPrompt,
     bot.public_key,
+    toolIds,
   ])
   return createHash('sha256').update(material).digest('hex').slice(0, 32)
 }
@@ -148,45 +153,88 @@ async function setSetting(db: SupabaseClient, key: string, value: string): Promi
   await db.from('platform_settings').upsert({ key, value, updated_at: new Date().toISOString() })
 }
 
-/**
- * Ensures a shared token (for our custom-LLM endpoint) and a matching ElevenLabs
- * workspace secret exist. Returns the token and the secret_id agents reference.
- */
-export async function ensureLlmAuth(
-  db: SupabaseClient,
-): Promise<{ token: string; secretId: string }> {
+/** Get-or-create the shared bearer token our agent tool webhook verifies. */
+async function ensureSharedToken(db: SupabaseClient): Promise<string> {
   let token = await getSetting(db, SETTING_TOKEN)
   if (!token) {
     token = randomBytes(24).toString('hex')
     await setSetting(db, SETTING_TOKEN, token)
   }
-  let secretId = await getSetting(db, SETTING_SECRET_ID)
-  if (!secretId) {
-    const res = await fetch(`${API}/convai/secrets`, {
-      method: 'POST',
-      headers: { 'xi-api-key': apiKey(), 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type: 'new', name: 'CBZ_LLM_TOKEN', value: token }),
-    })
-    if (!res.ok) throw new Error(`Failed to create ElevenLabs secret: HTTP ${res.status}`)
-    const data = (await res.json()) as { secret_id?: string; id?: string }
-    secretId = data.secret_id ?? data.id ?? ''
-    if (!secretId) throw new Error('ElevenLabs secret response missing id')
-    await setSetting(db, SETTING_SECRET_ID, secretId)
+  return token
+}
+
+/** Webhook tool config: lets the agent search the bot's products + knowledge. */
+function buildSearchToolConfig(bot: Bot, appUrl: string, token: string) {
+  return {
+    type: 'webhook' as const,
+    name: 'search',
+    description:
+      "Search this store's live product catalog and knowledge base. Call it whenever the user " +
+      'asks about products, prices, availability, recommendations, or any store information. ' +
+      'Pass a concise query (the product type or topic).',
+    response_timeout_secs: 20,
+    api_schema: {
+      url: `${appUrl}/api/agent-tools/${bot.public_key}`,
+      method: 'POST' as const,
+      request_headers: { Authorization: `Bearer ${token}` },
+      request_body_schema: {
+        type: 'object' as const,
+        properties: {
+          query: {
+            type: 'string' as const,
+            description: 'What to search for, e.g. "face cream" or "opening hours".',
+          },
+        },
+        required: ['query'],
+      },
+    },
   }
-  return { token, secretId }
+}
+
+/**
+ * Ensures the bot's `search` webhook tool exists in the ElevenLabs workspace
+ * (creating it once, then PATCHing). Returns its tool id.
+ */
+async function ensureSearchTool(
+  db: SupabaseClient,
+  bot: Bot,
+  appUrl: string,
+  token: string,
+): Promise<string> {
+  const headers = { 'xi-api-key': apiKey(), 'Content-Type': 'application/json' }
+  const body = JSON.stringify({ tool_config: buildSearchToolConfig(bot, appUrl, token) })
+  const key = `cbz_tool_${bot.id}`
+  const existing = await getSetting(db, key)
+
+  if (existing) {
+    const res = await fetch(`${API}/convai/tools/${existing}`, { method: 'PATCH', headers, body })
+    if (res.ok) return existing
+    if (res.status !== 404) throw new Error(`Failed to update tool: HTTP ${res.status}`)
+    // 404 → the tool was deleted; fall through and recreate.
+  }
+
+  const res = await fetch(`${API}/convai/tools`, { method: 'POST', headers, body })
+  if (!res.ok) throw new Error(`Failed to create tool: HTTP ${res.status}`)
+  const data = (await res.json()) as { id: string }
+  await setSetting(db, key, data.id)
+  return data.id
 }
 
 /**
  * Ensures the bot has an up-to-date ElevenLabs agent; creates or PATCHes as
  * needed. Returns the agent_id. Uses the service-role db client.
  */
-export async function ensureAgent(db: SupabaseClient, bot: Bot): Promise<string> {
-  const hash = agentConfigHash(bot)
+export async function ensureAgent(db: SupabaseClient, bot: Bot, appUrl: string): Promise<string> {
+  const token = await ensureSharedToken(db)
+  const toolId = await ensureSearchTool(db, bot, appUrl, token)
+  const toolIds = [toolId]
+
+  const hash = agentConfigHash(bot, toolIds)
   if (bot.elevenlabs_agent_id && bot.elevenlabs_agent_hash === hash) {
     return bot.elevenlabs_agent_id
   }
 
-  const config = buildAgentConfig(bot)
+  const config = buildAgentConfig(bot, toolIds)
   const headers = { 'xi-api-key': apiKey(), 'Content-Type': 'application/json' }
 
   const createAgent = async (): Promise<string> => {
