@@ -96,6 +96,8 @@ export interface BotConfig {
     bubbleIcon?: string
     cornerRadius: number
     bubbleRadius: number
+    /** Chat font key — see lib/fonts.ts FONT_OPTIONS. */
+    fontFamily?: string
   }
   voice: VoiceConfig
   /** Enabled languages. Always includes 'en'; the first entry is the default. */

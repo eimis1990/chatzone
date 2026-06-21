@@ -32,6 +32,7 @@ import { TestChat } from '@/components/client/TestChat'
 import { VoiceSection } from '@/components/client/VoiceSection'
 import { LogoUpload } from '@/components/client/LogoUpload'
 import type { BotConfig } from '@/lib/types'
+import { FONT_OPTIONS, fontStack } from '@/lib/fonts'
 import { cn } from '@/lib/utils'
 
 interface ConfigFormProps {
@@ -461,6 +462,39 @@ export function ConfigForm({ botId, initialConfig }: ConfigFormProps) {
                   )}
                 />
               </div>
+            </div>
+
+            {/* Font */}
+            <div className="space-y-1.5">
+              <Label>Chat font</Label>
+              <Controller
+                name="theme.fontFamily"
+                control={control}
+                render={({ field }) => (
+                  <Select value={field.value ?? 'geist'} onValueChange={field.onChange}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {FONT_OPTIONS.map((f) => (
+                        <SelectItem
+                          key={f.value}
+                          value={f.value}
+                          style={{ fontFamily: f.stack }}
+                        >
+                          {f.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+              <p
+                className="text-sm text-muted-foreground"
+                style={{ fontFamily: fontStack(watch('theme.fontFamily')) }}
+              >
+                The quick brown fox jumps over the lazy dog
+              </p>
             </div>
 
             {/* Radius sliders */}
