@@ -48,7 +48,7 @@
   // ── Styles ────────────────────────────────────────────────────────────────
   var LAUNCHER_SIZE = 56
   var IFRAME_WIDTH = 420
-  var IFRAME_HEIGHT = 600
+  var IFRAME_HEIGHT = 720
   var OFFSET = 20
   var Z_INDEX = 2147483647 // max z-index
   var POWERED_BY_URL = 'https://chatzone.app'

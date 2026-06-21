@@ -408,7 +408,7 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
           style={{
             transformOrigin: 'bottom right',
             borderRadius: `${cornerRadius}px`,
-            height: '520px',
+            height: '630px',
             width: '420px',
           }}
           className="absolute bottom-[72px] right-0 flex flex-col bg-background border shadow-2xl pointer-events-auto overflow-hidden"
