@@ -101,7 +101,11 @@ export function buildAgentConfig(bot: Bot, toolIds: string[] = []): AgentConfig 
         language: defaultLang,
         prompt: {
           prompt: toolIds.length
-            ? `${cfg.systemPrompt}\n\nWhen the user asks about products, prices, availability, recommendations, or anything about the store or its information, call the \`search\` tool with a concise query and answer naturally from its results. Keep spoken answers short.`
+            ? `${cfg.systemPrompt}\n\nWhen the user asks about products, prices, availability, recommendations, or store information, call the \`search\` tool. Use a SHORT query of the product type or topic.${
+                languages.includes('lt')
+                  ? " This store's catalog is often Lithuanian, so translate the term (e.g. \"veido kremas\" for face cream, \"serumas\" for serum)."
+                  : ''
+              } If a search returns nothing, try a simpler or translated term before saying it's unavailable. Answer briefly and naturally from the results — don't read out long lists or links.`
             : cfg.systemPrompt,
           llm,
           custom_llm: null,
@@ -126,7 +130,7 @@ export function buildAgentConfig(bot: Bot, toolIds: string[] = []): AgentConfig 
 export function agentConfigHash(bot: Bot, toolIds: string[] = []): string {
   const cfg = bot.config
   const material = JSON.stringify([
-    'v4-tools', // bump to force re-sync when the agent payload shape changes
+    'v5-tools', // bump to force re-sync when the agent payload shape changes
     cfg.languages,
     cfg.content,
     cfg.voice?.voices,
