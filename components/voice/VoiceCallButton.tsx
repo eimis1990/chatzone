@@ -14,11 +14,14 @@
  *  - className: optional extra class on the root element.
  */
 
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { ConversationProvider, useConversation } from '@elevenlabs/react'
 import { PhoneIcon, PhoneOffIcon, LoaderCircleIcon } from 'lucide-react'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
+
+/** High-level call state surfaced to the host (e.g. header subtitle). */
+export type CallState = 'idle' | 'connecting' | 'listening' | 'speaking'
 
 interface VoiceCallButtonProps {
   getToken: () => Promise<string>
@@ -26,6 +29,8 @@ interface VoiceCallButtonProps {
   appearance?: 'full' | 'compact'
   /** Conversation language — starts the agent in this language (en/lt). */
   language?: 'en' | 'lt'
+  /** Reports call state changes so the host can show listening/speaking. */
+  onStateChange?: (state: CallState) => void
   className?: string
 }
 
@@ -36,9 +41,10 @@ interface InnerProps {
   primaryColor: string
   appearance: 'full' | 'compact'
   language?: 'en' | 'lt'
+  onStateChange?: (state: CallState) => void
 }
 
-function VoiceCallInner({ getToken, primaryColor, appearance, language }: InnerProps) {
+function VoiceCallInner({ getToken, primaryColor, appearance, language, onStateChange }: InnerProps) {
   const [callError, setCallError] = useState<string | null>(null)
   const [micDenied, setMicDenied] = useState(false)
   const [unavailable, setUnavailable] = useState(false)
@@ -55,6 +61,18 @@ function VoiceCallInner({ getToken, primaryColor, appearance, language }: InnerP
   const isConnected = status === 'connected'
   const isConnecting = status === 'connecting'
   const isActive = isConnected || isConnecting
+
+  // Surface a high-level state to the host (header shows listening/speaking).
+  const callState: CallState = isConnecting
+    ? 'connecting'
+    : isConnected
+      ? isSpeaking
+        ? 'speaking'
+        : 'listening'
+      : 'idle'
+  useEffect(() => {
+    onStateChange?.(callState)
+  }, [callState, onStateChange])
 
   const handleStart = useCallback(async () => {
     setCallError(null)
@@ -243,6 +261,7 @@ export function VoiceCallButton({
   primaryColor = '#4f46e5',
   appearance = 'full',
   language,
+  onStateChange,
   className,
 }: VoiceCallButtonProps) {
   return (
@@ -253,6 +272,7 @@ export function VoiceCallButton({
           primaryColor={primaryColor}
           appearance={appearance}
           language={language}
+          onStateChange={onStateChange}
         />
       </ConversationProvider>
     </div>

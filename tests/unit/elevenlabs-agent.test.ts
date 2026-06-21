@@ -32,28 +32,32 @@ function bilingual(): BotConfig {
 }
 
 describe('buildAgentConfig', () => {
-  it('maps the bot config to a v3 conversational agent with a custom LLM URL', () => {
+  it('maps the bot config to a v3 conversational agent with a built-in LLM', () => {
     const bot = makeBot()
-    const cfg = buildAgentConfig(bot, 'https://app.example.com', 'sec_1')
+    const cfg = buildAgentConfig(bot)
     expect(cfg.conversation_config.agent.first_message).toBe(bot.config.content.en.greeting)
     expect(cfg.conversation_config.agent.language).toBe('en')
-    expect(cfg.conversation_config.agent.prompt.llm).toBe('custom-llm')
-    expect(cfg.conversation_config.agent.prompt.custom_llm.url).toBe(
-      'https://app.example.com/api/llm/pubkey123',
-    )
+    // Defaults to gpt-4o-mini when no llmModel is set.
+    expect(cfg.conversation_config.agent.prompt.llm).toBe('gpt-4o-mini')
     expect(cfg.conversation_config.tts.model_id).toBe('eleven_v3_conversational')
     expect(cfg.conversation_config.tts.expressive_mode).toBe(true)
     expect(cfg.conversation_config.tts.voice_id).toBe(bot.config.voice.voices.en)
   })
 
+  it('uses the configured built-in LLM model', () => {
+    const base = defaultBotConfig('Bot')
+    const bot = makeBot({ ...base, voice: { ...base.voice, llmModel: 'gemini-2.5-flash' } })
+    expect(buildAgentConfig(bot).conversation_config.agent.prompt.llm).toBe('gemini-2.5-flash')
+  })
+
   it('English-only bot has no language presets or supported voices', () => {
-    const cfg = buildAgentConfig(makeBot(), 'https://x', 'sec')
+    const cfg = buildAgentConfig(makeBot())
     expect(Object.keys(cfg.conversation_config.language_presets)).toEqual([])
     expect(cfg.conversation_config.tts.supported_voices).toEqual([])
   })
 
   it('bilingual bot adds an lt language preset + lt supported voice', () => {
-    const cfg = buildAgentConfig(makeBot(bilingual()), 'https://x', 'sec')
+    const cfg = buildAgentConfig(makeBot(bilingual()))
     expect(cfg.conversation_config.agent.language).toBe('en')
     expect(cfg.conversation_config.language_presets.lt.overrides.agent.first_message).toBe('Sveiki')
     const lt = cfg.conversation_config.tts.supported_voices.find((v) => v.language === 'lt')
@@ -64,17 +68,19 @@ describe('buildAgentConfig', () => {
 describe('agentConfigHash', () => {
   it('is stable for identical inputs', () => {
     const bot = makeBot()
-    expect(agentConfigHash(bot, 'https://x')).toBe(agentConfigHash(bot, 'https://x'))
+    expect(agentConfigHash(bot)).toBe(agentConfigHash(bot))
   })
 
   it('changes when a voice changes', () => {
     const a = makeBot()
     const b = makeBot(bilingual())
-    expect(agentConfigHash(a, 'https://x')).not.toBe(agentConfigHash(b, 'https://x'))
+    expect(agentConfigHash(a)).not.toBe(agentConfigHash(b))
   })
 
-  it('changes when the deployment URL changes', () => {
-    const bot = makeBot()
-    expect(agentConfigHash(bot, 'https://a')).not.toBe(agentConfigHash(bot, 'https://b'))
+  it('changes when the voice LLM model changes', () => {
+    const base = defaultBotConfig('Bot')
+    const a = makeBot({ ...base, voice: { ...base.voice, llmModel: 'gpt-4o-mini' } })
+    const b = makeBot({ ...base, voice: { ...base.voice, llmModel: 'gemini-2.5-flash' } })
+    expect(agentConfigHash(a)).not.toBe(agentConfigHash(b))
   })
 })

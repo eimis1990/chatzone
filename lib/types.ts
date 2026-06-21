@@ -78,6 +78,8 @@ export interface VoiceConfig {
   sttEnabled: boolean
   /** Per-language voice ids. `en` is required; others optional. */
   voices: Partial<Record<BotLanguage, string>> & { en: string }
+  /** Built-in ElevenLabs LLM the live-call agent uses. See lib/ai/voice-models.ts. */
+  llmModel?: string
 }
 
 /** Visitor-facing content that differs per language. */

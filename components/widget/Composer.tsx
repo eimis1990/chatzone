@@ -1,29 +1,18 @@
 'use client'
 
-import { useRef, useState, useCallback, type KeyboardEvent, type FormEvent } from 'react'
-import { VoiceCallButton } from '@/components/voice/VoiceCallButton'
-
-interface VoiceConfig {
-  enabled: boolean
-  ttsEnabled: boolean
-  sttEnabled: boolean
-}
+import { useRef, useState, type KeyboardEvent, type FormEvent } from 'react'
 
 interface ComposerProps {
   onSend: (message: string) => void
   disabled?: boolean
   primaryColor: string
-  voice?: VoiceConfig
-  publicKey?: string
-  /** Active visitor language — forwarded to VoiceCallButton so calls start in the right language. */
+  /** Active visitor language — drives the input placeholder. */
   language?: 'en' | 'lt'
 }
 
-export function Composer({ onSend, disabled = false, primaryColor, voice, publicKey, language }: ComposerProps) {
+export function Composer({ onSend, disabled = false, primaryColor, language }: ComposerProps) {
   const [value, setValue] = useState('')
   const textareaRef = useRef<HTMLTextAreaElement>(null)
-
-  const showCallButton = Boolean(voice?.enabled && publicKey)
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
@@ -50,24 +39,6 @@ export function Composer({ onSend, disabled = false, primaryColor, voice, public
     el.style.height = `${Math.min(el.scrollHeight, 120)}px`
   }
 
-  const getToken = useCallback(async (): Promise<string> => {
-    const res = await fetch('/api/widget/voice-token', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ publicKey }),
-    })
-    if (!res.ok) {
-      const data = (await res.json().catch(() => ({}))) as { error?: string }
-      throw new Error(
-        res.status === 503
-          ? 'Voice calling unavailable'
-          : (data.error ?? 'Token request failed'),
-      )
-    }
-    const data = (await res.json()) as { token: string }
-    return data.token
-  }, [publicKey])
-
   return (
     <div className="border-t border-gray-200 bg-white">
       <form
@@ -87,16 +58,6 @@ export function Composer({ onSend, disabled = false, primaryColor, voice, public
           className="flex-1 resize-none rounded-xl border border-gray-200 px-3 py-2 text-sm leading-5 focus:outline-none focus:ring-2 focus:ring-offset-0 disabled:opacity-50 overflow-hidden"
           style={{ maxHeight: '120px', '--tw-ring-color': primaryColor } as React.CSSProperties}
         />
-
-        {/* Voice call button — compact circle, only when voice is enabled */}
-        {showCallButton && (
-          <VoiceCallButton
-            appearance="compact"
-            getToken={getToken}
-            primaryColor={primaryColor}
-            language={language}
-          />
-        )}
 
         {/* Send button */}
         <button
