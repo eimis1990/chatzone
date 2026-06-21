@@ -409,7 +409,7 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
             transformOrigin: 'bottom right',
             borderRadius: `${cornerRadius}px`,
             height: '520px',
-            width: '360px',
+            width: '420px',
           }}
           className="absolute bottom-[72px] right-0 flex flex-col bg-background border shadow-2xl pointer-events-auto overflow-hidden"
         >
@@ -607,7 +607,7 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
-            className="absolute bottom-[52px] right-0 w-[360px] text-left pl-1 pointer-events-auto"
+            className="absolute bottom-[52px] right-0 w-[420px] text-left pl-1 pointer-events-auto"
           >
             <p className="text-[10px] text-muted-foreground/60">
               Powered by{' '}

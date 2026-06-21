@@ -6,30 +6,58 @@ import type { CommerceProduct } from '@/lib/commerce/types'
 import { searchStore } from '@/lib/commerce'
 
 /**
- * Builds the `search_products` tool for a commerce-enabled bot. Captures the
- * full product results (with images) into `sink` so the route can stream them
- * to the UI as product cards; returns a compact list to the model.
+ * Builds the product tools for a commerce-enabled bot:
+ *  - `search_products`: fetches CANDIDATES and returns them (id/title/price/desc)
+ *    to the model to review — it does NOT show anything to the user.
+ *  - `display_products`: the model passes the ids it judges relevant; those (and
+ *    only those) are pushed to `sink` and rendered as cards.
+ * This lets the model filter out false keyword matches (e.g. a bath bomb that
+ * merely contains a substring) before anything reaches the shopper.
  */
-export function makeProductSearchTool(config: BotConfig, sink: CommerceProduct[]): ToolSet {
+export function makeProductTools(config: BotConfig, sink: CommerceProduct[]): ToolSet {
+  const candidates = new Map<string, CommerceProduct>()
   return {
     search_products: tool({
       description:
-        'Search the store catalog for products matching the shopper request. Use whenever the ' +
-        'user asks about products, prices, availability, gifts, or wants recommendations. ' +
-        'Translate their request into a concise search query and optional price bounds.',
+        'Search the store catalog and get CANDIDATE products to review (not shown to the user yet). ' +
+        'Use the product type/noun in the catalog language (this store is often Lithuanian), e.g. ' +
+        '"veido kremas" for a face cream — avoid vague single adjectives. You may search multiple times.',
       inputSchema: z.object({
-        query: z.string().describe('Concise product search terms, e.g. "hydrating face mask"'),
+        query: z.string().describe('Product type/keywords in the catalog language'),
         minPrice: z.number().optional().describe('Minimum price in major units (e.g. euros)'),
         maxPrice: z.number().optional().describe('Maximum price in major units (e.g. euros)'),
       }),
       execute: async ({ query, minPrice, maxPrice }) => {
         const products = await searchStore(
           { enabled: true, provider: config.commerce.provider, storeUrl: config.commerce.storeUrl },
-          { query, minPrice, maxPrice, limit: 6 },
+          { query, minPrice, maxPrice, limit: 10 },
         )
-        sink.push(...products)
-        // Compact form for the model to reason/talk about (no image payloads).
-        return products.map((p) => ({ title: p.title, price: p.price, inStock: p.inStock }))
+        products.forEach((p) => candidates.set(p.id, p))
+        return products.map((p) => ({
+          id: p.id,
+          title: p.title,
+          price: p.price,
+          inStock: p.inStock,
+          description: p.shortDescription?.slice(0, 140),
+        }))
+      },
+    }),
+    display_products: tool({
+      description:
+        'Show selected products to the shopper as cards. Pass ONLY the ids of candidate products ' +
+        'that genuinely match what the user asked for (right category/type) — never include ' +
+        'unrelated items that merely share a keyword. Pass up to 6 ids, best matches first.',
+      inputSchema: z.object({
+        productIds: z.array(z.string()).describe('Candidate product ids to show, best first'),
+      }),
+      execute: async ({ productIds }) => {
+        const chosen = productIds
+          .map((id) => candidates.get(id))
+          .filter((p): p is CommerceProduct => Boolean(p))
+          .slice(0, 6)
+        sink.length = 0
+        sink.push(...chosen)
+        return { shown: chosen.length }
       },
     }),
   }

@@ -68,7 +68,6 @@ export function ConfigForm({ botId, initialConfig }: ConfigFormProps) {
   const [activeLang, setActiveLang] = useState<BotLanguage>(
     (initialConfig.languages?.[0] as BotLanguage) ?? 'en',
   )
-  const langHydratedRef = useRef(false)
 
   // After mount: restore the persisted language if it's still enabled.
   useEffect(() => {
@@ -79,7 +78,6 @@ export function ConfigForm({ botId, initialConfig }: ConfigFormProps) {
     } catch {
       // localStorage unavailable
     }
-    langHydratedRef.current = true
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -102,23 +100,26 @@ export function ConfigForm({ botId, initialConfig }: ConfigFormProps) {
   const watchedLanguages = watch('languages') ?? ['en']
   const ltEnabled = watchedLanguages.includes('lt')
 
-  // Persist activeLang to localStorage whenever it changes (after the initial
-  // restore, so we don't clobber the saved value before reading it).
-  useEffect(() => {
-    if (!langHydratedRef.current) return
-    try {
-      localStorage.setItem(lsKey, activeLang)
-    } catch {
-      // ignore
-    }
-  }, [activeLang, lsKey])
+  // Select a language tab AND persist it. Persisting only on explicit selection
+  // (never in a mount effect) avoids a remount race that clobbered the saved value.
+  const selectLang = useCallback(
+    (lang: BotLanguage) => {
+      setActiveLang(lang)
+      try {
+        localStorage.setItem(lsKey, lang)
+      } catch {
+        // ignore
+      }
+    },
+    [lsKey],
+  )
 
   // If Lithuanian gets disabled while it's active, fall back to 'en'
   useEffect(() => {
     if (!ltEnabled && activeLang === 'lt') {
-      setActiveLang('en')
+      selectLang('en')
     }
-  }, [ltEnabled, activeLang])
+  }, [ltEnabled, activeLang, selectLang])
 
   // Watch all values for the live preview
   const watchedValues = watch()
@@ -170,7 +171,7 @@ export function ConfigForm({ botId, initialConfig }: ConfigFormProps) {
             { shouldDirty: true },
           )
         }
-        setActiveLang('lt')
+        selectLang('lt')
       } else {
         // Remove 'lt' from languages
         const current = watch('languages') ?? ['en']
@@ -179,10 +180,10 @@ export function ConfigForm({ botId, initialConfig }: ConfigFormProps) {
           current.filter((l) => l !== 'lt'),
           { shouldDirty: true },
         )
-        setActiveLang('en')
+        selectLang('en')
       }
     },
-    [watch, setValue],
+    [watch, setValue, selectLang],
   )
 
   const onSubmit = useCallback(
@@ -265,7 +266,7 @@ export function ConfigForm({ botId, initialConfig }: ConfigFormProps) {
                       type="button"
                       onClick={() => {
                         if (lang === 'lt' && !ltEnabled) return
-                        setActiveLang(lang)
+                        selectLang(lang)
                       }}
                       disabled={lang === 'lt' && !ltEnabled}
                       className={cn(

@@ -5,7 +5,7 @@ import { createServiceClient } from '@/lib/supabase/service'
 import { previewChatSchema } from '@/lib/validation/schemas'
 import { retrieveContext, serviceRetrievalDeps } from '@/lib/ai/retrieval'
 import { buildMessages, contentFor, defaultLanguage, type ChatMessage } from '@/lib/ai/prompt'
-import { commerceEnabled, makeProductSearchTool, ndjsonChatResponse, ndjsonText } from '@/lib/ai/commerce-tool'
+import { commerceEnabled, makeProductTools, ndjsonChatResponse, ndjsonText } from '@/lib/ai/commerce-tool'
 import type { BotConfig } from '@/lib/types'
 import type { CommerceProduct } from '@/lib/commerce/types'
 import { createRateLimiter } from '@/lib/ratelimit'
@@ -61,7 +61,7 @@ export async function POST(req: Request) {
   return ndjsonChatResponse(openai(config.model || 'gpt-4o-mini'), messages, {
     temperature: config.temperature ?? 0.3,
     headers: {},
-    tools: commerce ? makeProductSearchTool(config, productSink) : undefined,
+    tools: commerce ? makeProductTools(config, productSink) : undefined,
     productSink,
   })
 }

@@ -60,13 +60,13 @@ function ProductCard({
   viewMoreLabel,
   outOfStockLabel,
 }: ProductCardProps) {
-  // Card takes ~46% of the container so 2 cards are visible; minimum width 150px.
+  // Card takes ~55% of the container so ~2 cards peek; minimum width 180px.
   const cardRadius = bubbleRadius
   const imageRadius = `${cardRadius}px ${cardRadius}px 0 0`
   const cardStyle = {
     borderRadius: `${cardRadius}px`,
-    minWidth: '150px',
-    width: '46%',
+    minWidth: '180px',
+    width: '55%',
     flexShrink: 0,
   }
 

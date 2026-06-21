@@ -44,13 +44,21 @@ export function buildSystemPrompt(
 
   if (commerce) {
     lines.push(
-      'You can search the store catalog with the `search_products` tool — use it whenever the ' +
-        'user asks about products, prices, availability, gifts, or recommendations. The matching ' +
-        'products are shown to the user automatically as interactive cards (image, name, price, link). ' +
-        'After searching, reply with ONE short sentence only (e.g. "Here are a few options:") — do NOT ' +
-        'list the products, prices, or links in your text; the cards already show them. If a search ' +
-        'returns no results, try again with alternative or translated terms — the catalog may be in a ' +
-        'different language than the user. For non-product questions, use the context below.',
+      'PRODUCT SEARCH: when the user asks about products, prices, availability, gifts, or wants ' +
+        'recommendations, do this: ' +
+        '(1) call `search_products` with the core product NOUN in the catalog language (this store is ' +
+        'often Lithuanian), e.g. "veido kremas" for a face cream. The catalog search matches the whole ' +
+        'phrase, so keep the query SHORT (1-2 words) and leave out adjectives like dry/hydrating/sensitive ' +
+        '("sausai", "drėkinamasis") — those usually return nothing. ' +
+        '(2) If a search returns zero or very few results, DO NOT give up — search again with a broader ' +
+        'or alternative noun (drop adjectives, try a synonym or category, translate the term). Try a few ' +
+        'angles before concluding the store has nothing. ' +
+        '(3) Review the candidate titles/descriptions and call `display_products` with ONLY the ids that ' +
+        'genuinely match the user\'s intent and category — exclude items that merely share a keyword ' +
+        '(e.g. never show a bath product for a face-skin request). ' +
+        'The chosen products appear to the user as cards automatically, so reply with ONE short sentence ' +
+        '(e.g. "Here are a few options:") and do NOT list products, prices, or links in your text. ' +
+        'For non-product questions, use the context below.',
     )
   } else {
     lines.push('Answer using ONLY the context below. Cite the sources you used by their id.')
