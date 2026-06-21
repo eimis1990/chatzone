@@ -1,10 +1,8 @@
-import { NextResponse, after } from 'next/server'
+import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createServerClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
-import { getEnv } from '@/lib/env'
-import { ensureAgent, getConversationToken, getLlmToken } from '@/lib/ai/elevenlabs-agent'
-import { warmCustomLlm } from '@/lib/ai/warm-llm'
+import { ensureAgent, getConversationToken } from '@/lib/ai/elevenlabs-agent'
 import { MissingVoiceKeyError } from '@/lib/ai/tts'
 import type { Bot } from '@/lib/types'
 
@@ -35,11 +33,8 @@ export async function POST(req: Request) {
   }
 
   try {
-    const appUrl = getEnv().NEXT_PUBLIC_APP_URL
-    const agentId = await ensureAgent(svc, bot, appUrl)
+    const agentId = await ensureAgent(svc, bot)
     const token = await getConversationToken(agentId)
-    const llmToken = await getLlmToken(svc).catch(() => null)
-    after(warmCustomLlm(appUrl, bot.public_key, llmToken))
     return NextResponse.json({ token, agentId })
   } catch (err) {
     if (err instanceof MissingVoiceKeyError) {

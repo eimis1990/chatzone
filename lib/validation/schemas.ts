@@ -110,8 +110,15 @@ export const botConfigFormSchema = z.object({
       voices: z
         .object({ en: z.string().default(DEFAULT_VOICE_ID), lt: z.string().optional() })
         .default({ en: DEFAULT_VOICE_ID }),
+      llmModel: z.string().default('gpt-4o-mini'),
     })
-    .default({ enabled: false, ttsEnabled: true, sttEnabled: true, voices: { en: DEFAULT_VOICE_ID } }),
+    .default({
+      enabled: false,
+      ttsEnabled: true,
+      sttEnabled: true,
+      voices: { en: DEFAULT_VOICE_ID },
+      llmModel: 'gpt-4o-mini',
+    }),
 })
 
 export const botConfigSchema = z

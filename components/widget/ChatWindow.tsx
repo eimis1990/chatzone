@@ -5,6 +5,7 @@ import { AnimatePresence } from 'framer-motion'
 import { MessageList, type ChatMessage } from './MessageList'
 import { ProductListView } from './ProductCards'
 import { Composer } from './Composer'
+import { VoiceCallButton, type CallState } from '@/components/voice/VoiceCallButton'
 import { LeadForm } from './LeadForm'
 import { SuggestedQuestions } from './SuggestedQuestions'
 import type { PublicBotConfig } from '@/lib/widget-config'
@@ -38,6 +39,12 @@ const LANG_LABELS: Record<BotLanguage, string> = {
   lt: 'LT',
 }
 
+// Header status while a live call is active.
+const VOICE_STATUS: Record<'en' | 'lt', Record<'connecting' | 'listening' | 'speaking', string>> = {
+  en: { connecting: 'Connecting…', listening: 'Listening…', speaking: 'Speaking…' },
+  lt: { connecting: 'Jungiamasi…', listening: 'Klausosi…', speaking: 'Kalba…' },
+}
+
 export function ChatWindow({ publicKey, config }: ChatWindowProps) {
   const languages = config.languages ?? ['en']
   const isMultilang = languages.length > 1
@@ -60,6 +67,8 @@ export function ChatWindow({ publicKey, config }: ChatWindowProps) {
   const [suggestedVisible, setSuggestedVisible] = useState(true)
   // When set, the full-height product list overlay covers the chat body.
   const [listProducts, setListProducts] = useState<CommerceProduct[] | null>(null)
+  // Live-call state, surfaced in the header.
+  const [callState, setCallState] = useState<CallState>('idle')
   const visitorIdRef = useRef<string>('')
   const primaryColor = config.theme.primaryColor
   const cornerRadius = config.theme.cornerRadius ?? 16
@@ -260,6 +269,23 @@ export function ChatWindow({ publicKey, config }: ChatWindowProps) {
     [publicKey, conversationId]
   )
 
+  const getVoiceToken = useCallback(async (): Promise<string> => {
+    const res = await fetch('/api/widget/voice-token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ publicKey }),
+    })
+    if (!res.ok) {
+      const data = (await res.json().catch(() => ({}))) as { error?: string }
+      throw new Error(
+        res.status === 503 ? 'Voice calling unavailable' : (data.error ?? 'Token request failed'),
+      )
+    }
+    const data = (await res.json()) as { token: string }
+    return data.token
+  }, [publicKey])
+
+  const voiceEnabled = Boolean(config.voice?.enabled)
   const headerBorderRadius = `${cornerRadius}px ${cornerRadius}px 0 0`
 
   return (
@@ -310,10 +336,38 @@ export function ChatWindow({ publicKey, config }: ChatWindowProps) {
           </div>
         )}
 
-        <span className="flex items-center gap-1 text-xs opacity-80 ml-1">
-          <span className="w-1.5 h-1.5 rounded-full bg-green-300 inline-block" aria-hidden="true" />
-          Online
+        <span className="flex items-center gap-1 text-xs opacity-80 ml-1" aria-live="polite">
+          {callState === 'idle' ? (
+            <>
+              <span className="w-1.5 h-1.5 rounded-full bg-green-300 inline-block" aria-hidden="true" />
+              {activeLang === 'lt' ? 'Prisijungęs' : 'Online'}
+            </>
+          ) : (
+            <>
+              <span
+                className={`w-1.5 h-1.5 rounded-full bg-white inline-block ${
+                  callState === 'speaking' ? 'animate-pulse' : ''
+                }`}
+                aria-hidden="true"
+              />
+              {callState === 'connecting'
+                ? VOICE_STATUS[activeLang].connecting
+                : VOICE_STATUS[activeLang][callState]}
+            </>
+          )}
         </span>
+
+        {/* Voice call button — in the header, only when voice is enabled */}
+        {voiceEnabled && (
+          <VoiceCallButton
+            appearance="compact"
+            getToken={getVoiceToken}
+            primaryColor="#ffffff"
+            language={activeLang}
+            onStateChange={setCallState}
+            className="flex-shrink-0 ml-1"
+          />
+        )}
       </div>
 
       {/* Body — messages + composer. Relative so the product list can overlay it. */}
@@ -359,8 +413,6 @@ export function ChatWindow({ publicKey, config }: ChatWindowProps) {
           onSend={sendMessage}
           disabled={streaming}
           primaryColor={primaryColor}
-          voice={config.voice}
-          publicKey={publicKey}
           language={activeLang}
         />
 

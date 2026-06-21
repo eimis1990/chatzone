@@ -32,11 +32,17 @@ import {
   XIcon,
 } from 'lucide-react'
 import type { BotConfig, BotLanguage } from '@/lib/types'
-import { VoiceCallButton } from '@/components/voice/VoiceCallButton'
+import { VoiceCallButton, type CallState } from '@/components/voice/VoiceCallButton'
 import { POWERED_BY_URL } from '@/lib/utils'
 import { ProductCards, ProductListView } from '@/components/widget/ProductCards'
 import type { CommerceProduct } from '@/lib/commerce/types'
 import { fontStack } from '@/lib/fonts'
+
+// Header subtitle labels while a live call is active.
+const VOICE_STATUS: Record<'en' | 'lt', Record<'connecting' | 'listening' | 'speaking', string>> = {
+  en: { connecting: 'Connecting…', listening: 'Listening…', speaking: 'Speaking…' },
+  lt: { connecting: 'Jungiamasi…', listening: 'Klausosi…', speaking: 'Kalba…' },
+}
 
 // Partial form values — fields may be undefined mid-edit.
 // voice.voices is kept as a loose Record to accommodate RHF partial types (en may be undefined).
@@ -120,6 +126,8 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
   const [suggestedVisible, setSuggestedVisible] = useState(true)
   // When set, the full-height product list overlay covers the chat body.
   const [listProducts, setListProducts] = useState<CommerceProduct[] | null>(null)
+  // Live-call state, surfaced in the header subtitle.
+  const [callState, setCallState] = useState<CallState>('idle')
 
   // TTS state — one audio at a time
   const [ttsStates, setTtsStates] = useState<Record<string, TtsState>>({})
@@ -439,8 +447,50 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium leading-tight truncate">{displayName}</p>
-              <p className="text-xs opacity-80">Online</p>
+              <p className="text-xs opacity-80 flex items-center gap-1.5">
+                {callState === 'idle' ? (
+                  activeLang === 'lt' ? 'Prisijungęs' : 'Online'
+                ) : (
+                  <>
+                    <span
+                      className={`inline-block size-1.5 rounded-full bg-current ${
+                        callState === 'speaking' ? 'animate-pulse' : ''
+                      }`}
+                      aria-hidden="true"
+                    />
+                    {VOICE_STATUS[activeLang][callState]}
+                  </>
+                )}
+              </p>
             </div>
+
+            {/* Call + restart controls */}
+            {voiceEnabled && (
+              <VoiceCallButton
+                appearance="compact"
+                primaryColor="#ffffff"
+                language={activeLang}
+                onStateChange={setCallState}
+                className="flex-shrink-0"
+                getToken={async () => {
+                  const res = await fetch('/api/preview/voice-token', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ botId }),
+                  })
+                  if (!res.ok) {
+                    const data = (await res.json().catch(() => ({}))) as { error?: string }
+                    throw new Error(
+                      res.status === 503
+                        ? 'Voice calling unavailable'
+                        : (data.error ?? 'Token request failed'),
+                    )
+                  }
+                  const data = (await res.json()) as { token: string }
+                  return data.token
+                }}
+              />
+            )}
 
             <button
               type="button"
@@ -561,32 +611,6 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
                 className="flex-1 resize-none rounded-lg border border-input px-3 py-2 text-sm leading-5 focus:outline-none focus:ring-1 disabled:opacity-50 overflow-hidden bg-background"
                 style={{ maxHeight: '120px' }}
               />
-
-              {/* Voice call button */}
-              {voiceEnabled && (
-                <VoiceCallButton
-                  appearance="compact"
-                  primaryColor={primaryColor}
-                  language={activeLang}
-                  getToken={async () => {
-                    const res = await fetch('/api/preview/voice-token', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ botId }),
-                    })
-                    if (!res.ok) {
-                      const data = (await res.json().catch(() => ({}))) as { error?: string }
-                      throw new Error(
-                        res.status === 503
-                          ? 'Voice calling unavailable'
-                          : (data.error ?? 'Token request failed'),
-                      )
-                    }
-                    const data = (await res.json()) as { token: string }
-                    return data.token
-                  }}
-                />
-              )}
 
               <button
                 type="submit"

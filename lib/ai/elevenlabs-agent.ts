@@ -32,13 +32,8 @@ export interface AgentConfig {
       language: string
       prompt: {
         prompt: string
+        // Built-in ElevenLabs LLM id (e.g. gpt-4o-mini, gemini-2.5-flash).
         llm: string
-        custom_llm: {
-          url: string
-          model_id: string
-          api_key: { secret_id: string }
-          api_type: string
-        }
       }
     }
     tts: {
@@ -67,8 +62,9 @@ const LANG_NAME: Record<string, string> = { en: 'English', lt: 'Lithuanian' }
  * a default language + `language_presets` (per-language first message) and
  * `supported_voices` (per-language voice override).
  */
-export function buildAgentConfig(bot: Bot, appUrl: string, secretId: string): AgentConfig {
+export function buildAgentConfig(bot: Bot): AgentConfig {
   const cfg = bot.config
+  const llm = cfg.voice?.llmModel || 'gpt-4o-mini'
   const languages: BotLanguage[] = cfg.languages?.length ? cfg.languages : ['en']
   const defaultLang = languages[0]
   const enContent = cfg.content?.en
@@ -100,13 +96,7 @@ export function buildAgentConfig(bot: Bot, appUrl: string, secretId: string): Ag
         language: defaultLang,
         prompt: {
           prompt: cfg.systemPrompt,
-          llm: 'custom-llm',
-          custom_llm: {
-            url: `${appUrl}/api/llm/${bot.public_key}`,
-            model_id: cfg.model || 'gpt-4o-mini',
-            api_key: { secret_id: secretId },
-            api_type: 'chat_completions',
-          },
+          llm,
         },
       },
       tts: {
@@ -124,17 +114,16 @@ export function buildAgentConfig(bot: Bot, appUrl: string, secretId: string): Ag
 }
 
 /** Stable hash of the bot fields that require re-syncing the agent when changed. */
-export function agentConfigHash(bot: Bot, appUrl: string): string {
+export function agentConfigHash(bot: Bot): string {
   const cfg = bot.config
   const material = JSON.stringify([
-    'v2-overrides', // bump to force re-sync when the agent payload shape changes
+    'v3-builtin-llm', // bump to force re-sync when the agent payload shape changes
     cfg.languages,
     cfg.content,
     cfg.voice?.voices,
-    cfg.model ?? '',
+    cfg.voice?.llmModel ?? 'gpt-4o-mini',
     cfg.systemPrompt,
     bot.public_key,
-    appUrl,
   ])
   return createHash('sha256').update(material).digest('hex').slice(0, 32)
 }
@@ -186,14 +175,13 @@ export async function ensureLlmAuth(
  * Ensures the bot has an up-to-date ElevenLabs agent; creates or PATCHes as
  * needed. Returns the agent_id. Uses the service-role db client.
  */
-export async function ensureAgent(db: SupabaseClient, bot: Bot, appUrl: string): Promise<string> {
-  const hash = agentConfigHash(bot, appUrl)
+export async function ensureAgent(db: SupabaseClient, bot: Bot): Promise<string> {
+  const hash = agentConfigHash(bot)
   if (bot.elevenlabs_agent_id && bot.elevenlabs_agent_hash === hash) {
     return bot.elevenlabs_agent_id
   }
 
-  const { secretId } = await ensureLlmAuth(db)
-  const config = buildAgentConfig(bot, appUrl, secretId)
+  const config = buildAgentConfig(bot)
   const headers = { 'xi-api-key': apiKey(), 'Content-Type': 'application/json' }
 
   const createAgent = async (): Promise<string> => {
