@@ -9,6 +9,8 @@ interface ProductCardsProps {
   bubbleRadius?: number
   primaryColor?: string
   language?: 'en' | 'lt'
+  /** Open the full-height list overlay for this message's products. */
+  onSeeAll?: (products: CommerceProduct[]) => void
 }
 
 /** How many products are shown as cards before the rest move behind "See all". */
@@ -24,7 +26,7 @@ interface Labels {
   products: string
 }
 
-function labelsFor(language: 'en' | 'lt'): Labels {
+export function labelsFor(language: 'en' | 'lt'): Labels {
   return language === 'lt'
     ? {
         viewMore: 'Plačiau',
@@ -51,83 +53,105 @@ export function ProductCards({
   bubbleRadius = 16,
   primaryColor = '#4f46e5',
   language = 'en',
+  onSeeAll,
 }: ProductCardsProps) {
-  const [view, setView] = useState<'cards' | 'list'>('cards')
-
   if (!products || products.length === 0) return null
   const labels = labelsFor(language)
   const hasMore = products.length > CARD_LIMIT
 
   return (
     <div className="w-full mt-2" aria-label={labels.products}>
-      <AnimatePresence mode="wait" initial={false}>
-        {view === 'cards' ? (
-          <motion.div
-            key="cards"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
-            className="flex gap-2 overflow-x-auto pb-2 snap-x snap-mandatory"
-            style={{ scrollbarWidth: 'thin' }}
-            role="list"
-          >
-            {products.slice(0, CARD_LIMIT).map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                bubbleRadius={bubbleRadius}
-                primaryColor={primaryColor}
-                viewMoreLabel={labels.viewMore}
-                outOfStockLabel={labels.outOfStock}
-              />
-            ))}
-            {hasMore && (
-              <SeeAllCard
-                bubbleRadius={bubbleRadius}
-                primaryColor={primaryColor}
-                label={labels.seeAll}
-                count={products.length}
-                onClick={() => setView('list')}
-              />
-            )}
-          </motion.div>
-        ) : (
-          <motion.div
-            key="list"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
-          >
-            <div className="mb-2 flex items-center justify-between">
-              <button
-                type="button"
-                onClick={() => setView('cards')}
-                className="flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <BackIcon />
-                {labels.back}
-              </button>
-              <span className="text-xs text-muted-foreground">
-                {labels.results} ({products.length})
-              </span>
-            </div>
-            <div className="flex flex-col gap-1.5" role="list">
-              {products.map((product) => (
-                <ProductRow
-                  key={product.id}
-                  product={product}
-                  bubbleRadius={bubbleRadius}
-                  primaryColor={primaryColor}
-                  labels={labels}
-                />
-              ))}
-            </div>
-          </motion.div>
+      <div
+        className="flex gap-2 overflow-x-auto pb-2 snap-x snap-mandatory"
+        style={{ scrollbarWidth: 'thin' }}
+        role="list"
+      >
+        {products.slice(0, CARD_LIMIT).map((product) => (
+          <ProductCard
+            key={product.id}
+            product={product}
+            bubbleRadius={bubbleRadius}
+            primaryColor={primaryColor}
+            viewMoreLabel={labels.viewMore}
+            outOfStockLabel={labels.outOfStock}
+          />
+        ))}
+        {hasMore && (
+          <SeeAllCard
+            bubbleRadius={bubbleRadius}
+            primaryColor={primaryColor}
+            label={labels.seeAll}
+            count={products.length}
+            onClick={() => onSeeAll?.(products)}
+          />
         )}
-      </AnimatePresence>
+      </div>
     </div>
+  )
+}
+
+interface ProductListViewProps {
+  products: CommerceProduct[]
+  bubbleRadius?: number
+  primaryColor?: string
+  language?: 'en' | 'lt'
+  onClose: () => void
+}
+
+/**
+ * Full-height product list that takes over the chat body (below the header,
+ * over the messages and composer). Rendered by the chat container, not inline
+ * in a message. Each row can expand to reveal a short description and links out.
+ */
+export function ProductListView({
+  products,
+  bubbleRadius = 16,
+  primaryColor = '#4f46e5',
+  language = 'en',
+  onClose,
+}: ProductListViewProps) {
+  const labels = labelsFor(language)
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 14 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 14 }}
+      transition={{ duration: 0.22, ease: [0.25, 0.46, 0.45, 0.94] }}
+      className="absolute inset-0 z-20 flex flex-col bg-background"
+      role="region"
+      aria-label={labels.products}
+    >
+      {/* Sticky sub-header with back + count */}
+      <div className="flex items-center justify-between px-4 py-2.5 border-b flex-shrink-0">
+        <button
+          type="button"
+          onClick={onClose}
+          className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors -ml-1"
+        >
+          <BackIcon />
+          {labels.back}
+        </button>
+        <span className="text-xs text-muted-foreground">
+          {labels.results} ({products.length})
+        </span>
+      </div>
+
+      {/* Scrollable list */}
+      <div className="flex-1 overflow-y-auto px-3 py-3 space-y-1.5" style={{ scrollbarWidth: 'thin' }}>
+        <div className="flex flex-col gap-1.5" role="list">
+          {products.map((product) => (
+            <ProductRow
+              key={product.id}
+              product={product}
+              bubbleRadius={bubbleRadius}
+              primaryColor={primaryColor}
+              labels={labels}
+            />
+          ))}
+        </div>
+      </div>
+    </motion.div>
   )
 }
 
@@ -414,8 +438,8 @@ function GridIcon() {
 function BackIcon() {
   return (
     <svg
-      width="14"
-      height="14"
+      width="16"
+      height="16"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"

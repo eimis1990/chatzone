@@ -34,7 +34,7 @@ import {
 import type { BotConfig, BotLanguage } from '@/lib/types'
 import { VoiceCallButton } from '@/components/voice/VoiceCallButton'
 import { POWERED_BY_URL } from '@/lib/utils'
-import { ProductCards } from '@/components/widget/ProductCards'
+import { ProductCards, ProductListView } from '@/components/widget/ProductCards'
 import type { CommerceProduct } from '@/lib/commerce/types'
 
 // Partial form values — fields may be undefined mid-edit.
@@ -116,6 +116,8 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
   const [streaming, setStreaming] = useState(false)
   const [inputValue, setInputValue] = useState('')
   const [suggestedVisible, setSuggestedVisible] = useState(true)
+  // When set, the full-height product list overlay covers the chat body.
+  const [listProducts, setListProducts] = useState<CommerceProduct[] | null>(null)
 
   // TTS state — one audio at a time
   const [ttsStates, setTtsStates] = useState<Record<string, TtsState>>({})
@@ -284,6 +286,7 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
     setMessages([{ id: 'greeting', role: 'assistant', content: greeting }])
     setSuggestedVisible(true)
     setInputValue('')
+    setListProducts(null)
   }, [greeting])
 
   // -------------------------------------------------------------------------
@@ -447,6 +450,8 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
             </button>
           </div>
 
+          {/* Body — messages + composer; relative so the product list can overlay it. */}
+          <div className="relative flex-1 flex flex-col min-h-0">
           {/* Messages */}
           <div
             className="flex-1 overflow-y-auto px-4 py-3 space-y-3 min-h-0"
@@ -510,6 +515,7 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
                         bubbleRadius={bubbleRadius}
                         primaryColor={primaryColor}
                         language={activeLang}
+                        onSeeAll={setListProducts}
                       />
                     )}
                 </div>
@@ -593,6 +599,20 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
                 )}
               </button>
             </form>
+          </div>
+
+          {/* Full-height product list overlay (covers messages + composer) */}
+          <AnimatePresence>
+            {listProducts && (
+              <ProductListView
+                products={listProducts}
+                bubbleRadius={bubbleRadius}
+                primaryColor={primaryColor}
+                language={activeLang}
+                onClose={() => setListProducts(null)}
+              />
+            )}
+          </AnimatePresence>
           </div>
         </motion.div>
         )}

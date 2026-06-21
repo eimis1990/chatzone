@@ -29,6 +29,7 @@ interface MessageListProps {
   voice?: VoiceConfig
   publicKey?: string
   activeLang?: 'en' | 'lt'
+  onSeeAllProducts?: (products: CommerceProduct[]) => void
 }
 
 /**
@@ -151,6 +152,7 @@ export function MessageList({
   voice,
   publicKey,
   activeLang = 'en',
+  onSeeAllProducts,
 }: MessageListProps) {
   const bottomRef = useRef<HTMLDivElement>(null)
   // Map of messageId → TtsState for all assistant messages.
@@ -265,6 +267,7 @@ export function MessageList({
                   bubbleRadius={bubbleRadius}
                   primaryColor={primaryColor}
                   language={activeLang}
+                  onSeeAll={onSeeAllProducts}
                 />
               )}
           </div>
