@@ -47,7 +47,7 @@
 
   // ── Styles ────────────────────────────────────────────────────────────────
   var LAUNCHER_SIZE = 56
-  var IFRAME_WIDTH = 400
+  var IFRAME_WIDTH = 420
   var IFRAME_HEIGHT = 600
   var OFFSET = 20
   var Z_INDEX = 2147483647 // max z-index

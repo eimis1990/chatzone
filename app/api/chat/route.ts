@@ -5,7 +5,7 @@ import { chatRequestSchema } from '@/lib/validation/schemas'
 import { isOriginAllowed, corsHeaders } from '@/lib/widget-auth'
 import { retrieveContext, serviceRetrievalDeps } from '@/lib/ai/retrieval'
 import { buildMessages, contentFor, defaultLanguage, type ChatMessage } from '@/lib/ai/prompt'
-import { commerceEnabled, makeProductSearchTool, ndjsonChatResponse, ndjsonText } from '@/lib/ai/commerce-tool'
+import { commerceEnabled, makeProductTools, ndjsonChatResponse, ndjsonText } from '@/lib/ai/commerce-tool'
 import { createRateLimiter } from '@/lib/ratelimit'
 import type { Bot, Citation } from '@/lib/types'
 import type { CommerceProduct } from '@/lib/commerce/types'
@@ -121,7 +121,7 @@ export async function POST(req: Request) {
   return ndjsonChatResponse(openai(bot.config.model || 'gpt-4o-mini'), messages, {
     temperature: bot.config.temperature ?? 0.3,
     headers: baseHeaders,
-    tools: commerce ? makeProductSearchTool(bot.config, productSink) : undefined,
+    tools: commerce ? makeProductTools(bot.config, productSink) : undefined,
     productSink,
     onText: async (text) => {
       await svc.from('messages').insert({

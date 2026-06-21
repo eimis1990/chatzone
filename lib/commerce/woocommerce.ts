@@ -99,16 +99,10 @@ export async function searchWooProducts(
     return (await res.json()) as WooProduct[]
   }
 
-  let data = await run(params.query)
-
-  // Multi-word queries can be too strict (esp. across languages). If empty,
-  // broaden: retry with the single longest word (usually the key noun).
-  if (data.length === 0 && params.query) {
-    const words = params.query.split(/\s+/).filter((w) => w.length > 2)
-    const longest = words.sort((a, b) => b.length - a.length)[0]
-    if (longest && longest !== params.query) data = await run(longest)
-  }
-
+  // Note: no automatic single-word broadening — it caused false matches (a
+  // search for "sausai" matching "sausainių"). The AI refines the query itself
+  // and curates which results to show via the display step.
+  const data = await run(params.query)
   return data.map(normalizeWooProduct)
 }
 
