@@ -1,9 +1,11 @@
+import { after } from 'next/server'
 import { z } from 'zod'
 import { createServiceClient } from '@/lib/supabase/service'
 import { getEnv } from '@/lib/env'
 import { isOriginAllowed, corsHeaders } from '@/lib/widget-auth'
 import { createRateLimiter } from '@/lib/ratelimit'
-import { ensureAgent, getConversationToken } from '@/lib/ai/elevenlabs-agent'
+import { ensureAgent, getConversationToken, getLlmToken } from '@/lib/ai/elevenlabs-agent'
+import { warmCustomLlm } from '@/lib/ai/warm-llm'
 import { MissingVoiceKeyError } from '@/lib/ai/tts'
 import type { Bot } from '@/lib/types'
 
@@ -40,8 +42,13 @@ export async function POST(req: Request) {
   if (!limiter.check(bot.id)) return json({ error: 'Rate limit exceeded' }, 429)
 
   try {
-    const agentId = await ensureAgent(svc, bot, getEnv().NEXT_PUBLIC_APP_URL)
+    const appUrl = getEnv().NEXT_PUBLIC_APP_URL
+    const agentId = await ensureAgent(svc, bot, appUrl)
     const token = await getConversationToken(agentId)
+    // Warm the custom-LLM lambda during call setup so the first spoken turn
+    // doesn't cold-start (which trips ElevenLabs' custom-LLM timeout).
+    const llmToken = await getLlmToken(svc).catch(() => null)
+    after(warmCustomLlm(appUrl, bot.public_key, llmToken))
     return json({ token, agentId })
   } catch (err) {
     if (err instanceof MissingVoiceKeyError) return json({ error: 'Voice calling unavailable' }, 503)

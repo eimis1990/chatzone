@@ -27,8 +27,15 @@ export async function POST(req: Request, ctx: { params: Promise<{ publicKey: str
   }
 
   const body = (await req.json().catch(() => null)) as
-    | { messages?: Array<{ role: string; content: string }> }
+    | { messages?: Array<{ role: string; content: string }>; warmup?: boolean }
     | null
+
+  // Warm-up ping (fired by the voice-token route during call setup). Loading
+  // this module + the Supabase client is the main cold-start cost, so a cheap
+  // authenticated round-trip here means the first spoken turn hits a warm lambda
+  // instead of cold-starting and overrunning ElevenLabs' custom-LLM timeout.
+  if (body?.warmup) return new Response('ok')
+
   if (!body?.messages?.length) {
     return new Response(JSON.stringify({ error: 'Invalid request' }), { status: 400 })
   }
@@ -38,10 +45,15 @@ export async function POST(req: Request, ctx: { params: Promise<{ publicKey: str
     return new Response(JSON.stringify({ error: 'Bot not available' }), { status: 404 })
   }
 
-  // RAG on the latest user turn.
+  // RAG on the latest user turn — but never let it block the spoken response for
+  // long. ElevenLabs aborts the turn ("custom_llm generation failed") if the LLM
+  // is slow, so cap retrieval and answer without grounding if it overruns.
   const lastUser = [...body.messages].reverse().find((m) => m.role === 'user')?.content ?? ''
-  const retrieval = await retrieveContext(bot.id, lastUser, {}, serviceRetrievalDeps(svc))
-  const system = buildSystemPrompt(bot.config, retrieval.chunks)
+  const retrieval = await Promise.race([
+    retrieveContext(bot.id, lastUser, {}, serviceRetrievalDeps(svc)).catch(() => null),
+    new Promise<null>((resolve) => setTimeout(() => resolve(null), 2000)),
+  ])
+  const system = buildSystemPrompt(bot.config, retrieval?.chunks ?? [])
 
   // Rebuild messages: our grounding system + the agent's non-system turns.
   const turns = body.messages.filter((m) => m.role !== 'system')
