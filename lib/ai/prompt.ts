@@ -47,7 +47,9 @@ export function buildSystemPrompt(
       'You can search the store catalog with the `search_products` tool — use it whenever the ' +
         'user asks about products, prices, availability, gifts, or recommendations. After searching, ' +
         'briefly introduce the results (the product cards are shown to the user automatically; do not ' +
-        'list every detail). For non-product questions, use the context below.',
+        'list every detail). If a search returns no results, try again with alternative or translated ' +
+        'search terms — the catalog may be in a different language than the user. For non-product ' +
+        'questions, use the context below.',
     )
   } else {
     lines.push('Answer using ONLY the context below. Cite the sources you used by their id.')

@@ -17,13 +17,26 @@ interface WooProduct {
   }
 }
 
+const NAMED_ENTITIES: Record<string, string> = {
+  '&amp;': '&',
+  '&lt;': '<',
+  '&gt;': '>',
+  '&quot;': '"',
+  '&apos;': "'",
+  '&nbsp;': ' ',
+}
+
+/** Decode HTML entities (numeric + common named) found in WooCommerce strings. */
+export function decodeEntities(text: string): string {
+  return text
+    .replace(/&#(\d+);/g, (_, n) => String.fromCodePoint(Number(n)))
+    .replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCodePoint(parseInt(n, 16)))
+    .replace(/&[a-z]+;/gi, (m) => NAMED_ENTITIES[m.toLowerCase()] ?? ' ')
+}
+
 function stripHtml(html: string | undefined): string {
   if (!html) return ''
-  return html
-    .replace(/<[^>]*>/g, ' ')
-    .replace(/&[a-z]+;/gi, ' ')
-    .replace(/\s+/g, ' ')
-    .trim()
+  return decodeEntities(html.replace(/<[^>]*>/g, ' ')).replace(/\s+/g, ' ').trim()
 }
 
 /** Format a Store API price object (minor units) into a display string. */
@@ -41,7 +54,7 @@ export function formatWooPrice(prices: WooProduct['prices']): string {
 export function normalizeWooProduct(p: WooProduct): CommerceProduct {
   return {
     id: String(p.id),
-    title: p.name,
+    title: decodeEntities(p.name),
     price: formatWooPrice(p.prices),
     url: p.permalink,
     imageUrl: p.images?.[0]?.src ?? p.images?.[0]?.thumbnail,
@@ -77,9 +90,25 @@ export async function searchWooProducts(
   if (params.maxPrice != null) qs.set('max_price', String(Math.round(params.maxPrice * 100)))
   qs.set('per_page', String(Math.min(params.limit ?? 6, 12)))
 
-  const res = await fetchImpl(`${base}/wp-json/wc/store/v1/products?${qs.toString()}`)
-  if (!res.ok) throw new Error(`WooCommerce search failed: HTTP ${res.status}`)
-  const data = (await res.json()) as WooProduct[]
+  const run = async (search: string): Promise<WooProduct[]> => {
+    const p = new URLSearchParams(qs)
+    if (search) p.set('search', search)
+    else p.delete('search')
+    const res = await fetchImpl(`${base}/wp-json/wc/store/v1/products?${p.toString()}`)
+    if (!res.ok) throw new Error(`WooCommerce search failed: HTTP ${res.status}`)
+    return (await res.json()) as WooProduct[]
+  }
+
+  let data = await run(params.query)
+
+  // Multi-word queries can be too strict (esp. across languages). If empty,
+  // broaden: retry with the single longest word (usually the key noun).
+  if (data.length === 0 && params.query) {
+    const words = params.query.split(/\s+/).filter((w) => w.length > 2)
+    const longest = words.sort((a, b) => b.length - a.length)[0]
+    if (longest && longest !== params.query) data = await run(longest)
+  }
+
   return data.map(normalizeWooProduct)
 }
 
