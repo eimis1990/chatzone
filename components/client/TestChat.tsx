@@ -25,8 +25,6 @@ import {
   BotIcon,
   RotateCcwIcon,
   LoaderCircleIcon,
-  SquareIcon,
-  Volume2Icon,
   SendIcon,
   MessageCircleIcon,
   XIcon,
@@ -84,8 +82,6 @@ interface ChatMessage {
   products?: CommerceProduct[]
 }
 
-type TtsState = 'idle' | 'loading' | 'playing'
-
 function generateId() {
   return Math.random().toString(36).slice(2)
 }
@@ -111,9 +107,6 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
   const inputPlaceholder = activeLang === 'lt' ? 'Rašykite žinutę…' : 'Type a message…'
 
   const voiceEnabled = config.voice?.enabled ?? false
-  const ttsEnabled = voiceEnabled && (config.voice?.ttsEnabled ?? true)
-  // Use per-language voice id
-  const voiceId = (config.voice?.voices as Record<string, string> | undefined)?.[activeLang] ?? ''
 
   // Open/closed state
   const [isOpen, setIsOpen] = useState(true)
@@ -128,10 +121,6 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
   const [listProducts, setListProducts] = useState<CommerceProduct[] | null>(null)
   // Live-call state, surfaced in the header subtitle.
   const [callState, setCallState] = useState<CallState>('idle')
-
-  // TTS state — one audio at a time
-  const [ttsStates, setTtsStates] = useState<Record<string, TtsState>>({})
-  const activeAudioRef = useRef<{ id: string; audio: HTMLAudioElement } | null>(null)
 
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
@@ -288,77 +277,11 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
   // Start over
   // -------------------------------------------------------------------------
   const handleStartOver = useCallback(() => {
-    if (activeAudioRef.current) {
-      activeAudioRef.current.audio.pause()
-      activeAudioRef.current = null
-    }
-    setTtsStates({})
     setMessages([{ id: 'greeting', role: 'assistant', content: greeting }])
     setSuggestedVisible(true)
     setInputValue('')
     setListProducts(null)
   }, [greeting])
-
-  // -------------------------------------------------------------------------
-  // TTS playback
-  // -------------------------------------------------------------------------
-  const handleTts = useCallback(
-    async (messageId: string, content: string) => {
-      if (activeAudioRef.current) {
-        activeAudioRef.current.audio.pause()
-        const prevId = activeAudioRef.current.id
-        activeAudioRef.current = null
-        if (prevId !== messageId) {
-          setTtsStates((prev) => ({ ...prev, [prevId]: 'idle' }))
-        }
-      }
-
-      const currentState = ttsStates[messageId] ?? 'idle'
-      if (currentState === 'playing') {
-        setTtsStates((prev) => ({ ...prev, [messageId]: 'idle' }))
-        return
-      }
-
-      if (!voiceId) return
-      setTtsStates((prev) => ({ ...prev, [messageId]: 'loading' }))
-
-      try {
-        const res = await fetch('/api/preview/tts', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text: content, voiceId, language: activeLang }),
-        })
-
-        if (!res.ok) {
-          setTtsStates((prev) => ({ ...prev, [messageId]: 'idle' }))
-          return
-        }
-
-        const blob = await res.blob()
-        const url = URL.createObjectURL(blob)
-        const audio = new Audio(url)
-
-        activeAudioRef.current = { id: messageId, audio }
-
-        audio.onended = () => {
-          URL.revokeObjectURL(url)
-          if (activeAudioRef.current?.id === messageId) activeAudioRef.current = null
-          setTtsStates((prev) => ({ ...prev, [messageId]: 'idle' }))
-        }
-        audio.onerror = () => {
-          URL.revokeObjectURL(url)
-          if (activeAudioRef.current?.id === messageId) activeAudioRef.current = null
-          setTtsStates((prev) => ({ ...prev, [messageId]: 'idle' }))
-        }
-
-        await audio.play()
-        setTtsStates((prev) => ({ ...prev, [messageId]: 'playing' }))
-      } catch {
-        setTtsStates((prev) => ({ ...prev, [messageId]: 'idle' }))
-      }
-    },
-    [ttsStates, voiceId, activeLang],
-  )
 
   // -------------------------------------------------------------------------
   // Form submit / keyboard
@@ -541,23 +464,6 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
                     )}
                   </div>
 
-                  {/* TTS button */}
-                  {ttsEnabled &&
-                    msg.role === 'assistant' &&
-                    !msg.streaming &&
-                    msg.content.length > 0 &&
-                    voiceId && (
-                      <div className="flex items-center">
-                        <TtsButton
-                          messageId={msg.id}
-                          content={msg.content}
-                          primaryColor={primaryColor}
-                          state={ttsStates[msg.id] ?? 'idle'}
-                          onPlay={handleTts}
-                        />
-                      </div>
-                    )}
-
                   {/* Product cards — rendered under completed assistant messages */}
                   {msg.role === 'assistant' &&
                     !msg.streaming &&
@@ -708,41 +614,6 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
         </AnimatePresence>
       </button>
     </div>
-  )
-}
-
-// -------------------------------------------------------------------------
-// TtsButton subcomponent
-// -------------------------------------------------------------------------
-interface TtsButtonProps {
-  messageId: string
-  content: string
-  primaryColor: string
-  state: TtsState
-  onPlay: (messageId: string, content: string) => void
-}
-
-function TtsButton({ messageId, content, primaryColor, state, onPlay }: TtsButtonProps) {
-  const label =
-    state === 'loading' ? 'Loading audio…' : state === 'playing' ? 'Stop audio' : 'Play message'
-
-  return (
-    <button
-      type="button"
-      onClick={() => onPlay(messageId, content)}
-      disabled={state === 'loading'}
-      aria-label={label}
-      className="flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-full transition-opacity hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed"
-      style={{ color: primaryColor }}
-    >
-      {state === 'loading' ? (
-        <LoaderCircleIcon className="w-3.5 h-3.5 animate-spin" aria-hidden="true" />
-      ) : state === 'playing' ? (
-        <SquareIcon className="w-3 h-3" aria-hidden="true" />
-      ) : (
-        <Volume2Icon className="w-3.5 h-3.5" aria-hidden="true" />
-      )}
-    </button>
   )
 }
 

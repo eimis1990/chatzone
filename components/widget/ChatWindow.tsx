@@ -379,8 +379,6 @@ export function ChatWindow({ publicKey, config }: ChatWindowProps) {
           greeting={greeting}
           displayName={config.displayName}
           avatarUrl={config.avatarUrl}
-          voice={config.voice}
-          publicKey={publicKey}
           activeLang={activeLang}
           onSeeAllProducts={setListProducts}
         />
