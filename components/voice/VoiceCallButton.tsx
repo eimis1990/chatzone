@@ -31,6 +31,10 @@ interface VoiceCallButtonProps {
   language?: 'en' | 'lt'
   /** Reports call state changes so the host can show listening/speaking. */
   onStateChange?: (state: CallState) => void
+  /** Each finalized utterance (visitor + agent) so the host can show it in chat. */
+  onTranscript?: (role: 'user' | 'assistant', text: string) => void
+  /** Hands the host an `end()` so it can hang up (e.g. when the visitor types). */
+  onReady?: (controls: { end: () => void }) => void
   className?: string
 }
 
@@ -42,9 +46,19 @@ interface InnerProps {
   appearance: 'full' | 'compact'
   language?: 'en' | 'lt'
   onStateChange?: (state: CallState) => void
+  onTranscript?: (role: 'user' | 'assistant', text: string) => void
+  onReady?: (controls: { end: () => void }) => void
 }
 
-function VoiceCallInner({ getToken, primaryColor, appearance, language, onStateChange }: InnerProps) {
+function VoiceCallInner({
+  getToken,
+  primaryColor,
+  appearance,
+  language,
+  onStateChange,
+  onTranscript,
+  onReady,
+}: InnerProps) {
   const [callError, setCallError] = useState<string | null>(null)
   const [micDenied, setMicDenied] = useState(false)
   const [unavailable, setUnavailable] = useState(false)
@@ -53,6 +67,11 @@ function VoiceCallInner({ getToken, primaryColor, appearance, language, onStateC
     onError: (msg: string) => {
       setCallError('Call error — please try again.')
       console.error('[VoiceCallButton] conversation error:', msg)
+    },
+    onMessage: (m: { message?: string; source?: string }) => {
+      const text = m?.message?.trim()
+      if (!text) return
+      onTranscript?.(m.source === 'user' ? 'user' : 'assistant', text)
     },
   })
 
@@ -73,6 +92,11 @@ function VoiceCallInner({ getToken, primaryColor, appearance, language, onStateC
   useEffect(() => {
     onStateChange?.(callState)
   }, [callState, onStateChange])
+
+  // Expose an end() control so the host can hang up the call programmatically.
+  useEffect(() => {
+    onReady?.({ end: () => void endSession() })
+  }, [onReady, endSession])
 
   const handleStart = useCallback(async () => {
     setCallError(null)
@@ -275,6 +299,8 @@ export function VoiceCallButton({
   appearance = 'full',
   language,
   onStateChange,
+  onTranscript,
+  onReady,
   className,
 }: VoiceCallButtonProps) {
   return (
@@ -286,6 +312,8 @@ export function VoiceCallButton({
           appearance={appearance}
           language={language}
           onStateChange={onStateChange}
+          onTranscript={onTranscript}
+          onReady={onReady}
         />
       </ConversationProvider>
     </div>

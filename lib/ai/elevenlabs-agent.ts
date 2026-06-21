@@ -3,6 +3,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Bot, BotLanguage } from '@/lib/types'
 import { MissingVoiceKeyError } from '@/lib/ai/tts'
 import { LLM_TOKEN_SETTING } from '@/lib/ai/llm-auth'
+import { isValidVoiceLlm, DEFAULT_VOICE_LLM } from '@/lib/ai/voice-models'
 
 // Re-export the Edge-safe token reader so existing voice-token route imports
 // (`from '@/lib/ai/elevenlabs-agent'`) keep working.
@@ -69,7 +70,9 @@ const LANG_NAME: Record<string, string> = { en: 'English', lt: 'Lithuanian' }
  */
 export function buildAgentConfig(bot: Bot, toolIds: string[] = []): AgentConfig {
   const cfg = bot.config
-  const llm = cfg.voice?.llmModel || 'gpt-4o-mini'
+  // Guard: an unknown/invalid id makes the agent API reject the whole config, so
+  // fall back to the default rather than break voice for the bot.
+  const llm = isValidVoiceLlm(cfg.voice?.llmModel) ? cfg.voice!.llmModel! : DEFAULT_VOICE_LLM
   const languages: BotLanguage[] = cfg.languages?.length ? cfg.languages : ['en']
   const defaultLang = languages[0]
   const enContent = cfg.content?.en

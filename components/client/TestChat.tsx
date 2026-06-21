@@ -121,6 +121,26 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
   const [listProducts, setListProducts] = useState<CommerceProduct[] | null>(null)
   // Live-call state, surfaced in the header subtitle.
   const [callState, setCallState] = useState<CallState>('idle')
+  const callStateRef = useRef<CallState>('idle')
+  const endVoiceRef = useRef<(() => void) | null>(null)
+
+  const handleCallState = useCallback((s: CallState) => {
+    callStateRef.current = s
+    setCallState(s)
+  }, [])
+
+  // Voice utterances (visitor + agent) flow into the chat transcript.
+  const handleVoiceTranscript = useCallback((role: 'user' | 'assistant', text: string) => {
+    setMessages((prev) => {
+      const last = prev[prev.length - 1]
+      if (last && last.role === role && last.content === text) return prev
+      return [...prev, { id: generateId(), role, content: text }]
+    })
+  }, [])
+
+  const handleVoiceReady = useCallback((c: { end: () => void }) => {
+    endVoiceRef.current = c.end
+  }, [])
 
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
@@ -147,6 +167,8 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
   const sendMessage = useCallback(
     async (text: string) => {
       if (streaming || !text.trim()) return
+      // Typing during a live call ends it and drops back to text chat.
+      if (callStateRef.current !== 'idle') endVoiceRef.current?.()
       setSuggestedVisible(false)
 
       const userMsg: ChatMessage = { id: generateId(), role: 'user', content: text.trim() }
@@ -393,7 +415,9 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
                 appearance="compact"
                 primaryColor="#ffffff"
                 language={activeLang}
-                onStateChange={setCallState}
+                onStateChange={handleCallState}
+                onTranscript={handleVoiceTranscript}
+                onReady={handleVoiceReady}
                 className="flex-shrink-0"
                 getToken={async () => {
                   const res = await fetch('/api/preview/voice-token', {
