@@ -69,7 +69,27 @@ export function ChatWindow({ publicKey, config }: ChatWindowProps) {
   const [listProducts, setListProducts] = useState<CommerceProduct[] | null>(null)
   // Live-call state, surfaced in the header.
   const [callState, setCallState] = useState<CallState>('idle')
+  const callStateRef = useRef<CallState>('idle')
+  const endVoiceRef = useRef<(() => void) | null>(null)
   const visitorIdRef = useRef<string>('')
+
+  const handleCallState = useCallback((s: CallState) => {
+    callStateRef.current = s
+    setCallState(s)
+  }, [])
+
+  // Voice utterances (visitor + agent) flow into the chat transcript.
+  const handleVoiceTranscript = useCallback((role: 'user' | 'assistant', text: string) => {
+    setMessages((prev) => {
+      const last = prev[prev.length - 1]
+      if (last && last.role === role && last.content === text) return prev
+      return [...prev, { id: generateId(), role, content: text }]
+    })
+  }, [])
+
+  const handleVoiceReady = useCallback((c: { end: () => void }) => {
+    endVoiceRef.current = c.end
+  }, [])
   const primaryColor = config.theme.primaryColor
   const cornerRadius = config.theme.cornerRadius ?? 16
   const bubbleRadius = config.theme.bubbleRadius ?? 16
@@ -135,6 +155,11 @@ export function ChatWindow({ publicKey, config }: ChatWindowProps) {
   const sendMessage = useCallback(
     async (text: string) => {
       if (streaming) return
+
+      // If a live call is in progress, typing ends it and drops back to text chat.
+      if (callStateRef.current !== 'idle') {
+        endVoiceRef.current?.()
+      }
 
       setSuggestedVisible(false)
 
@@ -364,7 +389,9 @@ export function ChatWindow({ publicKey, config }: ChatWindowProps) {
             getToken={getVoiceToken}
             primaryColor="#ffffff"
             language={activeLang}
-            onStateChange={setCallState}
+            onStateChange={handleCallState}
+            onTranscript={handleVoiceTranscript}
+            onReady={handleVoiceReady}
             className="flex-shrink-0 ml-1"
           />
         )}
