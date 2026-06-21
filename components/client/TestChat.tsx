@@ -129,18 +129,44 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
     setCallState(s)
   }, [])
 
-  // Voice utterances (visitor + agent) flow into the chat transcript.
+  // Voice utterances flow into the transcript; strip the agent's <language> tags.
   const handleVoiceTranscript = useCallback((role: 'user' | 'assistant', text: string) => {
+    const clean = text.replace(/<\/?[A-Za-z][\w-]*>/g, '').trim()
+    if (!clean) return
     setMessages((prev) => {
       const last = prev[prev.length - 1]
-      if (last && last.role === role && last.content === text) return prev
-      return [...prev, { id: generateId(), role, content: text }]
+      if (last && last.role === role && last.content === clean) return prev
+      return [...prev, { id: generateId(), role, content: clean }]
     })
   }, [])
 
   const handleVoiceReady = useCallback((c: { end: () => void }) => {
     endVoiceRef.current = c.end
   }, [])
+
+  // `search_products` client tool: fetch products, show cards, return a summary.
+  const handleVoiceSearch = useCallback(
+    async (query: string): Promise<string> => {
+      try {
+        const res = await fetch('/api/preview/search', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ botId, query }),
+        })
+        const data = (await res.json()) as { products?: CommerceProduct[]; summary?: string }
+        if (data.products?.length) {
+          setMessages((prev) => [
+            ...prev,
+            { id: generateId(), role: 'assistant', content: '', products: data.products },
+          ])
+        }
+        return data.summary ?? 'Here are a few options.'
+      } catch {
+        return 'The product search is temporarily unavailable.'
+      }
+    },
+    [botId],
+  )
 
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
@@ -418,6 +444,7 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
                 onStateChange={handleCallState}
                 onTranscript={handleVoiceTranscript}
                 onReady={handleVoiceReady}
+                onSearch={handleVoiceSearch}
                 className="flex-shrink-0"
                 getToken={async () => {
                   const res = await fetch('/api/preview/voice-token', {
@@ -466,27 +493,30 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
               >
                 {msg.role === 'assistant' && renderAvatar()}
                 <div className="flex flex-col gap-1 max-w-[80%]">
-                  <div
-                    className={`px-3 py-2 text-sm whitespace-pre-wrap ${
-                      msg.role === 'user'
-                        ? 'text-white'
-                        : 'bg-muted text-foreground'
-                    }`}
-                    style={{
-                      borderRadius: msg.role === 'user'
-                        ? `${msgBubbleRadius} ${msgBubbleRadius} 2px ${msgBubbleRadius}`
-                        : `${msgBubbleRadius} ${msgBubbleRadius} ${msgBubbleRadius} 2px`,
-                      ...(msg.role === 'user' ? { backgroundColor: primaryColor } : {}),
-                    }}
-                  >
-                    {msg.content}
-                    {msg.streaming && (
-                      <span
-                        className="inline-block w-1.5 h-4 ml-0.5 align-middle animate-pulse bg-current opacity-70"
-                        aria-hidden="true"
-                      />
-                    )}
-                  </div>
+                  {/* Skip the empty bubble for cards-only (voice search) messages. */}
+                  {(msg.content || msg.streaming) && (
+                    <div
+                      className={`px-3 py-2 text-sm whitespace-pre-wrap ${
+                        msg.role === 'user'
+                          ? 'text-white'
+                          : 'bg-muted text-foreground'
+                      }`}
+                      style={{
+                        borderRadius: msg.role === 'user'
+                          ? `${msgBubbleRadius} ${msgBubbleRadius} 2px ${msgBubbleRadius}`
+                          : `${msgBubbleRadius} ${msgBubbleRadius} ${msgBubbleRadius} 2px`,
+                        ...(msg.role === 'user' ? { backgroundColor: primaryColor } : {}),
+                      }}
+                    >
+                      {msg.content}
+                      {msg.streaming && (
+                        <span
+                          className="inline-block w-1.5 h-4 ml-0.5 align-middle animate-pulse bg-current opacity-70"
+                          aria-hidden="true"
+                        />
+                      )}
+                    </div>
+                  )}
 
                   {/* Product cards — rendered under completed assistant messages */}
                   {msg.role === 'assistant' &&

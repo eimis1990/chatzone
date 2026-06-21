@@ -1,16 +1,10 @@
-import { createHash, randomBytes } from 'node:crypto'
+import { createHash } from 'node:crypto'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Bot, BotLanguage } from '@/lib/types'
 import { MissingVoiceKeyError } from '@/lib/ai/tts'
-import { LLM_TOKEN_SETTING } from '@/lib/ai/llm-auth'
 import { isValidVoiceLlm, DEFAULT_VOICE_LLM } from '@/lib/ai/voice-models'
 
-// Re-export the Edge-safe token reader so existing voice-token route imports
-// (`from '@/lib/ai/elevenlabs-agent'`) keep working.
-export { getLlmToken } from '@/lib/ai/llm-auth'
-
 const API = 'https://api.elevenlabs.io/v1'
-const SETTING_TOKEN = LLM_TOKEN_SETTING
 
 // ElevenLabs "V3 Conversational" — the only model family that supports the full
 // language set (incl. Lithuanian) for real-time agents.
@@ -104,11 +98,11 @@ export function buildAgentConfig(bot: Bot, toolIds: string[] = []): AgentConfig 
         language: defaultLang,
         prompt: {
           prompt: toolIds.length
-            ? `${cfg.systemPrompt}\n\nWhen the user asks about products, prices, availability, recommendations, or store information, call the \`search\` tool. Use a SHORT query of the product type or topic.${
+            ? `${cfg.systemPrompt}\n\nWhen the user asks about products, prices, availability, or recommendations, call the \`search_products\` tool. Use a SHORT query — ONLY the product noun${
                 languages.includes('lt')
-                  ? " This store's catalog is often Lithuanian, so translate the term (e.g. \"veido kremas\" for face cream, \"serumas\" for serum)."
+                  ? ' in Lithuanian (e.g. "veido kremas" for face cream, "serumas" for serum)'
                   : ''
-              } If a search returns nothing, try a simpler or translated term before saying it's unavailable. Answer briefly and naturally from the results — don't read out long lists or links.`
+              }, with NO adjectives like dry/sensitive/hydrating (they return nothing). The matching products are shown to the user automatically as cards, so reply with just ONE short sentence (e.g. "Štai keletas variantų:" / "Here are a few options:") — do NOT read out the product names, prices, or details. If a search returns nothing, retry once with a broader noun; only say a product is unavailable if that also returns nothing.`
             : cfg.systemPrompt,
           llm,
           custom_llm: null,
@@ -133,7 +127,7 @@ export function buildAgentConfig(bot: Bot, toolIds: string[] = []): AgentConfig 
 export function agentConfigHash(bot: Bot, toolIds: string[] = []): string {
   const cfg = bot.config
   const material = JSON.stringify([
-    'v5-tools', // bump to force re-sync when the agent payload shape changes
+    'v6-client-tool', // bump to force re-sync when the agent payload shape changes
     cfg.languages,
     cfg.content,
     cfg.voice?.voices,
@@ -160,56 +154,40 @@ async function setSetting(db: SupabaseClient, key: string, value: string): Promi
   await db.from('platform_settings').upsert({ key, value, updated_at: new Date().toISOString() })
 }
 
-/** Get-or-create the shared bearer token our agent tool webhook verifies. */
-async function ensureSharedToken(db: SupabaseClient): Promise<string> {
-  let token = await getSetting(db, SETTING_TOKEN)
-  if (!token) {
-    token = randomBytes(24).toString('hex')
-    await setSetting(db, SETTING_TOKEN, token)
-  }
-  return token
-}
-
-/** Webhook tool config: lets the agent search the bot's products + knowledge. */
-function buildSearchToolConfig(bot: Bot, appUrl: string, token: string) {
+/**
+ * CLIENT tool config: the browser runs the search, renders product cards, and
+ * returns a short summary the agent speaks. (Client tools push UI to the page;
+ * a server webhook can't.) The SDK provides the implementation by name.
+ */
+function buildSearchToolConfig() {
   return {
-    type: 'webhook' as const,
-    name: 'search',
+    type: 'client' as const,
+    name: 'search_products',
     description:
-      "Search this store's live product catalog and knowledge base. Call it whenever the user " +
-      'asks about products, prices, availability, recommendations, or any store information. ' +
-      'Pass a concise query (the product type or topic).',
-    response_timeout_secs: 20,
-    api_schema: {
-      url: `${appUrl}/api/agent-tools/${bot.public_key}`,
-      method: 'POST' as const,
-      request_headers: { Authorization: `Bearer ${token}` },
-      request_body_schema: {
-        type: 'object' as const,
-        properties: {
-          query: {
-            type: 'string' as const,
-            description: 'What to search for, e.g. "face cream" or "opening hours".',
-          },
+      "Search the store's products and SHOW them to the user as cards on screen. Call this " +
+      'whenever the user asks about products, prices, availability, or recommendations. Pass a ' +
+      'SHORT query — just the product noun in the catalog language (e.g. "veido kremas", "serumas") ' +
+      '— never include adjectives like dry/sensitive/hydrating, which return nothing.',
+    parameters: {
+      type: 'object' as const,
+      properties: {
+        query: {
+          type: 'string' as const,
+          description: 'Product noun to search for, e.g. "veido kremas".',
         },
-        required: ['query'],
       },
+      required: ['query'],
     },
   }
 }
 
 /**
- * Ensures the bot's `search` webhook tool exists in the ElevenLabs workspace
- * (creating it once, then PATCHing). Returns its tool id.
+ * Ensures the bot's `search_products` client tool exists in the ElevenLabs
+ * workspace (creating it once, then PATCHing). Returns its tool id.
  */
-async function ensureSearchTool(
-  db: SupabaseClient,
-  bot: Bot,
-  appUrl: string,
-  token: string,
-): Promise<string> {
+async function ensureSearchTool(db: SupabaseClient, bot: Bot): Promise<string> {
   const headers = { 'xi-api-key': apiKey(), 'Content-Type': 'application/json' }
-  const body = JSON.stringify({ tool_config: buildSearchToolConfig(bot, appUrl, token) })
+  const body = JSON.stringify({ tool_config: buildSearchToolConfig() })
   const key = `cbz_tool_${bot.id}`
   const existing = await getSetting(db, key)
 
@@ -231,9 +209,8 @@ async function ensureSearchTool(
  * Ensures the bot has an up-to-date ElevenLabs agent; creates or PATCHes as
  * needed. Returns the agent_id. Uses the service-role db client.
  */
-export async function ensureAgent(db: SupabaseClient, bot: Bot, appUrl: string): Promise<string> {
-  const token = await ensureSharedToken(db)
-  const toolId = await ensureSearchTool(db, bot, appUrl, token)
+export async function ensureAgent(db: SupabaseClient, bot: Bot): Promise<string> {
+  const toolId = await ensureSearchTool(db, bot)
   const toolIds = [toolId]
 
   const hash = agentConfigHash(bot, toolIds)
