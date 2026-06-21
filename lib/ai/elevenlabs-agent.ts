@@ -34,6 +34,10 @@ export interface AgentConfig {
         prompt: string
         // Built-in ElevenLabs LLM id (e.g. gpt-4o-mini, gemini-2.5-flash).
         llm: string
+        // Must be null for built-in LLMs. Sending null also CLEARS any stale
+        // custom_llm on a PATCH (ElevenLabs merges; it rejects llm≠CUSTOM_LLM
+        // while a custom_llm object is still present).
+        custom_llm: null
       }
     }
     tts: {
@@ -97,6 +101,7 @@ export function buildAgentConfig(bot: Bot): AgentConfig {
         prompt: {
           prompt: cfg.systemPrompt,
           llm,
+          custom_llm: null,
         },
       },
       tts: {
