@@ -53,7 +53,10 @@ export function makeProductTools(config: BotConfig, sink: CommerceProduct[]): To
         productIds: z.array(z.string()).describe('Candidate product ids to show, best first'),
       }),
       execute: async ({ productIds }) => {
+        // De-duplicate: the model sometimes repeats an id.
+        const seen = new Set<string>()
         const chosen = productIds
+          .filter((id) => !seen.has(id) && (seen.add(id), true))
           .map((id) => candidates.get(id))
           .filter((p): p is CommerceProduct => Boolean(p))
           .slice(0, 10)

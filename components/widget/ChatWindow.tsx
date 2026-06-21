@@ -1,7 +1,9 @@
 'use client'
 
 import { useState, useCallback, useRef, useEffect } from 'react'
+import { AnimatePresence } from 'framer-motion'
 import { MessageList, type ChatMessage } from './MessageList'
+import { ProductListView } from './ProductCards'
 import { Composer } from './Composer'
 import { LeadForm } from './LeadForm'
 import { SuggestedQuestions } from './SuggestedQuestions'
@@ -55,6 +57,8 @@ export function ChatWindow({ publicKey, config }: ChatWindowProps) {
   const [showLeadForm, setShowLeadForm] = useState(false)
   const [leadDismissed, setLeadDismissed] = useState(false)
   const [suggestedVisible, setSuggestedVisible] = useState(true)
+  // When set, the full-height product list overlay covers the chat body.
+  const [listProducts, setListProducts] = useState<CommerceProduct[] | null>(null)
   const visitorIdRef = useRef<string>('')
   const primaryColor = config.theme.primaryColor
   const cornerRadius = config.theme.cornerRadius ?? 16
@@ -84,6 +88,7 @@ export function ChatWindow({ publicKey, config }: ChatWindowProps) {
     prevLangRef.current = activeLang
     setMessages([])
     setSuggestedVisible(true)
+    setListProducts(null)
   }, [activeLang])
 
   /**
@@ -310,51 +315,67 @@ export function ChatWindow({ publicKey, config }: ChatWindowProps) {
         </span>
       </div>
 
-      {/* Messages */}
-      <MessageList
-        messages={messages}
-        primaryColor={primaryColor}
-        bubbleRadius={bubbleRadius}
-        greeting={greeting}
-        displayName={config.displayName}
-        avatarUrl={config.avatarUrl}
-        voice={config.voice}
-        publicKey={publicKey}
-        activeLang={activeLang}
-      />
-
-      {/* Suggested Questions — pinned just above input, visible until first message */}
-      {suggestedVisible && suggestedQuestions.length > 0 && (
-        <SuggestedQuestions
-          questions={suggestedQuestions}
+      {/* Body — messages + composer. Relative so the product list can overlay it. */}
+      <div className="relative flex-1 flex flex-col min-h-0">
+        <MessageList
+          messages={messages}
           primaryColor={primaryColor}
-          onSelect={sendMessage}
+          bubbleRadius={bubbleRadius}
+          greeting={greeting}
+          displayName={config.displayName}
+          avatarUrl={config.avatarUrl}
+          voice={config.voice}
+          publicKey={publicKey}
+          activeLang={activeLang}
+          onSeeAllProducts={setListProducts}
+        />
+
+        {/* Suggested Questions — pinned just above input, visible until first message */}
+        {suggestedVisible && suggestedQuestions.length > 0 && (
+          <SuggestedQuestions
+            questions={suggestedQuestions}
+            primaryColor={primaryColor}
+            onSelect={sendMessage}
+            disabled={streaming}
+          />
+        )}
+
+        {/* Lead Form */}
+        {showLeadForm && !leadDismissed && config.leadCapture.fields.length > 0 && (
+          <LeadForm
+            fields={config.leadCapture.fields}
+            primaryColor={primaryColor}
+            onSubmit={handleLeadSubmit}
+            onDismiss={() => {
+              setShowLeadForm(false)
+              setLeadDismissed(true)
+            }}
+          />
+        )}
+
+        {/* Composer */}
+        <Composer
+          onSend={sendMessage}
           disabled={streaming}
-        />
-      )}
-
-      {/* Lead Form */}
-      {showLeadForm && !leadDismissed && config.leadCapture.fields.length > 0 && (
-        <LeadForm
-          fields={config.leadCapture.fields}
           primaryColor={primaryColor}
-          onSubmit={handleLeadSubmit}
-          onDismiss={() => {
-            setShowLeadForm(false)
-            setLeadDismissed(true)
-          }}
+          voice={config.voice}
+          publicKey={publicKey}
+          language={activeLang}
         />
-      )}
 
-      {/* Composer */}
-      <Composer
-        onSend={sendMessage}
-        disabled={streaming}
-        primaryColor={primaryColor}
-        voice={config.voice}
-        publicKey={publicKey}
-        language={activeLang}
-      />
+        {/* Full-height product list overlay (covers messages + composer) */}
+        <AnimatePresence>
+          {listProducts && (
+            <ProductListView
+              products={listProducts}
+              bubbleRadius={bubbleRadius}
+              primaryColor={primaryColor}
+              language={activeLang}
+              onClose={() => setListProducts(null)}
+            />
+          )}
+        </AnimatePresence>
+      </div>
     </div>
   )
 }
