@@ -211,8 +211,10 @@ matching email; never return an order on a mismatch; rate-limit per conversation
 - [x] Config: REST creds + discount fields; redacted from public config. _(commerce.restKey/restSecret/discount; publicBotConfig omits commerce entirely.)_
 - [x] `getOrderStatus` (WooCommerce REST) + identity check + normalization. _(lib/commerce: getWooOrderStatus gated by order id + matching billing email; getDiscount; orderLookupEnabled.)_
 - [x] Tests: identity match/mismatch, 404/error, missing-creds guard, discount delivery. _(tests/unit/order.test.ts — 11 tests.)_
-- [ ] `order_status` + `discount_code` tools (text + voice) + prompt updates.
-- [ ] Configurator UI (creds + test connection + discount).
+- [x] `order_status` + `discount_code` tools (**text** chat) + prompt updates. _(lib/ai/commerce-tool.ts + prompt.ts; gated by REST creds / configured discount.)_
+- [x] Configurator UI (REST creds + "Test order access" + discount fields). _(/api/commerce/validate mode:'orders'.)_
+- [ ] **Voice** client-tools for order_status/discount_code (ElevenLabs agent tool registration + SDK clientTools + agent-hash re-sync) — deferred follow-up.
+- [ ] Optional: an order-status card in chat (otherwise the agent writes it).
 
 ---
 
