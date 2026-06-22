@@ -135,7 +135,7 @@
    bot preview, à la the configurator canvas. */
 @layer utilities {
   .bg-dots {
-    background-color: var(--muted);
+    background-color: var(--background);
     background-image: radial-gradient(var(--border) 1.2px, transparent 1.2px);
     background-size: 18px 18px;
     background-position: -9px -9px;
