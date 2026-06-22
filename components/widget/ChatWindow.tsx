@@ -482,7 +482,7 @@ export function ChatWindow({ config, transport, initialLanguage }: ChatWindowPro
     >
       {/* Header */}
       <div
-        className="flex items-center gap-3 px-4 py-3 text-white flex-shrink-0"
+        className="flex items-center gap-3 px-4 py-4 text-white flex-shrink-0"
         style={{ backgroundColor: primaryColor, borderRadius: headerBorderRadius }}
       >
         {config.avatarUrl ? (
@@ -618,11 +618,16 @@ export function ChatWindow({ config, transport, initialLanguage }: ChatWindowPro
 
         {/* Talk to a person — only while the bot is handling the chat */}
         {handoffStatus === 'bot' && !streaming && (
-          <div className="px-4 pt-1.5 flex justify-center flex-shrink-0">
+          <div className="px-4 pt-1 pb-3 flex justify-center flex-shrink-0">
             <button
               type="button"
               onClick={requestHandoff}
-              className="inline-flex items-center gap-1.5 rounded-full border border-gray-300 bg-white px-3 py-1 text-xs font-medium text-gray-600 shadow-sm transition-colors hover:border-gray-400 hover:bg-gray-50 hover:text-gray-900"
+              className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-[filter] hover:brightness-95"
+              style={{
+                backgroundColor: `color-mix(in srgb, ${primaryColor} 10%, transparent)`,
+                borderColor: `color-mix(in srgb, ${primaryColor} 22%, transparent)`,
+                color: primaryColor,
+              }}
             >
               <HeadsetIcon className="size-3.5" aria-hidden="true" />
               {HANDOFF_TALK_LABEL[activeLang] ?? HANDOFF_TALK_LABEL.en}
