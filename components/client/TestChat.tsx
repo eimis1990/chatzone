@@ -133,8 +133,8 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
               />
             </div>
 
-            {/* Preview chrome — Powered by */}
-            <div className="px-1">
+            {/* Preview chrome — Powered by (right-aligned, matching the live widget) */}
+            <div className="px-1 text-right">
               <p className="text-[10px] text-muted-foreground/60">
                 Powered by{' '}
                 <a

@@ -29,7 +29,6 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import type { BotLanguage } from '@/lib/types'
-import { VOICE_LLM_OPTIONS } from '@/lib/ai/voice-models'
 import type { z } from 'zod'
 import type { botConfigFormSchema } from '@/lib/validation/schemas'
 
@@ -206,35 +205,6 @@ export function VoiceSection({ control, watch, setValue, activeLang, enabledLang
                 )}
               />
               <Label htmlFor="sttEnabled">Speech-to-text (visitor speaks questions)</Label>
-            </div>
-
-            {/* Conversation model — the built-in ElevenLabs LLM the live call uses */}
-            <div className="space-y-1.5">
-              <Label htmlFor="voiceLlm">Conversation model</Label>
-              <Controller
-                name="voice.llmModel"
-                control={control}
-                render={({ field }) => (
-                  <Select
-                    value={(field.value as string) ?? 'gpt-4o-mini'}
-                    onValueChange={field.onChange}
-                  >
-                    <SelectTrigger id="voiceLlm" className="w-full" aria-label="Select the voice conversation model">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {VOICE_LLM_OPTIONS.map((m) => (
-                        <SelectItem key={m.value} value={m.value}>
-                          {m.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-              <p className="text-xs text-muted-foreground">
-                Powers spoken replies during live calls. Faster models feel more responsive.
-              </p>
             </div>
 
             {/* Voice status messages */}
