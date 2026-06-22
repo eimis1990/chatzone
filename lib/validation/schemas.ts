@@ -69,6 +69,7 @@ export const botConfigFormSchema = z.object({
       launcherStyle: z.enum(['circle', 'pill']).default('circle'),
       launcherLabel: z.string().max(40).optional().or(z.literal('')),
       launcherShowLogo: z.boolean().default(false),
+      launcherColor: z.string().optional().or(z.literal('')),
     })
     .default({
       primaryColor: '#4f46e5',

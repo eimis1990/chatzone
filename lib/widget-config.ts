@@ -27,6 +27,7 @@ export interface PublicBotConfig {
     launcherStyle?: 'circle' | 'pill'
     launcherLabel?: string
     launcherShowLogo?: boolean
+    launcherColor?: string
   }
   languages: BotLanguage[]
   content: Partial<Record<BotLanguage, PublicLanguageContent>>
@@ -73,6 +74,7 @@ export function publicBotConfig(config: BotConfig): PublicBotConfig {
       launcherShowLogo: config.theme.launcherShowLogo ?? false,
       ...(config.theme.bubbleIcon !== undefined && { bubbleIcon: config.theme.bubbleIcon }),
       ...(config.theme.launcherLabel ? { launcherLabel: config.theme.launcherLabel } : {}),
+      ...(config.theme.launcherColor ? { launcherColor: config.theme.launcherColor } : {}),
     },
     languages: config.languages ?? ['en'],
     content,

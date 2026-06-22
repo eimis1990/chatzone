@@ -111,6 +111,8 @@ export interface BotConfig {
     launcherLabel?: string
     /** Show the company logo in the launcher instead of the default chat icon. */
     launcherShowLogo?: boolean
+    /** Launcher background color; falls back to primaryColor when unset. */
+    launcherColor?: string
   }
   voice: VoiceConfig
   /** Enabled languages. Always includes 'en'; the first entry is the default. */

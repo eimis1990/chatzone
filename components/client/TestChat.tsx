@@ -80,6 +80,7 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
   const cornerRadius = config.theme?.cornerRadius ?? 16
   const primaryColor = config.theme?.primaryColor ?? '#4f46e5'
   const launcherAvatar = config.avatarUrl || config.botAvatarUrl
+  const launcherColor = config.theme?.launcherColor || primaryColor
   const launcherStyleCfg = config.theme?.launcherStyle ?? 'circle'
   const launcherLabel = config.theme?.launcherLabel ?? ''
   const showLauncherLogo = (config.theme?.launcherShowLogo ?? false) && !!launcherAvatar
@@ -159,7 +160,7 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
         className={`flex h-14 items-center justify-center gap-2 shadow-lg transition-transform hover:scale-105 active:scale-95 pointer-events-auto ${
           asPill ? 'rounded-full px-5' : 'w-14 rounded-full'
         }`}
-        style={{ backgroundColor: primaryColor, color: readableTextColor(primaryColor) }}
+        style={{ backgroundColor: launcherColor, color: readableTextColor(launcherColor) }}
       >
         {isOpen ? (
           <XIcon className="size-6" aria-hidden="true" />

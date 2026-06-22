@@ -585,6 +585,37 @@ export function ConfigForm({ botId, initialConfig }: ConfigFormProps) {
               />
             </div>
 
+            <div className="space-y-1.5">
+              <Label htmlFor="launcherColor">Launcher color</Label>
+              <Controller
+                name="theme.launcherColor"
+                control={control}
+                render={({ field }) => (
+                  <div className="flex items-center gap-2">
+                    <input
+                      id="launcherColor"
+                      type="color"
+                      value={field.value || watch('theme.primaryColor') || '#4f46e5'}
+                      onChange={(e) => field.onChange(e.target.value)}
+                      className="h-8 w-10 flex-shrink-0 cursor-pointer rounded border border-input bg-transparent p-0.5"
+                      aria-label="Pick launcher color"
+                    />
+                    <Input
+                      value={field.value ?? ''}
+                      onChange={(e) => field.onChange(e.target.value)}
+                      onBlur={field.onBlur}
+                      placeholder="Defaults to primary color"
+                      className="flex-1 font-mono text-sm"
+                      aria-label="Launcher color hex value"
+                    />
+                  </div>
+                )}
+              />
+              <p className="text-xs text-muted-foreground">
+                The floating bubble&apos;s color. Leave empty to use your primary color.
+              </p>
+            </div>
+
             {/* Radius sliders — stacked vertically */}
             <div className="space-y-5">
               <div className="space-y-2">

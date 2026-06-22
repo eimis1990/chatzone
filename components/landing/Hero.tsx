@@ -1,8 +1,8 @@
 'use client'
 
-import Link from 'next/link'
 import { motion, useReducedMotion } from 'framer-motion'
 import { CheckIcon, SparklesIcon, ArrowDownRightIcon } from 'lucide-react'
+import { EmailCapture } from './EmailCapture'
 
 export function Hero() {
   const reduce = useReducedMotion()
@@ -59,26 +59,14 @@ export function Hero() {
             Free while in early access — no credit card required.
           </motion.div>
 
-          <motion.form
+          <motion.div
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.28 }}
-            className="mt-5 flex max-w-md flex-col gap-3 sm:flex-row"
-            action="/login"
+            className="mt-5"
           >
-            <input
-              type="email"
-              name="email"
-              placeholder="Enter your work email"
-              className="h-12 flex-1 rounded-full border border-white/15 bg-white/10 px-5 text-sm text-white placeholder:text-white/50 outline-none focus:border-[#68A369] focus:ring-2 focus:ring-[#68A369]/40"
-            />
-            <Link
-              href="/login"
-              className="inline-flex h-12 items-center justify-center rounded-full bg-[#68A369] px-6 text-sm font-semibold text-white shadow-lg shadow-[#68A369]/20 transition-colors hover:bg-[#5a9159]"
-            >
-              Get started
-            </Link>
-          </motion.form>
+            <EmailCapture source="hero" />
+          </motion.div>
 
           <motion.p
             initial={{ opacity: 0 }}

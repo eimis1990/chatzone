@@ -14,6 +14,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { Reveal } from './Reveal'
+import { EmailCapture } from './EmailCapture'
 
 const ACCENT = '#68A369'
 const DARK = '#13241b'
@@ -253,20 +254,9 @@ export function CTASection() {
             Free while we&apos;re in early access. Set it up in an afternoon and let your customers feel the
             difference tonight.
           </p>
-          <form action="/login" className="mx-auto mt-8 flex max-w-md flex-col gap-3 sm:flex-row">
-            <input
-              type="email"
-              name="email"
-              placeholder="Enter your work email"
-              className="h-12 flex-1 rounded-full border border-white/15 bg-white/10 px-5 text-sm text-white placeholder:text-white/50 outline-none focus:border-[#68A369] focus:ring-2 focus:ring-[#68A369]/40"
-            />
-            <Link
-              href="/login"
-              className="inline-flex h-12 items-center justify-center rounded-full bg-[#68A369] px-6 text-sm font-semibold text-white shadow-lg shadow-[#68A369]/20 transition-colors hover:bg-[#5a9159]"
-            >
-              Get started
-            </Link>
-          </form>
+          <div className="mx-auto mt-8 flex justify-center">
+            <EmailCapture source="cta" />
+          </div>
           <p className="mt-4 text-xs text-white/55">No credit card required.</p>
         </Reveal>
       </div>

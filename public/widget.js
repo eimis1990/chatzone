@@ -240,7 +240,7 @@
   // logo, and circle vs. pill (with label). Shows an X while the chat is open.
   function renderLauncher() {
     var theme = (config && config.theme) || {}
-    var pc = theme.primaryColor || '#6366f1'
+    var pc = theme.launcherColor || theme.primaryColor || '#6366f1'
     launcher.style.backgroundColor = pc
     launcher.style.color = readable(pc)
 
