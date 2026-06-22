@@ -24,6 +24,9 @@ export interface PublicBotConfig {
     cornerRadius: number
     bubbleRadius: number
     fontFamily?: string
+    launcherStyle?: 'circle' | 'pill'
+    launcherLabel?: string
+    launcherShowLogo?: boolean
   }
   languages: BotLanguage[]
   content: Partial<Record<BotLanguage, PublicLanguageContent>>
@@ -66,7 +69,10 @@ export function publicBotConfig(config: BotConfig): PublicBotConfig {
       cornerRadius: config.theme.cornerRadius ?? 16,
       bubbleRadius: config.theme.bubbleRadius ?? 16,
       fontFamily: config.theme.fontFamily ?? 'geist',
+      launcherStyle: config.theme.launcherStyle ?? 'circle',
+      launcherShowLogo: config.theme.launcherShowLogo ?? false,
       ...(config.theme.bubbleIcon !== undefined && { bubbleIcon: config.theme.bubbleIcon }),
+      ...(config.theme.launcherLabel ? { launcherLabel: config.theme.launcherLabel } : {}),
     },
     languages: config.languages ?? ['en'],
     content,

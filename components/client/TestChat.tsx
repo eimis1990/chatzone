@@ -71,6 +71,10 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
   const cornerRadius = config.theme?.cornerRadius ?? 16
   const primaryColor = config.theme?.primaryColor ?? '#4f46e5'
   const launcherAvatar = config.avatarUrl || config.botAvatarUrl
+  const launcherStyleCfg = config.theme?.launcherStyle ?? 'circle'
+  const launcherLabel = config.theme?.launcherLabel ?? ''
+  const showLauncherLogo = (config.theme?.launcherShowLogo ?? false) && !!launcherAvatar
+  const asPill = launcherStyleCfg === 'pill' && !!launcherLabel && !isOpen
 
   const transport = useMemo<ChatTransport>(
     () => createPreviewTransport(botId, () => buildFullConfig(configRef.current)),
@@ -138,45 +142,34 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
         )}
       </AnimatePresence>
 
-      {/* Launcher bubble */}
+      {/* Launcher bubble — circle or pill, optional company logo */}
       <button
         type="button"
         onClick={() => setIsOpen((v) => !v)}
         aria-label={isOpen ? 'Close chat preview' : 'Open chat preview'}
-        className="w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-transform hover:scale-105 active:scale-95 pointer-events-auto overflow-hidden"
+        className={`flex h-14 items-center justify-center gap-2 shadow-lg transition-transform hover:scale-105 active:scale-95 pointer-events-auto ${
+          asPill ? 'rounded-full px-5' : 'w-14 rounded-full'
+        }`}
         style={{ backgroundColor: primaryColor, color: readableTextColor(primaryColor) }}
       >
-        <AnimatePresence mode="wait" initial={false}>
-          {isOpen ? (
-            <motion.span
-              key="x"
-              initial={{ rotate: -90, opacity: 0 }}
-              animate={{ rotate: 0, opacity: 1 }}
-              exit={{ rotate: 90, opacity: 0 }}
-              transition={{ duration: 0.15 }}
-            >
-              <XIcon className="size-6" aria-hidden="true" />
-            </motion.span>
-          ) : (
-            <motion.span
-              key="chat"
-              initial={{ rotate: 90, opacity: 0 }}
-              animate={{ rotate: 0, opacity: 1 }}
-              exit={{ rotate: -90, opacity: 0 }}
-              transition={{ duration: 0.15 }}
-            >
-              {launcherAvatar ? (
-                <img
-                  src={launcherAvatar}
-                  alt={config.displayName ?? 'Bot'}
-                  className="w-14 h-14 object-cover rounded-full"
-                />
-              ) : (
-                <MessageCircleIcon className="size-7" aria-hidden="true" />
-              )}
-            </motion.span>
-          )}
-        </AnimatePresence>
+        {isOpen ? (
+          <XIcon className="size-6" aria-hidden="true" />
+        ) : (
+          <>
+            {showLauncherLogo ? (
+              <img
+                src={launcherAvatar}
+                alt={config.displayName ?? 'Bot'}
+                className="size-8 rounded-full object-cover"
+              />
+            ) : (
+              <MessageCircleIcon className="size-7" aria-hidden="true" />
+            )}
+            {asPill && (
+              <span className="whitespace-nowrap text-[15px] font-semibold">{launcherLabel}</span>
+            )}
+          </>
+        )}
       </button>
     </div>
   )

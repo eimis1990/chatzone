@@ -531,6 +531,60 @@ export function ConfigForm({ botId, initialConfig }: ConfigFormProps) {
               </p>
             </div>
 
+            {/* Launcher appearance */}
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label>Launcher style</Label>
+                <Controller
+                  name="theme.launcherStyle"
+                  control={control}
+                  render={({ field }) => (
+                    <Select value={field.value ?? 'circle'} onValueChange={field.onChange}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="circle">Circle (icon only)</SelectItem>
+                        <SelectItem value="pill">Pill (icon + text)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="launcherLabel">Launcher text</Label>
+                <Input
+                  id="launcherLabel"
+                  {...register('theme.launcherLabel')}
+                  placeholder="Chat with us"
+                  disabled={watch('theme.launcherStyle') !== 'pill'}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Shown next to the icon when the style is a pill.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between gap-4">
+              <div className="space-y-0.5">
+                <Label htmlFor="launcherShowLogo">Show company logo in launcher</Label>
+                <p className="text-xs text-muted-foreground">
+                  Use the company logo instead of the default chat icon.
+                </p>
+              </div>
+              <Controller
+                name="theme.launcherShowLogo"
+                control={control}
+                render={({ field }) => (
+                  <Switch
+                    id="launcherShowLogo"
+                    checked={field.value ?? false}
+                    onCheckedChange={field.onChange}
+                  />
+                )}
+              />
+            </div>
+
             {/* Radius sliders — stacked vertically */}
             <div className="space-y-5">
               <div className="space-y-2">

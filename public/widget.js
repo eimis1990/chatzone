@@ -34,6 +34,9 @@
 
   var position = script.getAttribute('data-position') || 'bottom-right'
 
+  // Bot config (theme, logo, launcher options) — fetched after mount.
+  var config = null
+
   // Derive APP_URL from the script's own src origin (same host that serves widget.js)
   var appUrl = ''
   var src = script.getAttribute('src') || ''
@@ -98,12 +101,33 @@
     launcher.style.left = OFFSET + 'px'
   }
 
-  // Chat bubble icon (SVG)
-  launcher.innerHTML =
+  // Launcher icons (themed by renderLauncher via currentColor).
+  var CHAT_ICON =
     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="26" height="26" aria-hidden="true">' +
     '<path d="M4.913 2.658c2.075-.27 4.19-.408 6.337-.408 2.147 0 4.262.139 6.337.408 1.922.25 3.291 1.861 3.405 3.727a4.403 4.403 0 00-1.032-.211 50.89 50.89 0 00-8.42 0c-2.358.196-4.04 2.19-4.04 4.434v4.286a4.47 4.47 0 002.433 3.984L7.28 21.53A.75.75 0 016 21v-4.03a48.527 48.527 0 01-1.087-.128C2.905 16.58 1.5 14.833 1.5 12.862V6.638c0-1.97 1.405-3.718 3.413-3.979z" />' +
     '<path d="M15.75 7.5c-1.376 0-2.739.057-4.086.169C10.124 7.797 9 9.103 9 10.609v4.285c0 1.507 1.128 2.814 2.67 2.94 1.243.102 2.5.157 3.768.165l2.782 2.781a.75.75 0 001.28-.53v-2.39l.33-.026c1.542-.125 2.67-1.433 2.67-2.94v-4.286c0-1.505-1.125-2.811-2.664-2.94A49.392 49.392 0 0015.75 7.5z" />' +
     '</svg>'
+  var CLOSE_ICON =
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+    'stroke-width="2.5" stroke-linecap="round" width="24" height="24" aria-hidden="true">' +
+    '<path d="M6 6l12 12M18 6L6 18" /></svg>'
+
+  // Near-black or white, whichever reads better on the launcher color.
+  function readable(hex) {
+    var h = String(hex || '').replace('#', '')
+    if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2]
+    if (h.length !== 6) return '#ffffff'
+    var r = parseInt(h.slice(0, 2), 16)
+    var g = parseInt(h.slice(2, 4), 16)
+    var b = parseInt(h.slice(4, 6), 16)
+    return (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.6 ? '#111827' : '#ffffff'
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+    })
+  }
 
   // ── Iframe wrapper ────────────────────────────────────────────────────────
   var wrapper = document.createElement('div')
@@ -178,6 +202,7 @@
     isOpen = true
     launcher.setAttribute('aria-expanded', 'true')
     launcher.setAttribute('aria-label', 'Close chat')
+    renderLauncher()
   }
 
   function closeWidget() {
@@ -185,6 +210,56 @@
     isOpen = false
     launcher.setAttribute('aria-expanded', 'false')
     launcher.setAttribute('aria-label', 'Open chat')
+    renderLauncher()
+  }
+
+  // Paints the launcher from config: theme color + contrast, optional company
+  // logo, and circle vs. pill (with label). Shows an X while the chat is open.
+  function renderLauncher() {
+    var theme = (config && config.theme) || {}
+    var pc = theme.primaryColor || '#6366f1'
+    launcher.style.backgroundColor = pc
+    launcher.style.color = readable(pc)
+
+    var label = theme.launcherLabel || ''
+    var asPill = theme.launcherStyle === 'pill' && !!label && !isOpen
+    var showLogo = !!theme.launcherShowLogo && !!(config && config.avatarUrl)
+
+    var iconHtml
+    if (isOpen) {
+      iconHtml = CLOSE_ICON
+    } else if (showLogo) {
+      iconHtml =
+        '<img src="' + config.avatarUrl + '" alt="" ' +
+        'style="width:30px;height:30px;border-radius:50%;object-fit:cover;display:block" />'
+    } else {
+      iconHtml = CHAT_ICON
+    }
+
+    if (asPill) {
+      css(launcher, {
+        width: 'auto',
+        height: '52px',
+        borderRadius: '26px',
+        padding: '0 18px 0 14px',
+        gap: '8px',
+      })
+      launcher.innerHTML =
+        iconHtml +
+        '<span style="font-size:15px;font-weight:600;white-space:nowrap;' +
+        'font-family:system-ui,-apple-system,sans-serif">' +
+        escapeHtml(label) +
+        '</span>'
+    } else {
+      css(launcher, {
+        width: LAUNCHER_SIZE + 'px',
+        height: LAUNCHER_SIZE + 'px',
+        borderRadius: '50%',
+        padding: '0',
+        gap: '0',
+      })
+      launcher.innerHTML = iconHtml
+    }
   }
 
   launcher.addEventListener('click', function () {
@@ -201,6 +276,24 @@
   })
 
   // ── Mount ─────────────────────────────────────────────────────────────────
+  renderLauncher()
   document.body.appendChild(wrapper)
   document.body.appendChild(launcher)
+
+  // Fetch theme/launcher config and repaint the launcher once it arrives.
+  try {
+    fetch(appUrl + '/api/widget-config?key=' + encodeURIComponent(botKey))
+      .then(function (r) {
+        return r.ok ? r.json() : null
+      })
+      .then(function (c) {
+        if (c) {
+          config = c
+          renderLauncher()
+        }
+      })
+      .catch(function () {})
+  } catch (_) {
+    // Non-critical — launcher keeps its default look.
+  }
 })()

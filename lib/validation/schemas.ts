@@ -66,6 +66,9 @@ export const botConfigFormSchema = z.object({
       cornerRadius: z.number().min(0).max(32).default(16),
       bubbleRadius: z.number().min(0).max(24).default(16),
       fontFamily: z.string().default('geist'),
+      launcherStyle: z.enum(['circle', 'pill']).default('circle'),
+      launcherLabel: z.string().max(40).optional().or(z.literal('')),
+      launcherShowLogo: z.boolean().default(false),
     })
     .default({
       primaryColor: '#4f46e5',
@@ -73,6 +76,8 @@ export const botConfigFormSchema = z.object({
       cornerRadius: 16,
       bubbleRadius: 16,
       fontFamily: 'geist',
+      launcherStyle: 'circle',
+      launcherShowLogo: false,
     }),
   languages: z.array(z.enum(['en', 'lt'])).min(1).default(['en']),
   content: z.object({

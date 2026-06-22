@@ -105,6 +105,12 @@ export interface BotConfig {
     bubbleRadius: number
     /** Chat font key — see lib/fonts.ts FONT_OPTIONS. */
     fontFamily?: string
+    /** Floating launcher shape: a plain circle, or a pill with a text label. */
+    launcherStyle?: 'circle' | 'pill'
+    /** Text shown next to the icon when launcherStyle is 'pill'. */
+    launcherLabel?: string
+    /** Show the company logo in the launcher instead of the default chat icon. */
+    launcherShowLogo?: boolean
   }
   voice: VoiceConfig
   /** Enabled languages. Always includes 'en'; the first entry is the default. */
