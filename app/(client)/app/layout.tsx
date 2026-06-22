@@ -22,10 +22,14 @@ export default async function ClientLayout({
     bots = (data ?? []) as BotLite[]
   }
 
+  // The whole shell carries the green mesh; the content is a white rounded card
+  // floating on top, with the mesh showing through the gutter around it.
   return (
-    <div className="flex h-svh overflow-hidden">
+    <div className="flex h-svh overflow-hidden bg-sidebar-mesh">
       <AppSidebar bots={bots} userEmail={user.email ?? ''} />
-      <main className="flex-1 min-w-0 overflow-y-auto">{children}</main>
+      <main className="flex-1 min-w-0 m-3 overflow-y-auto rounded-2xl bg-background shadow-sm ring-1 ring-black/5">
+        {children}
+      </main>
     </div>
   )
 }
