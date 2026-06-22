@@ -194,3 +194,15 @@
       radial-gradient(at 30% 70%, rgba(120, 180, 120, 0.08) 0px, transparent 45%);
   }
 }
+/* Lenis smooth-scroll (landing). Note: intentionally NO `iframe { pointer-events:
+   none }` rule — that would break the embedded chat widget. */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}

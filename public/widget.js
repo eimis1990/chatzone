@@ -137,6 +137,12 @@
     zIndex: Z_INDEX,
     width: IFRAME_WIDTH + 'px',
     display: 'none', // hidden until first open
+    // Open/close animation (scale + fade from the launcher corner).
+    opacity: '0',
+    transform: 'translateY(12px) scale(0.96)',
+    transformOrigin: isRight ? 'bottom right' : 'bottom left',
+    transition: 'opacity 0.24s ease, transform 0.28s cubic-bezier(0.16, 1, 0.3, 1)',
+    willChange: 'opacity, transform',
   })
 
   if (isRight) {
@@ -198,15 +204,32 @@
       })
       iframeContainer.appendChild(iframe)
     }
+    if (closeTimer) {
+      clearTimeout(closeTimer)
+      closeTimer = null
+    }
     wrapper.style.display = 'block'
+    // Force a reflow so the transition runs from the hidden state, then animate in.
+    void wrapper.offsetHeight
+    wrapper.style.opacity = '1'
+    wrapper.style.transform = 'translateY(0) scale(1)'
     isOpen = true
     launcher.setAttribute('aria-expanded', 'true')
     launcher.setAttribute('aria-label', 'Close chat')
     renderLauncher()
   }
 
+  var closeTimer = null
+
   function closeWidget() {
-    wrapper.style.display = 'none'
+    // Animate out, then hide after the transition.
+    wrapper.style.opacity = '0'
+    wrapper.style.transform = 'translateY(12px) scale(0.96)'
+    if (closeTimer) clearTimeout(closeTimer)
+    closeTimer = setTimeout(function () {
+      if (!isOpen) wrapper.style.display = 'none'
+      closeTimer = null
+    }, 300)
     isOpen = false
     launcher.setAttribute('aria-expanded', 'false')
     launcher.setAttribute('aria-label', 'Open chat')

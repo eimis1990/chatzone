@@ -5,7 +5,7 @@
  * We read the JS file content and execute it via Function() to simulate
  * how a browser loads the script.
  */
-import { describe, it, expect, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { JSDOM } from 'jsdom'
@@ -91,21 +91,30 @@ describe('widget.js loader', () => {
     expect(iframe!.src).toMatch(/^https:\/\/app\.chatbotzone\.com\/embed\/ACME_KEY/)
   })
 
-  it('toggles the iframe visibility on repeated clicks', () => {
-    const { document } = setupDOM('TOGGLE_KEY')
-    const launcher = document.querySelector<HTMLElement>('[data-cbz-launcher]')
+  it('toggles the widget open/closed on repeated clicks', () => {
+    vi.useFakeTimers()
+    try {
+      const { document } = setupDOM('TOGGLE_KEY')
+      const launcher = document.querySelector<HTMLElement>('[data-cbz-launcher]')
+      const wrapper = document.querySelector<HTMLElement>('[data-cbz-wrapper]')
 
-    // First click — open
-    launcher!.click()
-    const wrapper = document.querySelector<HTMLElement>('[data-cbz-wrapper]')
-    expect(wrapper?.style.display).not.toBe('none')
+      // First click — open (shown immediately, animates in)
+      launcher!.click()
+      expect(wrapper?.style.display).toBe('block')
+      expect(launcher?.getAttribute('aria-expanded')).toBe('true')
 
-    // Second click — close
-    launcher!.click()
-    expect(wrapper?.style.display).toBe('none')
+      // Second click — close (animates out, then hides after the transition)
+      launcher!.click()
+      expect(launcher?.getAttribute('aria-expanded')).toBe('false')
+      vi.advanceTimersByTime(350)
+      expect(wrapper?.style.display).toBe('none')
 
-    // Third click — open again
-    launcher!.click()
-    expect(wrapper?.style.display).not.toBe('none')
+      // Third click — open again (cancels any pending hide)
+      launcher!.click()
+      expect(wrapper?.style.display).toBe('block')
+      expect(launcher?.getAttribute('aria-expanded')).toBe('true')
+    } finally {
+      vi.useRealTimers()
+    }
   })
 })
