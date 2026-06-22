@@ -213,8 +213,10 @@ matching email; never return an order on a mismatch; rate-limit per conversation
 - [x] Tests: identity match/mismatch, 404/error, missing-creds guard, discount delivery. _(tests/unit/order.test.ts — 11 tests.)_
 - [x] `order_status` + `discount_code` tools (**text** chat) + prompt updates. _(lib/ai/commerce-tool.ts + prompt.ts; gated by REST creds / configured discount.)_
 - [x] Configurator UI (REST creds + "Test order access" + discount fields). _(/api/commerce/validate mode:'orders'.)_
-- [ ] **Voice** client-tools for order_status/discount_code (ElevenLabs agent tool registration + SDK clientTools + agent-hash re-sync) — deferred follow-up.
-- [ ] Optional: an order-status card in chat (otherwise the agent writes it).
+- [x] **Voice** client-tools for order_status/discount_code. _(ElevenLabs order/discount client tools gated by config; agent hash → v8; VoiceCallButton clientTools; widget+preview order/discount endpoints.)_
+- [x] Order-status **card** in chat + voice. _(NDJSON {t:'order'} → OrderStatusCard.)_
+
+**Phase 3 complete.** ✅ (Reservations/bookings + Shopify/feed remain out of scope here.)
 
 ---
 
