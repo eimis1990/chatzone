@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import type { CommerceProduct } from '@/lib/commerce/types'
+import { readableTextColor, isLightColor } from '@/lib/utils'
 
 interface ProductCardsProps {
   products: CommerceProduct[]
@@ -246,9 +247,11 @@ function ProductCard({
           href={product.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-auto flex items-center justify-center rounded text-white text-sm font-medium py-2 px-2 transition-opacity hover:opacity-85 active:opacity-70 focus-visible:ring-2 focus-visible:ring-offset-1 outline-none"
+          className="mt-auto flex items-center justify-center rounded text-sm font-medium py-2 px-2 transition-opacity hover:opacity-85 active:opacity-70 focus-visible:ring-2 focus-visible:ring-offset-1 outline-none"
           style={{
             backgroundColor: primaryColor,
+            color: readableTextColor(primaryColor),
+            border: isLightColor(primaryColor) ? '1px solid rgba(0,0,0,0.12)' : undefined,
             borderRadius: `${Math.min(cardRadius, 12)}px`,
           }}
         >
@@ -321,8 +324,13 @@ function ProductRow({ product, bubbleRadius, primaryColor, labels }: ProductRowP
             rel="noopener noreferrer"
             aria-label={labels.viewMore}
             title={labels.viewMore}
-            className="flex items-center justify-center size-9 shrink-0 text-white transition-opacity hover:opacity-85 active:opacity-70 outline-none focus-visible:ring-2"
-            style={{ backgroundColor: primaryColor, borderRadius: `${Math.min(rowRadius, 10)}px` }}
+            className="flex items-center justify-center size-9 shrink-0 transition-opacity hover:opacity-85 active:opacity-70 outline-none focus-visible:ring-2"
+            style={{
+              backgroundColor: primaryColor,
+              color: readableTextColor(primaryColor),
+              border: isLightColor(primaryColor) ? '1px solid rgba(0,0,0,0.12)' : undefined,
+              borderRadius: `${Math.min(rowRadius, 10)}px`,
+            }}
           >
             <ExternalLinkIcon />
           </a>

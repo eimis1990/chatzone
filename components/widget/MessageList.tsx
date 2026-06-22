@@ -5,6 +5,7 @@ import { ThumbsUpIcon, ThumbsDownIcon, HeadsetIcon } from 'lucide-react'
 import { ProductCards } from './ProductCards'
 import { OrderStatusCard } from './OrderStatusCard'
 import { ThinkingDots } from './ThinkingDots'
+import { readableTextColor } from '@/lib/utils'
 import type { CommerceProduct, OrderStatus } from '@/lib/commerce/types'
 
 export interface ChatMessage {
@@ -113,15 +114,15 @@ export function MessageList({
               {(msg.content || msg.streaming) && (
                 <div
                   className={`px-3 py-2 text-sm whitespace-pre-wrap ${
-                    msg.role === 'user'
-                      ? 'text-white'
-                      : 'bg-gray-100 text-gray-900'
+                    msg.role === 'user' ? '' : 'bg-gray-100 text-gray-900'
                   }`}
                   style={{
                     borderRadius: msg.role === 'user'
                       ? `${msgBubbleRadius} ${msgBubbleRadius} 2px ${msgBubbleRadius}`
                       : `${msgBubbleRadius} ${msgBubbleRadius} ${msgBubbleRadius} 2px`,
-                    ...(msg.role === 'user' ? { backgroundColor: primaryColor } : {}),
+                    ...(msg.role === 'user'
+                      ? { backgroundColor: primaryColor, color: readableTextColor(primaryColor) }
+                      : {}),
                   }}
                 >
                   {msg.streaming && !msg.content ? (
