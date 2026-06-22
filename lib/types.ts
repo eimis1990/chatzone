@@ -136,6 +136,11 @@ export interface BotConfig {
     enabled: boolean
     provider: 'woocommerce'
     storeUrl: string
+    /** WooCommerce REST consumer key/secret — server-only, for order lookups. */
+    restKey?: string
+    restSecret?: string
+    /** A static discount the agent can offer on discount intent. */
+    discount?: { enabled: boolean; code?: string; description?: string }
   }
 }
 

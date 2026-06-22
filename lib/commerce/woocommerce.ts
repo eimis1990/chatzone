@@ -1,4 +1,11 @@
-import type { CommerceProduct, ProductSearchParams, CommerceDeps } from '@/lib/commerce/types'
+import type {
+  CommerceProduct,
+  ProductSearchParams,
+  CommerceDeps,
+  OrderStatus,
+  OrderLookupParams,
+  OrderItem,
+} from '@/lib/commerce/types'
 
 /** Shape of a product from the public WooCommerce Store API (subset we use). */
 interface WooProduct {
@@ -117,6 +124,98 @@ export async function searchWooProducts(
   // and curates which results to show via the display step.
   const data = await run(params.query)
   return data.map(normalizeWooProduct)
+}
+
+// ---------------------------------------------------------------------------
+// Order status — authenticated WooCommerce REST API (wc/v3).
+// Unlike product search (public Store API), this needs consumer key/secret and
+// must run server-side only. We verify the shopper's identity (order id + a
+// matching billing email) before returning anything.
+// ---------------------------------------------------------------------------
+
+/** Subset of a WooCommerce REST order we read. */
+interface WooOrder {
+  id: number
+  number?: string
+  status?: string
+  currency?: string
+  total?: string
+  date_created?: string
+  billing?: { email?: string }
+  line_items?: Array<{ name?: string; quantity?: number; total?: string }>
+  meta_data?: Array<{ key?: string; value?: unknown }>
+}
+
+/** Base64 encode for the Basic auth header (works in Edge + Node). */
+function basicAuth(key: string, secret: string): string {
+  const raw = `${key}:${secret}`
+  if (typeof btoa !== 'undefined') return 'Basic ' + btoa(raw)
+  return 'Basic ' + Buffer.from(raw).toString('base64')
+}
+
+/** Best-effort tracking number from common Shipment Tracking meta keys. */
+function extractTracking(order: WooOrder): OrderStatus['tracking'] | undefined {
+  for (const m of order.meta_data ?? []) {
+    if (!m?.key) continue
+    if (/tracking[_-]?number/i.test(m.key) && typeof m.value === 'string' && m.value.trim()) {
+      return { number: m.value.trim() }
+    }
+  }
+  return undefined
+}
+
+export function normalizeWooOrder(order: WooOrder): OrderStatus {
+  const items: OrderItem[] = (order.line_items ?? []).map((li) => ({
+    name: decodeEntities(li.name ?? ''),
+    quantity: Number(li.quantity ?? 0),
+    total: String(li.total ?? ''),
+  }))
+  return {
+    found: true,
+    orderNumber: String(order.number ?? order.id),
+    status: order.status,
+    total: order.total,
+    currency: order.currency,
+    items,
+    tracking: extractTracking(order),
+    dateCreated: order.date_created,
+  }
+}
+
+/**
+ * Look up an order by id, gated by a matching billing email. Returns a safe
+ * failure (no data) on missing creds, bad id, not found, or email mismatch.
+ */
+export async function getWooOrderStatus(
+  storeUrl: string,
+  restKey: string,
+  restSecret: string,
+  params: OrderLookupParams,
+  deps: CommerceDeps = {},
+): Promise<OrderStatus> {
+  if (!restKey || !restSecret) return { found: false, reason: 'not_configured' }
+  const id = String(params.orderId ?? '').replace(/\D/g, '')
+  const email = String(params.email ?? '').trim().toLowerCase()
+  if (!id || !email) return { found: false, reason: 'not_found' }
+
+  const fetchImpl = deps.fetchImpl ?? fetch
+  const base = storeOrigin(storeUrl)
+  try {
+    const res = await fetchImpl(`${base}/wp-json/wc/v3/orders/${id}`, {
+      headers: { Authorization: basicAuth(restKey, restSecret) },
+    })
+    if (res.status === 404) return { found: false, reason: 'not_found' }
+    if (!res.ok) return { found: false, reason: 'error' }
+    const order = (await res.json()) as WooOrder
+    const billingEmail = (order.billing?.email ?? '').trim().toLowerCase()
+    // Identity check: never reveal an order unless the email matches.
+    if (!billingEmail || billingEmail !== email) {
+      return { found: false, reason: 'email_mismatch' }
+    }
+    return normalizeWooOrder(order)
+  } catch {
+    return { found: false, reason: 'error' }
+  }
 }
 
 /**

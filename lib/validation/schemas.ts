@@ -107,8 +107,17 @@ export const botConfigFormSchema = z.object({
       enabled: z.boolean().default(false),
       provider: z.literal('woocommerce').default('woocommerce'),
       storeUrl: z.string().default(''),
+      restKey: z.string().optional().or(z.literal('')),
+      restSecret: z.string().optional().or(z.literal('')),
+      discount: z
+        .object({
+          enabled: z.boolean().default(false),
+          code: z.string().optional().or(z.literal('')),
+          description: z.string().max(200).optional().or(z.literal('')),
+        })
+        .default({ enabled: false }),
     })
-    .default({ enabled: false, provider: 'woocommerce', storeUrl: '' }),
+    .default({ enabled: false, provider: 'woocommerce', storeUrl: '', discount: { enabled: false } }),
   voice: z
     .object({
       enabled: z.boolean().default(false),
