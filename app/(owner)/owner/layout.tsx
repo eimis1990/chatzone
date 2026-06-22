@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { LayoutDashboardIcon, UsersIcon, ShieldIcon, MicVocalIcon } from 'lucide-react'
+import { LayoutDashboardIcon, UsersIcon, ShieldIcon, MicVocalIcon, MailIcon } from 'lucide-react'
 import { requireRole } from '@/lib/auth/guards'
 import { SignOutButton } from '@/components/client/SignOutButton'
 
@@ -7,6 +7,7 @@ const NAV_LINKS = [
   { label: 'Dashboard', href: '/owner', icon: LayoutDashboardIcon },
   { label: 'Clients', href: '/owner/clients', icon: UsersIcon },
   { label: 'Voices', href: '/owner/voices', icon: MicVocalIcon },
+  { label: 'Signups', href: '/owner/signups', icon: MailIcon },
 ] as const
 
 export default async function OwnerLayout({
