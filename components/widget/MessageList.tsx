@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { ThumbsUpIcon, ThumbsDownIcon } from 'lucide-react'
+import { ThumbsUpIcon, ThumbsDownIcon, HeadsetIcon } from 'lucide-react'
 import { ProductCards } from './ProductCards'
 import { ThinkingDots } from './ThinkingDots'
 import type { CommerceProduct } from '@/lib/commerce/types'
@@ -12,6 +12,8 @@ export interface ChatMessage {
   content: string
   streaming?: boolean
   products?: CommerceProduct[]
+  /** Assistant message authored by a human agent (handoff) vs. the bot. */
+  fromHuman?: boolean
 }
 
 interface MessageListProps {
@@ -70,6 +72,17 @@ export function MessageList({
       </div>
     )
 
+  // Human-agent replies get a distinct avatar so they don't look like the bot.
+  const renderHumanAvatar = () => (
+    <div
+      className="w-8 h-8 rounded-full flex-shrink-0 mt-0.5 flex items-center justify-center bg-gray-800 text-white"
+      aria-label="Agent"
+      title="Agent"
+    >
+      <HeadsetIcon className="size-4" aria-hidden="true" />
+    </div>
+  )
+
   return (
     <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3" role="log" aria-live="polite" aria-label="Chat messages">
       {/* Greeting message always shown first */}
@@ -90,7 +103,8 @@ export function MessageList({
           <div
             className={`flex items-start gap-2 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}
           >
-            {msg.role === 'assistant' && renderAvatar(displayName)}
+            {msg.role === 'assistant' &&
+              (msg.fromHuman ? renderHumanAvatar() : renderAvatar(displayName))}
             <div className="flex flex-col gap-1 max-w-[80%]">
               {/* Skip the empty bubble for cards-only (voice search) messages. */}
               {(msg.content || msg.streaming) && (
@@ -123,6 +137,7 @@ export function MessageList({
               {/* 👍/👎 feedback on completed bot replies (real DB id only) */}
               {msg.role === 'assistant' &&
                 !msg.streaming &&
+                !msg.fromHuman &&
                 msg.content.length > 0 &&
                 UUID_RE.test(msg.id) && (
                   <div className="flex items-center gap-1 pl-1">

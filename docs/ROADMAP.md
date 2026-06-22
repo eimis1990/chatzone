@@ -88,14 +88,24 @@ timers, email/Slack notifications (add later), typing indicators.
 - An agent in org A cannot see org B's conversations.
 
 **Tasks.**
-- [ ] Migration: `handoff_status`, `assigned_to`, `handoff_requested_at` on
-      `conversations`; `from_human` on `messages`; RLS policies.
-- [ ] `/api/chat` handoff branch + escalation detector (fallback counter / intent).
-- [ ] `/api/widget/poll` (public, scoped) returning new messages + status.
-- [ ] Widget: escalation request, `live` banner, polling, UI suppression.
-- [ ] `/api/agent/conversations`, `/api/agent/messages`, `/api/agent/handoff`.
-- [ ] Inbox page + sidebar entry + Supabase Realtime subscription + unread badge.
-- [ ] Tests: state machine transitions, RLS isolation, poll returns only new msgs.
+- [x] Migration: `handoff_status`, `assigned_to`, `handoff_requested_at` on
+      `conversations`; `from_human` on `messages`; RLS policies. _(0010_handoff.sql:
+      member UPDATE on conversations + INSERT on messages; tables added to the
+      `supabase_realtime` publication; `replica identity full` on conversations.)_
+- [x] `/api/chat` handoff branch + escalation detector. _(Suppresses the bot
+      while `requested`/`live`; resets `resolved`→`bot` on a new turn; escalates
+      on human-intent keywords and on a repeat fallback; `x-handoff` header.)_
+- [x] `/api/widget/poll` (public, scoped) returning new human messages + status +
+      agent name; plus `/api/widget/request-handoff`.
+- [x] Widget: "Talk to a person" affordance, `requested`/`live` banner, 4s poll
+      loop, bot-reply suppression, distinct human-agent bubbles.
+- [x] Agent write paths. _Implemented as authenticated **server actions**
+      (`loadThread`/`loadList`/`sendAgentMessage`/`handoffAction`) on the Inbox
+      page rather than `/api/agent/*` routes — matches the codebase's existing
+      server-action pattern (Conversations page) and is RLS-scoped._
+- [x] Inbox page + sidebar entry + Supabase Realtime subscription + unread badge
+      (+ 8s polling fallback if the socket is unavailable).
+- [x] Tests: state machine transitions + intent detection (`tests/unit/handoff.test.ts`).
 
 ---
 

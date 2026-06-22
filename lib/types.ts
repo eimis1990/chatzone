@@ -166,6 +166,8 @@ export interface DocumentChunk {
   created_at: string
 }
 
+export type HandoffStatus = 'bot' | 'requested' | 'live' | 'resolved'
+
 export interface Conversation {
   id: string
   bot_id: string
@@ -178,6 +180,10 @@ export interface Conversation {
   topics?: string[] | null
   analyzed_at?: string | null
   had_fallback?: boolean
+  // Human handoff (Phase 2)
+  handoff_status?: HandoffStatus
+  assigned_to?: string | null
+  handoff_requested_at?: string | null
 }
 
 export interface Citation {
@@ -195,6 +201,8 @@ export interface Message {
   created_at: string
   /** Visitor thumbs feedback on an assistant reply (Phase 1). */
   feedback?: 'up' | 'down' | null
+  /** Assistant message authored by a human agent vs. the bot (Phase 2). */
+  from_human?: boolean
 }
 
 export interface Lead {

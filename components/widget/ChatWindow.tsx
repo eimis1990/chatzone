@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef, useEffect } from 'react'
 import { AnimatePresence } from 'framer-motion'
+import { HeadsetIcon } from 'lucide-react'
 import { MessageList, type ChatMessage } from './MessageList'
 import { ProductListView } from './ProductCards'
 import { Composer } from './Composer'
@@ -9,7 +10,7 @@ import { VoiceCallButton, type CallState } from '@/components/voice/VoiceCallBut
 import { LeadForm } from './LeadForm'
 import { SuggestedQuestions } from './SuggestedQuestions'
 import type { PublicBotConfig } from '@/lib/widget-config'
-import type { BotLanguage } from '@/lib/types'
+import type { BotLanguage, HandoffStatus } from '@/lib/types'
 import type { CommerceProduct } from '@/lib/commerce/types'
 import { fontStack } from '@/lib/fonts'
 
@@ -45,6 +46,32 @@ const VOICE_STATUS: Record<'en' | 'lt', Record<'connecting' | 'listening' | 'spe
   lt: { connecting: 'Jungiamasi…', listening: 'Klausosi…', speaking: 'Kalba…' },
 }
 
+// Human-handoff copy.
+const HANDOFF_TALK_LABEL: Record<BotLanguage, string> = {
+  en: 'Talk to a person',
+  lt: 'Kalbėti su žmogumi',
+}
+// Phrase sent when escalating before a conversation exists — must contain a
+// keyword detected by lib/handoff.ts detectHandoffIntent.
+const HANDOFF_REQUEST_PHRASE: Record<BotLanguage, string> = {
+  en: 'I would like to talk to a person.',
+  lt: 'Norėčiau pasikalbėti su žmogumi.',
+}
+const HANDOFF_BANNER_REQUESTED: Record<BotLanguage, string> = {
+  en: 'Connecting you with a team member…',
+  lt: 'Jungiame jus su komandos nariu…',
+}
+const HANDOFF_ENDED_NOTE: Record<BotLanguage, string> = {
+  en: 'The chat with our team member has ended. You can keep chatting with the assistant.',
+  lt: 'Pokalbis su komandos nariu baigtas. Galite toliau bendrauti su asistentu.',
+}
+function handoffBannerLive(lang: BotLanguage, agentName: string | null): string {
+  const who = agentName?.trim() || (lang === 'lt' ? 'komandos nariu' : 'a team member')
+  return lang === 'lt' ? `Bendraujate su ${who}` : `You're chatting with ${who}`
+}
+
+const POLL_INTERVAL_MS = 4000
+
 export function ChatWindow({ publicKey, config }: ChatWindowProps) {
   const languages = config.languages ?? ['en']
   const isMultilang = languages.length > 1
@@ -72,6 +99,17 @@ export function ChatWindow({ publicKey, config }: ChatWindowProps) {
   const callStateRef = useRef<CallState>('idle')
   const endVoiceRef = useRef<(() => void) | null>(null)
   const visitorIdRef = useRef<string>('')
+
+  // Human-handoff state.
+  const [handoffStatus, setHandoffStatus] = useState<HandoffStatus>('bot')
+  const [agentName, setAgentName] = useState<string | null>(null)
+  const handoffStatusRef = useRef<HandoffStatus>('bot')
+  const lastPollTsRef = useRef<string | undefined>(undefined)
+
+  const updateHandoff = useCallback((s: HandoffStatus) => {
+    handoffStatusRef.current = s
+    setHandoffStatus(s)
+  }, [])
 
   const handleCallState = useCallback((s: CallState) => {
     callStateRef.current = s
@@ -208,6 +246,33 @@ export function ChatWindow({ publicKey, config }: ChatWindowProps) {
 
       setSuggestedVisible(false)
 
+      // While a human is handling, the visitor's message is stored but the bot
+      // does not reply — the agent answers from the inbox (surfaced via polling).
+      if (handoffStatusRef.current === 'requested' || handoffStatusRef.current === 'live') {
+        const userMsg: ChatMessage = { id: generateId(), role: 'user', content: text }
+        setMessages((prev) => [...prev, userMsg])
+        try {
+          const res = await fetch('/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              publicKey,
+              visitorId: visitorIdRef.current,
+              conversationId,
+              message: text,
+              language: activeLang,
+            }),
+          })
+          const cid = res.headers.get('x-conversation-id')
+          if (cid) setConversationId(cid)
+          const h = res.headers.get('x-handoff') as HandoffStatus | null
+          if (h) updateHandoff(h === 'resolved' ? 'bot' : h)
+        } catch {
+          // Non-critical; polling will keep the transcript in sync.
+        }
+        return
+      }
+
       const userMsg: ChatMessage = { id: generateId(), role: 'user', content: text }
       const assistantMsg: ChatMessage = { id: generateId(), role: 'assistant', content: '', streaming: true }
 
@@ -229,6 +294,12 @@ export function ChatWindow({ publicKey, config }: ChatWindowProps) {
 
         const convId = res.headers.get('x-conversation-id')
         if (convId) setConversationId(convId)
+
+        // The bot may have escalated this turn (intent or repeat fallback).
+        const handoff = res.headers.get('x-handoff') as HandoffStatus | null
+        if (handoff === 'requested' || handoff === 'live') {
+          updateHandoff(handoff)
+        }
 
         const leadCapture = res.headers.get('x-lead-capture')
         if (leadCapture === '1' && !leadDismissed && config.leadCapture.enabled) {
@@ -323,8 +394,91 @@ export function ChatWindow({ publicKey, config }: ChatWindowProps) {
         setStreaming(false)
       }
     },
-    [streaming, conversationId, leadDismissed, config.leadCapture.enabled, publicKey, activeLang, syncMessageIds]
+    [streaming, conversationId, leadDismissed, config.leadCapture.enabled, publicKey, activeLang, syncMessageIds, updateHandoff]
   )
+
+  /** Visitor taps "Talk to a person" → escalate the conversation. */
+  const requestHandoff = useCallback(async () => {
+    if (handoffStatusRef.current !== 'bot') return
+    setSuggestedVisible(false)
+    // No conversation yet → escalate via an intent-bearing message, which also
+    // creates the conversation server-side.
+    if (!conversationId) {
+      await sendMessage(HANDOFF_REQUEST_PHRASE[activeLang] ?? HANDOFF_REQUEST_PHRASE.en)
+      return
+    }
+    try {
+      const res = await fetch('/api/widget/request-handoff', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ publicKey, conversationId }),
+      })
+      if (res.ok) {
+        const data = (await res.json()) as { status?: HandoffStatus }
+        updateHandoff(data.status === 'live' ? 'live' : 'requested')
+      }
+    } catch {
+      // Non-critical.
+    }
+  }, [conversationId, activeLang, publicKey, sendMessage, updateHandoff])
+
+  // While in handoff, poll for the agent's status + new human replies (~4s).
+  useEffect(() => {
+    if (handoffStatus === 'bot' || handoffStatus === 'resolved') return
+    if (!conversationId) return
+    let active = true
+
+    const poll = async () => {
+      try {
+        const res = await fetch('/api/widget/poll', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ publicKey, conversationId, afterTs: lastPollTsRef.current }),
+        })
+        if (!res.ok || !active) return
+        const data = (await res.json()) as {
+          status: HandoffStatus
+          agentName: string | null
+          serverTime?: string
+          messages?: { id: string; content: string }[]
+        }
+        if (data.serverTime) lastPollTsRef.current = data.serverTime
+        setAgentName(data.agentName ?? null)
+
+        if (Array.isArray(data.messages) && data.messages.length > 0) {
+          setMessages((prev) => {
+            const have = new Set(prev.map((m) => m.id))
+            const adds = data.messages!
+              .filter((m) => !have.has(m.id))
+              .map((m) => ({ id: m.id, role: 'assistant' as const, content: m.content, fromHuman: true }))
+            return adds.length ? [...prev, ...adds] : prev
+          })
+        }
+
+        // The human episode ended → close it out and let the bot resume.
+        if (data.status === 'bot' || data.status === 'resolved') {
+          if (handoffStatusRef.current !== 'bot') {
+            setMessages((prev) => [
+              ...prev,
+              { id: generateId(), role: 'assistant', content: HANDOFF_ENDED_NOTE[activeLang] ?? HANDOFF_ENDED_NOTE.en },
+            ])
+          }
+          updateHandoff('bot')
+        } else if (data.status !== handoffStatusRef.current) {
+          updateHandoff(data.status)
+        }
+      } catch {
+        // Transient; the next tick retries.
+      }
+    }
+
+    poll()
+    const timer = setInterval(poll, POLL_INTERVAL_MS)
+    return () => {
+      active = false
+      clearInterval(timer)
+    }
+  }, [handoffStatus, conversationId, publicKey, activeLang, updateHandoff])
 
   const handleLeadSubmit = useCallback(
     async (fields: Record<string, string>) => {
@@ -445,6 +599,25 @@ export function ChatWindow({ publicKey, config }: ChatWindowProps) {
 
       {/* Body — messages + composer. Relative so the product list can overlay it. */}
       <div className="relative flex-1 flex flex-col min-h-0">
+        {/* Handoff banner */}
+        {(handoffStatus === 'requested' || handoffStatus === 'live') && (
+          <div className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white text-xs flex-shrink-0">
+            <HeadsetIcon className="size-3.5 flex-shrink-0" aria-hidden="true" />
+            <span className="flex-1">
+              {handoffStatus === 'live'
+                ? handoffBannerLive(activeLang, agentName)
+                : HANDOFF_BANNER_REQUESTED[activeLang] ?? HANDOFF_BANNER_REQUESTED.en}
+            </span>
+            {handoffStatus === 'requested' && (
+              <span className="flex gap-0.5" aria-hidden="true">
+                <span className="size-1 rounded-full bg-white/70 animate-bounce [animation-delay:-0.2s]" />
+                <span className="size-1 rounded-full bg-white/70 animate-bounce [animation-delay:-0.1s]" />
+                <span className="size-1 rounded-full bg-white/70 animate-bounce" />
+              </span>
+            )}
+          </div>
+        )}
+
         <MessageList
           messages={messages}
           primaryColor={primaryColor}
@@ -478,6 +651,20 @@ export function ChatWindow({ publicKey, config }: ChatWindowProps) {
               setLeadDismissed(true)
             }}
           />
+        )}
+
+        {/* Talk to a person — only while the bot is handling the chat */}
+        {handoffStatus === 'bot' && !streaming && (
+          <div className="px-4 pt-1 flex justify-center flex-shrink-0">
+            <button
+              type="button"
+              onClick={requestHandoff}
+              className="inline-flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-900 transition-colors"
+            >
+              <HeadsetIcon className="size-3.5" aria-hidden="true" />
+              {HANDOFF_TALK_LABEL[activeLang] ?? HANDOFF_TALK_LABEL.en}
+            </button>
+          </div>
         )}
 
         {/* Optional privacy consent line */}

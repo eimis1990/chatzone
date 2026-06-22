@@ -7,7 +7,8 @@ import { retrieveContext, serviceRetrievalDeps } from '@/lib/ai/retrieval'
 import { buildMessages, contentFor, defaultLanguage, type ChatMessage } from '@/lib/ai/prompt'
 import { commerceEnabled, makeProductTools, ndjsonChatResponse, ndjsonText } from '@/lib/ai/commerce-tool'
 import { createRateLimiter } from '@/lib/ratelimit'
-import type { Bot, Citation } from '@/lib/types'
+import { detectHandoffIntent, HANDOFF_ACK } from '@/lib/handoff'
+import type { Bot, Citation, HandoffStatus } from '@/lib/types'
 import type { CommerceProduct } from '@/lib/commerce/types'
 
 export const maxDuration = 60
@@ -57,16 +58,22 @@ export async function POST(req: Request) {
     return json({ error: 'Rate limit exceeded' }, 429)
   }
 
-  // Find or create the conversation.
+  // Find or create the conversation, carrying its handoff state.
   let convId = conversationId ?? null
+  let handoffStatus: HandoffStatus = 'bot'
+  let priorHadFallback = false
   if (convId) {
     const { data: existing } = await svc
       .from('conversations')
-      .select('id')
+      .select('id, handoff_status, had_fallback')
       .eq('id', convId)
       .eq('bot_id', bot.id)
-      .single()
+      .single<{ id: string; handoff_status: HandoffStatus | null; had_fallback: boolean | null }>()
     if (!existing) convId = null
+    else {
+      handoffStatus = existing.handoff_status ?? 'bot'
+      priorHadFallback = Boolean(existing.had_fallback)
+    }
   }
   if (!convId) {
     const { data: created } = await svc
@@ -80,6 +87,32 @@ export async function POST(req: Request) {
   // Persist the user message; bump conversation activity.
   await svc.from('messages').insert({ conversation_id: convId, role: 'user', content: message })
   await svc.from('conversations').update({ last_message_at: new Date().toISOString() }).eq('id', convId)
+
+  const handoffHeaders = { ...cors, 'x-conversation-id': convId }
+
+  // A human is queued (`requested`) or actively handling (`live`): record the
+  // visitor turn but do NOT auto-reply — the agent answers from the inbox.
+  if (handoffStatus === 'requested' || handoffStatus === 'live') {
+    return new Response('', { status: 200, headers: { ...handoffHeaders, 'x-handoff': handoffStatus } })
+  }
+
+  // A resolved handoff episode is over; the bot resumes for this new turn.
+  if (handoffStatus === 'resolved') {
+    await svc.from('conversations').update({ handoff_status: 'bot' }).eq('id', convId)
+  }
+
+  // The visitor explicitly asks for a human → escalate + acknowledge (no LLM).
+  if (detectHandoffIntent(message, lang)) {
+    await svc
+      .from('conversations')
+      .update({ handoff_status: 'requested', handoff_requested_at: new Date().toISOString() })
+      .eq('id', convId)
+    const ack = HANDOFF_ACK[lang] ?? HANDOFF_ACK.en
+    await svc
+      .from('messages')
+      .insert({ conversation_id: convId, role: 'assistant', content: ack, citations: [] })
+    return ndjsonText(ack, { ...handoffHeaders, 'x-handoff': 'requested' })
+  }
 
   // Load recent history (excluding the just-inserted message handled by buildMessages tail).
   const { data: historyRows } = await svc
@@ -96,7 +129,7 @@ export async function POST(req: Request) {
   const retrieval = await retrieveContext(bot.id, message, {}, serviceRetrievalDeps(svc))
 
   const commerce = commerceEnabled(bot.config)
-  const baseHeaders = { ...cors, 'x-conversation-id': convId }
+  const baseHeaders = { ...handoffHeaders, 'x-handoff': 'bot' }
 
   // Weak retrieval with no product search → fallback + lead-capture signal.
   if (retrieval.isWeak && !commerce) {
@@ -109,8 +142,22 @@ export async function POST(req: Request) {
     })
     // Flag the conversation as having hit the fallback (AI-accuracy proxy).
     await svc.from('conversations').update({ had_fallback: true }).eq('id', convId)
+
+    // A repeat fallback means the bot is stuck — escalate to a human.
+    let handoff = 'bot'
+    if (priorHadFallback) {
+      await svc
+        .from('conversations')
+        .update({ handoff_status: 'requested', handoff_requested_at: new Date().toISOString() })
+        .eq('id', convId)
+      handoff = 'requested'
+    }
     const leadTrigger = bot.config.leadCapture?.enabled && bot.config.leadCapture.trigger === 'on_fallback'
-    return ndjsonText(fallback, { ...baseHeaders, 'x-lead-capture': leadTrigger ? '1' : '0' })
+    return ndjsonText(fallback, {
+      ...baseHeaders,
+      'x-lead-capture': leadTrigger ? '1' : '0',
+      'x-handoff': handoff,
+    })
   }
 
   const messages = buildMessages(bot.config, retrieval.chunks, history, message, lang) as ModelMessage[]
