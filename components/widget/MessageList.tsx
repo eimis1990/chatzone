@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import { ProductCards } from './ProductCards'
+import { ThinkingDots } from './ThinkingDots'
 import type { CommerceProduct } from '@/lib/commerce/types'
 
 export interface ChatMessage {
@@ -73,48 +74,55 @@ export function MessageList({
       </div>
 
       {messages.map((msg) => (
-        <div
-          key={msg.id}
-          className={`flex items-start gap-2 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}
-        >
-          {msg.role === 'assistant' && renderAvatar(displayName)}
-          <div className="flex flex-col gap-1 max-w-[80%]">
-            {/* Skip the empty bubble for cards-only (voice search) messages. */}
-            {(msg.content || msg.streaming) && (
-              <div
-                className={`px-3 py-2 text-sm whitespace-pre-wrap ${
-                  msg.role === 'user'
-                    ? 'text-white'
-                    : 'bg-gray-100 text-gray-900'
-                }`}
-                style={{
-                  borderRadius: msg.role === 'user'
-                    ? `${msgBubbleRadius} ${msgBubbleRadius} 2px ${msgBubbleRadius}`
-                    : `${msgBubbleRadius} ${msgBubbleRadius} ${msgBubbleRadius} 2px`,
-                  ...(msg.role === 'user' ? { backgroundColor: primaryColor } : {}),
-                }}
-              >
-                {msg.content}
-                {msg.streaming && (
-                  <span className="inline-block w-1.5 h-4 ml-0.5 align-middle animate-pulse bg-current opacity-70" />
-                )}
-              </div>
-            )}
-
-            {/* Product cards — rendered under completed assistant messages */}
-            {msg.role === 'assistant' &&
-              !msg.streaming &&
-              msg.products &&
-              msg.products.length > 0 && (
-                <ProductCards
-                  products={msg.products}
-                  bubbleRadius={bubbleRadius}
-                  primaryColor={primaryColor}
-                  language={activeLang}
-                  onSeeAll={onSeeAllProducts}
-                />
+        <div key={msg.id}>
+          <div
+            className={`flex items-start gap-2 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}
+          >
+            {msg.role === 'assistant' && renderAvatar(displayName)}
+            <div className="flex flex-col gap-1 max-w-[80%]">
+              {/* Skip the empty bubble for cards-only (voice search) messages. */}
+              {(msg.content || msg.streaming) && (
+                <div
+                  className={`px-3 py-2 text-sm whitespace-pre-wrap ${
+                    msg.role === 'user'
+                      ? 'text-white'
+                      : 'bg-gray-100 text-gray-900'
+                  }`}
+                  style={{
+                    borderRadius: msg.role === 'user'
+                      ? `${msgBubbleRadius} ${msgBubbleRadius} 2px ${msgBubbleRadius}`
+                      : `${msgBubbleRadius} ${msgBubbleRadius} ${msgBubbleRadius} 2px`,
+                    ...(msg.role === 'user' ? { backgroundColor: primaryColor } : {}),
+                  }}
+                >
+                  {msg.streaming && !msg.content ? (
+                    <ThinkingDots />
+                  ) : (
+                    <>
+                      {msg.content}
+                      {msg.streaming && (
+                        <span className="inline-block w-1.5 h-4 ml-0.5 align-middle animate-pulse bg-current opacity-70" />
+                      )}
+                    </>
+                  )}
+                </div>
               )}
+            </div>
           </div>
+
+          {/* Product cards — full chat width, below the message bubble */}
+          {msg.role === 'assistant' &&
+            !msg.streaming &&
+            msg.products &&
+            msg.products.length > 0 && (
+              <ProductCards
+                products={msg.products}
+                bubbleRadius={bubbleRadius}
+                primaryColor={primaryColor}
+                language={activeLang}
+                onSeeAll={onSeeAllProducts}
+              />
+            )}
         </div>
       ))}
       <div ref={bottomRef} />

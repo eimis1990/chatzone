@@ -141,6 +141,48 @@
     background-position: -9px -9px;
   }
 
+  /* "Agent is thinking" — bouncing dots (adapted from Uiverse / mobinkakei). */
+  .cz-think {
+    position: relative;
+    width: 46px;
+    height: 18px;
+  }
+  .cz-think .cz-dot {
+    width: 8px;
+    height: 8px;
+    position: absolute;
+    border-radius: 50%;
+    background-color: var(--muted-foreground);
+    left: 6%;
+    transform-origin: 50%;
+    animation: cz-bounce 0.5s alternate infinite ease;
+  }
+  .cz-think .cz-dot:nth-child(2) {
+    left: 42%;
+    animation-delay: 0.2s;
+  }
+  .cz-think .cz-dot:nth-child(3) {
+    left: auto;
+    right: 6%;
+    animation-delay: 0.3s;
+  }
+  @keyframes cz-bounce {
+    0% {
+      top: 14px;
+      height: 3px;
+      border-radius: 50px 50px 25px 25px;
+      transform: scaleX(1.6);
+    }
+    40% {
+      height: 8px;
+      border-radius: 50%;
+      transform: scaleX(1);
+    }
+    100% {
+      top: 0%;
+    }
+  }
+
   /* Soft green mesh gradient for the app sidebar (layered radial blobs). */
   .bg-sidebar-mesh {
     background-color: #f4f8f4;
