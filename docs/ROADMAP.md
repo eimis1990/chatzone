@@ -208,11 +208,11 @@ matching email; never return an order on a mismatch; rate-limit per conversation
 - Works in both text and voice.
 
 **Tasks.**
-- [ ] Config: REST creds + discount fields; redact from public config; validation.
-- [ ] `getOrderStatus` (WooCommerce REST) + identity check + normalization.
+- [x] Config: REST creds + discount fields; redacted from public config. _(commerce.restKey/restSecret/discount; publicBotConfig omits commerce entirely.)_
+- [x] `getOrderStatus` (WooCommerce REST) + identity check + normalization. _(lib/commerce: getWooOrderStatus gated by order id + matching billing email; getDiscount; orderLookupEnabled.)_
+- [x] Tests: identity match/mismatch, 404/error, missing-creds guard, discount delivery. _(tests/unit/order.test.ts — 11 tests.)_
 - [ ] `order_status` + `discount_code` tools (text + voice) + prompt updates.
-- [ ] Configurator UI (creds + test + discount).
-- [ ] Tests: identity match/mismatch, status normalization, discount delivery.
+- [ ] Configurator UI (creds + test connection + discount).
 
 ---
 
