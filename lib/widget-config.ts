@@ -15,6 +15,7 @@ export interface PublicLanguageContent {
 export interface PublicBotConfig {
   displayName: string
   avatarUrl?: string
+  botAvatarUrl?: string
   privacyUrl?: string
   theme: {
     primaryColor: string
@@ -84,6 +85,9 @@ export function publicBotConfig(config: BotConfig): PublicBotConfig {
 
   if (config.avatarUrl !== undefined) {
     result.avatarUrl = config.avatarUrl
+  }
+  if (config.botAvatarUrl) {
+    result.botAvatarUrl = config.botAvatarUrl
   }
   if (config.privacyUrl) {
     result.privacyUrl = config.privacyUrl

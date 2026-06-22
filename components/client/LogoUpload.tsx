@@ -16,16 +16,30 @@ interface LogoUploadProps {
   botId: string
   control: Control<FormValues>
   setValue: UseFormSetValue<FormValues>
+  /** Which config field this uploader writes to. Defaults to the company logo. */
+  name?: 'avatarUrl' | 'botAvatarUrl'
+  label?: string
+  description?: string
+  /** Storage filename prefix (keeps the two images distinct in the bucket). */
+  filePrefix?: string
 }
 
 const ACCEPTED_TYPES = ['image/png', 'image/jpeg', 'image/svg+xml', 'image/webp']
 const MAX_SIZE_MB = 2
 
-export function LogoUpload({ botId, control, setValue }: LogoUploadProps) {
+export function LogoUpload({
+  botId,
+  control,
+  setValue,
+  name = 'avatarUrl',
+  label = 'Logo',
+  description,
+  filePrefix = 'logo',
+}: LogoUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
 
-  const avatarUrl = useWatch({ control, name: 'avatarUrl' })
+  const avatarUrl = useWatch({ control, name })
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -45,7 +59,7 @@ export function LogoUpload({ botId, control, setValue }: LogoUploadProps) {
     setUploading(true)
     try {
       const ext = file.name.split('.').pop() ?? 'png'
-      const path = `${botId}/logo-${Date.now()}.${ext}`
+      const path = `${botId}/${filePrefix}-${Date.now()}.${ext}`
       const supabase = createBrowserClient()
 
       const { error: uploadError } = await supabase.storage
@@ -61,8 +75,8 @@ export function LogoUpload({ botId, control, setValue }: LogoUploadProps) {
         .from('public-assets')
         .getPublicUrl(path)
 
-      setValue('avatarUrl', data.publicUrl, { shouldDirty: true })
-      toast.success('Logo uploaded. Save to apply.')
+      setValue(name, data.publicUrl, { shouldDirty: true })
+      toast.success(`${label} uploaded. Save to apply.`)
     } catch {
       toast.error('Upload failed. Please try again.')
     } finally {
@@ -71,12 +85,12 @@ export function LogoUpload({ botId, control, setValue }: LogoUploadProps) {
   }
 
   const handleRemove = () => {
-    setValue('avatarUrl', '', { shouldDirty: true })
+    setValue(name, '', { shouldDirty: true })
   }
 
   return (
     <div className="space-y-2">
-      <Label>Logo</Label>
+      <Label>{label}</Label>
       <div className="flex items-center gap-4">
         {/* Preview */}
         <div className="w-14 h-14 rounded-xl border border-border flex items-center justify-center bg-muted flex-shrink-0 overflow-hidden">
@@ -101,7 +115,7 @@ export function LogoUpload({ botId, control, setValue }: LogoUploadProps) {
               onClick={() => inputRef.current?.click()}
             >
               <UploadIcon className="size-3.5 mr-1" aria-hidden="true" />
-              {uploading ? 'Uploading…' : 'Upload logo'}
+              {uploading ? 'Uploading…' : avatarUrl ? 'Replace' : 'Upload'}
             </Button>
             {avatarUrl && (
               <Button
@@ -117,7 +131,7 @@ export function LogoUpload({ botId, control, setValue }: LogoUploadProps) {
             )}
           </div>
           <p className="text-xs text-muted-foreground">
-            PNG, JPG, SVG, WebP — max {MAX_SIZE_MB} MB
+            {description ?? `PNG, JPG, SVG, WebP — max ${MAX_SIZE_MB} MB`}
           </p>
         </div>
       </div>

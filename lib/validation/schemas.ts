@@ -56,6 +56,7 @@ export function normalizeBotConfig(input: unknown): unknown {
 export const botConfigFormSchema = z.object({
   displayName: z.string().min(1).max(60),
   avatarUrl: z.string().url().optional().or(z.literal('')),
+  botAvatarUrl: z.string().url().optional().or(z.literal('')),
   privacyUrl: z.string().url().optional().or(z.literal('')),
   theme: z
     .object({

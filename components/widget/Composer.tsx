@@ -1,6 +1,7 @@
 'use client'
 
 import { useRef, useState, type KeyboardEvent, type FormEvent } from 'react'
+import { readableTextColor, isLightColor } from '@/lib/utils'
 
 interface ComposerProps {
   onSend: (message: string) => void
@@ -59,13 +60,16 @@ export function Composer({ onSend, disabled = false, primaryColor, language }: C
           style={{ maxHeight: '120px', '--tw-ring-color': primaryColor } as React.CSSProperties}
         />
 
-        {/* Send button */}
+        {/* Send button — icon auto-contrasts; a light button gets a border so
+            it stays visible on the white composer. */}
         <button
           type="submit"
           disabled={disabled || !value.trim()}
           aria-label="Send message"
-          className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 text-white transition-opacity hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed"
-          style={{ backgroundColor: primaryColor }}
+          className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 transition-opacity hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed ${
+            isLightColor(primaryColor) ? 'border border-gray-300' : ''
+          }`}
+          style={{ backgroundColor: primaryColor, color: readableTextColor(primaryColor) }}
         >
           <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4" aria-hidden="true">
             <path d="M3.105 2.288a.75.75 0 00-.826.95l1.903 6.114H14.25a.75.75 0 010 1.5H4.182l-1.903 6.114a.75.75 0 00.826.95 28.897 28.897 0 0015.293-7.154.75.75 0 000-1.115A28.897 28.897 0 003.105 2.288z" />

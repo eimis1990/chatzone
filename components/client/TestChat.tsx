@@ -44,6 +44,7 @@ type LiveConfig = {
   }
   allowedDomains?: string[]
   avatarUrl?: string
+  botAvatarUrl?: string
   privacyUrl?: string
   languages?: BotLanguage[]
   content?: Partial<
@@ -69,6 +70,7 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
   const publicConfig = buildPreviewPublicConfig(config)
   const cornerRadius = config.theme?.cornerRadius ?? 16
   const primaryColor = config.theme?.primaryColor ?? '#4f46e5'
+  const launcherAvatar = config.botAvatarUrl || config.avatarUrl
 
   const transport = useMemo<ChatTransport>(
     () => createPreviewTransport(botId, () => buildFullConfig(configRef.current)),
@@ -163,9 +165,9 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
               exit={{ rotate: -90, opacity: 0 }}
               transition={{ duration: 0.15 }}
             >
-              {config.avatarUrl ? (
+              {launcherAvatar ? (
                 <img
-                  src={config.avatarUrl}
+                  src={launcherAvatar}
                   alt={config.displayName ?? 'Bot'}
                   className="w-14 h-14 object-cover rounded-full"
                 />
@@ -297,6 +299,7 @@ function buildPreviewPublicConfig(config: LiveConfig): PublicBotConfig {
   }
 
   if (config.avatarUrl) result.avatarUrl = config.avatarUrl
+  if (config.botAvatarUrl) result.botAvatarUrl = config.botAvatarUrl
   if (config.privacyUrl) result.privacyUrl = config.privacyUrl
   return result
 }
@@ -327,6 +330,7 @@ function buildFullConfig(config: LiveConfig): BotConfig {
   return {
     displayName: config.displayName ?? 'Bot',
     avatarUrl: config.avatarUrl,
+    botAvatarUrl: config.botAvatarUrl,
     privacyUrl: config.privacyUrl,
     theme: {
       primaryColor: config.theme?.primaryColor ?? '#4f46e5',

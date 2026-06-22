@@ -215,6 +215,7 @@ export function ConfigForm({ botId, initialConfig }: ConfigFormProps) {
     leadCapture: watchedValues.leadCapture,
     allowedDomains: watchedValues.allowedDomains,
     avatarUrl: watchedValues.avatarUrl,
+    botAvatarUrl: watchedValues.botAvatarUrl,
     privacyUrl: watchedValues.privacyUrl,
     languages: watchedValues.languages,
     content: watchedValues.content,
@@ -246,7 +247,24 @@ export function ConfigForm({ botId, initialConfig }: ConfigFormProps) {
               )}
             </div>
 
-            <LogoUpload botId={botId} control={control} setValue={setValue} />
+            <LogoUpload
+              botId={botId}
+              control={control}
+              setValue={setValue}
+              name="avatarUrl"
+              label="Company logo"
+              filePrefix="logo"
+              description="Shown in the widget. Used as the default bot avatar."
+            />
+            <LogoUpload
+              botId={botId}
+              control={control}
+              setValue={setValue}
+              name="botAvatarUrl"
+              label="Bot image (optional)"
+              filePrefix="bot"
+              description="Overrides the company logo for this bot. If empty, the company logo is used."
+            />
 
             <div className="space-y-1.5">
               <Label htmlFor="privacyUrl">Privacy policy URL (optional)</Label>

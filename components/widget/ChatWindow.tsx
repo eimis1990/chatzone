@@ -14,6 +14,7 @@ import type { ChatTransport } from '@/lib/widget-transport'
 import type { BotLanguage, HandoffStatus } from '@/lib/types'
 import type { CommerceProduct } from '@/lib/commerce/types'
 import { fontStack } from '@/lib/fonts'
+import { readableTextColor, isLightColor } from '@/lib/utils'
 
 interface ChatWindowProps {
   config: PublicBotConfig
@@ -26,27 +27,6 @@ interface ChatWindowProps {
 
 function generateId() {
   return Math.random().toString(36).slice(2)
-}
-
-/** Black or white header text, whichever reads better on the chosen color. */
-function readableOn(bg: string): string {
-  const hex = bg.trim().replace(/^#/, '')
-  let r = 0,
-    g = 0,
-    b = 0
-  if (hex.length === 3) {
-    r = parseInt(hex[0] + hex[0], 16)
-    g = parseInt(hex[1] + hex[1], 16)
-    b = parseInt(hex[2] + hex[2], 16)
-  } else if (hex.length === 6) {
-    r = parseInt(hex.slice(0, 2), 16)
-    g = parseInt(hex.slice(2, 4), 16)
-    b = parseInt(hex.slice(4, 6), 16)
-  } else {
-    return '#ffffff'
-  }
-  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
-  return luminance > 0.6 ? '#111827' : '#ffffff'
 }
 
 // Header status while a live call is active.
@@ -466,7 +446,12 @@ export function ChatWindow({ config, transport, initialLanguage, headerAction }:
   const voiceEnabled = Boolean(config.voice?.enabled)
   const headerBorderRadius = `${cornerRadius}px ${cornerRadius}px 0 0`
   // Auto-contrast: keep header text/icons legible on any chosen color.
-  const headerFg = readableOn(primaryColor)
+  const headerFg = readableTextColor(primaryColor)
+  // Bot-specific image overrides the company logo when set.
+  const widgetAvatar = config.botAvatarUrl || config.avatarUrl
+  // For chips/buttons on the white chat body: fall back to a dark accent when
+  // the primary color is too light to show on white.
+  const onWhiteAccent = isLightColor(primaryColor) ? '#374151' : primaryColor
 
   return (
     <div
@@ -476,11 +461,16 @@ export function ChatWindow({ config, transport, initialLanguage, headerAction }:
       {/* Header */}
       <div
         className="flex items-center gap-3 px-4 py-4 flex-shrink-0"
-        style={{ backgroundColor: primaryColor, color: headerFg, borderRadius: headerBorderRadius }}
+        style={{
+          backgroundColor: primaryColor,
+          color: headerFg,
+          borderRadius: headerBorderRadius,
+          borderBottom: `1px solid color-mix(in srgb, ${headerFg} 14%, transparent)`,
+        }}
       >
-        {config.avatarUrl ? (
+        {widgetAvatar ? (
           <img
-            src={config.avatarUrl}
+            src={widgetAvatar}
             alt={config.displayName}
             className="w-8 h-8 rounded-full object-cover flex-shrink-0"
           />
@@ -564,7 +554,7 @@ export function ChatWindow({ config, transport, initialLanguage, headerAction }:
           bubbleRadius={bubbleRadius}
           greeting={greeting}
           displayName={config.displayName}
-          avatarUrl={config.avatarUrl}
+          avatarUrl={widgetAvatar}
           activeLang={activeLang}
           onSeeAllProducts={setListProducts}
           onFeedback={handleFeedback}
@@ -601,8 +591,8 @@ export function ChatWindow({ config, transport, initialLanguage, headerAction }:
               onClick={requestHandoff}
               className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-[filter] hover:brightness-95"
               style={{
-                backgroundColor: `color-mix(in srgb, ${primaryColor} 10%, transparent)`,
-                color: primaryColor,
+                backgroundColor: `color-mix(in srgb, ${onWhiteAccent} 12%, transparent)`,
+                color: onWhiteAccent,
               }}
             >
               <HeadsetIcon className="size-3.5" aria-hidden="true" />

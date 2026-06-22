@@ -91,7 +91,10 @@ export interface LanguageContent {
 
 export interface BotConfig {
   displayName: string
+  /** Company logo — the default avatar shown in the widget. */
   avatarUrl?: string
+  /** Optional bot-specific image; overrides the company logo when set. */
+  botAvatarUrl?: string
   /** Optional privacy-policy URL; shows a consent line in the widget when set. */
   privacyUrl?: string
   theme: {
