@@ -32,7 +32,7 @@ export default async function KnowledgePage({ params }: PageProps) {
     .returns<KnowledgeSource[]>()
 
   return (
-    <div className="space-y-8">
+    <div className="p-6 space-y-8">
       <div>
         <h2 className="text-lg font-semibold">Knowledge Base</h2>
         <p className="text-sm text-muted-foreground mt-1">

@@ -29,7 +29,7 @@ export default async function EmbedSnippetPage({
 ></script>`
 
   return (
-    <div className="max-w-2xl space-y-8">
+    <div className="p-6 max-w-2xl space-y-8">
       <div>
         <h2 className="text-xl font-semibold mb-1">Embed Widget</h2>
         <p className="text-sm text-muted-foreground">
