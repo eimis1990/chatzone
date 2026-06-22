@@ -447,8 +447,10 @@ export function ChatWindow({ config, transport, initialLanguage, headerAction }:
   const headerBorderRadius = `${cornerRadius}px ${cornerRadius}px 0 0`
   // Auto-contrast: keep header text/icons legible on any chosen color.
   const headerFg = readableTextColor(primaryColor)
-  // Bot-specific image overrides the company logo when set.
-  const widgetAvatar = config.botAvatarUrl || config.avatarUrl
+  // Header shows the company logo (brand); message bubbles show the bot avatar.
+  // Each falls back to the other, then to the name initial.
+  const headerAvatar = config.avatarUrl || config.botAvatarUrl
+  const messageAvatar = config.botAvatarUrl || config.avatarUrl
   // For chips/buttons on the white chat body: fall back to a dark accent when
   // the primary color is too light to show on white.
   const onWhiteAccent = isLightColor(primaryColor) ? '#374151' : primaryColor
@@ -468,9 +470,9 @@ export function ChatWindow({ config, transport, initialLanguage, headerAction }:
           borderBottom: `1px solid color-mix(in srgb, ${headerFg} 14%, transparent)`,
         }}
       >
-        {widgetAvatar ? (
+        {headerAvatar ? (
           <img
-            src={widgetAvatar}
+            src={headerAvatar}
             alt={config.displayName}
             className="w-8 h-8 rounded-full object-cover flex-shrink-0"
           />
@@ -554,7 +556,7 @@ export function ChatWindow({ config, transport, initialLanguage, headerAction }:
           bubbleRadius={bubbleRadius}
           greeting={greeting}
           displayName={config.displayName}
-          avatarUrl={widgetAvatar}
+          avatarUrl={messageAvatar}
           activeLang={activeLang}
           onSeeAllProducts={setListProducts}
           onFeedback={handleFeedback}

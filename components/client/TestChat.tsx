@@ -18,7 +18,7 @@ import { detectHandoffIntent, HANDOFF_ACK } from '@/lib/handoff'
 import type { ChatTransport } from '@/lib/widget-transport'
 import type { PublicBotConfig } from '@/lib/widget-config'
 import type { BotConfig, BotLanguage } from '@/lib/types'
-import { POWERED_BY_URL } from '@/lib/utils'
+import { POWERED_BY_URL, readableTextColor } from '@/lib/utils'
 
 const DEFAULT_VOICE_ID = '21m00Tcm4TlvDq8ikWAM'
 
@@ -70,7 +70,7 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
   const publicConfig = buildPreviewPublicConfig(config)
   const cornerRadius = config.theme?.cornerRadius ?? 16
   const primaryColor = config.theme?.primaryColor ?? '#4f46e5'
-  const launcherAvatar = config.botAvatarUrl || config.avatarUrl
+  const launcherAvatar = config.avatarUrl || config.botAvatarUrl
 
   const transport = useMemo<ChatTransport>(
     () => createPreviewTransport(botId, () => buildFullConfig(configRef.current)),
@@ -144,7 +144,7 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
         onClick={() => setIsOpen((v) => !v)}
         aria-label={isOpen ? 'Close chat preview' : 'Open chat preview'}
         className="w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-transform hover:scale-105 active:scale-95 pointer-events-auto overflow-hidden"
-        style={{ backgroundColor: primaryColor }}
+        style={{ backgroundColor: primaryColor, color: readableTextColor(primaryColor) }}
       >
         <AnimatePresence mode="wait" initial={false}>
           {isOpen ? (
@@ -155,7 +155,7 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
               exit={{ rotate: 90, opacity: 0 }}
               transition={{ duration: 0.15 }}
             >
-              <XIcon className="size-6 text-white" aria-hidden="true" />
+              <XIcon className="size-6" aria-hidden="true" />
             </motion.span>
           ) : (
             <motion.span
@@ -172,7 +172,7 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
                   className="w-14 h-14 object-cover rounded-full"
                 />
               ) : (
-                <MessageCircleIcon className="size-7 text-white" aria-hidden="true" />
+                <MessageCircleIcon className="size-7" aria-hidden="true" />
               )}
             </motion.span>
           )}

@@ -254,16 +254,16 @@ export function ConfigForm({ botId, initialConfig }: ConfigFormProps) {
               name="avatarUrl"
               label="Company logo"
               filePrefix="logo"
-              description="Shown in the widget. Used as the default bot avatar."
+              description="Shown in the chat header."
             />
             <LogoUpload
               botId={botId}
               control={control}
               setValue={setValue}
               name="botAvatarUrl"
-              label="Bot image (optional)"
+              label="Bot avatar (optional)"
               filePrefix="bot"
-              description="Overrides the company logo for this bot. If empty, the company logo is used."
+              description="Shown next to the bot's replies. If empty, the company logo is used."
             />
 
             <div className="space-y-1.5">
