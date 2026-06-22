@@ -1,5 +1,6 @@
 import type {
   CommerceProduct,
+  CommerceProvider,
   ProductSearchParams,
   CommerceDeps,
   OrderStatus,
@@ -12,16 +13,34 @@ import {
   getWooOrderStatus,
   validateWooOrderAccess,
 } from '@/lib/commerce/woocommerce'
+import { searchShopifyProducts, validateShopifyStore } from '@/lib/commerce/shopify'
 
 export interface CommerceConfig {
   enabled: boolean
-  provider: 'woocommerce'
+  provider: CommerceProvider
+  /** WooCommerce store URL (and base for the REST API). */
   storeUrl: string
   /** WooCommerce REST consumer key/secret — server-only, for order lookups. */
   restKey?: string
   restSecret?: string
+  /** Shopify Storefront domain + token (server-only token). */
+  shopifyDomain?: string
+  shopifyToken?: string
   /** A static discount the agent can offer on discount intent. */
   discount?: { enabled: boolean; code?: string; description?: string }
+}
+
+/** Whether the active provider has the fields it needs to run a search. */
+export function storeConfigured(config: CommerceConfig): boolean {
+  if (!config?.enabled) return false
+  switch (config.provider) {
+    case 'woocommerce':
+      return Boolean(config.storeUrl)
+    case 'shopify':
+      return Boolean(config.shopifyDomain && config.shopifyToken)
+    default:
+      return false
+  }
 }
 
 /** Search a store's catalog using the configured provider. */
@@ -30,10 +49,12 @@ export async function searchStore(
   params: ProductSearchParams,
   deps: CommerceDeps = {},
 ): Promise<CommerceProduct[]> {
-  if (!config?.enabled || !config.storeUrl) return []
+  if (!storeConfigured(config)) return []
   switch (config.provider) {
     case 'woocommerce':
       return searchWooProducts(config.storeUrl, params, deps)
+    case 'shopify':
+      return searchShopifyProducts(config.shopifyDomain!, config.shopifyToken!, params, deps)
     default:
       return []
   }
@@ -41,13 +62,21 @@ export async function searchStore(
 
 /** Validate a store connection and return the catalog size for the provider. */
 export async function validateStore(
-  provider: CommerceConfig['provider'],
-  storeUrl: string,
+  config: {
+    provider: CommerceProvider
+    storeUrl?: string
+    shopifyDomain?: string
+    shopifyToken?: string
+  },
   deps: CommerceDeps = {},
 ): Promise<{ ok: boolean; total: number }> {
-  switch (provider) {
+  switch (config.provider) {
     case 'woocommerce':
-      return validateWooStore(storeUrl, deps)
+      return config.storeUrl ? validateWooStore(config.storeUrl, deps) : { ok: false, total: 0 }
+    case 'shopify':
+      return config.shopifyDomain && config.shopifyToken
+        ? validateShopifyStore(config.shopifyDomain, config.shopifyToken, deps)
+        : { ok: false, total: 0 }
     default:
       return { ok: false, total: 0 }
   }

@@ -134,11 +134,14 @@ export interface BotConfig {
   /** Live product search (e-commerce). */
   commerce: {
     enabled: boolean
-    provider: 'woocommerce'
+    provider: 'woocommerce' | 'shopify'
     storeUrl: string
     /** WooCommerce REST consumer key/secret — server-only, for order lookups. */
     restKey?: string
     restSecret?: string
+    /** Shopify Storefront domain + access token (token is server-only). */
+    shopifyDomain?: string
+    shopifyToken?: string
     /** A static discount the agent can offer on discount intent. */
     discount?: { enabled: boolean; code?: string; description?: string }
   }

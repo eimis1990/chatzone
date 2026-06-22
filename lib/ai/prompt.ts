@@ -1,4 +1,5 @@
 import type { BotConfig, BotLanguage, LanguageContent } from '@/lib/types'
+import { storeConfigured } from '@/lib/commerce'
 
 export interface ChatMessage {
   role: 'system' | 'user' | 'assistant'
@@ -34,7 +35,7 @@ export function buildSystemPrompt(
     : '(no relevant context was found)'
   const languageName = lang === 'lt' ? 'Lithuanian' : 'English'
   const fallback = contentFor(config, lang).fallbackMessage
-  const commerce = Boolean(config.commerce?.enabled && config.commerce?.storeUrl)
+  const commerce = storeConfigured(config.commerce)
 
   const lines = [
     config.systemPrompt,

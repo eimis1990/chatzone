@@ -925,7 +925,10 @@ interface CommerceSectionProps {
 
 function CommerceSection({ control, watch }: CommerceSectionProps) {
   const commerceEnabled = watch('commerce.enabled')
+  const provider = watch('commerce.provider') ?? 'woocommerce'
   const storeUrl = watch('commerce.storeUrl') ?? ''
+  const shopifyDomain = watch('commerce.shopifyDomain') ?? ''
+  const shopifyToken = watch('commerce.shopifyToken') ?? ''
   const restKey = watch('commerce.restKey') ?? ''
   const restSecret = watch('commerce.restSecret') ?? ''
   const discountEnabled = watch('commerce.discount.enabled')
@@ -960,17 +963,27 @@ function CommerceSection({ control, watch }: CommerceSectionProps) {
     }
   }, [storeUrl, restKey, restSecret])
 
+  const testReady =
+    provider === 'shopify' ? Boolean(shopifyDomain.trim() && shopifyToken.trim()) : Boolean(storeUrl.trim())
+
   const handleTest = useCallback(async () => {
-    if (!storeUrl.trim()) {
-      setTestState({ status: 'error', message: 'Enter a store URL first.' })
+    if (!testReady) {
+      setTestState({
+        status: 'error',
+        message: provider === 'shopify' ? 'Enter the Shopify domain and token first.' : 'Enter a store URL first.',
+      })
       return
     }
     setTestState({ status: 'loading' })
     try {
+      const body =
+        provider === 'shopify'
+          ? { provider, shopifyDomain: shopifyDomain.trim(), shopifyToken: shopifyToken.trim() }
+          : { provider: 'woocommerce', storeUrl: storeUrl.trim() }
       const res = await fetch('/api/commerce/validate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ provider: 'woocommerce', storeUrl: storeUrl.trim() }),
+        body: JSON.stringify(body),
       })
       const data = (await res.json()) as { ok: boolean; error?: string; total?: number }
       if (data.ok) {
@@ -981,12 +994,13 @@ function CommerceSection({ control, watch }: CommerceSectionProps) {
     } catch {
       setTestState({ status: 'error', message: 'Network error — please try again.' })
     }
-  }, [storeUrl])
+  }, [provider, storeUrl, shopifyDomain, shopifyToken, testReady])
 
-  // Reset test state when URL changes
-  const prevUrlRef = useRef(storeUrl)
-  if (prevUrlRef.current !== storeUrl) {
-    prevUrlRef.current = storeUrl
+  // Reset test state when the connection inputs change.
+  const connKey = `${provider}:${storeUrl}:${shopifyDomain}:${shopifyToken}`
+  const prevConnRef = useRef(connKey)
+  if (prevConnRef.current !== connKey) {
+    prevConnRef.current = connKey
     if (testState.status !== 'idle') setTestState({ status: 'idle' })
   }
 
@@ -1016,43 +1030,95 @@ function CommerceSection({ control, watch }: CommerceSectionProps) {
 
         {commerceEnabled && (
           <div className="space-y-4 rounded-lg border p-4">
-            {/* Provider — read-only single option */}
+            {/* Provider */}
             <div className="space-y-1.5">
               <Label>Provider</Label>
-              <Select disabled value="woocommerce">
-                <SelectTrigger className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="woocommerce">WooCommerce</SelectItem>
-                </SelectContent>
-              </Select>
-              <p className="text-xs text-muted-foreground">
-                WooCommerce is auto-detected from your store URL.
-              </p>
-            </div>
-
-            {/* Store URL */}
-            <div className="space-y-1.5">
-              <Label htmlFor="commerceStoreUrl">Store URL</Label>
               <Controller
-                name="commerce.storeUrl"
+                name="commerce.provider"
                 control={control}
                 render={({ field }) => (
-                  <Input
-                    id="commerceStoreUrl"
-                    name={field.name}
-                    ref={field.ref}
-                    value={field.value ?? ''}
-                    onChange={field.onChange}
-                    onBlur={field.onBlur}
-                    placeholder="https://yourstore.com"
-                    autoComplete="url"
-                    inputMode="url"
-                  />
+                  <Select value={field.value ?? 'woocommerce'} onValueChange={field.onChange}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="woocommerce">WooCommerce</SelectItem>
+                      <SelectItem value="shopify">Shopify</SelectItem>
+                    </SelectContent>
+                  </Select>
                 )}
               />
             </div>
+
+            {/* WooCommerce: store URL */}
+            {provider === 'woocommerce' && (
+              <div className="space-y-1.5">
+                <Label htmlFor="commerceStoreUrl">Store URL</Label>
+                <Controller
+                  name="commerce.storeUrl"
+                  control={control}
+                  render={({ field }) => (
+                    <Input
+                      id="commerceStoreUrl"
+                      name={field.name}
+                      ref={field.ref}
+                      value={field.value ?? ''}
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                      placeholder="https://yourstore.com"
+                      autoComplete="url"
+                      inputMode="url"
+                    />
+                  )}
+                />
+              </div>
+            )}
+
+            {/* Shopify: Storefront domain + token */}
+            {provider === 'shopify' && (
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <Label htmlFor="shopifyDomain">Store domain</Label>
+                  <Controller
+                    name="commerce.shopifyDomain"
+                    control={control}
+                    render={({ field }) => (
+                      <Input
+                        id="shopifyDomain"
+                        value={field.value ?? ''}
+                        onChange={field.onChange}
+                        onBlur={field.onBlur}
+                        placeholder="your-store.myshopify.com"
+                        autoComplete="off"
+                        className="font-mono text-sm"
+                      />
+                    )}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="shopifyToken">Storefront access token</Label>
+                  <Controller
+                    name="commerce.shopifyToken"
+                    control={control}
+                    render={({ field }) => (
+                      <Input
+                        id="shopifyToken"
+                        type="password"
+                        value={field.value ?? ''}
+                        onChange={field.onChange}
+                        onBlur={field.onBlur}
+                        placeholder="shpat_… / public token"
+                        autoComplete="off"
+                        className="font-mono text-sm"
+                      />
+                    )}
+                  />
+                  <p className="text-xs text-muted-foreground sm:col-span-2">
+                    Create a Storefront API access token in Shopify admin → Settings → Apps → Develop apps.
+                  </p>
+                </div>
+              </div>
+            )}
 
             {/* Test connection button + result */}
             <div className="flex items-center gap-3 flex-wrap">
@@ -1060,7 +1126,7 @@ function CommerceSection({ control, watch }: CommerceSectionProps) {
                 type="button"
                 variant="outline"
                 size="sm"
-                disabled={testState.status === 'loading' || !storeUrl.trim()}
+                disabled={testState.status === 'loading' || !testReady}
                 onClick={handleTest}
               >
                 {testState.status === 'loading' ? 'Testing…' : 'Test connection'}
@@ -1068,8 +1134,9 @@ function CommerceSection({ control, watch }: CommerceSectionProps) {
 
               {testState.status === 'ok' && (
                 <TestBadge variant="ok">
-                  Connected — {testState.count.toLocaleString()} product
-                  {testState.count !== 1 ? 's' : ''} in catalog
+                  {testState.count > 0
+                    ? `Connected — ${testState.count.toLocaleString()} product${testState.count !== 1 ? 's' : ''} in catalog`
+                    : 'Connected'}
                 </TestBadge>
               )}
               {testState.status === 'error' && (
@@ -1081,7 +1148,8 @@ function CommerceSection({ control, watch }: CommerceSectionProps) {
               Your bot will search this store&apos;s catalog live and show product cards in chat.
             </p>
 
-            {/* Order lookup (optional) — WooCommerce REST credentials */}
+            {/* Order lookup (optional) — WooCommerce REST credentials (Woo only) */}
+            {provider === 'woocommerce' && (
             <div className="space-y-3 border-t pt-4">
               <div>
                 <Label>Order lookup (optional)</Label>
@@ -1146,6 +1214,7 @@ function CommerceSection({ control, watch }: CommerceSectionProps) {
                 )}
               </div>
             </div>
+            )}
 
             {/* Discount code (optional) */}
             <div className="space-y-3 border-t pt-4">

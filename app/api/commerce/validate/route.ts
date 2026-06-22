@@ -6,9 +6,11 @@ import { validateStore, validateOrderAccess } from '@/lib/commerce'
 export const maxDuration = 20
 
 const bodySchema = z.object({
-  provider: z.literal('woocommerce'),
-  storeUrl: z.string().url(),
-  // 'store' = public catalog (product search); 'orders' = REST creds (order lookup).
+  provider: z.enum(['woocommerce', 'shopify']).default('woocommerce'),
+  storeUrl: z.string().optional(),
+  shopifyDomain: z.string().optional(),
+  shopifyToken: z.string().optional(),
+  // 'store' = catalog connectivity; 'orders' = WooCommerce REST creds (order lookup).
   mode: z.enum(['store', 'orders']).default('store'),
   restKey: z.string().optional(),
   restSecret: z.string().optional(),
@@ -28,19 +30,27 @@ export async function POST(req: Request) {
 
   if (parsed.data.mode === 'orders') {
     const result = await validateOrderAccess(
-      parsed.data.provider,
-      parsed.data.storeUrl,
+      'woocommerce',
+      parsed.data.storeUrl ?? '',
       parsed.data.restKey ?? '',
       parsed.data.restSecret ?? '',
     )
     return NextResponse.json(result)
   }
 
-  const { ok, total } = await validateStore(parsed.data.provider, parsed.data.storeUrl)
+  const { ok, total } = await validateStore({
+    provider: parsed.data.provider,
+    storeUrl: parsed.data.storeUrl,
+    shopifyDomain: parsed.data.shopifyDomain,
+    shopifyToken: parsed.data.shopifyToken,
+  })
   if (!ok) {
     return NextResponse.json({
       ok: false,
-      error: 'Could not reach the WooCommerce Store API at that URL.',
+      error:
+        parsed.data.provider === 'shopify'
+          ? 'Could not reach Shopify with that domain and token.'
+          : 'Could not reach the WooCommerce Store API at that URL.',
     })
   }
   return NextResponse.json({ ok: true, total })

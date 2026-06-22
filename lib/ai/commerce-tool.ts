@@ -3,7 +3,7 @@ import { openai } from '@ai-sdk/openai'
 import { z } from 'zod'
 import type { BotConfig } from '@/lib/types'
 import type { CommerceProduct, OrderStatus } from '@/lib/commerce/types'
-import { searchStore, getOrderStatus, getDiscount, orderLookupEnabled } from '@/lib/commerce'
+import { searchStore, getOrderStatus, getDiscount, orderLookupEnabled, storeConfigured } from '@/lib/commerce'
 
 /**
  * Builds the product tools for a commerce-enabled bot:
@@ -32,10 +32,7 @@ export function makeProductTools(
         maxPrice: z.number().optional().describe('Maximum price in major units (e.g. euros)'),
       }),
       execute: async ({ query, minPrice, maxPrice }) => {
-        const products = await searchStore(
-          { enabled: true, provider: config.commerce.provider, storeUrl: config.commerce.storeUrl },
-          { query, minPrice, maxPrice, limit: 10 },
-        )
+        const products = await searchStore(config.commerce, { query, minPrice, maxPrice, limit: 10 })
         products.forEach((p) => candidates.set(p.id, p))
         return products.map((p) => ({
           id: p.id,
@@ -121,9 +118,9 @@ export function makeProductTools(
   return tools
 }
 
-/** True when the bot has live product search configured. */
+/** True when the bot has live product search configured (any provider). */
 export function commerceEnabled(config: BotConfig): boolean {
-  return Boolean(config.commerce?.enabled && config.commerce?.storeUrl)
+  return storeConfigured(config.commerce)
 }
 
 /** A one-shot NDJSON response containing a single text message (no LLM call). */

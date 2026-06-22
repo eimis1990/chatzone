@@ -52,10 +52,12 @@ type LiveConfig = {
   >
   commerce?: {
     enabled?: boolean
-    provider?: 'woocommerce'
+    provider?: 'woocommerce' | 'shopify'
     storeUrl?: string
     restKey?: string
     restSecret?: string
+    shopifyDomain?: string
+    shopifyToken?: string
     discount?: { enabled?: boolean; code?: string; description?: string }
   }
 }
@@ -391,10 +393,12 @@ function buildFullConfig(config: LiveConfig): BotConfig {
     allowedDomains: config.allowedDomains ?? [],
     commerce: {
       enabled: config.commerce?.enabled ?? false,
-      provider: 'woocommerce',
+      provider: config.commerce?.provider ?? 'woocommerce',
       storeUrl: config.commerce?.storeUrl ?? '',
       restKey: config.commerce?.restKey,
       restSecret: config.commerce?.restSecret,
+      shopifyDomain: config.commerce?.shopifyDomain,
+      shopifyToken: config.commerce?.shopifyToken,
       discount: config.commerce?.discount
         ? {
             enabled: config.commerce.discount.enabled ?? false,
