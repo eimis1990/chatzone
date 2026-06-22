@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
+import { Slider } from '@/components/ui/slider'
 import {
   Card,
   CardContent,
@@ -512,23 +513,27 @@ export function ConfigForm({ botId, initialConfig }: ConfigFormProps) {
               </p>
             </div>
 
-            {/* Radius sliders */}
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-1.5">
-                <Label htmlFor="cornerRadius">
+            {/* Radius sliders — stacked vertically */}
+            <div className="space-y-5">
+              <div className="space-y-2">
+                <Label>
                   Chat window roundness{' '}
                   <span className="text-muted-foreground font-normal">
                     ({watch('theme.cornerRadius') ?? 16}px)
                   </span>
                 </Label>
-                <input
-                  id="cornerRadius"
-                  type="range"
-                  min={0}
-                  max={32}
-                  step={1}
-                  {...register('theme.cornerRadius', { valueAsNumber: true })}
-                  className="w-full accent-primary"
+                <Controller
+                  control={control}
+                  name="theme.cornerRadius"
+                  render={({ field }) => (
+                    <Slider
+                      min={0}
+                      max={32}
+                      step={1}
+                      value={field.value ?? 16}
+                      onValueChange={(v) => field.onChange(Array.isArray(v) ? v[0] : v)}
+                    />
+                  )}
                 />
                 <div className="flex justify-between text-xs text-muted-foreground">
                   <span>Square</span>
@@ -536,21 +541,25 @@ export function ConfigForm({ botId, initialConfig }: ConfigFormProps) {
                 </div>
               </div>
 
-              <div className="space-y-1.5">
-                <Label htmlFor="bubbleRadius">
+              <div className="space-y-2">
+                <Label>
                   Bubble roundness{' '}
                   <span className="text-muted-foreground font-normal">
                     ({watch('theme.bubbleRadius') ?? 16}px)
                   </span>
                 </Label>
-                <input
-                  id="bubbleRadius"
-                  type="range"
-                  min={0}
-                  max={24}
-                  step={1}
-                  {...register('theme.bubbleRadius', { valueAsNumber: true })}
-                  className="w-full accent-primary"
+                <Controller
+                  control={control}
+                  name="theme.bubbleRadius"
+                  render={({ field }) => (
+                    <Slider
+                      min={0}
+                      max={24}
+                      step={1}
+                      value={field.value ?? 16}
+                      onValueChange={(v) => field.onChange(Array.isArray(v) ? v[0] : v)}
+                    />
+                  )}
                 />
                 <div className="flex justify-between text-xs text-muted-foreground">
                   <span>Square</span>
@@ -642,21 +651,25 @@ export function ConfigForm({ botId, initialConfig }: ConfigFormProps) {
                 />
               </div>
 
-              <div className="space-y-1.5">
-                <Label htmlFor="temperature">
+              <div className="space-y-2">
+                <Label>
                   Temperature{' '}
                   <span className="text-muted-foreground font-normal">
                     ({watch('temperature')?.toFixed(1) ?? '0.3'})
                   </span>
                 </Label>
-                <input
-                  id="temperature"
-                  type="range"
-                  min={0}
-                  max={2}
-                  step={0.1}
-                  {...register('temperature', { valueAsNumber: true })}
-                  className="w-full accent-primary"
+                <Controller
+                  control={control}
+                  name="temperature"
+                  render={({ field }) => (
+                    <Slider
+                      min={0}
+                      max={2}
+                      step={0.1}
+                      value={field.value ?? 0.3}
+                      onValueChange={(v) => field.onChange(Array.isArray(v) ? v[0] : v)}
+                    />
+                  )}
                 />
                 <div className="flex justify-between text-xs text-muted-foreground">
                   <span>Precise</span>

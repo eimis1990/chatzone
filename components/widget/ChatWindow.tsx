@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useRef, useEffect } from 'react'
+import { useState, useCallback, useRef, useEffect, type ReactNode } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { HeadsetIcon } from 'lucide-react'
 import { MessageList, type ChatMessage } from './MessageList'
@@ -18,29 +18,14 @@ import { fontStack } from '@/lib/fonts'
 interface ChatWindowProps {
   config: PublicBotConfig
   transport: ChatTransport
-  /** Initial display language (defaults to browser locale → first enabled). */
+  /** Display language, fixed by configuration (defaults to the first enabled). */
   initialLanguage?: BotLanguage
+  /** Optional extra control rendered at the right of the header (e.g. preview "Start over"). */
+  headerAction?: ReactNode
 }
 
 function generateId() {
   return Math.random().toString(36).slice(2)
-}
-
-/** Detect visitor's preferred language from browser, falling back to first enabled. */
-function detectInitialLanguage(languages: BotLanguage[]): BotLanguage {
-  if (languages.length <= 1) return languages[0] ?? 'en'
-  try {
-    const browserLang = navigator.language.split('-')[0].toLowerCase() as BotLanguage
-    if (languages.includes(browserLang)) return browserLang
-  } catch {
-    // navigator.language unavailable (e.g. SSR)
-  }
-  return languages[0]
-}
-
-const LANG_LABELS: Record<BotLanguage, string> = {
-  en: 'EN',
-  lt: 'LT',
 }
 
 // Header status while a live call is active.
@@ -75,16 +60,12 @@ function handoffBannerLive(lang: BotLanguage, agentName: string | null): string 
 
 const POLL_INTERVAL_MS = 4000
 
-export function ChatWindow({ config, transport, initialLanguage }: ChatWindowProps) {
+export function ChatWindow({ config, transport, initialLanguage, headerAction }: ChatWindowProps) {
   const languages = config.languages ?? ['en']
-  const isMultilang = languages.length > 1
 
-  // Active language — initialized once (prop → browser locale → first enabled)
-  const [activeLang, setActiveLang] = useState<BotLanguage>(() =>
-    initialLanguage && languages.includes(initialLanguage)
-      ? initialLanguage
-      : detectInitialLanguage(languages),
-  )
+  // Display language is fixed by configuration; visitors can't switch it.
+  const activeLang: BotLanguage =
+    initialLanguage && languages.includes(initialLanguage) ? initialLanguage : languages[0] ?? 'en'
 
   // Derived per-language content
   const langContent = config.content[activeLang] ?? config.content[languages[0]] ?? { greeting: '', suggestedQuestions: [] }
@@ -190,17 +171,6 @@ export function ChatWindow({ config, transport, initialLanguage }: ChatWindowPro
     }
     visitorIdRef.current = id
   }, [])
-
-  // When language changes: reset greeting-seeded messages and suggested visibility.
-  // Preserve conversation id and lead form state (server-side handles multilang).
-  const prevLangRef = useRef(activeLang)
-  useEffect(() => {
-    if (prevLangRef.current === activeLang) return
-    prevLangRef.current = activeLang
-    setMessages([])
-    setSuggestedVisible(true)
-    setListProducts(null)
-  }, [activeLang])
 
   /**
    * After a full chat turn, fetch the real DB message ids for the conversation
@@ -499,50 +469,30 @@ export function ChatWindow({ config, transport, initialLanguage }: ChatWindowPro
             {config.displayName.charAt(0).toUpperCase()}
           </div>
         )}
-        <span className="font-semibold text-sm flex-1 truncate">{config.displayName}</span>
-
-        {/* Language switcher — only when multiple languages are enabled */}
-        {isMultilang && (
-          <div className="flex items-center gap-0.5 bg-white/10 rounded-md p-0.5" role="group" aria-label="Language switcher">
-            {languages.map((lang) => (
-              <button
-                key={lang}
-                type="button"
-                onClick={() => setActiveLang(lang)}
-                aria-pressed={lang === activeLang}
-                className={`px-2 py-0.5 text-xs font-medium rounded transition-all ${
-                  lang === activeLang
-                    ? 'bg-white text-current font-semibold'
-                    : 'text-white/70 hover:text-white'
-                }`}
-                style={lang === activeLang ? { color: primaryColor } : {}}
-              >
-                {LANG_LABELS[lang] ?? lang.toUpperCase()}
-              </button>
-            ))}
-          </div>
-        )}
-
-        <span className="flex items-center gap-1 text-xs opacity-80 ml-1" aria-live="polite">
-          {callState === 'idle' ? (
-            <>
-              <span className="w-1.5 h-1.5 rounded-full bg-green-300 inline-block" aria-hidden="true" />
-              {activeLang === 'lt' ? 'Prisijungęs' : 'Online'}
-            </>
-          ) : (
-            <>
-              <span
-                className={`w-1.5 h-1.5 rounded-full bg-white inline-block ${
-                  callState === 'speaking' ? 'animate-pulse' : ''
-                }`}
-                aria-hidden="true"
-              />
-              {callState === 'connecting'
-                ? VOICE_STATUS[activeLang].connecting
-                : VOICE_STATUS[activeLang][callState]}
-            </>
-          )}
-        </span>
+        {/* Name + connection status (status sits under the name) */}
+        <div className="flex-1 min-w-0">
+          <p className="font-semibold text-sm truncate leading-tight">{config.displayName}</p>
+          <span className="mt-0.5 flex items-center gap-1 text-xs opacity-80" aria-live="polite">
+            {callState === 'idle' ? (
+              <>
+                <span className="w-1.5 h-1.5 rounded-full bg-green-300 inline-block" aria-hidden="true" />
+                {activeLang === 'lt' ? 'Prisijungęs' : 'Online'}
+              </>
+            ) : (
+              <>
+                <span
+                  className={`w-1.5 h-1.5 rounded-full bg-white inline-block ${
+                    callState === 'speaking' ? 'animate-pulse' : ''
+                  }`}
+                  aria-hidden="true"
+                />
+                {callState === 'connecting'
+                  ? VOICE_STATUS[activeLang].connecting
+                  : VOICE_STATUS[activeLang][callState]}
+              </>
+            )}
+          </span>
+        </div>
 
         {/* Voice call button — in the header, only when voice is enabled */}
         {voiceEnabled && (
@@ -555,9 +505,12 @@ export function ChatWindow({ config, transport, initialLanguage }: ChatWindowPro
             onTranscript={handleVoiceTranscript}
             onReady={handleVoiceReady}
             onSearch={handleVoiceSearch}
-            className="flex-shrink-0 ml-1"
+            className="flex-shrink-0"
           />
         )}
+
+        {/* Optional extra header control (e.g. preview "Start over") */}
+        {headerAction}
       </div>
 
       {/* Body — messages + composer. Relative so the product list can overlay it. */}
@@ -622,10 +575,9 @@ export function ChatWindow({ config, transport, initialLanguage }: ChatWindowPro
             <button
               type="button"
               onClick={requestHandoff}
-              className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-[filter] hover:brightness-95"
+              className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-[filter] hover:brightness-95"
               style={{
                 backgroundColor: `color-mix(in srgb, ${primaryColor} 10%, transparent)`,
-                borderColor: `color-mix(in srgb, ${primaryColor} 22%, transparent)`,
                 color: primaryColor,
               }}
             >

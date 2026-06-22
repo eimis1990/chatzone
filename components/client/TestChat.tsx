@@ -103,11 +103,22 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
                 config={publicConfig}
                 transport={transport}
                 initialLanguage={activeLang}
+                headerAction={
+                  <button
+                    type="button"
+                    onClick={() => setResetKey((k) => k + 1)}
+                    title="Start over"
+                    aria-label="Start over — clear test conversation"
+                    className="flex size-8 flex-shrink-0 items-center justify-center rounded-lg bg-white/15 text-white transition-colors hover:bg-white/25"
+                  >
+                    <RotateCcwIcon className="size-4" aria-hidden="true" />
+                  </button>
+                }
               />
             </div>
 
-            {/* Preview chrome — Powered by (left) + Start over (right) */}
-            <div className="flex items-center justify-between px-1">
+            {/* Preview chrome — Powered by */}
+            <div className="px-1">
               <p className="text-[10px] text-muted-foreground/60">
                 Powered by{' '}
                 <a
@@ -119,14 +130,6 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
                   Chatzone
                 </a>
               </p>
-              <button
-                type="button"
-                onClick={() => setResetKey((k) => k + 1)}
-                className="inline-flex items-center gap-1 text-[10px] text-muted-foreground/70 hover:text-muted-foreground transition-colors"
-              >
-                <RotateCcwIcon className="size-3" aria-hidden="true" />
-                Start over
-              </button>
             </div>
           </motion.div>
         )}
