@@ -197,6 +197,9 @@ export interface Conversation {
   topics?: string[] | null
   analyzed_at?: string | null
   had_fallback?: boolean
+  /** AI self-evaluation: how well the conversation was handled (1–5) + why. */
+  success_score?: number | null
+  success_reason?: string | null
   // Human handoff (Phase 2)
   handoff_status?: HandoffStatus
   assigned_to?: string | null

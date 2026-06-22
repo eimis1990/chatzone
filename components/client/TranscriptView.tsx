@@ -9,11 +9,23 @@ interface ConversationRow extends Pick<Conversation, 'id' | 'visitor_id' | 'star
   summary: string | null
   topics: string[] | null
   needs_attention: boolean
+  success_score: number | null
+  success_reason: string | null
 }
 
 interface Analysis {
   summary: string
   topics: string[]
+  successScore?: number
+  successReason?: string
+}
+
+/** Color + label for a 1–5 success score (0/undefined = not rated). */
+function scoreStyle(score: number | null | undefined): { label: string; cls: string } | null {
+  if (!score) return null
+  if (score >= 4) return { label: 'Success', cls: 'bg-green-100 text-green-800' }
+  if (score === 3) return { label: 'Mixed', cls: 'bg-amber-100 text-amber-800' }
+  return { label: 'Needs work', cls: 'bg-red-100 text-red-700' }
 }
 
 interface TranscriptViewProps {
@@ -50,7 +62,12 @@ export function TranscriptView({ conversations, loadMessages, analyze }: Transcr
       setLoading(false)
     }
     if (row?.summary) {
-      setAnalysis({ summary: row.summary, topics: row.topics ?? [] })
+      setAnalysis({
+        summary: row.summary,
+        topics: row.topics ?? [],
+        successScore: row.success_score ?? 0,
+        successReason: row.success_reason ?? '',
+      })
     } else {
       setAnalyzing(true)
       try {
@@ -122,8 +139,21 @@ export function TranscriptView({ conversations, loadMessages, analyze }: Transcr
                         {conv.message_count} msg{conv.message_count !== 1 ? 's' : ''}
                       </span>
                     </div>
-                    <div className="mt-1 text-xs text-muted-foreground">
-                      {formatDistanceToNow(conv.last_message_at)}
+                    <div className="mt-1 flex items-center justify-between gap-2">
+                      <span className="text-xs text-muted-foreground">
+                        {formatDistanceToNow(conv.last_message_at)}
+                      </span>
+                      {(() => {
+                        const s = scoreStyle(conv.success_score)
+                        return s ? (
+                          <span
+                            className={`rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${s.cls}`}
+                            title={`AI handling: ${s.label}`}
+                          >
+                            {conv.success_score}/5
+                          </span>
+                        ) : null
+                      })()}
                     </div>
                   </button>
                 </li>
@@ -161,7 +191,20 @@ export function TranscriptView({ conversations, loadMessages, analyze }: Transcr
                   <p className="text-xs text-muted-foreground">Summarizing…</p>
                 ) : (
                   <>
+                    {(() => {
+                      const s = scoreStyle(analysis?.successScore)
+                      return s ? (
+                        <div className="flex items-center gap-2">
+                          <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${s.cls}`}>
+                            {analysis?.successScore}/5 {s.label}
+                          </span>
+                        </div>
+                      ) : null
+                    })()}
                     <p className="text-sm text-foreground">{analysis?.summary}</p>
+                    {analysis?.successReason && (
+                      <p className="text-xs text-muted-foreground italic">{analysis.successReason}</p>
+                    )}
                     {analysis?.topics && analysis.topics.length > 0 && (
                       <div className="flex flex-wrap gap-1.5">
                         {analysis.topics.map((t) => (

@@ -65,7 +65,7 @@ export default async function AnalyticsPage({
   ] = await Promise.all([
     supabase
       .from('conversations')
-      .select('id, started_at, last_message_at, topics')
+      .select('id, started_at, last_message_at, topics, success_score')
       .eq('bot_id', botId)
       .gte('started_at', since30Iso),
     supabase
@@ -102,7 +102,10 @@ export default async function AnalyticsPage({
         .order('created_at', { ascending: true })
     : { data: [] }
 
-  const typedConvs = (conversations ?? []) as Pick<Conversation, 'id' | 'started_at' | 'last_message_at' | 'topics'>[]
+  const typedConvs = (conversations ?? []) as Pick<
+    Conversation,
+    'id' | 'started_at' | 'last_message_at' | 'topics' | 'success_score'
+  >[]
   const typedMsgs = (messagesReal ?? []) as Pick<Message, 'id' | 'conversation_id' | 'role' | 'content' | 'created_at' | 'feedback'>[]
   const typedLeads = (leads ?? []) as Pick<Lead, 'id' | 'created_at'>[]
   const typedSources = (sources ?? []) as Pick<KnowledgeSource, 'id' | 'status'>[]
@@ -154,6 +157,13 @@ export default async function AnalyticsPage({
   const ratedTotal = thumbsUp + thumbsDown
   const csat = ratedTotal > 0 ? Math.round((thumbsUp / ratedTotal) * 100) : null
 
+  // Average AI success score across evaluated conversations (1–5).
+  const scoredConvs = typedConvs.filter((c) => typeof c.success_score === 'number' && (c.success_score ?? 0) > 0)
+  const avgScore =
+    scoredConvs.length > 0
+      ? scoredConvs.reduce((sum, c) => sum + (c.success_score ?? 0), 0) / scoredConvs.length
+      : null
+
   // Top topics across analyzed conversations (last 30 days).
   const topicFreq: Record<string, number> = {}
   for (const c of typedConvs) {
@@ -175,10 +185,15 @@ export default async function AnalyticsPage({
       </div>
 
       {/* Scalar stat cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
         <StatCard label="Conversations" value={typedConvs.length} sub="last 30 days" />
         <StatCard label="Messages" value={typedMsgs.length} sub="last 30 days" />
         <StatCard label="Leads" value={typedLeads.length} sub="last 30 days" />
+        <StatCard
+          label="AI Success"
+          value={avgScore === null ? '—' : `${avgScore.toFixed(1)}/5`}
+          sub={scoredConvs.length > 0 ? `${scoredConvs.length} evaluated` : 'none evaluated yet'}
+        />
         <StatCard
           label="CSAT"
           value={csat === null ? '—' : `${csat}%`}

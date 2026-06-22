@@ -12,11 +12,15 @@ interface ConversationRow
   summary: string | null
   topics: string[] | null
   needs_attention: boolean
+  success_score: number | null
+  success_reason: string | null
 }
 
 export interface ConversationAnalysisResult {
   summary: string
   topics: string[]
+  successScore: number
+  successReason: string
 }
 
 export default async function ConversationsPage({
@@ -41,13 +45,23 @@ export default async function ConversationsPage({
   // Fetch conversations with intelligence fields
   const { data: rawConvs } = await supabase
     .from('conversations')
-    .select('id, visitor_id, started_at, last_message_at, summary, topics, had_fallback')
+    .select(
+      'id, visitor_id, started_at, last_message_at, summary, topics, had_fallback, success_score, success_reason',
+    )
     .eq('bot_id', botId)
     .order('last_message_at', { ascending: false })
 
   const conversations = (rawConvs ?? []) as Pick<
     Conversation,
-    'id' | 'visitor_id' | 'started_at' | 'last_message_at' | 'summary' | 'topics' | 'had_fallback'
+    | 'id'
+    | 'visitor_id'
+    | 'started_at'
+    | 'last_message_at'
+    | 'summary'
+    | 'topics'
+    | 'had_fallback'
+    | 'success_score'
+    | 'success_reason'
   >[]
 
   // Message counts + which conversations got a thumbs-down, in two queries.
@@ -85,6 +99,8 @@ export default async function ConversationsPage({
     summary: c.summary ?? null,
     topics: c.topics ?? null,
     needs_attention: Boolean(c.had_fallback) || negative.has(c.id),
+    success_score: c.success_score ?? null,
+    success_reason: c.success_reason ?? null,
   }))
 
   /**
@@ -110,15 +126,23 @@ export default async function ConversationsPage({
    */
   async function analyze(conversationId: string): Promise<ConversationAnalysisResult> {
     'use server'
+    const empty = { summary: '', topics: [], successScore: 0, successReason: '' }
     const sb = await createServerClient()
     const { data: conv } = await sb
       .from('conversations')
-      .select('id, summary, topics, analyzed_at')
+      .select('id, summary, topics, analyzed_at, success_score, success_reason')
       .eq('id', conversationId)
-      .single<Pick<Conversation, 'id' | 'summary' | 'topics' | 'analyzed_at'>>()
-    if (!conv) return { summary: '', topics: [] } // not owned/visible
+      .single<
+        Pick<Conversation, 'id' | 'summary' | 'topics' | 'analyzed_at' | 'success_score' | 'success_reason'>
+      >()
+    if (!conv) return empty // not owned/visible
     if (conv.analyzed_at && conv.summary) {
-      return { summary: conv.summary, topics: conv.topics ?? [] }
+      return {
+        summary: conv.summary,
+        topics: conv.topics ?? [],
+        successScore: conv.success_score ?? 0,
+        successReason: conv.success_reason ?? '',
+      }
     }
 
     const { data: msgs } = await sb
@@ -126,14 +150,20 @@ export default async function ConversationsPage({
       .select('role, content')
       .eq('conversation_id', conversationId)
       .order('created_at', { ascending: true })
-    if (!msgs || msgs.length < 2) return { summary: '', topics: [] }
+    if (!msgs || msgs.length < 2) return empty
 
     const result = await analyzeConversation(msgs as { role: string; content: string }[])
     if (result.summary) {
       const svc = createServiceClient()
       await svc
         .from('conversations')
-        .update({ summary: result.summary, topics: result.topics, analyzed_at: new Date().toISOString() })
+        .update({
+          summary: result.summary,
+          topics: result.topics,
+          success_score: result.successScore || null,
+          success_reason: result.successReason || null,
+          analyzed_at: new Date().toISOString(),
+        })
         .eq('id', conversationId)
     }
     return result
