@@ -32,17 +32,29 @@ export function nextHandoffStatus(_current: HandoffStatus, action: HandoffAction
   }
 }
 
-// Intent keywords that signal "I want to talk to a real person". Matched
-// word-ish (substring on a normalized, lowercased message) per language.
+// Lowercase + strip diacritics so "žmogumi" matches "zmogumi", "Norėčiau" →
+// "noreciau", etc. (NFD decomposes accented letters; we drop the marks.)
+function normalize(text: string): string {
+  return text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+}
+
+// Intent keywords signalling "I want a real person". Stored diacritic-free and
+// lowercase; matched as substrings against the normalized message. LT uses word
+// stems (e.g. "zmog", "operatori") to catch grammatical case endings.
 const INTENT_KEYWORDS: Record<BotLanguage, string[]> = {
   en: [
     'talk to a human',
     'talk to a person',
     'talk to someone',
+    'talk to an agent',
     'speak to a human',
     'speak to a person',
     'speak to someone',
     'speak with someone',
+    'speak to an agent',
     'real person',
     'real human',
     'live agent',
@@ -51,27 +63,26 @@ const INTENT_KEYWORDS: Record<BotLanguage, string[]> = {
     'customer support',
     'representative',
     'connect me to',
-    'talk to an agent',
-    'speak to an agent',
+    'a human',
+    'with a human',
   ],
   lt: [
-    'su žmogumi',
-    'gyvu žmogumi',
-    'gyvas žmogus',
-    'tikru žmogumi',
-    'operatoriu', // operatoriumi / operatorius
+    'zmog', // žmogus/žmogumi/žmogui/žmogaus (singular "person", not žmonės=plural)
+    'operatori', // operatorius/operatoriumi
     'su agentu',
-    'su darbuotoju',
-    'su konsultantu',
-    'klientų aptarnavim',
-    'sujunkite',
-    'sujunk su',
+    'agentu',
+    'darbuotoj', // darbuotoju/darbuotoja
+    'konsultant', // konsultantu/konsultanto
+    'klientu aptarnav',
+    'su asmeniu',
+    'gyvas asmuo',
+    'sujunk', // sujunkite/sujunk su
   ],
 }
 
 /** True when the visitor message asks for a human. */
 export function detectHandoffIntent(text: string, lang: BotLanguage = 'en'): boolean {
-  const normalized = text.toLowerCase()
+  const normalized = normalize(text)
   const keywords = INTENT_KEYWORDS[lang] ?? INTENT_KEYWORDS.en
   // Always also check English keywords (visitors often type English on LT bots).
   const all = lang === 'en' ? keywords : [...keywords, ...INTENT_KEYWORDS.en]

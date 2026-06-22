@@ -655,11 +655,11 @@ export function ChatWindow({ publicKey, config }: ChatWindowProps) {
 
         {/* Talk to a person — only while the bot is handling the chat */}
         {handoffStatus === 'bot' && !streaming && (
-          <div className="px-4 pt-1 flex justify-center flex-shrink-0">
+          <div className="px-4 pt-1.5 flex justify-center flex-shrink-0">
             <button
               type="button"
               onClick={requestHandoff}
-              className="inline-flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-900 transition-colors"
+              className="inline-flex items-center gap-1.5 rounded-full border border-gray-300 bg-white px-3 py-1 text-xs font-medium text-gray-600 shadow-sm transition-colors hover:border-gray-400 hover:bg-gray-50 hover:text-gray-900"
             >
               <HeadsetIcon className="size-3.5" aria-hidden="true" />
               {HANDOFF_TALK_LABEL[activeLang] ?? HANDOFF_TALK_LABEL.en}

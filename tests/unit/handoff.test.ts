@@ -47,6 +47,13 @@ describe('detectHandoffIntent (lt)', () => {
     expect(detectHandoffIntent('noriu pasikalbėti su žmogumi', 'lt')).toBe(true)
     expect(detectHandoffIntent('sujunkite su operatoriumi', 'lt')).toBe(true)
     expect(detectHandoffIntent('su darbuotoju prašau', 'lt')).toBe(true)
+    expect(detectHandoffIntent('ar galiu kalbėti su konsultantu?', 'lt')).toBe(true)
+  })
+
+  it('is diacritic-insensitive (visitors often drop LT diacritics)', () => {
+    // The exact phrase from the bug report — "real zmogumi", no diacritics.
+    expect(detectHandoffIntent('gal galiu kalbetis su real zmogumi?', 'lt')).toBe(true)
+    expect(detectHandoffIntent('noriu su zmogumi pasikalbeti', 'lt')).toBe(true)
   })
 
   it('still catches English phrasing on a Lithuanian bot', () => {
@@ -55,6 +62,8 @@ describe('detectHandoffIntent (lt)', () => {
 
   it('does not fire on ordinary Lithuanian questions', () => {
     expect(detectHandoffIntent('kokia šito kaina?', 'lt')).toBe(false)
+    // "žmonės" = plural "people", not a singular human-agent request.
+    expect(detectHandoffIntent('ar dirba žmonės savaitgalį?', 'lt')).toBe(false)
   })
 })
 
