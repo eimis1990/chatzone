@@ -28,6 +28,27 @@ function generateId() {
   return Math.random().toString(36).slice(2)
 }
 
+/** Black or white header text, whichever reads better on the chosen color. */
+function readableOn(bg: string): string {
+  const hex = bg.trim().replace(/^#/, '')
+  let r = 0,
+    g = 0,
+    b = 0
+  if (hex.length === 3) {
+    r = parseInt(hex[0] + hex[0], 16)
+    g = parseInt(hex[1] + hex[1], 16)
+    b = parseInt(hex[2] + hex[2], 16)
+  } else if (hex.length === 6) {
+    r = parseInt(hex.slice(0, 2), 16)
+    g = parseInt(hex.slice(2, 4), 16)
+    b = parseInt(hex.slice(4, 6), 16)
+  } else {
+    return '#ffffff'
+  }
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
+  return luminance > 0.6 ? '#111827' : '#ffffff'
+}
+
 // Header status while a live call is active.
 const VOICE_STATUS: Record<'en' | 'lt', Record<'connecting' | 'listening' | 'speaking', string>> = {
   en: { connecting: 'Connecting…', listening: 'Listening…', speaking: 'Speaking…' },
@@ -444,6 +465,8 @@ export function ChatWindow({ config, transport, initialLanguage, headerAction }:
 
   const voiceEnabled = Boolean(config.voice?.enabled)
   const headerBorderRadius = `${cornerRadius}px ${cornerRadius}px 0 0`
+  // Auto-contrast: keep header text/icons legible on any chosen color.
+  const headerFg = readableOn(primaryColor)
 
   return (
     <div
@@ -452,8 +475,8 @@ export function ChatWindow({ config, transport, initialLanguage, headerAction }:
     >
       {/* Header */}
       <div
-        className="flex items-center gap-3 px-4 py-4 text-white flex-shrink-0"
-        style={{ backgroundColor: primaryColor, borderRadius: headerBorderRadius }}
+        className="flex items-center gap-3 px-4 py-4 flex-shrink-0"
+        style={{ backgroundColor: primaryColor, color: headerFg, borderRadius: headerBorderRadius }}
       >
         {config.avatarUrl ? (
           <img
@@ -463,7 +486,8 @@ export function ChatWindow({ config, transport, initialLanguage, headerAction }:
           />
         ) : (
           <div
-            className="w-8 h-8 rounded-full bg-white/30 flex items-center justify-center text-sm font-bold flex-shrink-0"
+            className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0"
+            style={{ backgroundColor: `color-mix(in srgb, ${headerFg} 22%, transparent)` }}
             aria-hidden="true"
           >
             {config.displayName.charAt(0).toUpperCase()}
@@ -475,13 +499,13 @@ export function ChatWindow({ config, transport, initialLanguage, headerAction }:
           <span className="mt-0.5 flex items-center gap-1 text-xs opacity-80" aria-live="polite">
             {callState === 'idle' ? (
               <>
-                <span className="w-1.5 h-1.5 rounded-full bg-green-300 inline-block" aria-hidden="true" />
+                <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block" aria-hidden="true" />
                 {activeLang === 'lt' ? 'Prisijungęs' : 'Online'}
               </>
             ) : (
               <>
                 <span
-                  className={`w-1.5 h-1.5 rounded-full bg-white inline-block ${
+                  className={`w-1.5 h-1.5 rounded-full bg-current inline-block ${
                     callState === 'speaking' ? 'animate-pulse' : ''
                   }`}
                   aria-hidden="true"

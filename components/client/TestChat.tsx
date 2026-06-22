@@ -109,7 +109,8 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
                     onClick={() => setResetKey((k) => k + 1)}
                     title="Start over"
                     aria-label="Start over — clear test conversation"
-                    className="flex size-8 flex-shrink-0 items-center justify-center rounded-lg bg-white/15 text-white transition-colors hover:bg-white/25"
+                    className="flex size-8 flex-shrink-0 items-center justify-center rounded-lg text-current transition hover:brightness-90"
+                    style={{ backgroundColor: 'color-mix(in srgb, currentColor 15%, transparent)' }}
                   >
                     <RotateCcwIcon className="size-4" aria-hidden="true" />
                   </button>
