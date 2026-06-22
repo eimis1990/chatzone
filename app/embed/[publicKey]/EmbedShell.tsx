@@ -1,7 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { ChatWindow } from '@/components/widget/ChatWindow'
+import { createWidgetTransport } from '@/lib/widget-transport'
 import type { PublicBotConfig } from '@/lib/widget-config'
 
 interface EmbedShellProps {
@@ -11,6 +12,7 @@ interface EmbedShellProps {
 export function EmbedShell({ publicKey }: EmbedShellProps) {
   const [config, setConfig] = useState<PublicBotConfig | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const transport = useMemo(() => createWidgetTransport(publicKey), [publicKey])
 
   useEffect(() => {
     fetch(`/api/widget-config?key=${encodeURIComponent(publicKey)}`)
@@ -43,5 +45,5 @@ export function EmbedShell({ publicKey }: EmbedShellProps) {
     )
   }
 
-  return <ChatWindow publicKey={publicKey} config={config} />
+  return <ChatWindow config={config} transport={transport} />
 }

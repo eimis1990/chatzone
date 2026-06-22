@@ -214,6 +214,7 @@ export function ConfigForm({ botId, initialConfig }: ConfigFormProps) {
     leadCapture: watchedValues.leadCapture,
     allowedDomains: watchedValues.allowedDomains,
     avatarUrl: watchedValues.avatarUrl,
+    privacyUrl: watchedValues.privacyUrl,
     languages: watchedValues.languages,
     content: watchedValues.content,
     commerce: watchedValues.commerce,

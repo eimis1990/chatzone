@@ -1,50 +1,28 @@
 'use client'
 
 /**
- * TestChat — Interactive preview playground for the bot configurator.
+ * TestChat — the configurator preview.
  *
- * Renders as a floating chat widget (launcher bubble + open/close card) docked
- * to the bottom-right of the preview panel, matching the deployed widget appearance.
- *
- * Features:
- *  - Floating launcher bubble with open/close toggle
- *  - Streams bot replies from POST /api/preview/chat
- *  - TTS (🔊) per bot message via POST /api/preview/tts when voice.ttsEnabled
- *  - Live voice call via ElevenLabs WebRTC (VoiceCallButton) in composer
- *  - Suggested question chips pinned above input, hidden after first message
- *  - Start over button restores suggested questions
- *  - Live theming from config.theme (primaryColor, cornerRadius, bubbleRadius)
- *  - Avatar from config.avatarUrl (falls back to BotIcon)
- *  - "Powered by Chatzone" footer link below the card
- *  - Active language (activeLang) drives which content.<lang> is shown
+ * Renders the EXACT live widget component (`ChatWindow`) wired to a preview
+ * transport (authenticated `/api/preview/*`, using the current unsaved config),
+ * so the preview can never visually drift from what visitors actually see.
+ * It only adds the surrounding chrome: a floating card, launcher bubble,
+ * "Start over", and the "Powered by" footer.
  */
 
-import { useState, useRef, useCallback, type KeyboardEvent, type FormEvent } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import {
-  BotIcon,
-  RotateCcwIcon,
-  LoaderCircleIcon,
-  SendIcon,
-  MessageCircleIcon,
-  XIcon,
-} from 'lucide-react'
+import { MessageCircleIcon, XIcon, RotateCcwIcon } from 'lucide-react'
+import { ChatWindow } from '@/components/widget/ChatWindow'
+import { detectHandoffIntent, HANDOFF_ACK } from '@/lib/handoff'
+import type { ChatTransport } from '@/lib/widget-transport'
+import type { PublicBotConfig } from '@/lib/widget-config'
 import type { BotConfig, BotLanguage } from '@/lib/types'
-import { VoiceCallButton, type CallState } from '@/components/voice/VoiceCallButton'
 import { POWERED_BY_URL } from '@/lib/utils'
-import { ProductCards, ProductListView } from '@/components/widget/ProductCards'
-import { ThinkingDots } from '@/components/widget/ThinkingDots'
-import type { CommerceProduct } from '@/lib/commerce/types'
-import { fontStack } from '@/lib/fonts'
 
-// Header subtitle labels while a live call is active.
-const VOICE_STATUS: Record<'en' | 'lt', Record<'connecting' | 'listening' | 'speaking', string>> = {
-  en: { connecting: 'Connecting…', listening: 'Listening…', speaking: 'Speaking…' },
-  lt: { connecting: 'Jungiamasi…', listening: 'Klausosi…', speaking: 'Kalba…' },
-}
+const DEFAULT_VOICE_ID = '21m00Tcm4TlvDq8ikWAM'
 
 // Partial form values — fields may be undefined mid-edit.
-// voice.voices is kept as a loose Record to accommodate RHF partial types (en may be undefined).
 type LiveConfig = {
   displayName?: string
   theme?: Partial<BotConfig['theme']>
@@ -66,25 +44,12 @@ type LiveConfig = {
   }
   allowedDomains?: string[]
   avatarUrl?: string
+  privacyUrl?: string
   languages?: BotLanguage[]
-  content?: Partial<Record<BotLanguage, {
-    greeting?: string
-    suggestedQuestions?: string[]
-    fallbackMessage?: string
-  }>>
+  content?: Partial<
+    Record<BotLanguage, { greeting?: string; suggestedQuestions?: string[]; fallbackMessage?: string }>
+  >
   commerce?: { enabled?: boolean; provider?: 'woocommerce'; storeUrl?: string }
-}
-
-interface ChatMessage {
-  id: string
-  role: 'user' | 'assistant'
-  content: string
-  streaming?: boolean
-  products?: CommerceProduct[]
-}
-
-function generateId() {
-  return Math.random().toString(36).slice(2)
 }
 
 interface TestChatProps {
@@ -94,547 +59,75 @@ interface TestChatProps {
 }
 
 export function TestChat({ botId, config, activeLang }: TestChatProps) {
-  const primaryColor = config.theme?.primaryColor ?? '#4f46e5'
-  const cornerRadius = config.theme?.cornerRadius ?? 16
-  const bubbleRadius = config.theme?.bubbleRadius ?? 16
-  const chatFont = fontStack(config.theme?.fontFamily)
-  const displayName = config.displayName || 'Your Bot'
-  const avatarUrl = config.avatarUrl
-
-  // Per-language content
-  const langContent = config.content?.[activeLang]
-  const greeting = langContent?.greeting || (activeLang === 'lt' ? 'Sveiki! Kaip galiu padėti?' : 'Hi! How can I help you today?')
-  const suggestedQuestions = (langContent?.suggestedQuestions ?? []).filter(Boolean)
-  const inputPlaceholder = activeLang === 'lt' ? 'Rašykite žinutę…' : 'Type a message…'
-
-  const voiceEnabled = config.voice?.enabled ?? false
-
-  // Open/closed state
   const [isOpen, setIsOpen] = useState(true)
+  const [resetKey, setResetKey] = useState(0)
 
-  // Message state — starts with just the greeting
-  const greetingMsg: ChatMessage = { id: 'greeting', role: 'assistant', content: greeting }
-  const [messages, setMessages] = useState<ChatMessage[]>([greetingMsg])
-  const [streaming, setStreaming] = useState(false)
-  const [inputValue, setInputValue] = useState('')
-  const [suggestedVisible, setSuggestedVisible] = useState(true)
-  // When set, the full-height product list overlay covers the chat body.
-  const [listProducts, setListProducts] = useState<CommerceProduct[] | null>(null)
-  // Live-call state, surfaced in the header subtitle.
-  const [callState, setCallState] = useState<CallState>('idle')
-  const callStateRef = useRef<CallState>('idle')
-  const endVoiceRef = useRef<(() => void) | null>(null)
+  // Always read the latest config inside the (stable) transport.
+  const configRef = useRef(config)
+  configRef.current = config
 
-  const handleCallState = useCallback((s: CallState) => {
-    callStateRef.current = s
-    setCallState(s)
-  }, [])
+  const publicConfig = buildPreviewPublicConfig(config)
+  const cornerRadius = config.theme?.cornerRadius ?? 16
+  const primaryColor = config.theme?.primaryColor ?? '#4f46e5'
 
-  // Voice utterances flow into the transcript; strip the agent's <language> tags.
-  const handleVoiceTranscript = useCallback((role: 'user' | 'assistant', text: string) => {
-    const clean = text.replace(/<\/?[A-Za-z][\w-]*>/g, '').trim()
-    if (!clean) return
-    setMessages((prev) => {
-      const last = prev[prev.length - 1]
-      if (last && last.role === role && last.content === clean) return prev
-      return [...prev, { id: generateId(), role, content: clean }]
-    })
-  }, [])
-
-  const handleVoiceReady = useCallback((c: { end: () => void }) => {
-    endVoiceRef.current = c.end
-  }, [])
-
-  // `search_products` client tool: fetch products, show cards, return a summary.
-  const handleVoiceSearch = useCallback(
-    async (query: string): Promise<string> => {
-      try {
-        const res = await fetch('/api/preview/search', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ botId, query }),
-        })
-        const data = (await res.json()) as { products?: CommerceProduct[]; summary?: string }
-        if (data.products?.length) {
-          setMessages((prev) => [
-            ...prev,
-            { id: generateId(), role: 'assistant', content: '', products: data.products },
-          ])
-        }
-        return data.summary ?? 'Here are a few options.'
-      } catch {
-        return 'The product search is temporarily unavailable.'
-      }
-    },
+  const transport = useMemo<ChatTransport>(
+    () => createPreviewTransport(botId, () => buildFullConfig(configRef.current)),
     [botId],
   )
 
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
-  const bottomRef = useRef<HTMLDivElement>(null)
-
-  // Re-initialize when greeting changes (language switch or config change)
-  const prevGreetingRef = useRef(greeting)
-  if (prevGreetingRef.current !== greeting) {
-    prevGreetingRef.current = greeting
-    // Reset on greeting change — update the greeting message without full reset
-    setMessages([{ id: 'greeting', role: 'assistant', content: greeting }])
-    setSuggestedVisible(true)
-  }
-
-  // -------------------------------------------------------------------------
-  // Scroll to bottom on new messages
-  // -------------------------------------------------------------------------
-  const scrollBottom = useCallback(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [])
-
-  // -------------------------------------------------------------------------
-  // Send a message
-  // -------------------------------------------------------------------------
-  const sendMessage = useCallback(
-    async (text: string) => {
-      if (streaming || !text.trim()) return
-      // Typing during a live call ends it and drops back to text chat.
-      if (callStateRef.current !== 'idle') endVoiceRef.current?.()
-      setSuggestedVisible(false)
-
-      const userMsg: ChatMessage = { id: generateId(), role: 'user', content: text.trim() }
-      const assistantMsg: ChatMessage = {
-        id: generateId(),
-        role: 'assistant',
-        content: '',
-        streaming: true,
-      }
-
-      setMessages((prev) => [...prev, userMsg, assistantMsg])
-      setStreaming(true)
-      setInputValue('')
-      if (textareaRef.current) textareaRef.current.style.height = 'auto'
-
-      // Build history from current messages (exclude the greeting from history)
-      const history = messages
-        .filter((m) => m.id !== 'greeting' && !m.streaming)
-        .map((m) => ({ role: m.role as 'user' | 'assistant', content: m.content }))
-
-      // Build a full BotConfig from the live partial config (fill in defaults)
-      const fullConfig = buildFullConfig(config)
-
-      try {
-        const res = await fetch('/api/preview/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            botId,
-            config: fullConfig,
-            history,
-            message: text.trim(),
-            language: activeLang,
-          }),
-        })
-
-        if (!res.ok || !res.body) {
-          const errorText = 'Sorry, something went wrong. Please try again.'
-          setMessages((prev) =>
-            prev.map((m) =>
-              m.id === assistantMsg.id ? { ...m, content: errorText, streaming: false } : m,
-            ),
-          )
-          return
-        }
-
-        const reader = res.body.getReader()
-        const decoder = new TextDecoder()
-        // Buffer for partial NDJSON lines across network chunks
-        let lineBuffer = ''
-        let accumulatedText = ''
-        let accumulatedProducts: CommerceProduct[] = []
-
-        while (true) {
-          const { done, value } = await reader.read()
-          if (done) break
-          lineBuffer += decoder.decode(value, { stream: true })
-          // Split on newlines; the last element may be a partial line
-          const lines = lineBuffer.split('\n')
-          // Keep the trailing partial line for the next iteration
-          lineBuffer = lines.pop() ?? ''
-          for (const line of lines) {
-            const trimmed = line.trim()
-            if (!trimmed) continue
-            try {
-              const event = JSON.parse(trimmed) as { t: string; v: unknown }
-              if (event.t === 'text' && typeof event.v === 'string') {
-                accumulatedText += event.v
-                setMessages((prev) =>
-                  prev.map((m) =>
-                    m.id === assistantMsg.id
-                      ? { ...m, content: accumulatedText, streaming: true }
-                      : m,
-                  ),
-                )
-                scrollBottom()
-              } else if (event.t === 'products' && Array.isArray(event.v)) {
-                accumulatedProducts = event.v as CommerceProduct[]
-              }
-            } catch {
-              // Malformed line — skip
-            }
-          }
-        }
-        // Process any remaining buffered line
-        if (lineBuffer.trim()) {
-          try {
-            const event = JSON.parse(lineBuffer.trim()) as { t: string; v: unknown }
-            if (event.t === 'text' && typeof event.v === 'string') {
-              accumulatedText += event.v
-            } else if (event.t === 'products' && Array.isArray(event.v)) {
-              accumulatedProducts = event.v as CommerceProduct[]
-            }
-          } catch {
-            // Malformed trailing line — skip
-          }
-        }
-
-        setMessages((prev) =>
-          prev.map((m) =>
-            m.id === assistantMsg.id
-              ? {
-                  ...m,
-                  content: accumulatedText,
-                  streaming: false,
-                  products: accumulatedProducts.length > 0 ? accumulatedProducts : undefined,
-                }
-              : m,
-          ),
-        )
-      } catch {
-        setMessages((prev) =>
-          prev.map((m) =>
-            m.id === assistantMsg.id
-              ? { ...m, content: 'Sorry, something went wrong. Please try again.', streaming: false }
-              : m,
-          ),
-        )
-      } finally {
-        setStreaming(false)
-        scrollBottom()
-      }
-    },
-    [streaming, messages, botId, config, activeLang, scrollBottom],
-  )
-
-  // -------------------------------------------------------------------------
-  // Start over
-  // -------------------------------------------------------------------------
-  const handleStartOver = useCallback(() => {
-    setMessages([{ id: 'greeting', role: 'assistant', content: greeting }])
-    setSuggestedVisible(true)
-    setInputValue('')
-    setListProducts(null)
-  }, [greeting])
-
-  // -------------------------------------------------------------------------
-  // Form submit / keyboard
-  // -------------------------------------------------------------------------
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault()
-    sendMessage(inputValue)
-  }
-
-  const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault()
-      sendMessage(inputValue)
-    }
-  }
-
-  const handleInput = () => {
-    const el = textareaRef.current
-    if (!el) return
-    el.style.height = 'auto'
-    el.style.height = `${Math.min(el.scrollHeight, 120)}px`
-  }
-
-  // -------------------------------------------------------------------------
-  // Avatar helper
-  // -------------------------------------------------------------------------
-  const renderAvatar = (size: 'sm' | 'md' = 'sm') => {
-    const sizeClass = size === 'md' ? 'w-10 h-10' : 'w-7 h-7'
-    return (
-      <div
-        className={`${sizeClass} rounded-full flex-shrink-0 flex items-center justify-center text-white text-xs font-bold overflow-hidden`}
-        style={{ backgroundColor: avatarUrl ? 'transparent' : primaryColor }}
-        aria-hidden="true"
-      >
-        {avatarUrl ? (
-          <img src={avatarUrl} alt={displayName} className="w-full h-full object-cover" />
-        ) : (
-          <BotIcon className={size === 'md' ? 'size-5' : 'size-3.5'} />
-        )}
-      </div>
-    )
-  }
-
-  const msgBubbleRadius = `${bubbleRadius}px`
-
-  // -------------------------------------------------------------------------
-  // The preview panel: floating bottom-right widget (fixed overlay)
-  // -------------------------------------------------------------------------
   return (
     <div className="relative pointer-events-none select-none">
-      {/* Chat Card — floats above the launcher bubble */}
-      <AnimatePresence>
-        {isOpen && (
-        <motion.div
-          key="chat-card"
-          initial={{ opacity: 0, scale: 0.92, y: 12 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.92, y: 12 }}
-          transition={{ duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
-          style={{
-            transformOrigin: 'bottom right',
-            borderRadius: `${cornerRadius}px`,
-            height: '630px',
-            width: '420px',
-            fontFamily: chatFont,
-          }}
-          className="absolute bottom-[72px] right-0 flex flex-col bg-background border shadow-2xl pointer-events-auto overflow-hidden"
-        >
-          {/* Header */}
-          <div
-            className="flex items-center gap-3 px-4 py-3 text-white flex-shrink-0"
-            style={{
-              backgroundColor: primaryColor,
-              borderRadius: `${cornerRadius}px ${cornerRadius}px 0 0`,
-            }}
-          >
-            <div
-              className="flex size-8 items-center justify-center rounded-full overflow-hidden flex-shrink-0"
-              style={{ backgroundColor: avatarUrl ? 'transparent' : 'rgba(255,255,255,0.2)' }}
-            >
-              {avatarUrl ? (
-                <img src={avatarUrl} alt={displayName} className="w-full h-full object-cover" />
-              ) : (
-                <BotIcon className="size-4" />
-              )}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium leading-tight truncate">{displayName}</p>
-              <p className="text-xs opacity-80 flex items-center gap-1.5">
-                {callState === 'idle' ? (
-                  activeLang === 'lt' ? 'Prisijungęs' : 'Online'
-                ) : (
-                  <>
-                    <span
-                      className={`inline-block size-1.5 rounded-full bg-current ${
-                        callState === 'speaking' ? 'animate-pulse' : ''
-                      }`}
-                      aria-hidden="true"
-                    />
-                    {VOICE_STATUS[activeLang][callState]}
-                  </>
-                )}
-              </p>
-            </div>
-
-            {/* Call + restart controls */}
-            {voiceEnabled && (
-              <VoiceCallButton
-                appearance="compact"
-                primaryColor="#ffffff"
-                language={activeLang}
-                onStateChange={handleCallState}
-                onTranscript={handleVoiceTranscript}
-                onReady={handleVoiceReady}
-                onSearch={handleVoiceSearch}
-                className="flex-shrink-0"
-                getToken={async () => {
-                  const res = await fetch('/api/preview/voice-token', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ botId, language: activeLang }),
-                  })
-                  if (!res.ok) {
-                    const data = (await res.json().catch(() => ({}))) as { error?: string }
-                    throw new Error(
-                      res.status === 503
-                        ? 'Voice calling unavailable'
-                        : (data.error ?? 'Token request failed'),
-                    )
-                  }
-                  const data = (await res.json()) as { token: string; voiceId?: string }
-                  return { token: data.token, voiceId: data.voiceId }
-                }}
-              />
-            )}
-
-            <button
-              type="button"
-              onClick={handleStartOver}
-              title="Start over"
-              aria-label="Start over — clear test conversation"
-              className="flex items-center justify-center size-8 rounded-lg bg-white/15 hover:bg-white/25 transition-colors text-white"
-            >
-              <RotateCcwIcon className="size-4" aria-hidden="true" />
-            </button>
-          </div>
-
-          {/* Body — messages + composer; relative so the product list can overlay it. */}
-          <div className="relative flex-1 flex flex-col min-h-0">
-          {/* Messages */}
-          <div
-            className="flex-1 overflow-y-auto px-4 py-3 space-y-3 min-h-0"
-            role="log"
-            aria-live="polite"
-            aria-label="Test conversation"
-          >
-            {messages.map((msg) => (
-              <div key={msg.id}>
-                <div
-                  className={`flex items-start gap-2 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}
-                >
-                  {msg.role === 'assistant' && renderAvatar()}
-                  <div className="flex flex-col gap-1 max-w-[80%]">
-                    {/* Skip the empty bubble for cards-only (voice search) messages. */}
-                    {(msg.content || msg.streaming) && (
-                      <div
-                        className={`px-3 py-2 text-sm whitespace-pre-wrap ${
-                          msg.role === 'user'
-                            ? 'text-white'
-                            : 'bg-muted text-foreground'
-                        }`}
-                        style={{
-                          borderRadius: msg.role === 'user'
-                            ? `${msgBubbleRadius} ${msgBubbleRadius} 2px ${msgBubbleRadius}`
-                            : `${msgBubbleRadius} ${msgBubbleRadius} ${msgBubbleRadius} 2px`,
-                          ...(msg.role === 'user' ? { backgroundColor: primaryColor } : {}),
-                        }}
-                      >
-                        {msg.streaming && !msg.content ? (
-                          <ThinkingDots />
-                        ) : (
-                          <>
-                            {msg.content}
-                            {msg.streaming && (
-                              <span
-                                className="inline-block w-1.5 h-4 ml-0.5 align-middle animate-pulse bg-current opacity-70"
-                                aria-hidden="true"
-                              />
-                            )}
-                          </>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Product cards — full chat width, below the message bubble */}
-                {msg.role === 'assistant' &&
-                  !msg.streaming &&
-                  msg.products &&
-                  msg.products.length > 0 && (
-                    <ProductCards
-                      products={msg.products}
-                      bubbleRadius={bubbleRadius}
-                      primaryColor={primaryColor}
-                      language={activeLang}
-                      onSeeAll={setListProducts}
-                    />
-                  )}
-              </div>
-            ))}
-            <div ref={bottomRef} />
-          </div>
-
-          {/* Suggested questions */}
-          {suggestedVisible && suggestedQuestions.length > 0 && (
-            <div className="px-4 pt-2 pb-1 flex flex-wrap gap-1.5">
-              {suggestedQuestions.slice(0, 4).map((q, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  onClick={() => sendMessage(q)}
-                  disabled={streaming}
-                  className="rounded-full border px-3 py-1 text-xs hover:bg-muted transition-colors disabled:opacity-50 text-left leading-normal"
-                  style={{ borderColor: primaryColor, color: primaryColor }}
-                >
-                  {q}
-                </button>
-              ))}
-            </div>
-          )}
-
-          {/* Input area */}
-          <div className="border-t p-3 flex-shrink-0">
-            <form onSubmit={handleSubmit} className="flex items-end gap-2">
-              <textarea
-                ref={textareaRef}
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                onKeyDown={handleKeyDown}
-                onInput={handleInput}
-                placeholder={inputPlaceholder}
-                disabled={streaming}
-                rows={1}
-                aria-label="Test message input"
-                className="flex-1 resize-none rounded-lg border border-input px-3 py-2 text-sm leading-5 focus:outline-none focus:ring-1 disabled:opacity-50 overflow-hidden bg-background"
-                style={{ maxHeight: '120px' }}
-              />
-
-              <button
-                type="submit"
-                disabled={streaming || !inputValue.trim()}
-                aria-label="Send message"
-                className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 text-white transition-opacity hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed"
-                style={{ backgroundColor: primaryColor }}
-              >
-                {streaming ? (
-                  <LoaderCircleIcon className="size-3.5 animate-spin" aria-hidden="true" />
-                ) : (
-                  <SendIcon className="size-3.5" aria-hidden="true" />
-                )}
-              </button>
-            </form>
-          </div>
-
-          {/* Full-height product list overlay (covers messages + composer) */}
-          <AnimatePresence>
-            {listProducts && (
-              <ProductListView
-                products={listProducts}
-                bubbleRadius={bubbleRadius}
-                primaryColor={primaryColor}
-                language={activeLang}
-                onClose={() => setListProducts(null)}
-              />
-            )}
-          </AnimatePresence>
-          </div>
-        </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Powered by — below the card, bottom-left (close button is bottom-right) */}
+      {/* Card + chrome, as a column anchored just above the launcher */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            key="powered-by"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
-            className="absolute bottom-[52px] right-0 w-[420px] text-left pl-1 pointer-events-auto"
+            key="chat-card"
+            initial={{ opacity: 0, scale: 0.92, y: 12 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.92, y: 12 }}
+            transition={{ duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
+            style={{ transformOrigin: 'bottom right', width: '420px' }}
+            className="absolute bottom-[72px] right-0 flex flex-col gap-1.5 pointer-events-auto"
           >
-            <p className="text-[10px] text-muted-foreground/60">
-              Powered by{' '}
-              <a
-                href={POWERED_BY_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline hover:text-muted-foreground transition-colors"
+            {/* The real widget — identical to the live embed */}
+            <div
+              style={{
+                borderRadius: `${cornerRadius}px`,
+                height: '720px',
+                maxHeight: 'calc(100svh - 220px)',
+              }}
+              className="overflow-hidden border shadow-2xl bg-white"
+            >
+              <ChatWindow
+                key={`${activeLang}:${resetKey}`}
+                config={publicConfig}
+                transport={transport}
+                initialLanguage={activeLang}
+              />
+            </div>
+
+            {/* Preview chrome — Powered by (left) + Start over (right) */}
+            <div className="flex items-center justify-between px-1">
+              <p className="text-[10px] text-muted-foreground/60">
+                Powered by{' '}
+                <a
+                  href={POWERED_BY_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline hover:text-muted-foreground transition-colors"
+                >
+                  Chatzone
+                </a>
+              </p>
+              <button
+                type="button"
+                onClick={() => setResetKey((k) => k + 1)}
+                className="inline-flex items-center gap-1 text-[10px] text-muted-foreground/70 hover:text-muted-foreground transition-colors"
               >
-                Chatzone
-              </a>
-            </p>
+                <RotateCcwIcon className="size-3" aria-hidden="true" />
+                Start over
+              </button>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -666,8 +159,12 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
               exit={{ rotate: -90, opacity: 0 }}
               transition={{ duration: 0.15 }}
             >
-              {avatarUrl ? (
-                <img src={avatarUrl} alt={displayName} className="w-14 h-14 object-cover rounded-full" />
+              {config.avatarUrl ? (
+                <img
+                  src={config.avatarUrl}
+                  alt={config.displayName ?? 'Bot'}
+                  className="w-14 h-14 object-cover rounded-full"
+                />
               ) : (
                 <MessageCircleIcon className="size-7 text-white" aria-hidden="true" />
               )}
@@ -680,7 +177,128 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
 }
 
 // -------------------------------------------------------------------------
-// Helper: build a full BotConfig from the partial live form values
+// Preview transport — same UI, authenticated /api/preview/* backend.
+// -------------------------------------------------------------------------
+function createPreviewTransport(botId: string, getConfig: () => BotConfig): ChatTransport {
+  const JSON_HEADERS = { 'Content-Type': 'application/json' }
+  const PREVIEW_CONV = 'preview'
+
+  return {
+    async sendChat({ message, language, history }) {
+      // Faithfully mirror the server's human-intent escalation (no inbox in
+      // preview, but the visitor experience — ack + banner — is identical).
+      if (detectHandoffIntent(message, language)) {
+        const ack = HANDOFF_ACK[language] ?? HANDOFF_ACK.en
+        const body = JSON.stringify({ t: 'text', v: ack }) + '\n'
+        return new Response(body, {
+          status: 200,
+          headers: {
+            'content-type': 'application/x-ndjson',
+            'x-conversation-id': PREVIEW_CONV,
+            'x-handoff': 'requested',
+          },
+        })
+      }
+      return fetch('/api/preview/chat', {
+        method: 'POST',
+        headers: JSON_HEADERS,
+        body: JSON.stringify({ botId, config: getConfig(), history, message, language }),
+      })
+    },
+
+    async search(query) {
+      const res = await fetch('/api/preview/search', {
+        method: 'POST',
+        headers: JSON_HEADERS,
+        body: JSON.stringify({ botId, query }),
+      })
+      return res.json()
+    },
+
+    async getVoiceToken(language) {
+      const res = await fetch('/api/preview/voice-token', {
+        method: 'POST',
+        headers: JSON_HEADERS,
+        body: JSON.stringify({ botId, language }),
+      })
+      if (!res.ok) {
+        const data = (await res.json().catch(() => ({}))) as { error?: string }
+        throw new Error(
+          res.status === 503 ? 'Voice calling unavailable' : (data.error ?? 'Token request failed'),
+        )
+      }
+      const data = (await res.json()) as { token: string; voiceId?: string }
+      return { token: data.token, voiceId: data.voiceId }
+    },
+
+    // Preview is ephemeral — no persisted ids, so feedback is a no-op.
+    async fetchMessages() {
+      return []
+    },
+    async sendFeedback() {},
+
+    // Simulate the handoff so the banner shows what the visitor would see.
+    async requestHandoff() {
+      return { status: 'requested' }
+    },
+    async poll() {
+      return { status: 'requested', agentName: null, messages: [] }
+    },
+    async submitLead() {},
+  }
+}
+
+// -------------------------------------------------------------------------
+// Build the browser-safe PublicBotConfig the widget renders from.
+// -------------------------------------------------------------------------
+function buildPreviewPublicConfig(config: LiveConfig): PublicBotConfig {
+  const languages = (config.languages ?? ['en']) as BotLanguage[]
+  const content: PublicBotConfig['content'] = {}
+  for (const lang of languages) {
+    const c = config.content?.[lang]
+    content[lang] = {
+      greeting:
+        c?.greeting ||
+        (lang === 'lt' ? 'Sveiki! Kaip galiu padėti?' : 'Hi! How can I help you today?'),
+      suggestedQuestions: (c?.suggestedQuestions ?? []).filter(Boolean),
+    }
+  }
+
+  const result: PublicBotConfig = {
+    displayName: config.displayName || 'Your Bot',
+    theme: {
+      primaryColor: config.theme?.primaryColor ?? '#4f46e5',
+      position: config.theme?.position ?? 'bottom-right',
+      cornerRadius: config.theme?.cornerRadius ?? 16,
+      bubbleRadius: config.theme?.bubbleRadius ?? 16,
+      fontFamily: config.theme?.fontFamily ?? 'geist',
+      ...(config.theme?.bubbleIcon !== undefined && { bubbleIcon: config.theme.bubbleIcon }),
+    },
+    languages,
+    content,
+    leadCapture: {
+      enabled: config.leadCapture?.enabled ?? false,
+      trigger: config.leadCapture?.trigger ?? 'on_fallback',
+      fields: (config.leadCapture?.fields ?? []).map((f) => ({
+        key: f.key,
+        label: f.label,
+        required: f.required ?? false,
+      })),
+    },
+    voice: {
+      enabled: config.voice?.enabled ?? false,
+      ttsEnabled: config.voice?.ttsEnabled ?? true,
+      sttEnabled: config.voice?.sttEnabled ?? true,
+    },
+  }
+
+  if (config.avatarUrl) result.avatarUrl = config.avatarUrl
+  if (config.privacyUrl) result.privacyUrl = config.privacyUrl
+  return result
+}
+
+// -------------------------------------------------------------------------
+// Build a full BotConfig from the partial live form values (for /api/preview/chat).
 // -------------------------------------------------------------------------
 function buildFullConfig(config: LiveConfig): BotConfig {
   const languages = (config.languages ?? ['en']) as BotConfig['languages']
@@ -705,19 +323,21 @@ function buildFullConfig(config: LiveConfig): BotConfig {
   return {
     displayName: config.displayName ?? 'Bot',
     avatarUrl: config.avatarUrl,
+    privacyUrl: config.privacyUrl,
     theme: {
       primaryColor: config.theme?.primaryColor ?? '#4f46e5',
       position: config.theme?.position ?? 'bottom-right',
       bubbleIcon: config.theme?.bubbleIcon,
       cornerRadius: config.theme?.cornerRadius ?? 16,
       bubbleRadius: config.theme?.bubbleRadius ?? 16,
+      fontFamily: config.theme?.fontFamily ?? 'geist',
     },
     voice: {
       enabled: config.voice?.enabled ?? false,
       ttsEnabled: config.voice?.ttsEnabled ?? true,
       sttEnabled: config.voice?.sttEnabled ?? true,
       voices: {
-        en: (config.voice?.voices as Record<string, string> | undefined)?.en ?? '21m00Tcm4TlvDq8ikWAM',
+        en: (config.voice?.voices as Record<string, string> | undefined)?.en ?? DEFAULT_VOICE_ID,
         lt: (config.voice?.voices as Record<string, string> | undefined)?.lt,
       },
     },

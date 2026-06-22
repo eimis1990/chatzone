@@ -10,13 +10,16 @@ import { VoiceCallButton, type CallState } from '@/components/voice/VoiceCallBut
 import { LeadForm } from './LeadForm'
 import { SuggestedQuestions } from './SuggestedQuestions'
 import type { PublicBotConfig } from '@/lib/widget-config'
+import type { ChatTransport } from '@/lib/widget-transport'
 import type { BotLanguage, HandoffStatus } from '@/lib/types'
 import type { CommerceProduct } from '@/lib/commerce/types'
 import { fontStack } from '@/lib/fonts'
 
 interface ChatWindowProps {
-  publicKey: string
   config: PublicBotConfig
+  transport: ChatTransport
+  /** Initial display language (defaults to browser locale → first enabled). */
+  initialLanguage?: BotLanguage
 }
 
 function generateId() {
@@ -72,13 +75,15 @@ function handoffBannerLive(lang: BotLanguage, agentName: string | null): string 
 
 const POLL_INTERVAL_MS = 4000
 
-export function ChatWindow({ publicKey, config }: ChatWindowProps) {
+export function ChatWindow({ config, transport, initialLanguage }: ChatWindowProps) {
   const languages = config.languages ?? ['en']
   const isMultilang = languages.length > 1
 
-  // Active language — initialized once from browser locale
+  // Active language — initialized once (prop → browser locale → first enabled)
   const [activeLang, setActiveLang] = useState<BotLanguage>(() =>
-    detectInitialLanguage(languages),
+    initialLanguage && languages.includes(initialLanguage)
+      ? initialLanguage
+      : detectInitialLanguage(languages),
   )
 
   // Derived per-language content
@@ -99,6 +104,20 @@ export function ChatWindow({ publicKey, config }: ChatWindowProps) {
   const callStateRef = useRef<CallState>('idle')
   const endVoiceRef = useRef<(() => void) | null>(null)
   const visitorIdRef = useRef<string>('')
+  // Latest messages, for building request history without re-creating callbacks.
+  const messagesRef = useRef<ChatMessage[]>([])
+  useEffect(() => {
+    messagesRef.current = messages
+  }, [messages])
+
+  // Prior turns sent to the (stateless) chat transport.
+  const buildHistory = useCallback(
+    () =>
+      messagesRef.current
+        .filter((m) => (m.role === 'user' || m.role === 'assistant') && !!m.content && !m.streaming)
+        .map((m) => ({ role: m.role, content: m.content })),
+    [],
+  )
 
   // Human-handoff state.
   const [handoffStatus, setHandoffStatus] = useState<HandoffStatus>('bot')
@@ -138,12 +157,7 @@ export function ChatWindow({ publicKey, config }: ChatWindowProps) {
   const handleVoiceSearch = useCallback(
     async (query: string): Promise<string> => {
       try {
-        const res = await fetch('/api/widget/search', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ publicKey, query }),
-        })
-        const data = (await res.json()) as { products?: CommerceProduct[]; summary?: string }
+        const data = await transport.search(query)
         if (data.products?.length) {
           setMessages((prev) => [
             ...prev,
@@ -155,7 +169,7 @@ export function ChatWindow({ publicKey, config }: ChatWindowProps) {
         return 'The product search is temporarily unavailable.'
       }
     },
-    [publicKey],
+    [transport],
   )
   const primaryColor = config.theme.primaryColor
   const cornerRadius = config.theme.cornerRadius ?? 16
@@ -190,22 +204,15 @@ export function ChatWindow({ publicKey, config }: ChatWindowProps) {
 
   /**
    * After a full chat turn, fetch the real DB message ids for the conversation
-   * so the TTS button can use them.
+   * so feedback (👍/👎) can target the persisted message.
    */
   const syncMessageIds = useCallback(
     async (convId: string) => {
-      // Map our client-side assistant message ids to the real DB ids (by content)
-      // so TTS and 👍/👎 feedback can target the persisted message.
       try {
-        const res = await fetch(
-          `/api/messages?publicKey=${encodeURIComponent(publicKey)}&conversationId=${encodeURIComponent(convId)}`,
-        )
-        if (!res.ok) return
-        const data = (await res.json()) as { messages?: { id: string; role: string; content: string }[] }
-        if (!data.messages) return
-
+        const serverMessages = await transport.fetchMessages(convId)
+        if (!serverMessages.length) return
         setMessages((prev) => {
-          const serverAssistant = data.messages!.filter((m) => m.role === 'assistant')
+          const serverAssistant = serverMessages.filter((m) => m.role === 'assistant')
           return prev.map((m) => {
             if (m.role !== 'assistant') return m
             const match = serverAssistant.find((s) => s.content === m.content)
@@ -217,22 +224,18 @@ export function ChatWindow({ publicKey, config }: ChatWindowProps) {
         // Non-critical
       }
     },
-    [publicKey],
+    [transport],
   )
 
   const handleFeedback = useCallback(
     async (messageId: string, value: 'up' | 'down') => {
       try {
-        await fetch('/api/feedback', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ publicKey, messageId, value }),
-        })
+        await transport.sendFeedback(messageId, value)
       } catch {
         // Non-critical
       }
     },
-    [publicKey],
+    [transport],
   )
 
   const sendMessage = useCallback(
@@ -250,18 +253,15 @@ export function ChatWindow({ publicKey, config }: ChatWindowProps) {
       // does not reply — the agent answers from the inbox (surfaced via polling).
       if (handoffStatusRef.current === 'requested' || handoffStatusRef.current === 'live') {
         const userMsg: ChatMessage = { id: generateId(), role: 'user', content: text }
+        const history = buildHistory()
         setMessages((prev) => [...prev, userMsg])
         try {
-          const res = await fetch('/api/chat', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              publicKey,
-              visitorId: visitorIdRef.current,
-              conversationId,
-              message: text,
-              language: activeLang,
-            }),
+          const res = await transport.sendChat({
+            message: text,
+            conversationId,
+            language: activeLang,
+            visitorId: visitorIdRef.current,
+            history,
           })
           const cid = res.headers.get('x-conversation-id')
           if (cid) setConversationId(cid)
@@ -275,21 +275,18 @@ export function ChatWindow({ publicKey, config }: ChatWindowProps) {
 
       const userMsg: ChatMessage = { id: generateId(), role: 'user', content: text }
       const assistantMsg: ChatMessage = { id: generateId(), role: 'assistant', content: '', streaming: true }
+      const history = buildHistory()
 
       setMessages((prev) => [...prev, userMsg, assistantMsg])
       setStreaming(true)
 
       try {
-        const res = await fetch('/api/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            publicKey,
-            visitorId: visitorIdRef.current,
-            conversationId,
-            message: text,
-            language: activeLang,
-          }),
+        const res = await transport.sendChat({
+          message: text,
+          conversationId,
+          language: activeLang,
+          visitorId: visitorIdRef.current,
+          history,
         })
 
         const convId = res.headers.get('x-conversation-id')
@@ -394,7 +391,7 @@ export function ChatWindow({ publicKey, config }: ChatWindowProps) {
         setStreaming(false)
       }
     },
-    [streaming, conversationId, leadDismissed, config.leadCapture.enabled, publicKey, activeLang, syncMessageIds, updateHandoff]
+    [streaming, conversationId, leadDismissed, config.leadCapture.enabled, activeLang, transport, syncMessageIds, updateHandoff, buildHistory]
   )
 
   /** Visitor taps "Talk to a person" → escalate the conversation. */
@@ -408,19 +405,12 @@ export function ChatWindow({ publicKey, config }: ChatWindowProps) {
       return
     }
     try {
-      const res = await fetch('/api/widget/request-handoff', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ publicKey, conversationId }),
-      })
-      if (res.ok) {
-        const data = (await res.json()) as { status?: HandoffStatus }
-        updateHandoff(data.status === 'live' ? 'live' : 'requested')
-      }
+      const data = await transport.requestHandoff(conversationId)
+      if (data) updateHandoff(data.status === 'live' ? 'live' : 'requested')
     } catch {
       // Non-critical.
     }
-  }, [conversationId, activeLang, publicKey, sendMessage, updateHandoff])
+  }, [conversationId, activeLang, transport, sendMessage, updateHandoff])
 
   // While in handoff, poll for the agent's status + new human replies (~4s).
   useEffect(() => {
@@ -430,18 +420,8 @@ export function ChatWindow({ publicKey, config }: ChatWindowProps) {
 
     const poll = async () => {
       try {
-        const res = await fetch('/api/widget/poll', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ publicKey, conversationId, afterTs: lastPollTsRef.current }),
-        })
-        if (!res.ok || !active) return
-        const data = (await res.json()) as {
-          status: HandoffStatus
-          agentName: string | null
-          serverTime?: string
-          messages?: { id: string; content: string }[]
-        }
+        const data = await transport.poll(conversationId, lastPollTsRef.current)
+        if (!active) return
         if (data.serverTime) lastPollTsRef.current = data.serverTime
         setAgentName(data.agentName ?? null)
 
@@ -478,36 +458,19 @@ export function ChatWindow({ publicKey, config }: ChatWindowProps) {
       active = false
       clearInterval(timer)
     }
-  }, [handoffStatus, conversationId, publicKey, activeLang, updateHandoff])
+  }, [handoffStatus, conversationId, transport, activeLang, updateHandoff])
 
   const handleLeadSubmit = useCallback(
     async (fields: Record<string, string>) => {
-      await fetch('/api/lead', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ publicKey, conversationId, fields }),
-      }).then(async (r) => {
-        if (!r.ok) throw new Error('Lead submission failed')
-      })
+      await transport.submitLead(conversationId, fields)
     },
-    [publicKey, conversationId]
+    [transport, conversationId]
   )
 
-  const getVoiceToken = useCallback(async (): Promise<{ token: string; voiceId?: string }> => {
-    const res = await fetch('/api/widget/voice-token', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ publicKey, language: activeLang }),
-    })
-    if (!res.ok) {
-      const data = (await res.json().catch(() => ({}))) as { error?: string }
-      throw new Error(
-        res.status === 503 ? 'Voice calling unavailable' : (data.error ?? 'Token request failed'),
-      )
-    }
-    const data = (await res.json()) as { token: string; voiceId?: string }
-    return { token: data.token, voiceId: data.voiceId }
-  }, [publicKey, activeLang])
+  const getVoiceToken = useCallback(
+    (): Promise<{ token: string; voiceId?: string }> => transport.getVoiceToken(activeLang),
+    [transport, activeLang],
+  )
 
   const voiceEnabled = Boolean(config.voice?.enabled)
   const headerBorderRadius = `${cornerRadius}px ${cornerRadius}px 0 0`
