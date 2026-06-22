@@ -3,7 +3,7 @@ import { openai } from '@ai-sdk/openai'
 import { z } from 'zod'
 import type { BotConfig } from '@/lib/types'
 import type { CommerceProduct } from '@/lib/commerce/types'
-import { searchStore } from '@/lib/commerce'
+import { searchStore, getOrderStatus, getDiscount, orderLookupEnabled } from '@/lib/commerce'
 
 /**
  * Builds the product tools for a commerce-enabled bot:
@@ -16,7 +16,7 @@ import { searchStore } from '@/lib/commerce'
  */
 export function makeProductTools(config: BotConfig, sink: CommerceProduct[]): ToolSet {
   const candidates = new Map<string, CommerceProduct>()
-  return {
+  const tools: ToolSet = {
     search_products: tool({
       description:
         'Search the store catalog and get CANDIDATE products to review (not shown to the user yet). ' +
@@ -66,6 +66,50 @@ export function makeProductTools(config: BotConfig, sink: CommerceProduct[]): To
       },
     }),
   }
+
+  // Order status — only when REST credentials are configured.
+  if (orderLookupEnabled(config.commerce)) {
+    tools.order_status = tool({
+      description:
+        'Look up the status of an existing order. You MUST have BOTH the order number AND the email ' +
+        'used on the order before calling this — ask the shopper for whatever is missing; never guess. ' +
+        'If it returns found:false, do NOT reveal any order details.',
+      inputSchema: z.object({
+        orderId: z.string().describe('Order number from the receipt/confirmation'),
+        email: z.string().describe('Email address used to place the order'),
+      }),
+      execute: async ({ orderId, email }) => {
+        const r = await getOrderStatus(config.commerce, { orderId, email })
+        if (!r.found) return { found: false, reason: r.reason ?? 'not_found' }
+        return {
+          found: true,
+          orderNumber: r.orderNumber,
+          status: r.status,
+          total: r.total,
+          currency: r.currency,
+          items: r.items,
+          tracking: r.tracking,
+          dateCreated: r.dateCreated,
+        }
+      },
+    })
+  }
+
+  // Discount code — only when a discount is configured.
+  if (getDiscount(config.commerce).enabled) {
+    tools.discount_code = tool({
+      description:
+        'Provide the store discount/promo code when the shopper asks for a discount, coupon, or deal. ' +
+        'Only share the code this returns — never invent one.',
+      inputSchema: z.object({}),
+      execute: async () => {
+        const d = getDiscount(config.commerce)
+        return d.enabled ? { available: true, code: d.code, description: d.description } : { available: false }
+      },
+    })
+  }
+
+  return tools
 }
 
 /** True when the bot has live product search configured. */

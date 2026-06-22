@@ -926,7 +926,39 @@ interface CommerceSectionProps {
 function CommerceSection({ control, watch }: CommerceSectionProps) {
   const commerceEnabled = watch('commerce.enabled')
   const storeUrl = watch('commerce.storeUrl') ?? ''
+  const restKey = watch('commerce.restKey') ?? ''
+  const restSecret = watch('commerce.restSecret') ?? ''
+  const discountEnabled = watch('commerce.discount.enabled')
   const [testState, setTestState] = useState<CommerceTestState>({ status: 'idle' })
+  const [orderTest, setOrderTest] = useState<{
+    status: 'idle' | 'loading' | 'ok' | 'error'
+    message?: string
+  }>({ status: 'idle' })
+
+  const handleTestOrders = useCallback(async () => {
+    if (!storeUrl.trim() || !restKey.trim() || !restSecret.trim()) {
+      setOrderTest({ status: 'error', message: 'Enter the store URL, key and secret first.' })
+      return
+    }
+    setOrderTest({ status: 'loading' })
+    try {
+      const res = await fetch('/api/commerce/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          provider: 'woocommerce',
+          storeUrl: storeUrl.trim(),
+          mode: 'orders',
+          restKey: restKey.trim(),
+          restSecret: restSecret.trim(),
+        }),
+      })
+      const data = (await res.json()) as { ok: boolean; error?: string }
+      setOrderTest(data.ok ? { status: 'ok' } : { status: 'error', message: data.error ?? 'Connection failed.' })
+    } catch {
+      setOrderTest({ status: 'error', message: 'Network error — please try again.' })
+    }
+  }, [storeUrl, restKey, restSecret])
 
   const handleTest = useCallback(async () => {
     if (!storeUrl.trim()) {
@@ -1048,6 +1080,127 @@ function CommerceSection({ control, watch }: CommerceSectionProps) {
             <p className="text-xs text-muted-foreground bg-muted/50 rounded-md px-3 py-2">
               Your bot will search this store&apos;s catalog live and show product cards in chat.
             </p>
+
+            {/* Order lookup (optional) — WooCommerce REST credentials */}
+            <div className="space-y-3 border-t pt-4">
+              <div>
+                <Label>Order lookup (optional)</Label>
+                <p className="text-xs text-muted-foreground">
+                  Add read-only WooCommerce REST keys so the bot can check order status. Create them in
+                  WooCommerce → Settings → Advanced → REST API (permission: Read). Stored securely and
+                  never sent to the browser.
+                </p>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <Label htmlFor="restKey">Consumer key</Label>
+                  <Controller
+                    name="commerce.restKey"
+                    control={control}
+                    render={({ field }) => (
+                      <Input
+                        id="restKey"
+                        value={field.value ?? ''}
+                        onChange={field.onChange}
+                        onBlur={field.onBlur}
+                        placeholder="ck_…"
+                        autoComplete="off"
+                        className="font-mono text-sm"
+                      />
+                    )}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="restSecret">Consumer secret</Label>
+                  <Controller
+                    name="commerce.restSecret"
+                    control={control}
+                    render={({ field }) => (
+                      <Input
+                        id="restSecret"
+                        type="password"
+                        value={field.value ?? ''}
+                        onChange={field.onChange}
+                        onBlur={field.onBlur}
+                        placeholder="cs_…"
+                        autoComplete="off"
+                        className="font-mono text-sm"
+                      />
+                    )}
+                  />
+                </div>
+              </div>
+              <div className="flex items-center gap-3 flex-wrap">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={orderTest.status === 'loading' || !restKey.trim() || !restSecret.trim()}
+                  onClick={handleTestOrders}
+                >
+                  {orderTest.status === 'loading' ? 'Testing…' : 'Test order access'}
+                </Button>
+                {orderTest.status === 'ok' && <TestBadge variant="ok">REST access OK</TestBadge>}
+                {orderTest.status === 'error' && (
+                  <TestBadge variant="error">{orderTest.message}</TestBadge>
+                )}
+              </div>
+            </div>
+
+            {/* Discount code (optional) */}
+            <div className="space-y-3 border-t pt-4">
+              <div className="flex items-center gap-3">
+                <Controller
+                  name="commerce.discount.enabled"
+                  control={control}
+                  render={({ field }) => (
+                    <Switch
+                      id="discountEnabled"
+                      checked={field.value ?? false}
+                      onCheckedChange={field.onChange}
+                    />
+                  )}
+                />
+                <Label htmlFor="discountEnabled">Offer a discount code</Label>
+              </div>
+              {discountEnabled && (
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="discountCode">Code</Label>
+                    <Controller
+                      name="commerce.discount.code"
+                      control={control}
+                      render={({ field }) => (
+                        <Input
+                          id="discountCode"
+                          value={field.value ?? ''}
+                          onChange={field.onChange}
+                          onBlur={field.onBlur}
+                          placeholder="WELCOME10"
+                          className="font-mono text-sm"
+                        />
+                      )}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="discountDesc">Description</Label>
+                    <Controller
+                      name="commerce.discount.description"
+                      control={control}
+                      render={({ field }) => (
+                        <Input
+                          id="discountDesc"
+                          value={field.value ?? ''}
+                          onChange={field.onChange}
+                          onBlur={field.onBlur}
+                          placeholder="10% off your first order"
+                        />
+                      )}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         )}
       </CardContent>

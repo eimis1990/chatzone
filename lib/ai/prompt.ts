@@ -68,6 +68,26 @@ export function buildSystemPrompt(
         'links, or per-category bullets in your text — the cards already show all of that. ' +
         'For non-product questions, use the context below.',
     )
+
+    const orderEnabled = Boolean(config.commerce?.restKey && config.commerce?.restSecret)
+    if (orderEnabled) {
+      lines.push(
+        'ORDER STATUS: when the shopper asks about an existing order (where is it, tracking, status), ' +
+          'collect BOTH the order number AND the email used on the order, then call `order_status`. ' +
+          'Ask for whatever is missing; never guess or accept just one. If it returns found:false, do not ' +
+          'reveal any details — say you could not find an order matching that number and email, and offer ' +
+          'to connect them with a person. When found, briefly state the status, the items, and the total, ' +
+          'and include the tracking number if present.',
+      )
+    }
+
+    const discount = config.commerce?.discount
+    if (discount?.enabled && discount.code) {
+      lines.push(
+        'DISCOUNTS: if the shopper asks for a discount, coupon, promo, or deal, call `discount_code` and ' +
+          'share the code it returns (with its description). Do not invent or guess codes.',
+      )
+    }
   } else {
     lines.push('Answer using ONLY the context below. Cite the sources you used by their id.')
     lines.push(

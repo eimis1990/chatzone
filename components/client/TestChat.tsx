@@ -50,7 +50,14 @@ type LiveConfig = {
   content?: Partial<
     Record<BotLanguage, { greeting?: string; suggestedQuestions?: string[]; fallbackMessage?: string }>
   >
-  commerce?: { enabled?: boolean; provider?: 'woocommerce'; storeUrl?: string }
+  commerce?: {
+    enabled?: boolean
+    provider?: 'woocommerce'
+    storeUrl?: string
+    restKey?: string
+    restSecret?: string
+    discount?: { enabled?: boolean; code?: string; description?: string }
+  }
 }
 
 interface TestChatProps {
@@ -366,6 +373,15 @@ function buildFullConfig(config: LiveConfig): BotConfig {
       enabled: config.commerce?.enabled ?? false,
       provider: 'woocommerce',
       storeUrl: config.commerce?.storeUrl ?? '',
+      restKey: config.commerce?.restKey,
+      restSecret: config.commerce?.restSecret,
+      discount: config.commerce?.discount
+        ? {
+            enabled: config.commerce.discount.enabled ?? false,
+            code: config.commerce.discount.code,
+            description: config.commerce.discount.description,
+          }
+        : undefined,
     },
   }
 }

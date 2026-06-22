@@ -6,7 +6,12 @@ import type {
   OrderLookupParams,
   DiscountInfo,
 } from '@/lib/commerce/types'
-import { searchWooProducts, validateWooStore, getWooOrderStatus } from '@/lib/commerce/woocommerce'
+import {
+  searchWooProducts,
+  validateWooStore,
+  getWooOrderStatus,
+  validateWooOrderAccess,
+} from '@/lib/commerce/woocommerce'
 
 export interface CommerceConfig {
   enabled: boolean
@@ -66,6 +71,22 @@ export async function getOrderStatus(
       )
     default:
       return { found: false, reason: 'not_configured' }
+  }
+}
+
+/** Validate REST credentials can read orders (configurator "test"). */
+export async function validateOrderAccess(
+  provider: CommerceConfig['provider'],
+  storeUrl: string,
+  restKey: string,
+  restSecret: string,
+  deps: CommerceDeps = {},
+): Promise<{ ok: boolean; error?: string }> {
+  switch (provider) {
+    case 'woocommerce':
+      return validateWooOrderAccess(storeUrl, restKey, restSecret, deps)
+    default:
+      return { ok: false, error: 'Unsupported provider' }
   }
 }
 

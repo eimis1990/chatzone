@@ -218,6 +218,29 @@ export async function getWooOrderStatus(
   }
 }
 
+/** Check that REST consumer key/secret can read orders (for the configurator). */
+export async function validateWooOrderAccess(
+  storeUrl: string,
+  restKey: string,
+  restSecret: string,
+  deps: CommerceDeps = {},
+): Promise<{ ok: boolean; error?: string }> {
+  if (!restKey || !restSecret) return { ok: false, error: 'Enter both the consumer key and secret.' }
+  const fetchImpl = deps.fetchImpl ?? fetch
+  try {
+    const res = await fetchImpl(`${storeOrigin(storeUrl)}/wp-json/wc/v3/orders?per_page=1`, {
+      headers: { Authorization: basicAuth(restKey, restSecret) },
+    })
+    if (res.status === 401 || res.status === 403) {
+      return { ok: false, error: 'Unauthorized — check the key/secret and that it has read access.' }
+    }
+    if (!res.ok) return { ok: false, error: `WooCommerce REST returned HTTP ${res.status}.` }
+    return { ok: true }
+  } catch {
+    return { ok: false, error: 'Could not reach the WooCommerce REST API.' }
+  }
+}
+
 /**
  * Validate a WooCommerce Store API and return the total product count.
  * The Store API reports the total in the `x-wp-total` response header.
