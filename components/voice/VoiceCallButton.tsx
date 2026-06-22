@@ -184,19 +184,21 @@ function VoiceCallInner({
 
   // ── Compact (icon-only) appearance — square, matches the restart button ──────
   if (appearance === 'compact') {
-    const squareBtn =
-      'flex items-center justify-center size-8 rounded-lg flex-shrink-0 text-white transition-opacity hover:opacity-85'
+    const lt = language === 'lt'
+    const pill =
+      'inline-flex items-center gap-1.5 h-8 rounded-lg px-2.5 flex-shrink-0 text-xs font-medium text-white transition-opacity hover:opacity-85'
 
     if (isConnecting) {
       return (
         <button
           type="button"
           disabled
-          aria-label="Connecting voice call…"
-          className={squareBtn}
+          aria-label={lt ? 'Jungiamasi…' : 'Connecting…'}
+          className={pill}
           style={{ backgroundColor: '#22c55e' }}
         >
           <LoaderCircleIcon className="size-4 animate-spin" aria-hidden="true" />
+          {lt ? 'Jungiamasi…' : 'Connecting…'}
         </button>
       )
     }
@@ -207,11 +209,12 @@ function VoiceCallInner({
         <button
           type="button"
           onClick={handleEnd}
-          aria-label={`End voice call${isSpeaking ? ' — bot is speaking' : ''}`}
-          className={squareBtn}
+          aria-label={lt ? 'Baigti pokalbį' : 'End call'}
+          className={pill}
           style={{ backgroundColor: '#ef4444' }}
         >
           <FilledPhoneIcon />
+          {lt ? 'Baigti' : 'End call'}
         </button>
       )
     }
@@ -220,12 +223,13 @@ function VoiceCallInner({
       <button
         type="button"
         onClick={handleStart}
-        aria-label="Start voice call"
-        title={micDenied ? 'Microphone access denied' : callError ?? 'Start voice call'}
-        className={squareBtn}
+        aria-label={lt ? 'Kalbėti su agentu' : 'Talk with agent'}
+        title={micDenied ? 'Microphone access denied' : callError ?? undefined}
+        className={pill}
         style={{ backgroundColor: '#22c55e' }}
       >
         <FilledPhoneIcon />
+        {lt ? 'Kalbėti su Agentu' : 'Talk with Agent'}
       </button>
     )
   }

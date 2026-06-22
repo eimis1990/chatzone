@@ -60,9 +60,10 @@ export function ProductCards({
   const hasMore = products.length > CARD_LIMIT
 
   return (
-    <div className="w-full mt-2" aria-label={labels.products}>
+    <div className="w-full mt-2 space-y-2" aria-label={labels.products}>
+      {/* Full-width cards; swipe horizontally (snap) to see the rest. */}
       <div
-        className="flex gap-2 overflow-x-auto pb-2 snap-x snap-mandatory"
+        className="flex gap-3 overflow-x-auto pb-1 snap-x snap-mandatory"
         style={{ scrollbarWidth: 'thin' }}
         role="list"
       >
@@ -76,16 +77,19 @@ export function ProductCards({
             outOfStockLabel={labels.outOfStock}
           />
         ))}
-        {hasMore && (
-          <SeeAllCard
-            bubbleRadius={bubbleRadius}
-            primaryColor={primaryColor}
-            label={labels.seeAll}
-            count={products.length}
-            onClick={() => onSeeAll?.(products)}
-          />
-        )}
       </div>
+
+      {hasMore && (
+        <button
+          type="button"
+          onClick={() => onSeeAll?.(products)}
+          className="flex w-full items-center justify-center gap-1.5 border text-sm font-medium py-2 text-foreground transition-colors hover:bg-muted outline-none focus-visible:ring-2"
+          style={{ borderRadius: `${Math.min(bubbleRadius, 12)}px` }}
+        >
+          <GridIcon />
+          {labels.seeAll} ({products.length})
+        </button>
+      )}
     </div>
   )
 }
@@ -170,33 +174,32 @@ function ProductCard({
   viewMoreLabel,
   outOfStockLabel,
 }: ProductCardProps) {
-  // Card takes ~55% of the container so ~2 cards peek; minimum width 180px.
+  // Each card fills the full chat width; swipe to the next (snap).
   const cardRadius = bubbleRadius
   const imageRadius = `${cardRadius}px ${cardRadius}px 0 0`
   const cardStyle = {
     borderRadius: `${cardRadius}px`,
-    minWidth: '180px',
-    width: '55%',
+    width: '100%',
     flexShrink: 0,
   }
 
   return (
     <div
-      className="flex flex-col border bg-background shadow-sm snap-start overflow-hidden"
+      className="flex flex-col border bg-background snap-start overflow-hidden"
       style={cardStyle}
       role="listitem"
     >
-      {/* Image area */}
+      {/* Image area — capped height so a full-width card isn't too tall */}
       <div
-        className="relative w-full overflow-hidden bg-muted"
-        style={{ aspectRatio: '1 / 1', borderRadius: imageRadius }}
+        className="relative w-full overflow-hidden bg-white"
+        style={{ height: 180, borderRadius: imageRadius }}
       >
         {product.imageUrl ? (
           <img
             src={product.imageUrl}
             alt={product.title}
             loading="lazy"
-            className="w-full h-full object-cover"
+            className="w-full h-full object-contain"
           />
         ) : (
           <div
@@ -253,41 +256,6 @@ function ProductCard({
         </a>
       </div>
     </div>
-  )
-}
-
-interface SeeAllCardProps {
-  bubbleRadius: number
-  primaryColor: string
-  label: string
-  count: number
-  onClick: () => void
-}
-
-function SeeAllCard({ bubbleRadius, primaryColor, label, count, onClick }: SeeAllCardProps) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="flex flex-col items-center justify-center gap-2 border border-dashed bg-muted/30 snap-start shrink-0 transition-colors hover:bg-muted/60 focus-visible:ring-2 outline-none"
-      style={{
-        borderRadius: `${bubbleRadius}px`,
-        minWidth: '120px',
-        width: '38%',
-      }}
-      aria-label={`${label} (${count})`}
-    >
-      <span
-        className="flex items-center justify-center rounded-full"
-        style={{ width: 36, height: 36, backgroundColor: primaryColor, color: '#fff' }}
-      >
-        <GridIcon />
-      </span>
-      <span className="text-xs font-medium text-foreground text-center px-2">
-        {label}
-        <span className="block text-[11px] font-normal text-muted-foreground">{count}</span>
-      </span>
-    </button>
   )
 }
 
