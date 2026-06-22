@@ -10,6 +10,7 @@ import {
   SlidersHorizontalIcon,
   DatabaseIcon,
   MessagesSquareIcon,
+  InboxIcon,
   UsersIcon,
   BarChart3Icon,
   Code2Icon,
@@ -22,6 +23,7 @@ import { SignOutButton } from '@/components/client/SignOutButton'
 const SECTIONS: { label: string; href: string; icon: LucideIcon }[] = [
   { label: 'Configure', href: 'configure', icon: SlidersHorizontalIcon },
   { label: 'Knowledge', href: 'knowledge', icon: DatabaseIcon },
+  { label: 'Inbox', href: 'inbox', icon: InboxIcon },
   { label: 'Conversations', href: 'conversations', icon: MessagesSquareIcon },
   { label: 'Leads', href: 'leads', icon: UsersIcon },
   { label: 'Analytics', href: 'analytics', icon: BarChart3Icon },
@@ -32,6 +34,8 @@ export interface BotLite {
   id: string
   name: string
   status: string
+  /** Conversations awaiting/in human handoff (requested + live). */
+  inboxCount?: number
 }
 
 export function AppSidebar({ bots, userEmail }: { bots: BotLite[]; userEmail: string }) {
@@ -97,6 +101,14 @@ export function AppSidebar({ bots, userEmail }: { bots: BotLite[]; userEmail: st
                       aria-hidden="true"
                     />
                     <span className="flex-1 truncate">{bot.name}</span>
+                    {bot.inboxCount ? (
+                      <span
+                        className="ml-1 inline-flex min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold leading-4 text-primary-foreground"
+                        title={`${bot.inboxCount} awaiting a human`}
+                      >
+                        {bot.inboxCount}
+                      </span>
+                    ) : null}
                   </Link>
 
                   {/* Selected bot expands to its sections */}
@@ -118,7 +130,12 @@ export function AppSidebar({ bots, userEmail }: { bots: BotLite[]; userEmail: st
                             )}
                           >
                             <Icon className="size-4 flex-shrink-0" aria-hidden="true" />
-                            {s.label}
+                            <span className="flex-1">{s.label}</span>
+                            {s.href === 'inbox' && bot.inboxCount ? (
+                              <span className="inline-flex min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold leading-4 text-primary-foreground">
+                                {bot.inboxCount}
+                              </span>
+                            ) : null}
                           </Link>
                         )
                       })}

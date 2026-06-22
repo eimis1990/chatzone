@@ -20,6 +20,22 @@ export default async function ClientLayout({
       .eq('org_id', orgId)
       .order('created_at', { ascending: false })
     bots = (data ?? []) as BotLite[]
+
+    // Per-bot count of conversations awaiting / in human handoff (sidebar badge).
+    const botIds = bots.map((b) => b.id)
+    if (botIds.length > 0) {
+      const { data: pending } = await supabase
+        .from('conversations')
+        .select('bot_id')
+        .in('bot_id', botIds)
+        .in('handoff_status', ['requested', 'live'])
+      const counts: Record<string, number> = {}
+      for (const row of pending ?? []) {
+        const bid = (row as { bot_id: string }).bot_id
+        counts[bid] = (counts[bid] ?? 0) + 1
+      }
+      bots = bots.map((b) => ({ ...b, inboxCount: counts[b.id] ?? 0 }))
+    }
   }
 
   // The whole shell carries the green mesh; the content is a white rounded card
