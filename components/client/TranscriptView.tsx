@@ -6,53 +6,95 @@ import type { Conversation, Message } from '@/lib/types'
 
 interface ConversationRow extends Pick<Conversation, 'id' | 'visitor_id' | 'started_at' | 'last_message_at'> {
   message_count: number
+  summary: string | null
+  topics: string[] | null
+  needs_attention: boolean
+}
+
+interface Analysis {
+  summary: string
+  topics: string[]
 }
 
 interface TranscriptViewProps {
   conversations: ConversationRow[]
   /** Async loader called when user clicks a conversation row. */
   loadMessages: (conversationId: string) => Promise<Message[]>
+  /** Returns (and lazily generates) the AI summary/topics for a conversation. */
+  analyze: (conversationId: string) => Promise<Analysis>
 }
 
-export function TranscriptView({ conversations, loadMessages }: TranscriptViewProps) {
+export function TranscriptView({ conversations, loadMessages, analyze }: TranscriptViewProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [messages, setMessages] = useState<Message[]>([])
   const [loading, setLoading] = useState(false)
+  const [attentionOnly, setAttentionOnly] = useState(false)
+  const [analysis, setAnalysis] = useState<Analysis | null>(null)
+  const [analyzing, setAnalyzing] = useState(false)
 
   async function handleSelect(id: string) {
     if (id === selectedId) {
       setSelectedId(null)
       setMessages([])
+      setAnalysis(null)
       return
     }
     setSelectedId(id)
     setLoading(true)
+    setAnalysis(null)
+    const row = conversations.find((c) => c.id === id)
     try {
       const msgs = await loadMessages(id)
       setMessages(msgs)
     } finally {
       setLoading(false)
     }
+    if (row?.summary) {
+      setAnalysis({ summary: row.summary, topics: row.topics ?? [] })
+    } else {
+      setAnalyzing(true)
+      try {
+        setAnalysis(await analyze(id))
+      } finally {
+        setAnalyzing(false)
+      }
+    }
   }
 
   const selected = conversations.find((c) => c.id === selectedId)
+  const visible = attentionOnly ? conversations.filter((c) => c.needs_attention) : conversations
+  const attentionCount = conversations.filter((c) => c.needs_attention).length
 
   return (
     <div className="flex gap-6 min-h-[400px]">
       {/* Conversation list */}
       <div className="w-80 shrink-0 border rounded-lg overflow-hidden">
-        <div className="px-4 py-3 border-b bg-muted/30">
+        <div className="px-4 py-3 border-b bg-muted/30 flex items-center justify-between gap-2">
           <p className="text-sm font-medium">
-            {conversations.length} conversation{conversations.length !== 1 ? 's' : ''}
+            {visible.length} conversation{visible.length !== 1 ? 's' : ''}
           </p>
+          {attentionCount > 0 && (
+            <button
+              type="button"
+              onClick={() => setAttentionOnly((v) => !v)}
+              className={[
+                'text-xs font-medium rounded-full px-2.5 py-1 transition-colors',
+                attentionOnly
+                  ? 'bg-destructive/10 text-destructive'
+                  : 'text-muted-foreground hover:bg-muted',
+              ].join(' ')}
+            >
+              ⚠ Needs attention ({attentionCount})
+            </button>
+          )}
         </div>
-        {conversations.length === 0 ? (
+        {visible.length === 0 ? (
           <div className="flex items-center justify-center h-48 text-muted-foreground text-sm">
-            No conversations yet
+            {attentionOnly ? 'Nothing needs attention' : 'No conversations yet'}
           </div>
         ) : (
           <ul className="divide-y overflow-y-auto max-h-[600px]">
-            {conversations.map((conv) => {
+            {visible.map((conv) => {
               const visitorShort = conv.visitor_id.slice(0, 8)
               const isActive = conv.id === selectedId
               return (
@@ -66,7 +108,14 @@ export function TranscriptView({ conversations, loadMessages }: TranscriptViewPr
                     ].join(' ')}
                   >
                     <div className="flex items-center justify-between gap-2">
-                      <span className="font-mono text-xs text-muted-foreground">
+                      <span className="flex items-center gap-1.5 font-mono text-xs text-muted-foreground">
+                        {conv.needs_attention && (
+                          <span
+                            className="size-1.5 rounded-full bg-destructive"
+                            title="Needs attention"
+                            aria-label="Needs attention"
+                          />
+                        )}
                         {visitorShort}…
                       </span>
                       <span className="text-xs text-muted-foreground shrink-0">
@@ -104,6 +153,31 @@ export function TranscriptView({ conversations, loadMessages }: TranscriptViewPr
                 )}
               </div>
             </div>
+
+            {/* AI summary + topics */}
+            {(analyzing || analysis?.summary) && (
+              <div className="px-4 py-3 border-b bg-muted/10 space-y-2">
+                {analyzing && !analysis ? (
+                  <p className="text-xs text-muted-foreground">Summarizing…</p>
+                ) : (
+                  <>
+                    <p className="text-sm text-foreground">{analysis?.summary}</p>
+                    {analysis?.topics && analysis.topics.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5">
+                        {analysis.topics.map((t) => (
+                          <span
+                            key={t}
+                            className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground"
+                          >
+                            {t}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
 
             <div className="flex-1 overflow-y-auto p-4 space-y-4 max-h-[560px]">
               {loading ? (

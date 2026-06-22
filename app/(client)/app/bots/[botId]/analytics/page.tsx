@@ -65,7 +65,7 @@ export default async function AnalyticsPage({
   ] = await Promise.all([
     supabase
       .from('conversations')
-      .select('id, started_at, last_message_at')
+      .select('id, started_at, last_message_at, topics')
       .eq('bot_id', botId)
       .gte('started_at', since30Iso),
     supabase
@@ -97,13 +97,13 @@ export default async function AnalyticsPage({
   const { data: messagesReal } = convIds30.length > 0
     ? await supabase
         .from('messages')
-        .select('id, conversation_id, role, content, created_at')
+        .select('id, conversation_id, role, content, created_at, feedback')
         .in('conversation_id', convIds30)
         .order('created_at', { ascending: true })
     : { data: [] }
 
-  const typedConvs = (conversations ?? []) as Pick<Conversation, 'id' | 'started_at' | 'last_message_at'>[]
-  const typedMsgs = (messagesReal ?? []) as Pick<Message, 'id' | 'conversation_id' | 'role' | 'content' | 'created_at'>[]
+  const typedConvs = (conversations ?? []) as Pick<Conversation, 'id' | 'started_at' | 'last_message_at' | 'topics'>[]
+  const typedMsgs = (messagesReal ?? []) as Pick<Message, 'id' | 'conversation_id' | 'role' | 'content' | 'created_at' | 'feedback'>[]
   const typedLeads = (leads ?? []) as Pick<Lead, 'id' | 'created_at'>[]
   const typedSources = (sources ?? []) as Pick<KnowledgeSource, 'id' | 'status'>[]
 
@@ -148,6 +148,25 @@ export default async function AnalyticsPage({
       ? Math.round((fallbackCount / assistantMsgs.length) * 100)
       : 0
 
+  // CSAT from thumbs feedback: up / (up + down).
+  const thumbsUp = typedMsgs.filter((m) => m.feedback === 'up').length
+  const thumbsDown = typedMsgs.filter((m) => m.feedback === 'down').length
+  const ratedTotal = thumbsUp + thumbsDown
+  const csat = ratedTotal > 0 ? Math.round((thumbsUp / ratedTotal) * 100) : null
+
+  // Top topics across analyzed conversations (last 30 days).
+  const topicFreq: Record<string, number> = {}
+  for (const c of typedConvs) {
+    for (const t of c.topics ?? []) {
+      const tag = t.trim().toLowerCase()
+      if (tag) topicFreq[tag] = (topicFreq[tag] ?? 0) + 1
+    }
+  }
+  const topTopics = Object.entries(topicFreq)
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, 12)
+    .map(([topic, count]) => ({ topic, count }))
+
   return (
     <div className="p-6 space-y-8">
       <div>
@@ -156,21 +175,14 @@ export default async function AnalyticsPage({
       </div>
 
       {/* Scalar stat cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+        <StatCard label="Conversations" value={typedConvs.length} sub="last 30 days" />
+        <StatCard label="Messages" value={typedMsgs.length} sub="last 30 days" />
+        <StatCard label="Leads" value={typedLeads.length} sub="last 30 days" />
         <StatCard
-          label="Conversations"
-          value={typedConvs.length}
-          sub="last 30 days"
-        />
-        <StatCard
-          label="Messages"
-          value={typedMsgs.length}
-          sub="last 30 days"
-        />
-        <StatCard
-          label="Leads"
-          value={typedLeads.length}
-          sub="last 30 days"
+          label="CSAT"
+          value={csat === null ? '—' : `${csat}%`}
+          sub={ratedTotal > 0 ? `${thumbsUp}👍 / ${thumbsDown}👎` : 'no ratings yet'}
         />
         <StatCard
           label="Fallback Rate"
@@ -178,6 +190,24 @@ export default async function AnalyticsPage({
           sub={`${fallbackCount} of ${assistantMsgs.length} replies`}
         />
       </div>
+
+      {/* Top topics (from conversation analysis) */}
+      {topTopics.length > 0 && (
+        <div className="border rounded-lg p-5 space-y-3">
+          <h3 className="text-sm font-semibold">Top topics</h3>
+          <div className="flex flex-wrap gap-2">
+            {topTopics.map(({ topic, count }) => (
+              <span
+                key={topic}
+                className="inline-flex items-center gap-1.5 rounded-full border bg-muted/40 px-3 py-1 text-sm"
+              >
+                {topic}
+                <span className="text-xs text-muted-foreground tabular-nums">{count}</span>
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Charts row 1 */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

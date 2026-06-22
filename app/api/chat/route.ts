@@ -107,6 +107,8 @@ export async function POST(req: Request) {
       content: fallback,
       citations: [],
     })
+    // Flag the conversation as having hit the fallback (AI-accuracy proxy).
+    await svc.from('conversations').update({ had_fallback: true }).eq('id', convId)
     const leadTrigger = bot.config.leadCapture?.enabled && bot.config.leadCapture.trigger === 'on_fallback'
     return ndjsonText(fallback, { ...baseHeaders, 'x-lead-capture': leadTrigger ? '1' : '0' })
   }

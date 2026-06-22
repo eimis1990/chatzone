@@ -1,6 +1,7 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { ThumbsUpIcon, ThumbsDownIcon } from 'lucide-react'
 import { ProductCards } from './ProductCards'
 import { ThinkingDots } from './ThinkingDots'
 import type { CommerceProduct } from '@/lib/commerce/types'
@@ -22,7 +23,10 @@ interface MessageListProps {
   avatarUrl?: string
   activeLang?: 'en' | 'lt'
   onSeeAllProducts?: (products: CommerceProduct[]) => void
+  onFeedback?: (messageId: string, value: 'up' | 'down') => void
 }
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 export function MessageList({
   messages,
@@ -33,9 +37,17 @@ export function MessageList({
   avatarUrl,
   activeLang = 'en',
   onSeeAllProducts,
+  onFeedback,
 }: MessageListProps) {
   const bottomRef = useRef<HTMLDivElement>(null)
   const msgBubbleRadius = `${bubbleRadius}px`
+  // Local feedback state (messageId → value) for the button highlight.
+  const [feedback, setFeedback] = useState<Record<string, 'up' | 'down'>>({})
+
+  const sendFeedback = (messageId: string, value: 'up' | 'down') => {
+    setFeedback((prev) => ({ ...prev, [messageId]: value }))
+    onFeedback?.(messageId, value)
+  }
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -107,6 +119,37 @@ export function MessageList({
                   )}
                 </div>
               )}
+
+              {/* 👍/👎 feedback on completed bot replies (real DB id only) */}
+              {msg.role === 'assistant' &&
+                !msg.streaming &&
+                msg.content.length > 0 &&
+                UUID_RE.test(msg.id) && (
+                  <div className="flex items-center gap-1 pl-1">
+                    <button
+                      type="button"
+                      onClick={() => sendFeedback(msg.id, 'up')}
+                      aria-label="Helpful"
+                      aria-pressed={feedback[msg.id] === 'up'}
+                      className={`flex size-6 items-center justify-center rounded-md transition-colors hover:bg-gray-100 ${
+                        feedback[msg.id] === 'up' ? 'text-primary' : 'text-gray-400'
+                      }`}
+                    >
+                      <ThumbsUpIcon className="size-3.5" aria-hidden="true" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => sendFeedback(msg.id, 'down')}
+                      aria-label="Not helpful"
+                      aria-pressed={feedback[msg.id] === 'down'}
+                      className={`flex size-6 items-center justify-center rounded-md transition-colors hover:bg-gray-100 ${
+                        feedback[msg.id] === 'down' ? 'text-destructive' : 'text-gray-400'
+                      }`}
+                    >
+                      <ThumbsDownIcon className="size-3.5" aria-hidden="true" />
+                    </button>
+                  </div>
+                )}
             </div>
           </div>
 
