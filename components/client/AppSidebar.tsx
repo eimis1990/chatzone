@@ -44,7 +44,7 @@ export function AppSidebar({ bots, userEmail }: { bots: BotLite[]; userEmail: st
   const idle = 'text-foreground/75 hover:bg-white/55 hover:text-foreground'
 
   return (
-    <aside className="flex h-full w-64 flex-shrink-0 flex-col border-r border-sidebar-border bg-sidebar-mesh text-sidebar-foreground">
+    <aside className="flex h-full w-64 flex-shrink-0 flex-col bg-transparent text-sidebar-foreground">
       {/* Logo */}
       <Link
         href="/app"
@@ -130,8 +130,8 @@ export function AppSidebar({ bots, userEmail }: { bots: BotLite[]; userEmail: st
         )}
       </nav>
 
-      {/* Footer — user + sign out */}
-      <div className="border-t border-sidebar-border/70 p-3">
+      {/* Footer — user + sign out, as a floating white card */}
+      <div className="m-3 rounded-xl bg-white/70 p-3 shadow-sm ring-1 ring-black/5 backdrop-blur-sm">
         <p className="px-1 pb-1.5 text-xs text-muted-foreground truncate" title={userEmail}>
           {userEmail}
         </p>
