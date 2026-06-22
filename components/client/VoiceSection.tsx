@@ -19,6 +19,15 @@ import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import type { BotLanguage } from '@/lib/types'
 import { VOICE_LLM_OPTIONS } from '@/lib/ai/voice-models'
 import type { z } from 'zod'
@@ -206,19 +215,21 @@ export function VoiceSection({ control, watch, setValue, activeLang, enabledLang
                 name="voice.llmModel"
                 control={control}
                 render={({ field }) => (
-                  <select
-                    id="voiceLlm"
+                  <Select
                     value={(field.value as string) ?? 'gpt-4o-mini'}
-                    onChange={(e) => field.onChange(e.target.value)}
-                    className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-                    aria-label="Select the voice conversation model"
+                    onValueChange={field.onChange}
                   >
-                    {VOICE_LLM_OPTIONS.map((m) => (
-                      <option key={m.value} value={m.value}>
-                        {m.label}
-                      </option>
-                    ))}
-                  </select>
+                    <SelectTrigger id="voiceLlm" className="w-full" aria-label="Select the voice conversation model">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {VOICE_LLM_OPTIONS.map((m) => (
+                        <SelectItem key={m.value} value={m.value}>
+                          {m.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 )}
               />
               <p className="text-xs text-muted-foreground">
@@ -347,29 +358,36 @@ function LanguageVoicePicker({
           name={`voice.voices.${lang}` as keyof FormValues}
           control={control}
           render={({ field }) => (
-            <select
-              id={`voice-${lang}`}
-              value={(field.value as string) ?? ''}
-              onChange={(e) => field.onChange(e.target.value)}
-              className="flex-1 h-9 rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-              aria-label={`Select ${label} voice`}
+            <Select
+              value={(field.value as string) || undefined}
+              onValueChange={field.onChange}
             >
-              <option value="" disabled>Select a voice…</option>
-              {grouped.male.length > 0 && (
-                <optgroup label="Men">
-                  {grouped.male.map((v) => (
-                    <option key={v.id} value={v.id}>{v.name}</option>
-                  ))}
-                </optgroup>
-              )}
-              {grouped.female.length > 0 && (
-                <optgroup label="Women">
-                  {grouped.female.map((v) => (
-                    <option key={v.id} value={v.id}>{v.name}</option>
-                  ))}
-                </optgroup>
-              )}
-            </select>
+              <SelectTrigger id={`voice-${lang}`} className="flex-1" aria-label={`Select ${label} voice`}>
+                <SelectValue placeholder="Select a voice…" />
+              </SelectTrigger>
+              <SelectContent>
+                {grouped.male.length > 0 && (
+                  <SelectGroup>
+                    <SelectLabel>Men</SelectLabel>
+                    {grouped.male.map((v) => (
+                      <SelectItem key={v.id} value={v.id}>
+                        {v.name}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                )}
+                {grouped.female.length > 0 && (
+                  <SelectGroup>
+                    <SelectLabel>Women</SelectLabel>
+                    {grouped.female.map((v) => (
+                      <SelectItem key={v.id} value={v.id}>
+                        {v.name}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                )}
+              </SelectContent>
+            </Select>
           )}
         />
 
