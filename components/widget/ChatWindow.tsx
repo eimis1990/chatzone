@@ -480,6 +480,22 @@ export function ChatWindow({ publicKey, config }: ChatWindowProps) {
           />
         )}
 
+        {/* Optional privacy consent line */}
+        {config.privacyUrl && (
+          <p className="px-4 pb-1 text-center text-[10px] leading-tight text-muted-foreground">
+            {activeLang === 'lt' ? 'Bendraudami sutinkate su ' : 'By chatting you agree to our '}
+            <a
+              href={config.privacyUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline hover:text-foreground"
+            >
+              {activeLang === 'lt' ? 'privatumo politika' : 'privacy policy'}
+            </a>
+            .
+          </p>
+        )}
+
         {/* Composer */}
         <Composer
           onSend={sendMessage}

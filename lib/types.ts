@@ -92,6 +92,8 @@ export interface LanguageContent {
 export interface BotConfig {
   displayName: string
   avatarUrl?: string
+  /** Optional privacy-policy URL; shows a consent line in the widget when set. */
+  privacyUrl?: string
   theme: {
     primaryColor: string
     position: 'bottom-right' | 'bottom-left'

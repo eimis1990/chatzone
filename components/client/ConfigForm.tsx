@@ -245,6 +245,18 @@ export function ConfigForm({ botId, initialConfig }: ConfigFormProps) {
             </div>
 
             <LogoUpload botId={botId} control={control} setValue={setValue} />
+
+            <div className="space-y-1.5">
+              <Label htmlFor="privacyUrl">Privacy policy URL (optional)</Label>
+              <Input
+                id="privacyUrl"
+                {...register('privacyUrl')}
+                placeholder="https://yourstore.com/privacy"
+              />
+              <p className="text-xs text-muted-foreground">
+                When set, the widget shows a short consent line linking to it.
+              </p>
+            </div>
           </CardContent>
         </Card>
 

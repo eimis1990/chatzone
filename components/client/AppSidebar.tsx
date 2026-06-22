@@ -13,6 +13,7 @@ import {
   UsersIcon,
   BarChart3Icon,
   Code2Icon,
+  SettingsIcon,
   type LucideIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -128,6 +129,20 @@ export function AppSidebar({ bots, userEmail }: { bots: BotLite[]; userEmail: st
             })}
           </div>
         )}
+
+        {/* Org-level settings */}
+        <Link
+          href="/app/settings"
+          aria-current={pathname === '/app/settings' ? 'page' : undefined}
+          className={cn(
+            itemBase,
+            'mt-1',
+            pathname === '/app/settings' ? activePill : idle,
+          )}
+        >
+          <SettingsIcon className="size-4 flex-shrink-0" aria-hidden="true" />
+          Settings
+        </Link>
       </nav>
 
       {/* Footer — user + sign out, as a floating white card */}
