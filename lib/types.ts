@@ -171,6 +171,11 @@ export interface Conversation {
   metadata: Record<string, unknown>
   started_at: string
   last_message_at: string
+  // Conversation intelligence (Phase 1)
+  summary?: string | null
+  topics?: string[] | null
+  analyzed_at?: string | null
+  had_fallback?: boolean
 }
 
 export interface Citation {
@@ -186,6 +191,8 @@ export interface Message {
   citations: Citation[]
   token_count: number | null
   created_at: string
+  /** Visitor thumbs feedback on an assistant reply (Phase 1). */
+  feedback?: 'up' | 'down' | null
 }
 
 export interface Lead {

@@ -156,7 +156,8 @@ export function ChatWindow({ publicKey, config }: ChatWindowProps) {
    */
   const syncMessageIds = useCallback(
     async (convId: string) => {
-      if (!config.voice?.enabled || !config.voice?.ttsEnabled) return
+      // Map our client-side assistant message ids to the real DB ids (by content)
+      // so TTS and 👍/👎 feedback can target the persisted message.
       try {
         const res = await fetch(
           `/api/messages?publicKey=${encodeURIComponent(publicKey)}&conversationId=${encodeURIComponent(convId)}`,
@@ -178,7 +179,22 @@ export function ChatWindow({ publicKey, config }: ChatWindowProps) {
         // Non-critical
       }
     },
-    [publicKey, config.voice?.enabled, config.voice?.ttsEnabled],
+    [publicKey],
+  )
+
+  const handleFeedback = useCallback(
+    async (messageId: string, value: 'up' | 'down') => {
+      try {
+        await fetch('/api/feedback', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ publicKey, messageId, value }),
+        })
+      } catch {
+        // Non-critical
+      }
+    },
+    [publicKey],
   )
 
   const sendMessage = useCallback(
@@ -438,6 +454,7 @@ export function ChatWindow({ publicKey, config }: ChatWindowProps) {
           avatarUrl={config.avatarUrl}
           activeLang={activeLang}
           onSeeAllProducts={setListProducts}
+          onFeedback={handleFeedback}
         />
 
         {/* Suggested Questions — pinned just above input, visible until first message */}
