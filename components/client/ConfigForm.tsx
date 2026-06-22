@@ -574,7 +574,7 @@ export function ConfigForm({ botId, initialConfig }: ConfigFormProps) {
         <Card>
           <CardHeader>
             <CardTitle>AI behaviour</CardTitle>
-            <CardDescription>System prompt, persona, model, and temperature.</CardDescription>
+            <CardDescription>System prompt and persona.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-1.5">
@@ -632,50 +632,6 @@ export function ConfigForm({ botId, initialConfig }: ConfigFormProps) {
                 />
               </div>
 
-              <div className="space-y-1.5">
-                <Label>Model</Label>
-                <Controller
-                  name="model"
-                  control={control}
-                  render={({ field }) => (
-                    <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger className="w-full">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="gpt-4o-mini">GPT-4o mini (fast)</SelectItem>
-                        <SelectItem value="gpt-4o">GPT-4o (powerful)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label>
-                  Temperature{' '}
-                  <span className="text-muted-foreground font-normal">
-                    ({watch('temperature')?.toFixed(1) ?? '0.3'})
-                  </span>
-                </Label>
-                <Controller
-                  control={control}
-                  name="temperature"
-                  render={({ field }) => (
-                    <Slider
-                      min={0}
-                      max={2}
-                      step={0.1}
-                      value={field.value ?? 0.3}
-                      onValueChange={(v) => field.onChange(Array.isArray(v) ? v[0] : v)}
-                    />
-                  )}
-                />
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>Precise</span>
-                  <span>Creative</span>
-                </div>
-              </div>
             </div>
           </CardContent>
         </Card>
