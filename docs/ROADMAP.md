@@ -308,7 +308,9 @@ real-time inventory webhooks.
 - [x] `shopify.ts` (Storefront search) + validate + provider-aware dispatch (`storeConfigured`/`searchStore`/`validateStore`).
 - [x] Configurator provider UI (Woo/Shopify) + per-provider Test connection.
 - [x] Tests: Shopify normalization/search/validate + dispatch (11).
-- [ ] **Feed (2/2):** `products` table + RLS migration; `feed.ts` ingest + CSV/XML/JSON parsers; feed search (ILIKE + optional embeddings) + dispatch; Cron + "Sync now"; configurator feed fields.
+- [ ] **Feed (2/2) — deferred:** `products` table + RLS migration; `feed.ts` ingest + CSV/XML/JSON parsers; feed search (ILIKE + optional embeddings) + dispatch; Cron + "Sync now"; configurator feed fields. _Skipped for now — WooCommerce + Shopify cover the launch; revisit when onboarding a client on neither platform._
+
+**Phase 5 done for WooCommerce + Shopify.** ✅ (Generic feed deferred.)
 
 ---
 
