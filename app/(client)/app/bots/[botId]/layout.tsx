@@ -1,9 +1,8 @@
 import { notFound } from 'next/navigation'
 import { requireRole } from '@/lib/auth/guards'
 import { createServerClient } from '@/lib/supabase/server'
-import { Badge } from '@/components/ui/badge'
 import type { Bot } from '@/lib/types'
-import { BotTabNav } from './BotTabNav'
+import { BotSidebar } from './BotSidebar'
 
 export default async function BotLayout({
   children,
@@ -24,26 +23,12 @@ export default async function BotLayout({
 
   if (!data) notFound()
 
+  // Break out of the parent <main> padding (p-6) and fill the viewport below
+  // the app header (h-14 = 3.5rem): sidebar + content canvas.
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
-      {/* Bot header */}
-      <div className="flex items-center gap-3">
-        <div>
-          <h1 className="text-xl font-semibold">{data.name}</h1>
-        </div>
-        <Badge
-          variant={data.status === 'active' ? 'default' : 'secondary'}
-          className="capitalize"
-        >
-          {data.status}
-        </Badge>
-      </div>
-
-      {/* Tab navigation — client component for active-tab highlighting */}
-      <BotTabNav botId={botId} />
-
-      {/* Page content with clear separation from the tab strip */}
-      <div className="pt-4">{children}</div>
+    <div className="-m-6 flex h-[calc(100svh-3.5rem)] overflow-hidden">
+      <BotSidebar botId={botId} name={data.name} status={data.status} />
+      <main className="flex-1 min-w-0 overflow-y-auto">{children}</main>
     </div>
   )
 }

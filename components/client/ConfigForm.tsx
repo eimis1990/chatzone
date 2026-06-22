@@ -29,6 +29,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { TestChat } from '@/components/client/TestChat'
+import { ResizablePanel } from '@/components/ui/resizable-panel'
 import { VoiceSection } from '@/components/client/VoiceSection'
 import { LogoUpload } from '@/components/client/LogoUpload'
 import type { BotConfig } from '@/lib/types'
@@ -219,9 +220,10 @@ export function ConfigForm({ botId, initialConfig }: ConfigFormProps) {
   }
 
   return (
-    <div className="relative">
-      {/* ── Form — full-width, readable max-width ── */}
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 max-w-3xl">
+    <div className="flex h-full min-h-0">
+      {/* ── Config panel — resizable from its right edge, scrolls internally ── */}
+      <ResizablePanel defaultWidth={480} min={380} max={760}>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 p-5">
 
         {/* ── Display ── */}
         <Card>
@@ -842,15 +844,18 @@ export function ConfigForm({ botId, initialConfig }: ConfigFormProps) {
             {isSubmitting ? 'Saving…' : 'Save configuration'}
           </Button>
         </div>
-      </form>
+        </form>
+      </ResizablePanel>
 
       {/* ── Live Preview — fixed overlay, bottom-right, like the real embed widget ── */}
       <div
-        className="fixed bottom-6 right-6 z-50 pointer-events-none"
+        className="relative flex-1 min-w-0 overflow-hidden bg-dots"
         aria-label="Live preview"
         role="complementary"
       >
-        <TestChat botId={botId} config={liveConfig} activeLang={activeLang} />
+        <div className="absolute bottom-6 right-6 z-20 pointer-events-none">
+          <TestChat botId={botId} config={liveConfig} activeLang={activeLang} />
+        </div>
       </div>
     </div>
   )

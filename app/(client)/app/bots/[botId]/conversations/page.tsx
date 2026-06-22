@@ -80,7 +80,7 @@ export default async function ConversationsPage({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="p-6 space-y-4">
       <div>
         <h2 className="text-lg font-semibold">Conversations</h2>
         <p className="text-sm text-muted-foreground">

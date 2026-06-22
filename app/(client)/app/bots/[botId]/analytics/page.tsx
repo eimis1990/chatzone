@@ -149,7 +149,7 @@ export default async function AnalyticsPage({
       : 0
 
   return (
-    <div className="space-y-8">
+    <div className="p-6 space-y-8">
       <div>
         <h2 className="text-lg font-semibold">Analytics</h2>
         <p className="text-sm text-muted-foreground">Last 30 days</p>
