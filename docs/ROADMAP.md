@@ -304,12 +304,11 @@ real-time inventory webhooks.
   voice; switching provider in config takes effect after validate/sync.
 
 **Tasks.**
-- [ ] Extend provider type + config schema + `widget-config` passthrough.
-- [ ] `shopify.ts` (Storefront search) + validate.
-- [ ] `products` table + migration + RLS; `feed.ts` ingest + parser(s).
-- [ ] Feed search (ILIKE + optional embeddings) + dispatch in `index.ts`.
-- [ ] Cron + "Sync now"; configurator provider UI.
-- [ ] Tests: per-provider normalization, feed parse/upsert, dispatch.
+- [x] Extend provider type + config schema. _(CommerceProvider += shopify; commerce.shopifyDomain/shopifyToken; commerce stays out of public widget config.)_
+- [x] `shopify.ts` (Storefront search) + validate + provider-aware dispatch (`storeConfigured`/`searchStore`/`validateStore`).
+- [x] Configurator provider UI (Woo/Shopify) + per-provider Test connection.
+- [x] Tests: Shopify normalization/search/validate + dispatch (11).
+- [ ] **Feed (2/2):** `products` table + RLS migration; `feed.ts` ingest + CSV/XML/JSON parsers; feed search (ILIKE + optional embeddings) + dispatch; Cron + "Sync now"; configurator feed fields.
 
 ---
 
