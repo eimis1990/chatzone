@@ -174,12 +174,12 @@ function ProductCard({
   viewMoreLabel,
   outOfStockLabel,
 }: ProductCardProps) {
-  // Each card fills the full chat width; swipe to the next (snap).
+  // Card takes ~80% of the chat width so the next card peeks (signals scroll).
   const cardRadius = bubbleRadius
   const imageRadius = `${cardRadius}px ${cardRadius}px 0 0`
   const cardStyle = {
     borderRadius: `${cardRadius}px`,
-    width: '100%',
+    width: '80%',
     flexShrink: 0,
   }
 
@@ -246,10 +246,10 @@ function ProductCard({
           href={product.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-auto flex items-center justify-center rounded text-white text-xs font-medium py-1.5 px-2 transition-opacity hover:opacity-85 active:opacity-70 focus-visible:ring-2 focus-visible:ring-offset-1 outline-none"
+          className="mt-auto flex items-center justify-center rounded text-white text-sm font-medium py-2 px-2 transition-opacity hover:opacity-85 active:opacity-70 focus-visible:ring-2 focus-visible:ring-offset-1 outline-none"
           style={{
             backgroundColor: primaryColor,
-            borderRadius: `${Math.min(cardRadius, 8)}px`,
+            borderRadius: `${Math.min(cardRadius, 12)}px`,
           }}
         >
           {viewMoreLabel}
