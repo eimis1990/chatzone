@@ -2,7 +2,7 @@ import { tool, type ModelMessage, type ToolSet, streamText, stepCountIs } from '
 import { openai } from '@ai-sdk/openai'
 import { z } from 'zod'
 import type { BotConfig } from '@/lib/types'
-import type { CommerceProduct } from '@/lib/commerce/types'
+import type { CommerceProduct, OrderStatus } from '@/lib/commerce/types'
 import { searchStore, getOrderStatus, getDiscount, orderLookupEnabled } from '@/lib/commerce'
 
 /**
@@ -14,7 +14,11 @@ import { searchStore, getOrderStatus, getDiscount, orderLookupEnabled } from '@/
  * This lets the model filter out false keyword matches (e.g. a bath bomb that
  * merely contains a substring) before anything reaches the shopper.
  */
-export function makeProductTools(config: BotConfig, sink: CommerceProduct[]): ToolSet {
+export function makeProductTools(
+  config: BotConfig,
+  sink: CommerceProduct[],
+  orderSink?: OrderStatus[],
+): ToolSet {
   const candidates = new Map<string, CommerceProduct>()
   const tools: ToolSet = {
     search_products: tool({
@@ -81,6 +85,11 @@ export function makeProductTools(config: BotConfig, sink: CommerceProduct[]): To
       execute: async ({ orderId, email }) => {
         const r = await getOrderStatus(config.commerce, { orderId, email })
         if (!r.found) return { found: false, reason: r.reason ?? 'not_found' }
+        // Push the order so it renders as a card (like product search).
+        if (orderSink) {
+          orderSink.length = 0
+          orderSink.push(r)
+        }
         return {
           found: true,
           orderNumber: r.orderNumber,
@@ -143,6 +152,7 @@ export function ndjsonChatResponse(
     temperature: number
     tools?: ToolSet
     productSink?: CommerceProduct[]
+    orderSink?: OrderStatus[]
   } & NdjsonOptions,
 ): Response {
   const result = streamText({
@@ -172,6 +182,8 @@ export function ndjsonChatResponse(
         }
         const products = opts.productSink ?? []
         if (products.length) line({ t: 'products', v: products })
+        const order = opts.orderSink ?? []
+        if (order.length) line({ t: 'order', v: order[0] })
       } catch {
         line({ t: 'text', v: '' })
       } finally {

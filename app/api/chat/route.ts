@@ -9,7 +9,7 @@ import { commerceEnabled, makeProductTools, ndjsonChatResponse, ndjsonText } fro
 import { createRateLimiter } from '@/lib/ratelimit'
 import { detectHandoffIntent, HANDOFF_ACK } from '@/lib/handoff'
 import type { Bot, Citation, HandoffStatus } from '@/lib/types'
-import type { CommerceProduct } from '@/lib/commerce/types'
+import type { CommerceProduct, OrderStatus } from '@/lib/commerce/types'
 
 export const maxDuration = 60
 
@@ -166,12 +166,14 @@ export async function POST(req: Request) {
     snippet: m.content.slice(0, 160),
   }))
   const productSink: CommerceProduct[] = []
+  const orderSink: OrderStatus[] = []
 
   return ndjsonChatResponse(openai(bot.config.model || 'gpt-4o-mini'), messages, {
     temperature: bot.config.temperature ?? 0.3,
     headers: baseHeaders,
-    tools: commerce ? makeProductTools(bot.config, productSink) : undefined,
+    tools: commerce ? makeProductTools(bot.config, productSink, orderSink) : undefined,
     productSink,
+    orderSink,
     onText: async (text) => {
       await svc.from('messages').insert({
         conversation_id: convId,

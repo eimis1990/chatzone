@@ -9,7 +9,7 @@
  * can never visually drift from what visitors actually see.
  */
 import type { BotLanguage, HandoffStatus } from '@/lib/types'
-import type { CommerceProduct } from '@/lib/commerce/types'
+import type { CommerceProduct, OrderStatus } from '@/lib/commerce/types'
 
 export interface SendChatParams {
   message: string
@@ -44,6 +44,10 @@ export interface ChatTransport {
   poll(conversationId: string, afterTs?: string): Promise<PollResult>
   /** Submit a captured lead. */
   submitLead(conversationId: string | undefined, fields: Record<string, string>): Promise<void>
+  /** Voice `order_status` tool: look up an order (identity-gated server-side). */
+  lookupOrder(orderId: string, email: string): Promise<{ found: boolean; order?: OrderStatus; summary: string }>
+  /** Voice `discount_code` tool: fetch the configured discount. */
+  getDiscountInfo(): Promise<{ available: boolean; code?: string; description?: string; summary: string }>
 }
 
 const JSON_HEADERS = { 'Content-Type': 'application/json' }
@@ -129,6 +133,26 @@ export function createWidgetTransport(publicKey: string): ChatTransport {
         body: JSON.stringify({ publicKey, conversationId, fields }),
       })
       if (!res.ok) throw new Error('Lead submission failed')
+    },
+
+    async lookupOrder(orderId, email) {
+      const res = await fetch('/api/widget/order', {
+        method: 'POST',
+        headers: JSON_HEADERS,
+        body: JSON.stringify({ publicKey, orderId, email }),
+      })
+      if (!res.ok) return { found: false, summary: 'The order lookup is temporarily unavailable.' }
+      return (await res.json()) as { found: boolean; order?: OrderStatus; summary: string }
+    },
+
+    async getDiscountInfo() {
+      const res = await fetch('/api/widget/discount', {
+        method: 'POST',
+        headers: JSON_HEADERS,
+        body: JSON.stringify({ publicKey }),
+      })
+      if (!res.ok) return { available: false, summary: 'No discount is available right now.' }
+      return (await res.json()) as { available: boolean; code?: string; description?: string; summary: string }
     },
   }
 }

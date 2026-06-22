@@ -12,7 +12,7 @@ import { SuggestedQuestions } from './SuggestedQuestions'
 import type { PublicBotConfig } from '@/lib/widget-config'
 import type { ChatTransport } from '@/lib/widget-transport'
 import type { BotLanguage, HandoffStatus } from '@/lib/types'
-import type { CommerceProduct } from '@/lib/commerce/types'
+import type { CommerceProduct, OrderStatus } from '@/lib/commerce/types'
 import { fontStack } from '@/lib/fonts'
 import { readableTextColor, isLightColor } from '@/lib/utils'
 
@@ -153,6 +153,44 @@ export function ChatWindow({ config, transport, initialLanguage, headerAction }:
     },
     [transport],
   )
+
+  // Voice `order_status` tool: look up an order, show a card, speak a summary.
+  const handleVoiceOrder = useCallback(
+    async (orderId: string, email: string): Promise<string> => {
+      try {
+        const r = await transport.lookupOrder(orderId, email)
+        if (r.order?.found) {
+          setMessages((prev) => [...prev, { id: generateId(), role: 'assistant', content: '', order: r.order }])
+        }
+        return r.summary
+      } catch {
+        return 'The order lookup is temporarily unavailable.'
+      }
+    },
+    [transport],
+  )
+
+  // Voice `discount_code` tool: surface the code in chat + speak it.
+  const handleVoiceDiscount = useCallback(async (): Promise<string> => {
+    try {
+      const r = await transport.getDiscountInfo()
+      if (r.available && r.code) {
+        const label = activeLang === 'lt' ? 'Nuolaidos kodas' : 'Discount code'
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: generateId(),
+            role: 'assistant',
+            content: `${label}: ${r.code}${r.description ? ` — ${r.description}` : ''}`,
+          },
+        ])
+      }
+      return r.summary
+    } catch {
+      return 'No discount is available right now.'
+    }
+  }, [transport, activeLang])
+
   const primaryColor = config.theme.primaryColor
   const cornerRadius = config.theme.cornerRadius ?? 16
   const bubbleRadius = config.theme.bubbleRadius ?? 16
@@ -291,6 +329,7 @@ export function ChatWindow({ config, transport, initialLanguage, headerAction }:
         let lineBuffer = ''
         let accumulatedText = ''
         let accumulatedProducts: CommerceProduct[] = []
+        let accumulatedOrder: OrderStatus | null = null
 
         while (true) {
           const { done, value } = await reader.read()
@@ -314,6 +353,8 @@ export function ChatWindow({ config, transport, initialLanguage, headerAction }:
                 )
               } else if (event.t === 'products' && Array.isArray(event.v)) {
                 accumulatedProducts = event.v as CommerceProduct[]
+              } else if (event.t === 'order' && event.v) {
+                accumulatedOrder = event.v as OrderStatus
               }
             } catch {
               // Malformed NDJSON line — skip
@@ -328,6 +369,8 @@ export function ChatWindow({ config, transport, initialLanguage, headerAction }:
               accumulatedText += event.v
             } else if (event.t === 'products' && Array.isArray(event.v)) {
               accumulatedProducts = event.v as CommerceProduct[]
+            } else if (event.t === 'order' && event.v) {
+              accumulatedOrder = event.v as OrderStatus
             }
           } catch {
             // skip
@@ -342,6 +385,7 @@ export function ChatWindow({ config, transport, initialLanguage, headerAction }:
                   content: accumulatedText,
                   streaming: false,
                   products: accumulatedProducts.length > 0 ? accumulatedProducts : undefined,
+                  order: accumulatedOrder ?? undefined,
                 }
               : m
           )
@@ -521,6 +565,8 @@ export function ChatWindow({ config, transport, initialLanguage, headerAction }:
             onTranscript={handleVoiceTranscript}
             onReady={handleVoiceReady}
             onSearch={handleVoiceSearch}
+            onOrderStatus={handleVoiceOrder}
+            onDiscount={handleVoiceDiscount}
             className="flex-shrink-0"
           />
         )}

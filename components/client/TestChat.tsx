@@ -251,6 +251,26 @@ function createPreviewTransport(botId: string, getConfig: () => BotConfig): Chat
       return { status: 'requested', agentName: null, messages: [] }
     },
     async submitLead() {},
+
+    async lookupOrder(orderId, email) {
+      const res = await fetch('/api/preview/order', {
+        method: 'POST',
+        headers: JSON_HEADERS,
+        body: JSON.stringify({ botId, orderId, email }),
+      })
+      if (!res.ok) return { found: false, summary: 'The order lookup is temporarily unavailable.' }
+      return res.json()
+    },
+
+    async getDiscountInfo() {
+      const res = await fetch('/api/preview/discount', {
+        method: 'POST',
+        headers: JSON_HEADERS,
+        body: JSON.stringify({ botId }),
+      })
+      if (!res.ok) return { available: false, summary: 'No discount is available right now.' }
+      return res.json()
+    },
   }
 }
 

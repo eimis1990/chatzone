@@ -102,4 +102,23 @@ export function orderLookupEnabled(config: CommerceConfig): boolean {
   return Boolean(config?.enabled && config.storeUrl && config.restKey && config.restSecret)
 }
 
+/** A short, agent-speakable summary of an order lookup (the agent translates it). */
+export function summarizeOrder(order: OrderStatus): string {
+  if (!order.found) {
+    if (order.reason === 'not_configured') return 'Order lookup is not available for this store.'
+    if (order.reason === 'error') return 'The order lookup failed — ask them to try again shortly.'
+    return 'No order matches that number and email. Ask them to double-check both, or offer a human.'
+  }
+  const parts = [`Order ${order.orderNumber}`, `status ${order.status ?? 'unknown'}`]
+  if (order.total) parts.push(`total ${[order.total, order.currency].filter(Boolean).join(' ')}`)
+  if (order.tracking?.number) parts.push(`tracking ${order.tracking.number}`)
+  return `${parts.join(', ')}. The full details are shown on screen.`
+}
+
+/** A short, agent-speakable summary of the discount. */
+export function summarizeDiscount(d: DiscountInfo): string {
+  if (!d.enabled) return 'There is no discount code available right now.'
+  return `The discount code is ${d.code}${d.description ? ` (${d.description})` : ''}.`
+}
+
 export type { CommerceProduct, ProductSearchParams, OrderStatus, DiscountInfo } from '@/lib/commerce/types'

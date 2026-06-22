@@ -3,6 +3,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Bot, BotLanguage } from '@/lib/types'
 import { MissingVoiceKeyError } from '@/lib/ai/tts'
 import { isValidVoiceLlm, DEFAULT_VOICE_LLM } from '@/lib/ai/voice-models'
+import { orderLookupEnabled, getDiscount } from '@/lib/commerce'
 
 const API = 'https://api.elevenlabs.io/v1'
 
@@ -61,6 +62,33 @@ export interface AgentConfig {
 
 const LANG_NAME: Record<string, string> = { en: 'English', lt: 'Lithuanian' }
 
+/** Builds the voice agent's prompt, adding tool guidance for what's configured. */
+function buildAgentPrompt(cfg: Bot['config'], toolIds: string[], languages: BotLanguage[]): string {
+  if (!toolIds.length) return cfg.systemPrompt
+  const lt = languages.includes('lt')
+  const parts = [
+    cfg.systemPrompt,
+    `When the user asks about products, prices, availability, or recommendations, call the \`search_products\` tool. Use a SHORT query — ONLY the product noun${
+      lt ? ' in Lithuanian (e.g. "veido kremas" for face cream, "serumas" for serum)' : ''
+    }, with NO adjectives like dry/sensitive/hydrating (they return nothing). The matching products are shown to the user automatically as cards, so reply with just ONE short sentence (e.g. "Štai keletas variantų:" / "Here are a few options:") — do NOT read out the product names, prices, or details. If a search returns nothing, retry once with a broader noun; only say a product is unavailable if that also returns nothing.`,
+  ]
+  if (orderLookupEnabled(cfg.commerce)) {
+    parts.push(
+      'If the user asks about an existing order (status, where it is, tracking), ask for BOTH the order ' +
+        'number AND the email used on the order, then call `order_status` with both. Never call it with ' +
+        'only one, and never guess. The order details appear on screen as a card, so confirm briefly. If ' +
+        'the result says no match, relay that and offer to connect them with a person — never invent details.',
+    )
+  }
+  if (getDiscount(cfg.commerce).enabled) {
+    parts.push(
+      'If the user asks for a discount, coupon, or promo, call `discount_code` and tell them the code it ' +
+        'returns (with its description). Never invent a code.',
+    )
+  }
+  return parts.join('\n\n')
+}
+
 /**
  * Maps a bot to a single multilingual ElevenLabs agent: V3 Conversational with
  * a default language + `language_presets` (per-language first message) and
@@ -101,13 +129,7 @@ export function buildAgentConfig(bot: Bot, toolIds: string[] = []): AgentConfig 
         first_message: defaultContent?.greeting ?? '',
         language: defaultLang,
         prompt: {
-          prompt: toolIds.length
-            ? `${cfg.systemPrompt}\n\nWhen the user asks about products, prices, availability, or recommendations, call the \`search_products\` tool. Use a SHORT query — ONLY the product noun${
-                languages.includes('lt')
-                  ? ' in Lithuanian (e.g. "veido kremas" for face cream, "serumas" for serum)'
-                  : ''
-              }, with NO adjectives like dry/sensitive/hydrating (they return nothing). The matching products are shown to the user automatically as cards, so reply with just ONE short sentence (e.g. "Štai keletas variantų:" / "Here are a few options:") — do NOT read out the product names, prices, or details. If a search returns nothing, retry once with a broader noun; only say a product is unavailable if that also returns nothing.`
-            : cfg.systemPrompt,
+          prompt: buildAgentPrompt(cfg, toolIds, languages),
           llm,
           custom_llm: null,
           tool_ids: toolIds,
@@ -131,7 +153,7 @@ export function buildAgentConfig(bot: Bot, toolIds: string[] = []): AgentConfig 
 export function agentConfigHash(bot: Bot, toolIds: string[] = []): string {
   const cfg = bot.config
   const material = JSON.stringify([
-    'v7-voice-override', // bump to force re-sync when the agent payload shape changes
+    'v8-transactional', // bump to force re-sync when the agent payload shape changes
     cfg.languages,
     cfg.content,
     cfg.voice?.voices,
@@ -139,6 +161,10 @@ export function agentConfigHash(bot: Bot, toolIds: string[] = []): string {
     cfg.systemPrompt,
     bot.public_key,
     toolIds,
+    // Transactional skills affect the tool set + prompt.
+    orderLookupEnabled(cfg.commerce),
+    getDiscount(cfg.commerce).enabled,
+    cfg.commerce?.storeUrl ?? '',
   ])
   return createHash('sha256').update(material).digest('hex').slice(0, 32)
 }
@@ -185,14 +211,43 @@ function buildSearchToolConfig() {
   }
 }
 
+/** Client tool config for `order_status` (params: order id + email). */
+function buildOrderToolConfig() {
+  return {
+    type: 'client' as const,
+    name: 'order_status',
+    description:
+      'Look up the status of an existing order and show it on screen. Call this ONLY after you have ' +
+      'BOTH the order number AND the email used on the order — ask the user for whatever is missing ' +
+      'first, and never guess.',
+    parameters: {
+      type: 'object' as const,
+      properties: {
+        orderId: { type: 'string' as const, description: 'The order number from the receipt/confirmation.' },
+        email: { type: 'string' as const, description: 'The email address used to place the order.' },
+      },
+      required: ['orderId', 'email'],
+    },
+  }
+}
+
+/** Client tool config for `discount_code` (no params). */
+function buildDiscountToolConfig() {
+  return {
+    type: 'client' as const,
+    name: 'discount_code',
+    description: 'Provide the store discount/promo code when the user asks for a discount, coupon, or deal.',
+    parameters: { type: 'object' as const, properties: {}, required: [] as string[] },
+  }
+}
+
 /**
- * Ensures the bot's `search_products` client tool exists in the ElevenLabs
- * workspace (creating it once, then PATCHing). Returns its tool id.
+ * Ensures a client tool (stored under `key`) exists in the ElevenLabs workspace
+ * (creating it once, then PATCHing). Returns its tool id.
  */
-async function ensureSearchTool(db: SupabaseClient, bot: Bot): Promise<string> {
+async function ensureTool(db: SupabaseClient, key: string, toolConfig: object): Promise<string> {
   const headers = { 'xi-api-key': apiKey(), 'Content-Type': 'application/json' }
-  const body = JSON.stringify({ tool_config: buildSearchToolConfig() })
-  const key = `cbz_tool_${bot.id}`
+  const body = JSON.stringify({ tool_config: toolConfig })
   const existing = await getSetting(db, key)
 
   if (existing) {
@@ -209,13 +264,24 @@ async function ensureSearchTool(db: SupabaseClient, bot: Bot): Promise<string> {
   return data.id
 }
 
+/** Ensures all applicable client tools for a bot and returns their ids. */
+async function ensureTools(db: SupabaseClient, bot: Bot): Promise<string[]> {
+  const ids = [await ensureTool(db, `cbz_tool_${bot.id}`, buildSearchToolConfig())]
+  if (orderLookupEnabled(bot.config.commerce)) {
+    ids.push(await ensureTool(db, `cbz_tool_order_${bot.id}`, buildOrderToolConfig()))
+  }
+  if (getDiscount(bot.config.commerce).enabled) {
+    ids.push(await ensureTool(db, `cbz_tool_discount_${bot.id}`, buildDiscountToolConfig()))
+  }
+  return ids
+}
+
 /**
  * Ensures the bot has an up-to-date ElevenLabs agent; creates or PATCHes as
  * needed. Returns the agent_id. Uses the service-role db client.
  */
 export async function ensureAgent(db: SupabaseClient, bot: Bot): Promise<string> {
-  const toolId = await ensureSearchTool(db, bot)
-  const toolIds = [toolId]
+  const toolIds = await ensureTools(db, bot)
 
   const hash = agentConfigHash(bot, toolIds)
   if (bot.elevenlabs_agent_id && bot.elevenlabs_agent_hash === hash) {

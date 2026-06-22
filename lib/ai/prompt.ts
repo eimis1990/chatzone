@@ -76,8 +76,9 @@ export function buildSystemPrompt(
           'collect BOTH the order number AND the email used on the order, then call `order_status`. ' +
           'Ask for whatever is missing; never guess or accept just one. If it returns found:false, do not ' +
           'reveal any details — say you could not find an order matching that number and email, and offer ' +
-          'to connect them with a person. When found, briefly state the status, the items, and the total, ' +
-          'and include the tracking number if present.',
+          'to connect them with a person. When found, the order details (status, items, total, tracking) ' +
+          'appear as a card automatically, so reply with ONE short sentence (e.g. "Here\'s your order:" / ' +
+          '"Štai jūsų užsakymas:") — do NOT repeat the items, total, or tracking in your text.',
       )
     }
 

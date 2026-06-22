@@ -39,6 +39,10 @@ interface VoiceCallButtonProps {
   /** Implements the agent's `search_products` client tool — return a short
    *  spoken summary; the host renders the product cards in the chat. */
   onSearch?: (query: string) => Promise<string>
+  /** Implements `order_status` — look up an order, return a spoken summary. */
+  onOrderStatus?: (orderId: string, email: string) => Promise<string>
+  /** Implements `discount_code` — return the discount as a spoken summary. */
+  onDiscount?: () => Promise<string>
   className?: string
 }
 
@@ -53,6 +57,8 @@ interface InnerProps {
   onTranscript?: (role: 'user' | 'assistant', text: string) => void
   onReady?: (controls: { end: () => void }) => void
   onSearch?: (query: string) => Promise<string>
+  onOrderStatus?: (orderId: string, email: string) => Promise<string>
+  onDiscount?: () => Promise<string>
 }
 
 function VoiceCallInner({
@@ -64,6 +70,8 @@ function VoiceCallInner({
   onTranscript,
   onReady,
   onSearch,
+  onOrderStatus,
+  onDiscount,
 }: InnerProps) {
   const [callError, setCallError] = useState<string | null>(null)
   const [micDenied, setMicDenied] = useState(false)
@@ -89,6 +97,27 @@ function VoiceCallInner({
           return await onSearch(q)
         } catch {
           return 'The product search is temporarily unavailable.'
+        }
+      },
+      // Look up an order — REQUIRES order number + matching email (verified server-side).
+      order_status: async (params: { orderId?: string; email?: string }) => {
+        const orderId = params?.orderId?.trim()
+        const email = params?.email?.trim()
+        if (!orderId || !email) return 'I need both the order number and the email used on the order.'
+        if (!onOrderStatus) return 'Order lookup is unavailable.'
+        try {
+          return await onOrderStatus(orderId, email)
+        } catch {
+          return 'The order lookup is temporarily unavailable.'
+        }
+      },
+      // Provide the configured discount code.
+      discount_code: async () => {
+        if (!onDiscount) return 'No discount is available right now.'
+        try {
+          return await onDiscount()
+        } catch {
+          return 'The discount is temporarily unavailable.'
         }
       },
     },
@@ -335,6 +364,8 @@ export function VoiceCallButton({
   onTranscript,
   onReady,
   onSearch,
+  onOrderStatus,
+  onDiscount,
   className,
 }: VoiceCallButtonProps) {
   return (
@@ -349,6 +380,8 @@ export function VoiceCallButton({
           onTranscript={onTranscript}
           onReady={onReady}
           onSearch={onSearch}
+          onOrderStatus={onOrderStatus}
+          onDiscount={onDiscount}
         />
       </ConversationProvider>
     </div>

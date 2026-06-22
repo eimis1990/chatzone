@@ -3,8 +3,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { ThumbsUpIcon, ThumbsDownIcon, HeadsetIcon } from 'lucide-react'
 import { ProductCards } from './ProductCards'
+import { OrderStatusCard } from './OrderStatusCard'
 import { ThinkingDots } from './ThinkingDots'
-import type { CommerceProduct } from '@/lib/commerce/types'
+import type { CommerceProduct, OrderStatus } from '@/lib/commerce/types'
 
 export interface ChatMessage {
   id: string
@@ -12,6 +13,8 @@ export interface ChatMessage {
   content: string
   streaming?: boolean
   products?: CommerceProduct[]
+  /** An order-status lookup result, rendered as a card. */
+  order?: OrderStatus
   /** Assistant message authored by a human agent (handoff) vs. the bot. */
   fromHuman?: boolean
 }
@@ -181,6 +184,18 @@ export function MessageList({
                 onSeeAll={onSeeAllProducts}
               />
             )}
+
+          {/* Order-status card */}
+          {msg.role === 'assistant' && !msg.streaming && msg.order?.found && (
+            <div className="pl-10">
+              <OrderStatusCard
+                order={msg.order}
+                bubbleRadius={bubbleRadius}
+                primaryColor={primaryColor}
+                language={activeLang}
+              />
+            </div>
+          )}
         </div>
       ))}
       <div ref={bottomRef} />
