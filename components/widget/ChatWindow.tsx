@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useCallback, useRef, useEffect } from 'react'
-import { AnimatePresence } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
 import { HeadsetIcon, RotateCcwIcon } from 'lucide-react'
 import { MessageList, type ChatMessage } from './MessageList'
 import { ProductListView } from './ProductCards'
@@ -57,6 +57,20 @@ function handoffBannerLive(lang: BotLanguage, agentName: string | null): string 
   return lang === 'lt' ? `Bendraujate su ${who}` : `You're chatting with ${who}`
 }
 
+// Restart-confirmation copy (shown in the bottom sheet before clearing the chat).
+const RESTART_CONFIRM: Record<BotLanguage, { title: string; cancel: string; confirm: string }> = {
+  en: {
+    title: 'This will start a new conversation',
+    cancel: 'Cancel',
+    confirm: 'Start new conversation',
+  },
+  lt: {
+    title: 'Pokalbis bus pradėtas iš naujo',
+    cancel: 'Atšaukti',
+    confirm: 'Pradėti naują pokalbį',
+  },
+}
+
 const POLL_INTERVAL_MS = 4000
 
 export function ChatWindow({ config, transport, initialLanguage }: ChatWindowProps) {
@@ -83,6 +97,8 @@ export function ChatWindow({ config, transport, initialLanguage }: ChatWindowPro
   const [leadDismissed, setLeadDismissed] = useState(false)
   // When set, the full-height product list overlay covers the chat body.
   const [listProducts, setListProducts] = useState<CommerceProduct[] | null>(null)
+  // Confirmation bottom sheet before clearing the conversation.
+  const [confirmRestart, setConfirmRestart] = useState(false)
   // Live-call state, surfaced in the header.
   const [callState, setCallState] = useState<CallState>('idle')
   const callStateRef = useRef<CallState>('idle')
@@ -122,6 +138,7 @@ export function ChatWindow({ config, transport, initialLanguage }: ChatWindowPro
     setLeadDismissed(false)
     setListProducts(null)
     setAgentName(null)
+    setConfirmRestart(false)
     lastPollTsRef.current = undefined
     updateHandoff('bot')
   }, [updateHandoff])
@@ -585,10 +602,10 @@ export function ChatWindow({ config, transport, initialLanguage }: ChatWindowPro
           />
         )}
 
-        {/* Restart — clears the conversation and starts fresh */}
+        {/* Restart — asks for confirmation before clearing the conversation */}
         <button
           type="button"
-          onClick={handleRestart}
+          onClick={() => (messages.length > 0 ? setConfirmRestart(true) : handleRestart())}
           title={activeLang === 'lt' ? 'Pradėti iš naujo' : 'Start over'}
           aria-label={activeLang === 'lt' ? 'Pradėti iš naujo' : 'Start over'}
           className="flex size-8 flex-shrink-0 items-center justify-center transition hover:brightness-90"
@@ -711,6 +728,54 @@ export function ChatWindow({ config, transport, initialLanguage }: ChatWindowPro
               language={activeLang}
               onClose={() => setListProducts(null)}
             />
+          )}
+        </AnimatePresence>
+
+        {/* Restart confirmation — dims the chat and slides a sheet up over the composer */}
+        <AnimatePresence>
+          {confirmRestart && (
+            <motion.div
+              key="restart-backdrop"
+              className="absolute inset-0 z-20 bg-black/20"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+              onClick={() => setConfirmRestart(false)}
+              aria-hidden="true"
+            />
+          )}
+          {confirmRestart && (
+            <motion.div
+              key="restart-sheet"
+              role="dialog"
+              aria-modal="true"
+              className="absolute inset-x-0 bottom-0 z-30 bg-white px-5 pb-5 pt-5 shadow-[0_-8px_24px_rgba(0,0,0,0.1)]"
+              style={{ borderRadius: `${bubbleRadius + 4}px ${bubbleRadius + 4}px 0 0` }}
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', stiffness: 360, damping: 34 }}
+            >
+              <p className="text-center text-sm text-gray-600">{RESTART_CONFIRM[activeLang].title}</p>
+              <div className="mt-4 flex items-center justify-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setConfirmRestart(false)}
+                  className="rounded-full border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50"
+                >
+                  {RESTART_CONFIRM[activeLang].cancel}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleRestart}
+                  className="rounded-full px-4 py-2 text-sm font-semibold transition-[filter] hover:brightness-95"
+                  style={{ backgroundColor: onWhiteAccent, color: readableTextColor(onWhiteAccent) }}
+                >
+                  {RESTART_CONFIRM[activeLang].confirm}
+                </button>
+              </div>
+            </motion.div>
           )}
         </AnimatePresence>
       </div>
