@@ -4,13 +4,14 @@ import { cn } from '@/lib/utils'
 
 export type StatAccent = 'green' | 'blue' | 'violet' | 'amber' | 'rose' | 'slate'
 
-const ACCENTS: Record<StatAccent, string> = {
-  green: 'bg-primary/10 text-primary',
-  blue: 'bg-blue-500/10 text-blue-600',
-  violet: 'bg-violet-500/10 text-violet-600',
-  amber: 'bg-amber-500/10 text-amber-600',
-  rose: 'bg-rose-500/10 text-rose-600',
-  slate: 'bg-slate-500/10 text-slate-600',
+// Each accent maps to an icon tint and the colour of the soft corner glow.
+const ACCENTS: Record<StatAccent, { icon: string; glow: string }> = {
+  green: { icon: 'text-primary', glow: 'bg-primary' },
+  blue: { icon: 'text-blue-500', glow: 'bg-blue-400' },
+  violet: { icon: 'text-violet-500', glow: 'bg-violet-400' },
+  amber: { icon: 'text-amber-500', glow: 'bg-amber-400' },
+  rose: { icon: 'text-rose-500', glow: 'bg-rose-400' },
+  slate: { icon: 'text-slate-500', glow: 'bg-slate-400' },
 }
 
 interface StatCardProps {
@@ -21,28 +22,30 @@ interface StatCardProps {
   accent?: StatAccent
   /** Percent change vs. the previous period. */
   trend?: { value: number; direction: 'up' | 'down' } | null
-  /** Render with a subtle brand gradient to draw the eye. */
+  /** Slightly stronger corner glow to draw the eye (same 1px border). */
   highlight?: boolean
 }
 
 export function StatCard({ label, value, sub, icon: Icon, accent = 'green', trend, highlight }: StatCardProps) {
+  const a = ACCENTS[accent]
   return (
-    <div
-      className={cn(
-        'rounded-xl border p-5 transition-shadow hover:shadow-sm',
-        highlight && 'bg-gradient-to-br from-primary/10 via-primary/5 to-transparent ring-1 ring-primary/20',
-      )}
-    >
-      <div className="flex items-start justify-between gap-2">
-        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</p>
-        {Icon && (
-          <div className={cn('flex size-9 shrink-0 items-center justify-center rounded-lg', ACCENTS[accent])}>
-            <Icon className="size-5" aria-hidden="true" />
-          </div>
+    <div className="relative overflow-hidden rounded-xl border p-5 transition-shadow hover:shadow-sm">
+      {/* Soft glow bleeding from the top-right corner */}
+      <div
+        aria-hidden="true"
+        className={cn(
+          'pointer-events-none absolute -right-10 -top-10 size-28 rounded-full blur-2xl',
+          a.glow,
+          highlight ? 'opacity-50' : 'opacity-30',
         )}
+      />
+
+      <div className="relative flex items-start justify-between gap-2">
+        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</p>
+        {Icon && <Icon className={cn('size-5 shrink-0', a.icon)} aria-hidden="true" />}
       </div>
-      <p className="mt-3 text-3xl font-bold tabular-nums">{value}</p>
-      <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1">
+      <p className="relative mt-3 text-3xl font-bold tabular-nums">{value}</p>
+      <div className="relative mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1">
         {trend && (
           <span
             className={cn(

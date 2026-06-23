@@ -14,6 +14,7 @@ import { createServerClient } from '@/lib/supabase/server'
 import { toDateString } from '@/lib/date-utils'
 import { StatCard } from '@/components/client/charts/StatCard'
 import { AnalyticsRangeSelector } from '@/components/client/charts/AnalyticsRangeSelector'
+import { ExportReportButton } from '@/components/client/charts/ExportReportButton'
 import { ConversationsChart } from '@/components/client/charts/ConversationsChart'
 import { MessageVolumeChart } from '@/components/client/charts/MessageVolumeChart'
 import { TopQuestionsChart } from '@/components/client/charts/TopQuestionsChart'
@@ -231,6 +232,30 @@ export default async function AnalyticsPage({
   // Conversations that reached a human agent at some point.
   const handoffConvs = typedConvs.filter((c) => c.handoff_status && c.handoff_status !== 'bot').length
 
+  // Rows for the CSV export of this period.
+  const exportRows = [
+    { label: 'Date range', value: rangeLabel },
+    { label: 'Conversations', value: typedConvs.length },
+    { label: 'Messages', value: typedMsgs.length },
+    { label: 'Leads', value: typedLeads.length },
+    ...(showProducts
+      ? [
+          { label: 'Product suggestions', value: totalSuggestions },
+          { label: 'Replies with products', value: repliesWithProducts },
+        ]
+      : []),
+    { label: 'Human handoffs', value: handoffConvs },
+    { label: 'AI success (avg /5)', value: avgScore === null ? 'n/a' : avgScore.toFixed(1) },
+    { label: 'CSAT (%)', value: csat === null ? 'n/a' : csat },
+    { label: 'Fallback rate (%)', value: fallbackRate },
+    ...topQuestions.map((q, i) => ({ label: `Top question #${i + 1}`, value: `${q.question} (${q.count})` })),
+    ...topProducts.map((p, i) => ({
+      label: `Top product #${i + 1}`,
+      value: `${p.product.title} (${p.count})`,
+    })),
+  ]
+  const exportFilename = `analytics-${bot.name.replace(/[^a-z0-9]+/gi, '-').toLowerCase()}-${rangeDays}d.csv`
+
   return (
     <div className="space-y-6 p-6">
       {/* Header with interval selector */}
@@ -239,7 +264,10 @@ export default async function AnalyticsPage({
           <h2 className="text-lg font-semibold">Analytics</h2>
           <p className="text-sm text-muted-foreground">How your assistant is performing</p>
         </div>
-        <AnalyticsRangeSelector range={rangeDays} rangeLabel={rangeLabel} />
+        <div className="flex items-center gap-2">
+          <AnalyticsRangeSelector range={rangeDays} rangeLabel={rangeLabel} />
+          <ExportReportButton rows={exportRows} filename={exportFilename} />
+        </div>
       </div>
 
       {/* Scalar stat cards */}
@@ -261,6 +289,15 @@ export default async function AnalyticsPage({
           trend={leadTrend}
           sub="vs. previous period"
         />
+        {/* AI Success in the top-right corner */}
+        <StatCard
+          label="AI Success"
+          value={avgScore === null ? '—' : `${avgScore.toFixed(1)}/5`}
+          icon={GaugeIcon}
+          accent="green"
+          highlight
+          sub={scoredConvs.length > 0 ? `${scoredConvs.length} evaluated` : 'none evaluated yet'}
+        />
         {showProducts && (
           <StatCard
             label="Product Suggestions"
@@ -276,14 +313,6 @@ export default async function AnalyticsPage({
           icon={HeadsetIcon}
           accent="blue"
           sub={typedConvs.length > 0 ? `of ${typedConvs.length} chats` : 'no chats yet'}
-        />
-        <StatCard
-          label="AI Success"
-          value={avgScore === null ? '—' : `${avgScore.toFixed(1)}/5`}
-          icon={GaugeIcon}
-          accent="green"
-          highlight
-          sub={scoredConvs.length > 0 ? `${scoredConvs.length} evaluated` : 'none evaluated yet'}
         />
         <StatCard
           label="CSAT"
