@@ -33,7 +33,7 @@ export function ExportReportButton({ rows, filename }: ExportReportButtonProps) 
   }
 
   return (
-    <Button variant="outline" onClick={handleExport}>
+    <Button onClick={handleExport}>
       <DownloadIcon className="size-4" />
       Export
     </Button>

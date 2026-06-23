@@ -33,8 +33,8 @@ export function LeadsChart({ data }: LeadsChartProps) {
       <AreaChart data={data} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
         <defs>
           <linearGradient id="leadsGradient" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.25} />
-            <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+            <stop offset="5%" stopColor="#68A369" stopOpacity={0.25} />
+            <stop offset="95%" stopColor="#68A369" stopOpacity={0} />
           </linearGradient>
         </defs>
         <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
@@ -44,7 +44,7 @@ export function LeadsChart({ data }: LeadsChartProps) {
         <Area
           type="monotone"
           dataKey="count"
-          stroke="hsl(var(--primary))"
+          stroke="#68A369"
           fill="url(#leadsGradient)"
           strokeWidth={2}
           dot={false}

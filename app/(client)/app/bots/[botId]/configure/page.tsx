@@ -16,15 +16,15 @@ export default async function ConfigurePage({
   const supabase = await createServerClient()
   const { data } = await supabase
     .from('bots')
-    .select('id, config')
+    .select('id, name, config')
     .eq('id', botId)
-    .single<Pick<Bot, 'id' | 'config'>>()
+    .single<Pick<Bot, 'id' | 'name' | 'config'>>()
 
   if (!data) notFound()
 
   return (
     <>
-      <ConfigForm botId={data.id} initialConfig={data.config} />
+      <ConfigForm botId={data.id} botName={data.name} initialConfig={data.config} />
       <Toaster />
     </>
   )

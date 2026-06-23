@@ -19,8 +19,7 @@ import { ConversationsChart } from '@/components/client/charts/ConversationsChar
 import { MessageVolumeChart } from '@/components/client/charts/MessageVolumeChart'
 import { TopQuestionsChart } from '@/components/client/charts/TopQuestionsChart'
 import { LeadsChart } from '@/components/client/charts/LeadsChart'
-import { KbReadinessChart } from '@/components/client/charts/KbReadinessChart'
-import type { Bot, Conversation, Message, Lead, KnowledgeSource } from '@/lib/types'
+import type { Bot, Conversation, Message, Lead } from '@/lib/types'
 import type { CommerceProduct } from '@/lib/commerce/types'
 
 const ALLOWED_RANGES = [7, 30, 90]
@@ -91,7 +90,6 @@ export default async function AnalyticsPage({
   const [
     { data: conversations },
     { data: leads },
-    { data: sources },
     { count: prevConvCount },
     { count: prevLeadCount },
   ] = await Promise.all([
@@ -101,7 +99,6 @@ export default async function AnalyticsPage({
       .eq('bot_id', botId)
       .gte('started_at', sinceIso),
     supabase.from('leads').select('id, created_at').eq('bot_id', botId).gte('created_at', sinceIso),
-    supabase.from('knowledge_sources').select('id, status').eq('bot_id', botId),
     supabase
       .from('conversations')
       .select('id', { count: 'exact', head: true })
@@ -135,7 +132,6 @@ export default async function AnalyticsPage({
     'id' | 'conversation_id' | 'role' | 'content' | 'created_at' | 'feedback'
   > & { products?: CommerceProduct[] | null })[]
   const typedLeads = (leads ?? []) as Pick<Lead, 'id' | 'created_at'>[]
-  const typedSources = (sources ?? []) as Pick<KnowledgeSource, 'id' | 'status'>[]
 
   // --- Aggregations ---
 
@@ -172,15 +168,6 @@ export default async function AnalyticsPage({
   }
   const topProducts = [...productFreq.values()].sort((a, b) => b.count - a.count).slice(0, 6)
   const showProducts = Boolean(bot.config.commerce?.enabled) || totalSuggestions > 0
-
-  // KB source readiness breakdown
-  const sourceStatusCounts: Record<string, number> = { ready: 0, processing: 0, pending: 0, error: 0 }
-  for (const s of typedSources) {
-    sourceStatusCounts[s.status] = (sourceStatusCounts[s.status] ?? 0) + 1
-  }
-  const kbData = Object.entries(sourceStatusCounts)
-    .map(([status, count]) => ({ status, count }))
-    .filter((d) => d.count > 0)
 
   // Fallback rate
   const fallbackMsgs = Object.values(bot.config.content ?? {})
@@ -343,36 +330,21 @@ export default async function AnalyticsPage({
         </div>
       </div>
 
-      {/* Charts row 2 */}
+      {/* Charts row 2: top questions + (products | leads), equal height */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="space-y-3 rounded-xl border p-5 lg:col-span-2">
           <h3 className="text-sm font-semibold">Top visitor questions</h3>
           <TopQuestionsChart data={topQuestions} />
         </div>
 
-        <div className="space-y-6">
-          <div className="space-y-3 rounded-xl border p-5">
-            <h3 className="text-sm font-semibold">Leads captured</h3>
-            <LeadsChart data={leadsByDay} />
-          </div>
-
-          <div className="space-y-3 rounded-xl border p-5">
-            <h3 className="text-sm font-semibold">Knowledge base</h3>
-            <KbReadinessChart data={kbData} />
-          </div>
-        </div>
-      </div>
-
-      {/* Top suggested products + Top topics */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {showProducts && (
-          <div className="space-y-3 rounded-xl border p-5">
+        {showProducts ? (
+          <div className="flex flex-col space-y-3 rounded-xl border p-5">
             <div className="flex items-center gap-2">
               <ShoppingBagIcon className="size-4 text-amber-600" aria-hidden="true" />
               <h3 className="text-sm font-semibold">Top suggested products</h3>
             </div>
             {topProducts.length === 0 ? (
-              <p className="py-6 text-center text-sm text-muted-foreground">
+              <p className="flex flex-1 items-center justify-center py-6 text-center text-sm text-muted-foreground">
                 No product suggestions in this period yet.
               </p>
             ) : (
@@ -404,25 +376,31 @@ export default async function AnalyticsPage({
               </ul>
             )}
           </div>
-        )}
-
-        {topTopics.length > 0 && (
-          <div className={`space-y-3 rounded-xl border p-5${showProducts ? '' : ' lg:col-span-2'}`}>
-            <h3 className="text-sm font-semibold">Top topics</h3>
-            <div className="flex flex-wrap gap-2">
-              {topTopics.map(({ topic, count }) => (
-                <span
-                  key={topic}
-                  className="inline-flex items-center gap-1.5 rounded-full border bg-muted/40 px-3 py-1 text-sm"
-                >
-                  {topic}
-                  <span className="text-xs tabular-nums text-muted-foreground">{count}</span>
-                </span>
-              ))}
-            </div>
+        ) : (
+          <div className="space-y-3 rounded-xl border p-5">
+            <h3 className="text-sm font-semibold">Leads captured</h3>
+            <LeadsChart data={leadsByDay} />
           </div>
         )}
       </div>
+
+      {/* Top topics */}
+      {topTopics.length > 0 && (
+        <div className="space-y-3 rounded-xl border p-5">
+          <h3 className="text-sm font-semibold">Top topics</h3>
+          <div className="flex flex-wrap gap-2">
+            {topTopics.map(({ topic, count }) => (
+              <span
+                key={topic}
+                className="inline-flex items-center gap-1.5 rounded-full border bg-muted/40 px-3 py-1 text-sm"
+              >
+                {topic}
+                <span className="text-xs tabular-nums text-muted-foreground">{count}</span>
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

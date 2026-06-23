@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useCallback, useEffect, useRef, type ReactNode } from 'react'
+import { useRouter } from 'next/navigation'
 import { useForm, useFieldArray, Controller, type Control, type UseFormWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
@@ -39,6 +40,8 @@ import { cn } from '@/lib/utils'
 
 interface ConfigFormProps {
   botId: string
+  /** Internal bot name (sidebar label) — editable, distinct from displayName. */
+  botName: string
   initialConfig: BotConfig
 }
 
@@ -60,7 +63,10 @@ const LANG_LABELS: Record<BotLanguage, string> = {
   lt: 'Lithuanian',
 }
 
-export function ConfigForm({ botId, initialConfig }: ConfigFormProps) {
+export function ConfigForm({ botId, botName, initialConfig }: ConfigFormProps) {
+  const router = useRouter()
+  // Internal bot name — lives outside the config schema, saved alongside it.
+  const [name, setName] = useState(botName)
   // Active language tab — drives which content.<lang> fields are shown + live preview.
   // Persisted to localStorage keyed by botId so it survives refresh.
   const lsKey = `cbz_cfg_lang_${botId}`
@@ -201,14 +207,16 @@ export function ConfigForm({ botId, initialConfig }: ConfigFormProps) {
 
   const onSubmit = useCallback(
     async (values: FormValues) => {
-      const result = await saveConfig(botId, values)
+      const result = await saveConfig(botId, values, name.trim())
       if (result.success) {
         toast.success('Configuration saved')
+        // Refresh so the sidebar reflects a renamed bot.
+        router.refresh()
       } else {
         toast.error(result.error ?? 'Failed to save configuration')
       }
     },
-    [botId],
+    [botId, name, router],
   )
 
   const leadCaptureEnabled = watch('leadCapture.enabled')
@@ -247,6 +255,20 @@ export function ConfigForm({ botId, initialConfig }: ConfigFormProps) {
             <CardDescription>Bot name and avatar shown to visitors.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="botName">Bot name</Label>
+              <Input
+                id="botName"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="My Assistant"
+                maxLength={60}
+              />
+              <p className="text-xs text-muted-foreground">
+                Internal name shown in your dashboard sidebar. Visitors see the display name below.
+              </p>
+            </div>
+
             <div className="space-y-1.5">
               <Label htmlFor="displayName">Bot display name</Label>
               <Input

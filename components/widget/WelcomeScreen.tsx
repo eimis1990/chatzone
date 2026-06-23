@@ -108,10 +108,16 @@ export function WelcomeScreen({
                 type="button"
                 onClick={() => onSelect(q)}
                 variants={item}
-                className={`flex min-h-[84px] flex-col justify-end bg-gray-50 p-3 text-left text-sm font-medium leading-snug text-gray-800 transition-colors hover:bg-gray-100${fullWidth ? ' col-span-2' : ''}`}
+                className={`relative flex min-h-[84px] flex-col justify-end overflow-hidden bg-gray-50 p-3 text-left text-sm font-medium leading-snug text-gray-800 transition-colors hover:bg-gray-100${fullWidth ? ' col-span-2' : ''}`}
                 style={{ borderRadius: radius }}
               >
-                {q}
+                {/* Soft glow in the top-right corner, tinted to the header color */}
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none absolute -right-5 -top-5 size-16 rounded-full blur-2xl"
+                  style={{ backgroundColor: primaryColor, opacity: 0.22 }}
+                />
+                <span className="relative">{q}</span>
               </motion.button>
             )
           })}

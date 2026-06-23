@@ -13,6 +13,7 @@ export interface SaveConfigResult {
 export async function saveConfig(
   botId: string,
   rawConfig: unknown,
+  name?: string,
 ): Promise<SaveConfigResult> {
   // 1. Require authenticated client
   await requireRole('client')
@@ -28,12 +29,19 @@ export async function saveConfig(
 
   const config: BotConfig = parsed.data
 
+  // Optional internal bot name (sidebar label). Validate length when provided.
+  const update: { config: BotConfig; name?: string } = { config }
+  if (typeof name === 'string') {
+    const trimmed = name.trim()
+    if (trimmed.length < 1 || trimmed.length > 60) {
+      return { success: false, error: 'Bot name must be 1–60 characters.' }
+    }
+    update.name = trimmed
+  }
+
   // 3. Update — RLS ensures the row belongs to this user's org
   const supabase = await createServerClient()
-  const { error } = await supabase
-    .from('bots')
-    .update({ config })
-    .eq('id', botId)
+  const { error } = await supabase.from('bots').update(update).eq('id', botId)
 
   if (error) {
     return { success: false, error: error.message }
