@@ -111,8 +111,8 @@ export default async function InboxPage({ params }: { params: Promise<{ botId: s
   }
 
   return (
-    <div className="space-y-4 p-6">
-      <div>
+    <div className="flex h-full flex-col gap-4 overflow-hidden p-6">
+      <div className="flex-shrink-0">
         <h2 className="text-lg font-semibold">Inbox</h2>
         <p className="text-sm text-muted-foreground">
           Take over live conversations and reply as a human. The bot pauses while you handle a chat.

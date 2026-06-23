@@ -200,10 +200,10 @@ export function InboxView({
   const selectedStatus = selected?.handoff_status ?? 'bot'
 
   return (
-    <div className="flex h-[calc(100svh-7rem)] gap-4">
+    <div className="flex min-h-0 flex-1 gap-4">
       {/* Conversation list */}
-      <div className="flex w-80 flex-shrink-0 flex-col rounded-xl border bg-card">
-        <div className="flex items-center justify-between gap-2 border-b p-3">
+      <div className="flex w-80 min-h-0 flex-shrink-0 flex-col overflow-hidden rounded-xl border bg-card">
+        <div className="flex flex-shrink-0 items-center justify-between gap-2 border-b p-3">
           <div className="flex gap-1">
             {(['open', 'resolved', 'all'] as Filter[]).map((f) => (
               <button
@@ -230,7 +230,7 @@ export function InboxView({
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto">
+        <div className="min-h-0 flex-1 overflow-y-auto">
           {filtered.length === 0 && (
             <p className="p-6 text-center text-sm text-muted-foreground">
               {filter === 'open' ? 'No conversations need a human right now.' : 'Nothing here.'}
@@ -265,7 +265,7 @@ export function InboxView({
       </div>
 
       {/* Thread */}
-      <div className="flex min-w-0 flex-1 flex-col rounded-xl border bg-card">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-xl border bg-card">
         {!selected ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-2 text-muted-foreground">
             <HeadsetIcon className="size-8 opacity-40" />
@@ -274,7 +274,7 @@ export function InboxView({
         ) : (
           <>
             {/* Thread header + controls */}
-            <div className="flex items-center justify-between gap-2 border-b p-3">
+            <div className="flex flex-shrink-0 items-center justify-between gap-2 border-b p-3">
               <div className="flex items-center gap-2">
                 <CircleDotIcon
                   className={cn(
@@ -314,7 +314,7 @@ export function InboxView({
             </div>
 
             {/* Messages */}
-            <div className="flex-1 space-y-3 overflow-y-auto p-4">
+            <div className="min-h-0 flex-1 space-y-3 overflow-y-auto p-4">
               {thread.map((m) => {
                 const isUser = m.role === 'user'
                 return (
@@ -343,7 +343,7 @@ export function InboxView({
             </div>
 
             {/* Composer */}
-            <div className="flex items-end gap-2 border-t p-3">
+            <div className="flex flex-shrink-0 items-end gap-2 border-t p-3">
               <textarea
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}

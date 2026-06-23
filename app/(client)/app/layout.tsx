@@ -43,7 +43,7 @@ export default async function ClientLayout({
   return (
     <div className="flex h-svh overflow-hidden bg-sidebar-mesh">
       <AppSidebar bots={bots} userEmail={user.email ?? ''} />
-      <main className="flex-1 min-w-0 m-3 overflow-y-auto rounded-2xl bg-background ring-1 ring-primary/40">
+      <main className="flex-1 min-w-0 m-3 overflow-y-auto rounded-2xl bg-background shadow-sm">
         {children}
       </main>
     </div>

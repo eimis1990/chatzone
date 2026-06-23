@@ -2,7 +2,17 @@
 
 import { useEffect, useRef, useCallback } from 'react'
 import { toast } from 'sonner'
-import { RefreshCwIcon, Trash2Icon, AlertCircleIcon } from 'lucide-react'
+import {
+  RefreshCwIcon,
+  Trash2Icon,
+  AlertCircleIcon,
+  FileTextIcon,
+  MessageSquareTextIcon,
+  LinkIcon,
+  PaperclipIcon,
+  DatabaseIcon,
+} from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -25,11 +35,11 @@ interface SourceListProps {
 
 const POLL_INTERVAL_MS = 3000
 const SETTLED_STATUSES: SourceStatus[] = ['ready', 'error']
-const TYPE_LABELS: Record<SourceType, string> = {
-  text: 'Text',
-  qa: 'Q&A',
-  url: 'URL',
-  file: 'File',
+const TYPE_META: Record<SourceType, { label: string; icon: LucideIcon }> = {
+  text: { label: 'Text', icon: FileTextIcon },
+  qa: { label: 'Q&A', icon: MessageSquareTextIcon },
+  url: { label: 'URL', icon: LinkIcon },
+  file: { label: 'File', icon: PaperclipIcon },
 }
 
 function StatusBadge({ status, errorMessage }: { status: SourceStatus; errorMessage: string | null }) {
@@ -215,39 +225,47 @@ export function SourceList({ botId, sources, onDeleted, onUpdated }: SourceListP
 
   if (sources.length === 0) {
     return (
-      <div className="rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground">
-        No sources yet. Add one above to get started.
+      <div className="flex flex-col items-center gap-3 px-6 py-14 text-center">
+        <div className="flex size-11 items-center justify-center rounded-full bg-muted text-muted-foreground">
+          <DatabaseIcon className="size-5" aria-hidden="true" />
+        </div>
+        <div className="space-y-0.5">
+          <p className="text-sm font-medium text-foreground">No sources yet</p>
+          <p className="text-sm text-muted-foreground">Add one above to start training your bot.</p>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="rounded-lg border overflow-hidden">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Type</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Added</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {sources.map((source) => (
-            <TableRow key={source.id}>
-              <TableCell className="font-medium max-w-xs truncate" title={source.name}>
+    <Table>
+      <TableHeader>
+        <TableRow className="hover:bg-transparent">
+          <TableHead>Name</TableHead>
+          <TableHead>Type</TableHead>
+          <TableHead>Status</TableHead>
+          <TableHead>Added</TableHead>
+          <TableHead className="text-right">Actions</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {sources.map((source) => {
+          const { label, icon: TypeIcon } = TYPE_META[source.type]
+          return (
+            <TableRow key={source.id} className="transition-colors hover:bg-muted/40">
+              <TableCell className="max-w-xs truncate font-medium" title={source.name}>
                 {source.name}
               </TableCell>
               <TableCell>
-                <span className="text-muted-foreground text-xs">
-                  {TYPE_LABELS[source.type]}
+                <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <TypeIcon className="size-3.5" aria-hidden="true" />
+                  {label}
                 </span>
               </TableCell>
               <TableCell>
                 <StatusBadge status={source.status} errorMessage={source.error_message} />
               </TableCell>
-              <TableCell className="text-muted-foreground text-xs">
+              <TableCell className="text-xs text-muted-foreground">
                 {formatDate(source.created_at)}
               </TableCell>
               <TableCell className="text-right">
@@ -278,9 +296,9 @@ export function SourceList({ botId, sources, onDeleted, onUpdated }: SourceListP
                 </div>
               </TableCell>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
+          )
+        })}
+      </TableBody>
+    </Table>
   )
 }
