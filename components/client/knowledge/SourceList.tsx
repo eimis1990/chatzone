@@ -231,7 +231,7 @@ export function SourceList({ botId, sources, onDeleted, onUpdated }: SourceListP
         </div>
         <div className="space-y-0.5">
           <p className="text-sm font-medium text-foreground">No sources yet</p>
-          <p className="text-sm text-muted-foreground">Add one above to start training your bot.</p>
+          <p className="text-sm text-muted-foreground">Add one on the left to start training your bot.</p>
         </div>
       </div>
     )
@@ -240,12 +240,12 @@ export function SourceList({ botId, sources, onDeleted, onUpdated }: SourceListP
   return (
     <Table>
       <TableHeader>
-        <TableRow className="hover:bg-transparent">
-          <TableHead>Name</TableHead>
-          <TableHead>Type</TableHead>
-          <TableHead>Status</TableHead>
-          <TableHead>Added</TableHead>
-          <TableHead className="text-right">Actions</TableHead>
+        <TableRow className="border-b hover:bg-transparent">
+          <TableHead className="h-11 px-5 text-xs font-medium uppercase tracking-wide text-muted-foreground">Name</TableHead>
+          <TableHead className="h-11 px-5 text-xs font-medium uppercase tracking-wide text-muted-foreground">Type</TableHead>
+          <TableHead className="h-11 px-5 text-xs font-medium uppercase tracking-wide text-muted-foreground">Status</TableHead>
+          <TableHead className="h-11 px-5 text-xs font-medium uppercase tracking-wide text-muted-foreground">Added</TableHead>
+          <TableHead className="h-11 px-5 text-right text-xs font-medium uppercase tracking-wide text-muted-foreground">Actions</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -253,22 +253,22 @@ export function SourceList({ botId, sources, onDeleted, onUpdated }: SourceListP
           const { label, icon: TypeIcon } = TYPE_META[source.type]
           return (
             <TableRow key={source.id} className="transition-colors hover:bg-muted/40">
-              <TableCell className="max-w-xs truncate font-medium" title={source.name}>
+              <TableCell className="max-w-xs truncate px-5 py-3.5 font-medium" title={source.name}>
                 {source.name}
               </TableCell>
-              <TableCell>
+              <TableCell className="px-5 py-3.5">
                 <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
                   <TypeIcon className="size-3.5" aria-hidden="true" />
                   {label}
                 </span>
               </TableCell>
-              <TableCell>
+              <TableCell className="px-5 py-3.5">
                 <StatusBadge status={source.status} errorMessage={source.error_message} />
               </TableCell>
-              <TableCell className="text-xs text-muted-foreground">
+              <TableCell className="px-5 py-3.5 text-xs text-muted-foreground">
                 {formatDate(source.created_at)}
               </TableCell>
-              <TableCell className="text-right">
+              <TableCell className="px-5 py-3.5 text-right">
                 <div className="flex items-center justify-end gap-1">
                   {source.status === 'error' && (
                     <Button

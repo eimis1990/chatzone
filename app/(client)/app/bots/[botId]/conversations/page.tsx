@@ -112,7 +112,7 @@ export default async function ConversationsPage({
     const sb = await createServerClient()
     const { data } = await sb
       .from('messages')
-      .select('id, conversation_id, role, content, citations, token_count, created_at, feedback')
+      .select('id, conversation_id, role, content, citations, token_count, created_at, feedback, products')
       .eq('conversation_id', conversationId)
       .order('created_at', { ascending: true })
 
@@ -170,8 +170,8 @@ export default async function ConversationsPage({
   }
 
   return (
-    <div className="p-6 space-y-4">
-      <div>
+    <div className="flex h-full flex-col gap-4 overflow-hidden p-6">
+      <div className="flex-shrink-0">
         <h2 className="text-lg font-semibold">Conversations</h2>
         <p className="text-sm text-muted-foreground">
           Browse chat transcripts and visitor interactions

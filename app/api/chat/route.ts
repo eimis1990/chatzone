@@ -180,6 +180,9 @@ export async function POST(req: Request) {
         role: 'assistant',
         content: text,
         citations,
+        // Persist the products the bot surfaced this turn so the transcript can
+        // replay the full interaction. productSink is final by onText time.
+        products: productSink,
       })
       await svc
         .from('conversations')

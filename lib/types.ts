@@ -2,6 +2,7 @@
  * Hand-written row types mirroring supabase/migrations.
  * (Can later be replaced by `supabase gen types typescript`.)
  */
+import type { CommerceProduct } from '@/lib/commerce/types'
 
 export type UserRole = 'owner' | 'client'
 export type OrgStatus = 'active' | 'suspended'
@@ -233,6 +234,8 @@ export interface Message {
   feedback?: 'up' | 'down' | null
   /** Assistant message authored by a human agent vs. the bot (Phase 2). */
   from_human?: boolean
+  /** Product suggestions the bot surfaced this turn (Phase 3). */
+  products?: CommerceProduct[] | null
 }
 
 export interface Lead {
