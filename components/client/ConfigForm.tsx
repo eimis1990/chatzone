@@ -124,6 +124,16 @@ export function ConfigForm({ botId, initialConfig }: ConfigFormProps) {
     }
   }, [ltEnabled, activeLang, selectLang])
 
+  // Keep defaultLanguage a concrete, committed value. The select only *displays*
+  // a fallback when it's unset, so without this it would persist as undefined and
+  // the live widget would silently open in English regardless of enabled languages.
+  const watchedDefaultLanguage = watch('defaultLanguage')
+  useEffect(() => {
+    if (!watchedDefaultLanguage || !watchedLanguages.includes(watchedDefaultLanguage)) {
+      setValue('defaultLanguage', watchedLanguages[0] ?? 'en', { shouldDirty: false })
+    }
+  }, [watchedDefaultLanguage, watchedLanguages, setValue])
+
   // Watch all values for the live preview
   const watchedValues = watch()
 

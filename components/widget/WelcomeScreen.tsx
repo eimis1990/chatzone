@@ -29,6 +29,10 @@ export function WelcomeScreen({
   onSelect,
 }: WelcomeScreenProps) {
   const radius = `${Math.min(bubbleRadius, 16)}px`
+  const visibleQuestions = suggestedQuestions.slice(0, 6)
+  // With an odd number of tiles the last one would sit alone in a half-width
+  // cell — span it full width instead so the grid never looks lopsided.
+  const orphanLast = visibleQuestions.length % 2 === 1
 
   return (
     <div className="flex-1 flex flex-col overflow-y-auto px-4 py-6">
@@ -63,20 +67,24 @@ export function WelcomeScreen({
         </div>
       ) : null}
 
-      {/* Suggested-action tiles — 2 per row, bottom-aligned above the composer */}
-      {suggestedQuestions.length > 0 && (
+      {/* Suggested-action tiles — 2 per row, bottom-aligned above the composer.
+          An odd trailing tile spans the full width so the grid stays balanced. */}
+      {visibleQuestions.length > 0 && (
         <div className="mt-auto grid grid-cols-2 gap-2 pt-6">
-          {suggestedQuestions.slice(0, 6).map((q, i) => (
-            <button
-              key={i}
-              type="button"
-              onClick={() => onSelect(q)}
-              className="flex min-h-[84px] flex-col justify-end bg-gray-50 p-3 text-left text-sm font-medium leading-snug text-gray-800 transition-colors hover:bg-gray-100"
-              style={{ borderRadius: radius }}
-            >
-              {q}
-            </button>
-          ))}
+          {visibleQuestions.map((q, i) => {
+            const fullWidth = orphanLast && i === visibleQuestions.length - 1
+            return (
+              <button
+                key={i}
+                type="button"
+                onClick={() => onSelect(q)}
+                className={`flex min-h-[84px] flex-col justify-end bg-gray-50 p-3 text-left text-sm font-medium leading-snug text-gray-800 transition-colors hover:bg-gray-100${fullWidth ? ' col-span-2' : ''}`}
+                style={{ borderRadius: radius }}
+              >
+                {q}
+              </button>
+            )
+          })}
         </div>
       )}
     </div>
