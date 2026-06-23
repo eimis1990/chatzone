@@ -1,14 +1,28 @@
 import { notFound } from 'next/navigation'
+import {
+  MessagesSquareIcon,
+  MessageSquareIcon,
+  UserPlusIcon,
+  ShoppingBagIcon,
+  GaugeIcon,
+  ThumbsUpIcon,
+  LifeBuoyIcon,
+  HeadsetIcon,
+} from 'lucide-react'
 import { requireRole } from '@/lib/auth/guards'
 import { createServerClient } from '@/lib/supabase/server'
 import { toDateString } from '@/lib/date-utils'
 import { StatCard } from '@/components/client/charts/StatCard'
+import { AnalyticsRangeSelector } from '@/components/client/charts/AnalyticsRangeSelector'
 import { ConversationsChart } from '@/components/client/charts/ConversationsChart'
 import { MessageVolumeChart } from '@/components/client/charts/MessageVolumeChart'
 import { TopQuestionsChart } from '@/components/client/charts/TopQuestionsChart'
 import { LeadsChart } from '@/components/client/charts/LeadsChart'
 import { KbReadinessChart } from '@/components/client/charts/KbReadinessChart'
 import type { Bot, Conversation, Message, Lead, KnowledgeSource } from '@/lib/types'
+import type { CommerceProduct } from '@/lib/commerce/types'
+
+const ALLOWED_RANGES = [7, 30, 90]
 
 // Generate an array of date strings for the last N days (YYYY-MM-DD).
 function lastNDays(n: number): string[] {
@@ -32,13 +46,25 @@ function countByDate<T>(items: T[], getDate: (item: T) => string, dates: string[
   return dates.map((date) => ({ date, count: map[date] }))
 }
 
+// Percent change vs. previous period (null when not meaningful).
+function trendOf(curr: number, prev: number): { value: number; direction: 'up' | 'down' } | null {
+  if (prev === 0) return curr > 0 ? { value: 100, direction: 'up' } : null
+  const pct = Math.round(((curr - prev) / prev) * 100)
+  if (pct === 0) return null
+  return { value: pct, direction: pct >= 0 ? 'up' : 'down' }
+}
+
 export default async function AnalyticsPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ botId: string }>
+  searchParams: Promise<{ range?: string }>
 }) {
   await requireRole('client')
   const { botId } = await params
+  const { range: rangeParam } = await searchParams
+  const rangeDays = ALLOWED_RANGES.includes(Number(rangeParam)) ? Number(rangeParam) : 30
 
   const supabase = await createServerClient()
 
@@ -51,70 +77,70 @@ export default async function AnalyticsPage({
 
   if (!bot) notFound()
 
-  const dates30 = lastNDays(30)
-  const since30 = new Date()
-  since30.setDate(since30.getDate() - 30)
-  const since30Iso = since30.toISOString()
+  const dates = lastNDays(rangeDays)
+  const since = new Date()
+  since.setDate(since.getDate() - rangeDays)
+  const sinceIso = since.toISOString()
+  // Previous, equal-length window (for trend deltas).
+  const prevSince = new Date(since)
+  prevSince.setDate(prevSince.getDate() - rangeDays)
+  const prevSinceIso = prevSince.toISOString()
 
-  // Parallel data fetching — keep aggregation light, push work to DB where trivial.
+  // Current-period data + cheap previous-period counts, in parallel.
   const [
     { data: conversations },
-    { data: messages },
     { data: leads },
     { data: sources },
+    { count: prevConvCount },
+    { count: prevLeadCount },
   ] = await Promise.all([
     supabase
       .from('conversations')
-      .select('id, started_at, last_message_at, topics, success_score')
+      .select('id, started_at, last_message_at, topics, success_score, handoff_status')
       .eq('bot_id', botId)
-      .gte('started_at', since30Iso),
+      .gte('started_at', sinceIso),
+    supabase.from('leads').select('id, created_at').eq('bot_id', botId).gte('created_at', sinceIso),
+    supabase.from('knowledge_sources').select('id, status').eq('bot_id', botId),
     supabase
-      .from('messages')
-      .select('id, conversation_id, role, content, created_at')
-      .in(
-        'conversation_id',
-        // subquery via supabase RPC is not available here; we do a two-step
-        // but keep it simple: fetch conversation IDs first (already loaded above)
-        // We'll re-use conversations loaded in the next step; this is a workaround
-        // to avoid a second round-trip for conv IDs.
-        ['00000000-0000-0000-0000-000000000000'], // placeholder; overwritten below
-      )
-      .order('created_at', { ascending: true }),
+      .from('conversations')
+      .select('id', { count: 'exact', head: true })
+      .eq('bot_id', botId)
+      .gte('started_at', prevSinceIso)
+      .lt('started_at', sinceIso),
     supabase
       .from('leads')
-      .select('id, created_at')
+      .select('id', { count: 'exact', head: true })
       .eq('bot_id', botId)
-      .gte('created_at', since30Iso),
-    supabase
-      .from('knowledge_sources')
-      .select('id, status')
-      .eq('bot_id', botId),
+      .gte('created_at', prevSinceIso)
+      .lt('created_at', sinceIso),
   ])
-
-  // Re-fetch messages properly scoped to this bot's conversations in the last 30 days
-  const convIds30 = (conversations ?? []).map((c) => (c as Conversation).id)
-
-  const { data: messagesReal } = convIds30.length > 0
-    ? await supabase
-        .from('messages')
-        .select('id, conversation_id, role, content, created_at, feedback')
-        .in('conversation_id', convIds30)
-        .order('created_at', { ascending: true })
-    : { data: [] }
 
   const typedConvs = (conversations ?? []) as Pick<
     Conversation,
-    'id' | 'started_at' | 'last_message_at' | 'topics' | 'success_score'
+    'id' | 'started_at' | 'last_message_at' | 'topics' | 'success_score' | 'handoff_status'
   >[]
-  const typedMsgs = (messagesReal ?? []) as Pick<Message, 'id' | 'conversation_id' | 'role' | 'content' | 'created_at' | 'feedback'>[]
+  const convIds = typedConvs.map((c) => c.id)
+
+  const { data: messagesReal } = convIds.length > 0
+    ? await supabase
+        .from('messages')
+        .select('id, conversation_id, role, content, created_at, feedback, products')
+        .in('conversation_id', convIds)
+        .order('created_at', { ascending: true })
+    : { data: [] }
+
+  const typedMsgs = (messagesReal ?? []) as (Pick<
+    Message,
+    'id' | 'conversation_id' | 'role' | 'content' | 'created_at' | 'feedback'
+  > & { products?: CommerceProduct[] | null })[]
   const typedLeads = (leads ?? []) as Pick<Lead, 'id' | 'created_at'>[]
   const typedSources = (sources ?? []) as Pick<KnowledgeSource, 'id' | 'status'>[]
 
   // --- Aggregations ---
 
-  const convsByDay = countByDate(typedConvs, (c) => c.started_at, dates30)
-  const msgsByDay = countByDate(typedMsgs, (m) => m.created_at, dates30)
-  const leadsByDay = countByDate(typedLeads, (l) => l.created_at, dates30)
+  const convsByDay = countByDate(typedConvs, (c) => c.started_at, dates)
+  const msgsByDay = countByDate(typedMsgs, (m) => m.created_at, dates)
+  const leadsByDay = countByDate(typedLeads, (l) => l.created_at, dates)
 
   // Top 10 user questions (most frequent user message content)
   const userMsgs = typedMsgs.filter((m) => m.role === 'user')
@@ -128,6 +154,24 @@ export default async function AnalyticsPage({
     .slice(0, 10)
     .map(([question, count]) => ({ question, count }))
 
+  // Product suggestions surfaced by the bot.
+  const productFreq = new Map<string, { product: CommerceProduct; count: number }>()
+  let totalSuggestions = 0
+  let repliesWithProducts = 0
+  for (const m of typedMsgs) {
+    const prods = m.products ?? []
+    if (prods.length > 0) repliesWithProducts++
+    for (const p of prods) {
+      totalSuggestions++
+      const key = p.id || p.title
+      const existing = productFreq.get(key)
+      if (existing) existing.count++
+      else productFreq.set(key, { product: p, count: 1 })
+    }
+  }
+  const topProducts = [...productFreq.values()].sort((a, b) => b.count - a.count).slice(0, 6)
+  const showProducts = Boolean(bot.config.commerce?.enabled) || totalSuggestions > 0
+
   // KB source readiness breakdown
   const sourceStatusCounts: Record<string, number> = { ready: 0, processing: 0, pending: 0, error: 0 }
   for (const s of typedSources) {
@@ -137,8 +181,7 @@ export default async function AnalyticsPage({
     .map(([status, count]) => ({ status, count }))
     .filter((d) => d.count > 0)
 
-  // Fallback rate: % of assistant messages whose content matches any language's
-  // fallback message.
+  // Fallback rate
   const fallbackMsgs = Object.values(bot.config.content ?? {})
     .map((c) => c?.fallbackMessage?.trim())
     .filter((m): m is string => !!m)
@@ -147,24 +190,22 @@ export default async function AnalyticsPage({
     ? assistantMsgs.filter((m) => fallbackMsgs.includes(m.content.trim())).length
     : 0
   const fallbackRate =
-    assistantMsgs.length > 0
-      ? Math.round((fallbackCount / assistantMsgs.length) * 100)
-      : 0
+    assistantMsgs.length > 0 ? Math.round((fallbackCount / assistantMsgs.length) * 100) : 0
 
-  // CSAT from thumbs feedback: up / (up + down).
+  // CSAT from thumbs feedback
   const thumbsUp = typedMsgs.filter((m) => m.feedback === 'up').length
   const thumbsDown = typedMsgs.filter((m) => m.feedback === 'down').length
   const ratedTotal = thumbsUp + thumbsDown
   const csat = ratedTotal > 0 ? Math.round((thumbsUp / ratedTotal) * 100) : null
 
-  // Average AI success score across evaluated conversations (1–5).
+  // Average AI success score
   const scoredConvs = typedConvs.filter((c) => typeof c.success_score === 'number' && (c.success_score ?? 0) > 0)
   const avgScore =
     scoredConvs.length > 0
       ? scoredConvs.reduce((sum, c) => sum + (c.success_score ?? 0), 0) / scoredConvs.length
       : null
 
-  // Top topics across analyzed conversations (last 30 days).
+  // Top topics
   const topicFreq: Record<string, number> = {}
   for (const c of typedConvs) {
     for (const t of c.topics ?? []) {
@@ -177,84 +218,181 @@ export default async function AnalyticsPage({
     .slice(0, 12)
     .map(([topic, count]) => ({ topic, count }))
 
+  // Human-readable date span for the header.
+  const now = new Date()
+  const rangeLabel = `${since.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} – ${now.toLocaleDateString(
+    undefined,
+    { month: 'short', day: 'numeric', year: 'numeric' },
+  )}`
+
+  const convTrend = trendOf(typedConvs.length, prevConvCount ?? 0)
+  const leadTrend = trendOf(typedLeads.length, prevLeadCount ?? 0)
+
+  // Conversations that reached a human agent at some point.
+  const handoffConvs = typedConvs.filter((c) => c.handoff_status && c.handoff_status !== 'bot').length
+
   return (
-    <div className="p-6 space-y-8">
-      <div>
-        <h2 className="text-lg font-semibold">Analytics</h2>
-        <p className="text-sm text-muted-foreground">Last 30 days</p>
+    <div className="space-y-6 p-6">
+      {/* Header with interval selector */}
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h2 className="text-lg font-semibold">Analytics</h2>
+          <p className="text-sm text-muted-foreground">How your assistant is performing</p>
+        </div>
+        <AnalyticsRangeSelector range={rangeDays} rangeLabel={rangeLabel} />
       </div>
 
       {/* Scalar stat cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-        <StatCard label="Conversations" value={typedConvs.length} sub="last 30 days" />
-        <StatCard label="Messages" value={typedMsgs.length} sub="last 30 days" />
-        <StatCard label="Leads" value={typedLeads.length} sub="last 30 days" />
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
+        <StatCard
+          label="Conversations"
+          value={typedConvs.length}
+          icon={MessagesSquareIcon}
+          accent="green"
+          trend={convTrend}
+          sub="vs. previous period"
+        />
+        <StatCard label="Messages" value={typedMsgs.length} icon={MessageSquareIcon} accent="blue" sub="this period" />
+        <StatCard
+          label="Leads"
+          value={typedLeads.length}
+          icon={UserPlusIcon}
+          accent="violet"
+          trend={leadTrend}
+          sub="vs. previous period"
+        />
+        {showProducts && (
+          <StatCard
+            label="Product Suggestions"
+            value={totalSuggestions}
+            icon={ShoppingBagIcon}
+            accent="amber"
+            sub={repliesWithProducts > 0 ? `across ${repliesWithProducts} replies` : 'none yet'}
+          />
+        )}
+        <StatCard
+          label="Human Handoffs"
+          value={handoffConvs}
+          icon={HeadsetIcon}
+          accent="blue"
+          sub={typedConvs.length > 0 ? `of ${typedConvs.length} chats` : 'no chats yet'}
+        />
         <StatCard
           label="AI Success"
           value={avgScore === null ? '—' : `${avgScore.toFixed(1)}/5`}
+          icon={GaugeIcon}
+          accent="green"
+          highlight
           sub={scoredConvs.length > 0 ? `${scoredConvs.length} evaluated` : 'none evaluated yet'}
         />
         <StatCard
           label="CSAT"
           value={csat === null ? '—' : `${csat}%`}
+          icon={ThumbsUpIcon}
+          accent="rose"
           sub={ratedTotal > 0 ? `${thumbsUp}👍 / ${thumbsDown}👎` : 'no ratings yet'}
         />
         <StatCard
           label="Fallback Rate"
           value={`${fallbackRate}%`}
+          icon={LifeBuoyIcon}
+          accent="slate"
           sub={`${fallbackCount} of ${assistantMsgs.length} replies`}
         />
       </div>
 
-      {/* Top topics (from conversation analysis) */}
-      {topTopics.length > 0 && (
-        <div className="border rounded-lg p-5 space-y-3">
-          <h3 className="text-sm font-semibold">Top topics</h3>
-          <div className="flex flex-wrap gap-2">
-            {topTopics.map(({ topic, count }) => (
-              <span
-                key={topic}
-                className="inline-flex items-center gap-1.5 rounded-full border bg-muted/40 px-3 py-1 text-sm"
-              >
-                {topic}
-                <span className="text-xs text-muted-foreground tabular-nums">{count}</span>
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
-
       {/* Charts row 1 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="border rounded-lg p-5 space-y-3">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="space-y-3 rounded-xl border p-5">
           <h3 className="text-sm font-semibold">Conversations over time</h3>
           <ConversationsChart data={convsByDay} />
         </div>
 
-        <div className="border rounded-lg p-5 space-y-3">
+        <div className="space-y-3 rounded-xl border p-5">
           <h3 className="text-sm font-semibold">Message volume</h3>
           <MessageVolumeChart data={msgsByDay} />
         </div>
       </div>
 
       {/* Charts row 2 */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="border rounded-lg p-5 space-y-3 lg:col-span-2">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="space-y-3 rounded-xl border p-5 lg:col-span-2">
           <h3 className="text-sm font-semibold">Top visitor questions</h3>
           <TopQuestionsChart data={topQuestions} />
         </div>
 
         <div className="space-y-6">
-          <div className="border rounded-lg p-5 space-y-3">
+          <div className="space-y-3 rounded-xl border p-5">
             <h3 className="text-sm font-semibold">Leads captured</h3>
             <LeadsChart data={leadsByDay} />
           </div>
 
-          <div className="border rounded-lg p-5 space-y-3">
+          <div className="space-y-3 rounded-xl border p-5">
             <h3 className="text-sm font-semibold">Knowledge base</h3>
             <KbReadinessChart data={kbData} />
           </div>
         </div>
+      </div>
+
+      {/* Top suggested products + Top topics */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        {showProducts && (
+          <div className="space-y-3 rounded-xl border p-5">
+            <div className="flex items-center gap-2">
+              <ShoppingBagIcon className="size-4 text-amber-600" aria-hidden="true" />
+              <h3 className="text-sm font-semibold">Top suggested products</h3>
+            </div>
+            {topProducts.length === 0 ? (
+              <p className="py-6 text-center text-sm text-muted-foreground">
+                No product suggestions in this period yet.
+              </p>
+            ) : (
+              <ul className="space-y-2">
+                {topProducts.map(({ product, count }) => (
+                  <li key={product.id || product.title}>
+                    <a
+                      href={product.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-3 rounded-lg p-1.5 transition-colors hover:bg-muted/50"
+                    >
+                      {product.imageUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={product.imageUrl} alt="" className="size-10 shrink-0 rounded-md object-cover" />
+                      ) : (
+                        <div className="size-10 shrink-0 rounded-md bg-muted" />
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium">{product.title}</p>
+                        <p className="text-xs text-muted-foreground">{product.price}</p>
+                      </div>
+                      <span className="shrink-0 rounded-full bg-amber-500/10 px-2 py-0.5 text-xs font-semibold text-amber-700 tabular-nums">
+                        {count}×
+                      </span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
+
+        {topTopics.length > 0 && (
+          <div className={`space-y-3 rounded-xl border p-5${showProducts ? '' : ' lg:col-span-2'}`}>
+            <h3 className="text-sm font-semibold">Top topics</h3>
+            <div className="flex flex-wrap gap-2">
+              {topTopics.map(({ topic, count }) => (
+                <span
+                  key={topic}
+                  className="inline-flex items-center gap-1.5 rounded-full border bg-muted/40 px-3 py-1 text-sm"
+                >
+                  {topic}
+                  <span className="text-xs tabular-nums text-muted-foreground">{count}</span>
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
