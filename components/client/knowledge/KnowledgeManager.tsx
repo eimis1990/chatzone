@@ -45,8 +45,8 @@ export function KnowledgeManager({ botId, initialSources }: KnowledgeManagerProp
 
   return (
     <div className="flex min-h-0 flex-1 gap-6">
-      {/* ── Add sources ── */}
-      <Card className="flex min-h-0 flex-1 flex-col">
+      {/* ── Add sources ── (40% of the row) */}
+      <Card className="flex min-h-0 flex-[2] flex-col">
         <CardHeader className="flex-shrink-0 border-b">
           <CardTitle>Add a source</CardTitle>
           <CardDescription>
@@ -80,8 +80,8 @@ export function KnowledgeManager({ botId, initialSources }: KnowledgeManagerProp
         </CardContent>
       </Card>
 
-      {/* ── Source list ── */}
-      <Card className="flex min-h-0 flex-1 flex-col">
+      {/* ── Source list ── (60% of the row) */}
+      <Card className="flex min-h-0 flex-[3] flex-col">
         <CardHeader className="flex-shrink-0 border-b">
           <div className="flex items-center gap-2">
             <CardTitle>Sources</CardTitle>

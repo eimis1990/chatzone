@@ -1,0 +1,191 @@
+'use client'
+
+import { useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { XIcon, RefreshCwIcon, Trash2Icon, ExternalLinkIcon } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import type { KnowledgeSource } from '@/lib/types'
+import { TYPE_META, StatusBadge } from './SourceList'
+
+interface SourceDrawerProps {
+  source: KnowledgeSource | null
+  onClose: () => void
+  onDelete: (source: KnowledgeSource) => void
+  onRetry: (source: KnowledgeSource) => void
+}
+
+function formatDate(iso: string): string {
+  return new Date(iso).toLocaleString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
+/** Read-only details of a knowledge source rendered per type. */
+function SourceContent({ source }: { source: KnowledgeSource }) {
+  const m = (source.metadata ?? {}) as Record<string, unknown>
+
+  if (source.type === 'text') {
+    const content = String(m.content ?? '')
+    return (
+      <pre className="whitespace-pre-wrap break-words rounded-lg bg-muted/50 p-3 font-sans text-sm leading-relaxed text-foreground">
+        {content || 'No content stored.'}
+      </pre>
+    )
+  }
+
+  if (source.type === 'qa') {
+    const pairs = (Array.isArray(m.pairs) ? m.pairs : []) as { question: string; answer: string }[]
+    if (pairs.length === 0) return <p className="text-sm text-muted-foreground">No Q&amp;A pairs stored.</p>
+    return (
+      <div className="space-y-3">
+        {pairs.map((p, i) => (
+          <div key={i} className="rounded-lg border p-3">
+            <p className="text-sm font-medium text-foreground">{p.question}</p>
+            <p className="mt-1 whitespace-pre-wrap text-sm text-muted-foreground">{p.answer}</p>
+          </div>
+        ))}
+      </div>
+    )
+  }
+
+  if (source.type === 'url') {
+    const url = String(m.url ?? '')
+    return (
+      <a
+        href={url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center gap-1.5 break-all rounded-lg bg-muted/50 p-3 text-sm text-primary hover:underline"
+      >
+        <ExternalLinkIcon className="size-4 shrink-0" aria-hidden="true" />
+        {url || 'No URL stored.'}
+      </a>
+    )
+  }
+
+  // file
+  const path = String(m.path ?? '')
+  const mime = String(m.mime ?? '')
+  return (
+    <dl className="space-y-2 rounded-lg bg-muted/50 p-3 text-sm">
+      <div className="flex justify-between gap-3">
+        <dt className="text-muted-foreground">File</dt>
+        <dd className="truncate font-medium" title={source.name}>{source.name}</dd>
+      </div>
+      {mime && (
+        <div className="flex justify-between gap-3">
+          <dt className="text-muted-foreground">Type</dt>
+          <dd className="font-mono text-xs">{mime}</dd>
+        </div>
+      )}
+      {path && (
+        <div className="flex justify-between gap-3">
+          <dt className="text-muted-foreground">Path</dt>
+          <dd className="truncate font-mono text-xs" title={path}>{path}</dd>
+        </div>
+      )}
+    </dl>
+  )
+}
+
+export function SourceDrawer({ source, onClose, onDelete, onRetry }: SourceDrawerProps) {
+  // Close on Escape.
+  useEffect(() => {
+    if (!source) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [source, onClose])
+
+  const TypeIcon = source ? TYPE_META[source.type].icon : null
+
+  return (
+    <AnimatePresence>
+      {source && (
+        <>
+          <motion.div
+            key="source-drawer-backdrop"
+            className="fixed inset-0 z-50 bg-black/30"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.18 }}
+            onClick={onClose}
+            aria-hidden="true"
+          />
+          <motion.aside
+            key="source-drawer-panel"
+            role="dialog"
+            aria-modal="true"
+            aria-label={`Source: ${source.name}`}
+            className="fixed inset-y-0 right-0 z-50 flex w-full max-w-md flex-col bg-background shadow-2xl"
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '100%' }}
+            transition={{ type: 'spring', stiffness: 320, damping: 34 }}
+          >
+            {/* Header (static) */}
+            <div className="flex flex-shrink-0 items-start justify-between gap-3 border-b p-5">
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  {TypeIcon && <TypeIcon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />}
+                  <h2 className="truncate text-base font-semibold" title={source.name}>
+                    {source.name}
+                  </h2>
+                </div>
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  <StatusBadge status={source.status} errorMessage={source.error_message} />
+                  <span className="text-xs text-muted-foreground">{TYPE_META[source.type].label}</span>
+                  <span className="text-xs text-muted-foreground">· Added {formatDate(source.created_at)}</span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={onClose}
+                aria-label="Close"
+                className="flex size-8 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              >
+                <XIcon className="size-4" />
+              </button>
+            </div>
+
+            {/* Content (scrolls) */}
+            <div className="min-h-0 flex-1 overflow-y-auto p-5">
+              {source.status === 'error' && source.error_message && (
+                <div className="mb-4 rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
+                  {source.error_message}
+                </div>
+              )}
+              <SourceContent source={source} />
+            </div>
+
+            {/* Actions (static) */}
+            <div className="flex flex-shrink-0 items-center justify-end gap-2 border-t p-4">
+              {source.status === 'error' && (
+                <Button variant="outline" size="sm" onClick={() => onRetry(source)}>
+                  <RefreshCwIcon className="size-4" />
+                  Retry
+                </Button>
+              )}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onDelete(source)}
+                className="text-destructive hover:text-destructive"
+              >
+                <Trash2Icon className="size-4" />
+                Delete
+              </Button>
+            </div>
+          </motion.aside>
+        </>
+      )}
+    </AnimatePresence>
+  )
+}

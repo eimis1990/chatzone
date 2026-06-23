@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useCallback } from 'react'
+import { useEffect, useRef, useCallback, useState } from 'react'
 import { toast } from 'sonner'
 import {
   RefreshCwIcon,
@@ -24,6 +24,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { createBrowserClient } from '@/lib/supabase/browser'
+import { SourceDrawer } from './SourceDrawer'
 import type { KnowledgeSource, SourceStatus, SourceType } from '@/lib/types'
 
 interface SourceListProps {
@@ -35,14 +36,14 @@ interface SourceListProps {
 
 const POLL_INTERVAL_MS = 3000
 const SETTLED_STATUSES: SourceStatus[] = ['ready', 'error']
-const TYPE_META: Record<SourceType, { label: string; icon: LucideIcon }> = {
+export const TYPE_META: Record<SourceType, { label: string; icon: LucideIcon }> = {
   text: { label: 'Text', icon: FileTextIcon },
   qa: { label: 'Q&A', icon: MessageSquareTextIcon },
   url: { label: 'URL', icon: LinkIcon },
   file: { label: 'File', icon: PaperclipIcon },
 }
 
-function StatusBadge({ status, errorMessage }: { status: SourceStatus; errorMessage: string | null }) {
+export function StatusBadge({ status, errorMessage }: { status: SourceStatus; errorMessage: string | null }) {
   const badge = (() => {
     switch (status) {
       case 'pending':
@@ -106,6 +107,11 @@ export function SourceList({ botId, sources, onDeleted, onUpdated }: SourceListP
   const pollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const sourcesRef = useRef(sources)
   sourcesRef.current = sources
+
+  // The source open in the details drawer (tracked by id so it stays fresh as
+  // the list updates from polling).
+  const [viewingId, setViewingId] = useState<string | null>(null)
+  const viewing = sources.find((s) => s.id === viewingId) ?? null
 
   // Poll while any source is still processing or pending.
   const poll = useCallback(async () => {
@@ -238,6 +244,7 @@ export function SourceList({ botId, sources, onDeleted, onUpdated }: SourceListP
   }
 
   return (
+    <>
     <Table>
       <TableHeader>
         <TableRow className="border-b hover:bg-transparent">
@@ -252,7 +259,11 @@ export function SourceList({ botId, sources, onDeleted, onUpdated }: SourceListP
         {sources.map((source) => {
           const { label, icon: TypeIcon } = TYPE_META[source.type]
           return (
-            <TableRow key={source.id} className="transition-colors hover:bg-muted/40">
+            <TableRow
+              key={source.id}
+              onClick={() => setViewingId(source.id)}
+              className="cursor-pointer transition-colors hover:bg-muted/40"
+            >
               <TableCell className="max-w-xs truncate px-5 py-3.5 font-medium" title={source.name}>
                 {source.name}
               </TableCell>
@@ -275,7 +286,10 @@ export function SourceList({ botId, sources, onDeleted, onUpdated }: SourceListP
                       type="button"
                       variant="ghost"
                       size="icon-sm"
-                      onClick={() => handleRetry(source)}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleRetry(source)
+                      }}
                       aria-label={`Retry ingestion for "${source.name}"`}
                       title="Retry ingestion"
                     >
@@ -286,7 +300,10 @@ export function SourceList({ botId, sources, onDeleted, onUpdated }: SourceListP
                     type="button"
                     variant="ghost"
                     size="icon-sm"
-                    onClick={() => handleDelete(source)}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleDelete(source)
+                    }}
                     aria-label={`Delete "${source.name}"`}
                     title="Delete source"
                     className="text-destructive hover:text-destructive"
@@ -300,5 +317,16 @@ export function SourceList({ botId, sources, onDeleted, onUpdated }: SourceListP
         })}
       </TableBody>
     </Table>
+
+    <SourceDrawer
+      source={viewing}
+      onClose={() => setViewingId(null)}
+      onRetry={handleRetry}
+      onDelete={(s) => {
+        handleDelete(s)
+        setViewingId(null)
+      }}
+    />
+    </>
   )
 }
