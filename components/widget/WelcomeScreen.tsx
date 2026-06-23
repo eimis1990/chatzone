@@ -112,14 +112,15 @@ export function WelcomeScreen({
                 type="button"
                 onClick={() => onSelect(q)}
                 variants={item}
-                className={`group relative flex min-h-[84px] flex-col justify-end overflow-hidden border border-gray-200 bg-white p-3 text-left text-sm font-medium leading-snug text-gray-800 transition-colors hover:bg-gray-50${fullWidth ? ' col-span-2' : ''}`}
+                className={`group relative flex min-h-[84px] flex-col justify-end overflow-hidden border border-gray-200 bg-white p-3 text-left text-sm font-medium leading-snug text-gray-800${fullWidth ? ' col-span-2' : ''}`}
                 style={{ borderRadius: radius }}
               >
-                {/* Soft glow in the top-right corner, tinted to the header color */}
+                {/* Soft glow in the top-right corner, tinted to the header color.
+                    Intensifies on hover instead of a background change. */}
                 <span
                   aria-hidden="true"
-                  className="pointer-events-none absolute -right-5 -top-5 size-16 rounded-full blur-2xl"
-                  style={{ backgroundColor: primaryColor, opacity: 0.3 }}
+                  className="pointer-events-none absolute -right-5 -top-5 size-16 rounded-full opacity-30 blur-2xl transition-opacity duration-300 group-hover:opacity-65"
+                  style={{ backgroundColor: primaryColor }}
                 />
                 {/* Arrow sits in the glow; nudges down on hover to signal it's pressable */}
                 <ArrowDownIcon
