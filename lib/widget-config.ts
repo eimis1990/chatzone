@@ -14,6 +14,7 @@ export interface PublicLanguageContent {
  */
 export interface PublicBotConfig {
   displayName: string
+  tagline?: string
   avatarUrl?: string
   botAvatarUrl?: string
   privacyUrl?: string
@@ -97,6 +98,9 @@ export function publicBotConfig(config: BotConfig): PublicBotConfig {
     },
   }
 
+  if (config.tagline) {
+    result.tagline = config.tagline
+  }
   if (config.avatarUrl !== undefined) {
     result.avatarUrl = config.avatarUrl
   }

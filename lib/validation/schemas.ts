@@ -55,6 +55,7 @@ export function normalizeBotConfig(input: unknown): unknown {
 /** Plain object schema (no preprocessing) — use for the configurator form (RHF). */
 export const botConfigFormSchema = z.object({
   displayName: z.string().min(1).max(60),
+  tagline: z.string().max(120).optional().or(z.literal('')),
   avatarUrl: z.string().url().optional().or(z.literal('')),
   botAvatarUrl: z.string().url().optional().or(z.literal('')),
   privacyUrl: z.string().url().optional().or(z.literal('')),

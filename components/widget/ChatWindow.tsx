@@ -8,7 +8,7 @@ import { ProductListView } from './ProductCards'
 import { Composer } from './Composer'
 import { VoiceCallButton, type CallState } from '@/components/voice/VoiceCallButton'
 import { LeadForm } from './LeadForm'
-import { SuggestedQuestions } from './SuggestedQuestions'
+import { WelcomeScreen } from './WelcomeScreen'
 import type { PublicBotConfig } from '@/lib/widget-config'
 import type { ChatTransport } from '@/lib/widget-transport'
 import type { BotLanguage, HandoffStatus } from '@/lib/types'
@@ -81,7 +81,6 @@ export function ChatWindow({ config, transport, initialLanguage }: ChatWindowPro
   const [conversationId, setConversationId] = useState<string | undefined>()
   const [showLeadForm, setShowLeadForm] = useState(false)
   const [leadDismissed, setLeadDismissed] = useState(false)
-  const [suggestedVisible, setSuggestedVisible] = useState(true)
   // When set, the full-height product list overlay covers the chat body.
   const [listProducts, setListProducts] = useState<CommerceProduct[] | null>(null)
   // Live-call state, surfaced in the header.
@@ -119,7 +118,6 @@ export function ChatWindow({ config, transport, initialLanguage }: ChatWindowPro
   const handleRestart = useCallback(() => {
     setMessages([])
     setConversationId(undefined)
-    setSuggestedVisible(true)
     setShowLeadForm(false)
     setLeadDismissed(false)
     setListProducts(null)
@@ -271,8 +269,6 @@ export function ChatWindow({ config, transport, initialLanguage }: ChatWindowPro
       if (callStateRef.current !== 'idle') {
         endVoiceRef.current?.()
       }
-
-      setSuggestedVisible(false)
 
       // While a human is handling, the visitor's message is stored but the bot
       // does not reply — the agent answers from the inbox (surfaced via polling).
@@ -428,7 +424,6 @@ export function ChatWindow({ config, transport, initialLanguage }: ChatWindowPro
   /** Visitor taps "Talk to a person" → escalate the conversation. */
   const requestHandoff = useCallback(async () => {
     if (handoffStatusRef.current !== 'bot') return
-    setSuggestedVisible(false)
     // No conversation yet → escalate via an intent-bearing message, which also
     // creates the conversation server-side.
     if (!conversationId) {
@@ -627,25 +622,27 @@ export function ChatWindow({ config, transport, initialLanguage }: ChatWindowPro
           </div>
         )}
 
-        <MessageList
-          messages={messages}
-          primaryColor={primaryColor}
-          bubbleRadius={bubbleRadius}
-          greeting={greeting}
-          displayName={config.displayName}
-          avatarUrl={messageAvatar}
-          activeLang={activeLang}
-          onSeeAllProducts={setListProducts}
-          onFeedback={handleFeedback}
-        />
-
-        {/* Suggested Questions — pinned just above input, visible until first message */}
-        {suggestedVisible && suggestedQuestions.length > 0 && (
-          <SuggestedQuestions
-            questions={suggestedQuestions}
+        {messages.length === 0 ? (
+          <WelcomeScreen
+            displayName={config.displayName}
+            tagline={config.tagline}
+            avatarUrl={headerAvatar}
+            greeting={greeting}
+            suggestedQuestions={suggestedQuestions}
             primaryColor={primaryColor}
+            bubbleRadius={bubbleRadius}
             onSelect={sendMessage}
-            disabled={streaming}
+          />
+        ) : (
+          <MessageList
+            messages={messages}
+            primaryColor={primaryColor}
+            bubbleRadius={bubbleRadius}
+            displayName={config.displayName}
+            avatarUrl={messageAvatar}
+            activeLang={activeLang}
+            onSeeAllProducts={setListProducts}
+            onFeedback={handleFeedback}
           />
         )}
 

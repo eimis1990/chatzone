@@ -206,6 +206,7 @@ export function ConfigForm({ botId, initialConfig }: ConfigFormProps) {
   // Build a live config for the preview — typed to match TestChat's LiveConfig
   const liveConfig = {
     displayName: watchedValues.displayName,
+    tagline: watchedValues.tagline,
     theme: watchedValues.theme,
     voice: watchedValues.voice,
     model: watchedValues.model,
@@ -246,6 +247,18 @@ export function ConfigForm({ botId, initialConfig }: ConfigFormProps) {
               {errors.displayName && (
                 <p className="text-xs text-destructive">{errors.displayName.message}</p>
               )}
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="tagline">Tagline (optional)</Label>
+              <Input
+                id="tagline"
+                {...register('tagline')}
+                placeholder="Virtual assistant"
+              />
+              <p className="text-xs text-muted-foreground">
+                Short subtitle under the name on the welcome screen.
+              </p>
             </div>
 
             <LogoUpload

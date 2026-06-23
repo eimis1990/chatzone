@@ -91,6 +91,8 @@ export interface LanguageContent {
 
 export interface BotConfig {
   displayName: string
+  /** Short subtitle under the name on the welcome screen (e.g. "Virtual assistant"). */
+  tagline?: string
   /** Company logo — the default avatar shown in the widget. */
   avatarUrl?: string
   /** Optional bot-specific image; overrides the company logo when set. */

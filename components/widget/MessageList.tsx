@@ -24,7 +24,6 @@ interface MessageListProps {
   messages: ChatMessage[]
   primaryColor: string
   bubbleRadius?: number
-  greeting: string
   displayName: string
   avatarUrl?: string
   activeLang?: 'en' | 'lt'
@@ -38,7 +37,6 @@ export function MessageList({
   messages,
   primaryColor,
   bubbleRadius = 16,
-  greeting,
   displayName,
   avatarUrl,
   activeLang = 'en',
@@ -89,19 +87,6 @@ export function MessageList({
 
   return (
     <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3" role="log" aria-live="polite" aria-label="Chat messages">
-      {/* Greeting message always shown first */}
-      <div className="flex items-start gap-2">
-        {renderAvatar(displayName)}
-        <div
-          className="max-w-[80%] px-3 py-2 bg-gray-100 text-gray-900 text-sm"
-          style={{
-            borderRadius: `${msgBubbleRadius} ${msgBubbleRadius} ${msgBubbleRadius} 2px`,
-          }}
-        >
-          {greeting}
-        </div>
-      </div>
-
       {messages.map((msg) => (
         <div key={msg.id}>
           <div

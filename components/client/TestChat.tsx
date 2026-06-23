@@ -25,6 +25,7 @@ const DEFAULT_VOICE_ID = '21m00Tcm4TlvDq8ikWAM'
 // Partial form values — fields may be undefined mid-edit.
 type LiveConfig = {
   displayName?: string
+  tagline?: string
   theme?: Partial<BotConfig['theme']>
   voice?: {
     enabled?: boolean
@@ -283,6 +284,7 @@ function buildPreviewPublicConfig(config: LiveConfig): PublicBotConfig {
 
   const result: PublicBotConfig = {
     displayName: config.displayName || 'Your Bot',
+    tagline: config.tagline,
     theme: {
       primaryColor: config.theme?.primaryColor ?? '#4f46e5',
       position: config.theme?.position ?? 'bottom-right',
@@ -343,6 +345,7 @@ function buildFullConfig(config: LiveConfig): BotConfig {
 
   return {
     displayName: config.displayName ?? 'Bot',
+    tagline: config.tagline,
     avatarUrl: config.avatarUrl,
     botAvatarUrl: config.botAvatarUrl,
     privacyUrl: config.privacyUrl,
