@@ -43,6 +43,8 @@ interface VoiceCallButtonProps {
   onOrderStatus?: (orderId: string, email: string) => Promise<string>
   /** Implements `discount_code` — return the discount as a spoken summary. */
   onDiscount?: () => Promise<string>
+  /** Corner radius (px) for the call button. */
+  radius?: number
   className?: string
 }
 
@@ -59,6 +61,7 @@ interface InnerProps {
   onSearch?: (query: string) => Promise<string>
   onOrderStatus?: (orderId: string, email: string) => Promise<string>
   onDiscount?: () => Promise<string>
+  radius?: number
 }
 
 function VoiceCallInner({
@@ -72,6 +75,7 @@ function VoiceCallInner({
   onSearch,
   onOrderStatus,
   onDiscount,
+  radius,
 }: InnerProps) {
   const [callError, setCallError] = useState<string | null>(null)
   const [micDenied, setMicDenied] = useState(false)
@@ -216,6 +220,7 @@ function VoiceCallInner({
     const lt = language === 'lt'
     const pill =
       'inline-flex items-center gap-1.5 h-8 rounded-lg px-2.5 flex-shrink-0 text-xs font-medium text-white transition-opacity hover:opacity-85'
+    const radiusStyle = radius != null ? { borderRadius: `${radius}px` } : {}
 
     if (isConnecting) {
       return (
@@ -224,7 +229,7 @@ function VoiceCallInner({
           disabled
           aria-label={lt ? 'Jungiamasi…' : 'Connecting…'}
           className={pill}
-          style={{ backgroundColor: '#22c55e' }}
+          style={{ backgroundColor: '#22c55e', ...radiusStyle }}
         >
           <LoaderCircleIcon className="size-4 animate-spin" aria-hidden="true" />
           {lt ? 'Jungiamasi…' : 'Connecting…'}
@@ -240,7 +245,7 @@ function VoiceCallInner({
           onClick={handleEnd}
           aria-label={lt ? 'Baigti pokalbį' : 'End call'}
           className={pill}
-          style={{ backgroundColor: '#ef4444' }}
+          style={{ backgroundColor: '#ef4444', ...radiusStyle }}
         >
           <FilledPhoneIcon />
           {lt ? 'Baigti' : 'End call'}
@@ -255,7 +260,7 @@ function VoiceCallInner({
         aria-label={lt ? 'Kalbėti su agentu' : 'Talk with agent'}
         title={micDenied ? 'Microphone access denied' : callError ?? undefined}
         className={pill}
-        style={{ backgroundColor: '#22c55e' }}
+        style={{ backgroundColor: '#22c55e', ...radiusStyle }}
       >
         <FilledPhoneIcon />
         {lt ? 'Kalbėti su Agentu' : 'Talk with Agent'}
@@ -366,6 +371,7 @@ export function VoiceCallButton({
   onSearch,
   onOrderStatus,
   onDiscount,
+  radius,
   className,
 }: VoiceCallButtonProps) {
   return (
@@ -382,6 +388,7 @@ export function VoiceCallButton({
           onSearch={onSearch}
           onOrderStatus={onOrderStatus}
           onDiscount={onDiscount}
+          radius={radius}
         />
       </ConversationProvider>
     </div>

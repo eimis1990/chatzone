@@ -28,8 +28,11 @@ export interface PublicBotConfig {
     launcherLabel?: string
     launcherShowLogo?: boolean
     launcherColor?: string
+    showCallButton?: boolean
+    navButtonRadius?: number
   }
   languages: BotLanguage[]
+  defaultLanguage?: BotLanguage
   content: Partial<Record<BotLanguage, PublicLanguageContent>>
   leadCapture: {
     enabled: boolean
@@ -72,11 +75,14 @@ export function publicBotConfig(config: BotConfig): PublicBotConfig {
       fontFamily: config.theme.fontFamily ?? 'geist',
       launcherStyle: config.theme.launcherStyle ?? 'circle',
       launcherShowLogo: config.theme.launcherShowLogo ?? false,
+      showCallButton: config.theme.showCallButton ?? true,
+      navButtonRadius: config.theme.navButtonRadius ?? 12,
       ...(config.theme.bubbleIcon !== undefined && { bubbleIcon: config.theme.bubbleIcon }),
       ...(config.theme.launcherLabel ? { launcherLabel: config.theme.launcherLabel } : {}),
       ...(config.theme.launcherColor ? { launcherColor: config.theme.launcherColor } : {}),
     },
     languages: config.languages ?? ['en'],
+    defaultLanguage: config.defaultLanguage ?? (config.languages ?? ['en'])[0],
     content,
     leadCapture: {
       enabled: config.leadCapture.enabled,

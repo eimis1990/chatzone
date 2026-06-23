@@ -70,6 +70,8 @@ export const botConfigFormSchema = z.object({
       launcherLabel: z.string().max(40).optional().or(z.literal('')),
       launcherShowLogo: z.boolean().default(false),
       launcherColor: z.string().optional().or(z.literal('')),
+      showCallButton: z.boolean().default(true),
+      navButtonRadius: z.number().min(0).max(24).default(12),
     })
     .default({
       primaryColor: '#4f46e5',
@@ -79,8 +81,11 @@ export const botConfigFormSchema = z.object({
       fontFamily: 'geist',
       launcherStyle: 'circle',
       launcherShowLogo: false,
+      showCallButton: true,
+      navButtonRadius: 12,
     }),
   languages: z.array(z.enum(['en', 'lt'])).min(1).default(['en']),
+  defaultLanguage: z.enum(['en', 'lt']).optional(),
   content: z.object({
     en: languageContentSchema,
     lt: languageContentSchema.optional(),

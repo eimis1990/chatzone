@@ -218,6 +218,7 @@ export function ConfigForm({ botId, initialConfig }: ConfigFormProps) {
     botAvatarUrl: watchedValues.botAvatarUrl,
     privacyUrl: watchedValues.privacyUrl,
     languages: watchedValues.languages,
+    defaultLanguage: watchedValues.defaultLanguage,
     content: watchedValues.content,
     commerce: watchedValues.commerce,
   }
@@ -332,6 +333,37 @@ export function ConfigForm({ botId, initialConfig }: ConfigFormProps) {
                 </Label>
               </div>
             </div>
+
+            {/* Default widget language (only relevant with >1 language) */}
+            {ltEnabled && (
+              <div className="space-y-1.5">
+                <Label>Widget default language</Label>
+                <Controller
+                  name="defaultLanguage"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      value={field.value ?? watchedLanguages[0] ?? 'en'}
+                      onValueChange={field.onChange}
+                    >
+                      <SelectTrigger className="w-full max-w-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {watchedLanguages.map((l) => (
+                          <SelectItem key={l} value={l}>
+                            {LANG_LABELS[l]}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+                <p className="text-xs text-muted-foreground">
+                  The language the live widget opens in for visitors.
+                </p>
+              </div>
+            )}
 
             {/* Per-language content fields */}
             <div className="space-y-4 pt-1">
@@ -669,6 +701,55 @@ export function ConfigForm({ botId, initialConfig }: ConfigFormProps) {
                   <span>Pill</span>
                 </div>
               </div>
+
+              <div className="space-y-2">
+                <Label>
+                  Button roundness{' '}
+                  <span className="text-muted-foreground font-normal">
+                    ({watch('theme.navButtonRadius') ?? 12}px)
+                  </span>
+                </Label>
+                <Controller
+                  control={control}
+                  name="theme.navButtonRadius"
+                  render={({ field }) => (
+                    <Slider
+                      min={0}
+                      max={24}
+                      step={1}
+                      value={field.value ?? 12}
+                      onValueChange={(v) => field.onChange(Array.isArray(v) ? v[0] : v)}
+                    />
+                  )}
+                />
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <span>Square</span>
+                  <span>Round</span>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Corner radius of the header buttons (call &amp; restart).
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between gap-4">
+              <div className="space-y-0.5">
+                <Label htmlFor="showCallButton">Show &ldquo;talk with agent&rdquo; button</Label>
+                <p className="text-xs text-muted-foreground">
+                  The voice call button in the header (only shows when voice is enabled).
+                </p>
+              </div>
+              <Controller
+                name="theme.showCallButton"
+                control={control}
+                render={({ field }) => (
+                  <Switch
+                    id="showCallButton"
+                    checked={field.value ?? true}
+                    onCheckedChange={field.onChange}
+                  />
+                )}
+              />
             </div>
           </CardContent>
         </Card>

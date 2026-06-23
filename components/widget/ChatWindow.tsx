@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useCallback, useRef, useEffect, type ReactNode } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import { AnimatePresence } from 'framer-motion'
-import { HeadsetIcon } from 'lucide-react'
+import { HeadsetIcon, RotateCcwIcon } from 'lucide-react'
 import { MessageList, type ChatMessage } from './MessageList'
 import { ProductListView } from './ProductCards'
 import { Composer } from './Composer'
@@ -19,10 +19,8 @@ import { readableTextColor, isLightColor } from '@/lib/utils'
 interface ChatWindowProps {
   config: PublicBotConfig
   transport: ChatTransport
-  /** Display language, fixed by configuration (defaults to the first enabled). */
+  /** Display language override (preview). Live widget uses config.defaultLanguage. */
   initialLanguage?: BotLanguage
-  /** Optional extra control rendered at the right of the header (e.g. preview "Start over"). */
-  headerAction?: ReactNode
 }
 
 function generateId() {
@@ -61,12 +59,17 @@ function handoffBannerLive(lang: BotLanguage, agentName: string | null): string 
 
 const POLL_INTERVAL_MS = 4000
 
-export function ChatWindow({ config, transport, initialLanguage, headerAction }: ChatWindowProps) {
+export function ChatWindow({ config, transport, initialLanguage }: ChatWindowProps) {
   const languages = config.languages ?? ['en']
 
   // Display language is fixed by configuration; visitors can't switch it.
+  // Preview passes initialLanguage; the live widget uses the saved default.
   const activeLang: BotLanguage =
-    initialLanguage && languages.includes(initialLanguage) ? initialLanguage : languages[0] ?? 'en'
+    initialLanguage && languages.includes(initialLanguage)
+      ? initialLanguage
+      : config.defaultLanguage && languages.includes(config.defaultLanguage)
+        ? config.defaultLanguage
+        : languages[0] ?? 'en'
 
   // Derived per-language content
   const langContent = config.content[activeLang] ?? config.content[languages[0]] ?? { greeting: '', suggestedQuestions: [] }
@@ -111,6 +114,19 @@ export function ChatWindow({ config, transport, initialLanguage, headerAction }:
     handoffStatusRef.current = s
     setHandoffStatus(s)
   }, [])
+
+  /** Clear the conversation and start fresh. */
+  const handleRestart = useCallback(() => {
+    setMessages([])
+    setConversationId(undefined)
+    setSuggestedVisible(true)
+    setShowLeadForm(false)
+    setLeadDismissed(false)
+    setListProducts(null)
+    setAgentName(null)
+    lastPollTsRef.current = undefined
+    updateHandoff('bot')
+  }, [updateHandoff])
 
   const handleCallState = useCallback((s: CallState) => {
     callStateRef.current = s
@@ -488,6 +504,8 @@ export function ChatWindow({ config, transport, initialLanguage, headerAction }:
   )
 
   const voiceEnabled = Boolean(config.voice?.enabled)
+  const showCallButton = config.theme.showCallButton !== false
+  const navButtonRadius = config.theme.navButtonRadius ?? 12
   const headerBorderRadius = `${cornerRadius}px ${cornerRadius}px 0 0`
   // Auto-contrast: keep header text/icons legible on any chosen color.
   const headerFg = readableTextColor(primaryColor)
@@ -554,13 +572,14 @@ export function ChatWindow({ config, transport, initialLanguage, headerAction }:
           </span>
         </div>
 
-        {/* Voice call button — in the header, only when voice is enabled */}
-        {voiceEnabled && (
+        {/* Voice call button — when voice is on and the client hasn't hidden it */}
+        {voiceEnabled && showCallButton && (
           <VoiceCallButton
             appearance="compact"
             getToken={getVoiceToken}
             primaryColor="#ffffff"
             language={activeLang}
+            radius={navButtonRadius}
             onStateChange={handleCallState}
             onTranscript={handleVoiceTranscript}
             onReady={handleVoiceReady}
@@ -571,8 +590,20 @@ export function ChatWindow({ config, transport, initialLanguage, headerAction }:
           />
         )}
 
-        {/* Optional extra header control (e.g. preview "Start over") */}
-        {headerAction}
+        {/* Restart — clears the conversation and starts fresh */}
+        <button
+          type="button"
+          onClick={handleRestart}
+          title={activeLang === 'lt' ? 'Pradėti iš naujo' : 'Start over'}
+          aria-label={activeLang === 'lt' ? 'Pradėti iš naujo' : 'Start over'}
+          className="flex size-8 flex-shrink-0 items-center justify-center transition hover:brightness-90"
+          style={{
+            backgroundColor: 'color-mix(in srgb, currentColor 15%, transparent)',
+            borderRadius: `${navButtonRadius}px`,
+          }}
+        >
+          <RotateCcwIcon className="size-4" aria-hidden="true" />
+        </button>
       </div>
 
       {/* Body — messages + composer. Relative so the product list can overlay it. */}

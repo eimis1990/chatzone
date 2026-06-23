@@ -12,7 +12,7 @@
 
 import { useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { MessageCircleIcon, XIcon, RotateCcwIcon } from 'lucide-react'
+import { MessageCircleIcon, XIcon } from 'lucide-react'
 import { ChatWindow } from '@/components/widget/ChatWindow'
 import { detectHandoffIntent, HANDOFF_ACK } from '@/lib/handoff'
 import type { ChatTransport } from '@/lib/widget-transport'
@@ -47,6 +47,7 @@ type LiveConfig = {
   botAvatarUrl?: string
   privacyUrl?: string
   languages?: BotLanguage[]
+  defaultLanguage?: BotLanguage
   content?: Partial<
     Record<BotLanguage, { greeting?: string; suggestedQuestions?: string[]; fallbackMessage?: string }>
   >
@@ -70,7 +71,6 @@ interface TestChatProps {
 
 export function TestChat({ botId, config, activeLang }: TestChatProps) {
   const [isOpen, setIsOpen] = useState(true)
-  const [resetKey, setResetKey] = useState(0)
 
   // Always read the latest config inside the (stable) transport.
   const configRef = useRef(config)
@@ -115,22 +115,10 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
               className="overflow-hidden border shadow-2xl bg-white"
             >
               <ChatWindow
-                key={`${activeLang}:${resetKey}`}
+                key={activeLang}
                 config={publicConfig}
                 transport={transport}
                 initialLanguage={activeLang}
-                headerAction={
-                  <button
-                    type="button"
-                    onClick={() => setResetKey((k) => k + 1)}
-                    title="Start over"
-                    aria-label="Start over — clear test conversation"
-                    className="flex size-8 flex-shrink-0 items-center justify-center rounded-lg text-current transition hover:brightness-90"
-                    style={{ backgroundColor: 'color-mix(in srgb, currentColor 15%, transparent)' }}
-                  >
-                    <RotateCcwIcon className="size-4" aria-hidden="true" />
-                  </button>
-                }
               />
             </div>
 
@@ -301,9 +289,12 @@ function buildPreviewPublicConfig(config: LiveConfig): PublicBotConfig {
       cornerRadius: config.theme?.cornerRadius ?? 16,
       bubbleRadius: config.theme?.bubbleRadius ?? 16,
       fontFamily: config.theme?.fontFamily ?? 'geist',
+      showCallButton: config.theme?.showCallButton ?? true,
+      navButtonRadius: config.theme?.navButtonRadius ?? 12,
       ...(config.theme?.bubbleIcon !== undefined && { bubbleIcon: config.theme.bubbleIcon }),
     },
     languages,
+    defaultLanguage: config.defaultLanguage,
     content,
     leadCapture: {
       enabled: config.leadCapture?.enabled ?? false,
@@ -362,6 +353,8 @@ function buildFullConfig(config: LiveConfig): BotConfig {
       cornerRadius: config.theme?.cornerRadius ?? 16,
       bubbleRadius: config.theme?.bubbleRadius ?? 16,
       fontFamily: config.theme?.fontFamily ?? 'geist',
+      showCallButton: config.theme?.showCallButton ?? true,
+      navButtonRadius: config.theme?.navButtonRadius ?? 12,
     },
     voice: {
       enabled: config.voice?.enabled ?? false,
@@ -373,6 +366,7 @@ function buildFullConfig(config: LiveConfig): BotConfig {
       },
     },
     languages,
+    defaultLanguage: config.defaultLanguage,
     content,
     systemPrompt: config.systemPrompt ?? 'You are a helpful assistant.',
     persona: {
