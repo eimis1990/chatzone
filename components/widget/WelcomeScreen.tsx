@@ -1,7 +1,8 @@
 'use client'
 
 import { motion, useReducedMotion, type Variants } from 'framer-motion'
-import { readableTextColor } from '@/lib/utils'
+import { ArrowDownIcon } from 'lucide-react'
+import { readableTextColor, isLightColor } from '@/lib/utils'
 
 interface WelcomeScreenProps {
   displayName: string
@@ -33,6 +34,9 @@ export function WelcomeScreen({
   onSelect,
 }: WelcomeScreenProps) {
   const radius = `${Math.min(bubbleRadius, 16)}px`
+  // Tint the arrow with the header color, but keep it visible on white when
+  // that color is very light.
+  const accentColor = isLightColor(primaryColor) ? '#9ca3af' : primaryColor
   const visibleQuestions = suggestedQuestions.slice(0, 6)
   // With an odd number of tiles the last one would sit alone in a half-width
   // cell — span it full width instead so the grid never looks lopsided.
@@ -108,14 +112,20 @@ export function WelcomeScreen({
                 type="button"
                 onClick={() => onSelect(q)}
                 variants={item}
-                className={`relative flex min-h-[84px] flex-col justify-end overflow-hidden bg-gray-50 p-3 text-left text-sm font-medium leading-snug text-gray-800 transition-colors hover:bg-gray-100${fullWidth ? ' col-span-2' : ''}`}
+                className={`group relative flex min-h-[84px] flex-col justify-end overflow-hidden border border-gray-200 bg-white p-3 text-left text-sm font-medium leading-snug text-gray-800 transition-colors hover:bg-gray-50${fullWidth ? ' col-span-2' : ''}`}
                 style={{ borderRadius: radius }}
               >
                 {/* Soft glow in the top-right corner, tinted to the header color */}
                 <span
                   aria-hidden="true"
                   className="pointer-events-none absolute -right-5 -top-5 size-16 rounded-full blur-2xl"
-                  style={{ backgroundColor: primaryColor, opacity: 0.22 }}
+                  style={{ backgroundColor: primaryColor, opacity: 0.3 }}
+                />
+                {/* Arrow sits in the glow; nudges down on hover to signal it's pressable */}
+                <ArrowDownIcon
+                  aria-hidden="true"
+                  className="absolute right-3 top-3 size-4 transition-transform duration-200 ease-out group-hover:translate-y-1"
+                  style={{ color: accentColor }}
                 />
                 <span className="relative">{q}</span>
               </motion.button>
