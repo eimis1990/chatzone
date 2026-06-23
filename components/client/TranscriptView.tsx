@@ -111,7 +111,7 @@ export function TranscriptView({ conversations, loadMessages, analyze }: Transcr
   return (
     <div className="flex min-h-0 flex-1 gap-6">
       {/* Conversation list */}
-      <div className="flex w-80 min-h-0 shrink-0 flex-col overflow-hidden rounded-lg border">
+      <div className="flex w-80 min-h-0 shrink-0 flex-col overflow-hidden rounded-lg border bg-card">
         <div className="flex flex-shrink-0 items-center justify-between gap-2 border-b bg-muted/30 px-4 py-3">
           <p className="text-sm font-medium">
             {visible.length} conversation{visible.length !== 1 ? 's' : ''}
@@ -194,7 +194,7 @@ export function TranscriptView({ conversations, loadMessages, analyze }: Transcr
       </div>
 
       {/* Transcript panel */}
-      <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border">
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border bg-card">
         {!selectedId ? (
           <div className="flex min-h-0 flex-1 items-center justify-center text-sm text-muted-foreground">
             Select a conversation to view its transcript

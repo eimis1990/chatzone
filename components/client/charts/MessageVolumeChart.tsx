@@ -43,7 +43,7 @@ export function MessageVolumeChart({ data }: MessageVolumeChartProps) {
           contentStyle={{ fontSize: 12 }}
           formatter={(v) => [v, 'Messages']}
         />
-        <Bar dataKey="count" fill="#68A369" radius={[3, 3, 0, 0]} />
+        <Bar dataKey="count" fill="#9BDA48" radius={[3, 3, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
   )

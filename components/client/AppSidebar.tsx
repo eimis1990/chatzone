@@ -46,20 +46,20 @@ export function AppSidebar({ bots, userEmail }: { bots: BotLite[]; userEmail: st
   const itemBase =
     'flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm transition-colors'
   const activePill = 'bg-sidebar-accent font-medium text-sidebar-accent-foreground shadow-sm'
-  const idle = 'text-foreground/75 hover:bg-white/55 hover:text-foreground'
+  const idle = 'text-sidebar-foreground/70 hover:bg-white/10 hover:text-white'
 
   return (
     <aside className="flex h-full w-64 flex-shrink-0 flex-col bg-transparent text-sidebar-foreground">
       {/* Logo */}
       <Link
         href="/app"
-        className="flex items-center gap-2 px-4 py-4 font-semibold text-foreground"
+        className="flex items-center gap-2 px-4 py-4 font-semibold text-white"
       >
-        <BotIcon className="size-5 text-primary" />
+        <MessagesSquareIcon className="size-5 text-white" />
         <span>Chatzone</span>
       </Link>
 
-      <p className="px-4 pb-1 text-xs font-medium tracking-wide text-muted-foreground/80">
+      <p className="px-4 pb-1 text-xs font-medium tracking-wide text-white/45">
         My Panel
       </p>
 
@@ -72,7 +72,7 @@ export function AppSidebar({ bots, userEmail }: { bots: BotLite[]; userEmail: st
           className={cn(itemBase, idle, 'w-full')}
         >
           <BotIcon className="size-4 flex-shrink-0" aria-hidden="true" />
-          <span className="flex-1 text-left font-medium text-foreground">My Bots</span>
+          <span className="flex-1 text-left font-medium text-white">My Bots</span>
           {botsOpen ? (
             <ChevronDownIcon className="size-4" aria-hidden="true" />
           ) : (

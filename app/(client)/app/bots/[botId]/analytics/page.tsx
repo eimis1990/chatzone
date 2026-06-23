@@ -319,12 +319,12 @@ export default async function AnalyticsPage({
 
       {/* Charts row 1 */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <div className="space-y-3 rounded-xl border p-5">
+        <div className="space-y-3 rounded-xl border bg-card p-5">
           <h3 className="text-sm font-semibold">Conversations over time</h3>
           <ConversationsChart data={convsByDay} />
         </div>
 
-        <div className="space-y-3 rounded-xl border p-5">
+        <div className="space-y-3 rounded-xl border bg-card p-5">
           <h3 className="text-sm font-semibold">Message volume</h3>
           <MessageVolumeChart data={msgsByDay} />
         </div>
@@ -332,13 +332,13 @@ export default async function AnalyticsPage({
 
       {/* Charts row 2: top questions + (products | leads), equal height */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div className="space-y-3 rounded-xl border p-5 lg:col-span-2">
+        <div className="space-y-3 rounded-xl border bg-card p-5 lg:col-span-2">
           <h3 className="text-sm font-semibold">Top visitor questions</h3>
           <TopQuestionsChart data={topQuestions} />
         </div>
 
         {showProducts ? (
-          <div className="flex flex-col space-y-3 rounded-xl border p-5">
+          <div className="flex flex-col space-y-3 rounded-xl border bg-card p-5">
             <div className="flex items-center gap-2">
               <ShoppingBagIcon className="size-4 text-amber-600" aria-hidden="true" />
               <h3 className="text-sm font-semibold">Top suggested products</h3>
@@ -377,7 +377,7 @@ export default async function AnalyticsPage({
             )}
           </div>
         ) : (
-          <div className="space-y-3 rounded-xl border p-5">
+          <div className="space-y-3 rounded-xl border bg-card p-5">
             <h3 className="text-sm font-semibold">Leads captured</h3>
             <LeadsChart data={leadsByDay} />
           </div>
@@ -386,7 +386,7 @@ export default async function AnalyticsPage({
 
       {/* Top topics */}
       {topTopics.length > 0 && (
-        <div className="space-y-3 rounded-xl border p-5">
+        <div className="space-y-3 rounded-xl border bg-card p-5">
           <h3 className="text-sm font-semibold">Top topics</h3>
           <div className="flex flex-wrap gap-2">
             {topTopics.map(({ topic, count }) => (

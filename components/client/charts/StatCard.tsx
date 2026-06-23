@@ -29,7 +29,7 @@ interface StatCardProps {
 export function StatCard({ label, value, sub, icon: Icon, accent = 'green', trend, highlight }: StatCardProps) {
   const a = ACCENTS[accent]
   return (
-    <div className="relative overflow-hidden rounded-xl border p-5 transition-shadow hover:shadow-sm">
+    <div className="relative overflow-hidden rounded-xl border bg-card p-5 transition-shadow hover:shadow-sm">
       {/* Soft glow bleeding from the top-right corner */}
       <div
         aria-hidden="true"
