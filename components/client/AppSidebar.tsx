@@ -101,7 +101,7 @@ export function AppSidebar({ bots, userEmail }: { bots: BotLite[]; userEmail: st
         </button>
 
         {botsOpen && (
-          <div className="mt-0.5 space-y-0.5">
+          <div className="mt-0.5 ml-3 space-y-0.5">
             {bots.length === 0 && (
               <p className="px-3 py-1.5 text-xs text-muted-foreground">No bots yet</p>
             )}
