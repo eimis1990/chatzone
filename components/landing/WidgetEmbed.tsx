@@ -16,6 +16,14 @@ export function WidgetEmbed({ botKey, position = 'bottom-right' }: { botKey: str
     s.setAttribute('data-position', position)
     s.setAttribute('data-cbz-embed', '')
     document.body.appendChild(s)
+
+    // Tear down on unmount (e.g. navigating into the app) — widget.js appends
+    // the launcher + iframe to <body>, outside React, so remove them explicitly.
+    return () => {
+      document
+        .querySelectorAll('[data-cbz-launcher], [data-cbz-wrapper], script[data-cbz-embed]')
+        .forEach((el) => el.remove())
+    }
   }, [botKey, position])
 
   return null

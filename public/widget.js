@@ -155,11 +155,13 @@
   wrapper.style.bottom = (LAUNCHER_SIZE + OFFSET + 8) + 'px'
 
   // ── Iframe container ──────────────────────────────────────────────────────
+  // Cap to the viewport so it never overflows on short screens (matches preview).
+  var CONTAINER_HEIGHT = 'min(' + IFRAME_HEIGHT + 'px, calc(100dvh - 112px))'
   var iframeContainer = document.createElement('div')
   css(iframeContainer, {
     width: '100%',
-    height: IFRAME_HEIGHT + 'px',
-    borderRadius: '16px',
+    height: CONTAINER_HEIGHT,
+    borderRadius: '16px', // updated from config.theme.cornerRadius once loaded
     boxShadow: '0 8px 40px rgba(0,0,0,0.18)',
     overflow: 'hidden',
   })
@@ -312,6 +314,10 @@
       .then(function (c) {
         if (c) {
           config = c
+          // Match the chat window's configured corner radius.
+          if (c.theme && typeof c.theme.cornerRadius === 'number') {
+            iframeContainer.style.borderRadius = c.theme.cornerRadius + 'px'
+          }
           renderLauncher()
         }
       })

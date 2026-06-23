@@ -109,8 +109,8 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
             <div
               style={{
                 borderRadius: `${cornerRadius}px`,
-                height: '720px',
-                maxHeight: 'calc(100svh - 220px)',
+                // Match the live widget: 720 tall, capped to the viewport.
+                height: 'min(720px, calc(100svh - 140px))',
               }}
               className="overflow-hidden border shadow-2xl bg-white"
             >
