@@ -47,10 +47,13 @@ export function AppSidebar({ bots, userEmail }: { bots: BotLite[]; userEmail: st
 
   const itemBase =
     'flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm transition-colors'
-  // Selected bot — solid accent green pill (dark text). Sections/Settings — a
-  // faint 10% accent tint with lime text.
-  const botActive = 'bg-primary font-medium text-primary-foreground shadow-sm'
-  const sectionActive = 'bg-primary/10 font-medium text-primary'
+  // Top-level active item (Home, Settings, or My Bots when a bot is open) —
+  // solid accent-green pill with dark text.
+  const solidGreen = 'bg-primary font-medium text-primary-foreground shadow-sm'
+  // The selected bot row — a faint 10% accent tint with lime text.
+  const tintPill = 'bg-primary/10 font-medium text-primary'
+  // The active section (Configure, etc.) — green text + icon, no background.
+  const textOnly = 'font-medium text-primary'
   const idle = 'text-sidebar-foreground/70 hover:bg-white/10 hover:text-white'
 
   return (
@@ -75,21 +78,21 @@ export function AppSidebar({ bots, userEmail }: { bots: BotLite[]; userEmail: st
         <Link
           href="/app"
           aria-current={pathname === '/app' ? 'page' : undefined}
-          className={cn(itemBase, 'mb-0.5', pathname === '/app' ? sectionActive : idle)}
+          className={cn(itemBase, 'mb-0.5', pathname === '/app' ? solidGreen : idle)}
         >
           <HomeIcon className="size-4 flex-shrink-0" aria-hidden="true" />
           <span className="flex-1">Home</span>
         </Link>
 
-        {/* My Bots — collapsible group */}
+        {/* My Bots — collapsible group; turns green while a bot is selected */}
         <button
           type="button"
           onClick={() => setBotsOpen((v) => !v)}
           aria-expanded={botsOpen}
-          className={cn(itemBase, idle, 'w-full')}
+          className={cn(itemBase, 'w-full', activeBotId ? solidGreen : idle)}
         >
           <BotIcon className="size-4 flex-shrink-0" aria-hidden="true" />
-          <span className="flex-1 text-left font-medium text-white">My Bots</span>
+          <span className={cn('flex-1 text-left font-medium', !activeBotId && 'text-white')}>My Bots</span>
           {botsOpen ? (
             <ChevronDownIcon className="size-4" aria-hidden="true" />
           ) : (
@@ -108,26 +111,19 @@ export function AppSidebar({ bots, userEmail }: { bots: BotLite[]; userEmail: st
                 <div key={bot.id}>
                   <Link
                     href={`/app/bots/${bot.id}/configure`}
-                    className={cn(itemBase, 'pl-3', active ? botActive : idle)}
+                    className={cn(itemBase, 'pl-3', active ? tintPill : idle)}
                   >
                     <span
                       className={cn(
                         'size-1.5 flex-shrink-0 rounded-full',
-                        active
-                          ? 'bg-primary-foreground'
-                          : bot.status === 'active'
-                            ? 'bg-primary'
-                            : 'bg-muted-foreground/40',
+                        bot.status === 'active' ? 'bg-primary' : 'bg-muted-foreground/40',
                       )}
                       aria-hidden="true"
                     />
                     <span className="flex-1 truncate">{bot.name}</span>
                     {bot.inboxCount ? (
                       <span
-                        className={cn(
-                          'ml-1 inline-flex min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-semibold leading-4',
-                          active ? 'bg-primary-foreground text-primary' : 'bg-primary text-primary-foreground',
-                        )}
+                        className="ml-1 inline-flex min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold leading-4 text-primary-foreground"
                         title={`${bot.inboxCount} awaiting a human`}
                       >
                         {bot.inboxCount}
@@ -150,7 +146,7 @@ export function AppSidebar({ bots, userEmail }: { bots: BotLite[]; userEmail: st
                             className={cn(
                               itemBase,
                               'py-1.5',
-                              isActive ? sectionActive : idle,
+                              isActive ? textOnly : idle,
                             )}
                           >
                             <Icon className="size-4 flex-shrink-0" aria-hidden="true" />
@@ -178,7 +174,7 @@ export function AppSidebar({ bots, userEmail }: { bots: BotLite[]; userEmail: st
           className={cn(
             itemBase,
             'mt-1',
-            pathname === '/app/settings' ? sectionActive : idle,
+            pathname === '/app/settings' ? solidGreen : idle,
           )}
         >
           <SettingsIcon className="size-4 flex-shrink-0" aria-hidden="true" />
