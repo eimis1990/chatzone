@@ -215,56 +215,73 @@ export function TranscriptView({ conversations, loadMessages, analyze }: Transcr
               {selected && <CopyButton value={selected.visitor_id} label="Copy conversation ID" />}
             </div>
 
-            {/* AI summary + topics */}
-            {(analyzing || analysis?.summary) && (
-              <div className="flex-shrink-0 space-y-2 border-b bg-muted/10 px-4 py-3">
-                {analyzing && !analysis ? (
-                  <p className="text-xs text-muted-foreground">Summarizing…</p>
+            {/* Body: transcript (60%) + AI review (40%), each scrolls on its own */}
+            <div className="flex min-h-0 flex-1">
+              <div className="min-h-0 flex-[3] space-y-4 overflow-y-auto p-4">
+                {loading ? (
+                  <div className="flex h-32 items-center justify-center text-sm text-muted-foreground">
+                    Loading…
+                  </div>
+                ) : messages.length === 0 ? (
+                  <div className="flex h-32 items-center justify-center text-sm text-muted-foreground">
+                    No messages
+                  </div>
                 ) : (
-                  <>
-                    {(() => {
-                      const s = scoreStyle(analysis?.successScore)
-                      return s ? (
-                        <div className="flex items-center gap-2">
-                          <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${s.cls}`}>
-                            {analysis?.successScore}/5 {s.label}
-                          </span>
-                        </div>
-                      ) : null
-                    })()}
-                    <p className="text-sm text-foreground">{analysis?.summary}</p>
-                    {analysis?.successReason && (
-                      <p className="text-xs italic text-muted-foreground">{analysis.successReason}</p>
-                    )}
-                    {analysis?.topics && analysis.topics.length > 0 && (
-                      <div className="flex flex-wrap gap-1.5">
-                        {analysis.topics.map((t) => (
-                          <span
-                            key={t}
-                            className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground"
-                          >
-                            {t}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </>
+                  messages.map((msg) => <MessageBubble key={msg.id} message={msg} />)
                 )}
               </div>
-            )}
 
-            <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-4">
-              {loading ? (
-                <div className="flex h-32 items-center justify-center text-sm text-muted-foreground">
-                  Loading…
+              {/* AI review / evaluation */}
+              <aside className="flex min-h-0 flex-[2] flex-col border-l bg-muted/10">
+                <div className="flex-shrink-0 border-b px-4 py-3">
+                  <h3 className="text-sm font-semibold">Conversation review</h3>
                 </div>
-              ) : messages.length === 0 ? (
-                <div className="flex h-32 items-center justify-center text-sm text-muted-foreground">
-                  No messages
+                <div className="min-h-0 flex-1 space-y-3 overflow-y-auto p-4">
+                  {analyzing && !analysis ? (
+                    <p className="text-xs text-muted-foreground">Analyzing conversation…</p>
+                  ) : analysis?.summary ? (
+                    <>
+                      {(() => {
+                        const s = scoreStyle(analysis?.successScore)
+                        return s ? (
+                          <span className={`inline-block rounded-full px-2 py-0.5 text-xs font-semibold ${s.cls}`}>
+                            {analysis?.successScore}/5 {s.label}
+                          </span>
+                        ) : null
+                      })()}
+                      <div className="space-y-1">
+                        <p className="text-xs font-medium text-muted-foreground">Summary</p>
+                        <p className="text-sm text-foreground">{analysis.summary}</p>
+                      </div>
+                      {analysis?.successReason && (
+                        <div className="space-y-1">
+                          <p className="text-xs font-medium text-muted-foreground">Assessment</p>
+                          <p className="text-sm italic text-muted-foreground">{analysis.successReason}</p>
+                        </div>
+                      )}
+                      {analysis?.topics && analysis.topics.length > 0 && (
+                        <div className="space-y-1.5">
+                          <p className="text-xs font-medium text-muted-foreground">Topics</p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {analysis.topics.map((t) => (
+                              <span
+                                key={t}
+                                className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground"
+                              >
+                                {t}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <p className="text-xs text-muted-foreground">
+                      No review available for this conversation.
+                    </p>
+                  )}
                 </div>
-              ) : (
-                messages.map((msg) => <MessageBubble key={msg.id} message={msg} />)
-              )}
+              </aside>
             </div>
           </>
         )}

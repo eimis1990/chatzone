@@ -184,8 +184,18 @@ export function ndjsonChatResponse(
       } catch {
         line({ t: 'text', v: '' })
       } finally {
+        // Persist the assistant turn BEFORE closing the stream. If we close
+        // first, the platform can suspend the function before this DB write
+        // lands, which intermittently drops assistant messages (and their
+        // product suggestions) from the transcript.
+        if (opts.onText) {
+          try {
+            await opts.onText(fullText)
+          } catch {
+            // Swallow — a failed persist must not break the (already-streamed) reply.
+          }
+        }
         controller.close()
-        if (opts.onText) await opts.onText(fullText)
       }
     },
   })
