@@ -26,13 +26,13 @@ describe('botConfigSchema', () => {
     expect(parsed.allowedDomains).toEqual([])
   })
 
-  it('caps suggested questions at 4', () => {
+  it('caps suggested questions at 6', () => {
     expect(() =>
       botConfigSchema.parse({
         displayName: 'B',
         greeting: 'h',
         systemPrompt: 's',
-        suggestedQuestions: ['1', '2', '3', '4', '5'],
+        suggestedQuestions: ['1', '2', '3', '4', '5', '6', '7'],
       }),
     ).toThrow()
   })

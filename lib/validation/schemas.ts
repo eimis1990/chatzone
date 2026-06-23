@@ -16,7 +16,7 @@ const DEFAULT_FALLBACK =
 
 export const languageContentSchema = z.object({
   greeting: z.string().min(1).max(300),
-  suggestedQuestions: z.array(z.string().min(1)).max(4).default([]),
+  suggestedQuestions: z.array(z.string().min(1)).max(6).default([]),
   fallbackMessage: z.string().min(1).default(DEFAULT_FALLBACK),
 })
 

@@ -31,7 +31,7 @@ export function WelcomeScreen({
   const radius = `${Math.min(bubbleRadius, 16)}px`
 
   return (
-    <div className="flex-1 overflow-y-auto px-4 py-6">
+    <div className="flex-1 flex flex-col overflow-y-auto px-4 py-6">
       {/* Avatar + name + tagline */}
       <div className="flex flex-col items-center text-center">
         {avatarUrl ? (
@@ -63,15 +63,15 @@ export function WelcomeScreen({
         </div>
       ) : null}
 
-      {/* Suggested-action buttons */}
+      {/* Suggested-action tiles — 2 per row, bottom-aligned above the composer */}
       {suggestedQuestions.length > 0 && (
-        <div className="mt-3 space-y-2">
-          {suggestedQuestions.map((q, i) => (
+        <div className="mt-auto grid grid-cols-2 gap-2 pt-6">
+          {suggestedQuestions.slice(0, 6).map((q, i) => (
             <button
               key={i}
               type="button"
               onClick={() => onSelect(q)}
-              className="w-full bg-gray-50 px-4 py-3 text-left text-sm font-medium text-gray-800 transition-colors hover:bg-gray-100"
+              className="flex min-h-[84px] flex-col justify-end bg-gray-50 p-3 text-left text-sm font-medium leading-snug text-gray-800 transition-colors hover:bg-gray-100"
               style={{ borderRadius: radius }}
             >
               {q}

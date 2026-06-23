@@ -53,7 +53,7 @@ type CommerceTestState =
   | { status: 'ok'; count: number }
   | { status: 'error'; message: string }
 
-const MAX_SUGGESTED_QUESTIONS = 4
+const MAX_SUGGESTED_QUESTIONS = 6
 
 const LANG_LABELS: Record<BotLanguage, string> = {
   en: 'English',
