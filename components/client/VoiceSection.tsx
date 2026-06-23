@@ -14,7 +14,7 @@
 
 import { useEffect, useRef, useReducer, useCallback } from 'react'
 import { Controller, type Control, type UseFormWatch, type UseFormSetValue } from 'react-hook-form'
-import { PlayIcon, SquareIcon, LoaderCircleIcon, AlertCircleIcon } from 'lucide-react'
+import { PlayIcon, SquareIcon, LoaderCircleIcon, AlertCircleIcon, MicIcon } from 'lucide-react'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
@@ -152,9 +152,16 @@ export function VoiceSection({ control, watch, setValue, activeLang, enabledLang
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Voice</CardTitle>
-        <CardDescription>TTS, STT, and per-language voice settings.</CardDescription>
+      <CardHeader className="border-b">
+        <div className="flex items-start gap-3">
+          <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+            <MicIcon className="size-4" aria-hidden="true" />
+          </span>
+          <div className="space-y-0.5">
+            <CardTitle>Voice</CardTitle>
+            <CardDescription>TTS, STT, and per-language voice settings.</CardDescription>
+          </div>
+        </div>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Master toggle */}

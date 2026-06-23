@@ -5,7 +5,18 @@ import { useRouter } from 'next/navigation'
 import { useForm, useFieldArray, Controller, type Control, type UseFormWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
-import { PlusIcon, TrashIcon } from 'lucide-react'
+import {
+  PlusIcon,
+  TrashIcon,
+  MonitorIcon,
+  LanguagesIcon,
+  PaletteIcon,
+  SparklesIcon,
+  UserPlusIcon,
+  ShieldIcon,
+  ShoppingBagIcon,
+  type LucideIcon,
+} from 'lucide-react'
 import { botConfigFormSchema } from '@/lib/validation/schemas'
 import type { BotLanguage } from '@/lib/types'
 import type { z } from 'zod'
@@ -61,6 +72,29 @@ const MAX_SUGGESTED_QUESTIONS = 6
 const LANG_LABELS: Record<BotLanguage, string> = {
   en: 'English',
   lt: 'Lithuanian',
+}
+
+/** Consistent section header: an accent icon chip beside the title + description. */
+export function SectionHeader({
+  icon: Icon,
+  title,
+  description,
+}: {
+  icon: LucideIcon
+  title: string
+  description?: string
+}) {
+  return (
+    <div className="flex items-start gap-3">
+      <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+        <Icon className="size-4" aria-hidden="true" />
+      </span>
+      <div className="space-y-0.5">
+        <CardTitle>{title}</CardTitle>
+        {description && <CardDescription>{description}</CardDescription>}
+      </div>
+    </div>
+  )
 }
 
 export function ConfigForm({ botId, botName, initialConfig }: ConfigFormProps) {
@@ -248,11 +282,25 @@ export function ConfigForm({ botId, botName, initialConfig }: ConfigFormProps) {
       <ResizablePanel defaultWidth={480} min={380} max={760}>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 p-5">
 
+        {/* Sticky toolbar — title + always-visible Save */}
+        <div className="sticky top-0 z-10 -mx-5 -mt-5 mb-1 flex items-center justify-between gap-3 border-b bg-background/85 px-5 py-3 backdrop-blur">
+          <div>
+            <h2 className="text-sm font-semibold leading-tight">Configuration</h2>
+            <p className="text-xs text-muted-foreground">Changes go live when you save.</p>
+          </div>
+          <Button type="submit" size="sm" disabled={isSubmitting}>
+            {isSubmitting ? 'Saving…' : 'Save'}
+          </Button>
+        </div>
+
         {/* ── Display ── */}
         <Card>
-          <CardHeader>
-            <CardTitle>Display</CardTitle>
-            <CardDescription>Bot name and avatar shown to visitors.</CardDescription>
+          <CardHeader className="border-b">
+            <SectionHeader
+              icon={MonitorIcon}
+              title="Display"
+              description="Bot name and avatar shown to visitors."
+            />
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-1.5">
@@ -328,11 +376,12 @@ export function ConfigForm({ botId, botName, initialConfig }: ConfigFormProps) {
 
         {/* ── Language & Content ── */}
         <Card>
-          <CardHeader>
-            <CardTitle>Language &amp; content</CardTitle>
-            <CardDescription>
-              Greeting, suggested questions, and fallback message — per language.
-            </CardDescription>
+          <CardHeader className="border-b">
+            <SectionHeader
+              icon={LanguagesIcon}
+              title="Language & content"
+              description="Greeting, suggested questions, and fallback message — per language."
+            />
           </CardHeader>
           <CardContent className="space-y-4">
             {/* Language segmented control */}
@@ -519,9 +568,12 @@ export function ConfigForm({ botId, botName, initialConfig }: ConfigFormProps) {
 
         {/* ── Theme ── */}
         <Card>
-          <CardHeader>
-            <CardTitle>Theme</CardTitle>
-            <CardDescription>Colors, widget position, and corner roundness.</CardDescription>
+          <CardHeader className="border-b">
+            <SectionHeader
+              icon={PaletteIcon}
+              title="Theme"
+              description="Colors, widget position, and corner roundness."
+            />
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
@@ -801,9 +853,12 @@ export function ConfigForm({ botId, botName, initialConfig }: ConfigFormProps) {
 
         {/* ── AI Behaviour ── */}
         <Card>
-          <CardHeader>
-            <CardTitle>AI behaviour</CardTitle>
-            <CardDescription>System prompt and persona.</CardDescription>
+          <CardHeader className="border-b">
+            <SectionHeader
+              icon={SparklesIcon}
+              title="AI behaviour"
+              description="System prompt and persona."
+            />
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-1.5">
@@ -876,9 +931,12 @@ export function ConfigForm({ botId, botName, initialConfig }: ConfigFormProps) {
 
         {/* ── Lead Capture ── */}
         <Card>
-          <CardHeader>
-            <CardTitle>Lead capture</CardTitle>
-            <CardDescription>Collect visitor contact information during the conversation.</CardDescription>
+          <CardHeader className="border-b">
+            <SectionHeader
+              icon={UserPlusIcon}
+              title="Lead capture"
+              description="Collect visitor contact information during the conversation."
+            />
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center gap-3">
@@ -1009,11 +1067,12 @@ export function ConfigForm({ botId, botName, initialConfig }: ConfigFormProps) {
 
         {/* ── Allowed Domains (Advanced) ── */}
         <Card>
-          <CardHeader>
-            <CardTitle>Allowed domains</CardTitle>
-            <CardDescription>
-              Restrict which websites can embed this widget. Leave empty to allow any domain.
-            </CardDescription>
+          <CardHeader className="border-b">
+            <SectionHeader
+              icon={ShieldIcon}
+              title="Allowed domains"
+              description="Restrict which websites can embed this widget. Leave empty to allow any domain."
+            />
           </CardHeader>
           <CardContent className="space-y-3">
             {allowedDomainsField.fields.map((field, index) => (
@@ -1049,12 +1108,6 @@ export function ConfigForm({ botId, botName, initialConfig }: ConfigFormProps) {
           </CardContent>
         </Card>
 
-        {/* Save */}
-        <div className="flex justify-end pt-2 border-t">
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? 'Saving…' : 'Save configuration'}
-          </Button>
-        </div>
         </form>
       </ResizablePanel>
 
@@ -1163,11 +1216,12 @@ function CommerceSection({ control, watch }: CommerceSectionProps) {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Store / products</CardTitle>
-        <CardDescription>
-          Connect your WooCommerce store so the bot can search your catalog and show product cards.
-        </CardDescription>
+      <CardHeader className="border-b">
+        <SectionHeader
+          icon={ShoppingBagIcon}
+          title="Store / products"
+          description="Connect your WooCommerce store so the bot can search your catalog and show product cards."
+        />
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex items-center gap-3">
