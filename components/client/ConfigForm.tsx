@@ -284,7 +284,7 @@ export function ConfigForm({ botId, botName, initialConfig }: ConfigFormProps) {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 p-5">
 
         {/* Sticky toolbar — title + always-visible Save */}
-        <div className="sticky top-0 z-10 -mx-5 -mt-5 mb-6 flex items-center justify-between gap-3 border-b bg-background/85 px-5 py-3 backdrop-blur">
+        <div className="sticky top-0 z-10 -mx-5 -mt-5 mb-6 flex items-center justify-between gap-3 border-b bg-card/90 px-5 py-3 backdrop-blur">
           <div>
             <h2 className="text-sm font-semibold leading-tight">Configuration</h2>
             <p className="text-xs text-muted-foreground">Changes go live when you save.</p>

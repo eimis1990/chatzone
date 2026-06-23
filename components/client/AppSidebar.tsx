@@ -17,6 +17,7 @@ import {
   SettingsIcon,
   type LucideIcon,
 } from 'lucide-react'
+import { IoLogoWechat } from 'react-icons/io5'
 import { cn } from '@/lib/utils'
 import { SignOutButton } from '@/components/client/SignOutButton'
 
@@ -45,7 +46,10 @@ export function AppSidebar({ bots, userEmail }: { bots: BotLite[]; userEmail: st
 
   const itemBase =
     'flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm transition-colors'
-  const activePill = 'bg-sidebar-accent font-medium text-sidebar-accent-foreground shadow-sm'
+  // Selected bot — solid accent green pill (dark text). Sections/Settings — a
+  // faint 10% accent tint with lime text.
+  const botActive = 'bg-primary font-medium text-primary-foreground shadow-sm'
+  const sectionActive = 'bg-primary/10 font-medium text-primary'
   const idle = 'text-sidebar-foreground/70 hover:bg-white/10 hover:text-white'
 
   return (
@@ -53,10 +57,12 @@ export function AppSidebar({ bots, userEmail }: { bots: BotLite[]; userEmail: st
       {/* Logo */}
       <Link
         href="/app"
-        className="flex items-center gap-2 px-4 py-4 font-semibold text-white"
+        className="flex items-center gap-2.5 px-4 py-4 text-white"
       >
-        <MessagesSquareIcon className="size-5 text-white" />
-        <span>Chatzone</span>
+        <IoLogoWechat className="size-7 text-white" />
+        <span className="text-xl font-bold">
+          Chatzone<span className="text-primary">.</span>
+        </span>
       </Link>
 
       <p className="px-4 pb-1 text-xs font-medium tracking-wide text-white/45">
@@ -91,19 +97,26 @@ export function AppSidebar({ bots, userEmail }: { bots: BotLite[]; userEmail: st
                 <div key={bot.id}>
                   <Link
                     href={`/app/bots/${bot.id}/configure`}
-                    className={cn(itemBase, 'pl-3', active ? activePill : idle)}
+                    className={cn(itemBase, 'pl-3', active ? botActive : idle)}
                   >
                     <span
                       className={cn(
                         'size-1.5 flex-shrink-0 rounded-full',
-                        bot.status === 'active' ? 'bg-primary' : 'bg-muted-foreground/40',
+                        active
+                          ? 'bg-primary-foreground'
+                          : bot.status === 'active'
+                            ? 'bg-primary'
+                            : 'bg-muted-foreground/40',
                       )}
                       aria-hidden="true"
                     />
                     <span className="flex-1 truncate">{bot.name}</span>
                     {bot.inboxCount ? (
                       <span
-                        className="ml-1 inline-flex min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold leading-4 text-primary-foreground"
+                        className={cn(
+                          'ml-1 inline-flex min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-semibold leading-4',
+                          active ? 'bg-primary-foreground text-primary' : 'bg-primary text-primary-foreground',
+                        )}
                         title={`${bot.inboxCount} awaiting a human`}
                       >
                         {bot.inboxCount}
@@ -126,7 +139,7 @@ export function AppSidebar({ bots, userEmail }: { bots: BotLite[]; userEmail: st
                             className={cn(
                               itemBase,
                               'py-1.5',
-                              isActive ? activePill : idle,
+                              isActive ? sectionActive : idle,
                             )}
                           >
                             <Icon className="size-4 flex-shrink-0" aria-hidden="true" />
@@ -154,7 +167,7 @@ export function AppSidebar({ bots, userEmail }: { bots: BotLite[]; userEmail: st
           className={cn(
             itemBase,
             'mt-1',
-            pathname === '/app/settings' ? activePill : idle,
+            pathname === '/app/settings' ? sectionActive : idle,
           )}
         >
           <SettingsIcon className="size-4 flex-shrink-0" aria-hidden="true" />
