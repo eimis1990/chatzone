@@ -44,21 +44,21 @@ export function KnowledgeManager({ botId, initialSources }: KnowledgeManagerProp
   const readyCount = sources.filter((s) => s.status === 'ready').length
 
   return (
-    <div className="max-w-4xl space-y-6">
+    <div className="flex min-h-0 flex-1 gap-6">
       {/* ── Add sources ── */}
-      <Card>
-        <CardHeader className="border-b">
+      <Card className="flex min-h-0 flex-1 flex-col">
+        <CardHeader className="flex-shrink-0 border-b">
           <CardTitle>Add a source</CardTitle>
           <CardDescription>
             Pick a type, then paste text, add a Q&amp;A, link a page, or upload a file.
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="min-h-0 flex-1 overflow-y-auto">
           <Tabs defaultValue="text">
-            <TabsList className="mb-5">
+            <TabsList className="mb-5 w-full group-data-horizontal/tabs:h-11">
               {SOURCE_TABS.map(({ value, label, icon: Icon }) => (
                 <TabsTrigger key={value} value={value} className="gap-1.5">
-                  <Icon className="size-3.5" aria-hidden="true" />
+                  <Icon className="size-4" aria-hidden="true" />
                   {label}
                 </TabsTrigger>
               ))}
@@ -81,8 +81,8 @@ export function KnowledgeManager({ botId, initialSources }: KnowledgeManagerProp
       </Card>
 
       {/* ── Source list ── */}
-      <Card>
-        <CardHeader className="border-b">
+      <Card className="flex min-h-0 flex-1 flex-col">
+        <CardHeader className="flex-shrink-0 border-b">
           <div className="flex items-center gap-2">
             <CardTitle>Sources</CardTitle>
             {sources.length > 0 && (
@@ -97,7 +97,7 @@ export function KnowledgeManager({ botId, initialSources }: KnowledgeManagerProp
               : `${readyCount} of ${sources.length} ready to use.`}
           </CardDescription>
         </CardHeader>
-        <CardContent className="p-0">
+        <CardContent className="min-h-0 flex-1 overflow-y-auto p-0">
           <SourceList
             botId={botId}
             sources={sources}

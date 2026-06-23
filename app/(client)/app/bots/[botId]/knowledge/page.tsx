@@ -33,8 +33,8 @@ export default async function KnowledgePage({ params }: PageProps) {
     .returns<KnowledgeSource[]>()
 
   return (
-    <div className="space-y-6 p-6">
-      <div className="flex items-start gap-3">
+    <div className="flex h-full flex-col gap-6 overflow-hidden p-6">
+      <div className="flex flex-shrink-0 items-start gap-3">
         <div className="flex size-9 flex-shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
           <DatabaseIcon className="size-5" aria-hidden="true" />
         </div>
