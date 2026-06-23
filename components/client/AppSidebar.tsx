@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 import {
   BotIcon,
+  HomeIcon,
   ChevronDownIcon,
   ChevronRightIcon,
   SlidersHorizontalIcon,
@@ -70,6 +71,16 @@ export function AppSidebar({ bots, userEmail }: { bots: BotLite[]; userEmail: st
       </p>
 
       <nav className="flex-1 overflow-y-auto px-2 pb-2">
+        {/* Home */}
+        <Link
+          href="/app"
+          aria-current={pathname === '/app' ? 'page' : undefined}
+          className={cn(itemBase, 'mb-0.5', pathname === '/app' ? sectionActive : idle)}
+        >
+          <HomeIcon className="size-4 flex-shrink-0" aria-hidden="true" />
+          <span className="flex-1">Home</span>
+        </Link>
+
         {/* My Bots — collapsible group */}
         <button
           type="button"
@@ -175,9 +186,9 @@ export function AppSidebar({ bots, userEmail }: { bots: BotLite[]; userEmail: st
         </Link>
       </nav>
 
-      {/* Footer — user + sign out, as a floating white card */}
-      <div className="m-3 rounded-xl bg-white/70 p-3 shadow-sm ring-1 ring-black/5 backdrop-blur-sm">
-        <p className="px-1 pb-1.5 text-xs text-muted-foreground truncate" title={userEmail}>
+      {/* Footer — user + sign out, as a subtle dark card */}
+      <div className="m-3 rounded-xl bg-white/5 p-3 ring-1 ring-white/10">
+        <p className="truncate px-1 pb-1.5 text-xs text-white/55" title={userEmail}>
           {userEmail}
         </p>
         <SignOutButton />
