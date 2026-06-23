@@ -280,7 +280,7 @@ export function ConfigForm({ botId, botName, initialConfig }: ConfigFormProps) {
   return (
     <div className="flex h-full min-h-0">
       {/* ── Config panel — resizable from its right edge, scrolls internally ── */}
-      <ResizablePanel defaultWidth={480} min={380} max={760}>
+      <ResizablePanel defaultFraction={0.5} defaultWidth={480} min={380} max={1100}>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 p-5">
 
         {/* Sticky toolbar — title + always-visible Save */}

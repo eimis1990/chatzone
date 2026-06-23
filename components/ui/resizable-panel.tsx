@@ -1,11 +1,13 @@
 'use client'
 
-import { useCallback, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { cn } from '@/lib/utils'
 
 interface ResizablePanelProps {
   children: ReactNode
   defaultWidth?: number
+  /** If set, the initial width is this fraction of the parent's width (clamped to min/max). */
+  defaultFraction?: number
   min?: number
   max?: number
   className?: string
@@ -19,12 +21,28 @@ interface ResizablePanelProps {
 export function ResizablePanel({
   children,
   defaultWidth = 460,
+  defaultFraction,
   min = 360,
   max = 760,
   className,
 }: ResizablePanelProps) {
+  const containerRef = useRef<HTMLDivElement>(null)
   const [width, setWidth] = useState(defaultWidth)
   const [dragging, setDragging] = useState(false)
+  const sizedRef = useRef(false)
+
+  // On mount, size the panel to a fraction of the parent (e.g. half the
+  // content view), clamped to the drag bounds. Runs once.
+  useEffect(() => {
+    if (sizedRef.current || !defaultFraction) return
+    const parent = containerRef.current?.parentElement
+    if (!parent) return
+    const pw = parent.getBoundingClientRect().width
+    if (pw > 0) {
+      setWidth(Math.min(max, Math.max(min, Math.round(pw * defaultFraction))))
+      sizedRef.current = true
+    }
+  }, [defaultFraction, min, max])
 
   const onPointerDown = useCallback(
     (e: React.PointerEvent) => {
@@ -53,6 +71,7 @@ export function ResizablePanel({
 
   return (
     <div
+      ref={containerRef}
       className={cn('relative h-full flex-shrink-0 border-r bg-background', className)}
       style={{ width }}
     >
