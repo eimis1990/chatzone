@@ -9,9 +9,11 @@ interface ComposerProps {
   primaryColor: string
   /** Active visitor language — drives the input placeholder. */
   language?: 'en' | 'lt'
+  /** Corner radius (px) for the message field — shared with the nav buttons. */
+  radius?: number
 }
 
-export function Composer({ onSend, disabled = false, primaryColor, language }: ComposerProps) {
+export function Composer({ onSend, disabled = false, primaryColor, language, radius = 12 }: ComposerProps) {
   const [value, setValue] = useState('')
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -56,8 +58,8 @@ export function Composer({ onSend, disabled = false, primaryColor, language }: C
           disabled={disabled}
           rows={1}
           aria-label="Message input"
-          className="flex-1 resize-none rounded-xl border border-gray-200 px-3 py-2 text-sm leading-5 focus:outline-none focus:ring-2 focus:ring-offset-0 disabled:opacity-50 overflow-hidden"
-          style={{ maxHeight: '120px', '--tw-ring-color': primaryColor } as React.CSSProperties}
+          className="flex-1 resize-none border border-gray-200 px-3 py-2 text-sm leading-5 focus:outline-none focus:ring-2 focus:ring-offset-0 disabled:opacity-50 overflow-hidden"
+          style={{ maxHeight: '120px', borderRadius: `${radius}px`, '--tw-ring-color': primaryColor } as React.CSSProperties}
         />
 
         {/* Send button — icon auto-contrasts; a light button gets a border so

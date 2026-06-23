@@ -716,6 +716,7 @@ export function ChatWindow({ config, transport, initialLanguage }: ChatWindowPro
           disabled={streaming}
           primaryColor={primaryColor}
           language={activeLang}
+          radius={navButtonRadius}
         />
 
         {/* Full-height product list overlay (covers messages + composer) */}
