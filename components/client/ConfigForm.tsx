@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useEffect, useRef, type ReactNode } from 'react'
+import { useState, useCallback, useEffect, useMemo, useRef, type ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm, useFieldArray, Controller, type Control, type UseFormWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -125,9 +125,27 @@ export function ConfigForm({ botId, botName, initialConfig }: ConfigFormProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // Normalize suggested questions to the {label, prompt} object form so the
+  // field array can edit label + prompt (legacy configs store plain strings).
+  const initialFormValues = useMemo(() => {
+    const cfg = structuredClone(initialConfig) as unknown as Record<string, unknown>
+    const content = cfg.content as Record<string, { suggestedQuestions?: unknown[] }> | undefined
+    for (const lang of ['en', 'lt'] as const) {
+      const arr = content?.[lang]?.suggestedQuestions
+      if (Array.isArray(arr)) {
+        content![lang].suggestedQuestions = arr.map((q) =>
+          typeof q === 'string'
+            ? { label: q, prompt: '' }
+            : { label: (q as { label?: string }).label ?? '', prompt: (q as { prompt?: string }).prompt ?? '' },
+        )
+      }
+    }
+    return cfg as FormValues
+  }, [initialConfig])
+
   const form = useForm<FormValues>({
     resolver: zodResolver(botConfigFormSchema),
-    defaultValues: initialConfig as FormValues,
+    defaultValues: initialFormValues,
     mode: 'onChange',
   })
 
@@ -181,12 +199,10 @@ export function ConfigForm({ botId, botName, initialConfig }: ConfigFormProps) {
   // Suggested questions for the active language
   const suggestedQuestionsFieldEn = useFieldArray({
     control,
-    // @ts-expect-error — useFieldArray expects object items; we store strings
     name: 'content.en.suggestedQuestions',
   })
   const suggestedQuestionsFieldLt = useFieldArray({
     control,
-    // @ts-expect-error — useFieldArray expects object items; we store strings
     name: 'content.lt.suggestedQuestions',
   })
 
@@ -486,20 +502,31 @@ export function ConfigForm({ botId, botName, initialConfig }: ConfigFormProps) {
                 )}
               </div>
 
-              {/* Suggested questions */}
+              {/* Suggested questions — a button label + the message it sends */}
               <div className="space-y-2">
                 <Label>
                   Suggested questions
-                  <span className="ml-1.5 text-xs text-muted-foreground font-normal">
+                  <span className="ml-1.5 text-xs font-normal text-muted-foreground">
                     ({LANG_LABELS[activeLang]}, max {MAX_SUGGESTED_QUESTIONS})
                   </span>
                 </Label>
+                <p className="text-xs text-muted-foreground">
+                  The label is the button text; the message is what the bot receives. Leave the
+                  message empty to send the label as-is.
+                </p>
                 {activeSuggestedField.fields.map((field, index) => (
-                  <div key={field.id} className="flex items-center gap-2">
-                    <Input
-                      {...register(`content.${activeLang}.suggestedQuestions.${index}` as const)}
-                      placeholder="Enter a suggested question…"
-                    />
+                  <div key={field.id} className="flex items-start gap-2 rounded-lg border p-2">
+                    <div className="flex-1 space-y-1.5">
+                      <Input
+                        {...register(`content.${activeLang}.suggestedQuestions.${index}.label` as const)}
+                        placeholder="Button label — e.g. TOP Prekės"
+                      />
+                      <Input
+                        {...register(`content.${activeLang}.suggestedQuestions.${index}.prompt` as const)}
+                        placeholder="Message sent to the bot — e.g. Parodyk populiariausias prekes"
+                        className="text-muted-foreground"
+                      />
+                    </div>
                     <Button
                       type="button"
                       variant="ghost"
@@ -517,8 +544,7 @@ export function ConfigForm({ botId, botName, initialConfig }: ConfigFormProps) {
                     variant="outline"
                     size="sm"
                     disabled={suggestedCount >= MAX_SUGGESTED_QUESTIONS}
-                    // @ts-expect-error — FieldArray append for string[] is fine at runtime
-                    onClick={() => activeSuggestedField.append('')}
+                    onClick={() => activeSuggestedField.append({ label: '', prompt: '' })}
                   >
                     <PlusIcon />
                     Add question
@@ -1098,7 +1124,6 @@ export function ConfigForm({ botId, botName, initialConfig }: ConfigFormProps) {
               type="button"
               variant="outline"
               size="sm"
-              // @ts-expect-error — FieldArray append for string[] is fine at runtime
               onClick={() => allowedDomainsField.append('')}
             >
               <PlusIcon />

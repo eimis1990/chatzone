@@ -3,16 +3,19 @@
 import { motion, useReducedMotion, type Variants } from 'framer-motion'
 import { ArrowDownIcon } from 'lucide-react'
 import { readableTextColor, isLightColor } from '@/lib/utils'
+import { sqLabel, sqPrompt } from '@/lib/widget-config'
+import type { SuggestedQuestion } from '@/lib/types'
 
 interface WelcomeScreenProps {
   displayName: string
   tagline?: string
   avatarUrl?: string
   greeting: string
-  suggestedQuestions: string[]
+  suggestedQuestions: SuggestedQuestion[]
   primaryColor: string
   bubbleRadius?: number
-  onSelect: (q: string) => void
+  /** Receives (prompt, label): the message to send + the text shown in the bubble. */
+  onSelect: (prompt: string, label: string) => void
 }
 
 /**
@@ -106,11 +109,12 @@ export function WelcomeScreen({
         <motion.div className="mt-auto grid grid-cols-2 gap-2 pt-6" variants={container}>
           {visibleQuestions.map((q, i) => {
             const fullWidth = orphanLast && i === visibleQuestions.length - 1
+            const label = sqLabel(q)
             return (
               <motion.button
                 key={i}
                 type="button"
-                onClick={() => onSelect(q)}
+                onClick={() => onSelect(sqPrompt(q), label)}
                 variants={item}
                 className={`group relative flex min-h-[84px] flex-col justify-end overflow-hidden border border-gray-200 bg-white p-3 text-left text-sm font-medium leading-snug text-gray-800${fullWidth ? ' col-span-2' : ''}`}
                 style={{ borderRadius: radius }}
@@ -128,7 +132,7 @@ export function WelcomeScreen({
                   className="absolute right-3 top-3 size-4 transition-transform duration-200 ease-out group-hover:translate-y-1"
                   style={{ color: accentColor }}
                 />
-                <span className="relative">{q}</span>
+                <span className="relative">{label}</span>
               </motion.button>
             )
           })}

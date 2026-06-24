@@ -83,10 +83,18 @@ export interface VoiceConfig {
   llmModel?: string
 }
 
+/**
+ * A welcome-screen quick action. A plain string is shorthand for a button whose
+ * label and sent message are identical (legacy). The object form lets the label
+ * (what the visitor sees) differ from the prompt actually sent to the bot — so a
+ * short button like "TOP Prekės" can send a real query the bot can answer.
+ */
+export type SuggestedQuestion = string | { label: string; prompt?: string }
+
 /** Visitor-facing content that differs per language. */
 export interface LanguageContent {
   greeting: string
-  suggestedQuestions: string[]
+  suggestedQuestions: SuggestedQuestion[]
   fallbackMessage: string
 }
 

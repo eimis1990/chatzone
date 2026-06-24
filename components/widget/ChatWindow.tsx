@@ -279,7 +279,7 @@ export function ChatWindow({ config, transport, initialLanguage }: ChatWindowPro
   )
 
   const sendMessage = useCallback(
-    async (text: string) => {
+    async (text: string, displayText?: string) => {
       if (streaming) return
 
       // If a live call is in progress, typing ends it and drops back to text chat.
@@ -290,7 +290,7 @@ export function ChatWindow({ config, transport, initialLanguage }: ChatWindowPro
       // While a human is handling, the visitor's message is stored but the bot
       // does not reply — the agent answers from the inbox (surfaced via polling).
       if (handoffStatusRef.current === 'requested' || handoffStatusRef.current === 'live') {
-        const userMsg: ChatMessage = { id: generateId(), role: 'user', content: text }
+        const userMsg: ChatMessage = { id: generateId(), role: 'user', content: text, displayContent: displayText }
         const history = buildHistory()
         setMessages((prev) => [...prev, userMsg])
         try {
@@ -311,7 +311,7 @@ export function ChatWindow({ config, transport, initialLanguage }: ChatWindowPro
         return
       }
 
-      const userMsg: ChatMessage = { id: generateId(), role: 'user', content: text }
+      const userMsg: ChatMessage = { id: generateId(), role: 'user', content: text, displayContent: displayText }
       const assistantMsg: ChatMessage = { id: generateId(), role: 'assistant', content: '', streaming: true }
       const history = buildHistory()
 

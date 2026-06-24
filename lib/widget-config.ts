@@ -1,9 +1,20 @@
-import type { BotConfig, BotLanguage, LeadField, LeadTrigger } from '@/lib/types'
+import type { BotConfig, BotLanguage, LeadField, LeadTrigger, SuggestedQuestion } from '@/lib/types'
+
+/** The button text for a suggested question. */
+export function sqLabel(q: SuggestedQuestion): string {
+  return typeof q === 'string' ? q : q.label
+}
+
+/** The message actually sent to the bot when a suggestion is clicked. */
+export function sqPrompt(q: SuggestedQuestion): string {
+  if (typeof q === 'string') return q
+  return q.prompt?.trim() || q.label
+}
 
 /** Per-language browser-safe content (no fallback — server streams that). */
 export interface PublicLanguageContent {
   greeting: string
-  suggestedQuestions: string[]
+  suggestedQuestions: SuggestedQuestion[]
 }
 
 /**

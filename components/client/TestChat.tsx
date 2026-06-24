@@ -17,7 +17,7 @@ import { ChatWindow } from '@/components/widget/ChatWindow'
 import { detectHandoffIntent, HANDOFF_ACK } from '@/lib/handoff'
 import type { ChatTransport } from '@/lib/widget-transport'
 import type { PublicBotConfig } from '@/lib/widget-config'
-import type { BotConfig, BotLanguage } from '@/lib/types'
+import type { BotConfig, BotLanguage, SuggestedQuestion } from '@/lib/types'
 import { POWERED_BY_URL, readableTextColor } from '@/lib/utils'
 
 const DEFAULT_VOICE_ID = '21m00Tcm4TlvDq8ikWAM'
@@ -50,7 +50,10 @@ type LiveConfig = {
   languages?: BotLanguage[]
   defaultLanguage?: BotLanguage
   content?: Partial<
-    Record<BotLanguage, { greeting?: string; suggestedQuestions?: string[]; fallbackMessage?: string }>
+    Record<
+      BotLanguage,
+      { greeting?: string; suggestedQuestions?: SuggestedQuestion[]; fallbackMessage?: string }
+    >
   >
   commerce?: {
     enabled?: boolean

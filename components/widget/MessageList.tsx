@@ -12,6 +12,9 @@ export interface ChatMessage {
   id: string
   role: 'user' | 'assistant'
   content: string
+  /** Text shown in the bubble when it should differ from `content` (e.g. a
+   *  quick-action button's short label while `content` holds the sent prompt). */
+  displayContent?: string
   streaming?: boolean
   products?: CommerceProduct[]
   /** An order-status lookup result, rendered as a card. */
@@ -114,7 +117,7 @@ export function MessageList({
                     <ThinkingDots />
                   ) : (
                     <>
-                      {msg.content}
+                      {msg.displayContent ?? msg.content}
                       {msg.streaming && (
                         <span className="inline-block w-1.5 h-4 ml-0.5 align-middle animate-pulse bg-current opacity-70" />
                       )}
