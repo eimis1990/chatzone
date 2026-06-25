@@ -18,8 +18,8 @@ import {
   SettingsIcon,
   type LucideIcon,
 } from 'lucide-react'
-import { IoLogoWechat } from 'react-icons/io5'
 import { cn } from '@/lib/utils'
+import { ChatzoneIcon } from '@/components/ChatzoneIcon'
 import { SignOutButton } from '@/components/client/SignOutButton'
 
 const SECTIONS: { label: string; href: string; icon: LucideIcon }[] = [
@@ -61,10 +61,10 @@ export function AppSidebar({ bots, userEmail }: { bots: BotLite[]; userEmail: st
       {/* Logo */}
       <Link
         href="/app"
-        className="flex items-center gap-2.5 px-4 py-4 text-white"
+        className="flex items-center gap-1 px-4 py-4 text-white"
       >
-        <IoLogoWechat className="size-7 text-white" />
-        <span className="text-xl font-bold">
+        <ChatzoneIcon className="size-14" />
+        <span className="text-2xl font-bold">
           Chatzone<span className="text-primary">.</span>
         </span>
       </Link>
