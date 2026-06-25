@@ -1327,7 +1327,7 @@ function CommerceSection({ control, watch }: CommerceSectionProps) {
 
   return (
     <Card className="overflow-visible rounded-none border-b pt-0 shadow-none ring-0">
-      <CardHeader className="sticky top-14 z-[5] border-b bg-muted/70 backdrop-blur">
+      <CardHeader className="sticky top-14 z-[5] border-b bg-muted/70 py-3 backdrop-blur">
         <SectionHeader
           icon={ShoppingBagIcon}
           title="Store / products"
