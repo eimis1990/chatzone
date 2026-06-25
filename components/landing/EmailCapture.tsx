@@ -38,7 +38,7 @@ export function EmailCapture({ source }: { source: string }) {
 
   if (status === 'done') {
     return (
-      <div className="flex max-w-md items-center gap-2 rounded-full border border-[#68A369]/40 bg-[#68A369]/15 px-5 py-3 text-sm font-medium text-[#a9d6b4]">
+      <div className="flex max-w-md items-center gap-2 rounded-full border border-[#9BDA48]/40 bg-[#9BDA48]/15 px-5 py-3 text-sm font-medium text-[#a9d6b4]">
         <CheckCircle2Icon className="size-4 flex-shrink-0" />
         You&apos;re on the list — we&apos;ll be in touch.
       </div>
@@ -55,12 +55,12 @@ export function EmailCapture({ source }: { source: string }) {
           onChange={(e) => setEmail(e.target.value)}
           placeholder="Enter your work email"
           aria-label="Work email"
-          className="h-12 flex-1 rounded-full border border-white/15 bg-white/10 px-5 text-sm text-white placeholder:text-white/50 outline-none focus:border-[#68A369] focus:ring-2 focus:ring-[#68A369]/40"
+          className="h-12 flex-1 rounded-full border border-white/15 bg-white/10 px-5 text-sm text-white placeholder:text-white/50 outline-none focus:border-[#9BDA48] focus:ring-2 focus:ring-[#9BDA48]/40"
         />
         <button
           type="submit"
           disabled={status === 'loading'}
-          className="inline-flex h-12 items-center justify-center rounded-full bg-[#68A369] px-6 text-sm font-semibold text-white shadow-lg shadow-[#68A369]/20 transition-colors hover:bg-[#5a9159] disabled:opacity-70"
+          className="inline-flex h-12 items-center justify-center rounded-full bg-[#9BDA48] px-6 text-sm font-semibold text-[#101213] shadow-lg shadow-[#9BDA48]/20 transition-colors hover:bg-[#86c93c] disabled:opacity-70"
         >
           {status === 'loading' ? 'Joining…' : 'Get started'}
         </button>

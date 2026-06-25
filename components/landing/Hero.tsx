@@ -11,7 +11,7 @@ export function Hero() {
       {/* Mesh glows */}
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute -left-40 -top-40 size-[34rem] rounded-full bg-[#2f6b44]/40 blur-[120px]" />
-        <div className="absolute right-0 top-10 size-[30rem] rounded-full bg-[#68A369]/30 blur-[120px]" />
+        <div className="absolute right-0 top-10 size-[30rem] rounded-full bg-[#9BDA48]/30 blur-[120px]" />
         <div className="absolute bottom-0 left-1/3 size-[26rem] rounded-full bg-[#1d4a30]/50 blur-[100px]" />
       </div>
 
@@ -98,7 +98,7 @@ function ChatMockup() {
   return (
     <div className="overflow-hidden rounded-2xl border border-white/10 bg-white shadow-2xl">
       <div className="flex items-center gap-3 bg-[#13241b] px-4 py-3.5 text-white">
-        <div className="flex size-8 items-center justify-center rounded-full bg-[#68A369] text-sm font-bold">J</div>
+        <div className="flex size-8 items-center justify-center rounded-full bg-[#9BDA48] text-sm font-bold text-[#101213]">J</div>
         <div className="min-w-0">
           <p className="text-sm font-semibold leading-tight">Jarvis</p>
           <p className="mt-0.5 flex items-center gap-1 text-xs text-white/70">
@@ -125,7 +125,7 @@ function ChatMockup() {
         <div className="h-9 flex-1 rounded-full border border-gray-200 px-3 text-xs leading-9 text-gray-400">
           Type a message…
         </div>
-        <div className="flex size-9 items-center justify-center rounded-full bg-[#68A369] text-white">→</div>
+        <div className="flex size-9 items-center justify-center rounded-full bg-[#9BDA48] text-[#101213]">→</div>
       </div>
     </div>
   )
@@ -137,7 +137,7 @@ function Bubble({ who, children }: { who: 'bot' | 'user'; children: React.ReactN
     <div className={isUser ? 'flex justify-end' : 'flex justify-start'}>
       <div
         className={`max-w-[80%] rounded-2xl px-3 py-2 ${
-          isUser ? 'bg-[#68A369] text-white' : 'bg-gray-100 text-gray-800'
+          isUser ? 'bg-[#9BDA48] text-[#101213]' : 'bg-gray-100 text-gray-800'
         }`}
       >
         {children}

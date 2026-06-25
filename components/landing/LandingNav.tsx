@@ -29,7 +29,7 @@ export function LandingNav() {
     >
       <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5">
         <Link href="/" className={`flex items-center gap-2 font-semibold ${scrolled ? 'text-gray-900' : 'text-white'}`}>
-          <BotIcon className="size-5 text-[#68A369]" />
+          <BotIcon className="size-5 text-[#9BDA48]" />
           <span>Chatzone</span>
         </Link>
 
@@ -50,7 +50,7 @@ export function LandingNav() {
           </Link>
           <Link
             href="/login"
-            className="rounded-full bg-[#68A369] px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#5a9159]"
+            className="rounded-full bg-[#9BDA48] px-4 py-2 text-sm font-semibold text-[#101213] shadow-sm transition-colors hover:bg-[#86c93c]"
           >
             Get started
           </Link>
@@ -80,7 +80,7 @@ export function LandingNav() {
             <Link
               href="/login"
               onClick={() => setOpen(false)}
-              className="rounded-full bg-[#68A369] px-4 py-2 text-center font-semibold text-white"
+              className="rounded-full bg-[#9BDA48] px-4 py-2 text-center font-semibold text-[#101213]"
             >
               Get started
             </Link>

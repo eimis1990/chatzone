@@ -13,10 +13,10 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { Reveal } from './Reveal'
-import { ScrollRevealText } from './ScrollRevealText'
+import { FeatureText } from './ScrollRevealText'
 import { EmailCapture } from './EmailCapture'
 
-const ACCENT = '#68A369'
+const ACCENT = '#9BDA48'
 const DARK = '#13241b'
 
 // ───────────────────────── Trusted-by strip ─────────────────────────
@@ -129,15 +129,8 @@ function FeatureRow({ feature, index }: { feature: Feature; index: number }) {
         <Reveal className={reversed ? 'lg:order-2' : ''}>
           <FeatureVisual icon={Icon} imageSrc={feature.imageSrc} dark={false} />
         </Reveal>
-        <div className={`border-l-2 pl-6 sm:pl-8 ${reversed ? 'lg:order-1' : ''}`} style={{ borderColor: ACCENT }}>
-          <p className="text-sm font-semibold tracking-[0.2em]" style={{ color: ACCENT }}>
-            — {num}
-          </p>
-          <h2 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">{feature.title}</h2>
-          <ScrollRevealText
-            text={feature.body}
-            className="mt-5 text-xl leading-relaxed text-gray-900 sm:text-2xl"
-          />
+        <div className={reversed ? 'lg:order-1' : ''}>
+          <FeatureText number={num} title={feature.title} body={feature.body} accent={ACCENT} />
         </div>
       </div>
     </section>
@@ -234,7 +227,7 @@ export function CTASection() {
   return (
     <section id="pricing" className="relative overflow-hidden text-white" style={{ backgroundColor: DARK }}>
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -right-20 -top-20 size-[26rem] rounded-full bg-[#68A369]/25 blur-[120px]" />
+        <div className="absolute -right-20 -top-20 size-[26rem] rounded-full bg-[#9BDA48]/25 blur-[120px]" />
         <div className="absolute bottom-0 left-0 size-[22rem] rounded-full bg-[#2f6b44]/30 blur-[110px]" />
       </div>
       <div className="relative mx-auto max-w-3xl px-5 py-24 text-center">
