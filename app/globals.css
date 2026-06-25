@@ -222,6 +222,23 @@
   .bg-sidebar-mesh {
     background-color: #101213;
   }
+
+  /* Faint white grid fading up from the bottom — sits behind the content card. */
+  .shell-grid {
+    background-image:
+      repeating-linear-gradient(
+        to right,
+        color-mix(in srgb, #fff 5%, transparent) 0 1px,
+        transparent 1px 40px
+      ),
+      repeating-linear-gradient(
+        to bottom,
+        color-mix(in srgb, #fff 5%, transparent) 0 1px,
+        transparent 1px 40px
+      );
+    -webkit-mask-image: linear-gradient(to top, #000 0%, transparent 100%);
+    mask-image: linear-gradient(to top, #000 0%, transparent 100%);
+  }
 }
 /* Lenis smooth-scroll (landing). Note: intentionally NO `iframe { pointer-events:
    none }` rule — that would break the embedded chat widget. */
