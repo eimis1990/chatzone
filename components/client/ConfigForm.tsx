@@ -88,13 +88,15 @@ export function SectionHeader({
   description?: string
 }) {
   return (
-    <div className="flex items-start gap-3">
-      <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+    <div className="flex items-center gap-2.5">
+      <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground">
         <Icon className="size-4" aria-hidden="true" />
       </span>
-      <div className="space-y-0.5">
-        <CardTitle>{title}</CardTitle>
-        {description && <CardDescription>{description}</CardDescription>}
+      <div>
+        <CardTitle className="text-sm font-semibold leading-tight">{title}</CardTitle>
+        {description && (
+          <CardDescription className="text-xs leading-tight">{description}</CardDescription>
+        )}
       </div>
     </div>
   )
@@ -324,7 +326,7 @@ export function ConfigForm({ botId, botName, initialConfig }: ConfigFormProps) {
 
         {/* ── Display ── */}
         <Card className="overflow-visible rounded-none border-b pt-0 shadow-none ring-0">
-          <CardHeader className="sticky top-14 z-[5] border-b bg-muted/70 backdrop-blur">
+          <CardHeader className="sticky top-14 z-[5] border-b bg-muted/70 py-3 backdrop-blur">
             <SectionHeader
               icon={MonitorIcon}
               title="Display"
@@ -405,7 +407,7 @@ export function ConfigForm({ botId, botName, initialConfig }: ConfigFormProps) {
 
         {/* ── Language & Content ── */}
         <Card className="overflow-visible rounded-none border-b pt-0 shadow-none ring-0">
-          <CardHeader className="sticky top-14 z-[5] border-b bg-muted/70 backdrop-blur">
+          <CardHeader className="sticky top-14 z-[5] border-b bg-muted/70 py-3 backdrop-blur">
             <SectionHeader
               icon={LanguagesIcon}
               title="Language & content"
@@ -640,7 +642,7 @@ export function ConfigForm({ botId, botName, initialConfig }: ConfigFormProps) {
 
         {/* ── Theme ── */}
         <Card className="overflow-visible rounded-none border-b pt-0 shadow-none ring-0">
-          <CardHeader className="sticky top-14 z-[5] border-b bg-muted/70 backdrop-blur">
+          <CardHeader className="sticky top-14 z-[5] border-b bg-muted/70 py-3 backdrop-blur">
             <SectionHeader
               icon={PaletteIcon}
               title="Theme"
@@ -925,7 +927,7 @@ export function ConfigForm({ botId, botName, initialConfig }: ConfigFormProps) {
 
         {/* ── AI Behaviour ── */}
         <Card className="overflow-visible rounded-none border-b pt-0 shadow-none ring-0">
-          <CardHeader className="sticky top-14 z-[5] border-b bg-muted/70 backdrop-blur">
+          <CardHeader className="sticky top-14 z-[5] border-b bg-muted/70 py-3 backdrop-blur">
             <SectionHeader
               icon={SparklesIcon}
               title="AI behaviour"
@@ -963,7 +965,7 @@ export function ConfigForm({ botId, botName, initialConfig }: ConfigFormProps) {
 
                   {/* Expanded editor */}
                   <Dialog open={promptOpen} onOpenChange={setPromptOpen}>
-                    <DialogContent className="max-w-2xl">
+                    <DialogContent className="flex max-h-[85vh] w-[calc(100%-2rem)] flex-col sm:max-w-3xl">
                       <DialogHeader>
                         <DialogTitle>System prompt</DialogTitle>
                       </DialogHeader>
@@ -971,7 +973,7 @@ export function ConfigForm({ botId, botName, initialConfig }: ConfigFormProps) {
                         value={field.value ?? ''}
                         onChange={field.onChange}
                         placeholder="You are a helpful assistant…"
-                        className="min-h-[55vh] font-mono text-sm"
+                        className="min-h-0 flex-1 resize-none font-mono text-sm leading-relaxed"
                       />
                       <div className="flex justify-end">
                         <Button type="button" size="sm" onClick={() => setPromptOpen(false)}>
@@ -1041,7 +1043,7 @@ export function ConfigForm({ botId, botName, initialConfig }: ConfigFormProps) {
 
         {/* ── Lead Capture ── */}
         <Card className="overflow-visible rounded-none border-b pt-0 shadow-none ring-0">
-          <CardHeader className="sticky top-14 z-[5] border-b bg-muted/70 backdrop-blur">
+          <CardHeader className="sticky top-14 z-[5] border-b bg-muted/70 py-3 backdrop-blur">
             <SectionHeader
               icon={UserPlusIcon}
               title="Lead capture"
@@ -1177,7 +1179,7 @@ export function ConfigForm({ botId, botName, initialConfig }: ConfigFormProps) {
 
         {/* ── Allowed Domains (Advanced) ── */}
         <Card className="overflow-visible rounded-none border-b pt-0 shadow-none ring-0">
-          <CardHeader className="sticky top-14 z-[5] border-b bg-muted/70 backdrop-blur">
+          <CardHeader className="sticky top-14 z-[5] border-b bg-muted/70 py-3 backdrop-blur">
             <SectionHeader
               icon={ShieldIcon}
               title="Allowed domains"

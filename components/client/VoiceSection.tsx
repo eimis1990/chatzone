@@ -152,14 +152,14 @@ export function VoiceSection({ control, watch, setValue, activeLang, enabledLang
 
   return (
     <Card className="overflow-visible rounded-none border-b pt-0 shadow-none ring-0">
-      <CardHeader className="sticky top-14 z-[5] border-b bg-muted/70 backdrop-blur">
-        <div className="flex items-start gap-3">
-          <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+      <CardHeader className="sticky top-14 z-[5] border-b bg-muted/70 py-3 backdrop-blur">
+        <div className="flex items-center gap-2.5">
+          <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground">
             <MicIcon className="size-4" aria-hidden="true" />
           </span>
-          <div className="space-y-0.5">
-            <CardTitle>Voice</CardTitle>
-            <CardDescription>TTS, STT, and per-language voice settings.</CardDescription>
+          <div>
+            <CardTitle className="text-sm font-semibold leading-tight">Voice</CardTitle>
+            <CardDescription className="text-xs leading-tight">TTS, STT, and per-language voice settings.</CardDescription>
           </div>
         </div>
       </CardHeader>
