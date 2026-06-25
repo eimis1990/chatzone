@@ -5,6 +5,7 @@ import { createServerClient } from '@/lib/supabase/server'
 import { CreateBotDialog } from '@/components/client/CreateBotDialog'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { readableTextColor } from '@/lib/utils'
 import type { Bot } from '@/lib/types'
 
 export default async function BotsPage() {
@@ -51,6 +52,10 @@ export default async function BotsPage() {
             const greeting =
               bot.config.content?.[lang]?.greeting ?? bot.config.content?.en?.greeting ?? ''
             const avatar = bot.config.avatarUrl || bot.config.botAvatarUrl
+            // Tint the status badge with the bot's own accent, picking dark/light
+            // text the same way the chat widget does.
+            const primaryColor = bot.config.theme?.primaryColor ?? '#4f46e5'
+            const isActive = bot.status === 'active'
             return (
               <Link
                 key={bot.id}
@@ -59,7 +64,7 @@ export default async function BotsPage() {
               >
                 <Card className="h-full transition-all group-hover:-translate-y-0.5 group-hover:shadow-md group-focus-visible:ring-2 group-focus-visible:ring-ring">
                   <CardHeader>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-start gap-3">
                       {avatar ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
@@ -73,18 +78,25 @@ export default async function BotsPage() {
                         </div>
                       )}
                       <div className="min-w-0 flex-1">
-                        <CardTitle className="line-clamp-1">{bot.name}</CardTitle>
+                        <div className="flex items-start justify-between gap-2">
+                          <CardTitle className="line-clamp-1">{bot.name}</CardTitle>
+                          <Badge
+                            variant={isActive ? 'default' : 'secondary'}
+                            className="shrink-0 capitalize"
+                            style={
+                              isActive
+                                ? { backgroundColor: primaryColor, color: readableTextColor(primaryColor) }
+                                : undefined
+                            }
+                          >
+                            {bot.status}
+                          </Badge>
+                        </div>
                         <CardDescription className="mt-0.5 flex items-center gap-1 text-xs">
                           <SettingsIcon className="size-3" />
                           Configure
                         </CardDescription>
                       </div>
-                      <Badge
-                        variant={bot.status === 'active' ? 'default' : 'secondary'}
-                        className="shrink-0 capitalize"
-                      >
-                        {bot.status}
-                      </Badge>
                     </div>
                   </CardHeader>
                   <CardContent>
