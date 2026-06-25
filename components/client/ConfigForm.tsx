@@ -16,6 +16,7 @@ import {
   ShieldIcon,
   ShoppingBagIcon,
   SaveIcon,
+  Maximize2Icon,
   type LucideIcon,
 } from 'lucide-react'
 import { botConfigFormSchema } from '@/lib/validation/schemas'
@@ -42,6 +43,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { TestChat } from '@/components/client/TestChat'
 import { ResizablePanel } from '@/components/ui/resizable-panel'
 import { VoiceSection } from '@/components/client/VoiceSection'
@@ -104,6 +106,8 @@ export function ConfigForm({ botId, botName, initialConfig }: ConfigFormProps) {
   const [name, setName] = useState(botName)
   // Per-row quick-action mode (keyed by field id; UI-only, derived from fields).
   const [actionModes, setActionModes] = useState<Record<string, 'message' | 'prompt' | 'url'>>({})
+  // System-prompt expand dialog.
+  const [promptOpen, setPromptOpen] = useState(false)
   // Active language tab — drives which content.<lang> fields are shown + live preview.
   // Persisted to localStorage keyed by botId so it survives refresh.
   const lsKey = `cbz_cfg_lang_${botId}`
@@ -303,10 +307,11 @@ export function ConfigForm({ botId, botName, initialConfig }: ConfigFormProps) {
     <div className="flex h-full min-h-0">
       {/* ── Config panel — resizable from its right edge, scrolls internally ── */}
       <ResizablePanel defaultFraction={0.5} defaultWidth={480} min={380} max={1100}>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 p-5">
+        <form onSubmit={handleSubmit(onSubmit)} className="pb-10">
 
-        {/* Sticky toolbar — title + always-visible Save */}
-        <div className="sticky top-0 z-10 -mx-5 -mt-5 mb-6 flex items-center justify-between gap-3 border-b bg-card/90 px-5 py-3 backdrop-blur">
+        {/* Sticky toolbar — title + always-visible Save (fixed height so the
+            section headers below can pin exactly beneath it). */}
+        <div className="sticky top-0 z-20 flex h-14 items-center justify-between gap-3 border-b bg-card/95 px-5 backdrop-blur">
           <div>
             <h2 className="text-sm font-semibold leading-tight">Configuration</h2>
             <p className="text-xs text-muted-foreground">Changes go live when you save.</p>
@@ -318,8 +323,8 @@ export function ConfigForm({ botId, botName, initialConfig }: ConfigFormProps) {
         </div>
 
         {/* ── Display ── */}
-        <Card>
-          <CardHeader className="border-b">
+        <Card className="overflow-visible rounded-none border-b pt-0 shadow-none ring-0">
+          <CardHeader className="sticky top-14 z-[5] border-b bg-muted/70 backdrop-blur">
             <SectionHeader
               icon={MonitorIcon}
               title="Display"
@@ -399,8 +404,8 @@ export function ConfigForm({ botId, botName, initialConfig }: ConfigFormProps) {
         </Card>
 
         {/* ── Language & Content ── */}
-        <Card>
-          <CardHeader className="border-b">
+        <Card className="overflow-visible rounded-none border-b pt-0 shadow-none ring-0">
+          <CardHeader className="sticky top-14 z-[5] border-b bg-muted/70 backdrop-blur">
             <SectionHeader
               icon={LanguagesIcon}
               title="Language & content"
@@ -634,8 +639,8 @@ export function ConfigForm({ botId, botName, initialConfig }: ConfigFormProps) {
         </Card>
 
         {/* ── Theme ── */}
-        <Card>
-          <CardHeader className="border-b">
+        <Card className="overflow-visible rounded-none border-b pt-0 shadow-none ring-0">
+          <CardHeader className="sticky top-14 z-[5] border-b bg-muted/70 backdrop-blur">
             <SectionHeader
               icon={PaletteIcon}
               title="Theme"
@@ -919,8 +924,8 @@ export function ConfigForm({ botId, botName, initialConfig }: ConfigFormProps) {
         </Card>
 
         {/* ── AI Behaviour ── */}
-        <Card>
-          <CardHeader className="border-b">
+        <Card className="overflow-visible rounded-none border-b pt-0 shadow-none ring-0">
+          <CardHeader className="sticky top-14 z-[5] border-b bg-muted/70 backdrop-blur">
             <SectionHeader
               icon={SparklesIcon}
               title="AI behaviour"
@@ -928,18 +933,56 @@ export function ConfigForm({ botId, botName, initialConfig }: ConfigFormProps) {
             />
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-1.5">
-              <Label htmlFor="systemPrompt">System prompt</Label>
-              <Textarea
-                id="systemPrompt"
-                {...register('systemPrompt')}
-                placeholder="You are a helpful assistant…"
-                className="min-h-28 font-mono text-sm"
-              />
-              {errors.systemPrompt && (
-                <p className="text-xs text-destructive">{errors.systemPrompt.message}</p>
+            <Controller
+              name="systemPrompt"
+              control={control}
+              render={({ field }) => (
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="systemPrompt">System prompt</Label>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setPromptOpen(true)}
+                    >
+                      <Maximize2Icon className="size-3.5" />
+                      Expand
+                    </Button>
+                  </div>
+                  <Textarea
+                    id="systemPrompt"
+                    value={field.value ?? ''}
+                    onChange={field.onChange}
+                    placeholder="You are a helpful assistant…"
+                    className="h-32 resize-none overflow-auto font-mono text-sm"
+                  />
+                  {errors.systemPrompt && (
+                    <p className="text-xs text-destructive">{errors.systemPrompt.message}</p>
+                  )}
+
+                  {/* Expanded editor */}
+                  <Dialog open={promptOpen} onOpenChange={setPromptOpen}>
+                    <DialogContent className="max-w-2xl">
+                      <DialogHeader>
+                        <DialogTitle>System prompt</DialogTitle>
+                      </DialogHeader>
+                      <Textarea
+                        value={field.value ?? ''}
+                        onChange={field.onChange}
+                        placeholder="You are a helpful assistant…"
+                        className="min-h-[55vh] font-mono text-sm"
+                      />
+                      <div className="flex justify-end">
+                        <Button type="button" size="sm" onClick={() => setPromptOpen(false)}>
+                          Done
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </div>
               )}
-            </div>
+            />
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-1.5">
@@ -997,8 +1040,8 @@ export function ConfigForm({ botId, botName, initialConfig }: ConfigFormProps) {
         />
 
         {/* ── Lead Capture ── */}
-        <Card>
-          <CardHeader className="border-b">
+        <Card className="overflow-visible rounded-none border-b pt-0 shadow-none ring-0">
+          <CardHeader className="sticky top-14 z-[5] border-b bg-muted/70 backdrop-blur">
             <SectionHeader
               icon={UserPlusIcon}
               title="Lead capture"
@@ -1133,8 +1176,8 @@ export function ConfigForm({ botId, botName, initialConfig }: ConfigFormProps) {
         <CommerceSection control={control} watch={watch} />
 
         {/* ── Allowed Domains (Advanced) ── */}
-        <Card>
-          <CardHeader className="border-b">
+        <Card className="overflow-visible rounded-none border-b pt-0 shadow-none ring-0">
+          <CardHeader className="sticky top-14 z-[5] border-b bg-muted/70 backdrop-blur">
             <SectionHeader
               icon={ShieldIcon}
               title="Allowed domains"
@@ -1281,8 +1324,8 @@ function CommerceSection({ control, watch }: CommerceSectionProps) {
   }
 
   return (
-    <Card>
-      <CardHeader className="border-b">
+    <Card className="overflow-visible rounded-none border-b pt-0 shadow-none ring-0">
+      <CardHeader className="sticky top-14 z-[5] border-b bg-muted/70 backdrop-blur">
         <SectionHeader
           icon={ShoppingBagIcon}
           title="Store / products"

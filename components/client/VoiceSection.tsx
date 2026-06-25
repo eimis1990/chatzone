@@ -151,8 +151,8 @@ export function VoiceSection({ control, watch, setValue, activeLang, enabledLang
   }, [loadState.status, allVoices, enabledLanguages, watch, setValue])
 
   return (
-    <Card>
-      <CardHeader className="border-b">
+    <Card className="overflow-visible rounded-none border-b pt-0 shadow-none ring-0">
+      <CardHeader className="sticky top-14 z-[5] border-b bg-muted/70 backdrop-blur">
         <div className="flex items-start gap-3">
           <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
             <MicIcon className="size-4" aria-hidden="true" />
