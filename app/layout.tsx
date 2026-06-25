@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/next";
+import { SITE_URL, SITE_NAME } from "@/lib/site";
 import {
   Geist,
   Geist_Mono,
@@ -36,15 +38,36 @@ const fontVariables = [inter, poppins, nunito, jakarta, lora]
   .map((f) => f.variable)
   .join(" ");
 
+const TITLE = "Chatzone — AI chat & voice agent for modern stores";
+const DESCRIPTION =
+  "Answer every customer, day or night. A chat & voice agent that knows your products, captures leads, looks up orders, and hands off to your team — embedded in one line.";
+
 export const metadata: Metadata = {
-  title: "Chatzone — AI chat & voice agent for modern stores",
-  description:
-    "Answer every customer, day or night. A chat & voice agent that knows your products, captures leads, looks up orders, and hands off to your team — embedded in one line.",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: TITLE,
+    template: `%s · ${SITE_NAME}`,
+  },
+  description: DESCRIPTION,
+  applicationName: SITE_NAME,
+  alternates: {
+    canonical: "/",
+  },
   openGraph: {
-    title: "Chatzone — AI chat & voice agent for modern stores",
+    title: TITLE,
     description:
       "AI chat & voice support for e-commerce: grounded answers, product search, order lookups, live handoff, and analytics.",
     type: "website",
+    url: "/",
+    siteName: SITE_NAME,
+    locale: "en_US",
+    images: ["/landing/og.png"],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: TITLE,
+    description:
+      "AI chat & voice support for e-commerce: grounded answers, product search, order lookups, live handoff, and analytics.",
     images: ["/landing/og.png"],
   },
 };
@@ -59,7 +82,10 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} ${fontVariables} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        {children}
+        <Analytics />
+      </body>
     </html>
   );
 }

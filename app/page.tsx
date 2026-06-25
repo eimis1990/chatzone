@@ -1,27 +1,61 @@
 import { LandingNav } from '@/components/landing/LandingNav'
 import { Hero } from '@/components/landing/Hero'
-import { Logos, Features, Stats, HowItWorks, CTASection, Footer } from '@/components/landing/sections'
-import { WidgetEmbed } from '@/components/landing/WidgetEmbed'
+import { Features, Stats, HowItWorks, CTASection, Footer } from '@/components/landing/sections'
 import { SmoothScroll } from '@/components/landing/SmoothScroll'
+import { SITE_URL, SITE_NAME } from '@/lib/site'
 
-// The configured Jarvis bot (avatar, voice, commerce, EN/LT).
-const JARVIS_KEY = '135c8f3f62b77480ef0237e5827ca996'
+// Structured data — how Google rich results and AI assistants (GEO) parse what
+// Chatzone is, who makes it, and that it's a web app. Pricing is reflected as a
+// free Offer for now; update the SoftwareApplication offers when billing ships.
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Organization',
+      '@id': `${SITE_URL}/#organization`,
+      name: SITE_NAME,
+      url: SITE_URL,
+      logo: `${SITE_URL}/chatzone-icon.svg`,
+      description: 'The AI chat & voice agent for modern stores.',
+    },
+    {
+      '@type': 'WebSite',
+      '@id': `${SITE_URL}/#website`,
+      url: SITE_URL,
+      name: SITE_NAME,
+      publisher: { '@id': `${SITE_URL}/#organization` },
+    },
+    {
+      '@type': 'SoftwareApplication',
+      name: SITE_NAME,
+      applicationCategory: 'BusinessApplication',
+      operatingSystem: 'Web',
+      url: SITE_URL,
+      description:
+        'AI chat & voice support for e-commerce: grounded answers from your knowledge, product search, identity-checked order lookups, live human handoff, and analytics — embedded in one line of code.',
+      offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+      publisher: { '@id': `${SITE_URL}/#organization` },
+    },
+  ],
+}
 
 export default function Home() {
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <SmoothScroll />
       <LandingNav />
       <main>
         <Hero />
-        <Logos />
         <Features />
         <Stats />
         <HowItWorks />
         <CTASection />
       </main>
       <Footer />
-      <WidgetEmbed botKey={JARVIS_KEY} />
     </>
   )
 }
