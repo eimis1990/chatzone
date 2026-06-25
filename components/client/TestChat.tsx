@@ -114,8 +114,9 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
             <div
               style={{
                 borderRadius: `${cornerRadius}px`,
-                // Slightly shorter than the live cap so the preview keeps a
-                // little headroom from the top of the panel.
+                // 680px cap is shared with the live embed (see IFRAME_HEIGHT in
+                // public/widget.js) so the preview matches it exactly. The larger
+                // viewport subtraction just keeps headroom inside the config panel.
                 height: 'min(680px, calc(100svh - 170px))',
               }}
               className="overflow-hidden border shadow-2xl bg-white"
@@ -318,7 +319,10 @@ function buildPreviewPublicConfig(config: LiveConfig): PublicBotConfig {
       fontFamily: config.theme?.fontFamily ?? 'geist',
       showCallButton: config.theme?.showCallButton ?? true,
       navButtonRadius: config.theme?.navButtonRadius ?? 12,
+      backgroundColor: config.theme?.backgroundColor ?? '#ffffff',
+      backgroundImageOpacity: config.theme?.backgroundImageOpacity ?? 100,
       ...(config.theme?.bubbleIcon !== undefined && { bubbleIcon: config.theme.bubbleIcon }),
+      ...(config.theme?.backgroundImageUrl ? { backgroundImageUrl: config.theme.backgroundImageUrl } : {}),
     },
     languages,
     defaultLanguage: config.defaultLanguage,

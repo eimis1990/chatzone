@@ -57,6 +57,9 @@ export interface PublicBotConfig {
     launcherColor?: string
     showCallButton?: boolean
     navButtonRadius?: number
+    backgroundColor?: string
+    backgroundImageUrl?: string
+    backgroundImageOpacity?: number
   }
   languages: BotLanguage[]
   defaultLanguage?: BotLanguage
@@ -104,9 +107,12 @@ export function publicBotConfig(config: BotConfig): PublicBotConfig {
       launcherShowLogo: config.theme.launcherShowLogo ?? false,
       showCallButton: config.theme.showCallButton ?? true,
       navButtonRadius: config.theme.navButtonRadius ?? 12,
+      backgroundColor: config.theme.backgroundColor ?? '#ffffff',
+      backgroundImageOpacity: config.theme.backgroundImageOpacity ?? 100,
       ...(config.theme.bubbleIcon !== undefined && { bubbleIcon: config.theme.bubbleIcon }),
       ...(config.theme.launcherLabel ? { launcherLabel: config.theme.launcherLabel } : {}),
       ...(config.theme.launcherColor ? { launcherColor: config.theme.launcherColor } : {}),
+      ...(config.theme.backgroundImageUrl ? { backgroundImageUrl: config.theme.backgroundImageUrl } : {}),
     },
     languages: config.languages ?? ['en'],
     defaultLanguage: config.defaultLanguage ?? (config.languages ?? ['en'])[0],

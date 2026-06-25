@@ -131,6 +131,12 @@ export interface BotConfig {
     showCallButton?: boolean
     /** Corner radius (px) for the header nav buttons (call + restart). */
     navButtonRadius?: number
+    /** Chat-body background color (base layer). Defaults to white. */
+    backgroundColor?: string
+    /** Optional chat-body background image, overlaid on top of backgroundColor. */
+    backgroundImageUrl?: string
+    /** Opacity (0–100) of the background image over the color. Defaults to 100. */
+    backgroundImageOpacity?: number
   }
   voice: VoiceConfig
   /** Enabled languages. Always includes 'en'; the first entry is the default. */

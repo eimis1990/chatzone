@@ -11,9 +11,20 @@ interface ComposerProps {
   language?: 'en' | 'lt'
   /** Corner radius (px) for the message field — shared with the nav buttons. */
   radius?: number
+  /** Chat background color — the composer bar matches it (no background image). */
+  backgroundColor?: string
 }
 
-export function Composer({ onSend, disabled = false, primaryColor, language, radius = 12 }: ComposerProps) {
+export function Composer({
+  onSend,
+  disabled = false,
+  primaryColor,
+  language,
+  radius = 12,
+  backgroundColor = '#ffffff',
+}: ComposerProps) {
+  // Match the chat background color so a dark theme doesn't leave a white bar.
+  const lightBar = isLightColor(backgroundColor)
   const [value, setValue] = useState('')
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -43,7 +54,13 @@ export function Composer({ onSend, disabled = false, primaryColor, language, rad
   }
 
   return (
-    <div className="border-t border-gray-200 bg-white">
+    <div
+      className="border-t"
+      style={{
+        backgroundColor,
+        borderTopColor: lightBar ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.14)',
+      }}
+    >
       <form
         onSubmit={handleSubmit}
         className="flex items-end gap-2 px-4 py-3"
@@ -58,7 +75,7 @@ export function Composer({ onSend, disabled = false, primaryColor, language, rad
           disabled={disabled}
           rows={1}
           aria-label="Message input"
-          className="flex-1 resize-none border border-gray-200 px-3 py-2 text-sm leading-5 focus:outline-none focus:ring-2 focus:ring-offset-0 disabled:opacity-50 overflow-hidden"
+          className="flex-1 resize-none border border-gray-200 bg-white px-3 py-2 text-sm leading-5 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-0 disabled:opacity-50 overflow-hidden"
           style={{ maxHeight: '120px', borderRadius: `${radius}px`, '--tw-ring-color': primaryColor } as React.CSSProperties}
         />
 

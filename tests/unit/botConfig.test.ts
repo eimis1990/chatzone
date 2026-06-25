@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { botConfigSchema, defaultBotConfig } from '@/lib/validation/schemas'
+import { botConfigSchema, botConfigFormSchema, defaultBotConfig } from '@/lib/validation/schemas'
 
 describe('defaultBotConfig', () => {
   it('produces a config that satisfies the schema', () => {
@@ -110,5 +110,36 @@ describe('botConfigSchema', () => {
       },
     })
     expect(parsed.leadCapture.fields[0].key).toBe('email')
+  })
+})
+
+// Regression: creating a bot, configuring it, and pressing Save did nothing and
+// reverted on refresh. Root cause — RHF materialized a half-built content.lt
+// (greeting === undefined) when the Lithuanian field array mounted, and the form
+// schema validated it strictly even on an English-only bot, silently blocking
+// Save. The fix (withEnabledLanguagesOnly) drops content for disabled languages.
+describe('botConfigFormSchema — per-language content', () => {
+  const enContent = { greeting: 'Hi', suggestedQuestions: [], fallbackMessage: 'x' }
+
+  it('rejects a half-built content.lt with no greeting', () => {
+    expect(() =>
+      botConfigFormSchema.parse({
+        displayName: 'Bot',
+        systemPrompt: 's',
+        languages: ['en'],
+        content: { en: enContent, lt: { suggestedQuestions: [] } },
+      }),
+    ).toThrow()
+  })
+
+  it('accepts an English-only config once disabled-language content is dropped', () => {
+    expect(() =>
+      botConfigFormSchema.parse({
+        displayName: 'Bot',
+        systemPrompt: 's',
+        languages: ['en'],
+        content: { en: enContent },
+      }),
+    ).not.toThrow()
   })
 })

@@ -563,6 +563,15 @@ export function ChatWindow({ config, transport, initialLanguage }: ChatWindowPro
   // the primary color is too light to show on white.
   const onWhiteAccent = isLightColor(primaryColor) ? '#374151' : primaryColor
 
+  // Custom chat-body background: a base color with an optional image overlaid at
+  // a chosen opacity. Defaults preserve the original solid-white look.
+  const bgColor = config.theme.backgroundColor || '#ffffff'
+  const bgImage = config.theme.backgroundImageUrl
+  const bgImageOpacity = (config.theme.backgroundImageOpacity ?? 100) / 100
+  // Whether the chat body is dark — drives readable colors for chips/text that
+  // sit directly on the background (e.g. the "talk to a person" button).
+  const darkBody = !isLightColor(bgColor)
+
   return (
     <div
       className="flex flex-col h-full bg-white overflow-hidden"
@@ -652,8 +661,20 @@ export function ChatWindow({ config, transport, initialLanguage }: ChatWindowPro
         </button>
       </div>
 
-      {/* Body — messages + composer. Relative so the product list can overlay it. */}
-      <div className="relative flex-1 flex flex-col min-h-0">
+      {/* Body — messages + composer. Relative so the product list can overlay it;
+          isolate so the background image layer (−z-10) stays behind the content. */}
+      <div
+        className="relative isolate flex-1 flex flex-col min-h-0"
+        style={{ backgroundColor: bgColor }}
+      >
+        {/* Optional background image, overlaid on the base color at chosen opacity. */}
+        {bgImage ? (
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 -z-10 bg-cover bg-center"
+            style={{ backgroundImage: `url(${bgImage})`, opacity: bgImageOpacity }}
+          />
+        ) : null}
         {/* Handoff banner */}
         {(handoffStatus === 'requested' || handoffStatus === 'live') && (
           <div className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white text-xs flex-shrink-0">
@@ -681,6 +702,7 @@ export function ChatWindow({ config, transport, initialLanguage }: ChatWindowPro
             greeting={greeting}
             suggestedQuestions={suggestedQuestions}
             primaryColor={primaryColor}
+            backgroundColor={bgColor}
             bubbleRadius={bubbleRadius}
             onSelect={handleQuickAction}
           />
@@ -718,10 +740,14 @@ export function ChatWindow({ config, transport, initialLanguage }: ChatWindowPro
               type="button"
               onClick={requestHandoff}
               className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-[filter] hover:brightness-95"
-              style={{
-                backgroundColor: `color-mix(in srgb, ${onWhiteAccent} 12%, transparent)`,
-                color: onWhiteAccent,
-              }}
+              style={
+                darkBody
+                  ? { backgroundColor: 'rgba(255,255,255,0.16)', color: '#ffffff' }
+                  : {
+                      backgroundColor: `color-mix(in srgb, ${onWhiteAccent} 12%, transparent)`,
+                      color: onWhiteAccent,
+                    }
+              }
             >
               <HeadsetIcon className="size-3.5" aria-hidden="true" />
               {HANDOFF_TALK_LABEL[activeLang] ?? HANDOFF_TALK_LABEL.en}
@@ -752,6 +778,7 @@ export function ChatWindow({ config, transport, initialLanguage }: ChatWindowPro
           primaryColor={primaryColor}
           language={activeLang}
           radius={navButtonRadius}
+          backgroundColor={bgColor}
         />
 
         {/* Full-height product list overlay (covers messages + composer) */}

@@ -2,7 +2,14 @@
 
 import { useState, useCallback, useEffect, useMemo, useRef, type ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
-import { useForm, useFieldArray, Controller, type Control, type UseFormWatch } from 'react-hook-form'
+import {
+  useForm,
+  useFieldArray,
+  Controller,
+  type Control,
+  type UseFormWatch,
+  type FieldErrors,
+} from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
 import {
@@ -64,6 +71,21 @@ interface ConfigFormProps {
 // FormValues = what RHF stores (Zod input type, with optionals).
 type FormValues = z.input<typeof botConfigFormSchema>
 
+// Only consider per-language content for languages that are actually enabled —
+// mirrors the server's superRefine. Without this, a half-materialized content.lt
+// (e.g. greeting === undefined, which RHF creates when the Lithuanian
+// suggested-questions field array mounts) fails languageContentSchema and
+// silently blocks Save on an English-only bot. Operates on a copy.
+function withEnabledLanguagesOnly(values: FormValues): FormValues {
+  const langs = values.languages ?? ['en']
+  if (!values.content) return values
+  const content = { ...values.content }
+  if (!langs.includes('lt')) delete content.lt
+  return { ...values, content }
+}
+
+const baseConfigResolver = zodResolver(botConfigFormSchema)
+
 // Commerce validation result state
 type CommerceTestState =
   | { status: 'idle' }
@@ -101,6 +123,22 @@ export function SectionHeader({
       </div>
     </div>
   )
+}
+
+// Friendly names for surfacing validation errors (a save that fails client-side
+// validation must never be silent — see onInvalid below).
+const FIELD_LABELS: Record<string, string> = {
+  displayName: 'Bot display name',
+  tagline: 'Tagline',
+  avatarUrl: 'Company logo',
+  botAvatarUrl: 'Bot avatar',
+  privacyUrl: 'Privacy policy URL',
+  systemPrompt: 'System prompt',
+  greeting: 'Greeting',
+  fallbackMessage: 'Fallback message',
+  suggestedQuestions: 'Quick actions',
+  storeUrl: 'Store URL',
+  launcherLabel: 'Launcher label',
 }
 
 export function ConfigForm({ botId, botName, initialConfig }: ConfigFormProps) {
@@ -160,7 +198,8 @@ export function ConfigForm({ botId, botName, initialConfig }: ConfigFormProps) {
   }, [initialConfig])
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(botConfigFormSchema),
+    resolver: (values, context, options) =>
+      baseConfigResolver(withEnabledLanguagesOnly(values), context, options),
     defaultValues: initialFormValues,
     mode: 'onChange',
   })
@@ -276,15 +315,19 @@ export function ConfigForm({ botId, botName, initialConfig }: ConfigFormProps) {
         if (!current.includes('lt')) {
           setValue('languages', [...current, 'lt'], { shouldDirty: true })
         }
-        // Initialize lt content if not present
+        // Ensure lt content is fully present — seed any missing fields while
+        // keeping existing ones (a field array may have created a partial object
+        // with no greeting/fallback, which would fail validation).
         const ltContent = watch('content.lt')
-        if (!ltContent) {
-          setValue(
-            'content.lt',
-            { greeting: '', suggestedQuestions: [], fallbackMessage: '' },
-            { shouldDirty: true },
-          )
-        }
+        setValue(
+          'content.lt',
+          {
+            greeting: ltContent?.greeting ?? '',
+            suggestedQuestions: ltContent?.suggestedQuestions ?? [],
+            fallbackMessage: ltContent?.fallbackMessage ?? '',
+          },
+          { shouldDirty: true },
+        )
         selectLang('lt')
       } else {
         // Remove 'lt' from languages
@@ -302,17 +345,49 @@ export function ConfigForm({ botId, botName, initialConfig }: ConfigFormProps) {
 
   const onSubmit = useCallback(
     async (values: FormValues) => {
-      const result = await saveConfig(botId, values, name.trim())
-      if (result.success) {
-        toast.success('Configuration saved')
-        // Refresh so the sidebar reflects a renamed bot.
-        router.refresh()
-      } else {
-        toast.error(result.error ?? 'Failed to save configuration')
+      try {
+        const result = await saveConfig(botId, withEnabledLanguagesOnly(values), name.trim())
+        if (result.success) {
+          toast.success('Configuration saved')
+          // Refresh so the sidebar reflects a renamed bot.
+          router.refresh()
+        } else {
+          toast.error(result.error ?? 'Failed to save configuration')
+        }
+      } catch (err) {
+        // A thrown server action would otherwise fail silently.
+        toast.error(err instanceof Error ? err.message : 'Failed to save configuration')
       }
     },
     [botId, name, router],
   )
+
+  // Called when the form fails client-side validation. Without this, react-hook-form
+  // silently does nothing on Save — the user sees no feedback and the change never
+  // persists. Surface exactly which fields are blocking the save.
+  const onInvalid = useCallback((formErrors: FieldErrors<FormValues>) => {
+    const problems: string[] = []
+    const walk = (node: unknown, lastKey: string) => {
+      if (!node || typeof node !== 'object') return
+      const rec = node as Record<string, unknown>
+      if (typeof rec.message === 'string') {
+        const label = FIELD_LABELS[lastKey] ?? lastKey
+        problems.push(`${label} — ${String(rec.message).toLowerCase()}`)
+        return
+      }
+      for (const [key, value] of Object.entries(rec)) {
+        if (key === 'ref' || key === 'type' || key === 'types' || key === 'root') continue
+        walk(value, key)
+      }
+    }
+    walk(formErrors, '')
+    const unique = [...new Set(problems)].slice(0, 4)
+    toast.error(
+      unique.length
+        ? `Can't save yet — ${unique.join('; ')}`
+        : "Can't save — please check the highlighted fields.",
+    )
+  }, [])
 
   const leadCaptureEnabled = watch('leadCapture.enabled')
 
@@ -341,7 +416,7 @@ export function ConfigForm({ botId, botName, initialConfig }: ConfigFormProps) {
     <div className="flex h-full min-h-0">
       {/* ── Config panel — resizable from its right edge, scrolls internally ── */}
       <ResizablePanel defaultFraction={0.5} defaultWidth={480} min={380} max={1100}>
-        <form onSubmit={handleSubmit(onSubmit)} className="pb-10">
+        <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="pb-10">
 
         {/* Sticky toolbar — title + always-visible Save (fixed height so the
             section headers below can pin exactly beneath it). */}
@@ -988,6 +1063,82 @@ export function ConfigForm({ botId, botName, initialConfig }: ConfigFormProps) {
                   Corner radius of the header buttons (call &amp; restart).
                 </p>
               </div>
+            </div>
+
+            {/* Chat background — a base color with an optional image overlaid at
+                a chosen opacity (image is layered on top of the color). */}
+            <div className="space-y-4 border-t pt-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="backgroundColor">Chat background color</Label>
+                <Controller
+                  name="theme.backgroundColor"
+                  control={control}
+                  render={({ field }) => (
+                    <div className="flex items-center gap-2">
+                      <input
+                        id="backgroundColor"
+                        type="color"
+                        value={field.value || '#ffffff'}
+                        onChange={(e) => field.onChange(e.target.value)}
+                        className="h-8 w-10 cursor-pointer rounded border border-input bg-transparent p-0.5 flex-shrink-0"
+                        aria-label="Pick chat background color"
+                      />
+                      <Input
+                        value={field.value ?? ''}
+                        onChange={(e) => field.onChange(e.target.value)}
+                        onBlur={field.onBlur}
+                        placeholder="#ffffff"
+                        className="flex-1 font-mono text-sm"
+                        aria-label="Chat background color hex value"
+                      />
+                    </div>
+                  )}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Fills the chat area behind messages. Used on its own, or as the base layer under a background image.
+                </p>
+              </div>
+
+              <LogoUpload
+                botId={botId}
+                control={control}
+                setValue={setValue}
+                name="theme.backgroundImageUrl"
+                label="Chat background image (optional)"
+                filePrefix="bg"
+                description="Shown behind the conversation, layered on top of the background color."
+              />
+
+              {watch('theme.backgroundImageUrl') ? (
+                <div className="space-y-2">
+                  <Label>
+                    Background image opacity{' '}
+                    <span className="text-muted-foreground font-normal">
+                      ({watch('theme.backgroundImageOpacity') ?? 100}%)
+                    </span>
+                  </Label>
+                  <Controller
+                    control={control}
+                    name="theme.backgroundImageOpacity"
+                    render={({ field }) => (
+                      <Slider
+                        min={0}
+                        max={100}
+                        step={1}
+                        value={field.value ?? 100}
+                        onValueChange={(v) => field.onChange(Array.isArray(v) ? v[0] : v)}
+                      />
+                    )}
+                  />
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>Subtle</span>
+                    <span>Full</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Lower the opacity to blend the image into your background color and keep messages readable.
+                  </p>
+                </div>
+              ) : null}
             </div>
 
             <div className="flex items-center justify-between gap-4">

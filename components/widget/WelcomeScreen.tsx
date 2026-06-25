@@ -13,6 +13,8 @@ interface WelcomeScreenProps {
   greeting: string
   suggestedQuestions: SuggestedQuestion[]
   primaryColor: string
+  /** Chat background color — drives readable text color for the non-bubble header. */
+  backgroundColor?: string
   bubbleRadius?: number
   /** Receives the clicked action and its index (so the host can fetch / send). */
   onSelect: (action: SuggestedQuestion, index: number) => void
@@ -33,6 +35,7 @@ export function WelcomeScreen({
   greeting,
   suggestedQuestions,
   primaryColor,
+  backgroundColor = '#ffffff',
   bubbleRadius = 16,
   onSelect,
 }: WelcomeScreenProps) {
@@ -40,6 +43,9 @@ export function WelcomeScreen({
   // Tint the arrow with the header color, but keep it visible on white when
   // that color is very light.
   const accentColor = isLightColor(primaryColor) ? '#9ca3af' : primaryColor
+  // On a dark chat background the name + tagline (which sit directly on the
+  // background, not in a bubble) would be dark-on-dark — flip them to light.
+  const darkBg = !isLightColor(backgroundColor)
   const visibleQuestions = suggestedQuestions.slice(0, 6)
   // With an odd number of tiles the last one would sit alone in a half-width
   // cell — span it full width instead so the grid never looks lopsided.
@@ -88,8 +94,20 @@ export function WelcomeScreen({
             {displayName.charAt(0).toUpperCase()}
           </div>
         )}
-        <h2 className="mt-3 text-lg font-bold leading-tight text-gray-900">{displayName}</h2>
-        {tagline ? <p className="text-sm text-gray-500">{tagline}</p> : null}
+        <h2
+          className="mt-3 text-lg font-bold leading-tight text-gray-900"
+          style={darkBg ? { color: '#ffffff' } : undefined}
+        >
+          {displayName}
+        </h2>
+        {tagline ? (
+          <p
+            className="text-sm text-gray-500"
+            style={darkBg ? { color: 'rgba(255,255,255,0.75)' } : undefined}
+          >
+            {tagline}
+          </p>
+        ) : null}
       </motion.div>
 
       {/* Welcome message card */}
