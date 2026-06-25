@@ -49,9 +49,9 @@ const HANDOFF_BANNER_REQUESTED: Record<BotLanguage, string> = {
   en: 'Connecting you with a team member…',
   lt: 'Jungiame jus su komandos nariu…',
 }
-const QUICK_ACTION_EMPTY: Record<BotLanguage, string> = {
-  en: "Sorry, I couldn't load that right now.",
-  lt: 'Atsiprašau, šiuo metu nepavyko įkelti.',
+const LINK_ACTION_NOTE: Record<BotLanguage, string> = {
+  en: 'Sure! Just follow the link below 👇',
+  lt: 'Žinoma! Tiesiog spustelėkite nuorodą žemiau 👇',
 }
 const HANDOFF_ENDED_NOTE: Record<BotLanguage, string> = {
   en: 'The chat with our team member has ended. You can keep chatting with the assistant.',
@@ -443,57 +443,33 @@ export function ChatWindow({ config, transport, initialLanguage }: ChatWindowPro
     [streaming, conversationId, leadDismissed, config.leadCapture.enabled, activeLang, transport, syncMessageIds, updateHandoff, buildHistory]
   )
 
-  /** "Fetch URL" quick action: pull products server-side and show them as cards. */
-  const runQuickAction = useCallback(
-    async (index: number, label: string) => {
-      if (streaming) return
+  /** "Open URL" quick action: reply with a short note + a button to the link. */
+  const showLinkAction = useCallback(
+    (label: string, url: string) => {
       const userMsg: ChatMessage = { id: generateId(), role: 'user', content: label }
-      const placeholder: ChatMessage = { id: generateId(), role: 'assistant', content: '', streaming: true }
-      setMessages((prev) => [...prev, userMsg, placeholder])
-      setStreaming(true)
-      try {
-        const res = await transport.runAction({
-          actionIndex: index,
-          language: activeLang,
-          conversationId,
-          visitorId: visitorIdRef.current,
-        })
-        if (res.conversationId) setConversationId(res.conversationId)
-        setMessages((prev) =>
-          prev.map((m) =>
-            m.id === placeholder.id
-              ? res.products.length
-                ? { ...m, streaming: false, products: res.products }
-                : { ...m, streaming: false, content: QUICK_ACTION_EMPTY[activeLang] ?? QUICK_ACTION_EMPTY.en }
-              : m,
-          ),
-        )
-      } catch {
-        setMessages((prev) =>
-          prev.map((m) =>
-            m.id === placeholder.id
-              ? { ...m, streaming: false, content: QUICK_ACTION_EMPTY[activeLang] ?? QUICK_ACTION_EMPTY.en }
-              : m,
-          ),
-        )
-      } finally {
-        setStreaming(false)
+      const botMsg: ChatMessage = {
+        id: generateId(),
+        role: 'assistant',
+        content: LINK_ACTION_NOTE[activeLang] ?? LINK_ACTION_NOTE.en,
+        link: { url, label },
       }
+      setMessages((prev) => [...prev, userMsg, botMsg])
     },
-    [streaming, transport, activeLang, conversationId],
+    [activeLang],
   )
 
-  /** Welcome-screen quick action: fetch (URL), or send a prompt/label to the bot. */
+  /** Welcome-screen quick action: open a link, or send a prompt/label to the bot. */
   const handleQuickAction = useCallback(
-    (action: SuggestedQuestion, index: number) => {
+    (action: SuggestedQuestion) => {
       const label = sqLabel(action)
-      if (sqUrl(action)) {
-        void runQuickAction(index, label)
+      const url = sqUrl(action)
+      if (url) {
+        showLinkAction(label, url)
       } else {
         void sendMessage(sqPrompt(action), label)
       }
     },
-    [runQuickAction, sendMessage],
+    [showLinkAction, sendMessage],
   )
 
   /** Visitor taps "Talk to a person" → escalate the conversation. */

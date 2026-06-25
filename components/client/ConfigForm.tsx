@@ -106,8 +106,10 @@ export function ConfigForm({ botId, botName, initialConfig }: ConfigFormProps) {
   const router = useRouter()
   // Internal bot name — lives outside the config schema, saved alongside it.
   const [name, setName] = useState(botName)
-  // Per-row quick-action mode (keyed by field id; UI-only, derived from fields).
-  const [actionModes, setActionModes] = useState<Record<string, 'message' | 'prompt' | 'url'>>({})
+  // Quick-action add/edit dialog.
+  const [qaOpen, setQaOpen] = useState(false)
+  const [qaIndex, setQaIndex] = useState<number | null>(null)
+  const [qaDraft, setQaDraft] = useState({ label: '', prompt: '', url: '' })
   // System-prompt expand dialog.
   const [promptOpen, setPromptOpen] = useState(false)
   // Active language tab — drives which content.<lang> fields are shown + live preview.
@@ -221,6 +223,26 @@ export function ConfigForm({ botId, botName, initialConfig }: ConfigFormProps) {
   const activeSuggestedField =
     activeLang === 'lt' ? suggestedQuestionsFieldLt : suggestedQuestionsFieldEn
   const suggestedCount = activeSuggestedField.fields.length
+
+  // Open the quick-action dialog to add (index null) or edit an existing one.
+  const openQuickAction = (index: number | null) => {
+    if (index === null) {
+      setQaDraft({ label: '', prompt: '', url: '' })
+    } else {
+      const f = activeSuggestedField.fields[index] as { label?: string; prompt?: string; url?: string }
+      setQaDraft({ label: f.label ?? '', prompt: f.prompt ?? '', url: f.url ?? '' })
+    }
+    setQaIndex(index)
+    setQaOpen(true)
+  }
+
+  const saveQuickAction = () => {
+    const value = { label: qaDraft.label.trim(), prompt: qaDraft.prompt.trim(), url: qaDraft.url.trim() }
+    if (!value.label) return
+    if (qaIndex === null) activeSuggestedField.append(value)
+    else activeSuggestedField.update(qaIndex, value)
+    setQaOpen(false)
+  }
 
   // Dynamic list for lead capture fields
   const leadFieldsArray = useFieldArray({
@@ -515,7 +537,7 @@ export function ConfigForm({ botId, botName, initialConfig }: ConfigFormProps) {
                 )}
               </div>
 
-              {/* Quick actions — a button label + what happens on click */}
+              {/* Quick actions — welcome-screen buttons, edited via a dialog */}
               <div className="space-y-2">
                 <Label>
                   Quick actions
@@ -524,84 +546,112 @@ export function ConfigForm({ botId, botName, initialConfig }: ConfigFormProps) {
                   </span>
                 </Label>
                 <p className="text-xs text-muted-foreground">
-                  Buttons shown on the welcome screen. Each can send its label, send a custom message
-                  to the bot, or fetch products from a URL and show them as cards.
+                  Buttons shown on the welcome screen. Each sends text to the bot, or opens a link.
                 </p>
-                {activeSuggestedField.fields.map((field, index) => {
-                  const f = field as { id: string; prompt?: string; url?: string }
-                  const mode =
-                    actionModes[f.id] ?? (f.url ? 'url' : f.prompt ? 'prompt' : 'message')
-                  const base = `content.${activeLang}.suggestedQuestions.${index}` as const
-                  const setMode = (m: 'message' | 'prompt' | 'url') => {
-                    setActionModes((prev) => ({ ...prev, [f.id]: m }))
-                    if (m !== 'prompt') setValue(`${base}.prompt`, '')
-                    if (m !== 'url') setValue(`${base}.url`, '')
-                  }
-                  return (
-                    <div key={field.id} className="space-y-2 rounded-lg border p-2.5">
-                      <div className="flex items-center gap-2">
-                        <Input
-                          {...register(`${base}.label` as const)}
-                          placeholder="Button label — e.g. TOP Prekės"
-                        />
-                        <Button
+                <div className="space-y-2">
+                  {activeSuggestedField.fields.map((field, index) => {
+                    const f = field as { id: string; label?: string; prompt?: string; url?: string }
+                    const summary = f.url
+                      ? `Opens ${f.url}`
+                      : f.prompt
+                        ? `Sends: ${f.prompt}`
+                        : 'Sends the title'
+                    return (
+                      <div
+                        key={field.id}
+                        className="flex items-center gap-2 rounded-lg border p-2.5"
+                      >
+                        <button
                           type="button"
-                          variant="ghost"
-                          size="icon-sm"
+                          onClick={() => openQuickAction(index)}
+                          className="min-w-0 flex-1 text-left"
+                        >
+                          <p className="truncate text-sm font-medium">{f.label || 'Untitled action'}</p>
+                          <p className="truncate text-xs text-muted-foreground">{summary}</p>
+                        </button>
+                        <button
+                          type="button"
                           onClick={() => activeSuggestedField.remove(index)}
                           aria-label="Remove quick action"
+                          className="flex size-7 shrink-0 items-center justify-center rounded-md bg-destructive text-white transition-[filter] hover:brightness-95"
                         >
-                          <TrashIcon />
-                        </Button>
+                          <TrashIcon className="size-3.5" />
+                        </button>
                       </div>
-                      <Select value={mode} onValueChange={(v) => setMode(v as 'message' | 'prompt' | 'url')}>
-                        <SelectTrigger className="w-full">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="message">Send the label as a message</SelectItem>
-                          <SelectItem value="prompt">Send a custom message to the bot</SelectItem>
-                          <SelectItem value="url">Fetch products from a URL</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      {mode === 'prompt' && (
-                        <Input
-                          {...register(`${base}.prompt` as const)}
-                          placeholder="Message sent to the bot — e.g. Parodyk populiariausias prekes"
-                        />
-                      )}
-                      {mode === 'url' && (
-                        <div className="space-y-1">
-                          <Input
-                            {...register(`${base}.url` as const)}
-                            placeholder="https://yourstore.com/api/top-products.json"
-                          />
-                          <p className="text-xs text-muted-foreground">
-                            Must return JSON products; common field names are detected automatically.
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  )
-                })}
-                <div className="flex items-center gap-3">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    disabled={suggestedCount >= MAX_SUGGESTED_QUESTIONS}
-                    onClick={() => activeSuggestedField.append({ label: '', prompt: '', url: '' })}
-                  >
-                    <PlusIcon />
-                    Add quick action
-                  </Button>
-                  {suggestedCount >= MAX_SUGGESTED_QUESTIONS && (
-                    <p className="text-xs text-muted-foreground">
-                      Maximum {MAX_SUGGESTED_QUESTIONS} allowed
-                    </p>
-                  )}
+                    )
+                  })}
                 </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={suggestedCount >= MAX_SUGGESTED_QUESTIONS}
+                  onClick={() => openQuickAction(null)}
+                >
+                  <PlusIcon />
+                  Add quick action
+                </Button>
+                {suggestedCount >= MAX_SUGGESTED_QUESTIONS && (
+                  <p className="text-xs text-muted-foreground">Maximum {MAX_SUGGESTED_QUESTIONS} allowed</p>
+                )}
               </div>
+
+              {/* Quick-action add/edit dialog */}
+              <Dialog open={qaOpen} onOpenChange={setQaOpen}>
+                <DialogContent className="sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>{qaIndex === null ? 'Add quick action' : 'Edit quick action'}</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-3">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="qa-title">Action title</Label>
+                      <Input
+                        id="qa-title"
+                        value={qaDraft.label}
+                        onChange={(e) => setQaDraft((d) => ({ ...d, label: e.target.value }))}
+                        placeholder="e.g. TOP Prekės"
+                        maxLength={80}
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="qa-text">
+                        Action text to send
+                        <span className="ml-1.5 text-xs font-normal text-muted-foreground">(optional)</span>
+                      </Label>
+                      <Input
+                        id="qa-text"
+                        value={qaDraft.prompt}
+                        onChange={(e) => setQaDraft((d) => ({ ...d, prompt: e.target.value }))}
+                        placeholder="Message sent to the bot — e.g. Parodyk populiariausias prekes"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="qa-url">
+                        Url to open
+                        <span className="ml-1.5 text-xs font-normal text-muted-foreground">(optional)</span>
+                      </Label>
+                      <Input
+                        id="qa-url"
+                        value={qaDraft.url}
+                        onChange={(e) => setQaDraft((d) => ({ ...d, url: e.target.value }))}
+                        placeholder="https://yourstore.com/page"
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      If a URL is set, clicking shows the visitor a link button to follow. Otherwise the
+                      text is sent to the bot — or the title itself if no text is given.
+                    </p>
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <Button type="button" variant="outline" size="sm" onClick={() => setQaOpen(false)}>
+                      Cancel
+                    </Button>
+                    <Button type="button" size="sm" onClick={saveQuickAction} disabled={!qaDraft.label.trim()}>
+                      {qaIndex === null ? 'Add' : 'Save'}
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
 
               {/* Fallback message */}
               <div className="space-y-1.5">

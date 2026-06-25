@@ -43,7 +43,7 @@ export default async function ClientLayout({
   return (
     <div className="relative isolate flex h-svh overflow-hidden bg-sidebar-mesh">
       {/* Decorative grid fading up from the bottom of the dark shell */}
-      <div className="shell-grid pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-[22vh]" aria-hidden="true" />
+      <div className="shell-grid pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-[30vh]" aria-hidden="true" />
       <AppSidebar bots={bots} userEmail={user.email ?? ''} />
       <main className="flex-1 min-w-0 m-3 overflow-y-auto rounded-2xl bg-background shadow-sm">
         {children}

@@ -182,8 +182,8 @@ export function AppSidebar({ bots, userEmail }: { bots: BotLite[]; userEmail: st
         </Link>
       </nav>
 
-      {/* Footer — user + sign out, as a subtle dark card */}
-      <div className="m-3 rounded-xl bg-white/5 p-3 ring-1 ring-white/10">
+      {/* Footer — user + sign out, as a solid dark card */}
+      <div className="m-3 rounded-xl bg-[#1b1d1f] p-3 ring-1 ring-white/10">
         <p className="truncate px-1 pb-1.5 text-xs text-white/55" title={userEmail}>
           {userEmail}
         </p>

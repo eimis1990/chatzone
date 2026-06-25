@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { ThumbsUpIcon, ThumbsDownIcon, HeadsetIcon } from 'lucide-react'
+import { ThumbsUpIcon, ThumbsDownIcon, HeadsetIcon, ArrowUpRightIcon } from 'lucide-react'
 import { ProductCards } from './ProductCards'
 import { OrderStatusCard } from './OrderStatusCard'
 import { ThinkingDots } from './ThinkingDots'
@@ -19,6 +19,8 @@ export interface ChatMessage {
   products?: CommerceProduct[]
   /** An order-status lookup result, rendered as a card. */
   order?: OrderStatus
+  /** A link button (from an "open URL" quick action). */
+  link?: { url: string; label: string }
   /** Assistant message authored by a human agent (handoff) vs. the bot. */
   fromHuman?: boolean
 }
@@ -183,6 +185,26 @@ export function MessageList({
                 primaryColor={primaryColor}
                 language={activeLang}
               />
+            </div>
+          )}
+
+          {/* Link button (from an "open URL" quick action) */}
+          {msg.role === 'assistant' && msg.link && (
+            <div className="pl-10">
+              <a
+                href={msg.link.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium transition-[filter] hover:brightness-95"
+                style={{
+                  backgroundColor: primaryColor,
+                  color: readableTextColor(primaryColor),
+                  borderRadius: `${Math.min(bubbleRadius, 14)}px`,
+                }}
+              >
+                {msg.link.label}
+                <ArrowUpRightIcon className="size-4" aria-hidden="true" />
+              </a>
             </div>
           )}
         </div>
