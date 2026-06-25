@@ -677,7 +677,7 @@ export function ChatWindow({ config, transport, initialLanguage }: ChatWindowPro
           <WelcomeScreen
             displayName={config.displayName}
             tagline={config.tagline}
-            avatarUrl={headerAvatar}
+            avatarUrl={messageAvatar}
             greeting={greeting}
             suggestedQuestions={suggestedQuestions}
             primaryColor={primaryColor}
