@@ -67,11 +67,11 @@ export function MessageList({
       <img
         src={avatarUrl}
         alt={alt}
-        className="w-8 h-8 rounded-full object-cover flex-shrink-0 mt-0.5"
+        className="w-9 h-9 rounded-full object-cover flex-shrink-0 mt-0.5"
       />
     ) : (
       <div
-        className="w-8 h-8 rounded-full flex-shrink-0 mt-0.5 flex items-center justify-center text-white text-xs font-bold"
+        className="w-9 h-9 rounded-full flex-shrink-0 mt-0.5 flex items-center justify-center text-white text-xs font-bold"
         style={{ backgroundColor: primaryColor }}
         aria-hidden="true"
       >
@@ -82,7 +82,7 @@ export function MessageList({
   // Human-agent replies get a distinct avatar so they don't look like the bot.
   const renderHumanAvatar = () => (
     <div
-      className="w-8 h-8 rounded-full flex-shrink-0 mt-0.5 flex items-center justify-center bg-gray-800 text-white"
+      className="w-9 h-9 rounded-full flex-shrink-0 mt-0.5 flex items-center justify-center bg-gray-800 text-white"
       aria-label="Agent"
       title="Agent"
     >
@@ -178,7 +178,7 @@ export function MessageList({
 
           {/* Order-status card */}
           {msg.role === 'assistant' && !msg.streaming && msg.order?.found && (
-            <div className="pl-10">
+            <div className="pl-11">
               <OrderStatusCard
                 order={msg.order}
                 bubbleRadius={bubbleRadius}
@@ -190,7 +190,7 @@ export function MessageList({
 
           {/* Link button (from an "open URL" quick action) */}
           {msg.role === 'assistant' && msg.link && (
-            <div className="pl-10">
+            <div className="pl-11">
               <a
                 href={msg.link.url}
                 target="_blank"

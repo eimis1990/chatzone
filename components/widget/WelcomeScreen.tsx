@@ -77,19 +77,19 @@ export function WelcomeScreen({
           <img
             src={avatarUrl}
             alt={displayName}
-            className="size-16 rounded-full object-cover ring-1 ring-black/5"
+            className="size-20 rounded-full object-cover ring-1 ring-black/5"
           />
         ) : (
           <div
-            className="flex size-16 items-center justify-center rounded-full text-xl font-bold text-white"
+            className="flex size-20 items-center justify-center rounded-full text-2xl font-bold text-white"
             style={{ backgroundColor: primaryColor, color: readableTextColor(primaryColor) }}
             aria-hidden="true"
           >
             {displayName.charAt(0).toUpperCase()}
           </div>
         )}
-        <h2 className="mt-3 text-lg font-bold text-gray-900">{displayName}</h2>
-        {tagline ? <p className="mt-0.5 text-sm text-gray-500">{tagline}</p> : null}
+        <h2 className="mt-3 text-lg font-bold leading-tight text-gray-900">{displayName}</h2>
+        {tagline ? <p className="text-sm text-gray-500">{tagline}</p> : null}
       </motion.div>
 
       {/* Welcome message card */}
@@ -116,7 +116,7 @@ export function WelcomeScreen({
                 type="button"
                 onClick={() => onSelect(q, i)}
                 variants={item}
-                className={`group relative flex min-h-[84px] flex-col justify-end overflow-hidden border border-gray-200 bg-white p-3 text-left text-sm font-medium leading-snug text-gray-800${fullWidth ? ' col-span-2' : ''}`}
+                className={`group relative flex min-h-[64px] flex-col justify-end overflow-hidden border border-gray-200 bg-white p-3 text-left text-sm font-medium leading-snug text-gray-800${fullWidth ? ' col-span-2' : ''}`}
                 style={{ borderRadius: radius }}
               >
                 {/* Soft glow in the top-right corner, tinted to the header color.
