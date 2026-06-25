@@ -102,6 +102,8 @@ export function ConfigForm({ botId, botName, initialConfig }: ConfigFormProps) {
   const router = useRouter()
   // Internal bot name — lives outside the config schema, saved alongside it.
   const [name, setName] = useState(botName)
+  // Per-row quick-action mode (keyed by field id; UI-only, derived from fields).
+  const [actionModes, setActionModes] = useState<Record<string, 'message' | 'prompt' | 'url'>>({})
   // Active language tab — drives which content.<lang> fields are shown + live preview.
   // Persisted to localStorage keyed by botId so it survives refresh.
   const lsKey = `cbz_cfg_lang_${botId}`
@@ -135,8 +137,12 @@ export function ConfigForm({ botId, botName, initialConfig }: ConfigFormProps) {
       if (Array.isArray(arr)) {
         content![lang].suggestedQuestions = arr.map((q) =>
           typeof q === 'string'
-            ? { label: q, prompt: '' }
-            : { label: (q as { label?: string }).label ?? '', prompt: (q as { prompt?: string }).prompt ?? '' },
+            ? { label: q, prompt: '', url: '' }
+            : {
+                label: (q as { label?: string }).label ?? '',
+                prompt: (q as { prompt?: string }).prompt ?? '',
+                url: (q as { url?: string }).url ?? '',
+              },
         )
       }
     }
@@ -502,52 +508,85 @@ export function ConfigForm({ botId, botName, initialConfig }: ConfigFormProps) {
                 )}
               </div>
 
-              {/* Suggested questions — a button label + the message it sends */}
+              {/* Quick actions — a button label + what happens on click */}
               <div className="space-y-2">
                 <Label>
-                  Suggested questions
+                  Quick actions
                   <span className="ml-1.5 text-xs font-normal text-muted-foreground">
                     ({LANG_LABELS[activeLang]}, max {MAX_SUGGESTED_QUESTIONS})
                   </span>
                 </Label>
                 <p className="text-xs text-muted-foreground">
-                  The label is the button text; the message is what the bot receives. Leave the
-                  message empty to send the label as-is.
+                  Buttons shown on the welcome screen. Each can send its label, send a custom message
+                  to the bot, or fetch products from a URL and show them as cards.
                 </p>
-                {activeSuggestedField.fields.map((field, index) => (
-                  <div key={field.id} className="flex items-start gap-2 rounded-lg border p-2">
-                    <div className="flex-1 space-y-1.5">
-                      <Input
-                        {...register(`content.${activeLang}.suggestedQuestions.${index}.label` as const)}
-                        placeholder="Button label — e.g. TOP Prekės"
-                      />
-                      <Input
-                        {...register(`content.${activeLang}.suggestedQuestions.${index}.prompt` as const)}
-                        placeholder="Message sent to the bot — e.g. Parodyk populiariausias prekes"
-                        className="text-muted-foreground"
-                      />
+                {activeSuggestedField.fields.map((field, index) => {
+                  const f = field as { id: string; prompt?: string; url?: string }
+                  const mode =
+                    actionModes[f.id] ?? (f.url ? 'url' : f.prompt ? 'prompt' : 'message')
+                  const base = `content.${activeLang}.suggestedQuestions.${index}` as const
+                  const setMode = (m: 'message' | 'prompt' | 'url') => {
+                    setActionModes((prev) => ({ ...prev, [f.id]: m }))
+                    if (m !== 'prompt') setValue(`${base}.prompt`, '')
+                    if (m !== 'url') setValue(`${base}.url`, '')
+                  }
+                  return (
+                    <div key={field.id} className="space-y-2 rounded-lg border p-2.5">
+                      <div className="flex items-center gap-2">
+                        <Input
+                          {...register(`${base}.label` as const)}
+                          placeholder="Button label — e.g. TOP Prekės"
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon-sm"
+                          onClick={() => activeSuggestedField.remove(index)}
+                          aria-label="Remove quick action"
+                        >
+                          <TrashIcon />
+                        </Button>
+                      </div>
+                      <Select value={mode} onValueChange={(v) => setMode(v as 'message' | 'prompt' | 'url')}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="message">Send the label as a message</SelectItem>
+                          <SelectItem value="prompt">Send a custom message to the bot</SelectItem>
+                          <SelectItem value="url">Fetch products from a URL</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      {mode === 'prompt' && (
+                        <Input
+                          {...register(`${base}.prompt` as const)}
+                          placeholder="Message sent to the bot — e.g. Parodyk populiariausias prekes"
+                        />
+                      )}
+                      {mode === 'url' && (
+                        <div className="space-y-1">
+                          <Input
+                            {...register(`${base}.url` as const)}
+                            placeholder="https://yourstore.com/api/top-products.json"
+                          />
+                          <p className="text-xs text-muted-foreground">
+                            Must return JSON products; common field names are detected automatically.
+                          </p>
+                        </div>
+                      )}
                     </div>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon-sm"
-                      onClick={() => activeSuggestedField.remove(index)}
-                      aria-label="Remove question"
-                    >
-                      <TrashIcon />
-                    </Button>
-                  </div>
-                ))}
+                  )
+                })}
                 <div className="flex items-center gap-3">
                   <Button
                     type="button"
                     variant="outline"
                     size="sm"
                     disabled={suggestedCount >= MAX_SUGGESTED_QUESTIONS}
-                    onClick={() => activeSuggestedField.append({ label: '', prompt: '' })}
+                    onClick={() => activeSuggestedField.append({ label: '', prompt: '', url: '' })}
                   >
                     <PlusIcon />
-                    Add question
+                    Add quick action
                   </Button>
                   {suggestedCount >= MAX_SUGGESTED_QUESTIONS && (
                     <p className="text-xs text-muted-foreground">

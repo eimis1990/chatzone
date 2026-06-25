@@ -11,6 +11,21 @@ export function sqPrompt(q: SuggestedQuestion): string {
   return q.prompt?.trim() || q.label
 }
 
+/** The owner endpoint a "fetch" quick action pulls products from (else undefined). */
+export function sqUrl(q: SuggestedQuestion): string | undefined {
+  if (typeof q === 'string') return undefined
+  const u = q.url?.trim()
+  return u || undefined
+}
+
+/** Behavior of a quick action: fetch a URL, send a prompt, or send the label. */
+export function sqMode(q: SuggestedQuestion): 'url' | 'prompt' | 'message' {
+  if (typeof q === 'string') return 'message'
+  if (q.url?.trim()) return 'url'
+  if (q.prompt?.trim()) return 'prompt'
+  return 'message'
+}
+
 /** Per-language browser-safe content (no fallback — server streams that). */
 export interface PublicLanguageContent {
   greeting: string

@@ -14,13 +14,16 @@ export const DEFAULT_VOICE_ID = '21m00Tcm4TlvDq8ikWAM' // ElevenLabs "Rachel"
 const DEFAULT_FALLBACK =
   "I'm not sure about that — let me take your details so someone can follow up."
 
-// A quick-action: a plain string (label === prompt) or a {label, prompt} pair
-// where `prompt` is the message actually sent to the bot.
+// A quick action. A plain string is the legacy form (label === message). The
+// object form carries a title (label) plus, optionally, a `prompt` (a richer
+// message sent to the bot) or a `url` (an owner endpoint the server fetches and
+// renders as product cards). url takes priority over prompt.
 export const suggestedQuestionSchema = z.union([
   z.string().min(1),
   z.object({
     label: z.string().min(1).max(80),
     prompt: z.string().max(300).optional().or(z.literal('')),
+    url: z.string().url().optional().or(z.literal('')),
   }),
 ])
 

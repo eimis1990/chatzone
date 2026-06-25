@@ -3,7 +3,7 @@
 import { motion, useReducedMotion, type Variants } from 'framer-motion'
 import { ArrowDownIcon } from 'lucide-react'
 import { readableTextColor, isLightColor } from '@/lib/utils'
-import { sqLabel, sqPrompt } from '@/lib/widget-config'
+import { sqLabel } from '@/lib/widget-config'
 import type { SuggestedQuestion } from '@/lib/types'
 
 interface WelcomeScreenProps {
@@ -14,8 +14,8 @@ interface WelcomeScreenProps {
   suggestedQuestions: SuggestedQuestion[]
   primaryColor: string
   bubbleRadius?: number
-  /** Receives (prompt, label): the message to send + the text shown in the bubble. */
-  onSelect: (prompt: string, label: string) => void
+  /** Receives the clicked action and its index (so the host can fetch / send). */
+  onSelect: (action: SuggestedQuestion, index: number) => void
 }
 
 /**
@@ -114,7 +114,7 @@ export function WelcomeScreen({
               <motion.button
                 key={i}
                 type="button"
-                onClick={() => onSelect(sqPrompt(q), label)}
+                onClick={() => onSelect(q, i)}
                 variants={item}
                 className={`group relative flex min-h-[84px] flex-col justify-end overflow-hidden border border-gray-200 bg-white p-3 text-left text-sm font-medium leading-snug text-gray-800${fullWidth ? ' col-span-2' : ''}`}
                 style={{ borderRadius: radius }}

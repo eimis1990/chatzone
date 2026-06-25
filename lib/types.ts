@@ -86,10 +86,13 @@ export interface VoiceConfig {
 /**
  * A welcome-screen quick action. A plain string is shorthand for a button whose
  * label and sent message are identical (legacy). The object form lets the label
- * (what the visitor sees) differ from the prompt actually sent to the bot — so a
- * short button like "TOP Prekės" can send a real query the bot can answer.
+ * (what the visitor sees) differ from what happens on click:
+ *   - `url` set    → the server fetches that endpoint and renders product cards.
+ *   - `prompt` set → that message is sent to the bot.
+ *   - neither      → the label itself is sent.
+ * `url` takes priority over `prompt`.
  */
-export type SuggestedQuestion = string | { label: string; prompt?: string }
+export type SuggestedQuestion = string | { label: string; prompt?: string; url?: string }
 
 /** Visitor-facing content that differs per language. */
 export interface LanguageContent {

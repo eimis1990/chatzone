@@ -17,6 +17,7 @@ import { ChatWindow } from '@/components/widget/ChatWindow'
 import { detectHandoffIntent, HANDOFF_ACK } from '@/lib/handoff'
 import type { ChatTransport } from '@/lib/widget-transport'
 import type { PublicBotConfig } from '@/lib/widget-config'
+import { sqUrl } from '@/lib/widget-config'
 import type { BotConfig, BotLanguage, SuggestedQuestion } from '@/lib/types'
 import { POWERED_BY_URL, readableTextColor } from '@/lib/utils'
 
@@ -214,6 +215,26 @@ function createPreviewTransport(botId: string, getConfig: () => BotConfig): Chat
         headers: JSON_HEADERS,
         body: JSON.stringify({ botId, query }),
       })
+      return res.json()
+    },
+
+    async runAction({ actionIndex, language }) {
+      const config = getConfig()
+      const langs = config.languages ?? ['en']
+      const lang = langs.includes(language)
+        ? language
+        : (config.defaultLanguage && langs.includes(config.defaultLanguage)
+            ? config.defaultLanguage
+            : langs[0]) ?? 'en'
+      const action = config.content?.[lang]?.suggestedQuestions?.[actionIndex]
+      const url = action ? sqUrl(action) : undefined
+      if (!url) return { products: [] }
+      const res = await fetch('/api/preview/action', {
+        method: 'POST',
+        headers: JSON_HEADERS,
+        body: JSON.stringify({ url }),
+      })
+      if (!res.ok) return { products: [] }
       return res.json()
     },
 
