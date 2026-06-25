@@ -33,7 +33,7 @@ export function ExportReportButton({ rows, filename }: ExportReportButtonProps) 
   }
 
   return (
-    <Button onClick={handleExport}>
+    <Button onClick={handleExport} className="h-10 rounded-md px-7">
       <DownloadIcon className="size-4" />
       Export
     </Button>

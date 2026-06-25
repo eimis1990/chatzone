@@ -18,7 +18,7 @@ export function AnalyticsRangeSelector({ range, rangeLabel }: AnalyticsRangeSele
 
   return (
     <div className="flex items-center gap-2">
-      <span className="hidden items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm text-muted-foreground md:inline-flex">
+      <span className="hidden h-10 items-center gap-1.5 rounded-md border px-3 text-sm text-muted-foreground md:inline-flex">
         <CalendarIcon className="size-4" aria-hidden="true" />
         {rangeLabel}
       </span>
@@ -26,7 +26,7 @@ export function AnalyticsRangeSelector({ range, rangeLabel }: AnalyticsRangeSele
         value={String(range)}
         onValueChange={(v) => router.push(`${pathname}?range=${v}`)}
       >
-        <SelectTrigger className="w-[150px]">
+        <SelectTrigger className="w-[150px] bg-card">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
