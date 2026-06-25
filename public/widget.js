@@ -51,7 +51,9 @@
   // ── Styles ────────────────────────────────────────────────────────────────
   var LAUNCHER_SIZE = 56
   var IFRAME_WIDTH = 420
-  var IFRAME_HEIGHT = 720
+  // Keep this in sync with the preview cap in components/client/TestChat.tsx so
+  // the embedded widget matches exactly what the owner sees in the configurator.
+  var IFRAME_HEIGHT = 680
   var OFFSET = 20
   var Z_INDEX = 2147483647 // max z-index
   var POWERED_BY_URL = 'https://chatzone.app'
