@@ -13,8 +13,8 @@ import {
   DatabaseIcon,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 import {
   Table,
   TableBody,
@@ -43,39 +43,29 @@ export const TYPE_META: Record<SourceType, { label: string; icon: LucideIcon }> 
   file: { label: 'File', icon: PaperclipIcon },
 }
 
+const STATUS_STYLE: Record<
+  SourceStatus,
+  { label: string; cls: string; dot: string; pulse?: boolean }
+> = {
+  pending: { label: 'Pending', cls: 'bg-amber-100 text-amber-700', dot: 'bg-amber-500' },
+  processing: { label: 'Processing', cls: 'bg-blue-100 text-blue-700', dot: 'bg-blue-500', pulse: true },
+  ready: { label: 'Ready', cls: 'bg-green-100 text-green-700', dot: 'bg-green-500' },
+  error: { label: 'Error', cls: 'bg-red-100 text-red-700', dot: 'bg-red-500' },
+}
+
 export function StatusBadge({ status, errorMessage }: { status: SourceStatus; errorMessage: string | null }) {
-  const badge = (() => {
-    switch (status) {
-      case 'pending':
-        return (
-          <Badge variant="secondary" className="gap-1">
-            <span className="size-1.5 rounded-full bg-yellow-500 inline-block" />
-            Pending
-          </Badge>
-        )
-      case 'processing':
-        return (
-          <Badge variant="secondary" className="gap-1">
-            <span className="size-1.5 rounded-full bg-blue-500 inline-block animate-pulse" />
-            Processing
-          </Badge>
-        )
-      case 'ready':
-        return (
-          <Badge variant="default" className="gap-1 bg-green-600 hover:bg-green-600">
-            <span className="size-1.5 rounded-full bg-white inline-block" />
-            Ready
-          </Badge>
-        )
-      case 'error':
-        return (
-          <Badge variant="destructive" className="gap-1">
-            <span className="size-1.5 rounded-full bg-white/80 inline-block" />
-            Error
-          </Badge>
-        )
-    }
-  })()
+  const s = STATUS_STYLE[status]
+  const badge = (
+    <span
+      className={cn(
+        'inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium',
+        s.cls,
+      )}
+    >
+      <span className={cn('size-1.5 rounded-full', s.dot, s.pulse && 'animate-pulse')} />
+      {s.label}
+    </span>
+  )
 
   if (status === 'error' && errorMessage) {
     return (

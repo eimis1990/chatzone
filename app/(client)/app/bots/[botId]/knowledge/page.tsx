@@ -1,5 +1,4 @@
 import { notFound } from 'next/navigation'
-import { DatabaseIcon } from 'lucide-react'
 import { requireRole } from '@/lib/auth/guards'
 import { createServerClient } from '@/lib/supabase/server'
 import type { KnowledgeSource } from '@/lib/types'
@@ -34,17 +33,11 @@ export default async function KnowledgePage({ params }: PageProps) {
 
   return (
     <div className="flex h-full flex-col gap-6 overflow-hidden p-6">
-      <div className="flex flex-shrink-0 items-start gap-3">
-        <div className="flex size-9 flex-shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-          <DatabaseIcon className="size-5" aria-hidden="true" />
-        </div>
-        <div>
-          <h2 className="text-lg font-semibold">Knowledge Base</h2>
-          <p className="mt-0.5 text-sm text-muted-foreground">
-            Add sources to train your bot. Each source is parsed, chunked, and embedded
-            automatically.
-          </p>
-        </div>
+      <div className="flex-shrink-0">
+        <h2 className="text-lg font-semibold">Knowledge Base</h2>
+        <p className="text-sm text-muted-foreground">
+          Add sources to train your bot. Each source is parsed, chunked, and embedded automatically.
+        </p>
       </div>
       <KnowledgeManager botId={botId} initialSources={sources ?? []} />
     </div>

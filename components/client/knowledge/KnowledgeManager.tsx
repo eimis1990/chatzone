@@ -57,7 +57,11 @@ export function KnowledgeManager({ botId, initialSources }: KnowledgeManagerProp
           <Tabs defaultValue="text">
             <TabsList className="mb-5 w-full group-data-horizontal/tabs:h-11">
               {SOURCE_TABS.map(({ value, label, icon: Icon }) => (
-                <TabsTrigger key={value} value={value} className="gap-1.5">
+                <TabsTrigger
+                  key={value}
+                  value={value}
+                  className="gap-1.5 data-active:bg-primary data-active:text-primary-foreground"
+                >
                   <Icon className="size-4" aria-hidden="true" />
                   {label}
                 </TabsTrigger>

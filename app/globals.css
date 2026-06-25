@@ -157,12 +157,12 @@
     background-image:
       repeating-linear-gradient(
         to right,
-        color-mix(in srgb, var(--foreground) 7%, transparent) 0 1px,
+        color-mix(in srgb, var(--foreground) 16%, transparent) 0 1px,
         transparent 1px 18px
       ),
       repeating-linear-gradient(
         to bottom,
-        color-mix(in srgb, var(--foreground) 7%, transparent) 0 1px,
+        color-mix(in srgb, var(--foreground) 16%, transparent) 0 1px,
         transparent 1px 18px
       );
     -webkit-mask-image: linear-gradient(to left, #000 0%, transparent 100%);
