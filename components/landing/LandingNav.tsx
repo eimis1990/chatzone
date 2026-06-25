@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { BotIcon, MenuIcon, XIcon } from 'lucide-react'
+import { MenuIcon, XIcon } from 'lucide-react'
+import { ChatzoneIcon } from '@/components/ChatzoneIcon'
 
 const LINKS = [
   { label: 'Features', href: '#features' },
@@ -28,9 +29,11 @@ export function LandingNav() {
       }`}
     >
       <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5">
-        <Link href="/" className={`flex items-center gap-2 font-semibold ${scrolled ? 'text-gray-900' : 'text-white'}`}>
-          <BotIcon className="size-5 text-[#9BDA48]" />
-          <span>Chatzone</span>
+        <Link href="/" className={`flex items-center gap-1 text-xl font-bold ${scrolled ? 'text-gray-900' : 'text-white'}`}>
+          <ChatzoneIcon className="size-12" />
+          <span>
+            Chatzone<span className="text-[#9BDA48]">.</span>
+          </span>
         </Link>
 
         <div className={`hidden items-center gap-8 text-sm font-medium md:flex ${scrolled ? 'text-gray-700' : 'text-white/85'}`}>

@@ -228,16 +228,30 @@
     background-image:
       repeating-linear-gradient(
         to right,
-        color-mix(in srgb, var(--primary) 30%, transparent) 0 1px,
+        rgba(255, 255, 255, 0.08) 0 1px,
         transparent 1px 40px
       ),
       repeating-linear-gradient(
         to bottom,
-        color-mix(in srgb, var(--primary) 30%, transparent) 0 1px,
+        rgba(255, 255, 255, 0.08) 0 1px,
         transparent 1px 40px
       );
     -webkit-mask-image: linear-gradient(to top, #000 0%, transparent 100%);
     mask-image: linear-gradient(to top, #000 0%, transparent 100%);
+  }
+
+}
+
+/* Infinite horizontal brand marquee (landing hero). Defined at top level so the
+   keyframes always register regardless of Tailwind's layer handling; the element
+   applies it via inline style. The track holds two identical copies of the logo
+   row, so a -50% shift loops seamlessly. */
+@keyframes brand-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
   }
 }
 /* Lenis smooth-scroll (landing). Note: intentionally NO `iframe { pointer-events:

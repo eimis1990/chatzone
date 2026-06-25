@@ -9,15 +9,15 @@ import {
   PlugIcon,
   SlidersHorizontalIcon,
   RocketIcon,
-  BotIcon,
 } from 'lucide-react'
 import Link from 'next/link'
 import { Reveal } from './Reveal'
 import { FeatureText } from './ScrollRevealText'
 import { EmailCapture } from './EmailCapture'
+import { ChatzoneIcon } from '@/components/ChatzoneIcon'
 
 const ACCENT = '#9BDA48'
-const DARK = '#13241b'
+const DARK = '#101213'
 
 // ───────────────────────── Trusted-by strip ─────────────────────────
 export function Logos() {
@@ -170,13 +170,17 @@ export function Stats() {
   ]
   return (
     <section style={{ backgroundColor: DARK }} className="text-white">
-      <div className="mx-auto grid max-w-6xl grid-cols-2 gap-8 px-5 py-16 lg:grid-cols-4">
+      <div className="mx-auto grid max-w-6xl grid-cols-2 md:grid-cols-4">
         {stats.map((s, i) => (
-          <Reveal key={s.label} delay={i * 0.08} className="text-center">
-            <div className="text-4xl font-semibold tracking-tight" style={{ color: '#7cc08a' }}>
-              {s.value}
-            </div>
-            <div className="mt-2 text-sm text-white/70">{s.label}</div>
+          <Reveal
+            key={s.label}
+            delay={i * 0.08}
+            className={`border-white/10 px-6 py-12 text-center ${
+              i === 0 ? '' : i % 2 === 0 ? 'md:border-l' : 'border-l'
+            }`}
+          >
+            <div className="text-4xl font-semibold tracking-tight text-white sm:text-5xl">{s.value}</div>
+            <div className="mt-2 text-sm text-white/55">{s.label}</div>
           </Reveal>
         ))}
       </div>
@@ -225,12 +229,8 @@ export function HowItWorks() {
 // ───────────────────────── Big CTA band ─────────────────────────
 export function CTASection() {
   return (
-    <section id="pricing" className="relative overflow-hidden text-white" style={{ backgroundColor: DARK }}>
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -right-20 -top-20 size-[26rem] rounded-full bg-[#9BDA48]/25 blur-[120px]" />
-        <div className="absolute bottom-0 left-0 size-[22rem] rounded-full bg-[#2f6b44]/30 blur-[110px]" />
-      </div>
-      <div className="relative mx-auto max-w-3xl px-5 py-24 text-center">
+    <section id="pricing" className="text-white" style={{ backgroundColor: DARK }}>
+      <div className="mx-auto max-w-3xl px-5 py-24 text-center">
         <Reveal>
           <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
             Put an AI agent on your store today
@@ -251,40 +251,33 @@ export function CTASection() {
 
 // ───────────────────────── Footer ─────────────────────────
 export function Footer() {
-  const cols = [
-    { title: 'Product', links: [['Features', '#features'], ['How it works', '#how'], ['Pricing', '#pricing']] },
-    { title: 'Company', links: [['Sign in', '/login'], ['Privacy', '/privacy']] },
-  ] as const
   return (
-    <footer className="border-t bg-white">
-      <div className="mx-auto grid max-w-6xl gap-10 px-5 py-14 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="lg:col-span-2">
-          <div className="flex items-center gap-2 font-semibold text-gray-900">
-            <BotIcon className="size-5" style={{ color: ACCENT }} />
-            Chatzone
-          </div>
-          <p className="mt-3 max-w-xs text-sm text-gray-500">
-            The AI chat &amp; voice agent for modern stores. Answers, leads, orders, and handoff — in one widget.
-          </p>
+    <footer className="border-t border-white/10 text-white" style={{ backgroundColor: DARK }}>
+      <div className="mx-auto max-w-6xl px-5 py-16 text-center">
+        <div className="flex items-center justify-center gap-1 text-xl font-bold">
+          <ChatzoneIcon className="size-12" />
+          <span>
+            Chatzone<span style={{ color: ACCENT }}>.</span>
+          </span>
         </div>
-        {cols.map((c) => (
-          <div key={c.title}>
-            <h4 className="text-sm font-semibold text-gray-900">{c.title}</h4>
-            <ul className="mt-3 space-y-2 text-sm text-gray-500">
-              {c.links.map(([label, href]) => (
-                <li key={label}>
-                  <Link href={href} className="transition-colors hover:text-gray-900">
-                    {label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
-      </div>
-      <div className="border-t">
-        <div className="mx-auto max-w-6xl px-5 py-6 text-xs text-gray-400">
-          © {2026} Chatzone. All rights reserved.
+        <p className="mx-auto mt-3 max-w-2xl text-sm text-white/55">
+          The AI chat &amp; voice agent for modern stores. Answers, leads, orders, and handoff — in one widget.
+        </p>
+
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-sm text-white/45">
+          <span>© {2026} Chatzone. All rights reserved.</span>
+          <span aria-hidden="true" className="text-base font-bold text-white/30">
+            •
+          </span>
+          <Link href="/privacy" className="transition-colors hover:text-white">
+            Privacy
+          </Link>
+          <span aria-hidden="true" className="text-base font-bold text-white/30">
+            •
+          </span>
+          <Link href="/terms" className="transition-colors hover:text-white">
+            Terms of use
+          </Link>
         </div>
       </div>
     </footer>
