@@ -75,7 +75,7 @@ export function ResizablePanel({
       className={cn('relative h-full flex-shrink-0 border-r bg-background', className)}
       style={{ width }}
     >
-      <div className="h-full overflow-y-auto">{children}</div>
+      <div className="no-scrollbar h-full overflow-y-auto">{children}</div>
 
       {/* Drag handle on the right edge */}
       <div

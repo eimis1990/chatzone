@@ -134,6 +134,17 @@
 /* Dotted canvas background (light grey with subtle dots) used behind the
    bot preview, à la the configurator canvas. */
 @layer utilities {
+  /* Hide the scrollbar while keeping the element scrollable. */
+  .no-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none;
+  }
+
   .bg-dots {
     background-color: var(--background);
     background-image: radial-gradient(var(--border) 1.2px, transparent 1.2px);
