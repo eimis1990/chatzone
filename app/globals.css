@@ -145,6 +145,30 @@
     display: none;
   }
 
+  /* Faint grid lines fading in from the right edge of a section header. */
+  .header-grid::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 42%;
+    pointer-events: none;
+    background-image:
+      repeating-linear-gradient(
+        to right,
+        color-mix(in srgb, var(--foreground) 7%, transparent) 0 1px,
+        transparent 1px 18px
+      ),
+      repeating-linear-gradient(
+        to bottom,
+        color-mix(in srgb, var(--foreground) 7%, transparent) 0 1px,
+        transparent 1px 18px
+      );
+    -webkit-mask-image: linear-gradient(to left, #000 0%, transparent 100%);
+    mask-image: linear-gradient(to left, #000 0%, transparent 100%);
+  }
+
   .bg-dots {
     background-color: var(--background);
     background-image: radial-gradient(var(--border) 1.2px, transparent 1.2px);

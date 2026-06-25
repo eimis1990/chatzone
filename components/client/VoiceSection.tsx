@@ -152,8 +152,8 @@ export function VoiceSection({ control, watch, setValue, activeLang, enabledLang
 
   return (
     <Card className="overflow-visible rounded-none border-b pt-0 shadow-none ring-0">
-      <CardHeader className="sticky top-14 z-[5] border-b bg-muted/70 py-3 backdrop-blur">
-        <div className="flex items-center gap-2.5">
+      <CardHeader className="header-grid relative sticky top-16 z-[5] overflow-hidden rounded-none border-b bg-muted/70 py-3 backdrop-blur">
+        <div className="relative z-10 flex items-center gap-2.5">
           <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground">
             <MicIcon className="size-4" aria-hidden="true" />
           </span>

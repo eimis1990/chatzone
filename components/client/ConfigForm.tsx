@@ -88,7 +88,7 @@ export function SectionHeader({
   description?: string
 }) {
   return (
-    <div className="flex items-center gap-2.5">
+    <div className="relative z-10 flex items-center gap-2.5">
       <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground">
         <Icon className="size-4" aria-hidden="true" />
       </span>
@@ -313,12 +313,12 @@ export function ConfigForm({ botId, botName, initialConfig }: ConfigFormProps) {
 
         {/* Sticky toolbar — title + always-visible Save (fixed height so the
             section headers below can pin exactly beneath it). */}
-        <div className="sticky top-0 z-20 flex h-14 items-center justify-between gap-3 border-b bg-card/95 px-5 backdrop-blur">
+        <div className="sticky top-0 z-20 flex h-16 items-center justify-between gap-3 border-b bg-card/95 px-5 backdrop-blur">
           <div>
-            <h2 className="text-sm font-semibold leading-tight">Configuration</h2>
+            <h2 className="text-base font-semibold leading-tight">Configuration</h2>
             <p className="text-xs text-muted-foreground">Changes go live when you save.</p>
           </div>
-          <Button type="submit" disabled={isSubmitting}>
+          <Button type="submit" disabled={isSubmitting} className="h-10 rounded-md px-7">
             <SaveIcon className="size-4" />
             {isSubmitting ? 'Saving…' : 'Save'}
           </Button>
@@ -326,7 +326,7 @@ export function ConfigForm({ botId, botName, initialConfig }: ConfigFormProps) {
 
         {/* ── Display ── */}
         <Card className="overflow-visible rounded-none border-b pt-0 shadow-none ring-0">
-          <CardHeader className="sticky top-14 z-[5] border-b bg-muted/70 py-3 backdrop-blur">
+          <CardHeader className="header-grid relative sticky top-16 z-[5] overflow-hidden rounded-none border-b bg-muted/70 py-3 backdrop-blur">
             <SectionHeader
               icon={MonitorIcon}
               title="Display"
@@ -407,7 +407,7 @@ export function ConfigForm({ botId, botName, initialConfig }: ConfigFormProps) {
 
         {/* ── Language & Content ── */}
         <Card className="overflow-visible rounded-none border-b pt-0 shadow-none ring-0">
-          <CardHeader className="sticky top-14 z-[5] border-b bg-muted/70 py-3 backdrop-blur">
+          <CardHeader className="header-grid relative sticky top-16 z-[5] overflow-hidden rounded-none border-b bg-muted/70 py-3 backdrop-blur">
             <SectionHeader
               icon={LanguagesIcon}
               title="Language & content"
@@ -642,7 +642,7 @@ export function ConfigForm({ botId, botName, initialConfig }: ConfigFormProps) {
 
         {/* ── Theme ── */}
         <Card className="overflow-visible rounded-none border-b pt-0 shadow-none ring-0">
-          <CardHeader className="sticky top-14 z-[5] border-b bg-muted/70 py-3 backdrop-blur">
+          <CardHeader className="header-grid relative sticky top-16 z-[5] overflow-hidden rounded-none border-b bg-muted/70 py-3 backdrop-blur">
             <SectionHeader
               icon={PaletteIcon}
               title="Theme"
@@ -927,7 +927,7 @@ export function ConfigForm({ botId, botName, initialConfig }: ConfigFormProps) {
 
         {/* ── AI Behaviour ── */}
         <Card className="overflow-visible rounded-none border-b pt-0 shadow-none ring-0">
-          <CardHeader className="sticky top-14 z-[5] border-b bg-muted/70 py-3 backdrop-blur">
+          <CardHeader className="header-grid relative sticky top-16 z-[5] overflow-hidden rounded-none border-b bg-muted/70 py-3 backdrop-blur">
             <SectionHeader
               icon={SparklesIcon}
               title="AI behaviour"
@@ -1043,7 +1043,7 @@ export function ConfigForm({ botId, botName, initialConfig }: ConfigFormProps) {
 
         {/* ── Lead Capture ── */}
         <Card className="overflow-visible rounded-none border-b pt-0 shadow-none ring-0">
-          <CardHeader className="sticky top-14 z-[5] border-b bg-muted/70 py-3 backdrop-blur">
+          <CardHeader className="header-grid relative sticky top-16 z-[5] overflow-hidden rounded-none border-b bg-muted/70 py-3 backdrop-blur">
             <SectionHeader
               icon={UserPlusIcon}
               title="Lead capture"
@@ -1179,7 +1179,7 @@ export function ConfigForm({ botId, botName, initialConfig }: ConfigFormProps) {
 
         {/* ── Allowed Domains (Advanced) ── */}
         <Card className="overflow-visible rounded-none border-b pt-0 shadow-none ring-0">
-          <CardHeader className="sticky top-14 z-[5] border-b bg-muted/70 py-3 backdrop-blur">
+          <CardHeader className="header-grid relative sticky top-16 z-[5] overflow-hidden rounded-none border-b bg-muted/70 py-3 backdrop-blur">
             <SectionHeader
               icon={ShieldIcon}
               title="Allowed domains"
@@ -1327,7 +1327,7 @@ function CommerceSection({ control, watch }: CommerceSectionProps) {
 
   return (
     <Card className="overflow-visible rounded-none border-b pt-0 shadow-none ring-0">
-      <CardHeader className="sticky top-14 z-[5] border-b bg-muted/70 py-3 backdrop-blur">
+      <CardHeader className="header-grid relative sticky top-16 z-[5] overflow-hidden rounded-none border-b bg-muted/70 py-3 backdrop-blur">
         <SectionHeader
           icon={ShoppingBagIcon}
           title="Store / products"
