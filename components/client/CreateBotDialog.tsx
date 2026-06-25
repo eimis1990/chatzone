@@ -73,9 +73,9 @@ export function CreateBotDialog({ orgId }: CreateBotDialogProps) {
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger
         render={
-          <Button>
+          <Button className="h-10 rounded-md px-7">
             <PlusIcon />
-            Create bot
+            Create BOT
           </Button>
         }
       />
