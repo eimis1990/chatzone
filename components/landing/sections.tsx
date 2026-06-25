@@ -1,6 +1,5 @@
 import {
   type LucideIcon,
-  CheckIcon,
   BrainIcon,
   PhoneCallIcon,
   HeadsetIcon,
@@ -14,6 +13,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { Reveal } from './Reveal'
+import { ScrollRevealText } from './ScrollRevealText'
 import { EmailCapture } from './EmailCapture'
 
 const ACCENT = '#68A369'
@@ -120,33 +120,25 @@ function FeatureVisual({ icon: Icon, imageSrc, dark }: { icon: LucideIcon; image
 }
 
 function FeatureRow({ feature, index }: { feature: Feature; index: number }) {
-  const dark = index % 2 === 1
   const reversed = index % 2 === 1
   const Icon = feature.icon
+  const num = String(index + 1).padStart(2, '0')
   return (
-    <section style={dark ? { backgroundColor: DARK } : undefined} className={dark ? 'text-white' : 'bg-white text-gray-900'}>
-      <div className="mx-auto grid max-w-6xl items-center gap-10 px-5 py-20 lg:grid-cols-2 lg:py-28">
+    <section className="bg-white text-gray-900">
+      <div className="mx-auto grid max-w-6xl items-center gap-10 px-5 py-14 lg:grid-cols-2 lg:gap-16 lg:py-20">
         <Reveal className={reversed ? 'lg:order-2' : ''}>
-          <div
-            className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold tracking-wide"
-            style={dark ? { backgroundColor: 'rgba(255,255,255,0.1)', color: '#a9d6b4' } : { backgroundColor: 'rgba(104,163,105,0.12)', color: '#3f6b48' }}
-          >
-            <Icon className="size-3.5" /> {feature.eyebrow}
-          </div>
-          <h2 className="mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">{feature.title}</h2>
-          <p className={`mt-4 text-lg leading-relaxed ${dark ? 'text-white/75' : 'text-gray-600'}`}>{feature.body}</p>
-          <ul className="mt-6 space-y-2.5">
-            {feature.bullets.map((b) => (
-              <li key={b} className="flex items-start gap-2.5">
-                <CheckIcon className="mt-0.5 size-5 flex-shrink-0" style={{ color: dark ? '#7cc08a' : ACCENT }} />
-                <span className={dark ? 'text-white/80' : 'text-gray-700'}>{b}</span>
-              </li>
-            ))}
-          </ul>
+          <FeatureVisual icon={Icon} imageSrc={feature.imageSrc} dark={false} />
         </Reveal>
-        <Reveal delay={0.1} className={reversed ? 'lg:order-1' : ''}>
-          <FeatureVisual icon={Icon} imageSrc={feature.imageSrc} dark={dark} />
-        </Reveal>
+        <div className={`border-l-2 pl-6 sm:pl-8 ${reversed ? 'lg:order-1' : ''}`} style={{ borderColor: ACCENT }}>
+          <p className="text-sm font-semibold tracking-[0.2em]" style={{ color: ACCENT }}>
+            — {num}
+          </p>
+          <h2 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">{feature.title}</h2>
+          <ScrollRevealText
+            text={feature.body}
+            className="mt-5 text-xl leading-relaxed text-gray-900 sm:text-2xl"
+          />
+        </div>
       </div>
     </section>
   )
