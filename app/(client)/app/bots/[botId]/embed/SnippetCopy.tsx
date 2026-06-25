@@ -1,6 +1,8 @@
 'use client'
 
 import { useState } from 'react'
+import { CopyIcon, CheckIcon } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 
 interface SnippetCopyProps {
   snippet: string
@@ -15,7 +17,6 @@ export function SnippetCopy({ snippet }: SnippetCopyProps) {
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     } catch {
-      // Fallback for browsers without Clipboard API
       const ta = document.createElement('textarea')
       ta.value = snippet
       ta.style.position = 'fixed'
@@ -30,17 +31,20 @@ export function SnippetCopy({ snippet }: SnippetCopyProps) {
   }
 
   return (
-    <div className="relative group">
-      <pre className="rounded-lg bg-muted border text-sm p-4 overflow-x-auto whitespace-pre-wrap break-all">
+    <div className="relative">
+      <pre className="overflow-x-auto whitespace-pre-wrap break-all rounded-lg bg-[#101213] p-4 pr-24 text-sm leading-relaxed text-gray-100">
         <code>{snippet}</code>
       </pre>
-      <button
+      <Button
+        type="button"
+        size="sm"
         onClick={handleCopy}
-        className="absolute top-3 right-3 text-xs font-medium px-2.5 py-1 rounded bg-background border shadow-sm hover:bg-muted transition-colors"
+        className="absolute right-3 top-3 h-8 rounded-md"
         aria-label="Copy snippet to clipboard"
       >
-        {copied ? '✓ Copied!' : 'Copy'}
-      </button>
+        {copied ? <CheckIcon className="size-3.5" /> : <CopyIcon className="size-3.5" />}
+        {copied ? 'Copied' : 'Copy'}
+      </Button>
     </div>
   )
 }

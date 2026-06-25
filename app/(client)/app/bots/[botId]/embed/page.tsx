@@ -1,8 +1,18 @@
 import { notFound } from 'next/navigation'
+import { Code2Icon, ListChecksIcon, SlidersHorizontalIcon, ShieldAlertIcon } from 'lucide-react'
 import { requireRole } from '@/lib/auth/guards'
 import { createServerClient } from '@/lib/supabase/server'
+import { SectionCard } from '@/components/client/SectionCard'
 import type { Bot } from '@/lib/types'
 import { SnippetCopy } from './SnippetCopy'
+
+const STEPS = [
+  'Copy the snippet above.',
+  "Open your website's HTML source and locate the closing </body> tag.",
+  'Paste the snippet immediately before that tag.',
+  'Save and deploy your changes.',
+  'Reload your site — a chat bubble appears in the corner you configured.',
+]
 
 export default async function EmbedSnippetPage({
   params,
@@ -29,59 +39,58 @@ export default async function EmbedSnippetPage({
 ></script>`
 
   return (
-    <div className="p-6 max-w-2xl space-y-8">
+    <div className="mx-auto max-w-3xl space-y-6 p-6">
       <div>
-        <h2 className="text-xl font-semibold mb-1">Embed Widget</h2>
+        <h2 className="text-lg font-semibold">Embed Widget</h2>
         <p className="text-sm text-muted-foreground">
           Paste this snippet before the closing{' '}
-          <code className="text-xs bg-muted px-1 py-0.5 rounded">&lt;/body&gt;</code> tag of
-          any page where you want the chat widget to appear.
+          <code className="rounded bg-muted px-1 py-0.5 text-xs">&lt;/body&gt;</code> tag of any page
+          where you want the chat widget to appear.
         </p>
       </div>
 
-      <SnippetCopy snippet={snippet} />
+      <SectionCard icon={Code2Icon} title="Embed code" description="Add this to every page that should show the widget.">
+        <SnippetCopy snippet={snippet} />
+      </SectionCard>
 
-      <div className="space-y-4">
-        <h3 className="font-medium text-sm">Installation instructions</h3>
-        <ol className="list-decimal list-inside space-y-2 text-sm text-muted-foreground">
-          <li>Copy the snippet above.</li>
-          <li>
-            Open your website&apos;s HTML source and locate the closing{' '}
-            <code className="text-xs bg-muted px-1 py-0.5 rounded">&lt;/body&gt;</code> tag.
-          </li>
-          <li>Paste the snippet immediately before that tag.</li>
-          <li>Save and deploy your changes.</li>
-          <li>
-            Reload your site — a chat bubble will appear in the bottom-right corner
-            (default) or the position you configured.
-          </li>
+      <SectionCard icon={ListChecksIcon} title="Installation" description="Five quick steps.">
+        <ol className="space-y-3">
+          {STEPS.map((step, i) => (
+            <li key={i} className="flex gap-3">
+              <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
+                {i + 1}
+              </span>
+              <span className="pt-0.5 text-sm text-foreground/80">{step}</span>
+            </li>
+          ))}
         </ol>
-      </div>
+      </SectionCard>
 
-      <div className="space-y-3">
-        <h3 className="font-medium text-sm">Optional attributes</h3>
-        <div className="rounded-lg border bg-muted/40 text-sm divide-y">
-          <div className="grid grid-cols-[1fr_2fr] gap-4 px-4 py-3">
-            <code className="text-xs font-mono">data-position</code>
+      <SectionCard icon={SlidersHorizontalIcon} title="Optional attributes" contentClassName="p-0">
+        <div className="divide-y text-sm">
+          <div className="grid grid-cols-[150px_1fr] gap-4 px-5 py-3">
+            <code className="font-mono text-xs text-foreground">data-position</code>
             <span className="text-muted-foreground">
-              <code className="text-xs bg-muted px-1 py-0.5 rounded">bottom-right</code> (default) or{' '}
-              <code className="text-xs bg-muted px-1 py-0.5 rounded">bottom-left</code>
+              <code className="rounded bg-muted px-1 py-0.5 text-xs">bottom-right</code> (default) or{' '}
+              <code className="rounded bg-muted px-1 py-0.5 text-xs">bottom-left</code>
             </span>
           </div>
-          <div className="grid grid-cols-[1fr_2fr] gap-4 px-4 py-3">
-            <code className="text-xs font-mono">async</code>
+          <div className="grid grid-cols-[150px_1fr] gap-4 px-5 py-3">
+            <code className="font-mono text-xs text-foreground">async</code>
             <span className="text-muted-foreground">Non-blocking load — recommended.</span>
           </div>
         </div>
-      </div>
+      </SectionCard>
 
-      <div className="rounded-lg border border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-800 p-4 text-sm">
-        <p className="font-medium text-amber-800 dark:text-amber-200 mb-1">Domain allow-list</p>
-        <p className="text-amber-700 dark:text-amber-300">
-          Only origins listed in your bot&apos;s{' '}
-          <strong>Allowed Domains</strong> setting (Configure tab) can load the widget.
-          An empty list allows any domain — useful during development.
-        </p>
+      <div className="flex gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm dark:border-amber-800 dark:bg-amber-950/20">
+        <ShieldAlertIcon className="mt-0.5 size-5 shrink-0 text-amber-600" aria-hidden="true" />
+        <div>
+          <p className="mb-1 font-medium text-amber-800 dark:text-amber-200">Domain allow-list</p>
+          <p className="text-amber-700 dark:text-amber-300">
+            Only origins listed in your bot&apos;s <strong>Allowed Domains</strong> setting (Configure
+            tab) can load the widget. An empty list allows any domain — useful during development.
+          </p>
+        </div>
       </div>
     </div>
   )

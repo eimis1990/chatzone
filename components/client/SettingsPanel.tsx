@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { DownloadIcon, ShieldCheckIcon, Trash2Icon } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { DownloadIcon, ShieldCheckIcon, Trash2Icon, ClockIcon } from 'lucide-react'
+import { SectionCard } from '@/components/client/SectionCard'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { cn } from '@/lib/utils'
@@ -53,95 +53,86 @@ export function SettingsPanel({ retentionDays, setRetention, deleteData }: Setti
   }
 
   return (
-    <div className="space-y-6">
+    <div className="max-w-2xl space-y-6">
       {/* Retention */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Data retention</CardTitle>
-          <CardDescription>
-            Automatically delete conversations older than this. Leads are kept.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          <Label htmlFor="retention">Keep conversations for</Label>
-          <Select value={value} onValueChange={onRetentionChange}>
-            <SelectTrigger id="retention" className="w-full max-w-xs">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {RETENTION_OPTIONS.map((o) => (
-                <SelectItem key={o.value} value={o.value}>
-                  {o.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {savedMsg && <p className="text-xs text-muted-foreground">{pending ? 'Saving…' : savedMsg}</p>}
-        </CardContent>
-      </Card>
+      <SectionCard
+        icon={ClockIcon}
+        title="Data retention"
+        description="Automatically delete conversations older than this. Leads are kept."
+        contentClassName="space-y-2"
+      >
+        <Label htmlFor="retention">Keep conversations for</Label>
+        <Select value={value} onValueChange={onRetentionChange}>
+          <SelectTrigger id="retention" className="w-full max-w-xs bg-card">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {RETENTION_OPTIONS.map((o) => (
+              <SelectItem key={o.value} value={o.value}>
+                {o.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        {savedMsg && <p className="text-xs text-muted-foreground">{pending ? 'Saving…' : savedMsg}</p>}
+      </SectionCard>
 
       {/* Export */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Export data</CardTitle>
-          <CardDescription>
-            Download all of your organization&apos;s bots, conversations, and leads as JSON.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <a href="/api/account/export" download className={cn(buttonVariants({ variant: 'outline' }))}>
-            <DownloadIcon />
-            Export JSON
-          </a>
-        </CardContent>
-      </Card>
+      <SectionCard
+        icon={DownloadIcon}
+        title="Export data"
+        description="Download all of your organization's bots, conversations, and leads as JSON."
+      >
+        <a href="/api/account/export" download className={cn(buttonVariants(), 'h-10 rounded-md px-6')}>
+          <DownloadIcon />
+          Export JSON
+        </a>
+      </SectionCard>
 
       {/* Danger zone */}
-      <Card className="border-destructive/30">
-        <CardHeader>
-          <CardTitle className="text-destructive">Delete data</CardTitle>
-          <CardDescription>
-            Erase stored data on request (right to be forgotten). This is permanent.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-wrap gap-2">
-          <Button
-            variant="outline"
-            disabled={pending}
-            onClick={() => onDelete('conversations', 'all conversations')}
-          >
-            <Trash2Icon />
-            Delete conversations
-          </Button>
-          <Button
-            variant="outline"
-            disabled={pending}
-            onClick={() => onDelete('leads', 'all leads')}
-          >
-            <Trash2Icon />
-            Delete leads
-          </Button>
-        </CardContent>
-      </Card>
+      <SectionCard
+        icon={Trash2Icon}
+        accent="danger"
+        title="Delete data"
+        description="Erase stored data on request (right to be forgotten). This is permanent."
+        contentClassName="flex flex-wrap gap-2"
+      >
+        <Button
+          variant="outline"
+          disabled={pending}
+          onClick={() => onDelete('conversations', 'all conversations')}
+          className="text-destructive hover:text-destructive"
+        >
+          <Trash2Icon />
+          Delete conversations
+        </Button>
+        <Button
+          variant="outline"
+          disabled={pending}
+          onClick={() => onDelete('leads', 'all leads')}
+          className="text-destructive hover:text-destructive"
+        >
+          <Trash2Icon />
+          Delete leads
+        </Button>
+      </SectionCard>
 
       {/* Privacy */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Privacy &amp; security</CardTitle>
-          <CardDescription>How we handle data and who processes it.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <a
-            href="/privacy"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={cn(buttonVariants({ variant: 'outline' }))}
-          >
-            <ShieldCheckIcon />
-            View privacy &amp; data handling
-          </a>
-        </CardContent>
-      </Card>
+      <SectionCard
+        icon={ShieldCheckIcon}
+        title="Privacy & security"
+        description="How we handle data and who processes it."
+      >
+        <a
+          href="/privacy"
+          target="_blank"
+          rel="noopener noreferrer"
+          className={cn(buttonVariants({ variant: 'outline' }))}
+        >
+          <ShieldCheckIcon />
+          View privacy &amp; data handling
+        </a>
+      </SectionCard>
     </div>
   )
 }

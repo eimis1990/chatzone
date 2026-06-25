@@ -49,10 +49,10 @@ export default async function SettingsPage() {
   }
 
   return (
-    <div className="p-6 max-w-2xl space-y-8">
+    <div className="space-y-6 p-6">
       <div>
-        <h1 className="text-xl font-semibold">Settings</h1>
-        <p className="text-sm text-muted-foreground mt-1">
+        <h1 className="text-lg font-semibold">Settings</h1>
+        <p className="text-sm text-muted-foreground">
           Data retention, export, and privacy controls for your organization.
         </p>
       </div>
