@@ -44,6 +44,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { TestChat } from '@/components/client/TestChat'
 import { ResizablePanel } from '@/components/ui/resizable-panel'
 import { VoiceSection } from '@/components/client/VoiceSection'
@@ -109,6 +110,7 @@ export function ConfigForm({ botId, botName, initialConfig }: ConfigFormProps) {
   // Quick-action add/edit dialog.
   const [qaOpen, setQaOpen] = useState(false)
   const [qaIndex, setQaIndex] = useState<number | null>(null)
+  const [qaMode, setQaMode] = useState<'text' | 'url'>('text')
   const [qaDraft, setQaDraft] = useState({ label: '', prompt: '', url: '' })
   // System-prompt expand dialog.
   const [promptOpen, setPromptOpen] = useState(false)
@@ -228,17 +230,25 @@ export function ConfigForm({ botId, botName, initialConfig }: ConfigFormProps) {
   const openQuickAction = (index: number | null) => {
     if (index === null) {
       setQaDraft({ label: '', prompt: '', url: '' })
+      setQaMode('text')
     } else {
       const f = activeSuggestedField.fields[index] as { label?: string; prompt?: string; url?: string }
       setQaDraft({ label: f.label ?? '', prompt: f.prompt ?? '', url: f.url ?? '' })
+      setQaMode(f.url ? 'url' : 'text')
     }
     setQaIndex(index)
     setQaOpen(true)
   }
 
   const saveQuickAction = () => {
-    const value = { label: qaDraft.label.trim(), prompt: qaDraft.prompt.trim(), url: qaDraft.url.trim() }
-    if (!value.label) return
+    const label = qaDraft.label.trim()
+    if (!label) return
+    // Either text-to-send OR url-to-open — never both.
+    const value = {
+      label,
+      prompt: qaMode === 'text' ? qaDraft.prompt.trim() : '',
+      url: qaMode === 'url' ? qaDraft.url.trim() : '',
+    }
     if (qaIndex === null) activeSuggestedField.append(value)
     else activeSuggestedField.update(qaIndex, value)
     setQaOpen(false)
@@ -602,7 +612,7 @@ export function ConfigForm({ botId, botName, initialConfig }: ConfigFormProps) {
                   <DialogHeader>
                     <DialogTitle>{qaIndex === null ? 'Add quick action' : 'Edit quick action'}</DialogTitle>
                   </DialogHeader>
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     <div className="space-y-1.5">
                       <Label htmlFor="qa-title">Action title</Label>
                       <Input
@@ -613,40 +623,67 @@ export function ConfigForm({ botId, botName, initialConfig }: ConfigFormProps) {
                         maxLength={80}
                       />
                     </div>
-                    <div className="space-y-1.5">
-                      <Label htmlFor="qa-text">
-                        Action text to send
-                        <span className="ml-1.5 text-xs font-normal text-muted-foreground">(optional)</span>
-                      </Label>
-                      <Input
-                        id="qa-text"
-                        value={qaDraft.prompt}
-                        onChange={(e) => setQaDraft((d) => ({ ...d, prompt: e.target.value }))}
-                        placeholder="Message sent to the bot — e.g. Parodyk populiariausias prekes"
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label htmlFor="qa-url">
-                        Url to open
-                        <span className="ml-1.5 text-xs font-normal text-muted-foreground">(optional)</span>
-                      </Label>
-                      <Input
-                        id="qa-url"
-                        value={qaDraft.url}
-                        onChange={(e) => setQaDraft((d) => ({ ...d, url: e.target.value }))}
-                        placeholder="https://yourstore.com/page"
-                      />
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      If a URL is set, clicking shows the visitor a link button to follow. Otherwise the
-                      text is sent to the bot — or the title itself if no text is given.
-                    </p>
+
+                    <Tabs value={qaMode} onValueChange={(v) => setQaMode(v as 'text' | 'url')}>
+                      <TabsList className="mb-3 w-full group-data-horizontal/tabs:h-10">
+                        <TabsTrigger
+                          value="text"
+                          className="data-active:bg-primary data-active:text-primary-foreground"
+                        >
+                          Send text
+                        </TabsTrigger>
+                        <TabsTrigger
+                          value="url"
+                          className="data-active:bg-primary data-active:text-primary-foreground"
+                        >
+                          Open a URL
+                        </TabsTrigger>
+                      </TabsList>
+
+                      {qaMode === 'text' ? (
+                        <div className="space-y-1.5">
+                          <Label htmlFor="qa-text">Action text to send</Label>
+                          <Input
+                            id="qa-text"
+                            value={qaDraft.prompt}
+                            onChange={(e) => setQaDraft((d) => ({ ...d, prompt: e.target.value }))}
+                            placeholder="Message sent to the bot — e.g. Parodyk populiariausias prekes"
+                          />
+                          <p className="text-xs text-muted-foreground">
+                            Sent to the bot when clicked. Leave empty to send the title itself.
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="space-y-1.5">
+                          <Label htmlFor="qa-url">Url to open</Label>
+                          <Input
+                            id="qa-url"
+                            value={qaDraft.url}
+                            onChange={(e) => setQaDraft((d) => ({ ...d, url: e.target.value }))}
+                            placeholder="https://yourstore.com/page"
+                          />
+                          <p className="text-xs text-muted-foreground">
+                            The visitor gets a link button to follow.
+                          </p>
+                        </div>
+                      )}
+                    </Tabs>
                   </div>
                   <div className="flex justify-end gap-2">
-                    <Button type="button" variant="outline" size="sm" onClick={() => setQaOpen(false)}>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setQaOpen(false)}
+                      className="h-10 rounded-md px-6"
+                    >
                       Cancel
                     </Button>
-                    <Button type="button" size="sm" onClick={saveQuickAction} disabled={!qaDraft.label.trim()}>
+                    <Button
+                      type="button"
+                      onClick={saveQuickAction}
+                      disabled={!qaDraft.label.trim()}
+                      className="h-10 rounded-md px-6"
+                    >
                       {qaIndex === null ? 'Add' : 'Save'}
                     </Button>
                   </div>
