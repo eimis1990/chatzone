@@ -41,7 +41,7 @@ export default async function ClientLayout({
   // The whole shell carries the green mesh; the content is a white rounded card
   // floating on top, with the mesh showing through the gutter around it.
   return (
-    <div className="relative flex h-svh overflow-hidden bg-sidebar-mesh">
+    <div className="relative isolate flex h-svh overflow-hidden bg-sidebar-mesh">
       {/* Decorative grid fading up from the bottom of the dark shell */}
       <div className="shell-grid pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-[22vh]" aria-hidden="true" />
       <AppSidebar bots={bots} userEmail={user.email ?? ''} />
