@@ -17,6 +17,10 @@ const envSchema = z.object({
   // Optional: enables ElevenLabs text-to-speech. Voice features degrade
   // gracefully (503) when this is absent.
   ELEVENLABS_API_KEY: z.string().min(1).optional(),
+  // Optional: enables Stripe billing. Checkout/portal/webhook degrade
+  // gracefully (503) when these are absent, so the app runs without billing.
+  STRIPE_SECRET_KEY: z.string().min(1).optional(),
+  STRIPE_WEBHOOK_SECRET: z.string().min(1).optional(),
 })
 
 export type Env = z.infer<typeof envSchema>

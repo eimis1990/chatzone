@@ -12,6 +12,15 @@ export type BotStatus = 'active' | 'paused'
 export type SourceType = 'file' | 'url' | 'qa' | 'text'
 export type SourceStatus = 'pending' | 'processing' | 'ready' | 'error'
 export type MessageRole = 'user' | 'assistant' | 'system'
+export type Plan = 'free' | 'starter' | 'growth' | 'scale' | 'enterprise'
+export type BillingInterval = 'month' | 'year'
+export type SubscriptionStatus =
+  | 'inactive'
+  | 'trialing'
+  | 'active'
+  | 'past_due'
+  | 'canceled'
+  | 'unpaid'
 
 export interface Profile {
   id: string
@@ -30,6 +39,14 @@ export interface Organization {
   created_by: string | null
   created_at: string
   updated_at: string
+  // Billing (Stripe). See supabase/migrations/0014_billing.sql.
+  stripe_customer_id: string | null
+  stripe_subscription_id: string | null
+  plan: Plan
+  subscription_status: SubscriptionStatus
+  billing_interval: BillingInterval | null
+  current_period_end: string | null
+  cancel_at_period_end: boolean
 }
 
 export interface OrganizationMember {
