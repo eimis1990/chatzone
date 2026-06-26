@@ -33,8 +33,8 @@ export function ConversationsChart({ data }: ConversationsChartProps) {
       <AreaChart data={data} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
         <defs>
           <linearGradient id="convGradient" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="#9BDA48" stopOpacity={0.3} />
-            <stop offset="95%" stopColor="#9BDA48" stopOpacity={0} />
+            <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.3} />
+            <stop offset="95%" stopColor="var(--primary)" stopOpacity={0} />
           </linearGradient>
         </defs>
         <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
@@ -53,7 +53,7 @@ export function ConversationsChart({ data }: ConversationsChartProps) {
         <Area
           type="monotone"
           dataKey="count"
-          stroke="#9BDA48"
+          stroke="var(--primary)"
           fill="url(#convGradient)"
           strokeWidth={2}
           dot={false}
