@@ -21,9 +21,12 @@ export function Hero() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="mb-5 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-primary"
+            className="mb-5 inline-flex items-center gap-2.5 text-xs font-semibold uppercase tracking-[0.2em] text-green-400"
           >
-            <span className="size-1.5 rounded-full bg-primary" aria-hidden="true" />
+            <span className="relative flex size-2 items-center justify-center" aria-hidden="true">
+              <span className="absolute inline-flex size-full animate-ping rounded-full bg-green-400 opacity-75" />
+              <span className="relative size-1.5 rounded-full bg-green-400" />
+            </span>
             Always on · 24/7
           </motion.div>
           <motion.h1
@@ -35,7 +38,14 @@ export function Hero() {
             Answer every customer,
             <br />
             <span className="font-[family-name:var(--font-lora)] font-medium italic tracking-normal text-primary">
-              day or night.
+              <span className="relative inline-block">
+                day or night
+                <span
+                  aria-hidden="true"
+                  className="absolute inset-x-0 -bottom-[0.08em] h-[0.06em] rounded-full bg-primary/70"
+                />
+              </span>
+              .
             </span>
           </motion.h1>
 
