@@ -5,8 +5,8 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-/** Marketing site URL used in "Powered by Chatzone" links. */
-export const POWERED_BY_URL = 'https://chatzone.app'
+/** Marketing site URL used in "Powered by Loqara" links. */
+export const POWERED_BY_URL = 'https://www.loqara.com'
 
 /**
  * Returns near-black or white — whichever reads better on the given background

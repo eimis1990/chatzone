@@ -3,15 +3,15 @@
 import { useId } from 'react'
 
 /**
- * The Chatzone bubbles mark, drawn in a single color via `currentColor` so it
+ * The Loqara bubbles mark, drawn in a single color via `currentColor` so it
  * inherits the text color of its context — white on a dark background, dark on a
  * light one. The bubble faces are knocked out of the mask so they show the
  * background through, keeping the little expressions readable on any color.
  *
- * Source art lives at public/chatzone-icon.svg (a black-tiled version kept for
+ * Source art lives at public/loqara-icon.svg (a black-tiled version kept for
  * the favicon, where a solid tile reads better on browser chrome).
  */
-export function ChatzoneIcon({ className }: { className?: string }) {
+export function LoqaraIcon({ className }: { className?: string }) {
   const maskId = useId()
   return (
     <svg

@@ -4,7 +4,7 @@ import { VoicesPanel } from '@/components/owner/VoicesPanel'
 import { Toaster } from '@/components/ui/sonner'
 import type { PlatformVoice } from '@/lib/types'
 
-export const metadata = { title: 'Voices — Owner | Chatzone' }
+export const metadata = { title: 'Voices — Owner | Loqara' }
 
 export default async function VoicesPage() {
   await requireRole('owner')

@@ -38,7 +38,7 @@ const fontVariables = [inter, poppins, nunito, jakarta, lora]
   .map((f) => f.variable)
   .join(" ");
 
-const TITLE = "Chatzone — AI chat & voice agent for modern stores";
+const TITLE = "Loqara — AI chat & voice agent for modern stores";
 const DESCRIPTION =
   "Answer every customer, day or night. A chat & voice agent that knows your products, captures leads, looks up orders, and hands off to your team — embedded in one line.";
 

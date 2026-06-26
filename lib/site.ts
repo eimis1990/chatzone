@@ -6,7 +6,7 @@
  * lib/env.ts requires it in production). Falls back to the brand domain so a
  * misconfigured preview never emits `localhost` canonicals by surprise.
  */
-export const SITE_URL = (process.env.NEXT_PUBLIC_APP_URL ?? 'https://chatzone.app').replace(/\/+$/, '')
+export const SITE_URL = (process.env.NEXT_PUBLIC_APP_URL ?? 'https://www.loqara.com').replace(/\/+$/, '')
 
 /** Human-facing brand name, reused across metadata + structured data. */
-export const SITE_NAME = 'Chatzone'
+export const SITE_NAME = 'Loqara'

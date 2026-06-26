@@ -1,4 +1,4 @@
-# Chatzone — Roadmap: closing the competitive gaps
+# Loqara — Roadmap: closing the competitive gaps
 
 Specs, plan, and task checklists for the gaps identified vs. Neria (Parnidia).
 Scope: **Human handoff, Conversation intelligence, Transactional skills, Broaden

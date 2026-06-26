@@ -95,7 +95,7 @@ export function Composer({
           </svg>
         </button>
       </form>
-      {/* "Powered by Chatzone" is rendered by the widget loader chrome (widget.js),
+      {/* "Powered by Loqara" is rendered by the widget loader chrome (widget.js),
          below the close button — matching the reference layout. */}
     </div>
   )

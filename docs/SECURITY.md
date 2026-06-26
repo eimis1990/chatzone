@@ -1,6 +1,6 @@
 # Security & data handling
 
-This documents how Chatzone handles data, who processes it, and the technical
+This documents how Loqara handles data, who processes it, and the technical
 controls in place — plus a SOC 2 readiness checklist. (Certification is an audit
 process, separate from these controls.)
 

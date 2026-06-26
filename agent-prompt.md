@@ -1,4 +1,4 @@
-# Chatzone — Agent system prompt
+# Loqara — Agent system prompt
 
 Canonical system prompt for the store assistant. Keep this file up to date and
 paste it into both the Configure → AI behaviour field and the ElevenLabs agent.

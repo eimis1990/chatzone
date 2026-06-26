@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Privacy & Data Handling — Chatzone',
-  description: 'How Chatzone collects, processes, retains, and protects data.',
+  title: 'Privacy & Data Handling — Loqara',
+  description: 'How Loqara collects, processes, retains, and protects data.',
 }
 
 const SUBPROCESSORS = [
@@ -17,7 +17,7 @@ export default function PrivacyPage() {
     <main className="mx-auto max-w-2xl px-6 py-12">
       <h1 className="text-2xl font-semibold">Privacy &amp; Data Handling</h1>
       <p className="mt-2 text-sm text-muted-foreground">
-        How Chatzone collects, processes, retains, and protects data. Last updated{' '}
+        How Loqara collects, processes, retains, and protects data. Last updated{' '}
         {new Date().getFullYear()}.
       </p>
 

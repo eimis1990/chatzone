@@ -139,7 +139,7 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
                   rel="noopener noreferrer"
                   className="underline hover:text-muted-foreground transition-colors"
                 >
-                  Chatzone
+                  Loqara
                 </a>
               </p>
             </div>

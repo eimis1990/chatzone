@@ -59,7 +59,7 @@ export async function GET() {
   return new Response(JSON.stringify(payload, null, 2), {
     headers: {
       'Content-Type': 'application/json',
-      'Content-Disposition': `attachment; filename="chatzone-export-${orgId}.json"`,
+      'Content-Disposition': `attachment; filename="loqara-export-${orgId}.json"`,
     },
   })
 }

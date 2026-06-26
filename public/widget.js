@@ -1,5 +1,5 @@
 /**
- * Chatzone Widget Loader
+ * Loqara Widget Loader
  *
  * Plain vanilla JS — NO build step, NO imports.
  * Customers paste:
@@ -12,7 +12,7 @@
  *  2. Injects a floating launcher <button> into the page.
  *  3. On first click, lazy-creates an <iframe> pointed at /embed/{key}.
  *  4. Toggles open/close on subsequent launcher clicks.
- *  5. When open: renders a "Powered by Chatzone" link below the iframe.
+ *  5. When open: renders a "Powered by Loqara" link below the iframe.
  */
 ;(function () {
   'use strict'
@@ -56,7 +56,7 @@
   var IFRAME_HEIGHT = 680
   var OFFSET = 20
   var Z_INDEX = 2147483647 // max z-index
-  var POWERED_BY_URL = 'https://chatzone.app'
+  var POWERED_BY_URL = 'https://loqara.app'
 
   var isRight = position !== 'bottom-left'
 
@@ -182,7 +182,7 @@
   })
   poweredBy.innerHTML =
     'Powered by <a href="' + POWERED_BY_URL + '" target="_blank" rel="noopener noreferrer" ' +
-    'style="color:rgba(0,0,0,0.5);text-decoration:underline;font-family:inherit;">Chatzone</a>'
+    'style="color:rgba(0,0,0,0.5);text-decoration:underline;font-family:inherit;">Loqara</a>'
 
   wrapper.appendChild(iframeContainer)
   wrapper.appendChild(poweredBy)

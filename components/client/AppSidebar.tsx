@@ -19,7 +19,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { ChatzoneIcon } from '@/components/ChatzoneIcon'
+import { LoqaraIcon } from '@/components/LoqaraIcon'
 import { SignOutButton } from '@/components/client/SignOutButton'
 
 const SECTIONS: { label: string; href: string; icon: LucideIcon }[] = [
@@ -63,9 +63,9 @@ export function AppSidebar({ bots, userEmail }: { bots: BotLite[]; userEmail: st
         href="/app"
         className="flex items-center gap-1 px-4 py-4 text-white"
       >
-        <ChatzoneIcon className="size-14" />
+        <LoqaraIcon className="size-14" />
         <span className="text-2xl font-bold">
-          Chatzone<span className="text-primary">.</span>
+          Loqara<span className="text-primary">.</span>
         </span>
       </Link>
 

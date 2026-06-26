@@ -1,4 +1,4 @@
-# Chatzone landing page — spec, plan, tasks
+# Loqara landing page — spec, plan, tasks
 
 A marketing landing page at `/`, in the clean modern-SaaS style (big display
 headlines, alternating light / deep-green bands, generous whitespace, rounded
@@ -6,7 +6,7 @@ pill CTAs, scroll-reveal motion) — built with **our** brand, copy, and feature
 The real **Jarvis** widget is embedded so visitors (and we, pre-launch) can try
 the product live on the page.
 
-> Inspiration is structural/feel only. All copy + visuals are original to Chatzone.
+> Inspiration is structural/feel only. All copy + visuals are original to Loqara.
 
 ## Brand tokens
 - Accent green **#68A369** (CTAs, highlights, accent headline line).
@@ -17,7 +17,7 @@ the product live on the page.
 ## Section map
 1. **Announcement bar** — thin top strip: early-access / book-a-demo.
 2. **Sticky nav** — logo, anchor links (Features, How it works, Pricing, Docs), Sign in, "Get started" pill. Gains a blurred background after scroll.
-3. **Hero** — full-bleed deep-green gradient/mesh. Eyebrow label, oversized headline with the **last line in accent green**, subhead, "free while in early access" check line, email + CTA. Right: a **live-looking product mockup** (faux Chatzone chat) — no photo needed.
+3. **Hero** — full-bleed deep-green gradient/mesh. Eyebrow label, oversized headline with the **last line in accent green**, subhead, "free while in early access" check line, email + CTA. Right: a **live-looking product mockup** (faux Loqara chat) — no photo needed.
 4. **Trusted-by strip** — short line + placeholder store logos (grayscale).
 5. **Feature rows** (alternating white / deep-green), each scroll-revealed with an image slot:
    - Grounded AI chat (RAG over your knowledge base)

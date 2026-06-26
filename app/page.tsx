@@ -5,7 +5,7 @@ import { SmoothScroll } from '@/components/landing/SmoothScroll'
 import { SITE_URL, SITE_NAME } from '@/lib/site'
 
 // Structured data — how Google rich results and AI assistants (GEO) parse what
-// Chatzone is, who makes it, and that it's a web app. Pricing is reflected as a
+// Loqara is, who makes it, and that it's a web app. Pricing is reflected as a
 // free Offer for now; update the SoftwareApplication offers when billing ships.
 const jsonLd = {
   '@context': 'https://schema.org',
@@ -15,7 +15,7 @@ const jsonLd = {
       '@id': `${SITE_URL}/#organization`,
       name: SITE_NAME,
       url: SITE_URL,
-      logo: `${SITE_URL}/chatzone-icon.svg`,
+      logo: `${SITE_URL}/loqara-icon.svg`,
       description: 'The AI chat & voice agent for modern stores.',
     },
     {

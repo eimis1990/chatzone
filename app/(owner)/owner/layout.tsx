@@ -26,7 +26,7 @@ export default async function OwnerLayout({
           className="flex items-center gap-2 font-semibold text-foreground"
         >
           <ShieldIcon className="size-5 text-primary" />
-          <span>Chatzone — Owner</span>
+          <span>Loqara — Owner</span>
         </Link>
 
         <nav className="flex items-center gap-1 ml-4">
