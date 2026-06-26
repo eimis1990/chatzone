@@ -245,7 +245,7 @@ export function BillingPanel({
                     {p.monthly > 0 && <span className="text-sm text-muted-foreground">/mo</span>}
                   </div>
                   <p className="mt-1 h-4 text-xs text-muted-foreground">
-                    {p.monthly > 0 && annual ? `billed annually · €${p.monthly * 10}/yr` : ' '}
+                    {p.monthly > 0 ? (annual ? `billed annually · €${p.monthly * 10}/yr` : 'billed monthly') : ' '}
                   </p>
 
                   <p className="mt-3 text-sm font-medium text-primary">

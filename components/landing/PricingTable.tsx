@@ -100,7 +100,7 @@ export function PricingTable() {
               {p.monthly > 0 && <span className="text-sm text-white/60">/mo</span>}
             </div>
             <p className="mt-1 h-4 text-xs text-white/45">
-              {p.monthly > 0 && annual ? `billed annually · €${p.monthly * 10}/yr` : ' '}
+              {p.monthly > 0 ? (annual ? `billed annually · €${p.monthly * 10}/yr` : 'billed monthly') : ' '}
             </p>
 
             <p className="mt-4 text-sm font-medium text-primary">{p.conversations}</p>
