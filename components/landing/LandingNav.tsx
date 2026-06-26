@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { MenuIcon, XIcon } from 'lucide-react'
-import { ChatzoneIcon } from '@/components/ChatzoneIcon'
+import { LoqaraIcon } from '@/components/LoqaraIcon'
 
 const LINKS = [
   { label: 'Features', href: '#features' },
@@ -30,9 +30,9 @@ export function LandingNav() {
     >
       <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5">
         <Link href="/" className={`flex items-center gap-1 text-xl font-bold ${scrolled ? 'text-gray-900' : 'text-white'}`}>
-          <ChatzoneIcon className="size-12" />
+          <LoqaraIcon className="size-12" />
           <span>
-            Chatzone<span className="text-[#9BDA48]">.</span>
+            Loqara<span className="text-primary">.</span>
           </span>
         </Link>
 
@@ -47,15 +47,13 @@ export function LandingNav() {
         <div className="hidden items-center gap-3 md:flex">
           <Link
             href="/login"
-            className={`text-sm font-medium transition-opacity hover:opacity-70 ${scrolled ? 'text-gray-700' : 'text-white/85'}`}
+            className={`rounded-full px-5 py-2 text-sm font-semibold shadow-sm transition-colors ${
+              scrolled
+                ? 'bg-[#101213] text-white hover:bg-black'
+                : 'bg-white text-[#101213] hover:bg-white/90'
+            }`}
           >
             Sign in
-          </Link>
-          <Link
-            href="/login"
-            className="rounded-full bg-[#9BDA48] px-4 py-2 text-sm font-semibold text-[#101213] shadow-sm transition-colors hover:bg-[#86c93c]"
-          >
-            Get started
           </Link>
         </div>
 
@@ -77,15 +75,12 @@ export function LandingNav() {
                 {l.label}
               </a>
             ))}
-            <Link href="/login" onClick={() => setOpen(false)}>
-              Sign in
-            </Link>
             <Link
               href="/login"
               onClick={() => setOpen(false)}
-              className="rounded-full bg-[#9BDA48] px-4 py-2 text-center font-semibold text-[#101213]"
+              className="rounded-full bg-[#101213] px-4 py-2 text-center font-semibold text-white"
             >
-              Get started
+              Sign in
             </Link>
           </div>
         </div>

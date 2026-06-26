@@ -1,80 +1,63 @@
 'use client'
 
 import { motion, useReducedMotion } from 'framer-motion'
-import { CheckIcon, ArrowDownRightIcon } from 'lucide-react'
 import { EmailCapture } from './EmailCapture'
+import { HeroVideo } from './HeroVideo'
 
 export function Hero() {
-  const reduce = useReducedMotion()
   return (
     <section className="relative flex min-h-svh flex-col overflow-hidden bg-[#101213] text-white">
-      <div className="relative mx-auto grid w-full max-w-6xl flex-1 items-center gap-10 px-5 pt-32 pb-12 lg:grid-cols-[1.55fr_1fr] lg:gap-16 lg:pt-36 lg:pb-16">
-        {/* Copy */}
-        <div>
+      {/* Full-bleed hero: fox walks in once, then loops idle (see HeroVideo) */}
+      <HeroVideo />
+      {/* Slight left-side dark fade so the copy stays legible over the bright scene */}
+      <div
+        className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#101213] via-[#101213]/45 to-transparent"
+        aria-hidden="true"
+      />
+      {/* Copy — overlaid on the darkened left */}
+      <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 items-center px-5 pt-32 pb-16">
+        <div className="max-w-2xl">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="mb-5 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-primary"
+          >
+            <span className="size-1.5 rounded-full bg-primary" aria-hidden="true" />
+            Always on · 24/7
+          </motion.div>
           <motion.h1
-            initial={reduce ? { opacity: 0 } : { opacity: 0, y: 18 }}
+            initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-            className="text-5xl font-semibold leading-[1.03] tracking-tight sm:text-6xl lg:text-7xl"
+            className="text-balance font-[family-name:var(--font-jakarta)] text-5xl font-bold leading-[1.05] tracking-tight sm:text-6xl lg:text-[4.75rem]"
           >
             Answer every customer,
             <br />
-            <span className="text-[#9BDA48]">day or night.</span>
+            <span className="font-[family-name:var(--font-lora)] font-medium italic tracking-normal text-primary">
+              day or night.
+            </span>
           </motion.h1>
 
           <motion.p
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="mt-6 max-w-xl text-xl leading-relaxed text-white/75"
+            className="mt-6 max-w-xl text-lg leading-relaxed text-white/80 sm:text-xl"
           >
-            A chat &amp; voice agent that knows your products, captures leads, looks up orders, and
-            hands off to your team — embedded with one line of code.
+            Your always-on AI agent for chat &amp; voice — answering questions, capturing leads, and
+            looking up orders 24/7, so customers never wait. Live in one line of code.
           </motion.p>
 
           <motion.div
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="mt-8 flex items-center gap-2 text-sm text-[#a9d6b4]"
-          >
-            <CheckIcon className="size-4" />
-            Free while in early access — no credit card required.
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.28 }}
-            className="mt-5"
+            transition={{ duration: 0.6, delay: 0.22 }}
+            className="mt-8"
           >
             <EmailCapture source="hero" />
           </motion.div>
-
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            className="mt-6 inline-flex items-center gap-1.5 text-xs text-white/60"
-          >
-            <ArrowDownRightIcon className="size-3.5" />
-            It&apos;s live on this page — try the chat bubble in the corner.
-          </motion.p>
         </div>
-
-        {/* Product screenshot */}
-        <motion.div
-          initial={reduce ? { opacity: 0 } : { opacity: 0, scale: 0.96, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
-          className="relative mx-auto w-full max-w-[300px]"
-        >
-          <img
-            src="/landing/chatzone-chatview.png"
-            alt="Chatzone chat widget"
-            className="w-full rounded-3xl shadow-2xl ring-1 ring-white/10"
-          />
-        </motion.div>
       </div>
 
       <BrandMarquee />
@@ -97,10 +80,10 @@ const BRANDS = [
 function BrandMarquee() {
   const reduce = useReducedMotion()
   return (
-    <div className="relative w-full overflow-hidden border-t border-white/10 py-6">
-      {/* Fade the logos into the dark background at both edges. */}
-      <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-20 bg-gradient-to-r from-[#101213] to-transparent sm:w-32" />
-      <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-20 bg-gradient-to-l from-[#101213] to-transparent sm:w-32" />
+    <div className="relative z-10 w-full overflow-hidden border-t border-white/10 bg-black/30 py-6 shadow-[0_-1px_0_rgba(255,255,255,0.06)] backdrop-blur-md">
+      {/* Fade the logos into the dark glass at both edges (dark, not the bright image). */}
+      <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-24 bg-gradient-to-r from-[#101213] via-[#101213]/85 to-transparent sm:w-40" />
+      <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-24 bg-gradient-to-l from-[#101213] via-[#101213]/85 to-transparent sm:w-40" />
       <div
         className="flex w-max"
         style={reduce ? undefined : { animation: 'brand-marquee 40s linear infinite' }}
@@ -110,7 +93,7 @@ function BrandMarquee() {
             {BRANDS.map((b) => (
               <li
                 key={b}
-                className="whitespace-nowrap text-2xl font-semibold tracking-tight text-white/45 transition-colors hover:text-white"
+                className="whitespace-nowrap text-2xl font-semibold tracking-tight text-white/60 transition-colors hover:text-white"
               >
                 {b}
               </li>

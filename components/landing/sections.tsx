@@ -14,9 +14,11 @@ import Link from 'next/link'
 import { Reveal } from './Reveal'
 import { FeatureText } from './ScrollRevealText'
 import { EmailCapture } from './EmailCapture'
-import { ChatzoneIcon } from '@/components/ChatzoneIcon'
+import { LoqaraIcon } from '@/components/LoqaraIcon'
 
-const ACCENT = '#9BDA48'
+// Brand accent for inline styles — resolves to the --primary CSS variable so
+// the whole landing follows a single source of truth (see app/globals.css).
+const ACCENT = 'var(--primary)'
 const DARK = '#101213'
 
 // ───────────────────────── Trusted-by strip ─────────────────────────
@@ -147,7 +149,7 @@ export function Features() {
               One agent. Every part of support.
             </h2>
             <p className="mt-4 text-lg text-gray-600">
-              From the first question to the final order, Chatzone handles it — and brings in your
+              From the first question to the final order, Loqara handles it — and brings in your
               team exactly when it matters.
             </p>
           </Reveal>
@@ -255,9 +257,9 @@ export function Footer() {
     <footer className="border-t border-white/10 text-white" style={{ backgroundColor: DARK }}>
       <div className="mx-auto max-w-6xl px-5 py-16 text-center">
         <div className="flex items-center justify-center gap-1 text-xl font-bold">
-          <ChatzoneIcon className="size-12" />
+          <LoqaraIcon className="size-12" />
           <span>
-            Chatzone<span style={{ color: ACCENT }}>.</span>
+            Loqara<span style={{ color: ACCENT }}>.</span>
           </span>
         </div>
         <p className="mx-auto mt-3 max-w-2xl text-sm text-white/55">
@@ -265,7 +267,7 @@ export function Footer() {
         </p>
 
         <div className="mt-8 flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-sm text-white/45">
-          <span>© {2026} Chatzone. All rights reserved.</span>
+          <span>© {2026} Loqara. All rights reserved.</span>
           <span aria-hidden="true" className="text-base font-bold text-white/30">
             •
           </span>
