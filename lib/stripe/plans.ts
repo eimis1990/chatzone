@@ -20,16 +20,77 @@ export interface PlanMeta {
   monthly: number
   /** Included conversations per month. */
   conversations: number
+  /** Short tagline. */
+  blurb: string
+  /** Headline features (mirrors the landing pricing table). */
+  features: string[]
   /** Purchasable via Stripe Checkout (false for Free / Enterprise). */
   purchasable: boolean
 }
 
 export const PLANS: Record<Plan, PlanMeta> = {
-  free: { plan: 'free', name: 'Free', monthly: 0, conversations: 100, purchasable: false },
-  starter: { plan: 'starter', name: 'Starter', monthly: 149, conversations: 1500, purchasable: true },
-  growth: { plan: 'growth', name: 'Growth', monthly: 249, conversations: 4000, purchasable: true },
-  scale: { plan: 'scale', name: 'Scale', monthly: 449, conversations: 12000, purchasable: true },
-  enterprise: { plan: 'enterprise', name: 'Enterprise', monthly: 0, conversations: 0, purchasable: false },
+  free: {
+    plan: 'free',
+    name: 'Free',
+    monthly: 0,
+    conversations: 100,
+    blurb: 'Try Loqara on your store.',
+    features: ['1 bot', 'English + Lithuanian', 'Live handoff', 'Lead capture', 'Basic analytics'],
+    purchasable: false,
+  },
+  starter: {
+    plan: 'starter',
+    name: 'Starter',
+    monthly: 149,
+    conversations: 1500,
+    blurb: 'For growing stores.',
+    features: [
+      'Everything in Free',
+      'All languages',
+      'Product search & order lookup',
+      'Full analytics + CSAT',
+      'Remove Loqara badge',
+    ],
+    purchasable: true,
+  },
+  growth: {
+    plan: 'growth',
+    name: 'Growth',
+    monthly: 249,
+    conversations: 4000,
+    blurb: 'For busy teams.',
+    features: [
+      'Everything in Starter',
+      'Multiple bots',
+      'Priority support',
+      'Domain allowlist',
+      'Advanced analytics',
+    ],
+    purchasable: true,
+  },
+  scale: {
+    plan: 'scale',
+    name: 'Scale',
+    monthly: 449,
+    conversations: 12000,
+    blurb: 'High-volume support.',
+    features: [
+      'Everything in Growth',
+      'Teams & roles',
+      'Custom data retention',
+      'Priority SLA',
+    ],
+    purchasable: true,
+  },
+  enterprise: {
+    plan: 'enterprise',
+    name: 'Enterprise',
+    monthly: 0,
+    conversations: 0,
+    blurb: 'Custom volume & terms.',
+    features: ['Unlimited volume', 'SSO & SLA', 'Dedicated support'],
+    purchasable: false,
+  },
 }
 
 /** The plans a customer can buy through self-serve Checkout, in display order. */

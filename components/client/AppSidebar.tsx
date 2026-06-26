@@ -16,6 +16,7 @@ import {
   BarChart3Icon,
   Code2Icon,
   SettingsIcon,
+  CreditCardIcon,
   type LucideIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -167,13 +168,25 @@ export function AppSidebar({ bots, userEmail }: { bots: BotLite[]; userEmail: st
           </div>
         )}
 
-        {/* Org-level settings */}
+        {/* Org-level: subscription + settings */}
+        <Link
+          href="/app/subscription"
+          aria-current={pathname === '/app/subscription' ? 'page' : undefined}
+          className={cn(
+            itemBase,
+            'mt-1',
+            pathname === '/app/subscription' ? solidGreen : idle,
+          )}
+        >
+          <CreditCardIcon className="size-4 flex-shrink-0" aria-hidden="true" />
+          Subscription
+        </Link>
         <Link
           href="/app/settings"
           aria-current={pathname === '/app/settings' ? 'page' : undefined}
           className={cn(
             itemBase,
-            'mt-1',
+            'mt-0.5',
             pathname === '/app/settings' ? solidGreen : idle,
           )}
         >

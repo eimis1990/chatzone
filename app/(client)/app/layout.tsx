@@ -1,6 +1,7 @@
 import { requireRole, getUserOrgIds } from '@/lib/auth/guards'
 import { createServerClient } from '@/lib/supabase/server'
 import { AppSidebar, type BotLite } from '@/components/client/AppSidebar'
+import { Toaster } from '@/components/ui/sonner'
 
 export default async function ClientLayout({
   children,
@@ -48,6 +49,7 @@ export default async function ClientLayout({
       <main className="flex-1 min-w-0 m-3 overflow-y-auto rounded-2xl bg-background shadow-sm">
         {children}
       </main>
+      <Toaster />
     </div>
   )
 }

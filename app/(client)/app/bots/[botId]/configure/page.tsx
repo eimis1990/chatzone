@@ -2,7 +2,6 @@ import { notFound } from 'next/navigation'
 import { requireRole } from '@/lib/auth/guards'
 import { createServerClient } from '@/lib/supabase/server'
 import { ConfigForm } from '@/components/client/ConfigForm'
-import { Toaster } from '@/components/ui/sonner'
 import type { Bot } from '@/lib/types'
 
 export default async function ConfigurePage({
@@ -22,10 +21,5 @@ export default async function ConfigurePage({
 
   if (!data) notFound()
 
-  return (
-    <>
-      <ConfigForm botId={data.id} botName={data.name} initialConfig={data.config} />
-      <Toaster />
-    </>
-  )
+  return <ConfigForm botId={data.id} botName={data.name} initialConfig={data.config} />
 }
