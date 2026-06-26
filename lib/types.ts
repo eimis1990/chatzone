@@ -64,6 +64,7 @@ export interface Invite {
   email: string
   token: string
   status: InviteStatus
+  role: MemberRole
   expires_at: string
   invited_by: string | null
   created_at: string

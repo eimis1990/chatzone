@@ -168,13 +168,21 @@ export function AppSidebar({ bots, userEmail }: { bots: BotLite[]; userEmail: st
           </div>
         )}
 
-        {/* Org-level: subscription + settings */}
+        {/* Org-level: team + subscription + settings */}
+        <Link
+          href="/app/team"
+          aria-current={pathname === '/app/team' ? 'page' : undefined}
+          className={cn(itemBase, 'mt-1', pathname === '/app/team' ? solidGreen : idle)}
+        >
+          <UsersIcon className="size-4 flex-shrink-0" aria-hidden="true" />
+          Team
+        </Link>
         <Link
           href="/app/subscription"
           aria-current={pathname === '/app/subscription' ? 'page' : undefined}
           className={cn(
             itemBase,
-            'mt-1',
+            'mt-0.5',
             pathname === '/app/subscription' ? solidGreen : idle,
           )}
         >

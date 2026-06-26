@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
   const { error: memberError } = await service.from('organization_members').insert({
     org_id: invite.org_id,
     user_id: newUserId,
-    role: 'admin',
+    role: invite.role ?? 'admin',
   })
 
   if (memberError) {
