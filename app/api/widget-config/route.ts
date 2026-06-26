@@ -1,7 +1,8 @@
 import { createServiceClient } from '@/lib/supabase/service'
 import { isOriginAllowed, corsHeaders } from '@/lib/widget-auth'
 import { publicBotConfig } from '@/lib/widget-config'
-import type { Bot } from '@/lib/types'
+import { entitlementsFor } from '@/lib/entitlements'
+import type { Bot, Plan } from '@/lib/types'
 
 export async function OPTIONS(req: Request) {
   return new Response(null, {
@@ -41,5 +42,13 @@ export async function GET(req: Request) {
     return json({ error: 'Origin not allowed' }, 403)
   }
 
-  return json(publicBotConfig(bot.config))
+  // Apply plan entitlements (English-only / lead capture / badge) for the org.
+  const { data: org } = await svc
+    .from('organizations')
+    .select('plan')
+    .eq('id', bot.org_id)
+    .single<{ plan: Plan | null }>()
+  const entitlements = entitlementsFor(org?.plan ?? 'free')
+
+  return json(publicBotConfig(bot.config, entitlements))
 }

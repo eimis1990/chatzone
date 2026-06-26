@@ -43,7 +43,7 @@ export function Pricing() {
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary">Pricing</p>
           <h2 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">Simple, honest pricing</h2>
           <p className="mt-4 text-lg text-white/70">
-            No setup fee. Handoff, languages and analytics included. Free while we’re in early access.
+            No setup fee. Live handoff on every plan. Start free, upgrade as you grow.
           </p>
         </div>
 

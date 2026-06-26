@@ -14,8 +14,7 @@ import {
   DialogTrigger,
   DialogFooter,
 } from '@/components/ui/dialog'
-import { createBrowserClient } from '@/lib/supabase/browser'
-import { defaultBotConfig } from '@/lib/validation/schemas'
+import { createBot } from '@/lib/actions/createBot'
 import { trackEvent } from '@/lib/analytics'
 
 interface CreateBotDialogProps {
@@ -38,20 +37,10 @@ export function CreateBotDialog({ orgId, trigger }: CreateBotDialogProps) {
     setError(null)
     setLoading(true)
 
-    const supabase = createBrowserClient()
+    const res = await createBot(name)
 
-    const { data, error: insertError } = await supabase
-      .from('bots')
-      .insert({
-        org_id: orgId,
-        name: name.trim(),
-        config: defaultBotConfig(name.trim()),
-      })
-      .select('id')
-      .single<{ id: string }>()
-
-    if (insertError || !data) {
-      setError(insertError?.message ?? 'Failed to create bot. Please try again.')
+    if (res.error || !res.id) {
+      setError(res.error ?? 'Failed to create bot. Please try again.')
       setLoading(false)
       return
     }
@@ -59,7 +48,7 @@ export function CreateBotDialog({ orgId, trigger }: CreateBotDialogProps) {
     trackEvent('bot_created', { orgId })
     setOpen(false)
     setName('')
-    router.push(`/app/bots/${data.id}/configure`)
+    router.push(`/app/bots/${res.id}/configure`)
     router.refresh()
   }
 

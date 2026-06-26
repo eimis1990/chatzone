@@ -320,6 +320,10 @@
           if (c.theme && typeof c.theme.cornerRadius === 'number') {
             iframeContainer.style.borderRadius = c.theme.cornerRadius + 'px'
           }
+          // Paid plans hide the "Powered by Loqara" badge.
+          if (c.hideBadge) {
+            poweredBy.style.display = 'none'
+          }
           renderLauncher()
         }
       })

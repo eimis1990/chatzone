@@ -1,4 +1,5 @@
 import type { BotConfig, BotLanguage, LeadField, LeadTrigger, SuggestedQuestion } from '@/lib/types'
+import type { Entitlements } from '@/lib/entitlements'
 
 /** The button text for a suggested question. */
 export function sqLabel(q: SuggestedQuestion): string {
@@ -74,6 +75,8 @@ export interface PublicBotConfig {
     ttsEnabled: boolean
     sttEnabled: boolean
   }
+  /** Hide the "Powered by Loqara" badge (true on plans that allow it). */
+  hideBadge?: boolean
 }
 
 /**
@@ -88,9 +91,16 @@ export interface PublicBotConfig {
  *  - persona       — reveals tone/verbosity tuning
  *  - fallbackMessage — not needed client-side (server streams it)
  */
-export function publicBotConfig(config: BotConfig): PublicBotConfig {
+export function publicBotConfig(config: BotConfig, entitlements?: Entitlements): PublicBotConfig {
+  // Plan-gating: free plans are English-only and can't capture leads or hide
+  // the badge. Enforced here, the single public entry point for the widget.
+  const languages: BotLanguage[] =
+    entitlements && !entitlements.allLanguages ? ['en'] : (config.languages ?? ['en'])
+  const leadCaptureEnabled =
+    config.leadCapture.enabled && (entitlements ? entitlements.leadCapture : true)
+
   const content: Partial<Record<BotLanguage, PublicLanguageContent>> = {}
-  for (const lang of config.languages ?? ['en']) {
+  for (const lang of languages) {
     const c = config.content?.[lang]
     if (c) content[lang] = { greeting: c.greeting, suggestedQuestions: c.suggestedQuestions }
   }
@@ -114,14 +124,18 @@ export function publicBotConfig(config: BotConfig): PublicBotConfig {
       ...(config.theme.launcherColor ? { launcherColor: config.theme.launcherColor } : {}),
       ...(config.theme.backgroundImageUrl ? { backgroundImageUrl: config.theme.backgroundImageUrl } : {}),
     },
-    languages: config.languages ?? ['en'],
-    defaultLanguage: config.defaultLanguage ?? (config.languages ?? ['en'])[0],
+    languages,
+    defaultLanguage:
+      config.defaultLanguage && languages.includes(config.defaultLanguage)
+        ? config.defaultLanguage
+        : languages[0],
     content,
     leadCapture: {
-      enabled: config.leadCapture.enabled,
+      enabled: leadCaptureEnabled,
       trigger: config.leadCapture.trigger,
       fields: config.leadCapture.fields,
     },
+    hideBadge: entitlements?.removeBadge ?? false,
     // Only flags — never the raw voiceId (TTS runs server-side).
     voice: {
       enabled: config.voice?.enabled ?? false,
