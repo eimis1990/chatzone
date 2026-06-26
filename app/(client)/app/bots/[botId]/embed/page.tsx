@@ -50,7 +50,7 @@ export default async function EmbedSnippetPage({
       </div>
 
       <SectionCard icon={Code2Icon} title="Embed code" description="Add this to every page that should show the widget.">
-        <SnippetCopy snippet={snippet} />
+        <SnippetCopy snippet={snippet} botId={data.id} />
       </SectionCard>
 
       <SectionCard icon={ListChecksIcon} title="Installation" description="Five quick steps.">

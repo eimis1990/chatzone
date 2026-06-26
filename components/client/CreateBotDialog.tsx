@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/dialog'
 import { createBrowserClient } from '@/lib/supabase/browser'
 import { defaultBotConfig } from '@/lib/validation/schemas'
+import { trackEvent } from '@/lib/analytics'
 
 interface CreateBotDialogProps {
   orgId: string
@@ -55,6 +56,7 @@ export function CreateBotDialog({ orgId, trigger }: CreateBotDialogProps) {
       return
     }
 
+    trackEvent('bot_created', { orgId })
     setOpen(false)
     setName('')
     router.push(`/app/bots/${data.id}/configure`)

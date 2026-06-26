@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { createBrowserClient } from '@/lib/supabase/browser'
 import type { KnowledgeSource } from '@/lib/types'
+import { trackEvent } from '@/lib/analytics'
 
 interface TextSourceProps {
   botId: string
@@ -61,6 +62,7 @@ export function TextSource({ botId, onSourceAdded }: TextSourceProps) {
         }
 
         toast.success('Text source added and ingestion started')
+        trackEvent('knowledge_source_added', { type: 'text' })
         setName('')
         setContent('')
       } catch (err) {

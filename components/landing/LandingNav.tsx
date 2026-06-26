@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { MenuIcon, XIcon } from 'lucide-react'
 import { LoqaraIcon } from '@/components/LoqaraIcon'
+import { trackEvent } from '@/lib/analytics'
 
 const LINKS = [
   { label: 'Features', href: '/#features' },
@@ -39,7 +40,12 @@ export function LandingNav() {
 
         <div className={`hidden items-center gap-8 text-sm font-medium md:flex ${scrolled ? 'text-gray-700' : 'text-white/85'}`}>
           {LINKS.map((l) => (
-            <a key={l.href} href={l.href} className="transition-opacity hover:opacity-70">
+            <a
+              key={l.href}
+              href={l.href}
+              onClick={() => trackEvent('nav_click', { target: l.label })}
+              className="transition-opacity hover:opacity-70"
+            >
               {l.label}
             </a>
           ))}
@@ -48,6 +54,7 @@ export function LandingNav() {
         <div className="hidden items-center gap-3 md:flex">
           <Link
             href="/login"
+            onClick={() => trackEvent('signin_click', { location: 'nav' })}
             className={`rounded-full px-5 py-2 text-sm font-semibold shadow-sm transition-colors ${
               scrolled
                 ? 'bg-[#101213] text-white hover:bg-black'
@@ -72,13 +79,23 @@ export function LandingNav() {
         <div className="border-t border-black/5 bg-white px-5 py-4 md:hidden">
           <div className="flex flex-col gap-3 text-sm font-medium text-gray-700">
             {LINKS.map((l) => (
-              <a key={l.href} href={l.href} onClick={() => setOpen(false)}>
+              <a
+                key={l.href}
+                href={l.href}
+                onClick={() => {
+                  setOpen(false)
+                  trackEvent('nav_click', { target: l.label })
+                }}
+              >
                 {l.label}
               </a>
             ))}
             <Link
               href="/login"
-              onClick={() => setOpen(false)}
+              onClick={() => {
+                setOpen(false)
+                trackEvent('signin_click', { location: 'nav-mobile' })
+              }}
               className="rounded-full bg-[#101213] px-4 py-2 text-center font-semibold text-white"
             >
               Sign in

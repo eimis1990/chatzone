@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { CheckIcon } from 'lucide-react'
 import { Shimmer } from './Shimmer'
+import { trackEvent } from '@/lib/analytics'
 
 type Plan = {
   name: string
@@ -57,14 +58,20 @@ export function PricingTable() {
         <div className="inline-flex items-center rounded-full border border-white/10 bg-white/[0.04] p-1 text-sm">
           <button
             type="button"
-            onClick={() => setAnnual(false)}
+            onClick={() => {
+              setAnnual(false)
+              trackEvent('pricing_billing_toggled', { period: 'monthly' })
+            }}
             className={`rounded-full px-4 py-1.5 font-medium transition-colors ${!annual ? 'bg-white text-[#101213]' : 'text-white/70 hover:text-white'}`}
           >
             Monthly
           </button>
           <button
             type="button"
-            onClick={() => setAnnual(true)}
+            onClick={() => {
+              setAnnual(true)
+              trackEvent('pricing_billing_toggled', { period: 'annual' })
+            }}
             className={`rounded-full px-4 py-1.5 font-medium transition-colors ${annual ? 'bg-white text-[#101213]' : 'text-white/70 hover:text-white'}`}
           >
             Annual <span className="text-primary">· save ~17%</span>
@@ -100,6 +107,13 @@ export function PricingTable() {
 
             <Link
               href="#get-started"
+              onClick={() =>
+                trackEvent('pricing_plan_click', {
+                  plan: p.name,
+                  period: annual ? 'annual' : 'monthly',
+                  price: perMonth(p.monthly),
+                })
+              }
               className={`relative mt-5 inline-flex h-11 items-center justify-center overflow-hidden rounded-full px-5 text-sm font-semibold transition-colors ${
                 p.popular
                   ? 'bg-primary text-[#101213] hover:bg-primary-hover'

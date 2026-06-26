@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { createBrowserClient } from '@/lib/supabase/browser'
 import type { KnowledgeSource } from '@/lib/types'
+import { trackEvent } from '@/lib/analytics'
 
 interface QaPair {
   question: string
@@ -90,6 +91,7 @@ export function QaSource({ botId, onSourceAdded }: QaSourceProps) {
         }
 
         toast.success('Q&A source added and ingestion started')
+        trackEvent('knowledge_source_added', { type: 'qa' })
         setName('')
         setPairs([{ ...EMPTY_PAIR }])
       } catch (err) {

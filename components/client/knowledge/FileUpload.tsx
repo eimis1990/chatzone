@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { createBrowserClient } from '@/lib/supabase/browser'
 import type { KnowledgeSource } from '@/lib/types'
+import { trackEvent } from '@/lib/analytics'
 
 interface FileUploadProps {
   botId: string
@@ -147,6 +148,7 @@ export function FileUpload({ botId, onSourceAdded }: FileUploadProps) {
         }
 
         toast.success('File uploaded and ingestion started')
+        trackEvent('knowledge_source_added', { type: 'file' })
         setFile(null)
         if (inputRef.current) inputRef.current.value = ''
       } catch (err) {

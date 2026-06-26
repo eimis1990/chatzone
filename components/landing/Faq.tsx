@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { ChevronDownIcon } from 'lucide-react'
+import { trackEvent } from '@/lib/analytics'
 
 // Add or edit Q&As here — the accordion renders whatever's in this list.
 const FAQ: [string, string][] = [
@@ -40,7 +41,10 @@ export function Faq() {
               <div key={q}>
                 <button
                   type="button"
-                  onClick={() => setOpen(isOpen ? null : i)}
+                  onClick={() => {
+                    setOpen(isOpen ? null : i)
+                    if (!isOpen) trackEvent('faq_opened', { question: q })
+                  }}
                   aria-expanded={isOpen}
                   className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left text-[15px] font-semibold text-gray-900 transition-colors hover:bg-gray-50"
                 >

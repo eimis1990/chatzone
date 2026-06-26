@@ -3,15 +3,18 @@
 import { useState } from 'react'
 import { CopyIcon, CheckIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { trackEvent } from '@/lib/analytics'
 
 interface SnippetCopyProps {
   snippet: string
+  botId: string
 }
 
-export function SnippetCopy({ snippet }: SnippetCopyProps) {
+export function SnippetCopy({ snippet, botId }: SnippetCopyProps) {
   const [copied, setCopied] = useState(false)
 
   const handleCopy = async () => {
+    trackEvent('embed_code_copied', { botId })
     try {
       await navigator.clipboard.writeText(snippet)
       setCopied(true)

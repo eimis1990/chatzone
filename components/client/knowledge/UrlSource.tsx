@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { createBrowserClient } from '@/lib/supabase/browser'
 import type { KnowledgeSource } from '@/lib/types'
+import { trackEvent } from '@/lib/analytics'
 
 interface UrlSourceProps {
   botId: string
@@ -77,6 +78,7 @@ export function UrlSource({ botId, onSourceAdded }: UrlSourceProps) {
         }
 
         toast.success('URL source added and ingestion started')
+        trackEvent('knowledge_source_added', { type: 'url' })
         setUrl('')
         setUrlError(null)
       } catch (err) {

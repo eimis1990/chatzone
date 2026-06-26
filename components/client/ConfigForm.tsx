@@ -36,6 +36,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
 import { Scrubber } from '@/components/ui/scrubber'
+import { trackEvent } from '@/lib/analytics'
 import {
   Card,
   CardContent,
@@ -349,6 +350,7 @@ export function ConfigForm({ botId, botName, initialConfig }: ConfigFormProps) {
         const result = await saveConfig(botId, withEnabledLanguagesOnly(values), name.trim())
         if (result.success) {
           toast.success('Configuration saved')
+          trackEvent('bot_config_saved', { botId })
           // Refresh so the sidebar reflects a renamed bot.
           router.refresh()
         } else {

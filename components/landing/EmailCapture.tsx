@@ -3,6 +3,7 @@
 import { useRef, useState } from 'react'
 import { CheckCircle2Icon } from 'lucide-react'
 import { Shimmer } from './Shimmer'
+import { trackEvent } from '@/lib/analytics'
 
 /** Celebratory burst on successful signup, fired from a screen-space origin. */
 async function celebrate(origin: { x: number; y: number }) {
@@ -34,6 +35,7 @@ export function EmailCapture({ source }: { source: string }) {
     if (status === 'loading') return
     setStatus('loading')
     setError('')
+    trackEvent('signup_submitted', { source })
     try {
       const res = await fetch('/api/signup', {
         method: 'POST',
@@ -51,14 +53,17 @@ export function EmailCapture({ source }: { source: string }) {
             }
           : { x: 0.5, y: 0.65 }
         setStatus('done')
+        trackEvent('signup_succeeded', { source })
         void celebrate(origin)
       } else {
         setStatus('error')
         setError(data.error ?? 'Something went wrong.')
+        trackEvent('signup_failed', { source, reason: data.error ?? 'unknown' })
       }
     } catch {
       setStatus('error')
       setError('Network error — please try again.')
+      trackEvent('signup_failed', { source, reason: 'network' })
     }
   }
 
