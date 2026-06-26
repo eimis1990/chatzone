@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { publicBotConfig } from '@/lib/widget-config'
+import { entitlementsFor } from '@/lib/entitlements'
 import type { BotConfig } from '@/lib/types'
 
 const fullConfig: BotConfig = {
@@ -114,5 +115,56 @@ describe('publicBotConfig', () => {
     const pub = publicBotConfig(configNoAvatar)
     expect(pub.avatarUrl).toBeUndefined()
     expect(pub.displayName).toBe('Test Bot')
+  })
+})
+
+// A bot configured with everything ON — used to verify plan gating strips it.
+const maxedConfig: BotConfig = {
+  ...fullConfig,
+  languages: ['en', 'lt'],
+  defaultLanguage: 'lt',
+  content: {
+    en: { greeting: 'Hello!', suggestedQuestions: ['Q1'], fallbackMessage: 'No.' },
+    lt: { greeting: 'Labas!', suggestedQuestions: ['K1'], fallbackMessage: 'Ne.' },
+  },
+  leadCapture: { enabled: true, trigger: 'on_fallback', fields: [{ key: 'email', label: 'Email', required: true }] },
+}
+
+describe('publicBotConfig — plan entitlements gating', () => {
+  it('Free plan: English only, no lead capture, badge shown', () => {
+    const pub = publicBotConfig(maxedConfig, entitlementsFor('free'))
+    expect(pub.languages).toEqual(['en'])
+    expect(pub.defaultLanguage).toBe('en') // lt default falls back to en
+    expect(pub.content.lt).toBeUndefined()
+    expect(pub.content.en).toBeDefined()
+    expect(pub.leadCapture.enabled).toBe(false)
+    expect(pub.hideBadge).toBe(false)
+  })
+
+  it('Starter plan: all languages, lead capture, badge hidden', () => {
+    const pub = publicBotConfig(maxedConfig, entitlementsFor('starter'))
+    expect(pub.languages).toEqual(['en', 'lt'])
+    expect(pub.defaultLanguage).toBe('lt')
+    expect(pub.content.lt).toBeDefined()
+    expect(pub.leadCapture.enabled).toBe(true)
+    expect(pub.hideBadge).toBe(true)
+  })
+
+  it('Free plan never enables lead capture even if config says so', () => {
+    const pub = publicBotConfig(maxedConfig, entitlementsFor('free'))
+    expect(pub.leadCapture.enabled).toBe(false)
+  })
+
+  it('paid plan does not turn ON lead capture that the bot left OFF', () => {
+    const off: BotConfig = { ...maxedConfig, leadCapture: { ...maxedConfig.leadCapture, enabled: false } }
+    const pub = publicBotConfig(off, entitlementsFor('scale'))
+    expect(pub.leadCapture.enabled).toBe(false)
+  })
+
+  it('no entitlements (legacy call) passes config through unchanged', () => {
+    const pub = publicBotConfig(maxedConfig)
+    expect(pub.languages).toEqual(['en', 'lt'])
+    expect(pub.leadCapture.enabled).toBe(true)
+    expect(pub.hideBadge).toBe(false)
   })
 })

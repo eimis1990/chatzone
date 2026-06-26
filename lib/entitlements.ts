@@ -33,7 +33,7 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
     conversations: 100,
   },
   starter: {
-    maxBots: 1,
+    maxBots: 2,
     allLanguages: true,
     leadCapture: true,
     removeBadge: true,
@@ -42,7 +42,7 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
     conversations: 1500,
   },
   growth: {
-    maxBots: 10,
+    maxBots: 5,
     allLanguages: true,
     leadCapture: true,
     removeBadge: true,

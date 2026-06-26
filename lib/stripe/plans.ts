@@ -46,6 +46,7 @@ export const PLANS: Record<Plan, PlanMeta> = {
     blurb: 'For growing stores.',
     features: [
       'Everything in Free',
+      '2 bots',
       'Lead capture',
       'All languages',
       'Product search & order lookup',
@@ -62,7 +63,7 @@ export const PLANS: Record<Plan, PlanMeta> = {
     blurb: 'For busy teams.',
     features: [
       'Everything in Starter',
-      'Multiple bots',
+      'Up to 5 bots',
       'Priority support',
       'Domain allowlist',
       'Advanced analytics',
@@ -77,6 +78,7 @@ export const PLANS: Record<Plan, PlanMeta> = {
     blurb: 'High-volume support.',
     features: [
       'Everything in Growth',
+      'Unlimited bots',
       'Teams & roles',
       'Custom data retention',
       'Priority SLA',
