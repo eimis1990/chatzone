@@ -2,7 +2,8 @@ import { notFound } from 'next/navigation'
 import { requireRole } from '@/lib/auth/guards'
 import { createServerClient } from '@/lib/supabase/server'
 import { ConfigForm } from '@/components/client/ConfigForm'
-import type { Bot } from '@/lib/types'
+import { entitlementsFor } from '@/lib/entitlements'
+import type { Bot, Plan } from '@/lib/types'
 
 export default async function ConfigurePage({
   params,
@@ -15,11 +16,27 @@ export default async function ConfigurePage({
   const supabase = await createServerClient()
   const { data } = await supabase
     .from('bots')
-    .select('id, name, config')
+    .select('id, name, config, org_id')
     .eq('id', botId)
-    .single<Pick<Bot, 'id' | 'name' | 'config'>>()
+    .single<Pick<Bot, 'id' | 'name' | 'config' | 'org_id'>>()
 
   if (!data) notFound()
 
-  return <ConfigForm botId={data.id} botName={data.name} initialConfig={data.config} />
+  // Plan entitlements gate which controls are editable.
+  const { data: org } = await supabase
+    .from('organizations')
+    .select('plan')
+    .eq('id', data.org_id)
+    .single<{ plan: Plan | null }>()
+  const ent = entitlementsFor(org?.plan ?? 'free')
+
+  return (
+    <ConfigForm
+      botId={data.id}
+      botName={data.name}
+      initialConfig={data.config}
+      canUseAllLanguages={ent.allLanguages}
+      canUseLeadCapture={ent.leadCapture}
+    />
+  )
 }

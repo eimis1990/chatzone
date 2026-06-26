@@ -34,6 +34,12 @@ interface BillingPanelProps {
   cancelAtPeriodEnd: boolean
   hasCustomer: boolean
   isPaying: boolean
+  usage: {
+    conversationsUsed: number
+    conversationsLimit: number
+    botsUsed: number
+    botsLimit: number
+  }
   voiceActive: boolean
   voiceConfigured: boolean
   voice: { name: string; monthly: number; blurb: string; features: string[] }
@@ -66,6 +72,7 @@ export function BillingPanel({
   cancelAtPeriodEnd,
   hasCustomer,
   isPaying,
+  usage,
   voiceActive,
   voiceConfigured,
   voice,
@@ -133,6 +140,39 @@ export function BillingPanel({
     })
   }
 
+  const Meter = ({ label, used, limit }: { label: string; used: number; limit: number }) => {
+    const unlimited = !isFinite(limit)
+    const pct = unlimited || limit <= 0 ? 0 : Math.min(100, Math.round((used / limit) * 100))
+    const over = !unlimited && used >= limit
+    const near = !unlimited && !over && pct >= 90
+    const barColor = over ? 'bg-red-500' : near ? 'bg-amber-500' : 'bg-primary'
+    return (
+      <div>
+        <div className="flex items-baseline justify-between text-sm">
+          <span className="font-medium">{label}</span>
+          <span className="text-muted-foreground">
+            {used.toLocaleString()}
+            {unlimited ? ' · Unlimited' : ` / ${limit.toLocaleString()}`}
+          </span>
+        </div>
+        {!unlimited && (
+          <div className="mt-1.5 h-2 w-full overflow-hidden rounded-full bg-muted">
+            <div
+              className={`h-full rounded-full ${barColor} transition-all`}
+              style={{ width: `${pct}%` }}
+            />
+          </div>
+        )}
+        {over && <p className="mt-1 text-xs text-red-600">Limit reached — upgrade to add more.</p>}
+        {near && (
+          <p className="mt-1 text-xs text-amber-600">
+            {(limit - used).toLocaleString()} left this month.
+          </p>
+        )}
+      </div>
+    )
+  }
+
   const anyBusy = busy !== null
   const periodLabel = currentPeriodEnd
     ? new Date(currentPeriodEnd).toLocaleDateString(undefined, {
@@ -174,6 +214,20 @@ export function BillingPanel({
             Manage billing
           </Button>
         )}
+      </div>
+
+      {/* Usage this month */}
+      <div className="rounded-xl border bg-card p-5">
+        <h2 className="text-base font-semibold">Usage this month</h2>
+        <p className="text-sm text-muted-foreground">Resets on the 1st.</p>
+        <div className="mt-4 space-y-4">
+          <Meter
+            label="Conversations"
+            used={usage.conversationsUsed}
+            limit={usage.conversationsLimit}
+          />
+          <Meter label="Bots" used={usage.botsUsed} limit={usage.botsLimit} />
+        </div>
       </div>
 
       {!billingEnabled ? (

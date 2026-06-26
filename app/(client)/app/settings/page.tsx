@@ -2,6 +2,8 @@ import { requireRole, getUserOrgIds } from '@/lib/auth/guards'
 import { createServerClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { SettingsPanel } from '@/components/client/SettingsPanel'
+import { entitlementsFor } from '@/lib/entitlements'
+import type { Plan } from '@/lib/types'
 
 export default async function SettingsPage() {
   await requireRole('client')
@@ -9,14 +11,16 @@ export default async function SettingsPage() {
   const orgId = orgIds[0] ?? null
 
   let retentionDays: number | null = null
+  let canCustomRetention = false
   if (orgId) {
     const sb = await createServerClient()
     const { data } = await sb
       .from('organizations')
-      .select('retention_days')
+      .select('retention_days, plan')
       .eq('id', orgId)
-      .single<{ retention_days: number | null }>()
+      .single<{ retention_days: number | null; plan: Plan | null }>()
     retentionDays = data?.retention_days ?? null
+    canCustomRetention = entitlementsFor(data?.plan ?? 'free').customRetention
   }
 
   /** Set the org conversation-retention window (service client; org verified). */
@@ -26,6 +30,13 @@ export default async function SettingsPage() {
     const oid = ids[0]
     if (!oid) return
     const svc = createServiceClient()
+    // Enforce the entitlement server-side — the UI control is also gated.
+    const { data: org } = await svc
+      .from('organizations')
+      .select('plan')
+      .eq('id', oid)
+      .single<{ plan: Plan | null }>()
+    if (!entitlementsFor(org?.plan ?? 'free').customRetention) return
     await svc.from('organizations').update({ retention_days: days }).eq('id', oid)
   }
 
@@ -61,6 +72,7 @@ export default async function SettingsPage() {
         retentionDays={retentionDays}
         setRetention={setRetention}
         deleteData={deleteData}
+        canCustomRetention={canCustomRetention}
       />
     </div>
   )

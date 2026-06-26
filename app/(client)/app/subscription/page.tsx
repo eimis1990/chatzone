@@ -6,6 +6,7 @@ import { isStripeConfigured, getStripe } from '@/lib/stripe/client'
 import { getPriceId, getVoicePriceId, PLANS, DISPLAY_PLANS, VOICE_ADDON } from '@/lib/stripe/plans'
 import { ensureStripeCustomer } from '@/lib/stripe/customer'
 import { changeBasePlan, setVoiceAddon, reconcileOrgFromStripe } from '@/lib/stripe/manage'
+import { entitlementsFor } from '@/lib/entitlements'
 import type { Plan, BillingInterval, SubscriptionStatus } from '@/lib/types'
 
 const PAYING: SubscriptionStatus[] = ['active', 'trialing', 'past_due']
@@ -74,6 +75,26 @@ export default async function SubscriptionPage({
   }
 
   const isPaying = PAYING.includes(billing.status) && Boolean(billing.subscriptionId)
+
+  // Usage this calendar month: conversations started + bots in use vs the plan.
+  const ent = entitlementsFor(billing.plan)
+  const usage = { conversationsUsed: 0, botsUsed: 0 }
+  if (orgId) {
+    const sb = await createServerClient()
+    const { data: bots } = await sb.from('bots').select('id').eq('org_id', orgId)
+    const botIds = (bots ?? []).map((b) => (b as { id: string }).id)
+    usage.botsUsed = botIds.length
+    if (botIds.length) {
+      const now = new Date()
+      const monthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString()
+      const { count } = await sb
+        .from('conversations')
+        .select('id', { count: 'exact', head: true })
+        .in('bot_id', botIds)
+        .gte('started_at', monthStart)
+      usage.conversationsUsed = count ?? 0
+    }
+  }
 
   const planOptions = DISPLAY_PLANS.map((pl) => ({
     plan: pl,
@@ -215,6 +236,12 @@ export default async function SubscriptionPage({
         cancelAtPeriodEnd={billing.cancelAtPeriodEnd}
         hasCustomer={billing.hasCustomer}
         isPaying={isPaying}
+        usage={{
+          conversationsUsed: usage.conversationsUsed,
+          conversationsLimit: ent.conversations,
+          botsUsed: usage.botsUsed,
+          botsLimit: ent.maxBots,
+        }}
         voiceActive={billing.voiceActive}
         voiceConfigured={Boolean(getVoicePriceId())}
         voice={{

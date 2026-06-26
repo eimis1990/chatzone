@@ -66,6 +66,9 @@ interface ConfigFormProps {
   /** Internal bot name (sidebar label) — editable, distinct from displayName. */
   botName: string
   initialConfig: BotConfig
+  /** Plan gating — disable controls the org's plan doesn't include. */
+  canUseAllLanguages?: boolean
+  canUseLeadCapture?: boolean
 }
 
 // Use botConfigFormSchema (plain, no preprocessing) for the RHF resolver.
@@ -142,7 +145,13 @@ const FIELD_LABELS: Record<string, string> = {
   launcherLabel: 'Launcher label',
 }
 
-export function ConfigForm({ botId, botName, initialConfig }: ConfigFormProps) {
+export function ConfigForm({
+  botId,
+  botName,
+  initialConfig,
+  canUseAllLanguages = true,
+  canUseLeadCapture = true,
+}: ConfigFormProps) {
   const router = useRouter()
   // Internal bot name — lives outside the config schema, saved alongside it.
   const [name, setName] = useState(botName)
@@ -561,10 +570,16 @@ export function ConfigForm({ botId, botName, initialConfig }: ConfigFormProps) {
                   onCheckedChange={handleLtToggle}
                   id="ltEnabled"
                   size="sm"
+                  disabled={!canUseAllLanguages}
                 />
                 <Label htmlFor="ltEnabled" className="text-sm font-normal cursor-pointer">
                   Enable Lithuanian content
                 </Label>
+                {!canUseAllLanguages && (
+                  <a href="/app/subscription" className="text-xs text-primary hover:underline">
+                    Upgrade for more languages
+                  </a>
+                )}
               </div>
             </div>
 
@@ -1288,10 +1303,16 @@ export function ConfigForm({ botId, botName, initialConfig }: ConfigFormProps) {
                     checked={field.value}
                     onCheckedChange={field.onChange}
                     id="leadCaptureEnabled"
+                    disabled={!canUseLeadCapture}
                   />
                 )}
               />
               <Label htmlFor="leadCaptureEnabled">Enable lead capture</Label>
+              {!canUseLeadCapture && (
+                <a href="/app/subscription" className="text-xs text-primary hover:underline">
+                  Available on paid plans
+                </a>
+              )}
             </div>
 
             {leadCaptureEnabled && (

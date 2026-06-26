@@ -26,9 +26,16 @@ interface SettingsPanelProps {
   retentionDays: number | null
   setRetention: (days: number | null) => Promise<void>
   deleteData: (scope: 'conversations' | 'leads' | 'all') => Promise<{ ok: boolean }>
+  /** Whether the plan allows a configurable retention window (else Scale-gated). */
+  canCustomRetention: boolean
 }
 
-export function SettingsPanel({ retentionDays, setRetention, deleteData }: SettingsPanelProps) {
+export function SettingsPanel({
+  retentionDays,
+  setRetention,
+  deleteData,
+  canCustomRetention,
+}: SettingsPanelProps) {
   const [value, setValue] = useState(retentionDays == null ? 'forever' : String(retentionDays))
   const [savedMsg, setSavedMsg] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
@@ -62,7 +69,7 @@ export function SettingsPanel({ retentionDays, setRetention, deleteData }: Setti
         contentClassName="space-y-2"
       >
         <Label htmlFor="retention">Keep conversations for</Label>
-        <Select value={value} onValueChange={onRetentionChange}>
+        <Select value={value} onValueChange={onRetentionChange} disabled={!canCustomRetention}>
           <SelectTrigger id="retention" className="w-full max-w-xs bg-card">
             <SelectValue />
           </SelectTrigger>
@@ -74,7 +81,17 @@ export function SettingsPanel({ retentionDays, setRetention, deleteData }: Setti
             ))}
           </SelectContent>
         </Select>
-        {savedMsg && <p className="text-xs text-muted-foreground">{pending ? 'Saving…' : savedMsg}</p>}
+        {canCustomRetention ? (
+          savedMsg && <p className="text-xs text-muted-foreground">{pending ? 'Saving…' : savedMsg}</p>
+        ) : (
+          <p className="text-xs text-muted-foreground">
+            A custom retention window is available on the Scale plan.{' '}
+            <a href="/app/subscription" className="text-primary hover:underline">
+              Upgrade
+            </a>
+            .
+          </p>
+        )}
       </SectionCard>
 
       {/* Export */}
