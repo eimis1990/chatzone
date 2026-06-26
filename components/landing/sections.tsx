@@ -15,6 +15,7 @@ import { Reveal } from './Reveal'
 import { FeatureText } from './ScrollRevealText'
 import { EmailCapture } from './EmailCapture'
 import { LoqaraIcon } from '@/components/LoqaraIcon'
+import { FlickeringGrid } from '@/components/magicui/flickering-grid'
 
 // Brand accent for inline styles — resolves to the --primary CSS variable so
 // the whole landing follows a single source of truth (see app/globals.css).
@@ -171,8 +172,16 @@ export function Stats() {
     { value: '1 line', label: 'To install anywhere' },
   ]
   return (
-    <section style={{ backgroundColor: DARK }} className="text-white">
-      <div className="mx-auto grid max-w-6xl grid-cols-2 md:grid-cols-4">
+    <section style={{ backgroundColor: DARK }} className="relative isolate overflow-hidden text-white">
+      <FlickeringGrid
+        className="absolute inset-0 -z-10 size-full"
+        squareSize={4}
+        gridGap={6}
+        color="#e97634"
+        maxOpacity={0.18}
+        flickerChance={0.1}
+      />
+      <div className="relative mx-auto grid max-w-6xl grid-cols-2 md:grid-cols-4">
         {stats.map((s, i) => (
           <Reveal
             key={s.label}
@@ -254,7 +263,9 @@ export function CTASection() {
 // ───────────────────────── Footer ─────────────────────────
 export function Footer() {
   return (
-    <footer className="border-t border-white/10 text-white" style={{ backgroundColor: DARK }}>
+    <footer className="relative isolate overflow-hidden border-t border-white/10 text-white" style={{ backgroundColor: DARK }}>
+      {/* Faint grid, same as the logged-in app shell */}
+      <div className="shell-grid pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-full" aria-hidden="true" />
       <div className="mx-auto max-w-6xl px-5 py-16 text-center">
         <div className="flex items-center justify-center gap-1 text-xl font-bold">
           <LoqaraIcon className="size-12" />

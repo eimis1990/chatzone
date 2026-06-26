@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { CheckIcon } from 'lucide-react'
+import { Shimmer } from './Shimmer'
 
 type Plan = {
   name: string
@@ -99,13 +100,14 @@ export function PricingTable() {
 
             <Link
               href="#get-started"
-              className={`mt-5 inline-flex h-11 items-center justify-center rounded-full px-5 text-sm font-semibold transition-colors ${
+              className={`relative mt-5 inline-flex h-11 items-center justify-center overflow-hidden rounded-full px-5 text-sm font-semibold transition-colors ${
                 p.popular
                   ? 'bg-primary text-[#101213] hover:bg-primary-hover'
                   : 'border border-white/15 text-white hover:bg-white/10'
               }`}
             >
-              {p.monthly === 0 ? 'Start free' : 'Get started'}
+              <span className="relative z-10">{p.monthly === 0 ? 'Start free' : 'Get started'}</span>
+              {p.popular && <Shimmer />}
             </Link>
 
             <ul className="mt-6 space-y-2.5 text-sm text-white/75">

@@ -2,6 +2,7 @@
 
 import { useRef, useState } from 'react'
 import { CheckCircle2Icon } from 'lucide-react'
+import { Shimmer } from './Shimmer'
 
 /** Celebratory burst on successful signup, fired from a screen-space origin. */
 async function celebrate(origin: { x: number; y: number }) {
@@ -86,9 +87,10 @@ export function EmailCapture({ source }: { source: string }) {
           ref={buttonRef}
           type="submit"
           disabled={status === 'loading'}
-          className="inline-flex h-12 items-center justify-center rounded-full bg-primary px-6 text-sm font-semibold text-[#101213] shadow-lg shadow-primary/20 transition-colors hover:bg-primary-hover disabled:opacity-70"
+          className="relative inline-flex h-12 items-center justify-center overflow-hidden rounded-full bg-primary px-6 text-sm font-semibold text-[#101213] shadow-lg shadow-primary/20 transition-colors hover:bg-primary-hover disabled:opacity-70"
         >
-          {status === 'loading' ? 'Joining…' : 'Get started'}
+          <span className="relative z-10">{status === 'loading' ? 'Joining…' : 'Get started'}</span>
+          <Shimmer />
         </button>
       </form>
       {status === 'error' && <p className="mt-2 pl-1 text-xs text-red-300">{error}</p>}
