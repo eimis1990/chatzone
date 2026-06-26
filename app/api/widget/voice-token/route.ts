@@ -36,6 +36,13 @@ export async function POST(req: Request) {
     .single<Bot>()
   if (!bot || bot.status !== 'active') return json({ error: 'Bot not available' }, 404)
   if (!bot.config.voice?.enabled) return json({ error: 'Voice not enabled' }, 403)
+  // Voice is a paid add-on — reject calls when the org doesn't have it active.
+  const { data: org } = await svc
+    .from('organizations')
+    .select('voice_addon')
+    .eq('id', bot.org_id)
+    .single<{ voice_addon: boolean | null }>()
+  if (!org?.voice_addon) return json({ error: 'Voice add-on not active' }, 403)
   if (!isOriginAllowed(origin, bot.config.allowedDomains ?? [])) {
     return json({ error: 'Origin not allowed' }, 403)
   }

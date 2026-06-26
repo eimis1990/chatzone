@@ -11,6 +11,8 @@ interface ResizablePanelProps {
   min?: number
   max?: number
   className?: string
+  /** When false, the panel keeps its computed width and shows no drag handle. */
+  resizable?: boolean
 }
 
 /**
@@ -25,6 +27,7 @@ export function ResizablePanel({
   min = 360,
   max = 760,
   className,
+  resizable = true,
 }: ResizablePanelProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [width, setWidth] = useState(defaultWidth)
@@ -77,25 +80,27 @@ export function ResizablePanel({
     >
       <div className="no-scrollbar min-h-0 flex-1 overflow-y-auto">{children}</div>
 
-      {/* Drag handle on the right edge */}
-      <div
-        role="separator"
-        aria-orientation="vertical"
-        aria-label="Resize panel"
-        onPointerDown={onPointerDown}
-        className={cn(
-          'group absolute inset-y-0 right-0 z-10 w-2 translate-x-1/2 cursor-col-resize',
-          'flex items-center justify-center',
-        )}
-      >
-        <span
+      {/* Drag handle on the right edge (only when resizable) */}
+      {resizable && (
+        <div
+          role="separator"
+          aria-orientation="vertical"
+          aria-label="Resize panel"
+          onPointerDown={onPointerDown}
           className={cn(
-            'h-full w-px bg-border transition-colors',
-            'group-hover:bg-primary/40',
-            dragging && 'bg-primary/60',
+            'group absolute inset-y-0 right-0 z-10 w-2 translate-x-1/2 cursor-col-resize',
+            'flex items-center justify-center',
           )}
-        />
-      </div>
+        >
+          <span
+            className={cn(
+              'h-full w-px bg-border transition-colors',
+              'group-hover:bg-primary/40',
+              dragging && 'bg-primary/60',
+            )}
+          />
+        </div>
+      )}
     </div>
   )
 }

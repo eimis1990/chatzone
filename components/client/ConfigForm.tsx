@@ -405,12 +405,17 @@ export function ConfigForm({
 
   const leadCaptureEnabled = watch('leadCapture.enabled')
 
-  // Build a live config for the preview — typed to match TestChat's LiveConfig
+  // Build a live config for the preview — typed to match TestChat's LiveConfig.
+  // Mirror the add-on gate so the preview matches the live widget (no call
+  // button / voice when the Voice add-on isn't active).
+  const previewVoice = canUseVoice
+    ? watchedValues.voice
+    : { ...watchedValues.voice, enabled: false, ttsEnabled: false, sttEnabled: false }
   const liveConfig = {
     displayName: watchedValues.displayName,
     tagline: watchedValues.tagline,
     theme: watchedValues.theme,
-    voice: watchedValues.voice,
+    voice: previewVoice,
     model: watchedValues.model,
     temperature: watchedValues.temperature,
     systemPrompt: watchedValues.systemPrompt,
@@ -427,9 +432,9 @@ export function ConfigForm({
   }
 
   return (
-    <div className="flex h-full min-h-0">
-      {/* ── Config panel — resizable from its right edge, scrolls internally ── */}
-      <ResizablePanel defaultFraction={0.5} defaultWidth={480} min={380} max={1100}>
+    <div className="flex h-full min-h-0 overflow-hidden">
+      {/* ── Config panel — fixed ~half width, scrolls internally ── */}
+      <ResizablePanel defaultFraction={0.5} defaultWidth={480} min={380} max={1100} resizable={false}>
         <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="pb-10">
 
         {/* Sticky toolbar — title + always-visible Save (fixed height so the
