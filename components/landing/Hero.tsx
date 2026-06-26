@@ -39,13 +39,26 @@ export function Hero() {
             <br />
             <span className="font-[family-name:var(--font-lora)] font-medium italic tracking-normal text-primary">
               <span className="relative inline-block">
-                day or night
-                <span
+                day and night
+                {/* Hand-drawn underline: wavy stroke, full-opacity accent, constant
+                    thickness (non-scaling-stroke) while it stretches to the text. */}
+                <svg
                   aria-hidden="true"
-                  className="absolute inset-x-0 -bottom-[0.08em] h-[0.06em] rounded-full bg-primary/70"
-                />
+                  viewBox="0 0 300 16"
+                  fill="none"
+                  preserveAspectRatio="none"
+                  className="absolute inset-x-0 top-full h-[0.24em] w-full overflow-visible text-primary"
+                >
+                  <path
+                    d="M3 8 C 82 13, 176 13, 236 9 C 264 7, 287 9, 298 5"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                    strokeLinecap="round"
+                    vectorEffect="non-scaling-stroke"
+                  />
+                </svg>
               </span>
-              .
+              !
             </span>
           </motion.h1>
 
