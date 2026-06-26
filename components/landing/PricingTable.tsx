@@ -5,47 +5,7 @@ import Link from 'next/link'
 import { CheckIcon } from 'lucide-react'
 import { Shimmer } from './Shimmer'
 import { trackEvent } from '@/lib/analytics'
-
-type Plan = {
-  name: string
-  monthly: number
-  conversations: string
-  blurb: string
-  features: string[]
-  popular?: boolean
-}
-
-const PLANS: Plan[] = [
-  {
-    name: 'Free',
-    monthly: 0,
-    conversations: '100 conversations / mo',
-    blurb: 'Try Loqara on your store.',
-    features: ['1 bot', 'English + Lithuanian', 'Live handoff to your team', 'Lead capture', 'Basic analytics'],
-  },
-  {
-    name: 'Starter',
-    monthly: 149,
-    conversations: '1,500 conversations / mo',
-    blurb: 'For growing stores.',
-    features: ['Everything in Free', 'All languages', 'Product search & order lookup', 'Full analytics + CSAT', 'Remove Loqara badge'],
-    popular: true,
-  },
-  {
-    name: 'Growth',
-    monthly: 249,
-    conversations: '4,000 conversations / mo',
-    blurb: 'For busy teams.',
-    features: ['Everything in Starter', 'Multiple bots', 'Priority support', 'Domain allowlist', 'Advanced analytics'],
-  },
-  {
-    name: 'Scale',
-    monthly: 449,
-    conversations: '12,000 conversations / mo',
-    blurb: 'High-volume support.',
-    features: ['Everything in Growth', 'Teams & roles', 'Custom data retention', 'Priority SLA'],
-  },
-]
+import { PLANS, DISPLAY_PLANS, POPULAR_PLAN } from '@/lib/plans-catalog'
 
 export function PricingTable() {
   const [annual, setAnnual] = useState(true)
@@ -80,14 +40,17 @@ export function PricingTable() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-4">
-        {PLANS.map((p) => (
+        {DISPLAY_PLANS.map((key) => {
+          const p = PLANS[key]
+          const popular = key === POPULAR_PLAN
+          return (
           <div
-            key={p.name}
+            key={key}
             className={`relative flex flex-col rounded-2xl border p-6 ${
-              p.popular ? 'border-primary bg-primary/[0.06] ring-1 ring-primary' : 'border-white/10 bg-white/[0.03]'
+              popular ? 'border-primary bg-primary/[0.06] ring-1 ring-primary' : 'border-white/10 bg-white/[0.03]'
             }`}
           >
-            {p.popular && (
+            {popular && (
               <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-[#101213]">
                 Most popular
               </span>
@@ -103,7 +66,9 @@ export function PricingTable() {
               {p.monthly > 0 ? (annual ? `billed annually · €${p.monthly * 10}/yr` : 'billed monthly') : ' '}
             </p>
 
-            <p className="mt-4 text-sm font-medium text-primary">{p.conversations}</p>
+            <p className="mt-4 text-sm font-medium text-primary">
+              {p.conversations.toLocaleString()} conversations / mo
+            </p>
 
             <Link
               href="#get-started"
@@ -115,13 +80,13 @@ export function PricingTable() {
                 })
               }
               className={`relative mt-5 inline-flex h-11 items-center justify-center overflow-hidden rounded-full px-5 text-sm font-semibold transition-colors ${
-                p.popular
+                popular
                   ? 'bg-primary text-[#101213] hover:bg-primary-hover'
                   : 'border border-white/15 text-white hover:bg-white/10'
               }`}
             >
               <span className="relative z-10">{p.monthly === 0 ? 'Start free' : 'Get started'}</span>
-              {p.popular && <Shimmer />}
+              {popular && <Shimmer />}
             </Link>
 
             <ul className="mt-6 space-y-2.5 text-sm text-white/75">
@@ -133,7 +98,8 @@ export function PricingTable() {
               ))}
             </ul>
           </div>
-        ))}
+          )
+        })}
       </div>
     </div>
   )
