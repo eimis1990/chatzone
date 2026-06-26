@@ -4,9 +4,10 @@ import { useRef, useState } from 'react'
 import { useReducedMotion } from 'framer-motion'
 
 /**
- * Hero background: the fox walks in (intro) once, then we crossfade to a looping
- * idle clip. Both clips end/begin on the same close-up frame, so the handoff is
- * seamless. Under reduced-motion we show the static poster only.
+ * Hero background: the lobby starts empty, the fox leans in from the right, waves,
+ * and settles into the standing pose (intro) once, then we crossfade to a looping
+ * idle clip. The intro ends on the same standing frame the loop begins on, so the
+ * handoff is seamless. Under reduced-motion we show the static poster only.
  */
 export function HeroVideo() {
   const reduce = useReducedMotion()
@@ -41,10 +42,11 @@ export function HeroVideo() {
         aria-hidden="true"
         className={`${base} ${introDone ? 'opacity-100' : 'opacity-0'}`}
       />
-      {/* Approach intro — autoplays once, then hands off to the loop. */}
+      {/* Intro — empty lobby, then the fox leans in, waves, and settles into the
+          standing pose; autoplays once, then hands off to the loop. */}
       <video
         src="/loqara-hero-intro.mp4"
-        poster="/loqara-hero-poster.jpg"
+        poster="/loqara-hero-empty-poster.jpg"
         autoPlay
         muted
         playsInline
