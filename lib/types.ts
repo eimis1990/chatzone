@@ -47,6 +47,7 @@ export interface Organization {
   billing_interval: BillingInterval | null
   current_period_end: string | null
   cancel_at_period_end: boolean
+  voice_addon: boolean
 }
 
 export interface OrganizationMember {

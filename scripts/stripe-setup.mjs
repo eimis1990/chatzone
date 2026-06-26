@@ -36,6 +36,9 @@ const PLANS = [
   { plan: 'growth', name: 'Growth', monthly: 249 },
   { plan: 'scale', name: 'Scale', monthly: 449 },
 ]
+// Add-ons attach to a base subscription as an extra item (not a separate sub).
+// Voice is a flat monthly fee for now; per-minute metering comes in a later pass.
+const ADDONS = [{ key: 'voice', name: 'Voice agent', monthly: 49 }]
 const CURRENCY = 'eur'
 
 const key = process.env.STRIPE_SECRET_KEY
@@ -60,10 +63,10 @@ if (isLive && !optedIntoLive) {
 
 const stripe = new Stripe(key)
 
-/** Find a plan's product by metadata, or create it. */
-async function findOrCreateProduct(plan, name) {
+/** Find a product by a metadata tag, or create it. */
+async function findOrCreateProduct(metaKey, metaVal, name) {
   const found = await stripe.products.search({
-    query: `active:'true' AND metadata['loqara_plan']:'${plan}'`,
+    query: `active:'true' AND metadata['${metaKey}']:'${metaVal}'`,
     limit: 1,
   })
   if (found.data[0]) {
@@ -72,15 +75,15 @@ async function findOrCreateProduct(plan, name) {
   }
   const created = await stripe.products.create({
     name: `Loqara ${name}`,
-    metadata: { loqara_plan: plan },
+    metadata: { [metaKey]: metaVal },
   })
   console.log(`  · product ${name}: created ${created.id}`)
   return created
 }
 
 /** Find a recurring price by lookup_key (and matching shape), or create it. */
-async function findOrCreatePrice(productId, plan, interval, amountCents) {
-  const lookup_key = `loqara_${plan}_${interval}`
+async function findOrCreatePrice(productId, keyBase, interval, amountCents) {
+  const lookup_key = `loqara_${keyBase}_${interval}`
   const existing = await stripe.prices.list({ lookup_keys: [lookup_key], active: true, limit: 1 })
   const p = existing.data[0]
   if (
@@ -99,7 +102,7 @@ async function findOrCreatePrice(productId, plan, interval, amountCents) {
     recurring: { interval },
     lookup_key,
     transfer_lookup_key: true,
-    nickname: `${plan} ${interval}`,
+    nickname: `${keyBase} ${interval}`,
   })
   console.log(`    - ${interval}: created ${created.id} (${lookup_key})`)
   return created
@@ -111,12 +114,19 @@ async function main() {
 
   for (const { plan, name, monthly } of PLANS) {
     console.log(`${name}:`)
-    const product = await findOrCreateProduct(plan, name)
+    const product = await findOrCreateProduct('loqara_plan', plan, name)
     const monthPrice = await findOrCreatePrice(product.id, plan, 'month', monthly * 100)
     const yearPrice = await findOrCreatePrice(product.id, plan, 'year', monthly * 10 * 100)
     const P = plan.toUpperCase()
     envLines.push(`STRIPE_PRICE_${P}_MONTH=${monthPrice.id}`)
     envLines.push(`STRIPE_PRICE_${P}_YEAR=${yearPrice.id}`)
+  }
+
+  for (const { key, name, monthly } of ADDONS) {
+    console.log(`${name} (add-on):`)
+    const product = await findOrCreateProduct('loqara_addon', key, name)
+    const monthPrice = await findOrCreatePrice(product.id, key, 'month', monthly * 100)
+    envLines.push(`STRIPE_PRICE_${key.toUpperCase()}_MONTH=${monthPrice.id}`)
   }
 
   console.log('\n✅ Done. Add these to .env.local (and the matching Vercel env):\n')

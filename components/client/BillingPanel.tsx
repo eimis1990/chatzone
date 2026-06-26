@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { CheckIcon, ExternalLinkIcon, Loader2Icon } from 'lucide-react'
+import { CheckIcon, ExternalLinkIcon, Loader2Icon, MicIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import type { Plan, BillingInterval, SubscriptionStatus } from '@/lib/types'
 
@@ -13,10 +14,11 @@ export interface BillingPlanOption {
   conversations: number
   blurb: string
   features: string[]
+  purchasable: boolean
+  popular: boolean
 }
 
 interface BillingPanelProps {
-  /** Whether Stripe keys are configured on the server. */
   billingEnabled: boolean
   plan: Plan
   status: SubscriptionStatus
@@ -24,11 +26,16 @@ interface BillingPanelProps {
   currentPeriodEnd: string | null
   cancelAtPeriodEnd: boolean
   hasCustomer: boolean
+  isPaying: boolean
+  voiceActive: boolean
+  voiceConfigured: boolean
+  voice: { name: string; monthly: number; blurb: string; features: string[] }
   plans: BillingPlanOption[]
-  startCheckout: (
+  selectPlan: (
     plan: Plan,
     interval: BillingInterval,
-  ) => Promise<{ url?: string; error?: string }>
+  ) => Promise<{ url?: string; ok?: boolean; error?: string }>
+  setVoice: (enabled: boolean) => Promise<{ ok?: boolean; error?: string }>
   openPortal: () => Promise<{ url?: string; error?: string }>
 }
 
@@ -51,48 +58,75 @@ export function BillingPanel({
   currentPeriodEnd,
   cancelAtPeriodEnd,
   hasCustomer,
+  isPaying,
+  voiceActive,
+  voiceConfigured,
+  voice,
   plans,
-  startCheckout,
+  selectPlan,
+  setVoice,
   openPortal,
 }: BillingPanelProps) {
+  const router = useRouter()
   const [annual, setAnnual] = useState(interval !== 'month')
-  const [pendingPlan, setPendingPlan] = useState<Plan | null>(null)
-  const [portalPending, setPortalPending] = useState(false)
+  const [busy, setBusy] = useState<string | null>(null)
   const [, startTransition] = useTransition()
 
   const perMonth = (m: number) => (annual ? Math.round((m * 10) / 12) : m)
+  const selectedInterval: BillingInterval = annual ? 'year' : 'month'
   const currentRank = ORDER.indexOf(plan)
 
-  const go = (result: { url?: string; error?: string }) => {
+  /** Handle a {url|ok|error} action result. */
+  const resolve = (result: { url?: string; ok?: boolean; error?: string }, okMsg: string) => {
     if (result.url) {
       window.location.href = result.url
+    } else if (result.ok) {
+      toast.success(okMsg)
+      router.refresh()
     } else {
       toast.error(result.error ?? 'Something went wrong. Please try again.')
     }
   }
 
-  const handleCheckout = (target: Plan) => {
-    setPendingPlan(target)
+  const runPlan = (p: BillingPlanOption, label: string) => {
+    setBusy(p.plan)
     startTransition(async () => {
       try {
-        go(await startCheckout(target, annual ? 'year' : 'month'))
+        resolve(await selectPlan(p.plan, selectedInterval), `Switched to ${p.name}.`)
       } finally {
-        setPendingPlan(null)
+        setBusy(null)
       }
     })
   }
 
-  const handlePortal = () => {
-    setPortalPending(true)
+  const runPortal = (tag: string) => {
+    setBusy(tag)
     startTransition(async () => {
       try {
-        go(await openPortal())
+        const r = await openPortal()
+        if (r.url) window.location.href = r.url
+        else toast.error(r.error ?? 'Could not open billing portal.')
       } finally {
-        setPortalPending(false)
+        setBusy(null)
       }
     })
   }
 
+  const runVoice = (enabled: boolean) => {
+    setBusy('voice')
+    startTransition(async () => {
+      try {
+        resolve(
+          await setVoice(enabled),
+          enabled ? 'Voice agent added.' : 'Voice agent removed.',
+        )
+      } finally {
+        setBusy(null)
+      }
+    })
+  }
+
+  const anyBusy = busy !== null
   const periodLabel = currentPeriodEnd
     ? new Date(currentPeriodEnd).toLocaleDateString(undefined, {
         year: 'numeric',
@@ -101,20 +135,19 @@ export function BillingPanel({
       })
     : null
 
-  const anyPending = pendingPlan !== null || portalPending
-
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Current-plan banner */}
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-card p-5">
         <div>
           <p className="text-sm text-muted-foreground">Current plan</p>
           <p className="text-xl font-semibold capitalize">
             {plan}
-            {plan !== 'free' && (
+            {isPaying && (
               <span className="ml-2 align-middle text-sm font-normal text-muted-foreground">
                 {STATUS_LABEL[status]}
                 {interval ? ` · billed ${interval === 'year' ? 'annually' : 'monthly'}` : ''}
+                {voiceActive ? ' · Voice add-on' : ''}
               </span>
             )}
           </p>
@@ -125,8 +158,8 @@ export function BillingPanel({
           )}
         </div>
         {hasCustomer && (
-          <Button variant="outline" onClick={handlePortal} disabled={anyPending}>
-            {portalPending ? (
+          <Button variant="outline" onClick={() => runPortal('portal')} disabled={anyBusy}>
+            {busy === 'portal' ? (
               <Loader2Icon className="size-4 animate-spin" />
             ) : (
               <ExternalLinkIcon className="size-4" />
@@ -162,33 +195,50 @@ export function BillingPanel({
             </div>
           </div>
 
-          <div className="grid gap-5 lg:grid-cols-3">
+          {/* Plan cards */}
+          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
             {plans.map((p) => {
-              const isCurrent = p.plan === plan
+              const samePlan = p.plan === plan
+              const isFree = p.plan === 'free'
+              const isCurrent = isFree
+                ? plan === 'free'
+                : samePlan && isPaying && interval === selectedInterval
               const rank = ORDER.indexOf(p.plan)
-              const isDowngrade = currentRank > rank
-              const busy = pendingPlan === p.plan
+
+              let label = 'Upgrade'
+              let action: 'plan' | 'portal' | null = 'plan'
+              if (isCurrent) {
+                label = 'Current plan'
+                action = null
+              } else if (isFree) {
+                label = 'Cancel plan'
+                action = 'portal'
+              } else if (samePlan) {
+                label = `Switch to ${annual ? 'annual' : 'monthly'}`
+              } else if (rank < currentRank) {
+                label = 'Downgrade'
+              }
+
+              const thisBusy = busy === p.plan
               return (
                 <div
                   key={p.plan}
-                  className={`flex flex-col rounded-2xl border p-6 ${isCurrent ? 'border-primary ring-1 ring-primary' : ''}`}
+                  className={`relative flex flex-col rounded-2xl border p-6 ${p.popular ? 'border-primary ring-1 ring-primary' : ''}`}
                 >
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-semibold">{p.name}</h3>
-                    {isCurrent && (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
-                        <CheckIcon className="size-3" /> Current
-                      </span>
-                    )}
-                  </div>
+                  {p.popular && (
+                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground">
+                      Most popular
+                    </span>
+                  )}
+                  <h3 className="text-lg font-semibold">{p.name}</h3>
                   <p className="mt-1 text-sm text-muted-foreground">{p.blurb}</p>
 
                   <div className="mt-4 flex items-baseline gap-1">
                     <span className="text-3xl font-bold tracking-tight">€{perMonth(p.monthly)}</span>
-                    <span className="text-sm text-muted-foreground">/mo</span>
+                    {p.monthly > 0 && <span className="text-sm text-muted-foreground">/mo</span>}
                   </div>
                   <p className="mt-1 h-4 text-xs text-muted-foreground">
-                    {annual ? `billed annually · €${p.monthly * 10}/yr` : ' '}
+                    {p.monthly > 0 && annual ? `billed annually · €${p.monthly * 10}/yr` : ' '}
                   </p>
 
                   <p className="mt-3 text-sm font-medium text-primary">
@@ -197,12 +247,12 @@ export function BillingPanel({
 
                   <Button
                     className="mt-5"
-                    variant={isCurrent || isDowngrade ? 'outline' : 'default'}
-                    disabled={anyPending || isCurrent}
-                    onClick={() => handleCheckout(p.plan)}
+                    variant={isCurrent || action === 'portal' || rank < currentRank ? 'outline' : 'default'}
+                    disabled={anyBusy || action === null}
+                    onClick={() => (action === 'portal' ? runPortal(p.plan) : runPlan(p, label))}
                   >
-                    {busy && <Loader2Icon className="size-4 animate-spin" />}
-                    {isCurrent ? 'Current plan' : isDowngrade ? 'Switch to this' : 'Upgrade'}
+                    {thisBusy && <Loader2Icon className="size-4 animate-spin" />}
+                    {label}
                   </Button>
 
                   <ul className="mt-6 space-y-2.5 text-sm text-foreground/80">
@@ -217,6 +267,62 @@ export function BillingPanel({
               )
             })}
           </div>
+
+          {/* Voice add-on */}
+          {voiceConfigured && (
+            <div className="rounded-2xl border bg-card p-6">
+              <div className="flex flex-wrap items-start justify-between gap-4">
+                <div className="flex items-start gap-3">
+                  <span className="mt-0.5 flex size-9 flex-shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    <MicIcon className="size-5" />
+                  </span>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-semibold">{voice.name}</h3>
+                      <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                        Add-on
+                      </span>
+                      {voiceActive && (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+                          <CheckIcon className="size-3" /> Active
+                        </span>
+                      )}
+                    </div>
+                    <p className="mt-1 max-w-xl text-sm text-muted-foreground">{voice.blurb}</p>
+                    <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                      {voice.features.map((f) => (
+                        <li key={f} className="flex items-center gap-1">
+                          <CheckIcon className="size-3 text-primary" />
+                          {f}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+
+                <div className="flex flex-col items-end gap-1">
+                  <div className="text-right">
+                    <span className="text-2xl font-bold">€{voice.monthly}</span>
+                    <span className="text-sm text-muted-foreground">/mo</span>
+                  </div>
+                  {voiceActive ? (
+                    <Button variant="outline" disabled={anyBusy} onClick={() => runVoice(false)}>
+                      {busy === 'voice' && <Loader2Icon className="size-4 animate-spin" />}
+                      Remove
+                    </Button>
+                  ) : (
+                    <Button disabled={anyBusy || !isPaying} onClick={() => runVoice(true)}>
+                      {busy === 'voice' && <Loader2Icon className="size-4 animate-spin" />}
+                      Add voice agent
+                    </Button>
+                  )}
+                  {!isPaying && !voiceActive && (
+                    <p className="text-xs text-muted-foreground">Available with any paid plan</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
 
           <p className="text-center text-sm text-muted-foreground">
             Need higher volume or custom terms?{' '}

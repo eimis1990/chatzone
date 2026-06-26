@@ -1,7 +1,7 @@
 import 'server-only'
 import type Stripe from 'stripe'
 import { createServiceClient } from '@/lib/supabase/service'
-import { planFromPriceId } from './plans'
+import { planFromPriceId, getVoicePriceId } from './plans'
 import type { Plan, BillingInterval, SubscriptionStatus } from '@/lib/types'
 
 /** Map Stripe's subscription status onto ours (unknowns → inactive). */
@@ -40,10 +40,21 @@ function periodEndIso(sub: Stripe.Subscription): string | null {
 export async function syncSubscriptionToOrg(sub: Stripe.Subscription): Promise<void> {
   const svc = createServiceClient()
   const customerId = typeof sub.customer === 'string' ? sub.customer : sub.customer.id
-
-  const priceId = sub.items?.data?.[0]?.price?.id ?? null
-  const match = priceId ? planFromPriceId(priceId) : null
   const status = mapStatus(sub.status)
+
+  // A subscription can hold the base plan plus add-on items. Find the item
+  // whose price maps to a plan; separately detect the voice add-on item.
+  const items = sub.items?.data ?? []
+  const voicePriceId = getVoicePriceId()
+  let match: { plan: Plan; interval: BillingInterval } | null = null
+  let hasVoice = false
+  for (const it of items) {
+    const pid = it.price?.id
+    if (!pid) continue
+    if (voicePriceId && pid === voicePriceId) hasVoice = true
+    const m = planFromPriceId(pid)
+    if (m) match = m
+  }
 
   const paying = status === 'active' || status === 'trialing' || status === 'past_due'
   const plan: Plan = paying && match ? match.plan : 'free'
@@ -58,6 +69,7 @@ export async function syncSubscriptionToOrg(sub: Stripe.Subscription): Promise<v
       billing_interval: interval,
       current_period_end: periodEndIso(sub),
       cancel_at_period_end: sub.cancel_at_period_end ?? false,
+      voice_addon: paying && hasVoice,
     })
     .eq('stripe_customer_id', customerId)
 }

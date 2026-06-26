@@ -3,9 +3,12 @@ import { createServerClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { BillingPanel } from '@/components/client/BillingPanel'
 import { isStripeConfigured, getStripe } from '@/lib/stripe/client'
-import { getPriceId, PLANS, PURCHASABLE_PLANS } from '@/lib/stripe/plans'
+import { getPriceId, getVoicePriceId, PLANS, DISPLAY_PLANS, VOICE_ADDON } from '@/lib/stripe/plans'
 import { ensureStripeCustomer } from '@/lib/stripe/customer'
+import { changeBasePlan, setVoiceAddon } from '@/lib/stripe/manage'
 import type { Plan, BillingInterval, SubscriptionStatus } from '@/lib/types'
+
+const PAYING: SubscriptionStatus[] = ['active', 'trialing', 'past_due']
 
 export default async function SubscriptionPage() {
   await requireRole('client')
@@ -19,13 +22,15 @@ export default async function SubscriptionPage() {
     currentPeriodEnd: null as string | null,
     cancelAtPeriodEnd: false,
     hasCustomer: false,
+    voiceActive: false,
+    subscriptionId: null as string | null,
   }
   if (orgId) {
     const sb = await createServerClient()
     const { data, error } = await sb
       .from('organizations')
       .select(
-        'plan, subscription_status, billing_interval, current_period_end, cancel_at_period_end, stripe_customer_id',
+        'plan, subscription_status, billing_interval, current_period_end, cancel_at_period_end, stripe_customer_id, stripe_subscription_id, voice_addon',
       )
       .eq('id', orgId)
       .single()
@@ -37,6 +42,8 @@ export default async function SubscriptionPage() {
         current_period_end: string | null
         cancel_at_period_end: boolean | null
         stripe_customer_id: string | null
+        stripe_subscription_id: string | null
+        voice_addon: boolean | null
       }
       billing.plan = d.plan ?? 'free'
       billing.status = d.subscription_status ?? 'inactive'
@@ -44,23 +51,33 @@ export default async function SubscriptionPage() {
       billing.currentPeriodEnd = d.current_period_end ?? null
       billing.cancelAtPeriodEnd = d.cancel_at_period_end ?? false
       billing.hasCustomer = Boolean(d.stripe_customer_id)
+      billing.voiceActive = Boolean(d.voice_addon)
+      billing.subscriptionId = d.stripe_subscription_id ?? null
     }
   }
 
-  const planOptions = PURCHASABLE_PLANS.map((pl) => ({
+  const isPaying = PAYING.includes(billing.status) && Boolean(billing.subscriptionId)
+
+  const planOptions = DISPLAY_PLANS.map((pl) => ({
     plan: pl,
     name: PLANS[pl].name,
     monthly: PLANS[pl].monthly,
     conversations: PLANS[pl].conversations,
     blurb: PLANS[pl].blurb,
-    features: PLANS[pl].features,
+    features: [...PLANS[pl].features],
+    purchasable: PLANS[pl].purchasable,
+    popular: pl === 'starter',
   }))
 
-  /** Start a Stripe Checkout session for a plan+interval (org verified). */
-  async function startCheckout(
+  /**
+   * Choose a plan. If the org isn't subscribed yet → Stripe Checkout (returns a
+   * URL). If it already has a subscription → swap the base item in place
+   * (proration), no second subscription. Returns {url} | {ok} | {error}.
+   */
+  async function selectPlan(
     plan: Plan,
     interval: BillingInterval,
-  ): Promise<{ url?: string; error?: string }> {
+  ): Promise<{ url?: string; ok?: boolean; error?: string }> {
     'use server'
     const ids = await getUserOrgIds()
     const oid = ids[0]
@@ -69,7 +86,24 @@ export default async function SubscriptionPage() {
     if (!stripe) return { error: 'Billing is not enabled yet.' }
     const priceId = getPriceId(plan, interval)
     if (!priceId) return { error: `No Stripe price configured for ${plan} (${interval}).` }
+
+    const svc = createServiceClient()
+    const { data: org } = await svc
+      .from('organizations')
+      .select('subscription_status, stripe_subscription_id')
+      .eq('id', oid)
+      .single<{ subscription_status: SubscriptionStatus | null; stripe_subscription_id: string | null }>()
+
+    const paying =
+      org?.subscription_status &&
+      PAYING.includes(org.subscription_status) &&
+      org.stripe_subscription_id
+
     try {
+      if (paying && org?.stripe_subscription_id) {
+        await changeBasePlan(org.stripe_subscription_id, priceId)
+        return { ok: true }
+      }
       const customerId = await ensureStripeCustomer(oid)
       const base = process.env.NEXT_PUBLIC_APP_URL ?? ''
       const session = await stripe.checkout.sessions.create({
@@ -83,7 +117,39 @@ export default async function SubscriptionPage() {
       })
       return { url: session.url ?? undefined }
     } catch (err) {
-      return { error: err instanceof Error ? err.message : 'Could not start checkout.' }
+      return { error: err instanceof Error ? err.message : 'Could not update your plan.' }
+    }
+  }
+
+  /** Add or remove the Voice add-on on the existing subscription. */
+  async function setVoice(enabled: boolean): Promise<{ ok?: boolean; error?: string }> {
+    'use server'
+    const ids = await getUserOrgIds()
+    const oid = ids[0]
+    if (!oid) return { error: 'No organization found.' }
+    const stripe = getStripe()
+    if (!stripe) return { error: 'Billing is not enabled yet.' }
+    if (!getVoicePriceId()) return { error: 'Voice add-on isn’t configured yet.' }
+
+    const svc = createServiceClient()
+    const { data: org } = await svc
+      .from('organizations')
+      .select('subscription_status, stripe_subscription_id')
+      .eq('id', oid)
+      .single<{ subscription_status: SubscriptionStatus | null; stripe_subscription_id: string | null }>()
+
+    if (
+      !org?.stripe_subscription_id ||
+      !org.subscription_status ||
+      !PAYING.includes(org.subscription_status)
+    ) {
+      return { error: 'Add a paid plan first, then you can enable the voice agent.' }
+    }
+    try {
+      await setVoiceAddon(org.stripe_subscription_id, enabled)
+      return { ok: true }
+    } catch (err) {
+      return { error: err instanceof Error ? err.message : 'Could not update the voice add-on.' }
     }
   }
 
@@ -115,11 +181,11 @@ export default async function SubscriptionPage() {
   }
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-8 p-6">
       <div>
         <h1 className="text-lg font-semibold">Subscription</h1>
         <p className="text-sm text-muted-foreground">
-          Choose a plan, upgrade or downgrade, and manage your billing details.
+          Choose a plan, upgrade or downgrade, add the voice agent, and manage your billing.
         </p>
       </div>
 
@@ -131,8 +197,18 @@ export default async function SubscriptionPage() {
         currentPeriodEnd={billing.currentPeriodEnd}
         cancelAtPeriodEnd={billing.cancelAtPeriodEnd}
         hasCustomer={billing.hasCustomer}
+        isPaying={isPaying}
+        voiceActive={billing.voiceActive}
+        voiceConfigured={Boolean(getVoicePriceId())}
+        voice={{
+          name: VOICE_ADDON.name,
+          monthly: VOICE_ADDON.monthly,
+          blurb: VOICE_ADDON.blurb,
+          features: [...VOICE_ADDON.features],
+        }}
         plans={planOptions}
-        startCheckout={startCheckout}
+        selectPlan={selectPlan}
+        setVoice={setVoice}
         openPortal={openPortal}
       />
     </div>

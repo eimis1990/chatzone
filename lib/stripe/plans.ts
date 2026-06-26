@@ -96,6 +96,29 @@ export const PLANS: Record<Plan, PlanMeta> = {
 /** The plans a customer can buy through self-serve Checkout, in display order. */
 export const PURCHASABLE_PLANS: Plan[] = ['starter', 'growth', 'scale']
 
+/** Plans shown as cards on the in-app subscription screen (Free + paid). */
+export const DISPLAY_PLANS: Plan[] = ['free', 'starter', 'growth', 'scale']
+
+/**
+ * The Voice add-on — an extra item on the base subscription (not a separate
+ * subscription). Flat monthly fee for now; ~200 minutes included, then
+ * per-minute metering in a later pass.
+ */
+export const VOICE_ADDON = {
+  key: 'voice',
+  name: 'Voice agent',
+  monthly: 49,
+  minutesIncluded: 200,
+  perMinute: 0.2,
+  blurb: 'Let customers talk to your bot by voice. Real-time speech in and out.',
+  features: ['~200 minutes included', 'Then €0.20 / min', 'Works with any paid plan'],
+} as const
+
+/** Stripe Price ID for the Voice add-on (monthly), or null when not configured. */
+export function getVoicePriceId(): string | null {
+  return process.env.STRIPE_PRICE_VOICE_MONTH ?? null
+}
+
 function priceEnvKey(plan: Plan, interval: BillingInterval): string {
   return `STRIPE_PRICE_${plan.toUpperCase()}_${interval === 'year' ? 'YEAR' : 'MONTH'}`
 }
