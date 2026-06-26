@@ -1,7 +1,22 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { CheckCircle2Icon } from 'lucide-react'
+
+/** Celebratory burst on successful signup, fired from a screen-space origin. */
+async function celebrate(origin: { x: number; y: number }) {
+  const { default: confetti } = await import('canvas-confetti')
+  confetti({
+    particleCount: 95,
+    spread: 78,
+    startVelocity: 42,
+    origin,
+    colors: ['#e97634', '#ffffff', '#f3b89a', '#4ade80'],
+    scalar: 0.9,
+    ticks: 220,
+    disableForReducedMotion: true,
+  })
+}
 
 /**
  * Early-access email capture for the landing page (hero + final CTA). Posts to
@@ -11,6 +26,7 @@ export function EmailCapture({ source }: { source: string }) {
   const [email, setEmail] = useState('')
   const [status, setStatus] = useState<'idle' | 'loading' | 'done' | 'error'>('idle')
   const [error, setError] = useState('')
+  const buttonRef = useRef<HTMLButtonElement>(null)
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -25,7 +41,16 @@ export function EmailCapture({ source }: { source: string }) {
       })
       const data = (await res.json().catch(() => ({}))) as { ok?: boolean; error?: string }
       if (res.ok && data.ok) {
+        // Capture the button's screen position before it unmounts, then celebrate.
+        const rect = buttonRef.current?.getBoundingClientRect()
+        const origin = rect
+          ? {
+              x: (rect.left + rect.width / 2) / window.innerWidth,
+              y: (rect.top + rect.height / 2) / window.innerHeight,
+            }
+          : { x: 0.5, y: 0.65 }
         setStatus('done')
+        void celebrate(origin)
       } else {
         setStatus('error')
         setError(data.error ?? 'Something went wrong.')
@@ -58,6 +83,7 @@ export function EmailCapture({ source }: { source: string }) {
           className="h-12 flex-1 rounded-full border border-white/10 bg-black/30 px-5 text-sm text-white backdrop-blur-md placeholder:text-white/50 outline-none focus:border-primary focus:ring-2 focus:ring-primary/40"
         />
         <button
+          ref={buttonRef}
           type="submit"
           disabled={status === 'loading'}
           className="inline-flex h-12 items-center justify-center rounded-full bg-primary px-6 text-sm font-semibold text-[#101213] shadow-lg shadow-primary/20 transition-colors hover:bg-primary-hover disabled:opacity-70"
