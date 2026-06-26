@@ -35,7 +35,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
-import { Slider } from '@/components/ui/slider'
+import { Scrubber } from '@/components/ui/scrubber'
 import {
   Card,
   CardContent,
@@ -984,22 +984,19 @@ export function ConfigForm({ botId, botName, initialConfig }: ConfigFormProps) {
             {/* Radius sliders — stacked vertically */}
             <div className="space-y-5">
               <div className="space-y-2">
-                <Label>
-                  Chat window roundness{' '}
-                  <span className="text-muted-foreground font-normal">
-                    ({watch('theme.cornerRadius') ?? 16}px)
-                  </span>
-                </Label>
                 <Controller
                   control={control}
                   name="theme.cornerRadius"
                   render={({ field }) => (
-                    <Slider
+                    <Scrubber
+                      label="Chat window roundness"
                       min={0}
                       max={32}
                       step={1}
+                      decimals={0}
+                      suffix="px"
                       value={field.value ?? 16}
-                      onValueChange={(v) => field.onChange(Array.isArray(v) ? v[0] : v)}
+                      onValueChange={(v) => field.onChange(v)}
                     />
                   )}
                 />
@@ -1010,22 +1007,19 @@ export function ConfigForm({ botId, botName, initialConfig }: ConfigFormProps) {
               </div>
 
               <div className="space-y-2">
-                <Label>
-                  Bubble roundness{' '}
-                  <span className="text-muted-foreground font-normal">
-                    ({watch('theme.bubbleRadius') ?? 16}px)
-                  </span>
-                </Label>
                 <Controller
                   control={control}
                   name="theme.bubbleRadius"
                   render={({ field }) => (
-                    <Slider
+                    <Scrubber
+                      label="Bubble roundness"
                       min={0}
                       max={24}
                       step={1}
+                      decimals={0}
+                      suffix="px"
                       value={field.value ?? 16}
-                      onValueChange={(v) => field.onChange(Array.isArray(v) ? v[0] : v)}
+                      onValueChange={(v) => field.onChange(v)}
                     />
                   )}
                 />
@@ -1036,22 +1030,19 @@ export function ConfigForm({ botId, botName, initialConfig }: ConfigFormProps) {
               </div>
 
               <div className="space-y-2">
-                <Label>
-                  Button roundness{' '}
-                  <span className="text-muted-foreground font-normal">
-                    ({watch('theme.navButtonRadius') ?? 12}px)
-                  </span>
-                </Label>
                 <Controller
                   control={control}
                   name="theme.navButtonRadius"
                   render={({ field }) => (
-                    <Slider
+                    <Scrubber
+                      label="Button roundness"
                       min={0}
                       max={24}
                       step={1}
+                      decimals={0}
+                      suffix="px"
                       value={field.value ?? 12}
-                      onValueChange={(v) => field.onChange(Array.isArray(v) ? v[0] : v)}
+                      onValueChange={(v) => field.onChange(v)}
                     />
                   )}
                 />
@@ -1111,22 +1102,19 @@ export function ConfigForm({ botId, botName, initialConfig }: ConfigFormProps) {
 
               {watch('theme.backgroundImageUrl') ? (
                 <div className="space-y-2">
-                  <Label>
-                    Background image opacity{' '}
-                    <span className="text-muted-foreground font-normal">
-                      ({watch('theme.backgroundImageOpacity') ?? 100}%)
-                    </span>
-                  </Label>
                   <Controller
                     control={control}
                     name="theme.backgroundImageOpacity"
                     render={({ field }) => (
-                      <Slider
+                      <Scrubber
+                        label="Background image opacity"
                         min={0}
                         max={100}
                         step={1}
+                        decimals={0}
+                        suffix="%"
                         value={field.value ?? 100}
-                        onValueChange={(v) => field.onChange(Array.isArray(v) ? v[0] : v)}
+                        onValueChange={(v) => field.onChange(v)}
                       />
                     )}
                   />
