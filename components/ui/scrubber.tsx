@@ -216,11 +216,14 @@ const Scrubber = ({
         >
           <motion.div
             animate={{
-              opacity: isActive ? 0.8 : 0.15,
+              opacity: isActive ? 1 : 0.15,
               scaleX: isActive ? 1 : 0.7,
               scaleY: isActive ? 1 : 0.7,
             }}
-            className="bg-foreground/90"
+            className={cn(
+              'transition-colors duration-150',
+              isActive ? 'bg-primary' : 'bg-foreground/90',
+            )}
             style={{
               width: 5,
               height: 34,
