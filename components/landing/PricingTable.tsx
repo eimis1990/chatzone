@@ -98,7 +98,7 @@ export function PricingTable() {
             <p className="mt-4 text-sm font-medium text-primary">{p.conversations}</p>
 
             <Link
-              href="#start"
+              href="#get-started"
               className={`mt-5 inline-flex h-11 items-center justify-center rounded-full px-5 text-sm font-semibold transition-colors ${
                 p.popular
                   ? 'bg-primary text-[#101213] hover:bg-primary-hover'

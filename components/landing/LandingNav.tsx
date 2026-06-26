@@ -8,7 +8,7 @@ import { LoqaraIcon } from '@/components/LoqaraIcon'
 const LINKS = [
   { label: 'Features', href: '/#features' },
   { label: 'How it works', href: '/#how' },
-  { label: 'Pricing', href: '/pricing' },
+  { label: 'Pricing', href: '/#pricing' },
 ]
 
 export function LandingNav() {

@@ -231,7 +231,7 @@ export function HowItWorks() {
 // ───────────────────────── Big CTA band ─────────────────────────
 export function CTASection() {
   return (
-    <section id="pricing" className="text-white" style={{ backgroundColor: DARK }}>
+    <section id="get-started" className="scroll-mt-20 text-white" style={{ backgroundColor: DARK }}>
       <div className="mx-auto max-w-3xl px-5 py-24 text-center">
         <Reveal>
           <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
