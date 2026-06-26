@@ -3,7 +3,14 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { CheckIcon, ExternalLinkIcon, Loader2Icon, MicIcon } from 'lucide-react'
+import {
+  CheckIcon,
+  ExternalLinkIcon,
+  Loader2Icon,
+  PhoneCallIcon,
+  MessageSquareIcon,
+  ArrowUpRightIcon,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import type { Plan, BillingInterval, SubscriptionStatus } from '@/lib/types'
 
@@ -177,18 +184,18 @@ export function BillingPanel({
         <>
           {/* Billing period toggle */}
           <div className="flex justify-center">
-            <div className="inline-flex items-center rounded-full border bg-muted/50 p-1 text-sm">
+            <div className="inline-flex items-center rounded-full border bg-card p-1 text-sm shadow-sm">
               <button
                 type="button"
                 onClick={() => setAnnual(false)}
-                className={`rounded-full px-4 py-1.5 font-medium transition-colors ${!annual ? 'bg-background shadow-sm' : 'text-muted-foreground'}`}
+                className={`rounded-full px-4 py-1.5 font-medium transition-colors ${!annual ? 'bg-muted shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
               >
                 Monthly
               </button>
               <button
                 type="button"
                 onClick={() => setAnnual(true)}
-                className={`rounded-full px-4 py-1.5 font-medium transition-colors ${annual ? 'bg-background shadow-sm' : 'text-muted-foreground'}`}
+                className={`rounded-full px-4 py-1.5 font-medium transition-colors ${annual ? 'bg-muted shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
               >
                 Annual <span className="text-primary">· save ~17%</span>
               </button>
@@ -223,7 +230,7 @@ export function BillingPanel({
               return (
                 <div
                   key={p.plan}
-                  className={`relative flex flex-col rounded-2xl border p-6 ${p.popular ? 'border-primary ring-1 ring-primary' : ''}`}
+                  className={`relative flex flex-col rounded-2xl border bg-card p-6 shadow-sm ${p.popular ? 'border-primary ring-1 ring-primary' : ''}`}
                 >
                   {p.popular && (
                     <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground">
@@ -268,61 +275,115 @@ export function BillingPanel({
             })}
           </div>
 
-          {/* Voice add-on */}
-          {voiceConfigured && (
-            <div className="rounded-2xl border bg-card p-6">
-              <div className="flex flex-wrap items-start justify-between gap-4">
-                <div className="flex items-start gap-3">
-                  <span className="mt-0.5 flex size-9 flex-shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                    <MicIcon className="size-5" />
-                  </span>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-semibold">{voice.name}</h3>
-                      <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
-                        Add-on
-                      </span>
-                      {voiceActive && (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
-                          <CheckIcon className="size-3" /> Active
-                        </span>
-                      )}
-                    </div>
-                    <p className="mt-1 max-w-xl text-sm text-muted-foreground">{voice.blurb}</p>
-                    <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                      {voice.features.map((f) => (
-                        <li key={f} className="flex items-center gap-1">
-                          <CheckIcon className="size-3 text-primary" />
-                          {f}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
+          {/* Add-ons */}
+          <div className="space-y-4">
+            <div>
+              <h2 className="text-base font-semibold">Add-ons</h2>
+              <p className="text-sm text-muted-foreground">
+                Extend any paid plan. Add-ons are billed on the same subscription.
+              </p>
+            </div>
 
-                <div className="flex flex-col items-end gap-1">
-                  <div className="text-right">
-                    <span className="text-2xl font-bold">€{voice.monthly}</span>
-                    <span className="text-sm text-muted-foreground">/mo</span>
-                  </div>
+            <div className="grid gap-5 md:grid-cols-3">
+              {/* Voice agent — interactive */}
+              <div className="flex flex-col rounded-2xl border bg-card p-6 shadow-sm">
+                <div className="flex items-center justify-between">
+                  <span className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    <PhoneCallIcon className="size-5" />
+                  </span>
                   {voiceActive ? (
-                    <Button variant="outline" disabled={anyBusy} onClick={() => runVoice(false)}>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+                      <CheckIcon className="size-3" /> Active
+                    </span>
+                  ) : (
+                    <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                      Add-on
+                    </span>
+                  )}
+                </div>
+                <h3 className="mt-3 font-semibold">{voice.name}</h3>
+                <p className="mt-1 text-lg font-bold">
+                  €{voice.monthly}
+                  <span className="text-sm font-normal text-muted-foreground"> /mo + €0.20/min</span>
+                </p>
+                <p className="mt-1 text-sm text-muted-foreground">{voice.blurb}</p>
+
+                {voiceConfigured ? (
+                  voiceActive ? (
+                    <Button
+                      className="mt-4"
+                      variant="outline"
+                      disabled={anyBusy}
+                      onClick={() => runVoice(false)}
+                    >
                       {busy === 'voice' && <Loader2Icon className="size-4 animate-spin" />}
                       Remove
                     </Button>
                   ) : (
-                    <Button disabled={anyBusy || !isPaying} onClick={() => runVoice(true)}>
+                    <Button
+                      className="mt-4"
+                      disabled={anyBusy || !isPaying}
+                      onClick={() => runVoice(true)}
+                    >
                       {busy === 'voice' && <Loader2Icon className="size-4 animate-spin" />}
                       Add voice agent
                     </Button>
-                  )}
-                  {!isPaying && !voiceActive && (
-                    <p className="text-xs text-muted-foreground">Available with any paid plan</p>
-                  )}
+                  )
+                ) : (
+                  <Button className="mt-4" variant="outline" disabled>
+                    Coming soon
+                  </Button>
+                )}
+                {voiceConfigured && !isPaying && !voiceActive && (
+                  <p className="mt-1.5 text-xs text-muted-foreground">Available with any paid plan</p>
+                )}
+              </div>
+
+              {/* Channels — coming soon */}
+              <div className="flex flex-col rounded-2xl border border-dashed bg-card/60 p-6">
+                <div className="flex items-center justify-between">
+                  <span className="flex size-9 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                    <MessageSquareIcon className="size-5" />
+                  </span>
+                  <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                    Coming soon
+                  </span>
                 </div>
+                <h3 className="mt-3 font-semibold">Channels</h3>
+                <p className="mt-1 text-lg font-bold">
+                  €19<span className="text-sm font-normal text-muted-foreground"> /mo each</span>
+                </p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  WhatsApp, Instagram &amp; Messenger — connect any channel with no setup fee.
+                </p>
+                <Button className="mt-4" variant="outline" disabled>
+                  Coming soon
+                </Button>
+              </div>
+
+              {/* Extra conversations — coming soon */}
+              <div className="flex flex-col rounded-2xl border border-dashed bg-card/60 p-6">
+                <div className="flex items-center justify-between">
+                  <span className="flex size-9 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                    <ArrowUpRightIcon className="size-5" />
+                  </span>
+                  <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                    Coming soon
+                  </span>
+                </div>
+                <h3 className="mt-3 font-semibold">Extra conversations</h3>
+                <p className="mt-1 text-lg font-bold">
+                  ~€15<span className="text-sm font-normal text-muted-foreground"> / 1,000</span>
+                </p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Busy month? Top up any plan instead of jumping a tier.
+                </p>
+                <Button className="mt-4" variant="outline" disabled>
+                  Coming soon
+                </Button>
               </div>
             </div>
-          )}
+          </div>
 
           <p className="text-center text-sm text-muted-foreground">
             Need higher volume or custom terms?{' '}

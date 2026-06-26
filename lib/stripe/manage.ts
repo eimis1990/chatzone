@@ -1,7 +1,35 @@
 import 'server-only'
-import { requireStripe } from './client'
+import { requireStripe, getStripe } from './client'
 import { getVoicePriceId, planFromPriceId } from './plans'
 import { syncSubscriptionToOrg } from './sync'
+import { createServiceClient } from '@/lib/supabase/service'
+
+const PAYING_STATUSES = ['active', 'trialing', 'past_due']
+
+/**
+ * Pull the org's current subscription straight from Stripe and sync it. Used on
+ * return from Checkout so the plan reflects immediately without waiting on the
+ * webhook (the webhook still handles renewals / out-of-band changes). Idempotent.
+ */
+export async function reconcileOrgFromStripe(orgId: string): Promise<void> {
+  const stripe = getStripe()
+  if (!stripe) return
+  const svc = createServiceClient()
+  const { data } = await svc
+    .from('organizations')
+    .select('stripe_customer_id')
+    .eq('id', orgId)
+    .single<{ stripe_customer_id: string | null }>()
+  if (!data?.stripe_customer_id) return
+
+  const subs = await stripe.subscriptions.list({
+    customer: data.stripe_customer_id,
+    status: 'all',
+    limit: 5,
+  })
+  const sub = subs.data.find((s) => PAYING_STATUSES.includes(s.status)) ?? subs.data[0]
+  if (sub) await syncSubscriptionToOrg(sub)
+}
 
 /**
  * Swap the base plan price on an existing subscription, leaving any add-on

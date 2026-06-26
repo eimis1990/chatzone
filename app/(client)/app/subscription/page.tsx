@@ -5,55 +5,72 @@ import { BillingPanel } from '@/components/client/BillingPanel'
 import { isStripeConfigured, getStripe } from '@/lib/stripe/client'
 import { getPriceId, getVoicePriceId, PLANS, DISPLAY_PLANS, VOICE_ADDON } from '@/lib/stripe/plans'
 import { ensureStripeCustomer } from '@/lib/stripe/customer'
-import { changeBasePlan, setVoiceAddon } from '@/lib/stripe/manage'
+import { changeBasePlan, setVoiceAddon, reconcileOrgFromStripe } from '@/lib/stripe/manage'
 import type { Plan, BillingInterval, SubscriptionStatus } from '@/lib/types'
 
 const PAYING: SubscriptionStatus[] = ['active', 'trialing', 'past_due']
 
-export default async function SubscriptionPage() {
+export default async function SubscriptionPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ billing?: string }>
+}) {
   await requireRole('client')
   const orgIds = await getUserOrgIds()
   const orgId = orgIds[0] ?? null
 
-  const billing = {
-    plan: 'free' as Plan,
-    status: 'inactive' as SubscriptionStatus,
-    interval: null as BillingInterval | null,
-    currentPeriodEnd: null as string | null,
-    cancelAtPeriodEnd: false,
-    hasCustomer: false,
-    voiceActive: false,
-    subscriptionId: null as string | null,
-  }
-  if (orgId) {
+  const sp = await searchParams
+
+  async function loadBilling(oid: string) {
     const sb = await createServerClient()
     const { data, error } = await sb
       .from('organizations')
       .select(
         'plan, subscription_status, billing_interval, current_period_end, cancel_at_period_end, stripe_customer_id, stripe_subscription_id, voice_addon',
       )
-      .eq('id', orgId)
+      .eq('id', oid)
       .single()
-    if (!error && data) {
-      const d = data as {
-        plan: Plan | null
-        subscription_status: SubscriptionStatus | null
-        billing_interval: BillingInterval | null
-        current_period_end: string | null
-        cancel_at_period_end: boolean | null
-        stripe_customer_id: string | null
-        stripe_subscription_id: string | null
-        voice_addon: boolean | null
-      }
-      billing.plan = d.plan ?? 'free'
-      billing.status = d.subscription_status ?? 'inactive'
-      billing.interval = d.billing_interval ?? null
-      billing.currentPeriodEnd = d.current_period_end ?? null
-      billing.cancelAtPeriodEnd = d.cancel_at_period_end ?? false
-      billing.hasCustomer = Boolean(d.stripe_customer_id)
-      billing.voiceActive = Boolean(d.voice_addon)
-      billing.subscriptionId = d.stripe_subscription_id ?? null
+    const d = (!error && data ? data : {}) as Partial<{
+      plan: Plan
+      subscription_status: SubscriptionStatus
+      billing_interval: BillingInterval | null
+      current_period_end: string | null
+      cancel_at_period_end: boolean | null
+      stripe_customer_id: string | null
+      stripe_subscription_id: string | null
+      voice_addon: boolean | null
+    }>
+    return {
+      plan: d.plan ?? ('free' as Plan),
+      status: d.subscription_status ?? ('inactive' as SubscriptionStatus),
+      interval: d.billing_interval ?? null,
+      currentPeriodEnd: d.current_period_end ?? null,
+      cancelAtPeriodEnd: d.cancel_at_period_end ?? false,
+      hasCustomer: Boolean(d.stripe_customer_id),
+      voiceActive: Boolean(d.voice_addon),
+      subscriptionId: d.stripe_subscription_id ?? null,
     }
+  }
+
+  let billing = orgId
+    ? await loadBilling(orgId)
+    : {
+        plan: 'free' as Plan,
+        status: 'inactive' as SubscriptionStatus,
+        interval: null as BillingInterval | null,
+        currentPeriodEnd: null as string | null,
+        cancelAtPeriodEnd: false,
+        hasCustomer: false,
+        voiceActive: false,
+        subscriptionId: null as string | null,
+      }
+
+  // Sync from Stripe on return from Checkout, OR self-heal a missed webhook
+  // (we have a Stripe customer but the row says "not paying"). Then re-read.
+  const stale = billing.hasCustomer && !PAYING.includes(billing.status)
+  if (orgId && isStripeConfigured() && (sp?.billing === 'success' || stale)) {
+    await reconcileOrgFromStripe(orgId)
+    billing = await loadBilling(orgId)
   }
 
   const isPaying = PAYING.includes(billing.status) && Boolean(billing.subscriptionId)
