@@ -69,6 +69,17 @@ export default function PrivacyPage() {
           the operator of the website where you used the chat.
         </p>
       </section>
+
+      <section className="mt-8 space-y-3">
+        <h2 className="text-lg font-semibold">Contact</h2>
+        <p className="text-sm text-foreground/80">
+          Questions about privacy or this page? Email{' '}
+          <a href="mailto:e.kudarauskas@gmail.com" className="font-medium text-foreground underline">
+            e.kudarauskas@gmail.com
+          </a>
+          .
+        </p>
+      </section>
     </main>
   )
 }
