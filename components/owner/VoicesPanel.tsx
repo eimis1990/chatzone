@@ -347,8 +347,8 @@ export function VoicesPanel({ initialVoices }: VoicesPanelProps) {
       {/* Header row */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold">Voices</h1>
-          <p className="text-sm text-muted-foreground mt-1">
+          <h1 className="text-lg font-semibold">Voices</h1>
+          <p className="text-sm text-muted-foreground">
             Manage the curated voice catalog available to clients.
           </p>
         </div>

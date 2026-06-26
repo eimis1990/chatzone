@@ -1,7 +1,6 @@
 import { requireRole } from '@/lib/auth/guards'
 import { createServiceClient } from '@/lib/supabase/service'
 import { VoicesPanel } from '@/components/owner/VoicesPanel'
-import { Toaster } from '@/components/ui/sonner'
 import type { PlatformVoice } from '@/lib/types'
 
 export const metadata = { title: 'Voices — Owner | Loqara' }
@@ -19,9 +18,8 @@ export default async function VoicesPage() {
   const voices = (data ?? []) as PlatformVoice[]
 
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="max-w-4xl space-y-6 p-6">
       <VoicesPanel initialVoices={voices} />
-      <Toaster />
     </div>
   )
 }

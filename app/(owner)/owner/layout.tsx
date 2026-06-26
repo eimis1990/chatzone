@@ -1,14 +1,6 @@
-import Link from 'next/link'
-import { LayoutDashboardIcon, UsersIcon, ShieldIcon, MicVocalIcon, MailIcon } from 'lucide-react'
 import { requireRole } from '@/lib/auth/guards'
-import { SignOutButton } from '@/components/client/SignOutButton'
-
-const NAV_LINKS = [
-  { label: 'Dashboard', href: '/owner', icon: LayoutDashboardIcon },
-  { label: 'Clients', href: '/owner/clients', icon: UsersIcon },
-  { label: 'Voices', href: '/owner/voices', icon: MicVocalIcon },
-  { label: 'Signups', href: '/owner/signups', icon: MailIcon },
-] as const
+import { OwnerSidebar } from '@/components/owner/OwnerSidebar'
+import { Toaster } from '@/components/ui/sonner'
 
 export default async function OwnerLayout({
   children,
@@ -17,41 +9,15 @@ export default async function OwnerLayout({
 }) {
   const user = await requireRole('owner')
 
+  // Same shell as the client app: dark mesh with a white rounded content card.
   return (
-    <div className="flex min-h-svh flex-col">
-      {/* Top navigation bar */}
-      <header className="sticky top-0 z-40 flex h-14 items-center border-b bg-background px-4 gap-4">
-        <Link
-          href="/owner"
-          className="flex items-center gap-2 font-semibold text-foreground"
-        >
-          <ShieldIcon className="size-5 text-primary" />
-          <span>Loqara — Owner</span>
-        </Link>
-
-        <nav className="flex items-center gap-1 ml-4">
-          {NAV_LINKS.map(({ label, href, icon: Icon }) => (
-            <Link
-              key={href}
-              href={href}
-              className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground px-2 py-1 rounded-md hover:bg-muted transition-colors"
-            >
-              <Icon className="size-4" />
-              {label}
-            </Link>
-          ))}
-        </nav>
-
-        <div className="ml-auto flex items-center gap-3">
-          <span className="text-sm text-muted-foreground hidden sm:block">
-            {user.email}
-          </span>
-          <SignOutButton />
-        </div>
-      </header>
-
-      {/* Page content */}
-      <main className="flex-1 p-6">{children}</main>
+    <div className="relative isolate flex h-svh overflow-hidden bg-sidebar-mesh">
+      <div className="shell-grid pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-[42vh]" aria-hidden="true" />
+      <OwnerSidebar userEmail={user.email ?? ''} />
+      <main className="flex-1 min-h-0 min-w-0 m-3 overflow-y-auto rounded-2xl bg-background shadow-sm">
+        {children}
+      </main>
+      <Toaster />
     </div>
   )
 }

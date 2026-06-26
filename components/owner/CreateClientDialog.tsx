@@ -25,7 +25,7 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>
 
-export function CreateClientDialog() {
+export function CreateClientDialog({ trigger }: { trigger?: React.ReactElement } = {}) {
   const [open, setOpen] = useState(false)
   const [inviteUrl, setInviteUrl] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
@@ -83,10 +83,12 @@ export function CreateClientDialog() {
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogTrigger
         render={
-          <Button size="sm">
-            <PlusIcon className="size-4" />
-            Add client
-          </Button>
+          trigger ?? (
+            <Button size="sm">
+              <PlusIcon className="size-4" />
+              Add client
+            </Button>
+          )
         }
       />
 
