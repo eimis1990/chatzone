@@ -5,7 +5,12 @@ import { BillingPanel } from '@/components/client/BillingPanel'
 import { isStripeConfigured, getStripe } from '@/lib/stripe/client'
 import { getPriceId, getVoicePriceId, PLANS, DISPLAY_PLANS, VOICE_ADDON } from '@/lib/stripe/plans'
 import { ensureStripeCustomer } from '@/lib/stripe/customer'
-import { changeBasePlan, setVoiceAddon, reconcileOrgFromStripe } from '@/lib/stripe/manage'
+import {
+  changeBasePlan,
+  setVoiceAddon,
+  reconcileOrgFromStripe,
+  activeSubscriptionId,
+} from '@/lib/stripe/manage'
 import { entitlementsFor } from '@/lib/entitlements'
 import type { Plan, BillingInterval, SubscriptionStatus } from '@/lib/types'
 
@@ -125,21 +130,12 @@ export default async function SubscriptionPage({
     const priceId = getPriceId(plan, interval)
     if (!priceId) return { error: `No Stripe price configured for ${plan} (${interval}).` }
 
-    const svc = createServiceClient()
-    const { data: org } = await svc
-      .from('organizations')
-      .select('subscription_status, stripe_subscription_id')
-      .eq('id', oid)
-      .single<{ subscription_status: SubscriptionStatus | null; stripe_subscription_id: string | null }>()
-
-    const paying =
-      org?.subscription_status &&
-      PAYING.includes(org.subscription_status) &&
-      org.stripe_subscription_id
-
     try {
-      if (paying && org?.stripe_subscription_id) {
-        await changeBasePlan(org.stripe_subscription_id, priceId)
+      // Source of truth is Stripe, not the (possibly stale) org row — this is
+      // what prevents a second Checkout creating a duplicate subscription.
+      const existingSubId = await activeSubscriptionId(oid)
+      if (existingSubId) {
+        await changeBasePlan(existingSubId, priceId)
         return { ok: true }
       }
       const customerId = await ensureStripeCustomer(oid)
@@ -169,22 +165,12 @@ export default async function SubscriptionPage({
     if (!stripe) return { error: 'Billing is not enabled yet.' }
     if (!getVoicePriceId()) return { error: 'Voice add-on isn’t configured yet.' }
 
-    const svc = createServiceClient()
-    const { data: org } = await svc
-      .from('organizations')
-      .select('subscription_status, stripe_subscription_id')
-      .eq('id', oid)
-      .single<{ subscription_status: SubscriptionStatus | null; stripe_subscription_id: string | null }>()
-
-    if (
-      !org?.stripe_subscription_id ||
-      !org.subscription_status ||
-      !PAYING.includes(org.subscription_status)
-    ) {
-      return { error: 'Add a paid plan first, then you can enable the voice agent.' }
-    }
     try {
-      await setVoiceAddon(org.stripe_subscription_id, enabled)
+      const existingSubId = await activeSubscriptionId(oid)
+      if (!existingSubId) {
+        return { error: 'Add a paid plan first, then you can enable the voice agent.' }
+      }
+      await setVoiceAddon(existingSubId, enabled)
       return { ok: true }
     } catch (err) {
       return { error: err instanceof Error ? err.message : 'Could not update the voice add-on.' }

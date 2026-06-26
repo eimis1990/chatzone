@@ -12,6 +12,14 @@ import {
   ArrowUpRightIcon,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog'
 import type { Plan, BillingInterval, SubscriptionStatus } from '@/lib/types'
 
 export interface BillingPlanOption {
@@ -84,6 +92,7 @@ export function BillingPanel({
   const router = useRouter()
   const [annual, setAnnual] = useState(interval !== 'month')
   const [busy, setBusy] = useState<string | null>(null)
+  const [confirmVoice, setConfirmVoice] = useState(false)
   const [, startTransition] = useTransition()
 
   const perMonth = (m: number) => (annual ? Math.round((m * 10) / 12) : m)
@@ -377,7 +386,7 @@ export function BillingPanel({
                     <Button
                       className="mt-4"
                       disabled={anyBusy || !isPaying}
-                      onClick={() => runVoice(true)}
+                      onClick={() => setConfirmVoice(true)}
                     >
                       {busy === 'voice' && <Loader2Icon className="size-4 animate-spin" />}
                       Add voice agent
@@ -448,6 +457,34 @@ export function BillingPanel({
           </p>
         </>
       )}
+
+      {/* Confirm adding the Voice add-on (extra recurring charge). */}
+      <Dialog open={confirmVoice} onOpenChange={setConfirmVoice}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add the Voice agent?</DialogTitle>
+            <DialogDescription>
+              This adds <span className="font-medium text-foreground">€{voice.monthly}/mo</span> to your
+              subscription (plus €0.20/min beyond the included minutes), prorated for the rest of the
+              current billing period. You can remove it anytime.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setConfirmVoice(false)} disabled={anyBusy}>
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                setConfirmVoice(false)
+                runVoice(true)
+              }}
+              disabled={anyBusy}
+            >
+              Continue
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

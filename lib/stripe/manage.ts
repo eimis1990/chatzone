@@ -7,6 +7,31 @@ import { createServiceClient } from '@/lib/supabase/service'
 const PAYING_STATUSES = ['active', 'trialing', 'past_due']
 
 /**
+ * The org's current live Stripe subscription id, read straight from Stripe (the
+ * org row can lag a missed webhook). Returns null if the org has no customer or
+ * no active subscription. Use this to decide Checkout vs in-place change so we
+ * never create a duplicate subscription.
+ */
+export async function activeSubscriptionId(orgId: string): Promise<string | null> {
+  const stripe = getStripe()
+  if (!stripe) return null
+  const svc = createServiceClient()
+  const { data } = await svc
+    .from('organizations')
+    .select('stripe_customer_id')
+    .eq('id', orgId)
+    .single<{ stripe_customer_id: string | null }>()
+  if (!data?.stripe_customer_id) return null
+  const subs = await stripe.subscriptions.list({
+    customer: data.stripe_customer_id,
+    status: 'all',
+    limit: 10,
+  })
+  const active = subs.data.find((s) => PAYING_STATUSES.includes(s.status))
+  return active?.id ?? null
+}
+
+/**
  * Pull the org's current subscription straight from Stripe and sync it. Used on
  * return from Checkout so the plan reflects immediately without waiting on the
  * webhook (the webhook still handles renewals / out-of-band changes). Idempotent.
