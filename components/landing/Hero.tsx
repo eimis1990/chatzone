@@ -44,18 +44,13 @@ export function Hero() {
                     thickness (non-scaling-stroke) while it stretches to the text. */}
                 <svg
                   aria-hidden="true"
-                  viewBox="0 0 300 16"
-                  fill="none"
+                  viewBox="0 0 300 22"
                   preserveAspectRatio="none"
-                  className="absolute inset-x-0 top-full h-[0.24em] w-full overflow-visible text-primary"
+                  className="absolute inset-x-0 top-full h-[0.3em] w-full overflow-visible text-primary"
                 >
-                  <path
-                    d="M3 8 C 82 13, 176 13, 236 9 C 264 7, 287 9, 298 5"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                    strokeLinecap="round"
-                    vectorEffect="non-scaling-stroke"
-                  />
+                  {/* Filled, tapered ribbon = brush stroke (thick middle, pointed ends),
+                      arched upward (the bend flipped vs the previous pencil line). */}
+                  <path d="M5 13 C 92 5, 208 5, 295 9 C 208 16, 92 17, 5 13 Z" fill="currentColor" />
                 </svg>
               </span>
               !
