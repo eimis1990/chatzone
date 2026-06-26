@@ -406,16 +406,16 @@ export function ConfigForm({
   const leadCaptureEnabled = watch('leadCapture.enabled')
 
   // Build a live config for the preview — typed to match TestChat's LiveConfig.
-  // Mirror the add-on gate so the preview matches the live widget (no call
-  // button / voice when the Voice add-on isn't active).
-  const previewVoice = canUseVoice
-    ? watchedValues.voice
-    : { ...watchedValues.voice, enabled: false, ttsEnabled: false, sttEnabled: false }
+  // Mirror the add-on gate so the preview matches the live widget: hide the
+  // call button when the Voice add-on isn't active (TTS/STT are unaffected).
+  const previewTheme = canUseVoice
+    ? watchedValues.theme
+    : { ...watchedValues.theme, showCallButton: false }
   const liveConfig = {
     displayName: watchedValues.displayName,
     tagline: watchedValues.tagline,
-    theme: watchedValues.theme,
-    voice: previewVoice,
+    theme: previewTheme,
+    voice: watchedValues.voice,
     model: watchedValues.model,
     temperature: watchedValues.temperature,
     systemPrompt: watchedValues.systemPrompt,

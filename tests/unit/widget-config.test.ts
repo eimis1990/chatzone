@@ -169,19 +169,23 @@ describe('publicBotConfig — plan entitlements gating', () => {
   })
 })
 
-describe('publicBotConfig — Voice add-on gating', () => {
-  it('forces voice OFF when the add-on is absent, even if config enables it', () => {
+describe('publicBotConfig — Voice add-on gating (call button only)', () => {
+  it('hides the call button when the add-on is absent; TTS/STT untouched', () => {
     const pub = publicBotConfig(maxedConfig, entitlementsFor('starter'), false)
-    expect(pub.voice).toEqual({ enabled: false, ttsEnabled: false, sttEnabled: false })
-  })
-
-  it('keeps voice ON when the add-on is active', () => {
-    const pub = publicBotConfig(maxedConfig, entitlementsFor('starter'), true)
+    expect(pub.theme.showCallButton).toBe(false)
+    // Voice flags pass through — only the live call is gated.
     expect(pub.voice).toEqual({ enabled: true, ttsEnabled: true, sttEnabled: true })
   })
 
-  it('legacy call (no voiceAddon arg) leaves voice as configured', () => {
+  it('keeps the call button when the add-on is active', () => {
+    const pub = publicBotConfig(maxedConfig, entitlementsFor('starter'), true)
+    expect(pub.theme.showCallButton).toBe(true)
+    expect(pub.voice.enabled).toBe(true)
+  })
+
+  it('legacy call (no voiceAddon arg) leaves the call button as configured', () => {
     const pub = publicBotConfig(maxedConfig)
+    expect(pub.theme.showCallButton).toBe(true)
     expect(pub.voice.enabled).toBe(true)
   })
 })

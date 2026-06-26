@@ -4,6 +4,7 @@ import { isOriginAllowed, corsHeaders } from '@/lib/widget-auth'
 import { createRateLimiter } from '@/lib/ratelimit'
 import { ensureAgent, getConversationToken } from '@/lib/ai/elevenlabs-agent'
 import { MissingVoiceKeyError } from '@/lib/ai/tts'
+import { isOverConversationLimit } from '@/lib/usage'
 import type { Bot } from '@/lib/types'
 
 export const maxDuration = 30
@@ -43,6 +44,10 @@ export async function POST(req: Request) {
     .eq('id', bot.org_id)
     .single<{ voice_addon: boolean | null }>()
   if (!org?.voice_addon) return json({ error: 'Voice add-on not active' }, 403)
+  // Hard block: no calls once the org is over its monthly conversation pool.
+  if (await isOverConversationLimit(svc, bot.org_id)) {
+    return json({ error: 'Agent offline — monthly limit reached' }, 403)
+  }
   if (!isOriginAllowed(origin, bot.config.allowedDomains ?? [])) {
     return json({ error: 'Origin not allowed' }, 403)
   }

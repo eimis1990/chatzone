@@ -47,7 +47,7 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
     leadCapture: true,
     removeBadge: true,
     customRetention: false,
-    teams: true,
+    teams: false,
     conversations: 4000,
   },
   scale: {

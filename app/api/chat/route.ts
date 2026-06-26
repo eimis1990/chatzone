@@ -8,13 +8,20 @@ import { buildMessages, contentFor, defaultLanguage, type ChatMessage } from '@/
 import { commerceEnabled, makeProductTools, ndjsonChatResponse, ndjsonText } from '@/lib/ai/commerce-tool'
 import { createRateLimiter } from '@/lib/ratelimit'
 import { detectHandoffIntent, HANDOFF_ACK } from '@/lib/handoff'
-import type { Bot, Citation, HandoffStatus } from '@/lib/types'
+import { isOverConversationLimit } from '@/lib/usage'
+import type { Bot, BotLanguage, Citation, HandoffStatus } from '@/lib/types'
 import type { CommerceProduct, OrderStatus } from '@/lib/commerce/types'
 
 export const maxDuration = 60
 
 // ~30 messages/min per visitor per bot, small burst.
 const limiter = createRateLimiter({ capacity: 10, refillPerSec: 0.5 })
+
+// Shown when the org has used up its monthly conversation allowance (hard block).
+const OFFLINE_MESSAGE: Record<BotLanguage, string> = {
+  en: 'Our assistant is offline right now. Please reach out through our other contact channels and we’ll get back to you.',
+  lt: 'Mūsų asistentas šiuo metu nepasiekiamas. Susisiekite kitais būdais ir mes jums atsakysime.',
+}
 
 export async function OPTIONS(req: Request) {
   return new Response(null, { status: 204, headers: corsHeaders(req.headers.get('origin')) })
@@ -76,6 +83,11 @@ export async function POST(req: Request) {
     }
   }
   if (!convId) {
+    // Hard block: once the org is over its monthly conversation pool, new
+    // conversations get an offline message and the model is never called.
+    if (await isOverConversationLimit(svc, bot.org_id)) {
+      return ndjsonText(OFFLINE_MESSAGE[lang] ?? OFFLINE_MESSAGE.en, { ...cors })
+    }
     const { data: created } = await svc
       .from('conversations')
       .insert({ bot_id: bot.id, visitor_id: visitorId })

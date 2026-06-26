@@ -183,19 +183,18 @@ export function VoiceSection({
                 checked={field.value ?? false}
                 onCheckedChange={field.onChange}
                 id="voiceEnabled"
-                disabled={!canUseVoice}
               />
             )}
           />
           <Label htmlFor="voiceEnabled">Enable voice</Label>
           {!canUseVoice && (
             <a href="/app/subscription" className="text-xs text-primary hover:underline">
-              Add the Voice add-on
+              Live calls need the Voice add-on
             </a>
           )}
         </div>
 
-        {voiceEnabled && canUseVoice && (
+        {voiceEnabled && (
           <div className="space-y-5 rounded-lg border p-4">
             {/* TTS toggle */}
             <div className="flex items-center gap-3">

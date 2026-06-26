@@ -102,8 +102,9 @@ export function publicBotConfig(
     entitlements && !entitlements.allLanguages ? ['en'] : (config.languages ?? ['en'])
   const leadCaptureEnabled =
     config.leadCapture.enabled && (entitlements ? entitlements.leadCapture : true)
-  // Voice is a paid add-on (org.voice_addon). When explicitly absent, force off.
-  const voiceAllowed = voiceAddon !== false
+  // The live voice CALL is a paid add-on. When the add-on is explicitly absent
+  // we hide the call button (showCallButton) — TTS/STT in chat are unaffected.
+  const callAllowed = voiceAddon !== false
 
   const content: Partial<Record<BotLanguage, PublicLanguageContent>> = {}
   for (const lang of languages) {
@@ -121,7 +122,7 @@ export function publicBotConfig(
       fontFamily: config.theme.fontFamily ?? 'geist',
       launcherStyle: config.theme.launcherStyle ?? 'circle',
       launcherShowLogo: config.theme.launcherShowLogo ?? false,
-      showCallButton: config.theme.showCallButton ?? true,
+      showCallButton: callAllowed && (config.theme.showCallButton ?? true),
       navButtonRadius: config.theme.navButtonRadius ?? 12,
       backgroundColor: config.theme.backgroundColor ?? '#ffffff',
       backgroundImageOpacity: config.theme.backgroundImageOpacity ?? 100,
@@ -142,11 +143,11 @@ export function publicBotConfig(
       fields: config.leadCapture.fields,
     },
     hideBadge: entitlements?.removeBadge ?? false,
-    // Only flags — never the raw voiceId (TTS runs server-side). Gated by add-on.
+    // Only flags — never the raw voiceId (TTS runs server-side).
     voice: {
-      enabled: voiceAllowed && (config.voice?.enabled ?? false),
-      ttsEnabled: voiceAllowed && (config.voice?.ttsEnabled ?? false),
-      sttEnabled: voiceAllowed && (config.voice?.sttEnabled ?? false),
+      enabled: config.voice?.enabled ?? false,
+      ttsEnabled: config.voice?.ttsEnabled ?? false,
+      sttEnabled: config.voice?.sttEnabled ?? false,
     },
   }
 

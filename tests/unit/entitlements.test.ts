@@ -45,6 +45,14 @@ describe('entitlementsFor — plan limits', () => {
     expect(e.customRetention).toBe(true)
   })
 
+  it('teams is Scale (and Enterprise) only', () => {
+    expect(entitlementsFor('free').teams).toBe(false)
+    expect(entitlementsFor('starter').teams).toBe(false)
+    expect(entitlementsFor('growth').teams).toBe(false)
+    expect(entitlementsFor('scale').teams).toBe(true)
+    expect(entitlementsFor('enterprise').teams).toBe(true)
+  })
+
   it('falls back to Free for null / undefined / unknown', () => {
     expect(entitlementsFor(null)).toEqual(entitlementsFor('free'))
     expect(entitlementsFor(undefined)).toEqual(entitlementsFor('free'))
