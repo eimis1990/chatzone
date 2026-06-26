@@ -42,13 +42,14 @@ export async function GET(req: Request) {
     return json({ error: 'Origin not allowed' }, 403)
   }
 
-  // Apply plan entitlements (English-only / lead capture / badge) for the org.
+  // Apply plan entitlements (English-only / lead capture / badge) + the Voice
+  // add-on for the org.
   const { data: org } = await svc
     .from('organizations')
-    .select('plan')
+    .select('plan, voice_addon')
     .eq('id', bot.org_id)
-    .single<{ plan: Plan | null }>()
+    .single<{ plan: Plan | null; voice_addon: boolean | null }>()
   const entitlements = entitlementsFor(org?.plan ?? 'free')
 
-  return json(publicBotConfig(bot.config, entitlements))
+  return json(publicBotConfig(bot.config, entitlements, Boolean(org?.voice_addon)))
 }

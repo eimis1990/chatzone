@@ -81,9 +81,18 @@ interface VoiceSectionProps {
   setValue: UseFormSetValue<FormValues>
   activeLang: BotLanguage
   enabledLanguages: BotLanguage[]
+  /** Whether the org has the Voice add-on (else the toggle is locked). */
+  canUseVoice?: boolean
 }
 
-export function VoiceSection({ control, watch, setValue, activeLang, enabledLanguages }: VoiceSectionProps) {
+export function VoiceSection({
+  control,
+  watch,
+  setValue,
+  activeLang,
+  enabledLanguages,
+  canUseVoice = true,
+}: VoiceSectionProps) {
   const voiceEnabled = watch('voice.enabled')
 
   // When voice is turned on, make sure the sub-flags have real boolean values
@@ -174,13 +183,19 @@ export function VoiceSection({ control, watch, setValue, activeLang, enabledLang
                 checked={field.value ?? false}
                 onCheckedChange={field.onChange}
                 id="voiceEnabled"
+                disabled={!canUseVoice}
               />
             )}
           />
           <Label htmlFor="voiceEnabled">Enable voice</Label>
+          {!canUseVoice && (
+            <a href="/app/subscription" className="text-xs text-primary hover:underline">
+              Add the Voice add-on
+            </a>
+          )}
         </div>
 
-        {voiceEnabled && (
+        {voiceEnabled && canUseVoice && (
           <div className="space-y-5 rounded-lg border p-4">
             {/* TTS toggle */}
             <div className="flex items-center gap-3">

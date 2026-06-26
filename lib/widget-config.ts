@@ -91,13 +91,19 @@ export interface PublicBotConfig {
  *  - persona       — reveals tone/verbosity tuning
  *  - fallbackMessage — not needed client-side (server streams it)
  */
-export function publicBotConfig(config: BotConfig, entitlements?: Entitlements): PublicBotConfig {
+export function publicBotConfig(
+  config: BotConfig,
+  entitlements?: Entitlements,
+  voiceAddon?: boolean,
+): PublicBotConfig {
   // Plan-gating: free plans are English-only and can't capture leads or hide
   // the badge. Enforced here, the single public entry point for the widget.
   const languages: BotLanguage[] =
     entitlements && !entitlements.allLanguages ? ['en'] : (config.languages ?? ['en'])
   const leadCaptureEnabled =
     config.leadCapture.enabled && (entitlements ? entitlements.leadCapture : true)
+  // Voice is a paid add-on (org.voice_addon). When explicitly absent, force off.
+  const voiceAllowed = voiceAddon !== false
 
   const content: Partial<Record<BotLanguage, PublicLanguageContent>> = {}
   for (const lang of languages) {
@@ -136,11 +142,11 @@ export function publicBotConfig(config: BotConfig, entitlements?: Entitlements):
       fields: config.leadCapture.fields,
     },
     hideBadge: entitlements?.removeBadge ?? false,
-    // Only flags — never the raw voiceId (TTS runs server-side).
+    // Only flags — never the raw voiceId (TTS runs server-side). Gated by add-on.
     voice: {
-      enabled: config.voice?.enabled ?? false,
-      ttsEnabled: config.voice?.ttsEnabled ?? false,
-      sttEnabled: config.voice?.sttEnabled ?? false,
+      enabled: voiceAllowed && (config.voice?.enabled ?? false),
+      ttsEnabled: voiceAllowed && (config.voice?.ttsEnabled ?? false),
+      sttEnabled: voiceAllowed && (config.voice?.sttEnabled ?? false),
     },
   }
 

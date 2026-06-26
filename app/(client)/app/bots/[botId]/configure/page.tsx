@@ -22,12 +22,12 @@ export default async function ConfigurePage({
 
   if (!data) notFound()
 
-  // Plan entitlements gate which controls are editable.
+  // Plan entitlements + the Voice add-on gate which controls are editable.
   const { data: org } = await supabase
     .from('organizations')
-    .select('plan')
+    .select('plan, voice_addon')
     .eq('id', data.org_id)
-    .single<{ plan: Plan | null }>()
+    .single<{ plan: Plan | null; voice_addon: boolean | null }>()
   const ent = entitlementsFor(org?.plan ?? 'free')
 
   return (
@@ -37,6 +37,7 @@ export default async function ConfigurePage({
       initialConfig={data.config}
       canUseAllLanguages={ent.allLanguages}
       canUseLeadCapture={ent.leadCapture}
+      canUseVoice={Boolean(org?.voice_addon)}
     />
   )
 }

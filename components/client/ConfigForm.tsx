@@ -69,6 +69,8 @@ interface ConfigFormProps {
   /** Plan gating — disable controls the org's plan doesn't include. */
   canUseAllLanguages?: boolean
   canUseLeadCapture?: boolean
+  /** Voice add-on gating — disable voice unless the add-on is active. */
+  canUseVoice?: boolean
 }
 
 // Use botConfigFormSchema (plain, no preprocessing) for the RHF resolver.
@@ -151,6 +153,7 @@ export function ConfigForm({
   initialConfig,
   canUseAllLanguages = true,
   canUseLeadCapture = true,
+  canUseVoice = true,
 }: ConfigFormProps) {
   const router = useRouter()
   // Internal bot name — lives outside the config schema, saved alongside it.
@@ -1282,6 +1285,7 @@ export function ConfigForm({
           setValue={setValue}
           activeLang={activeLang}
           enabledLanguages={watchedLanguages as BotLanguage[]}
+          canUseVoice={canUseVoice}
         />
 
         {/* ── Lead Capture ── */}
