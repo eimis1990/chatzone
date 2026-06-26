@@ -19,9 +19,11 @@ import { defaultBotConfig } from '@/lib/validation/schemas'
 
 interface CreateBotDialogProps {
   orgId: string
+  /** Custom trigger element. Falls back to the default "Create BOT" button. */
+  trigger?: React.ReactElement
 }
 
-export function CreateBotDialog({ orgId }: CreateBotDialogProps) {
+export function CreateBotDialog({ orgId, trigger }: CreateBotDialogProps) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [name, setName] = useState('')
@@ -73,10 +75,12 @@ export function CreateBotDialog({ orgId }: CreateBotDialogProps) {
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger
         render={
-          <Button className="h-10 rounded-md px-7">
-            <PlusIcon />
-            Create BOT
-          </Button>
+          trigger ?? (
+            <Button className="h-10 rounded-md px-7">
+              <PlusIcon />
+              Create BOT
+            </Button>
+          )
         }
       />
       <DialogContent>

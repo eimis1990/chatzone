@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { BotIcon, SettingsIcon } from 'lucide-react'
+import { PlusIcon, SettingsIcon } from 'lucide-react'
 import { requireRole, getUserOrgIds } from '@/lib/auth/guards'
 import { createServerClient } from '@/lib/supabase/server'
 import { CreateBotDialog } from '@/components/client/CreateBotDialog'
@@ -28,25 +28,28 @@ export default async function BotsPage() {
 
   return (
     <div className="max-w-6xl space-y-6 p-6">
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <h1 className="text-lg font-semibold">Home</h1>
-          <p className="text-sm text-muted-foreground">Create and manage your AI chatbots.</p>
-        </div>
-        {orgId && <CreateBotDialog orgId={orgId} />}
+      <div>
+        <h1 className="text-lg font-semibold">Home</h1>
+        <p className="text-sm text-muted-foreground">Create and manage your AI chatbots.</p>
       </div>
 
-      {bots.length === 0 ? (
-        <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed bg-card py-20 text-center">
-          <BotIcon className="size-10 text-muted-foreground/50" />
-          <div>
-            <p className="font-medium text-foreground">No bots yet</p>
-            <p className="mt-1 text-sm text-muted-foreground">Create your first bot to get started.</p>
-          </div>
-          {orgId && <CreateBotDialog orgId={orgId} />}
-        </div>
-      ) : (
-        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+        {orgId && (
+          <CreateBotDialog
+            orgId={orgId}
+            trigger={
+              <button
+                type="button"
+                className="group flex h-full min-h-[152px] w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border bg-card/40 text-muted-foreground transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <span className="flex size-11 items-center justify-center rounded-lg border border-dashed border-current">
+                  <PlusIcon className="size-5" />
+                </span>
+                <span className="text-sm font-medium">Create bot</span>
+              </button>
+            }
+          />
+        )}
           {bots.map((bot) => {
             const lang = bot.config.defaultLanguage ?? 'en'
             const greeting =
@@ -106,8 +109,7 @@ export default async function BotsPage() {
               </Link>
             )
           })}
-        </div>
-      )}
+      </div>
     </div>
   )
 }
