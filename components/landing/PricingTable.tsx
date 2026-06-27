@@ -51,7 +51,7 @@ export function PricingTable() {
             }`}
           >
             {popular && (
-              <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-[#101213]">
+              <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-white">
                 Most popular
               </span>
             )}
@@ -81,7 +81,7 @@ export function PricingTable() {
               }
               className={`relative mt-5 inline-flex h-11 items-center justify-center overflow-hidden rounded-full px-5 text-sm font-semibold transition-colors ${
                 popular
-                  ? 'bg-primary text-[#101213] hover:bg-primary-hover'
+                  ? 'bg-primary text-white hover:bg-primary-hover'
                   : 'border border-white/15 text-white hover:bg-white/10'
               }`}
             >

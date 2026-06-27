@@ -92,7 +92,7 @@ export function EmailCapture({ source }: { source: string }) {
           ref={buttonRef}
           type="submit"
           disabled={status === 'loading'}
-          className="relative inline-flex h-12 items-center justify-center overflow-hidden rounded-full bg-primary px-6 text-sm font-semibold text-[#101213] shadow-lg shadow-primary/20 transition-colors hover:bg-primary-hover disabled:opacity-70"
+          className="relative inline-flex h-12 items-center justify-center overflow-hidden rounded-full bg-primary px-6 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition-colors hover:bg-primary-hover disabled:opacity-70"
         >
           <span className="relative z-10">{status === 'loading' ? 'Joining…' : 'Get started'}</span>
           <Shimmer />
