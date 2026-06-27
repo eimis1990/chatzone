@@ -156,6 +156,8 @@ export interface BotConfig {
     backgroundImageUrl?: string
     /** Opacity (0–100) of the background image over the color. Defaults to 100. */
     backgroundImageOpacity?: number
+    /** Frosted-glass message bubbles (translucent + backdrop blur). */
+    glassBubbles?: boolean
   }
   voice: VoiceConfig
   /** Enabled languages. Always includes 'en'; the first entry is the default. */

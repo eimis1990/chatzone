@@ -91,6 +91,8 @@ export const botConfigFormSchema = z.object({
       backgroundColor: z.string().default('#ffffff'),
       backgroundImageUrl: z.string().url().optional().or(z.literal('')),
       backgroundImageOpacity: z.number().min(0).max(100).default(100),
+      // Frosted-glass message bubbles (translucent + backdrop blur).
+      glassBubbles: z.boolean().default(false),
     })
     .default({
       primaryColor: '#4f46e5',
@@ -104,6 +106,7 @@ export const botConfigFormSchema = z.object({
       navButtonRadius: 12,
       backgroundColor: '#ffffff',
       backgroundImageOpacity: 100,
+      glassBubbles: false,
     }),
   languages: z.array(z.enum(['en', 'lt'])).min(1).default(['en']),
   defaultLanguage: z.enum(['en', 'lt']).optional(),

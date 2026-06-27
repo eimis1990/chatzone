@@ -61,6 +61,7 @@ export interface PublicBotConfig {
     backgroundColor?: string
     backgroundImageUrl?: string
     backgroundImageOpacity?: number
+    glassBubbles?: boolean
   }
   languages: BotLanguage[]
   defaultLanguage?: BotLanguage
@@ -126,6 +127,7 @@ export function publicBotConfig(
       navButtonRadius: config.theme.navButtonRadius ?? 12,
       backgroundColor: config.theme.backgroundColor ?? '#ffffff',
       backgroundImageOpacity: config.theme.backgroundImageOpacity ?? 100,
+      glassBubbles: config.theme.glassBubbles ?? false,
       ...(config.theme.bubbleIcon !== undefined && { bubbleIcon: config.theme.bubbleIcon }),
       ...(config.theme.launcherLabel ? { launcherLabel: config.theme.launcherLabel } : {}),
       ...(config.theme.launcherColor ? { launcherColor: config.theme.launcherColor } : {}),

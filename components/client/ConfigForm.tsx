@@ -1173,6 +1173,26 @@ export function ConfigForm({
                 )}
               />
             </div>
+
+            <div className="flex items-center justify-between gap-4">
+              <div className="space-y-0.5">
+                <Label htmlFor="glassBubbles">Glass message bubbles</Label>
+                <p className="text-xs text-muted-foreground">
+                  Frosted, translucent chat bubbles — looks best over a background image or color.
+                </p>
+              </div>
+              <Controller
+                name="theme.glassBubbles"
+                control={control}
+                render={({ field }) => (
+                  <Switch
+                    id="glassBubbles"
+                    checked={field.value ?? false}
+                    onCheckedChange={field.onChange}
+                  />
+                )}
+              />
+            </div>
           </CardContent>
         </Card>
 

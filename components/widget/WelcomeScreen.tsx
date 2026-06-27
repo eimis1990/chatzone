@@ -16,6 +16,8 @@ interface WelcomeScreenProps {
   /** Chat background color — drives readable text color for the non-bubble header. */
   backgroundColor?: string
   bubbleRadius?: number
+  /** Frosted-glass greeting bubble (translucent + backdrop blur). */
+  glassBubbles?: boolean
   /** Receives the clicked action and its index (so the host can fetch / send). */
   onSelect: (action: SuggestedQuestion, index: number) => void
 }
@@ -37,6 +39,7 @@ export function WelcomeScreen({
   primaryColor,
   backgroundColor = '#ffffff',
   bubbleRadius = 16,
+  glassBubbles = false,
   onSelect,
 }: WelcomeScreenProps) {
   const radius = `${Math.min(bubbleRadius, 16)}px`
@@ -113,7 +116,9 @@ export function WelcomeScreen({
       {/* Welcome message card */}
       {greeting ? (
         <motion.div
-          className="mt-5 bg-gray-100 px-4 py-3 text-sm leading-relaxed text-gray-800 whitespace-pre-wrap"
+          className={`mt-5 px-4 py-3 text-sm leading-relaxed text-gray-800 whitespace-pre-wrap ${
+            glassBubbles ? 'bg-white/40 backdrop-blur-md ring-1 ring-white/50' : 'bg-gray-100'
+          }`}
           style={{ borderRadius: radius }}
           variants={item}
         >

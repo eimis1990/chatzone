@@ -704,6 +704,7 @@ export function ChatWindow({ config, transport, initialLanguage }: ChatWindowPro
             primaryColor={primaryColor}
             backgroundColor={bgColor}
             bubbleRadius={bubbleRadius}
+            glassBubbles={config.theme.glassBubbles ?? false}
             onSelect={handleQuickAction}
           />
         ) : (
@@ -714,6 +715,7 @@ export function ChatWindow({ config, transport, initialLanguage }: ChatWindowPro
             displayName={config.displayName}
             avatarUrl={messageAvatar}
             activeLang={activeLang}
+            glassBubbles={config.theme.glassBubbles ?? false}
             onSeeAllProducts={setListProducts}
             onFeedback={handleFeedback}
           />

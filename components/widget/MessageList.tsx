@@ -32,6 +32,8 @@ interface MessageListProps {
   displayName: string
   avatarUrl?: string
   activeLang?: 'en' | 'lt'
+  /** Frosted-glass bubbles (translucent + backdrop blur). */
+  glassBubbles?: boolean
   onSeeAllProducts?: (products: CommerceProduct[]) => void
   onFeedback?: (messageId: string, value: 'up' | 'down') => void
 }
@@ -45,6 +47,7 @@ export function MessageList({
   displayName,
   avatarUrl,
   activeLang = 'en',
+  glassBubbles = false,
   onSeeAllProducts,
   onFeedback,
 }: MessageListProps) {
@@ -104,14 +107,25 @@ export function MessageList({
               {(msg.content || msg.streaming) && (
                 <div
                   className={`px-3 py-2 text-sm whitespace-pre-wrap ${
-                    msg.role === 'user' ? '' : 'bg-gray-100 text-gray-900'
+                    msg.role === 'user'
+                      ? glassBubbles
+                        ? 'backdrop-blur-md ring-1 ring-white/30'
+                        : ''
+                      : glassBubbles
+                        ? 'bg-white/40 text-gray-900 backdrop-blur-md ring-1 ring-white/50'
+                        : 'bg-gray-100 text-gray-900'
                   }`}
                   style={{
                     borderRadius: msg.role === 'user'
                       ? `${msgBubbleRadius} ${msgBubbleRadius} 2px ${msgBubbleRadius}`
                       : `${msgBubbleRadius} ${msgBubbleRadius} ${msgBubbleRadius} 2px`,
                     ...(msg.role === 'user'
-                      ? { backgroundColor: primaryColor, color: readableTextColor(primaryColor) }
+                      ? {
+                          backgroundColor: glassBubbles
+                            ? `color-mix(in srgb, ${primaryColor} 62%, transparent)`
+                            : primaryColor,
+                          color: readableTextColor(primaryColor),
+                        }
                       : {}),
                   }}
                 >
