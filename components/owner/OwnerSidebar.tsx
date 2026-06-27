@@ -33,11 +33,11 @@ export function OwnerSidebar({ userEmail }: { userEmail: string }) {
       <Link href="/owner" className="flex items-center gap-1 px-4 py-4 text-white">
         <LoqaraIcon className="size-14" />
         <span className="text-2xl font-bold">
-          Loqara<span className="text-primary">.</span>
+          Loqara<span className="text-primary">.owner</span>
         </span>
       </Link>
 
-      <p className="px-4 pb-1 text-xs font-medium tracking-wide text-white/45">Owner</p>
+      <p className="px-4 pb-1 text-xs font-medium tracking-wide text-white/45">Operator panel</p>
 
       <nav className="flex-1 overflow-y-auto px-2 pb-2">
         {NAV.map(({ label, href, icon: Icon, exact }) => {

@@ -203,6 +203,8 @@ export interface Bot {
   config: BotConfig
   elevenlabs_agent_id: string | null
   elevenlabs_agent_hash: string | null
+  /** Last time the widget loaded this bot's config (embedded & visited). */
+  last_seen_at: string | null
   created_at: string
   updated_at: string
 }

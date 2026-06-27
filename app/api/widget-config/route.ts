@@ -51,5 +51,12 @@ export async function GET(req: Request) {
     .single<{ plan: Plan | null; voice_addon: boolean | null }>()
   const entitlements = entitlementsFor(org?.plan ?? 'free')
 
+  // Stamp "last seen" so the owner can tell this bot is embedded & live. The
+  // row is already loaded, so we only write when it's stale (≤ every 10 min).
+  const lastSeen = bot.last_seen_at ? new Date(bot.last_seen_at).getTime() : 0
+  if (Date.now() - lastSeen > 10 * 60 * 1000) {
+    await svc.from('bots').update({ last_seen_at: new Date().toISOString() }).eq('id', bot.id)
+  }
+
   return json(publicBotConfig(bot.config, entitlements, Boolean(org?.voice_addon)))
 }
