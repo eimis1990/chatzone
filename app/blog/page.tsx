@@ -53,9 +53,20 @@ function PostCard({ post }: { post: BlogPost }) {
         </h3>
         <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-gray-600">{post.description}</p>
         <div className="mt-5 flex items-center gap-3">
-          <span className="flex size-9 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary ring-1 ring-black/[0.04]">
-            {initials(post.author)}
-          </span>
+          {post.authorImage ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={post.authorImage}
+              alt={post.author}
+              width={36}
+              height={36}
+              className="size-9 rounded-full object-cover ring-1 ring-black/[0.06]"
+            />
+          ) : (
+            <span className="flex size-9 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary ring-1 ring-black/[0.04]">
+              {initials(post.author)}
+            </span>
+          )}
           <span className="text-sm leading-tight">
             <span className="font-semibold text-gray-900">{post.author}</span>
             <span className="text-gray-500"> • {post.authorRole}</span>

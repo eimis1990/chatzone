@@ -71,11 +71,27 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
         </Link>
         <header className="mb-8 mt-6">
           <p className="text-xs uppercase tracking-wide text-gray-500">
-            {formatDate(post.date)} · {post.author}
+            {formatDate(post.date)} · {post.readingMinutes} min read
           </p>
           <h1 className="mt-2 text-3xl font-semibold tracking-tight text-gray-900 sm:text-4xl">
             {post.title}
           </h1>
+          <div className="mt-5 flex items-center gap-3">
+            {post.authorImage ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={post.authorImage}
+                alt={post.author}
+                width={40}
+                height={40}
+                className="size-10 rounded-full object-cover ring-1 ring-black/[0.06]"
+              />
+            ) : null}
+            <span className="text-sm leading-tight">
+              <span className="font-semibold text-gray-900">{post.author}</span>
+              <span className="text-gray-500"> • {post.authorRole}</span>
+            </span>
+          </div>
         </header>
 
         {post.image && (

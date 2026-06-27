@@ -12,6 +12,8 @@ export interface BlogPost {
   author: string
   /** Author's role/title, shown next to their name. */
   authorRole: string
+  /** Optional author headshot path (under /public). */
+  authorImage?: string
   /** Optional hero image path (under /public), e.g. /blog/foo.webp. */
   image?: string
   /** Estimated reading time in minutes. */
@@ -25,6 +27,10 @@ function readingTime(markdown: string): number {
   const words = markdown.trim().split(/\s+/).filter(Boolean).length
   return Math.max(1, Math.round(words / 200))
 }
+
+// The site owner writes the posts; show their headshot unless a post overrides it.
+const OWNER = 'Eimantas Kudarauskas'
+const OWNER_PHOTO = '/ceo.webp'
 
 const BLOG_DIR = join(process.cwd(), 'content', 'blog')
 
@@ -46,13 +52,15 @@ function parseFrontmatter(raw: string): { data: Record<string, string>; body: st
 function fileToPost(filename: string): BlogPost {
   const raw = readFileSync(join(BLOG_DIR, filename), 'utf8')
   const { data, body } = parseFrontmatter(raw)
+  const author = data.author ?? 'Loqara'
   return {
     slug: filename.replace(/\.mdx?$/, ''),
     title: data.title ?? 'Untitled',
     description: data.description ?? '',
     date: data.date ?? '1970-01-01',
-    author: data.author ?? 'Loqara',
+    author,
     authorRole: data.authorRole ?? 'Founder',
+    authorImage: data.authorImage || (author === OWNER ? OWNER_PHOTO : undefined),
     image: data.image || undefined,
     readingMinutes: readingTime(body),
     html: marked.parse(body, { async: false }) as string,

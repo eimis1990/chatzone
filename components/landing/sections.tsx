@@ -277,8 +277,8 @@ export function Footer() {
           The AI chat &amp; voice agent for modern stores. Answers, leads, orders, and handoff — in one widget.
         </p>
 
-        {/* Divider, then the bottom bar */}
-        <div className="mt-14 flex flex-wrap items-center justify-center gap-x-8 gap-y-2 border-t border-white/10 pt-8 text-sm text-white/45">
+        {/* Bottom bar (no divider — the footer grid already separates it) */}
+        <div className="mt-10 flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-sm text-white/45">
           <span>© {2026} Loqara. All rights reserved.</span>
           <span aria-hidden="true" className="text-base font-bold text-white/30">
             •
