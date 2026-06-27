@@ -10,10 +10,20 @@ export interface BlogPost {
   /** ISO date (yyyy-mm-dd). */
   date: string
   author: string
+  /** Author's role/title, shown next to their name. */
+  authorRole: string
   /** Optional hero image path (under /public), e.g. /blog/foo.webp. */
   image?: string
+  /** Estimated reading time in minutes. */
+  readingMinutes: number
   /** Rendered HTML body (frontmatter stripped). */
   html: string
+}
+
+/** Rough reading time at ~200 words/min, floored at 1. */
+function readingTime(markdown: string): number {
+  const words = markdown.trim().split(/\s+/).filter(Boolean).length
+  return Math.max(1, Math.round(words / 200))
 }
 
 const BLOG_DIR = join(process.cwd(), 'content', 'blog')
@@ -42,7 +52,9 @@ function fileToPost(filename: string): BlogPost {
     description: data.description ?? '',
     date: data.date ?? '1970-01-01',
     author: data.author ?? 'Loqara',
+    authorRole: data.authorRole ?? 'Founder',
     image: data.image || undefined,
+    readingMinutes: readingTime(body),
     html: marked.parse(body, { async: false }) as string,
   }
 }
