@@ -26,6 +26,7 @@ import {
   SaveIcon,
   Maximize2Icon,
   XIcon,
+  ChevronDownIcon,
   type LucideIcon,
 } from 'lucide-react'
 import { botConfigFormSchema } from '@/lib/validation/schemas'
@@ -453,14 +454,11 @@ export function ConfigForm({
         </div>
 
         {/* ── Display ── */}
-        <Card className="overflow-visible rounded-none border-b pt-0 shadow-none ring-0">
-          <CardHeader className="header-grid relative sticky top-16 z-[5] overflow-hidden rounded-none border-b bg-muted/70 py-3 backdrop-blur">
-            <SectionHeader
+        <CollapsibleSection defaultOpen header={<SectionHeader
               icon={MonitorIcon}
               title="Display"
               description="Bot name and avatar shown to visitors."
-            />
-          </CardHeader>
+            />}>
           <CardContent className="space-y-4">
             <div className="space-y-1.5">
               <Label htmlFor="botName">Bot name</Label>
@@ -531,17 +529,14 @@ export function ConfigForm({
               </p>
             </div>
           </CardContent>
-        </Card>
+        </CollapsibleSection>
 
         {/* ── Language & Content ── */}
-        <Card className="overflow-visible rounded-none border-b pt-0 shadow-none ring-0">
-          <CardHeader className="header-grid relative sticky top-16 z-[5] overflow-hidden rounded-none border-b bg-muted/70 py-3 backdrop-blur">
-            <SectionHeader
+        <CollapsibleSection header={<SectionHeader
               icon={LanguagesIcon}
               title="Language & content"
               description="Greeting, suggested questions, and fallback message — per language."
-            />
-          </CardHeader>
+            />}>
           <CardContent className="space-y-4">
             {/* Language segmented control */}
             <div className="space-y-3">
@@ -827,17 +822,14 @@ export function ConfigForm({
               )}
             </div>
           </CardContent>
-        </Card>
+        </CollapsibleSection>
 
         {/* ── Theme ── */}
-        <Card className="overflow-visible rounded-none border-b pt-0 shadow-none ring-0">
-          <CardHeader className="header-grid relative sticky top-16 z-[5] overflow-hidden rounded-none border-b bg-muted/70 py-3 backdrop-blur">
-            <SectionHeader
+        <CollapsibleSection header={<SectionHeader
               icon={PaletteIcon}
               title="Appearance"
               description="Colors, shape, launcher, and background — grouped."
-            />
-          </CardHeader>
+            />}>
           <CardContent className="space-y-6">
             {/* ── Colors ── */}
             <div className="space-y-3">
@@ -1042,17 +1034,14 @@ export function ConfigForm({
               </div>
             </div>
           </CardContent>
-        </Card>
+        </CollapsibleSection>
 
         {/* ── AI Behaviour ── */}
-        <Card className="overflow-visible rounded-none border-b pt-0 shadow-none ring-0">
-          <CardHeader className="header-grid relative sticky top-16 z-[5] overflow-hidden rounded-none border-b bg-muted/70 py-3 backdrop-blur">
-            <SectionHeader
+        <CollapsibleSection header={<SectionHeader
               icon={SparklesIcon}
               title="AI behaviour"
               description="System prompt and persona."
-            />
-          </CardHeader>
+            />}>
           <CardContent className="space-y-4">
             <Controller
               name="systemPrompt"
@@ -1149,7 +1138,7 @@ export function ConfigForm({
 
             </div>
           </CardContent>
-        </Card>
+        </CollapsibleSection>
 
         {/* ── Voice ── */}
         <VoiceSection
@@ -1162,14 +1151,11 @@ export function ConfigForm({
         />
 
         {/* ── Lead Capture ── */}
-        <Card className="overflow-visible rounded-none border-b pt-0 shadow-none ring-0">
-          <CardHeader className="header-grid relative sticky top-16 z-[5] overflow-hidden rounded-none border-b bg-muted/70 py-3 backdrop-blur">
-            <SectionHeader
+        <CollapsibleSection header={<SectionHeader
               icon={UserPlusIcon}
               title="Lead capture"
               description="Collect visitor contact information during the conversation."
-            />
-          </CardHeader>
+            />}>
           <CardContent className="space-y-4">
             <div className="flex items-center gap-3">
               <Controller
@@ -1298,20 +1284,17 @@ export function ConfigForm({
               </div>
             )}
           </CardContent>
-        </Card>
+        </CollapsibleSection>
 
         {/* ── Store / Products ── */}
         <CommerceSection control={control} watch={watch} />
 
         {/* ── Allowed Domains (Advanced) ── */}
-        <Card className="overflow-visible rounded-none border-b pt-0 shadow-none ring-0">
-          <CardHeader className="header-grid relative sticky top-16 z-[5] overflow-hidden rounded-none border-b bg-muted/70 py-3 backdrop-blur">
-            <SectionHeader
+        <CollapsibleSection header={<SectionHeader
               icon={ShieldIcon}
               title="Allowed domains"
               description="Restrict which websites can embed this widget. Leave empty to allow any domain."
-            />
-          </CardHeader>
+            />}>
           <CardContent className="space-y-3">
             {allowedDomainsField.fields.map((field, index) => (
               <div key={field.id} className="flex items-center gap-2">
@@ -1343,7 +1326,7 @@ export function ConfigForm({
               Not recommended to leave empty in production.
             </p>
           </CardContent>
-        </Card>
+        </CollapsibleSection>
 
         </form>
       </ResizablePanel>
@@ -1468,14 +1451,11 @@ function CommerceSection({ control, watch }: CommerceSectionProps) {
   }
 
   return (
-    <Card className="overflow-visible rounded-none border-b pt-0 shadow-none ring-0">
-      <CardHeader className="header-grid relative sticky top-16 z-[5] overflow-hidden rounded-none border-b bg-muted/70 py-3 backdrop-blur">
-        <SectionHeader
+    <CollapsibleSection header={<SectionHeader
           icon={ShoppingBagIcon}
           title="Store / products"
           description="Connect your store (WooCommerce, Shopify, or Magento) so the bot can search your catalog and show product cards."
-        />
-      </CardHeader>
+        />}>
       <CardContent className="space-y-4">
         <div className="flex items-center gap-3">
           <Controller
@@ -1815,7 +1795,7 @@ function CommerceSection({ control, watch }: CommerceSectionProps) {
           </div>
         )}
       </CardContent>
-    </Card>
+    </CollapsibleSection>
   )
 }
 
@@ -1900,5 +1880,47 @@ function ColorField({
         )
       }}
     />
+  )
+}
+
+// -------------------------------------------------------------------------
+// CollapsibleSection — a config card whose body collapses. The sticky header
+// stays visible with a chevron on the right (vertically centered).
+// -------------------------------------------------------------------------
+function CollapsibleSection({
+  header,
+  defaultOpen = false,
+  children,
+}: {
+  header: ReactNode
+  defaultOpen?: boolean
+  children: ReactNode
+}) {
+  const [open, setOpen] = useState(defaultOpen)
+  return (
+    <Card className="overflow-visible rounded-none border-b pt-0 shadow-none ring-0">
+      <CardHeader
+        className="header-grid relative sticky top-16 z-[5] cursor-pointer select-none overflow-hidden rounded-none border-b bg-muted/70 py-3 pr-12 backdrop-blur"
+        onClick={() => setOpen((o) => !o)}
+      >
+        {header}
+        <button
+          type="button"
+          aria-expanded={open}
+          aria-label={open ? 'Collapse section' : 'Expand section'}
+          onClick={(e) => {
+            e.stopPropagation()
+            setOpen((o) => !o)
+          }}
+          className="absolute right-3 top-1/2 flex size-7 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-black/5 hover:text-foreground"
+        >
+          <ChevronDownIcon
+            className={`size-5 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+            aria-hidden="true"
+          />
+        </button>
+      </CardHeader>
+      {open && children}
+    </Card>
   )
 }

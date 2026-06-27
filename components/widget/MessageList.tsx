@@ -128,10 +128,10 @@ export function MessageList({
                   className={`px-3 py-2 text-sm whitespace-pre-wrap ${
                     msg.role === 'user'
                       ? glassBubbles
-                        ? 'backdrop-blur-md ring-1 ring-white/30'
+                        ? 'backdrop-blur-md'
                         : ''
                       : glassBubbles
-                        ? 'bg-white/40 text-gray-900 backdrop-blur-md ring-1 ring-white/50'
+                        ? 'bg-white/20 text-gray-900 backdrop-blur-md'
                         : 'bg-gray-100 text-gray-900'
                   }`}
                   style={{
@@ -142,7 +142,7 @@ export function MessageList({
                     ...(msg.role === 'user'
                       ? {
                           backgroundColor: glassBubbles
-                            ? `color-mix(in srgb, ${primaryColor} 62%, transparent)`
+                            ? `color-mix(in srgb, ${primaryColor} 45%, transparent)`
                             : primaryColor,
                           color: readableTextColor(primaryColor),
                         }
