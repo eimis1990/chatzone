@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Shimmer } from '@/components/landing/Shimmer'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -17,13 +18,14 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
+  const canSubmit = email.trim().length > 0 && password.length > 0 && !loading
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setError(null)
     setLoading(true)
 
     const supabase = createBrowserClient()
-
     const { error: authError } = await supabase.auth.signInWithPassword({ email, password })
 
     if (authError) {
@@ -32,7 +34,6 @@ export default function LoginPage() {
       return
     }
 
-    // Fetch the profile to determine the role for redirect.
     const {
       data: { user },
     } = await supabase.auth.getUser()
@@ -55,11 +56,21 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="flex min-h-svh items-center justify-center bg-background px-4">
-      <Card className="w-full max-w-md">
+    <main className="relative flex min-h-svh items-center justify-center overflow-hidden px-4">
+      {/* Strongly-blurred hero behind the card (scaled up so blurred edges stay off-screen) */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 -z-10 scale-110 bg-cover bg-center blur-2xl"
+        style={{ backgroundImage: "url('/loqara-hero-1.png')" }}
+      />
+      <div aria-hidden="true" className="absolute inset-0 -z-10 bg-black/15" />
+
+      <Card className="w-full max-w-md border-white/40 bg-white/60 shadow-2xl ring-1 ring-black/5 backdrop-blur-2xl">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold">Sign in</CardTitle>
-          <CardDescription>Enter your email and password to access Loqara.</CardDescription>
+          <CardDescription className="text-foreground/60">
+            Enter your email and password to access Loqara.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4" noValidate>
@@ -74,6 +85,7 @@ export default function LoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
                 disabled={loading}
+                className="bg-white/70"
               />
             </div>
 
@@ -96,6 +108,7 @@ export default function LoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 disabled={loading}
+                className="bg-white/70"
               />
             </div>
 
@@ -105,8 +118,13 @@ export default function LoginPage() {
               </p>
             )}
 
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Signing in…' : 'Sign in'}
+            <Button
+              type="submit"
+              disabled={!canSubmit}
+              className="relative h-12 w-full overflow-hidden text-base shadow-lg shadow-primary/20"
+            >
+              <span className="relative z-10">{loading ? 'Signing in…' : 'Sign in'}</span>
+              {canSubmit && <Shimmer />}
             </Button>
           </form>
         </CardContent>
