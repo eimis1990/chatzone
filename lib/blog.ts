@@ -10,6 +10,8 @@ export interface BlogPost {
   /** ISO date (yyyy-mm-dd). */
   date: string
   author: string
+  /** Optional hero image path (under /public), e.g. /blog/foo.webp. */
+  image?: string
   /** Rendered HTML body (frontmatter stripped). */
   html: string
 }
@@ -40,6 +42,7 @@ function fileToPost(filename: string): BlogPost {
     description: data.description ?? '',
     date: data.date ?? '1970-01-01',
     author: data.author ?? 'Loqara',
+    image: data.image || undefined,
     html: marked.parse(body, { async: false }) as string,
   }
 }

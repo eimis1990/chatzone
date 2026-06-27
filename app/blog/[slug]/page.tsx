@@ -58,7 +58,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
       logo: { '@type': 'ImageObject', url: `${SITE_URL}/loqara-icon.svg` },
     },
     mainEntityOfPage: `${SITE_URL}/blog/${slug}`,
-    image: `${SITE_URL}/landing/og.png`,
+    image: post.image ? `${SITE_URL}${post.image}` : `${SITE_URL}/landing/og.png`,
   }
 
   return (
@@ -77,6 +77,17 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
             {post.title}
           </h1>
         </header>
+
+        {post.image && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={post.image}
+            alt={post.title}
+            width={1200}
+            height={675}
+            className="mb-10 aspect-video w-full rounded-2xl object-cover"
+          />
+        )}
 
         <div className="article" dangerouslySetInnerHTML={{ __html: post.html }} />
 

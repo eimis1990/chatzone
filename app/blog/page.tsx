@@ -34,22 +34,36 @@ export default function BlogIndex() {
         ) : (
           <div className="divide-y divide-gray-200 border-t border-gray-200">
             {posts.map((p) => (
-              <article key={p.slug} className="py-8">
-                <p className="text-xs uppercase tracking-wide text-gray-500">
-                  {formatDate(p.date)} · {p.author}
-                </p>
-                <h2 className="mt-2 text-2xl font-semibold tracking-tight text-gray-900">
-                  <Link href={`/blog/${p.slug}`} className="transition-colors hover:text-primary">
-                    {p.title}
+              <article key={p.slug} className="flex flex-col gap-5 py-8 sm:flex-row">
+                {p.image && (
+                  <Link href={`/blog/${p.slug}`} className="shrink-0">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={p.image}
+                      alt={p.title}
+                      width={320}
+                      height={180}
+                      className="aspect-video w-full rounded-xl object-cover sm:w-56"
+                    />
                   </Link>
-                </h2>
-                <p className="mt-2 text-gray-600">{p.description}</p>
-                <Link
-                  href={`/blog/${p.slug}`}
-                  className="mt-3 inline-block text-sm font-semibold text-primary hover:underline"
-                >
-                  Read more →
-                </Link>
+                )}
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-gray-500">
+                    {formatDate(p.date)} · {p.author}
+                  </p>
+                  <h2 className="mt-2 text-2xl font-semibold tracking-tight text-gray-900">
+                    <Link href={`/blog/${p.slug}`} className="transition-colors hover:text-primary">
+                      {p.title}
+                    </Link>
+                  </h2>
+                  <p className="mt-2 text-gray-600">{p.description}</p>
+                  <Link
+                    href={`/blog/${p.slug}`}
+                    className="mt-3 inline-block text-sm font-semibold text-primary hover:underline"
+                  >
+                    Read more →
+                  </Link>
+                </div>
               </article>
             ))}
           </div>
