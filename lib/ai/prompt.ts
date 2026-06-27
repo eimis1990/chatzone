@@ -52,12 +52,13 @@ export function buildSystemPrompt(
         'NEED or problem ("something for dry skin", "a gift for mum") → assemble a small ROUTINE / mix ' +
         'across complementary categories (e.g. for skincare: serum, cream, toner, mist, maybe a set), ' +
         'not several of the same thing. ' +
-        '(2) Call `search_products` with the core product NOUN in the catalog language (this store is ' +
-        'often Lithuanian), e.g. "veido kremas" for a face cream. The catalog matches the whole phrase, ' +
-        'so keep queries SHORT (1-2 words) and drop adjectives like dry/hydrating ("sausai", ' +
-        '"drėkinamasis") — they usually return nothing. For an open need, run SEVERAL searches, one per ' +
-        'complementary category, to gather a varied set. If a search is empty, retry with a broader or ' +
-        'translated noun before giving up. ' +
+        '(2) Call `search_products` with the core product NOUN — keep it SHORT (1-2 words) and drop ' +
+        'adjectives like dry/hydrating ("sausai", "drėkinamasis"), they usually return nothing. Search ' +
+        'in the language the shopper is using. IMPORTANT: a catalog only matches its own language, so if ' +
+        'a search returns nothing you MUST retry the SAME noun translated to the other language ' +
+        '(English ↔ Lithuanian: "pants" ↔ "kelnės", "face cream" ↔ "veido kremas", "dress" ↔ "suknelė") ' +
+        'before concluding an item is unavailable. For an open need, run SEVERAL searches, one per ' +
+        'complementary category, to gather a varied set. ' +
         '(3) Review the candidates and call `display_products` with ONLY ids that genuinely match the ' +
         'intent (exclude keyword-only matches — never a bath product for a face request). The first 4 ids ' +
         'show as cards and the rest sit behind "See all", so order carefully: for an OPEN NEED make the ' +
