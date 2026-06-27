@@ -231,8 +231,9 @@ export function ChatWindow({ config, transport, initialLanguage }: ChatWindowPro
   const cornerRadius = config.theme.cornerRadius ?? 16
   const bubbleRadius = config.theme.bubbleRadius ?? 16
   const glassBubbles = config.theme.glassBubbles ?? false
-  const bubbleBorderColor = config.theme.bubbleBorderColor ?? '#e5e7eb'
+  const bubbleBorderColor = config.theme.bubbleBorderColor || '#e5e7eb'
   const bubbleBorderWidth = config.theme.bubbleBorderWidth ?? 0
+  const botBubbleColor = config.theme.botBubbleColor || undefined
 
   // Restore/generate visitorId from localStorage on mount
   useEffect(() => {
@@ -725,6 +726,7 @@ export function ChatWindow({ config, transport, initialLanguage }: ChatWindowPro
             glassBubbles={glassBubbles}
             bubbleBorderColor={bubbleBorderColor}
             bubbleBorderWidth={bubbleBorderWidth}
+            botBubbleColor={botBubbleColor}
             onSeeAllProducts={setListProducts}
             onFeedback={handleFeedback}
           />

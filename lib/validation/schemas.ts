@@ -97,6 +97,8 @@ export const botConfigFormSchema = z.object({
       glassBubbles: z.boolean().default(false),
       // Optional custom send-button icon (uploaded image URL).
       sendIconUrl: z.string().url().optional().or(z.literal('')),
+      // Bot (assistant) message bubble background; text auto-contrasts. Empty = default grey.
+      botBubbleColor: z.string().optional().or(z.literal('')),
       // Border for message bubbles + suggested-action tiles (width 0 = none).
       bubbleBorderColor: z.string().default('#e5e7eb'),
       bubbleBorderWidth: z.number().min(0).max(6).default(0),

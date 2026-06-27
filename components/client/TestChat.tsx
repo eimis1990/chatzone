@@ -327,6 +327,7 @@ function buildPreviewPublicConfig(config: LiveConfig): PublicBotConfig {
       glassBubbles: config.theme?.glassBubbles ?? false,
       bubbleBorderColor: config.theme?.bubbleBorderColor ?? '#e5e7eb',
       bubbleBorderWidth: config.theme?.bubbleBorderWidth ?? 0,
+      ...(config.theme?.botBubbleColor ? { botBubbleColor: config.theme.botBubbleColor } : {}),
       ...(config.theme?.bubbleIcon !== undefined && { bubbleIcon: config.theme.bubbleIcon }),
       ...(config.theme?.backgroundImageUrl ? { backgroundImageUrl: config.theme.backgroundImageUrl } : {}),
       ...(config.theme?.sendIconUrl ? { sendIconUrl: config.theme.sendIconUrl } : {}),

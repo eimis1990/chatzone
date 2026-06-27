@@ -37,6 +37,8 @@ interface MessageListProps {
   /** Optional bubble border (width 0 = none). */
   bubbleBorderColor?: string
   bubbleBorderWidth?: number
+  /** Bot (assistant) bubble background; text auto-contrasts. Empty = default grey. */
+  botBubbleColor?: string
   onSeeAllProducts?: (products: CommerceProduct[]) => void
   onFeedback?: (messageId: string, value: 'up' | 'down') => void
 }
@@ -53,9 +55,15 @@ export function MessageList({
   glassBubbles = false,
   bubbleBorderColor = '#e5e7eb',
   bubbleBorderWidth = 0,
+  botBubbleColor,
   onSeeAllProducts,
   onFeedback,
 }: MessageListProps) {
+  // Custom bot bubble color applies only outside glass mode (glass is its own style).
+  const botBubbleStyle =
+    botBubbleColor && !glassBubbles
+      ? { backgroundColor: botBubbleColor, color: readableTextColor(botBubbleColor) }
+      : {}
   const bubbleBorder =
     bubbleBorderWidth > 0 ? { border: `${bubbleBorderWidth}px solid ${bubbleBorderColor}` } : {}
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -138,7 +146,7 @@ export function MessageList({
                             : primaryColor,
                           color: readableTextColor(primaryColor),
                         }
-                      : {}),
+                      : botBubbleStyle),
                   }}
                 >
                   {msg.streaming && !msg.content ? (

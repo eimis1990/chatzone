@@ -9,6 +9,7 @@ import {
   type Control,
   type UseFormWatch,
   type FieldErrors,
+  type FieldPath,
 } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
@@ -24,6 +25,7 @@ import {
   ShoppingBagIcon,
   SaveIcon,
   Maximize2Icon,
+  XIcon,
   type LucideIcon,
 } from 'lucide-react'
 import { botConfigFormSchema } from '@/lib/validation/schemas'
@@ -832,289 +834,132 @@ export function ConfigForm({
           <CardHeader className="header-grid relative sticky top-16 z-[5] overflow-hidden rounded-none border-b bg-muted/70 py-3 backdrop-blur">
             <SectionHeader
               icon={PaletteIcon}
-              title="Theme"
-              description="Colors, widget position, and corner roundness."
+              title="Appearance"
+              description="Colors, shape, launcher, and background — grouped."
             />
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-4 sm:grid-cols-2">
-              {/* Primary color */}
-              <div className="space-y-1.5">
-                <Label htmlFor="primaryColor">Primary color</Label>
-                <Controller
-                  name="theme.primaryColor"
-                  control={control}
-                  render={({ field }) => (
-                    <div className="flex items-center gap-2">
-                      <input
-                        id="primaryColor"
-                        type="color"
-                        value={field.value ?? '#4f46e5'}
-                        onChange={(e) => field.onChange(e.target.value)}
-                        className="h-8 w-10 cursor-pointer rounded border border-input bg-transparent p-0.5 flex-shrink-0"
-                        aria-label="Pick primary color"
-                      />
-                      <Input
-                        value={field.value ?? ''}
-                        onChange={(e) => field.onChange(e.target.value)}
-                        onBlur={field.onBlur}
-                        placeholder="#4f46e5"
-                        className="flex-1 font-mono text-sm"
-                        aria-label="Primary color hex value"
-                      />
-                    </div>
-                  )}
-                />
-              </div>
-
-              {/* Launcher position */}
-              <div className="space-y-1.5">
-                <Label>Launcher position</Label>
-                <Controller
-                  name="theme.position"
-                  control={control}
-                  render={({ field }) => (
-                    <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger className="w-full">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="bottom-right">Bottom right</SelectItem>
-                        <SelectItem value="bottom-left">Bottom left</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-              </div>
-            </div>
-
-            {/* Font */}
-            <div className="space-y-1.5">
-              <Label>Chat font</Label>
-              <Controller
-                name="theme.fontFamily"
-                control={control}
-                render={({ field }) => (
-                  <Select value={field.value ?? 'geist'} onValueChange={field.onChange}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {FONT_OPTIONS.map((f) => (
-                        <SelectItem
-                          key={f.value}
-                          value={f.value}
-                          style={{ fontFamily: f.stack }}
-                        >
-                          {f.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+          <CardContent className="space-y-6">
+            {/* ── Colors ── */}
+            <div className="space-y-3">
+              <h4 className="text-sm font-semibold">Colors</h4>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <ColorField control={control} name="theme.primaryColor" label="Primary color" placeholder="#4f46e5" swatchDefault="#4f46e5" clearable={false} description="Brand color: user bubbles, buttons, accents." />
+                <ColorField control={control} name="theme.botBubbleColor" label="Bot bubble color" placeholder="Default grey" swatchDefault="#f3f4f6" description="Assistant message bubbles. Text adapts; empty = grey." />
+                <ColorField control={control} name="theme.backgroundColor" label="Chat background" placeholder="#ffffff" swatchDefault="#ffffff" description="Behind the conversation." />
+                <ColorField control={control} name="theme.launcherColor" label="Launcher color" placeholder="Defaults to primary" swatchDefault={watch('theme.primaryColor') || '#4f46e5'} description="Floating bubble; empty = primary." />
+                <ColorField control={control} name="theme.bubbleBorderColor" label="Bubble border color" placeholder="#e5e7eb" swatchDefault="#e5e7eb" description="Used when border width > 0 (see roundness)." />
+                {watch('theme.showCallButton') !== false && (
+                  <ColorField control={control} name="theme.callButtonColor" label="Call button color" placeholder="#22c55e" swatchDefault="#22c55e" description="Voice call button; label adapts for contrast." />
                 )}
-              />
-              <p
-                className="text-sm text-muted-foreground"
-                style={{ fontFamily: fontStack(watch('theme.fontFamily')) }}
-              >
-                The quick brown fox jumps over the lazy dog
-              </p>
-            </div>
-
-            {/* Launcher appearance */}
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-1.5">
-                <Label>Launcher style</Label>
-                <Controller
-                  name="theme.launcherStyle"
-                  control={control}
-                  render={({ field }) => (
-                    <Select value={field.value ?? 'circle'} onValueChange={field.onChange}>
-                      <SelectTrigger className="w-full">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="circle">Circle (icon only)</SelectItem>
-                        <SelectItem value="pill">Pill (icon + text)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="launcherLabel">Launcher text</Label>
-                <Input
-                  id="launcherLabel"
-                  {...register('theme.launcherLabel')}
-                  placeholder="Chat with us"
-                  disabled={watch('theme.launcherStyle') !== 'pill'}
-                />
-                <p className="text-xs text-muted-foreground">
-                  Shown next to the icon when the style is a pill.
-                </p>
               </div>
             </div>
 
-            <div className="flex items-center justify-between gap-4">
-              <div className="space-y-0.5">
-                <Label htmlFor="launcherShowLogo">Show company logo in launcher</Label>
-                <p className="text-xs text-muted-foreground">
-                  Use the company logo instead of the default chat icon.
-                </p>
-              </div>
-              <Controller
-                name="theme.launcherShowLogo"
-                control={control}
-                render={({ field }) => (
-                  <Switch
-                    id="launcherShowLogo"
-                    checked={field.value ?? false}
-                    onCheckedChange={field.onChange}
-                  />
-                )}
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <Label htmlFor="launcherColor">Launcher color</Label>
-              <Controller
-                name="theme.launcherColor"
-                control={control}
-                render={({ field }) => (
-                  <div className="flex items-center gap-2">
-                    <input
-                      id="launcherColor"
-                      type="color"
-                      value={field.value || watch('theme.primaryColor') || '#4f46e5'}
-                      onChange={(e) => field.onChange(e.target.value)}
-                      className="h-8 w-10 flex-shrink-0 cursor-pointer rounded border border-input bg-transparent p-0.5"
-                      aria-label="Pick launcher color"
-                    />
-                    <Input
-                      value={field.value ?? ''}
-                      onChange={(e) => field.onChange(e.target.value)}
-                      onBlur={field.onBlur}
-                      placeholder="Defaults to primary color"
-                      className="flex-1 font-mono text-sm"
-                      aria-label="Launcher color hex value"
-                    />
-                  </div>
-                )}
-              />
-              <p className="text-xs text-muted-foreground">
-                The floating bubble&apos;s color. Leave empty to use your primary color.
-              </p>
-            </div>
-
-            {/* Radius sliders — stacked vertically */}
-            <div className="space-y-5">
+            {/* ── Corners & roundness ── */}
+            <div className="space-y-5 border-t pt-5">
+              <h4 className="text-sm font-semibold">Corners &amp; roundness</h4>
               <div className="space-y-2">
                 <Controller
                   control={control}
                   name="theme.cornerRadius"
                   render={({ field }) => (
-                    <Scrubber
-                      label="Chat window roundness"
-                      min={0}
-                      max={32}
-                      step={1}
-                      decimals={0}
-                      suffix="px"
-                      value={field.value ?? 16}
-                      onValueChange={(v) => field.onChange(v)}
-                    />
+                    <Scrubber label="Chat window roundness" min={0} max={32} step={1} decimals={0} suffix="px" value={field.value ?? 16} onValueChange={(v) => field.onChange(v)} />
                   )}
                 />
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>Square</span>
-                  <span>Rounded</span>
-                </div>
+                <div className="flex justify-between text-xs text-muted-foreground"><span>Square</span><span>Rounded</span></div>
               </div>
-
               <div className="space-y-2">
                 <Controller
                   control={control}
                   name="theme.bubbleRadius"
                   render={({ field }) => (
-                    <Scrubber
-                      label="Bubble roundness"
-                      min={0}
-                      max={24}
-                      step={1}
-                      decimals={0}
-                      suffix="px"
-                      value={field.value ?? 16}
-                      onValueChange={(v) => field.onChange(v)}
-                    />
+                    <Scrubber label="Bubble roundness" min={0} max={24} step={1} decimals={0} suffix="px" value={field.value ?? 16} onValueChange={(v) => field.onChange(v)} />
                   )}
                 />
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>Square</span>
-                  <span>Pill</span>
-                </div>
+                <div className="flex justify-between text-xs text-muted-foreground"><span>Square</span><span>Pill</span></div>
               </div>
-
               <div className="space-y-2">
                 <Controller
                   control={control}
                   name="theme.navButtonRadius"
                   render={({ field }) => (
-                    <Scrubber
-                      label="Button roundness"
-                      min={0}
-                      max={24}
-                      step={1}
-                      decimals={0}
-                      suffix="px"
-                      value={field.value ?? 12}
-                      onValueChange={(v) => field.onChange(v)}
-                    />
+                    <Scrubber label="Button roundness" min={0} max={24} step={1} decimals={0} suffix="px" value={field.value ?? 12} onValueChange={(v) => field.onChange(v)} />
                   )}
                 />
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>Square</span>
-                  <span>Round</span>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Corner radius of the header buttons (call &amp; restart).
-                </p>
+                <div className="flex justify-between text-xs text-muted-foreground"><span>Square</span><span>Round</span></div>
+                <p className="text-xs text-muted-foreground">Corner radius of the header buttons (call &amp; restart).</p>
+              </div>
+              <div className="space-y-2">
+                <Controller
+                  control={control}
+                  name="theme.bubbleBorderWidth"
+                  render={({ field }) => (
+                    <Scrubber label="Bubble border width" min={0} max={6} step={1} decimals={0} suffix="px" value={field.value ?? 0} onValueChange={(v) => field.onChange(v)} />
+                  )}
+                />
+                <p className="text-xs text-muted-foreground">A border around message bubbles and suggested-action tiles. 0 = none; set its color above.</p>
               </div>
             </div>
 
-            {/* Chat background — a base color with an optional image overlaid at
-                a chosen opacity (image is layered on top of the color). */}
-            <div className="space-y-4 border-t pt-4">
+            {/* ── Launcher ── */}
+            <div className="space-y-4 border-t pt-5">
+              <h4 className="text-sm font-semibold">Launcher</h4>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <Label>Position</Label>
+                  <Controller
+                    name="theme.position"
+                    control={control}
+                    render={({ field }) => (
+                      <Select value={field.value} onValueChange={field.onChange}>
+                        <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="bottom-right">Bottom right</SelectItem>
+                          <SelectItem value="bottom-left">Bottom left</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Style</Label>
+                  <Controller
+                    name="theme.launcherStyle"
+                    control={control}
+                    render={({ field }) => (
+                      <Select value={field.value ?? 'circle'} onValueChange={field.onChange}>
+                        <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="circle">Circle (icon only)</SelectItem>
+                          <SelectItem value="pill">Pill (icon + text)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                </div>
+              </div>
               <div className="space-y-1.5">
-                <Label htmlFor="backgroundColor">Chat background color</Label>
+                <Label htmlFor="launcherLabel">Launcher text</Label>
+                <Input id="launcherLabel" {...register('theme.launcherLabel')} placeholder="Chat with us" disabled={watch('theme.launcherStyle') !== 'pill'} />
+                <p className="text-xs text-muted-foreground">Shown next to the icon when the style is a pill.</p>
+              </div>
+              <div className="flex items-center justify-between gap-4">
+                <div className="space-y-0.5">
+                  <Label htmlFor="launcherShowLogo">Show company logo in launcher</Label>
+                  <p className="text-xs text-muted-foreground">Use the company logo instead of the default chat icon.</p>
+                </div>
                 <Controller
-                  name="theme.backgroundColor"
+                  name="theme.launcherShowLogo"
                   control={control}
                   render={({ field }) => (
-                    <div className="flex items-center gap-2">
-                      <input
-                        id="backgroundColor"
-                        type="color"
-                        value={field.value || '#ffffff'}
-                        onChange={(e) => field.onChange(e.target.value)}
-                        className="h-8 w-10 cursor-pointer rounded border border-input bg-transparent p-0.5 flex-shrink-0"
-                        aria-label="Pick chat background color"
-                      />
-                      <Input
-                        value={field.value ?? ''}
-                        onChange={(e) => field.onChange(e.target.value)}
-                        onBlur={field.onBlur}
-                        placeholder="#ffffff"
-                        className="flex-1 font-mono text-sm"
-                        aria-label="Chat background color hex value"
-                      />
-                    </div>
+                    <Switch id="launcherShowLogo" checked={field.value ?? false} onCheckedChange={field.onChange} />
                   )}
                 />
-                <p className="text-xs text-muted-foreground">
-                  Fills the chat area behind messages. Used on its own, or as the base layer under a background image.
-                </p>
               </div>
+            </div>
 
+            {/* ── Background & images ── */}
+            <div className="space-y-4 border-t pt-5">
+              <h4 className="text-sm font-semibold">Background &amp; images</h4>
               <LogoUpload
                 botId={botId}
                 control={control}
@@ -1124,160 +969,19 @@ export function ConfigForm({
                 filePrefix="bg"
                 description="Shown behind the conversation, layered on top of the background color."
               />
-
               {watch('theme.backgroundImageUrl') ? (
                 <div className="space-y-2">
                   <Controller
                     control={control}
                     name="theme.backgroundImageOpacity"
                     render={({ field }) => (
-                      <Scrubber
-                        label="Background image opacity"
-                        min={0}
-                        max={100}
-                        step={1}
-                        decimals={0}
-                        suffix="%"
-                        value={field.value ?? 100}
-                        onValueChange={(v) => field.onChange(v)}
-                      />
+                      <Scrubber label="Background image opacity" min={0} max={100} step={1} decimals={0} suffix="%" value={field.value ?? 100} onValueChange={(v) => field.onChange(v)} />
                     )}
                   />
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>Subtle</span>
-                    <span>Full</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Lower the opacity to blend the image into your background color and keep messages readable.
-                  </p>
+                  <div className="flex justify-between text-xs text-muted-foreground"><span>Subtle</span><span>Full</span></div>
+                  <p className="text-xs text-muted-foreground">Lower the opacity to blend the image into your background color and keep messages readable.</p>
                 </div>
               ) : null}
-            </div>
-
-            <div className="flex items-center justify-between gap-4">
-              <div className="space-y-0.5">
-                <Label htmlFor="showCallButton">Show &ldquo;talk with agent&rdquo; button</Label>
-                <p className="text-xs text-muted-foreground">
-                  The voice call button in the header (only shows when voice is enabled).
-                </p>
-              </div>
-              <Controller
-                name="theme.showCallButton"
-                control={control}
-                render={({ field }) => (
-                  <Switch
-                    id="showCallButton"
-                    checked={field.value ?? true}
-                    onCheckedChange={field.onChange}
-                  />
-                )}
-              />
-            </div>
-
-            {watch('theme.showCallButton') !== false && (
-              <div className="space-y-1.5">
-                <Label htmlFor="callButtonColor">Call button color</Label>
-                <Controller
-                  name="theme.callButtonColor"
-                  control={control}
-                  render={({ field }) => (
-                    <div className="flex items-center gap-2">
-                      <input
-                        id="callButtonColor"
-                        type="color"
-                        value={field.value || '#22c55e'}
-                        onChange={(e) => field.onChange(e.target.value)}
-                        className="h-8 w-10 flex-shrink-0 cursor-pointer rounded border border-input bg-transparent p-0.5"
-                        aria-label="Pick call button color"
-                      />
-                      <Input
-                        value={field.value ?? ''}
-                        onChange={(e) => field.onChange(e.target.value)}
-                        onBlur={field.onBlur}
-                        placeholder="#22c55e"
-                        className="font-mono text-sm"
-                      />
-                    </div>
-                  )}
-                />
-                <p className="text-xs text-muted-foreground">
-                  Background of the voice call button. The label adapts to light/dark for contrast.
-                </p>
-              </div>
-            )}
-
-            <div className="flex items-center justify-between gap-4">
-              <div className="space-y-0.5">
-                <Label htmlFor="glassBubbles">Glass message bubbles</Label>
-                <p className="text-xs text-muted-foreground">
-                  Frosted, translucent chat bubbles — looks best over a background image or color.
-                </p>
-              </div>
-              <Controller
-                name="theme.glassBubbles"
-                control={control}
-                render={({ field }) => (
-                  <Switch
-                    id="glassBubbles"
-                    checked={field.value ?? false}
-                    onCheckedChange={field.onChange}
-                  />
-                )}
-              />
-            </div>
-
-            {/* Bubble border — applies to message bubbles + suggested actions */}
-            <div className="space-y-3 border-t pt-4">
-              <Controller
-                control={control}
-                name="theme.bubbleBorderWidth"
-                render={({ field }) => (
-                  <Scrubber
-                    label="Bubble border width"
-                    min={0}
-                    max={6}
-                    step={1}
-                    decimals={0}
-                    suffix="px"
-                    value={field.value ?? 0}
-                    onValueChange={(v) => field.onChange(v)}
-                  />
-                )}
-              />
-              <p className="text-xs text-muted-foreground">
-                A border around message bubbles and suggested-action tiles. Set to 0 for none.
-              </p>
-              <div className="space-y-1.5">
-                <Label htmlFor="bubbleBorderColor">Border color</Label>
-                <Controller
-                  name="theme.bubbleBorderColor"
-                  control={control}
-                  render={({ field }) => (
-                    <div className="flex items-center gap-2">
-                      <input
-                        id="bubbleBorderColor"
-                        type="color"
-                        value={field.value || '#e5e7eb'}
-                        onChange={(e) => field.onChange(e.target.value)}
-                        className="h-8 w-10 cursor-pointer rounded border border-input bg-transparent p-0.5 flex-shrink-0"
-                        aria-label="Pick bubble border color"
-                      />
-                      <Input
-                        value={field.value ?? ''}
-                        onChange={(e) => field.onChange(e.target.value)}
-                        onBlur={field.onBlur}
-                        placeholder="#e5e7eb"
-                        className="flex-1 font-mono text-sm"
-                        aria-label="Bubble border color hex value"
-                      />
-                    </div>
-                  )}
-                />
-              </div>
-            </div>
-
-            {/* Custom send-button icon */}
-            <div className="border-t pt-4">
               <LogoUpload
                 botId={botId}
                 control={control}
@@ -1287,6 +991,55 @@ export function ConfigForm({
                 description="Replaces the default arrow in the composer. A small square icon works best."
                 filePrefix="sendicon"
               />
+            </div>
+
+            {/* ── Display options ── */}
+            <div className="space-y-4 border-t pt-5">
+              <h4 className="text-sm font-semibold">Display options</h4>
+              <div className="flex items-center justify-between gap-4">
+                <div className="space-y-0.5">
+                  <Label htmlFor="glassBubbles">Glass message bubbles</Label>
+                  <p className="text-xs text-muted-foreground">Frosted, translucent chat bubbles — looks best over a background image or color.</p>
+                </div>
+                <Controller
+                  name="theme.glassBubbles"
+                  control={control}
+                  render={({ field }) => (
+                    <Switch id="glassBubbles" checked={field.value ?? false} onCheckedChange={field.onChange} />
+                  )}
+                />
+              </div>
+              <div className="flex items-center justify-between gap-4">
+                <div className="space-y-0.5">
+                  <Label htmlFor="showCallButton">Show &ldquo;talk with agent&rdquo; button</Label>
+                  <p className="text-xs text-muted-foreground">The voice call button in the header (only shows when voice is enabled).</p>
+                </div>
+                <Controller
+                  name="theme.showCallButton"
+                  control={control}
+                  render={({ field }) => (
+                    <Switch id="showCallButton" checked={field.value ?? true} onCheckedChange={field.onChange} />
+                  )}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Chat font</Label>
+                <Controller
+                  name="theme.fontFamily"
+                  control={control}
+                  render={({ field }) => (
+                    <Select value={field.value ?? 'geist'} onValueChange={field.onChange}>
+                      <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {FONT_OPTIONS.map((f) => (
+                          <SelectItem key={f.value} value={f.value} style={{ fontFamily: f.stack }}>{f.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+                <p className="text-sm text-muted-foreground" style={{ fontFamily: fontStack(watch('theme.fontFamily')) }}>The quick brown fox jumps over the lazy dog</p>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -2079,5 +1832,73 @@ function TestBadge({ variant, children }: { variant: 'ok' | 'error'; children: R
     >
       {variant === 'ok' ? '✓' : '✗'} {children}
     </span>
+  )
+}
+
+// -------------------------------------------------------------------------
+// ColorField — swatch + hex input, with an optional clear button (React
+// equivalent of a "clearable" color picker). Clearing sets '' so the widget
+// falls back to its default for that color.
+// -------------------------------------------------------------------------
+function ColorField({
+  control,
+  name,
+  label,
+  placeholder = '#000000',
+  swatchDefault = '#000000',
+  description,
+  clearable = true,
+}: {
+  control: Control<FormValues>
+  name: FieldPath<FormValues>
+  label?: string
+  placeholder?: string
+  /** Color shown in the swatch when the value is empty. */
+  swatchDefault?: string
+  description?: string
+  clearable?: boolean
+}) {
+  return (
+    <Controller
+      name={name}
+      control={control}
+      render={({ field }) => {
+        const value = typeof field.value === 'string' ? field.value : ''
+        return (
+          <div className="space-y-1.5">
+            {label && <Label htmlFor={name}>{label}</Label>}
+            <div className="flex items-center gap-2">
+              <input
+                id={name}
+                type="color"
+                value={value || swatchDefault}
+                onChange={(e) => field.onChange(e.target.value)}
+                className="h-8 w-10 flex-shrink-0 cursor-pointer rounded border border-input bg-transparent p-0.5"
+                aria-label={label ? `Pick ${label.toLowerCase()}` : 'Pick color'}
+              />
+              <Input
+                value={value}
+                onChange={(e) => field.onChange(e.target.value)}
+                onBlur={field.onBlur}
+                placeholder={placeholder}
+                className="flex-1 font-mono text-sm"
+              />
+              {clearable && value ? (
+                <button
+                  type="button"
+                  onClick={() => field.onChange('')}
+                  className="flex size-8 flex-shrink-0 items-center justify-center rounded border border-input text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                  aria-label="Clear color"
+                  title="Clear"
+                >
+                  <XIcon className="size-4" />
+                </button>
+              ) : null}
+            </div>
+            {description && <p className="text-xs text-muted-foreground">{description}</p>}
+          </div>
+        )
+      }}
+    />
   )
 }

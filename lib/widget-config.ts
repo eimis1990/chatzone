@@ -64,6 +64,7 @@ export interface PublicBotConfig {
     backgroundImageOpacity?: number
     glassBubbles?: boolean
     sendIconUrl?: string
+    botBubbleColor?: string
     bubbleBorderColor?: string
     bubbleBorderWidth?: number
   }
@@ -138,6 +139,7 @@ export function publicBotConfig(
       ...(config.theme.launcherLabel ? { launcherLabel: config.theme.launcherLabel } : {}),
       ...(config.theme.launcherColor ? { launcherColor: config.theme.launcherColor } : {}),
       ...(config.theme.callButtonColor ? { callButtonColor: config.theme.callButtonColor } : {}),
+      ...(config.theme.botBubbleColor ? { botBubbleColor: config.theme.botBubbleColor } : {}),
       ...(config.theme.backgroundImageUrl ? { backgroundImageUrl: config.theme.backgroundImageUrl } : {}),
       ...(config.theme.sendIconUrl ? { sendIconUrl: config.theme.sendIconUrl } : {}),
     },

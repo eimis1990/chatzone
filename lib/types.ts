@@ -163,6 +163,8 @@ export interface BotConfig {
     /** Optional custom send-button icon (uploaded image URL). */
     sendIconUrl?: string
     /** Border on message bubbles + suggested-action tiles. */
+    /** Bot (assistant) bubble background; text auto-contrasts. Empty = default grey. */
+    botBubbleColor?: string
     bubbleBorderColor?: string
     bubbleBorderWidth?: number
   }
