@@ -1193,6 +1193,69 @@ export function ConfigForm({
                 )}
               />
             </div>
+
+            {/* Bubble border — applies to message bubbles + suggested actions */}
+            <div className="space-y-3 border-t pt-4">
+              <Controller
+                control={control}
+                name="theme.bubbleBorderWidth"
+                render={({ field }) => (
+                  <Scrubber
+                    label="Bubble border width"
+                    min={0}
+                    max={6}
+                    step={1}
+                    decimals={0}
+                    suffix="px"
+                    value={field.value ?? 0}
+                    onValueChange={(v) => field.onChange(v)}
+                  />
+                )}
+              />
+              <p className="text-xs text-muted-foreground">
+                A border around message bubbles and suggested-action tiles. Set to 0 for none.
+              </p>
+              <div className="space-y-1.5">
+                <Label htmlFor="bubbleBorderColor">Border color</Label>
+                <Controller
+                  name="theme.bubbleBorderColor"
+                  control={control}
+                  render={({ field }) => (
+                    <div className="flex items-center gap-2">
+                      <input
+                        id="bubbleBorderColor"
+                        type="color"
+                        value={field.value || '#e5e7eb'}
+                        onChange={(e) => field.onChange(e.target.value)}
+                        className="h-8 w-10 cursor-pointer rounded border border-input bg-transparent p-0.5 flex-shrink-0"
+                        aria-label="Pick bubble border color"
+                      />
+                      <Input
+                        value={field.value ?? ''}
+                        onChange={(e) => field.onChange(e.target.value)}
+                        onBlur={field.onBlur}
+                        placeholder="#e5e7eb"
+                        className="flex-1 font-mono text-sm"
+                        aria-label="Bubble border color hex value"
+                      />
+                    </div>
+                  )}
+                />
+              </div>
+            </div>
+
+            {/* Custom send-button icon */}
+            <div className="border-t pt-4">
+              <LogoUpload
+                botId={botId}
+                control={control}
+                setValue={setValue}
+                name="theme.sendIconUrl"
+                label="Send button icon (optional)"
+                description="Replaces the default arrow in the composer. A small square icon works best."
+                filePrefix="sendicon"
+              />
+            </div>
           </CardContent>
         </Card>
 

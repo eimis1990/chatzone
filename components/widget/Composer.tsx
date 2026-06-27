@@ -13,6 +13,8 @@ interface ComposerProps {
   radius?: number
   /** Chat background color — the composer bar matches it (no background image). */
   backgroundColor?: string
+  /** Optional custom send-button icon (replaces the default arrow). */
+  sendIconUrl?: string
 }
 
 export function Composer({
@@ -22,6 +24,7 @@ export function Composer({
   language,
   radius = 12,
   backgroundColor = '#ffffff',
+  sendIconUrl,
 }: ComposerProps) {
   // Match the chat background color so a dark theme doesn't leave a white bar.
   const lightBar = isLightColor(backgroundColor)
@@ -90,9 +93,14 @@ export function Composer({
           }`}
           style={{ backgroundColor: primaryColor, color: readableTextColor(primaryColor) }}
         >
-          <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4" aria-hidden="true">
-            <path d="M3.105 2.288a.75.75 0 00-.826.95l1.903 6.114H14.25a.75.75 0 010 1.5H4.182l-1.903 6.114a.75.75 0 00.826.95 28.897 28.897 0 0015.293-7.154.75.75 0 000-1.115A28.897 28.897 0 003.105 2.288z" />
-          </svg>
+          {sendIconUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={sendIconUrl} alt="" className="h-4 w-4 object-contain" aria-hidden="true" />
+          ) : (
+            <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4" aria-hidden="true">
+              <path d="M3.105 2.288a.75.75 0 00-.826.95l1.903 6.114H14.25a.75.75 0 010 1.5H4.182l-1.903 6.114a.75.75 0 00.826.95 28.897 28.897 0 0015.293-7.154.75.75 0 000-1.115A28.897 28.897 0 003.105 2.288z" />
+            </svg>
+          )}
         </button>
       </form>
       {/* "Powered by Loqara" is rendered by the widget loader chrome (widget.js),

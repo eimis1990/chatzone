@@ -230,6 +230,9 @@ export function ChatWindow({ config, transport, initialLanguage }: ChatWindowPro
   const primaryColor = config.theme.primaryColor
   const cornerRadius = config.theme.cornerRadius ?? 16
   const bubbleRadius = config.theme.bubbleRadius ?? 16
+  const glassBubbles = config.theme.glassBubbles ?? false
+  const bubbleBorderColor = config.theme.bubbleBorderColor ?? '#e5e7eb'
+  const bubbleBorderWidth = config.theme.bubbleBorderWidth ?? 0
 
   // Restore/generate visitorId from localStorage on mount
   useEffect(() => {
@@ -704,7 +707,9 @@ export function ChatWindow({ config, transport, initialLanguage }: ChatWindowPro
             primaryColor={primaryColor}
             backgroundColor={bgColor}
             bubbleRadius={bubbleRadius}
-            glassBubbles={config.theme.glassBubbles ?? false}
+            glassBubbles={glassBubbles}
+            bubbleBorderColor={bubbleBorderColor}
+            bubbleBorderWidth={bubbleBorderWidth}
             onSelect={handleQuickAction}
           />
         ) : (
@@ -715,7 +720,9 @@ export function ChatWindow({ config, transport, initialLanguage }: ChatWindowPro
             displayName={config.displayName}
             avatarUrl={messageAvatar}
             activeLang={activeLang}
-            glassBubbles={config.theme.glassBubbles ?? false}
+            glassBubbles={glassBubbles}
+            bubbleBorderColor={bubbleBorderColor}
+            bubbleBorderWidth={bubbleBorderWidth}
             onSeeAllProducts={setListProducts}
             onFeedback={handleFeedback}
           />
@@ -781,6 +788,7 @@ export function ChatWindow({ config, transport, initialLanguage }: ChatWindowPro
           language={activeLang}
           radius={navButtonRadius}
           backgroundColor={bgColor}
+          sendIconUrl={config.theme.sendIconUrl}
         />
 
         {/* Full-height product list overlay (covers messages + composer) */}

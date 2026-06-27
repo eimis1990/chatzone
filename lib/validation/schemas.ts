@@ -93,6 +93,11 @@ export const botConfigFormSchema = z.object({
       backgroundImageOpacity: z.number().min(0).max(100).default(100),
       // Frosted-glass message bubbles (translucent + backdrop blur).
       glassBubbles: z.boolean().default(false),
+      // Optional custom send-button icon (uploaded image URL).
+      sendIconUrl: z.string().url().optional().or(z.literal('')),
+      // Border for message bubbles + suggested-action tiles (width 0 = none).
+      bubbleBorderColor: z.string().default('#e5e7eb'),
+      bubbleBorderWidth: z.number().min(0).max(6).default(0),
     })
     .default({
       primaryColor: '#4f46e5',
@@ -107,6 +112,8 @@ export const botConfigFormSchema = z.object({
       backgroundColor: '#ffffff',
       backgroundImageOpacity: 100,
       glassBubbles: false,
+      bubbleBorderColor: '#e5e7eb',
+      bubbleBorderWidth: 0,
     }),
   languages: z.array(z.enum(['en', 'lt'])).min(1).default(['en']),
   defaultLanguage: z.enum(['en', 'lt']).optional(),

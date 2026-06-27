@@ -62,6 +62,9 @@ export interface PublicBotConfig {
     backgroundImageUrl?: string
     backgroundImageOpacity?: number
     glassBubbles?: boolean
+    sendIconUrl?: string
+    bubbleBorderColor?: string
+    bubbleBorderWidth?: number
   }
   languages: BotLanguage[]
   defaultLanguage?: BotLanguage
@@ -128,10 +131,13 @@ export function publicBotConfig(
       backgroundColor: config.theme.backgroundColor ?? '#ffffff',
       backgroundImageOpacity: config.theme.backgroundImageOpacity ?? 100,
       glassBubbles: config.theme.glassBubbles ?? false,
+      bubbleBorderColor: config.theme.bubbleBorderColor ?? '#e5e7eb',
+      bubbleBorderWidth: config.theme.bubbleBorderWidth ?? 0,
       ...(config.theme.bubbleIcon !== undefined && { bubbleIcon: config.theme.bubbleIcon }),
       ...(config.theme.launcherLabel ? { launcherLabel: config.theme.launcherLabel } : {}),
       ...(config.theme.launcherColor ? { launcherColor: config.theme.launcherColor } : {}),
       ...(config.theme.backgroundImageUrl ? { backgroundImageUrl: config.theme.backgroundImageUrl } : {}),
+      ...(config.theme.sendIconUrl ? { sendIconUrl: config.theme.sendIconUrl } : {}),
     },
     languages,
     defaultLanguage:

@@ -18,6 +18,9 @@ interface WelcomeScreenProps {
   bubbleRadius?: number
   /** Frosted-glass greeting bubble (translucent + backdrop blur). */
   glassBubbles?: boolean
+  /** Optional border on the greeting bubble + action tiles (width 0 = none). */
+  bubbleBorderColor?: string
+  bubbleBorderWidth?: number
   /** Receives the clicked action and its index (so the host can fetch / send). */
   onSelect: (action: SuggestedQuestion, index: number) => void
 }
@@ -40,9 +43,13 @@ export function WelcomeScreen({
   backgroundColor = '#ffffff',
   bubbleRadius = 16,
   glassBubbles = false,
+  bubbleBorderColor = '#e5e7eb',
+  bubbleBorderWidth = 0,
   onSelect,
 }: WelcomeScreenProps) {
   const radius = `${Math.min(bubbleRadius, 16)}px`
+  const bubbleBorder =
+    bubbleBorderWidth > 0 ? { border: `${bubbleBorderWidth}px solid ${bubbleBorderColor}` } : {}
   // Tint the arrow with the header color, but keep it visible on white when
   // that color is very light.
   const accentColor = isLightColor(primaryColor) ? '#9ca3af' : primaryColor
@@ -119,7 +126,7 @@ export function WelcomeScreen({
           className={`mt-5 px-4 py-3 text-sm leading-relaxed text-gray-800 whitespace-pre-wrap ${
             glassBubbles ? 'bg-white/40 backdrop-blur-md ring-1 ring-white/50' : 'bg-gray-100'
           }`}
-          style={{ borderRadius: radius }}
+          style={{ borderRadius: radius, ...bubbleBorder }}
           variants={item}
         >
           {greeting}
@@ -140,7 +147,7 @@ export function WelcomeScreen({
                 onClick={() => onSelect(q, i)}
                 variants={item}
                 className={`group relative flex min-h-[64px] flex-col justify-end overflow-hidden border border-gray-200 bg-white p-3 text-left text-sm font-medium leading-snug text-gray-800${fullWidth ? ' col-span-2' : ''}`}
-                style={{ borderRadius: radius }}
+                style={{ borderRadius: radius, ...bubbleBorder }}
               >
                 {/* Soft glow in the top-right corner, tinted to the header color.
                     Intensifies on hover instead of a background change. */}

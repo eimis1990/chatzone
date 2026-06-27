@@ -34,6 +34,9 @@ interface MessageListProps {
   activeLang?: 'en' | 'lt'
   /** Frosted-glass bubbles (translucent + backdrop blur). */
   glassBubbles?: boolean
+  /** Optional bubble border (width 0 = none). */
+  bubbleBorderColor?: string
+  bubbleBorderWidth?: number
   onSeeAllProducts?: (products: CommerceProduct[]) => void
   onFeedback?: (messageId: string, value: 'up' | 'down') => void
 }
@@ -48,9 +51,13 @@ export function MessageList({
   avatarUrl,
   activeLang = 'en',
   glassBubbles = false,
+  bubbleBorderColor = '#e5e7eb',
+  bubbleBorderWidth = 0,
   onSeeAllProducts,
   onFeedback,
 }: MessageListProps) {
+  const bubbleBorder =
+    bubbleBorderWidth > 0 ? { border: `${bubbleBorderWidth}px solid ${bubbleBorderColor}` } : {}
   const scrollRef = useRef<HTMLDivElement>(null)
   const msgBubbleRadius = `${bubbleRadius}px`
   // Local feedback state (messageId → value) for the button highlight.
@@ -123,6 +130,7 @@ export function MessageList({
                     borderRadius: msg.role === 'user'
                       ? `${msgBubbleRadius} ${msgBubbleRadius} 2px ${msgBubbleRadius}`
                       : `${msgBubbleRadius} ${msgBubbleRadius} ${msgBubbleRadius} 2px`,
+                    ...bubbleBorder,
                     ...(msg.role === 'user'
                       ? {
                           backgroundColor: glassBubbles

@@ -17,7 +17,7 @@ interface LogoUploadProps {
   control: Control<FormValues>
   setValue: UseFormSetValue<FormValues>
   /** Which config field this uploader writes to. Defaults to the company logo. */
-  name?: 'avatarUrl' | 'botAvatarUrl' | 'theme.backgroundImageUrl'
+  name?: 'avatarUrl' | 'botAvatarUrl' | 'theme.backgroundImageUrl' | 'theme.sendIconUrl'
   label?: string
   description?: string
   /** Storage filename prefix (keeps the two images distinct in the bucket). */

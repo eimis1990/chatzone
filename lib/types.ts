@@ -158,6 +158,11 @@ export interface BotConfig {
     backgroundImageOpacity?: number
     /** Frosted-glass message bubbles (translucent + backdrop blur). */
     glassBubbles?: boolean
+    /** Optional custom send-button icon (uploaded image URL). */
+    sendIconUrl?: string
+    /** Border on message bubbles + suggested-action tiles. */
+    bubbleBorderColor?: string
+    bubbleBorderWidth?: number
   }
   voice: VoiceConfig
   /** Enabled languages. Always includes 'en'; the first entry is the default. */
