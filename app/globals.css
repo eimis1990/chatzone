@@ -272,3 +272,74 @@ html.lenis body {
 .lenis.lenis-stopped {
   overflow: hidden;
 }
+
+/* Blog article prose (rendered from Markdown via marked). */
+.article {
+  color: #374151;
+  font-size: 1rem;
+  line-height: 1.75;
+}
+.article h2 {
+  margin-top: 2.5rem;
+  margin-bottom: 0.75rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #111827;
+}
+.article h3 {
+  margin-top: 2rem;
+  margin-bottom: 0.5rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111827;
+}
+.article p {
+  margin: 1rem 0;
+}
+.article ul,
+.article ol {
+  margin: 1rem 0;
+  padding-left: 1.5rem;
+}
+.article ul {
+  list-style: disc;
+}
+.article ol {
+  list-style: decimal;
+}
+.article li {
+  margin: 0.35rem 0;
+}
+.article a {
+  color: var(--primary);
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.article a:hover {
+  opacity: 0.8;
+}
+.article strong {
+  font-weight: 600;
+  color: #111827;
+}
+.article blockquote {
+  margin: 1.25rem 0;
+  border-left: 3px solid color-mix(in srgb, var(--primary) 45%, transparent);
+  padding-left: 1rem;
+  font-style: italic;
+  color: #4b5563;
+}
+.article code {
+  background: #f3f4f6;
+  border-radius: 4px;
+  padding: 0.1rem 0.3rem;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.875em;
+}
+.article hr {
+  margin: 2rem 0;
+  border: 0;
+  border-top: 1px solid #e5e7eb;
+}

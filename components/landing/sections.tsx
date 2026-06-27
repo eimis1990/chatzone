@@ -282,6 +282,12 @@ export function Footer() {
           <span aria-hidden="true" className="text-base font-bold text-white/30">
             •
           </span>
+          <Link href="/blog" className="transition-colors hover:text-white">
+            Blog
+          </Link>
+          <span aria-hidden="true" className="text-base font-bold text-white/30">
+            •
+          </span>
           <Link href="/privacy" className="transition-colors hover:text-white">
             Privacy
           </Link>

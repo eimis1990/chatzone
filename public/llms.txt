@@ -27,6 +27,7 @@
 - Overview: https://www.loqara.com/
 - Pricing: https://www.loqara.com/#pricing
 - FAQ: https://www.loqara.com/#faq
+- Blog (guides): https://www.loqara.com/blog
 - Privacy & data handling: https://www.loqara.com/privacy
 - Terms of service: https://www.loqara.com/terms
 
