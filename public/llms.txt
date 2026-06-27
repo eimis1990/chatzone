@@ -1,0 +1,34 @@
+# Loqara
+
+> Loqara is an AI chat & voice agent for modern e-commerce stores. It answers customer questions from your own knowledge base, searches your product catalog, looks up orders, captures leads, and hands conversations off to a human — all embedded with one line of code. Supports English and Lithuanian.
+
+## What it does
+- AI chat agent grounded in your own content (no made-up answers)
+- Real-time voice agent (optional add-on)
+- Product search and order-status lookup against your store
+- Lead capture during conversations
+- Live human handoff from a shared inbox, on every plan
+- Conversation analytics and CSAT
+- One-line `<script>` embed — live in minutes, no engineers
+
+## Pricing (EUR per month, billed monthly or annually)
+- Free — €0 — 100 conversations/mo, 1 bot, English, live handoff, basic analytics
+- Starter — €149 — 1,500 conversations/mo, 2 bots, all languages, lead capture, product search & order lookup, remove Loqara badge
+- Growth — €249 — 4,000 conversations/mo, up to 5 bots, priority support, advanced analytics
+- Scale — €449 — 12,000 conversations/mo, unlimited bots, teams & roles, custom data retention, priority SLA
+- Voice agent add-on — €49/mo including ~200 minutes, then €0.20/min
+- No setup fee. Upgrade, downgrade, or cancel anytime.
+
+## Channels
+- Website chat widget today
+- WhatsApp, Instagram, and Messenger — coming soon
+
+## Key pages
+- Overview: https://www.loqara.com/
+- Pricing: https://www.loqara.com/#pricing
+- FAQ: https://www.loqara.com/#faq
+- Privacy & data handling: https://www.loqara.com/privacy
+- Terms of service: https://www.loqara.com/terms
+
+## Contact
+- Email: e.kudarauskas@gmail.com

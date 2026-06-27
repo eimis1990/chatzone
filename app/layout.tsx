@@ -50,9 +50,19 @@ export const metadata: Metadata = {
   },
   description: DESCRIPTION,
   applicationName: SITE_NAME,
-  alternates: {
-    canonical: "/",
-  },
+  keywords: [
+    "AI chat agent",
+    "AI voice agent",
+    "ecommerce customer support",
+    "AI chatbot for online stores",
+    "live chat widget",
+    "AI customer service",
+    "product search chatbot",
+    "order lookup chatbot",
+    "Loqara",
+  ],
+  // No site-wide canonical here — each page sets its own so sub-pages
+  // (privacy, terms) don't all canonicalize to the homepage.
   verification: {
     google: "Ju35YHEkl87l80jTznv0fN40cVZIAVGGYWHJ4MRF-QI",
   },
@@ -64,7 +74,14 @@ export const metadata: Metadata = {
     url: "/",
     siteName: SITE_NAME,
     locale: "en_US",
-    images: ["/landing/og.png"],
+    images: [
+      {
+        url: "/landing/og.png",
+        width: 1200,
+        height: 630,
+        alt: "Loqara — AI chat & voice agent for modern stores",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",

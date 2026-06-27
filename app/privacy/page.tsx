@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 export const metadata: Metadata = {
   title: 'Privacy & Data Handling — Loqara',
   description: 'How Loqara collects, processes, retains, and protects data.',
+  alternates: { canonical: '/privacy' },
 }
 
 const SUBPROCESSORS = [
