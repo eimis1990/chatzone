@@ -2,6 +2,7 @@ import { LandingNav } from '@/components/landing/LandingNav'
 import { Hero } from '@/components/landing/Hero'
 import { Features, Stats, HowItWorks, CTASection, Footer } from '@/components/landing/sections'
 import { Pricing } from '@/components/landing/Pricing'
+import { Showcase } from '@/components/landing/Showcase'
 import { Faq } from '@/components/landing/Faq'
 import { SmoothScroll } from '@/components/landing/SmoothScroll'
 import { SITE_URL, SITE_NAME } from '@/lib/site'
@@ -52,6 +53,7 @@ export default function Home() {
       <LandingNav />
       <main>
         <Hero />
+        <Showcase />
         <Features />
         <Stats />
         <HowItWorks />
