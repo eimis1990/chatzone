@@ -51,7 +51,7 @@ export function MessageList({
   onSeeAllProducts,
   onFeedback,
 }: MessageListProps) {
-  const bottomRef = useRef<HTMLDivElement>(null)
+  const scrollRef = useRef<HTMLDivElement>(null)
   const msgBubbleRadius = `${bubbleRadius}px`
   // Local feedback state (messageId → value) for the button highlight.
   const [feedback, setFeedback] = useState<Record<string, 'up' | 'down'>>({})
@@ -61,8 +61,12 @@ export function MessageList({
     onFeedback?.(messageId, value)
   }
 
+  // Scroll the message container itself (not scrollIntoView, which also scrolls
+  // ancestors — that drags the whole page up in the configurator preview, where
+  // the widget isn't isolated in an iframe).
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+    const el = scrollRef.current
+    if (el) el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' })
   }, [messages])
 
   const renderAvatar = (alt: string) =>
@@ -94,7 +98,7 @@ export function MessageList({
   )
 
   return (
-    <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3" role="log" aria-live="polite" aria-label="Chat messages">
+    <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-3 space-y-3" role="log" aria-live="polite" aria-label="Chat messages">
       {messages.map((msg) => (
         <div key={msg.id}>
           <div
@@ -223,7 +227,6 @@ export function MessageList({
           )}
         </div>
       ))}
-      <div ref={bottomRef} />
     </div>
   )
 }
