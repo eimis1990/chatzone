@@ -57,6 +57,7 @@ export interface PublicBotConfig {
     launcherShowLogo?: boolean
     launcherColor?: string
     showCallButton?: boolean
+    callButtonColor?: string
     navButtonRadius?: number
     backgroundColor?: string
     backgroundImageUrl?: string
@@ -136,6 +137,7 @@ export function publicBotConfig(
       ...(config.theme.bubbleIcon !== undefined && { bubbleIcon: config.theme.bubbleIcon }),
       ...(config.theme.launcherLabel ? { launcherLabel: config.theme.launcherLabel } : {}),
       ...(config.theme.launcherColor ? { launcherColor: config.theme.launcherColor } : {}),
+      ...(config.theme.callButtonColor ? { callButtonColor: config.theme.callButtonColor } : {}),
       ...(config.theme.backgroundImageUrl ? { backgroundImageUrl: config.theme.backgroundImageUrl } : {}),
       ...(config.theme.sendIconUrl ? { sendIconUrl: config.theme.sendIconUrl } : {}),
     },

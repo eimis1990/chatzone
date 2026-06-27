@@ -85,6 +85,8 @@ export const botConfigFormSchema = z.object({
       launcherShowLogo: z.boolean().default(false),
       launcherColor: z.string().optional().or(z.literal('')),
       showCallButton: z.boolean().default(true),
+      // Background color for the voice call button (text auto-contrasts).
+      callButtonColor: z.string().optional().or(z.literal('')),
       navButtonRadius: z.number().min(0).max(24).default(12),
       // Chat-body background. Color is the base layer; an optional image is
       // overlaid at backgroundImageOpacity (0–100). Header/composer are unaffected.

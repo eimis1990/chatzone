@@ -322,6 +322,7 @@ function buildPreviewPublicConfig(config: LiveConfig): PublicBotConfig {
       showCallButton: config.theme?.showCallButton ?? true,
       navButtonRadius: config.theme?.navButtonRadius ?? 12,
       backgroundColor: config.theme?.backgroundColor ?? '#ffffff',
+      ...(config.theme?.callButtonColor ? { callButtonColor: config.theme.callButtonColor } : {}),
       backgroundImageOpacity: config.theme?.backgroundImageOpacity ?? 100,
       glassBubbles: config.theme?.glassBubbles ?? false,
       bubbleBorderColor: config.theme?.bubbleBorderColor ?? '#e5e7eb',

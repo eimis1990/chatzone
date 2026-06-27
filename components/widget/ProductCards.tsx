@@ -84,7 +84,7 @@ export function ProductCards({
         <button
           type="button"
           onClick={() => onSeeAll?.(products)}
-          className="flex w-full items-center justify-center gap-1.5 border text-sm font-medium py-2 text-foreground transition-colors hover:bg-muted outline-none focus-visible:ring-2"
+          className="flex w-full items-center justify-center gap-1.5 border border-black/5 bg-gray-100 text-gray-900 text-sm font-medium py-2 transition-colors hover:bg-gray-200 outline-none focus-visible:ring-2"
           style={{ borderRadius: `${Math.min(bubbleRadius, 12)}px` }}
         >
           <GridIcon />

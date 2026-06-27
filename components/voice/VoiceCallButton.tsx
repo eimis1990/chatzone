@@ -17,6 +17,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { ConversationProvider, useConversation } from '@elevenlabs/react'
 import { PhoneIcon, PhoneOffIcon, LoaderCircleIcon } from 'lucide-react'
+import { readableTextColor } from '@/lib/utils'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -27,6 +28,8 @@ interface VoiceCallButtonProps {
   /** Mints a conversation token + the voice id to use for the active language. */
   getToken: () => Promise<{ token: string; voiceId?: string }>
   primaryColor?: string
+  /** Background color for the idle "start call" button; text auto-contrasts. */
+  callColor?: string
   appearance?: 'full' | 'compact'
   /** Conversation language — starts the agent in this language (en/lt). */
   language?: 'en' | 'lt'
@@ -53,6 +56,7 @@ interface VoiceCallButtonProps {
 interface InnerProps {
   getToken: () => Promise<{ token: string; voiceId?: string }>
   primaryColor: string
+  callColor: string
   appearance: 'full' | 'compact'
   language?: 'en' | 'lt'
   onStateChange?: (state: CallState) => void
@@ -67,6 +71,7 @@ interface InnerProps {
 function VoiceCallInner({
   getToken,
   primaryColor,
+  callColor,
   appearance,
   language,
   onStateChange,
@@ -219,8 +224,10 @@ function VoiceCallInner({
   if (appearance === 'compact') {
     const lt = language === 'lt'
     const pill =
-      'inline-flex items-center gap-1.5 h-8 rounded-lg px-2.5 flex-shrink-0 text-xs font-medium text-white transition-opacity hover:opacity-85'
+      'inline-flex items-center gap-1.5 h-8 rounded-lg px-2.5 flex-shrink-0 text-xs font-medium transition-opacity hover:opacity-85'
     const radiusStyle = radius != null ? { borderRadius: `${radius}px` } : {}
+    // Idle/connecting use the configured call color; text auto-contrasts.
+    const callStyle = { backgroundColor: callColor, color: readableTextColor(callColor), ...radiusStyle }
 
     if (isConnecting) {
       return (
@@ -229,7 +236,7 @@ function VoiceCallInner({
           disabled
           aria-label={lt ? 'Jungiamasi…' : 'Connecting…'}
           className={pill}
-          style={{ backgroundColor: '#22c55e', ...radiusStyle }}
+          style={callStyle}
         >
           <LoaderCircleIcon className="size-4 animate-spin" aria-hidden="true" />
           {lt ? 'Jungiamasi…' : 'Connecting…'}
@@ -238,14 +245,14 @@ function VoiceCallInner({
     }
 
     if (isConnected) {
-      // Red = in a call; tap to end.
+      // Red = in a call; tap to end (universal signal, white text).
       return (
         <button
           type="button"
           onClick={handleEnd}
           aria-label={lt ? 'Baigti pokalbį' : 'End call'}
           className={pill}
-          style={{ backgroundColor: '#ef4444', ...radiusStyle }}
+          style={{ backgroundColor: '#ef4444', color: '#ffffff', ...radiusStyle }}
         >
           <FilledPhoneIcon />
           {lt ? 'Baigti' : 'End call'}
@@ -260,7 +267,7 @@ function VoiceCallInner({
         aria-label={lt ? 'Kalbėti su agentu' : 'Talk with agent'}
         title={micDenied ? 'Microphone access denied' : callError ?? undefined}
         className={pill}
-        style={{ backgroundColor: '#22c55e', ...radiusStyle }}
+        style={callStyle}
       >
         <FilledPhoneIcon />
         {lt ? 'Kalbėti su Agentu' : 'Talk with Agent'}
@@ -363,6 +370,7 @@ function FilledPhoneIcon() {
 export function VoiceCallButton({
   getToken,
   primaryColor = '#4f46e5',
+  callColor = '#22c55e',
   appearance = 'full',
   language,
   onStateChange,
@@ -380,6 +388,7 @@ export function VoiceCallButton({
         <VoiceCallInner
           getToken={getToken}
           primaryColor={primaryColor}
+          callColor={callColor}
           appearance={appearance}
           language={language}
           onStateChange={onStateChange}

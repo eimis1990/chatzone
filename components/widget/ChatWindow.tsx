@@ -554,6 +554,7 @@ export function ChatWindow({ config, transport, initialLanguage }: ChatWindowPro
 
   const voiceEnabled = Boolean(config.voice?.enabled)
   const showCallButton = config.theme.showCallButton !== false
+  const callButtonColor = config.theme.callButtonColor || '#22c55e'
   const navButtonRadius = config.theme.navButtonRadius ?? 12
   const headerBorderRadius = `${cornerRadius}px ${cornerRadius}px 0 0`
   // Auto-contrast: keep header text/icons legible on any chosen color.
@@ -636,6 +637,7 @@ export function ChatWindow({ config, transport, initialLanguage }: ChatWindowPro
             appearance="compact"
             getToken={getVoiceToken}
             primaryColor="#ffffff"
+            callColor={callButtonColor}
             language={activeLang}
             radius={navButtonRadius}
             onStateChange={handleCallState}

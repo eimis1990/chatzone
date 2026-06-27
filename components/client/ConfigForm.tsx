@@ -1174,6 +1174,38 @@ export function ConfigForm({
               />
             </div>
 
+            {watch('theme.showCallButton') !== false && (
+              <div className="space-y-1.5">
+                <Label htmlFor="callButtonColor">Call button color</Label>
+                <Controller
+                  name="theme.callButtonColor"
+                  control={control}
+                  render={({ field }) => (
+                    <div className="flex items-center gap-2">
+                      <input
+                        id="callButtonColor"
+                        type="color"
+                        value={field.value || '#22c55e'}
+                        onChange={(e) => field.onChange(e.target.value)}
+                        className="h-8 w-10 flex-shrink-0 cursor-pointer rounded border border-input bg-transparent p-0.5"
+                        aria-label="Pick call button color"
+                      />
+                      <Input
+                        value={field.value ?? ''}
+                        onChange={(e) => field.onChange(e.target.value)}
+                        onBlur={field.onBlur}
+                        placeholder="#22c55e"
+                        className="font-mono text-sm"
+                      />
+                    </div>
+                  )}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Background of the voice call button. The label adapts to light/dark for contrast.
+                </p>
+              </div>
+            )}
+
             <div className="flex items-center justify-between gap-4">
               <div className="space-y-0.5">
                 <Label htmlFor="glassBubbles">Glass message bubbles</Label>
