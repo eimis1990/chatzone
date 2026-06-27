@@ -321,6 +321,7 @@ function buildPreviewPublicConfig(config: LiveConfig): PublicBotConfig {
       navButtonRadius: config.theme?.navButtonRadius ?? 12,
       backgroundColor: config.theme?.backgroundColor ?? '#ffffff',
       backgroundImageOpacity: config.theme?.backgroundImageOpacity ?? 100,
+      glassBubbles: config.theme?.glassBubbles ?? false,
       ...(config.theme?.bubbleIcon !== undefined && { bubbleIcon: config.theme.bubbleIcon }),
       ...(config.theme?.backgroundImageUrl ? { backgroundImageUrl: config.theme.backgroundImageUrl } : {}),
     },
