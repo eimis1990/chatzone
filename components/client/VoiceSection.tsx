@@ -18,7 +18,8 @@ import { PlayIcon, SquareIcon, LoaderCircleIcon, AlertCircleIcon, MicIcon } from
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { CardContent, CardTitle, CardDescription } from '@/components/ui/card'
+import { CollapsibleSection } from '@/components/client/CollapsibleSection'
 import {
   Select,
   SelectContent,
@@ -160,8 +161,8 @@ export function VoiceSection({
   }, [loadState.status, allVoices, enabledLanguages, watch, setValue])
 
   return (
-    <Card className="overflow-visible rounded-none border-b pt-0 shadow-none ring-0">
-      <CardHeader className="header-grid relative sticky top-16 z-[5] overflow-hidden rounded-none border-b bg-muted/70 py-3 backdrop-blur">
+    <CollapsibleSection
+      header={
         <div className="relative z-10 flex items-center gap-2.5">
           <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground">
             <MicIcon className="size-4" aria-hidden="true" />
@@ -171,7 +172,8 @@ export function VoiceSection({
             <CardDescription className="text-xs leading-tight">TTS, STT, and per-language voice settings.</CardDescription>
           </div>
         </div>
-      </CardHeader>
+      }
+    >
       <CardContent className="space-y-4">
         {/* Master toggle */}
         <div className="flex items-center gap-3">
@@ -275,7 +277,7 @@ export function VoiceSection({
           </div>
         )}
       </CardContent>
-    </Card>
+    </CollapsibleSection>
   )
 }
 
