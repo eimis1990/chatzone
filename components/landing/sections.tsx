@@ -246,8 +246,7 @@ export function CTASection() {
             Put an AI agent on your store today
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-lg text-white/75">
-            Free while we&apos;re in early access. Set it up in an afternoon and let your customers feel the
-            difference tonight.
+            Free to get started. Set it up in an afternoon and let your customers feel the difference tonight.
           </p>
           <div className="mx-auto mt-8 flex justify-center">
             <EmailCapture source="cta" />
@@ -273,7 +272,7 @@ export function Footer() {
         >
           Loqara<span style={{ color: ACCENT }}>.</span>
         </div>
-        <p className="mx-auto mt-6 max-w-2xl text-base text-white/55">
+        <p className="mx-auto mt-6 max-w-md text-balance text-base text-white/55">
           The AI chat &amp; voice agent for modern stores. Answers, leads, orders, and handoff — in one widget.
         </p>
 
