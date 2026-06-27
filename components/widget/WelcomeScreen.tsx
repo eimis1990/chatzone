@@ -146,7 +146,9 @@ export function WelcomeScreen({
                 type="button"
                 onClick={() => onSelect(q, i)}
                 variants={item}
-                className={`group relative flex min-h-[64px] flex-col justify-end overflow-hidden border border-gray-200 bg-white p-3 text-left text-sm font-medium leading-snug text-gray-800${fullWidth ? ' col-span-2' : ''}`}
+                className={`group relative flex min-h-[64px] flex-col justify-end overflow-hidden p-3 text-left text-sm font-medium leading-snug text-gray-800 ${
+                  glassBubbles ? 'bg-white/40 backdrop-blur-md ring-1 ring-white/40' : 'border border-gray-200 bg-white'
+                }${fullWidth ? ' col-span-2' : ''}`}
                 style={{ borderRadius: radius, ...bubbleBorder }}
               >
                 {/* Soft glow in the top-right corner, tinted to the header color.
