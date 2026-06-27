@@ -198,9 +198,9 @@ export function Stats() {
 // ───────────────────────── How it works ─────────────────────────
 export function HowItWorks() {
   const steps = [
-    { image: '/landing/how-connect.webp', title: 'Connect your knowledge', body: 'Add docs, FAQs, or your site, and link WooCommerce or Shopify for live products.' },
-    { image: '/landing/how-customize.webp', title: 'Customize the widget', body: 'Pick colors, fonts, launcher, and voice. Preview it exactly as customers will see it.' },
-    { image: '/landing/how-launch.webp', title: 'Embed and go live', body: 'Paste one script tag. Your agent is answering — and your inbox is ready for handoffs.' },
+    { image: '/landing/how-step-1.webp', title: 'Connect your knowledge', body: 'Add docs, FAQs, or your site, and link WooCommerce or Shopify for live products.' },
+    { image: '/landing/how-step-2.webp', title: 'Customize the widget', body: 'Pick colors, fonts, launcher, and voice. Preview it exactly as customers will see it.' },
+    { image: '/landing/how-step-3.webp', title: 'Embed and go live', body: 'Paste one script tag. Your agent is answering — and your inbox is ready for handoffs.' },
   ]
   return (
     <section id="how" className="bg-[#f6f8f6]">
