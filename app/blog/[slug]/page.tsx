@@ -29,7 +29,7 @@ export async function generateMetadata({
       url: `/blog/${slug}`,
       publishedTime: post.date,
       authors: [post.author],
-      images: ['/landing/og.png'],
+      // og:image comes from the colocated opengraph-image.tsx (per-post card).
     },
     twitter: { card: 'summary_large_image', title: post.title, description: post.description },
   }
@@ -51,7 +51,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     description: post.description,
     datePublished: post.date,
     dateModified: post.date,
-    author: { '@type': 'Organization', name: post.author, url: SITE_URL },
+    author: { '@type': 'Person', name: post.author },
     publisher: {
       '@type': 'Organization',
       name: SITE_NAME,

@@ -2,7 +2,7 @@
 title: How to add an AI chatbot to your online store (the one-line way)
 description: A practical guide to adding an AI chat agent to your e-commerce store — what it should do, how to set it up in minutes, and how to keep answers accurate.
 date: 2026-06-27
-author: Loqara
+author: Eimantas Kudarauskas
 ---
 
 Most online stores lose sales the same way: a shopper has a question at 11pm, there's no one to answer, and they leave. An AI chat agent fixes that — but only if it's set up well. Here's how to do it without a engineering project.
