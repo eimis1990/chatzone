@@ -58,13 +58,14 @@ type LiveConfig = {
   >
   commerce?: {
     enabled?: boolean
-    provider?: 'woocommerce' | 'shopify' | 'magento'
+    provider?: 'woocommerce' | 'shopify' | 'magento' | 'feed'
     storeUrl?: string
     restKey?: string
     restSecret?: string
     shopifyDomain?: string
     shopifyToken?: string
     magentoToken?: string
+    feedUrl?: string
     discount?: { enabled?: boolean; code?: string; description?: string }
   }
 }

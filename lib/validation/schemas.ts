@@ -142,13 +142,14 @@ export const botConfigFormSchema = z.object({
   commerce: z
     .object({
       enabled: z.boolean().default(false),
-      provider: z.enum(['woocommerce', 'shopify', 'magento']).default('woocommerce'),
+      provider: z.enum(['woocommerce', 'shopify', 'magento', 'feed']).default('woocommerce'),
       storeUrl: z.string().default(''),
       restKey: z.string().optional().or(z.literal('')),
       restSecret: z.string().optional().or(z.literal('')),
       shopifyDomain: z.string().optional().or(z.literal('')),
       shopifyToken: z.string().optional().or(z.literal('')),
       magentoToken: z.string().optional().or(z.literal('')),
+      feedUrl: z.string().optional().or(z.literal('')),
       discount: z
         .object({
           enabled: z.boolean().default(false),

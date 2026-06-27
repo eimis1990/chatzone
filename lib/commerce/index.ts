@@ -20,6 +20,7 @@ import {
   getMagentoOrderStatus,
   validateMagentoOrderAccess,
 } from '@/lib/commerce/magento'
+import { searchFeed, validateFeed } from '@/lib/commerce/feed'
 
 export interface CommerceConfig {
   enabled: boolean
@@ -34,6 +35,8 @@ export interface CommerceConfig {
   shopifyToken?: string
   /** Magento integration access token — server-only, for order lookups. */
   magentoToken?: string
+  /** Product feed URL (JSON/XML/CSV) for the 'feed' provider. */
+  feedUrl?: string
   /** A static discount the agent can offer on discount intent. */
   discount?: { enabled: boolean; code?: string; description?: string }
 }
@@ -48,6 +51,8 @@ export function storeConfigured(config: CommerceConfig): boolean {
       return Boolean(config.shopifyDomain && config.shopifyToken)
     case 'magento':
       return Boolean(config.storeUrl)
+    case 'feed':
+      return Boolean(config.feedUrl)
     default:
       return false
   }
@@ -67,6 +72,8 @@ export async function searchStore(
       return searchShopifyProducts(config.shopifyDomain!, config.shopifyToken!, params, deps)
     case 'magento':
       return searchMagentoProducts(config.storeUrl, params, deps)
+    case 'feed':
+      return searchFeed(config.feedUrl ?? '', params, deps)
     default:
       return []
   }
@@ -79,6 +86,7 @@ export async function validateStore(
     storeUrl?: string
     shopifyDomain?: string
     shopifyToken?: string
+    feedUrl?: string
   },
   deps: CommerceDeps = {},
 ): Promise<{ ok: boolean; total: number }> {
@@ -91,6 +99,8 @@ export async function validateStore(
         : { ok: false, total: 0 }
     case 'magento':
       return config.storeUrl ? validateMagentoStore(config.storeUrl, deps) : { ok: false, total: 0 }
+    case 'feed':
+      return config.feedUrl ? validateFeed(config.feedUrl, deps) : { ok: false, total: 0 }
     default:
       return { ok: false, total: 0 }
   }

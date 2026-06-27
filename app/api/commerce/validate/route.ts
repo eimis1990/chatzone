@@ -6,10 +6,11 @@ import { validateStore, validateOrderAccess } from '@/lib/commerce'
 export const maxDuration = 20
 
 const bodySchema = z.object({
-  provider: z.enum(['woocommerce', 'shopify', 'magento']).default('woocommerce'),
+  provider: z.enum(['woocommerce', 'shopify', 'magento', 'feed']).default('woocommerce'),
   storeUrl: z.string().optional(),
   shopifyDomain: z.string().optional(),
   shopifyToken: z.string().optional(),
+  feedUrl: z.string().optional(),
   // 'store' = catalog connectivity; 'orders' = REST creds (order lookup).
   mode: z.enum(['store', 'orders']).default('store'),
   restKey: z.string().optional(),
@@ -49,11 +50,13 @@ export async function POST(req: Request) {
     storeUrl: parsed.data.storeUrl,
     shopifyDomain: parsed.data.shopifyDomain,
     shopifyToken: parsed.data.shopifyToken,
+    feedUrl: parsed.data.feedUrl,
   })
   if (!ok) {
     const errors: Record<string, string> = {
       shopify: 'Could not reach Shopify with that domain and token.',
       magento: 'Could not reach the Magento GraphQL API at that URL.',
+      feed: 'Could not read a product feed at that URL (expects JSON, XML, or CSV).',
       woocommerce: 'Could not reach the WooCommerce Store API at that URL.',
     }
     return NextResponse.json({ ok: false, error: errors[parsed.data.provider] ?? errors.woocommerce })

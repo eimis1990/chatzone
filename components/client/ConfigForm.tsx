@@ -1594,6 +1594,7 @@ function CommerceSection({ control, watch }: CommerceSectionProps) {
   const restKey = watch('commerce.restKey') ?? ''
   const restSecret = watch('commerce.restSecret') ?? ''
   const magentoToken = watch('commerce.magentoToken') ?? ''
+  const feedUrl = watch('commerce.feedUrl') ?? ''
   const discountEnabled = watch('commerce.discount.enabled')
   const [testState, setTestState] = useState<CommerceTestState>({ status: 'idle' })
   const [orderTest, setOrderTest] = useState<{
@@ -1635,7 +1636,11 @@ function CommerceSection({ control, watch }: CommerceSectionProps) {
   }, [provider, storeUrl, restKey, restSecret, magentoToken])
 
   const testReady =
-    provider === 'shopify' ? Boolean(shopifyDomain.trim() && shopifyToken.trim()) : Boolean(storeUrl.trim())
+    provider === 'shopify'
+      ? Boolean(shopifyDomain.trim() && shopifyToken.trim())
+      : provider === 'feed'
+        ? Boolean(feedUrl.trim())
+        : Boolean(storeUrl.trim())
 
   const handleTest = useCallback(async () => {
     if (!testReady) {
@@ -1650,7 +1655,9 @@ function CommerceSection({ control, watch }: CommerceSectionProps) {
       const body =
         provider === 'shopify'
           ? { provider, shopifyDomain: shopifyDomain.trim(), shopifyToken: shopifyToken.trim() }
-          : { provider, storeUrl: storeUrl.trim() }
+          : provider === 'feed'
+            ? { provider, feedUrl: feedUrl.trim() }
+            : { provider, storeUrl: storeUrl.trim() }
       const res = await fetch('/api/commerce/validate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1665,10 +1672,10 @@ function CommerceSection({ control, watch }: CommerceSectionProps) {
     } catch {
       setTestState({ status: 'error', message: 'Network error — please try again.' })
     }
-  }, [provider, storeUrl, shopifyDomain, shopifyToken, testReady])
+  }, [provider, storeUrl, shopifyDomain, shopifyToken, feedUrl, testReady])
 
   // Reset test state when the connection inputs change.
-  const connKey = `${provider}:${storeUrl}:${shopifyDomain}:${shopifyToken}`
+  const connKey = `${provider}:${storeUrl}:${shopifyDomain}:${shopifyToken}:${feedUrl}`
   const prevConnRef = useRef(connKey)
   if (prevConnRef.current !== connKey) {
     prevConnRef.current = connKey
@@ -1717,6 +1724,7 @@ function CommerceSection({ control, watch }: CommerceSectionProps) {
                       <SelectItem value="woocommerce">WooCommerce</SelectItem>
                       <SelectItem value="shopify">Shopify</SelectItem>
                       <SelectItem value="magento">Magento</SelectItem>
+                      <SelectItem value="feed">Product feed (XML / CSV / JSON)</SelectItem>
                     </SelectContent>
                   </Select>
                 )}
@@ -1790,6 +1798,34 @@ function CommerceSection({ control, watch }: CommerceSectionProps) {
                     Create a Storefront API access token in Shopify admin → Settings → Apps → Develop apps.
                   </p>
                 </div>
+              </div>
+            )}
+
+            {/* Feed: product feed URL */}
+            {provider === 'feed' && (
+              <div className="space-y-1.5">
+                <Label htmlFor="commerceFeedUrl">Product feed URL</Label>
+                <Controller
+                  name="commerce.feedUrl"
+                  control={control}
+                  render={({ field }) => (
+                    <Input
+                      id="commerceFeedUrl"
+                      value={field.value ?? ''}
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                      placeholder="https://yourstore.com/feed/products.xml"
+                      autoComplete="url"
+                      inputMode="url"
+                      className="font-mono text-sm"
+                    />
+                  )}
+                />
+                <p className="text-xs text-muted-foreground">
+                  A Google Shopping / RSS XML, CSV, or JSON product feed. Use this when your store&apos;s
+                  live API isn&apos;t available (e.g. a locked-down Magento). Order lookup isn&apos;t available
+                  with a feed.
+                </p>
               </div>
             )}
 
