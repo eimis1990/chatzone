@@ -4,6 +4,7 @@ import { requireRole } from '@/lib/auth/guards'
 import { createServerClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { StatCard } from '@/components/client/charts/StatCard'
+import { LiveIndicator } from '@/components/LiveIndicator'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { formatDistanceToNow } from '@/lib/date-utils'
@@ -40,7 +41,7 @@ export default async function ClientDetailPage({
       .single<OrgStatRow>(),
     supabase
       .from('bots')
-      .select('id, name, status, config, created_at, public_key')
+      .select('id, name, status, config, created_at, public_key, last_seen_at')
       .eq('org_id', orgId)
       .order('created_at', { ascending: false }),
     supabase
@@ -52,7 +53,10 @@ export default async function ClientDetailPage({
 
   if (!orgStat) notFound()
 
-  const botRows = (bots ?? []) as Pick<Bot, 'id' | 'name' | 'status' | 'config' | 'created_at' | 'public_key'>[]
+  const botRows = (bots ?? []) as Pick<
+    Bot,
+    'id' | 'name' | 'status' | 'config' | 'created_at' | 'public_key' | 'last_seen_at'
+  >[]
   const inviteRows = (invites ?? []) as Pick<Invite, 'id' | 'email' | 'status' | 'expires_at' | 'created_at'>[]
 
   return (
@@ -110,6 +114,7 @@ export default async function ClientDetailPage({
                   </p>
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
+                  <LiveIndicator lastSeenAt={bot.last_seen_at} />
                   <Badge
                     variant={bot.status === 'active' ? 'default' : 'secondary'}
                     className="capitalize"

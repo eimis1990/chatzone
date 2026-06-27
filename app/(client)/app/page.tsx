@@ -5,6 +5,7 @@ import { createServerClient } from '@/lib/supabase/server'
 import { CreateBotDialog } from '@/components/client/CreateBotDialog'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { LiveIndicator } from '@/components/LiveIndicator'
 import { readableTextColor } from '@/lib/utils'
 import type { Bot } from '@/lib/types'
 
@@ -102,8 +103,9 @@ export default async function BotsPage() {
                       </div>
                     </div>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="space-y-3">
                     <p className="line-clamp-2 text-sm text-muted-foreground">{greeting}</p>
+                    <LiveIndicator lastSeenAt={bot.last_seen_at} />
                   </CardContent>
                 </Card>
               </Link>
