@@ -7,8 +7,8 @@ import { LoqaraIcon } from '@/components/LoqaraIcon'
 import { trackEvent } from '@/lib/analytics'
 
 const LINKS = [
-  { label: 'Features', href: '/#features' },
   { label: 'Showcase', href: '/#showcase' },
+  { label: 'Features', href: '/#features' },
   { label: 'How it works', href: '/#how' },
   { label: 'Pricing', href: '/#pricing' },
   { label: 'Blog', href: '/blog' },
