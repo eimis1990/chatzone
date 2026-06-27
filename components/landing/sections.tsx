@@ -6,9 +6,6 @@ import {
   BarChart3Icon,
   ShoppingBagIcon,
   LanguagesIcon,
-  PlugIcon,
-  SlidersHorizontalIcon,
-  RocketIcon,
 } from 'lucide-react'
 import Link from 'next/link'
 import { Reveal } from './Reveal'
@@ -201,9 +198,9 @@ export function Stats() {
 // ───────────────────────── How it works ─────────────────────────
 export function HowItWorks() {
   const steps = [
-    { icon: PlugIcon, title: 'Connect your knowledge', body: 'Add docs, FAQs, or your site, and link WooCommerce or Shopify for live products.' },
-    { icon: SlidersHorizontalIcon, title: 'Customize the widget', body: 'Pick colors, fonts, launcher, and voice. Preview it exactly as customers will see it.' },
-    { icon: RocketIcon, title: 'Embed and go live', body: 'Paste one script tag. Your agent is answering — and your inbox is ready for handoffs.' },
+    { image: '/landing/how-connect.webp', title: 'Connect your knowledge', body: 'Add docs, FAQs, or your site, and link WooCommerce or Shopify for live products.' },
+    { image: '/landing/how-customize.webp', title: 'Customize the widget', body: 'Pick colors, fonts, launcher, and voice. Preview it exactly as customers will see it.' },
+    { image: '/landing/how-launch.webp', title: 'Embed and go live', body: 'Paste one script tag. Your agent is answering — and your inbox is ready for handoffs.' },
   ]
   return (
     <section id="how" className="bg-[#f6f8f6]">
@@ -213,23 +210,28 @@ export function HowItWorks() {
           <p className="mt-4 text-lg text-gray-600">No engineers required — set it up, preview it, ship it.</p>
         </Reveal>
         <div className="mt-14 grid gap-6 md:grid-cols-3">
-          {steps.map((s, i) => {
-            const Icon = s.icon
-            return (
-              <Reveal key={s.title} delay={i * 0.1}>
-                <div className="h-full rounded-2xl border bg-white p-6 shadow-sm transition-shadow hover:shadow-md">
-                  <div className="flex size-11 items-center justify-center rounded-xl" style={{ backgroundColor: 'rgba(104,163,105,0.12)' }}>
-                    <Icon className="size-6" style={{ color: ACCENT }} />
-                  </div>
-                  <div className="mt-4 text-sm font-semibold" style={{ color: ACCENT }}>
+          {steps.map((s, i) => (
+            <Reveal key={s.title} delay={i * 0.1}>
+              <div className="group h-full overflow-hidden rounded-2xl border bg-white shadow-sm transition-shadow hover:shadow-md">
+                <div className="bg-[#faf8f5]">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={s.image}
+                    alt=""
+                    aria-hidden="true"
+                    className="aspect-[4/3] w-full object-cover"
+                  />
+                </div>
+                <div className="p-6 pt-5">
+                  <div className="text-sm font-semibold" style={{ color: ACCENT }}>
                     Step {i + 1}
                   </div>
                   <h3 className="mt-1 text-lg font-semibold text-gray-900">{s.title}</h3>
                   <p className="mt-2 text-sm leading-relaxed text-gray-600">{s.body}</p>
                 </div>
-              </Reveal>
-            )
-          })}
+              </div>
+            </Reveal>
+          ))}
         </div>
       </div>
     </section>
