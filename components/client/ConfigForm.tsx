@@ -1593,6 +1593,7 @@ function CommerceSection({ control, watch }: CommerceSectionProps) {
   const shopifyToken = watch('commerce.shopifyToken') ?? ''
   const restKey = watch('commerce.restKey') ?? ''
   const restSecret = watch('commerce.restSecret') ?? ''
+  const magentoToken = watch('commerce.magentoToken') ?? ''
   const discountEnabled = watch('commerce.discount.enabled')
   const [testState, setTestState] = useState<CommerceTestState>({ status: 'idle' })
   const [orderTest, setOrderTest] = useState<{
@@ -1601,29 +1602,37 @@ function CommerceSection({ control, watch }: CommerceSectionProps) {
   }>({ status: 'idle' })
 
   const handleTestOrders = useCallback(async () => {
-    if (!storeUrl.trim() || !restKey.trim() || !restSecret.trim()) {
-      setOrderTest({ status: 'error', message: 'Enter the store URL, key and secret first.' })
+    const isMagento = provider === 'magento'
+    const missing = isMagento ? !storeUrl.trim() || !magentoToken.trim() : !storeUrl.trim() || !restKey.trim() || !restSecret.trim()
+    if (missing) {
+      setOrderTest({
+        status: 'error',
+        message: isMagento ? 'Enter the store URL and access token first.' : 'Enter the store URL, key and secret first.',
+      })
       return
     }
     setOrderTest({ status: 'loading' })
     try {
+      const body = isMagento
+        ? { provider: 'magento', storeUrl: storeUrl.trim(), mode: 'orders', magentoToken: magentoToken.trim() }
+        : {
+            provider: 'woocommerce',
+            storeUrl: storeUrl.trim(),
+            mode: 'orders',
+            restKey: restKey.trim(),
+            restSecret: restSecret.trim(),
+          }
       const res = await fetch('/api/commerce/validate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          provider: 'woocommerce',
-          storeUrl: storeUrl.trim(),
-          mode: 'orders',
-          restKey: restKey.trim(),
-          restSecret: restSecret.trim(),
-        }),
+        body: JSON.stringify(body),
       })
       const data = (await res.json()) as { ok: boolean; error?: string }
       setOrderTest(data.ok ? { status: 'ok' } : { status: 'error', message: data.error ?? 'Connection failed.' })
     } catch {
       setOrderTest({ status: 'error', message: 'Network error — please try again.' })
     }
-  }, [storeUrl, restKey, restSecret])
+  }, [provider, storeUrl, restKey, restSecret, magentoToken])
 
   const testReady =
     provider === 'shopify' ? Boolean(shopifyDomain.trim() && shopifyToken.trim()) : Boolean(storeUrl.trim())
@@ -1641,7 +1650,7 @@ function CommerceSection({ control, watch }: CommerceSectionProps) {
       const body =
         provider === 'shopify'
           ? { provider, shopifyDomain: shopifyDomain.trim(), shopifyToken: shopifyToken.trim() }
-          : { provider: 'woocommerce', storeUrl: storeUrl.trim() }
+          : { provider, storeUrl: storeUrl.trim() }
       const res = await fetch('/api/commerce/validate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1672,7 +1681,7 @@ function CommerceSection({ control, watch }: CommerceSectionProps) {
         <SectionHeader
           icon={ShoppingBagIcon}
           title="Store / products"
-          description="Connect your WooCommerce store so the bot can search your catalog and show product cards."
+          description="Connect your store (WooCommerce, Shopify, or Magento) so the bot can search your catalog and show product cards."
         />
       </CardHeader>
       <CardContent className="space-y-4">
@@ -1707,14 +1716,15 @@ function CommerceSection({ control, watch }: CommerceSectionProps) {
                     <SelectContent>
                       <SelectItem value="woocommerce">WooCommerce</SelectItem>
                       <SelectItem value="shopify">Shopify</SelectItem>
+                      <SelectItem value="magento">Magento</SelectItem>
                     </SelectContent>
                   </Select>
                 )}
               />
             </div>
 
-            {/* WooCommerce: store URL */}
-            {provider === 'woocommerce' && (
+            {/* WooCommerce / Magento: store URL */}
+            {(provider === 'woocommerce' || provider === 'magento') && (
               <div className="space-y-1.5">
                 <Label htmlFor="commerceStoreUrl">Store URL</Label>
                 <Controller
@@ -1867,6 +1877,54 @@ function CommerceSection({ control, watch }: CommerceSectionProps) {
                   variant="outline"
                   size="sm"
                   disabled={orderTest.status === 'loading' || !restKey.trim() || !restSecret.trim()}
+                  onClick={handleTestOrders}
+                >
+                  {orderTest.status === 'loading' ? 'Testing…' : 'Test order access'}
+                </Button>
+                {orderTest.status === 'ok' && <TestBadge variant="ok">REST access OK</TestBadge>}
+                {orderTest.status === 'error' && (
+                  <TestBadge variant="error">{orderTest.message}</TestBadge>
+                )}
+              </div>
+            </div>
+            )}
+
+            {/* Order lookup (optional) — Magento integration access token */}
+            {provider === 'magento' && (
+            <div className="space-y-3 border-t pt-4">
+              <div>
+                <Label>Order lookup (optional)</Label>
+                <p className="text-xs text-muted-foreground">
+                  Add a Magento integration access token so the bot can check order status. Create it in
+                  Magento Admin → System → Integrations (resource access: Sales). Stored securely and
+                  never sent to the browser.
+                </p>
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="magentoToken">Access token</Label>
+                <Controller
+                  name="commerce.magentoToken"
+                  control={control}
+                  render={({ field }) => (
+                    <Input
+                      id="magentoToken"
+                      type="password"
+                      value={field.value ?? ''}
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                      placeholder="Integration access token"
+                      autoComplete="off"
+                      className="font-mono text-sm"
+                    />
+                  )}
+                />
+              </div>
+              <div className="flex items-center gap-3 flex-wrap">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={orderTest.status === 'loading' || !magentoToken.trim()}
                   onClick={handleTestOrders}
                 >
                   {orderTest.status === 'loading' ? 'Testing…' : 'Test order access'}

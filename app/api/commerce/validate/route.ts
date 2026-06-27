@@ -6,14 +6,16 @@ import { validateStore, validateOrderAccess } from '@/lib/commerce'
 export const maxDuration = 20
 
 const bodySchema = z.object({
-  provider: z.enum(['woocommerce', 'shopify']).default('woocommerce'),
+  provider: z.enum(['woocommerce', 'shopify', 'magento']).default('woocommerce'),
   storeUrl: z.string().optional(),
   shopifyDomain: z.string().optional(),
   shopifyToken: z.string().optional(),
-  // 'store' = catalog connectivity; 'orders' = WooCommerce REST creds (order lookup).
+  // 'store' = catalog connectivity; 'orders' = REST creds (order lookup).
   mode: z.enum(['store', 'orders']).default('store'),
   restKey: z.string().optional(),
   restSecret: z.string().optional(),
+  // Magento integration access token (order lookup).
+  magentoToken: z.string().optional(),
 })
 
 // Authenticated: checks a store connection (catalog or order REST access).
@@ -29,12 +31,16 @@ export async function POST(req: Request) {
   if (!parsed.success) return NextResponse.json({ ok: false, error: 'Invalid request' }, { status: 400 })
 
   if (parsed.data.mode === 'orders') {
-    const result = await validateOrderAccess(
-      'woocommerce',
-      parsed.data.storeUrl ?? '',
-      parsed.data.restKey ?? '',
-      parsed.data.restSecret ?? '',
-    )
+    // Magento authenticates with a single integration token (passed in restKey slot).
+    const result =
+      parsed.data.provider === 'magento'
+        ? await validateOrderAccess('magento', parsed.data.storeUrl ?? '', parsed.data.magentoToken ?? '', '')
+        : await validateOrderAccess(
+            'woocommerce',
+            parsed.data.storeUrl ?? '',
+            parsed.data.restKey ?? '',
+            parsed.data.restSecret ?? '',
+          )
     return NextResponse.json(result)
   }
 
@@ -45,13 +51,12 @@ export async function POST(req: Request) {
     shopifyToken: parsed.data.shopifyToken,
   })
   if (!ok) {
-    return NextResponse.json({
-      ok: false,
-      error:
-        parsed.data.provider === 'shopify'
-          ? 'Could not reach Shopify with that domain and token.'
-          : 'Could not reach the WooCommerce Store API at that URL.',
-    })
+    const errors: Record<string, string> = {
+      shopify: 'Could not reach Shopify with that domain and token.',
+      magento: 'Could not reach the Magento GraphQL API at that URL.',
+      woocommerce: 'Could not reach the WooCommerce Store API at that URL.',
+    }
+    return NextResponse.json({ ok: false, error: errors[parsed.data.provider] ?? errors.woocommerce })
   }
   return NextResponse.json({ ok: true, total })
 }

@@ -14,6 +14,12 @@ import {
   validateWooOrderAccess,
 } from '@/lib/commerce/woocommerce'
 import { searchShopifyProducts, validateShopifyStore } from '@/lib/commerce/shopify'
+import {
+  searchMagentoProducts,
+  validateMagentoStore,
+  getMagentoOrderStatus,
+  validateMagentoOrderAccess,
+} from '@/lib/commerce/magento'
 
 export interface CommerceConfig {
   enabled: boolean
@@ -26,6 +32,8 @@ export interface CommerceConfig {
   /** Shopify Storefront domain + token (server-only token). */
   shopifyDomain?: string
   shopifyToken?: string
+  /** Magento integration access token — server-only, for order lookups. */
+  magentoToken?: string
   /** A static discount the agent can offer on discount intent. */
   discount?: { enabled: boolean; code?: string; description?: string }
 }
@@ -38,6 +46,8 @@ export function storeConfigured(config: CommerceConfig): boolean {
       return Boolean(config.storeUrl)
     case 'shopify':
       return Boolean(config.shopifyDomain && config.shopifyToken)
+    case 'magento':
+      return Boolean(config.storeUrl)
     default:
       return false
   }
@@ -55,6 +65,8 @@ export async function searchStore(
       return searchWooProducts(config.storeUrl, params, deps)
     case 'shopify':
       return searchShopifyProducts(config.shopifyDomain!, config.shopifyToken!, params, deps)
+    case 'magento':
+      return searchMagentoProducts(config.storeUrl, params, deps)
     default:
       return []
   }
@@ -77,6 +89,8 @@ export async function validateStore(
       return config.shopifyDomain && config.shopifyToken
         ? validateShopifyStore(config.shopifyDomain, config.shopifyToken, deps)
         : { ok: false, total: 0 }
+    case 'magento':
+      return config.storeUrl ? validateMagentoStore(config.storeUrl, deps) : { ok: false, total: 0 }
     default:
       return { ok: false, total: 0 }
   }
@@ -98,6 +112,8 @@ export async function getOrderStatus(
         params,
         deps,
       )
+    case 'magento':
+      return getMagentoOrderStatus(config.storeUrl, config.magentoToken ?? '', params, deps)
     default:
       return { found: false, reason: 'not_configured' }
   }
@@ -114,6 +130,9 @@ export async function validateOrderAccess(
   switch (provider) {
     case 'woocommerce':
       return validateWooOrderAccess(storeUrl, restKey, restSecret, deps)
+    // Magento uses a single integration token, passed in the `restKey` slot.
+    case 'magento':
+      return validateMagentoOrderAccess(storeUrl, restKey, deps)
     default:
       return { ok: false, error: 'Unsupported provider' }
   }
@@ -126,9 +145,11 @@ export function getDiscount(config: CommerceConfig): DiscountInfo {
   return { enabled: true, code: d.code, description: d.description }
 }
 
-/** Whether order lookups are usable (enabled + store + REST creds present). */
+/** Whether order lookups are usable (enabled + store + the provider's creds). */
 export function orderLookupEnabled(config: CommerceConfig): boolean {
-  return Boolean(config?.enabled && config.storeUrl && config.restKey && config.restSecret)
+  if (!config?.enabled || !config.storeUrl) return false
+  if (config.provider === 'magento') return Boolean(config.magentoToken)
+  return Boolean(config.restKey && config.restSecret)
 }
 
 /** A short, agent-speakable summary of an order lookup (the agent translates it). */

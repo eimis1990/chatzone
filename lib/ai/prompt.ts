@@ -1,5 +1,5 @@
 import type { BotConfig, BotLanguage, LanguageContent } from '@/lib/types'
-import { storeConfigured } from '@/lib/commerce'
+import { storeConfigured, orderLookupEnabled } from '@/lib/commerce'
 
 export interface ChatMessage {
   role: 'system' | 'user' | 'assistant'
@@ -70,7 +70,7 @@ export function buildSystemPrompt(
         'For non-product questions, use the context below.',
     )
 
-    const orderEnabled = Boolean(config.commerce?.restKey && config.commerce?.restSecret)
+    const orderEnabled = orderLookupEnabled(config.commerce)
     if (orderEnabled) {
       lines.push(
         'ORDER STATUS: when the shopper asks about an existing order (where is it, tracking, status), ' +
