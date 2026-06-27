@@ -14,7 +14,6 @@ import Link from 'next/link'
 import { Reveal } from './Reveal'
 import { FeatureText } from './ScrollRevealText'
 import { EmailCapture } from './EmailCapture'
-import { LoqaraIcon } from '@/components/LoqaraIcon'
 import { FlickeringGrid } from '@/components/magicui/flickering-grid'
 
 // Brand accent for inline styles — resolves to the --primary CSS variable so
@@ -263,21 +262,23 @@ export function CTASection() {
 // ───────────────────────── Footer ─────────────────────────
 export function Footer() {
   return (
-    <footer className="relative isolate overflow-hidden border-t border-white/10 text-white" style={{ backgroundColor: DARK }}>
+    <footer className="relative isolate overflow-hidden text-white" style={{ backgroundColor: DARK }}>
       {/* Faint grid, same as the logged-in app shell */}
       <div className="shell-grid pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-full" aria-hidden="true" />
-      <div className="mx-auto max-w-6xl px-5 py-16 text-center">
-        <div className="flex items-center justify-center gap-1 text-xl font-bold">
-          <LoqaraIcon className="size-12" />
-          <span>
-            Loqara<span style={{ color: ACCENT }}>.</span>
-          </span>
+      <div className="mx-auto max-w-6xl px-5 pb-12 pt-20 text-center">
+        {/* Oversized brand wordmark */}
+        <div
+          className="font-semibold leading-none tracking-tight"
+          style={{ fontSize: 'clamp(3rem, 12vw, 10rem)' }}
+        >
+          Loqara<span style={{ color: ACCENT }}>.</span>
         </div>
-        <p className="mx-auto mt-3 max-w-2xl text-sm text-white/55">
+        <p className="mx-auto mt-6 max-w-2xl text-base text-white/55">
           The AI chat &amp; voice agent for modern stores. Answers, leads, orders, and handoff — in one widget.
         </p>
 
-        <div className="mt-8 flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-sm text-white/45">
+        {/* Divider, then the bottom bar */}
+        <div className="mt-14 flex flex-wrap items-center justify-center gap-x-8 gap-y-2 border-t border-white/10 pt-8 text-sm text-white/45">
           <span>© {2026} Loqara. All rights reserved.</span>
           <span aria-hidden="true" className="text-base font-bold text-white/30">
             •

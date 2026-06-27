@@ -5,8 +5,6 @@ import { Footer } from '@/components/landing/sections'
 import { FlickeringGrid } from '@/components/magicui/flickering-grid'
 import { getAllPosts, type BlogPost } from '@/lib/blog'
 
-const DARK = '#101213'
-
 export const metadata: Metadata = {
   title: 'Blog',
   description:
@@ -113,23 +111,6 @@ export default function BlogIndex() {
           )}
         </div>
       </main>
-
-      {/* Oversized brand wordmark that dissolves into the dark footer */}
-      <section className="relative overflow-hidden" style={{ backgroundColor: DARK }}>
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-white to-transparent"
-        />
-        <div className="relative mx-auto flex max-w-6xl justify-center px-5 pt-24">
-          <span
-            aria-hidden="true"
-            className="select-none bg-gradient-to-b from-white/30 to-transparent bg-clip-text font-semibold leading-[0.8] tracking-tighter text-transparent"
-            style={{ fontSize: 'clamp(4rem, 19vw, 17rem)' }}
-          >
-            Loqara
-          </span>
-        </div>
-      </section>
 
       <Footer />
     </>
