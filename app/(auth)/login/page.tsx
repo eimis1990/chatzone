@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useReducedMotion } from 'framer-motion'
 import { createBrowserClient } from '@/lib/supabase/browser'
 import { resolveHome } from '@/lib/auth/roles'
 import type { UserRole } from '@/lib/types'
@@ -13,6 +14,7 @@ import { Shimmer } from '@/components/landing/Shimmer'
 
 export default function LoginPage() {
   const router = useRouter()
+  const reduce = useReducedMotion()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -57,15 +59,31 @@ export default function LoginPage() {
 
   return (
     <main className="relative flex min-h-svh items-center justify-center overflow-hidden px-4">
-      {/* Strongly-blurred hero behind the card (scaled up so blurred edges stay off-screen) */}
-      <div
-        aria-hidden="true"
-        className="absolute inset-0 -z-10 scale-110 bg-cover bg-center blur-2xl"
-        style={{ backgroundImage: "url('/loqara-hero-1.png')" }}
-      />
-      <div aria-hidden="true" className="absolute inset-0 -z-10 bg-black/15" />
+      {/* Looping hero behind the card — lightly blurred, scaled so soft edges
+          stay off-screen. Reduced-motion users get the static poster. */}
+      {reduce ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src="/loqara-hero-poster.jpg"
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 -z-10 size-full scale-105 object-cover blur-md"
+        />
+      ) : (
+        <video
+          src="/loqara-hero-loop.mp4"
+          poster="/loqara-hero-poster.jpg"
+          autoPlay
+          muted
+          loop
+          playsInline
+          aria-hidden="true"
+          className="absolute inset-0 -z-10 size-full scale-105 object-cover blur-md"
+        />
+      )}
+      <div aria-hidden="true" className="absolute inset-0 -z-10 bg-black/10" />
 
-      <Card className="w-full max-w-md border-white/40 bg-white/60 shadow-2xl ring-1 ring-black/5 backdrop-blur-2xl">
+      <Card className="w-full max-w-md border border-white/50 bg-white/40 shadow-2xl ring-1 ring-white/25 backdrop-blur-2xl">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold">Sign in</CardTitle>
           <CardDescription className="text-foreground/60">
