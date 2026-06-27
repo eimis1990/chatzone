@@ -75,9 +75,10 @@ export function ShowcaseMarquee({ images }: { images: string[] }) {
       {/* Full-bleed scrolling marquee. Cards overflow vertically (not clipped);
           edges fade via gradient overlays instead of a clipping mask. */}
       <div className="relative mt-14 pb-24">
-        {/* Edge fades */}
-        <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-gradient-to-r from-black to-transparent md:w-32" />
-        <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-l from-black to-transparent md:w-32" />
+        {/* Edge fades — taller than the band so they also cover the card tops
+            that overflow above it. */}
+        <div className="pointer-events-none absolute -top-16 bottom-0 left-0 z-10 w-16 bg-gradient-to-r from-black to-transparent md:w-32" />
+        <div className="pointer-events-none absolute -top-16 bottom-0 right-0 z-10 w-16 bg-gradient-to-l from-black to-transparent md:w-32" />
         <motion.div
           className="flex w-max"
           animate={reduce ? undefined : { x: ['0%', '-50%'] }}
