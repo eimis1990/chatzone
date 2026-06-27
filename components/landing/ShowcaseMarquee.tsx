@@ -5,7 +5,7 @@ import { Shimmer } from './Shimmer'
 
 const TITLE_LINES = ['A widget that fits', 'your brand']
 const DESCRIPTION =
-  'Tweak colors, shapes, backgrounds, glass, voice and more — then push it live to your site in one click. Want something bespoke? Custom designs on request.'
+  'Tweak colors, shapes, backgrounds, voice and more — then push it live to your site in one click. Want something bespoke? Custom designs on request.'
 
 const FADE_IN = {
   hidden: { opacity: 0, y: 12 },
@@ -21,7 +21,7 @@ export function ShowcaseMarquee({ images }: { images: string[] }) {
   const duration = Math.max(20, images.length * 6)
 
   return (
-    <section id="showcase" className="overflow-hidden bg-black text-white scroll-mt-20">
+    <section id="showcase" className="overflow-x-clip bg-black text-white scroll-mt-20">
       {/* Centered heading block */}
       <div className="mx-auto max-w-3xl px-5 pt-24 text-center">
         <motion.h2
@@ -72,8 +72,12 @@ export function ShowcaseMarquee({ images }: { images: string[] }) {
         </motion.div>
       </div>
 
-      {/* Full-bleed scrolling marquee */}
-      <div className="mt-14 pb-24 [mask-image:linear-gradient(to_right,transparent,black_6%,black_94%,transparent)]">
+      {/* Full-bleed scrolling marquee. Cards overflow vertically (not clipped);
+          edges fade via gradient overlays instead of a clipping mask. */}
+      <div className="relative mt-14 pb-24">
+        {/* Edge fades */}
+        <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-gradient-to-r from-black to-transparent md:w-32" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-l from-black to-transparent md:w-32" />
         <motion.div
           className="flex w-max"
           animate={reduce ? undefined : { x: ['0%', '-50%'] }}
