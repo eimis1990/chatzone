@@ -8,5 +8,5 @@ export const FAQ: [question: string, answer: string][] = [
   ['Can I change or cancel anytime?', 'Yes. Upgrade, downgrade, or cancel whenever — changes take effect right away.'],
   ['What if I hit my conversation limit?', 'Nothing breaks. Extra conversations are billed per 1,000, or you can move up a plan.'],
   ['Which languages are supported?', 'English and Lithuanian out of the box, with more on the way — additional languages are included, not charged per language.'],
-  ['Is it really free right now?', 'Yes. Loqara is free while we’re in early access — you won’t be charged until billing launches, and we’ll give plenty of notice.'],
+  ['Is there a free plan?', 'Yes — the Free plan gives you 100 conversations a month, one bot, and live human handoff, with no credit card required. Paid plans start at €149/mo and add more conversations, extra bots, all languages, lead capture, and order lookup as you grow.'],
 ]

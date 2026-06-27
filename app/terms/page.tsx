@@ -35,11 +35,12 @@ export default function TermsPage() {
       </section>
 
       <section className="mt-8 space-y-3">
-        <h2 className="text-lg font-semibold">Early access</h2>
+        <h2 className="text-lg font-semibold">Plans and pricing</h2>
         <p className="text-sm text-foreground/80">
-          Loqara is in early access and currently free. We may introduce paid plans, change usage
-          limits, or modify features during this period. We’ll give reasonable notice of material
-          changes that affect active accounts.
+          Loqara offers a free plan and paid subscription plans. We may change plan features, usage
+          limits, or pricing over time, and we’ll give reasonable notice of material changes that
+          affect active accounts. Paid plans are billed through our payment processor, and you can
+          upgrade, downgrade, or cancel at any time.
         </p>
       </section>
 
@@ -69,8 +70,7 @@ export default function TermsPage() {
         <h2 className="text-lg font-semibold">Availability and warranty</h2>
         <p className="text-sm text-foreground/80">
           The Service is provided “as is,” without warranties of any kind. We aim for reliable uptime
-          but do not guarantee the Service will be uninterrupted or error-free, particularly during
-          early access.
+          but do not guarantee the Service will be uninterrupted or error-free.
         </p>
       </section>
 
