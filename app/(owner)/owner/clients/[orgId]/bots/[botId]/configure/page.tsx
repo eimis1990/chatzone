@@ -37,8 +37,8 @@ export default async function OwnerConfigurePage({
   const ent = entitlementsFor(org?.plan ?? 'free')
 
   return (
-    <div>
-      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 border-b border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-900">
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="flex shrink-0 flex-wrap items-center gap-x-2 gap-y-1 border-b border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-900">
         <span>
           Editing <strong>{bot.name}</strong> for <strong>{org?.name ?? 'client'}</strong> as the
           platform owner — changes go live on save.
@@ -47,15 +47,17 @@ export default async function OwnerConfigurePage({
           ← Back to client
         </Link>
       </div>
-      <ConfigForm
-        botId={bot.id}
-        botName={bot.name}
-        initialConfig={bot.config}
-        canUseAllLanguages={ent.allLanguages}
-        canUseLeadCapture={ent.leadCapture}
-        canUseVoice={Boolean(org?.voice_addon)}
-        onSave={saveClientBotConfig}
-      />
+      <div className="min-h-0 flex-1">
+        <ConfigForm
+          botId={bot.id}
+          botName={bot.name}
+          initialConfig={bot.config}
+          canUseAllLanguages={ent.allLanguages}
+          canUseLeadCapture={ent.leadCapture}
+          canUseVoice={Boolean(org?.voice_addon)}
+          onSave={saveClientBotConfig}
+        />
+      </div>
     </div>
   )
 }
