@@ -1,6 +1,5 @@
 'use client'
 
-import { DownloadIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 interface SignupRow {
@@ -34,7 +33,6 @@ export function SignupsExport({ rows }: { rows: SignupRow[] }) {
 
   return (
     <Button type="button" variant="outline" size="sm" onClick={download} disabled={rows.length === 0}>
-      <DownloadIcon className="size-4" />
       Export CSV
     </Button>
   )

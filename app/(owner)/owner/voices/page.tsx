@@ -18,7 +18,7 @@ export default async function VoicesPage() {
   const voices = (data ?? []) as PlatformVoice[]
 
   return (
-    <div className="max-w-4xl space-y-6 p-6">
+    <div className="space-y-6 p-6">
       <VoicesPanel initialVoices={voices} />
     </div>
   )

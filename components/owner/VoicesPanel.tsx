@@ -5,7 +5,7 @@
  * Receives the server-fetched initial voices and manages client-side mutations.
  */
 
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, type ReactElement } from 'react'
 import { TrashIcon, PlayIcon, SquareIcon, LoaderCircleIcon, MicIcon, PlusIcon, AlertCircleIcon, SearchIcon } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -36,9 +36,11 @@ type LoadStatus = 'idle' | 'loading' | 'ready' | 'unavailable'
 
 interface AddVoiceDialogProps {
   onAdded: (voice: PlatformVoice) => void
+  /** Custom trigger element; defaults to a primary "Add voice" button. */
+  trigger?: ReactElement
 }
 
-function AddVoiceDialog({ onAdded }: AddVoiceDialogProps) {
+function AddVoiceDialog({ onAdded, trigger }: AddVoiceDialogProps) {
   const [open, setOpen] = useState(false)
   const [loadStatus, setLoadStatus] = useState<LoadStatus>('idle')
   const [voices, setVoices] = useState<CatalogVoice[]>([])
@@ -144,10 +146,12 @@ function AddVoiceDialog({ onAdded }: AddVoiceDialogProps) {
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger
         render={
-          <Button type="button">
-            <PlusIcon className="size-4" aria-hidden="true" />
-            Add voice
-          </Button>
+          trigger ?? (
+            <Button type="button">
+              <PlusIcon className="size-4" aria-hidden="true" />
+              Add voice
+            </Button>
+          )
         }
       />
       <DialogContent className="max-w-md">
@@ -344,91 +348,99 @@ export function VoicesPanel({ initialVoices }: VoicesPanelProps) {
 
   return (
     <div className="space-y-6">
-      {/* Header row */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-lg font-semibold">Voices</h1>
-          <p className="text-sm text-muted-foreground">
-            Manage the curated voice catalog available to clients.
-          </p>
-        </div>
-        <AddVoiceDialog onAdded={handleAdded} />
+      {/* Header */}
+      <div>
+        <h1 className="text-lg font-semibold">Voices</h1>
+        <p className="text-sm text-muted-foreground">
+          Manage the curated voice catalog available to clients.
+        </p>
       </div>
 
-      {/* List */}
-      {voices.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed py-20 text-center gap-3">
-          <MicIcon className="size-10 text-muted-foreground" aria-hidden="true" />
-          <p className="font-medium">No voices yet</p>
-          <p className="text-sm text-muted-foreground max-w-sm">
-            Add voices from your ElevenLabs catalog. Clients will see a Men / Women grouped picker.
-          </p>
-          <AddVoiceDialog onAdded={handleAdded} />
-        </div>
-      ) : (
-        <div className="rounded-lg border overflow-hidden">
-          {/* Table header */}
-          <div className="grid grid-cols-[1fr_110px_80px_80px] gap-4 px-4 py-2.5 text-xs font-medium text-muted-foreground bg-muted/40 border-b">
-            <span>Name</span>
-            <span>Gender</span>
-            <span className="text-center">Preview</span>
-            <span className="text-center">Remove</span>
-          </div>
+      {/* Cards grid — Add voice is the first card */}
+      <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+        <AddVoiceDialog
+          onAdded={handleAdded}
+          trigger={
+            <button
+              type="button"
+              className="group flex min-h-[124px] w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border bg-card/40 text-muted-foreground transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <span className="flex size-10 items-center justify-center rounded-lg border border-dashed border-current">
+                <PlusIcon className="size-5" aria-hidden="true" />
+              </span>
+              <span className="text-sm font-medium">Add voice</span>
+            </button>
+          }
+        />
 
-          {voices.map((voice) => {
-            const previewState = previewStates[voice.id] ?? 'idle'
-            const isDeleting = deletingId === voice.id
-            return (
-              <div
-                key={voice.id}
-                className="grid grid-cols-[1fr_110px_80px_80px] gap-4 px-4 py-3 items-center border-b last:border-b-0 text-sm hover:bg-muted/20 transition-colors"
-              >
-                <span className="font-medium">{voice.name}</span>
-                <span>
-                  <Badge variant={voice.gender === 'male' ? 'default' : 'secondary'}>
-                    {voice.gender === 'male' ? 'Male' : 'Female'}
-                  </Badge>
-                </span>
-                <span className="flex justify-center">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon-sm"
-                    disabled={!voice.preview_url || previewState === 'loading'}
-                    onClick={() => handlePreview(voice)}
-                    aria-label={previewState === 'playing' ? `Stop preview of ${voice.name}` : `Preview ${voice.name}`}
-                  >
-                    {previewState === 'loading' ? (
-                      <LoaderCircleIcon className="size-4 animate-spin" aria-hidden="true" />
-                    ) : previewState === 'playing' ? (
-                      <SquareIcon className="size-4" aria-hidden="true" />
-                    ) : (
-                      <PlayIcon className="size-4" aria-hidden="true" />
-                    )}
-                  </Button>
-                </span>
-                <span className="flex justify-center">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon-sm"
-                    disabled={isDeleting}
-                    onClick={() => handleDelete(voice.id, voice.name)}
-                    aria-label={`Remove ${voice.name}`}
-                    className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                  >
-                    {isDeleting ? (
-                      <LoaderCircleIcon className="size-4 animate-spin" aria-hidden="true" />
-                    ) : (
-                      <TrashIcon className="size-4" aria-hidden="true" />
-                    )}
-                  </Button>
-                </span>
+        {voices.map((voice) => {
+          const previewState = previewStates[voice.id] ?? 'idle'
+          const isDeleting = deletingId === voice.id
+          return (
+            <div
+              key={voice.id}
+              className="flex flex-col gap-3 rounded-xl border bg-card p-4 shadow-sm transition-shadow hover:shadow-md"
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex min-w-0 items-center gap-2.5">
+                  <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    <MicIcon className="size-4" aria-hidden="true" />
+                  </span>
+                  <span className="truncate font-medium" title={voice.name}>
+                    {voice.name}
+                  </span>
+                </div>
+                <Badge variant={voice.gender === 'male' ? 'default' : 'secondary'} className="shrink-0">
+                  {voice.gender === 'male' ? 'Male' : 'Female'}
+                </Badge>
               </div>
-            )
-          })}
-        </div>
-      )}
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="flex-1"
+                  disabled={!voice.preview_url || previewState === 'loading'}
+                  onClick={() => handlePreview(voice)}
+                  aria-label={previewState === 'playing' ? `Stop preview of ${voice.name}` : `Preview ${voice.name}`}
+                >
+                  {previewState === 'loading' ? (
+                    <>
+                      <LoaderCircleIcon className="size-4 animate-spin" aria-hidden="true" />
+                      Loading…
+                    </>
+                  ) : previewState === 'playing' ? (
+                    <>
+                      <SquareIcon className="size-4" aria-hidden="true" />
+                      Stop
+                    </>
+                  ) : (
+                    <>
+                      <PlayIcon className="size-4" aria-hidden="true" />
+                      Preview
+                    </>
+                  )}
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  disabled={isDeleting}
+                  onClick={() => handleDelete(voice.id, voice.name)}
+                  aria-label={`Remove ${voice.name}`}
+                  className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                >
+                  {isDeleting ? (
+                    <LoaderCircleIcon className="size-4 animate-spin" aria-hidden="true" />
+                  ) : (
+                    <TrashIcon className="size-4" aria-hidden="true" />
+                  )}
+                </Button>
+              </div>
+            </div>
+          )
+        })}
+      </div>
     </div>
   )
 }

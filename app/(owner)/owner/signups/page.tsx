@@ -1,8 +1,7 @@
-import { MailIcon } from 'lucide-react'
 import { requireRole } from '@/lib/auth/guards'
 import { createServerClient } from '@/lib/supabase/server'
 import { formatDistanceToNow } from '@/lib/date-utils'
-import { StatCard } from '@/components/client/charts/StatCard'
+import { Badge } from '@/components/ui/badge'
 import { SignupsExport } from '@/components/owner/SignupsExport'
 
 interface SignupRow {
@@ -12,29 +11,43 @@ interface SignupRow {
   created_at: string
 }
 
+type BadgeVariant = 'default' | 'secondary' | 'destructive' | 'outline'
+
 export default async function SignupsPage() {
   await requireRole('owner')
 
   const supabase = await createServerClient()
-  const { data } = await supabase
-    .from('signups')
-    .select('id, email, source, created_at')
-    .order('created_at', { ascending: false })
+  const [{ data: signupData }, { data: inviteData }] = await Promise.all([
+    supabase.from('signups').select('id, email, source, created_at').order('created_at', { ascending: false }),
+    supabase.from('invites').select('email, status, created_at').order('created_at', { ascending: false }),
+  ])
 
-  const rows = (data ?? []) as SignupRow[]
+  const rows = (signupData ?? []) as SignupRow[]
+  const invites = (inviteData ?? []) as { email: string; status: string }[]
+
+  // Latest invite status per email (invites are ordered newest-first).
+  const inviteByEmail = new Map<string, string>()
+  for (const inv of invites) {
+    const key = inv.email.toLowerCase()
+    if (!inviteByEmail.has(key)) inviteByEmail.set(key, inv.status)
+  }
+
+  function inviteState(email: string): { label: string; variant: BadgeVariant } {
+    const s = inviteByEmail.get(email.toLowerCase())
+    if (!s) return { label: 'Not invited', variant: 'outline' }
+    if (s === 'accepted') return { label: 'Accepted', variant: 'default' }
+    if (s === 'expired') return { label: 'Invite expired', variant: 'destructive' }
+    return { label: 'Invited — waiting', variant: 'secondary' }
+  }
 
   return (
-    <div className="max-w-4xl space-y-6 p-6">
+    <div className="space-y-6 p-6">
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-lg font-semibold">Early-access signups</h1>
           <p className="text-sm text-muted-foreground">Emails captured from the landing page.</p>
         </div>
         {rows.length > 0 && <SignupsExport rows={rows} />}
-      </div>
-
-      <div className="grid grid-cols-2 gap-4 sm:max-w-xs">
-        <StatCard label="Signups" value={rows.length} icon={MailIcon} accent="green" />
       </div>
 
       {rows.length === 0 ? (
@@ -45,29 +58,33 @@ export default async function SignupsPage() {
           </p>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-xl border bg-card">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b bg-muted/40">
-                <th className="px-5 py-3 text-left font-medium text-muted-foreground">Email</th>
-                <th className="px-5 py-3 text-left font-medium text-muted-foreground">Source</th>
-                <th className="px-5 py-3 text-left font-medium text-muted-foreground">Signed up</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y">
-              {rows.map((s) => (
-                <tr key={s.id} className="transition-colors hover:bg-muted/30">
-                  <td className="px-5 py-3 font-medium">
-                    <a href={`mailto:${s.email}`} className="hover:underline">
-                      {s.email}
-                    </a>
-                  </td>
-                  <td className="px-5 py-3 text-muted-foreground">{s.source ?? '—'}</td>
-                  <td className="px-5 py-3 text-muted-foreground">{formatDistanceToNow(s.created_at)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {rows.map((s) => {
+            const st = inviteState(s.email)
+            return (
+              <div
+                key={s.id}
+                className="flex flex-col gap-3 rounded-xl border bg-card p-4 shadow-sm transition-shadow hover:shadow-md"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <a
+                    href={`mailto:${s.email}`}
+                    className="min-w-0 truncate font-medium hover:underline"
+                    title={s.email}
+                  >
+                    {s.email}
+                  </a>
+                  <Badge variant={st.variant} className="shrink-0 whitespace-nowrap">
+                    {st.label}
+                  </Badge>
+                </div>
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+                  <span className="rounded bg-muted px-1.5 py-0.5 font-medium">{s.source ?? 'unknown'}</span>
+                  <span>· signed up {formatDistanceToNow(s.created_at)}</span>
+                </div>
+              </div>
+            )
+          })}
         </div>
       )}
     </div>
