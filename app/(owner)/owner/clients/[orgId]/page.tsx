@@ -6,7 +6,7 @@ import { createServiceClient } from '@/lib/supabase/service'
 import { StatCard } from '@/components/client/charts/StatCard'
 import { LiveIndicator } from '@/components/LiveIndicator'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
+import { buttonVariants } from '@/components/ui/button'
 import { formatDistanceToNow } from '@/lib/date-utils'
 import { SuspendToggle } from '@/components/owner/SuspendToggle'
 import type { Bot, Invite } from '@/lib/types'
@@ -124,6 +124,12 @@ export default async function ClientDetailPage({
                   <span className="text-xs text-muted-foreground hidden sm:block">
                     {formatDistanceToNow(bot.created_at)}
                   </span>
+                  <Link
+                    href={`/owner/clients/${orgId}/bots/${bot.id}/configure`}
+                    className={buttonVariants({ variant: 'outline', size: 'sm' })}
+                  >
+                    Configure
+                  </Link>
                 </div>
               </div>
             ))}

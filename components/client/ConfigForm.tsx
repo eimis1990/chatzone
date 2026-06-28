@@ -31,7 +31,7 @@ import {
 import { botConfigFormSchema } from '@/lib/validation/schemas'
 import type { BotLanguage } from '@/lib/types'
 import type { z } from 'zod'
-import { saveConfig } from '@/app/(client)/app/bots/[botId]/configure/actions'
+import { saveConfig, type SaveConfigResult } from '@/app/(client)/app/bots/[botId]/configure/actions'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -72,6 +72,8 @@ interface ConfigFormProps {
   canUseLeadCapture?: boolean
   /** Voice add-on gating — disable voice unless the add-on is active. */
   canUseVoice?: boolean
+  /** Save handler — defaults to the client saveConfig; the owner editor injects its own. */
+  onSave?: (botId: string, rawConfig: unknown, name?: string) => Promise<SaveConfigResult>
 }
 
 // Use botConfigFormSchema (plain, no preprocessing) for the RHF resolver.
@@ -155,6 +157,7 @@ export function ConfigForm({
   canUseAllLanguages = true,
   canUseLeadCapture = true,
   canUseVoice = true,
+  onSave = saveConfig,
 }: ConfigFormProps) {
   const router = useRouter()
   // Internal bot name — lives outside the config schema, saved alongside it.
@@ -360,7 +363,7 @@ export function ConfigForm({
   const onSubmit = useCallback(
     async (values: FormValues) => {
       try {
-        const result = await saveConfig(botId, withEnabledLanguagesOnly(values), name.trim())
+        const result = await onSave(botId, withEnabledLanguagesOnly(values), name.trim())
         if (result.success) {
           toast.success('Configuration saved')
           trackEvent('bot_config_saved', { botId })
