@@ -36,11 +36,13 @@ type LoadStatus = 'idle' | 'loading' | 'ready' | 'unavailable'
 
 interface AddVoiceDialogProps {
   onAdded: (voice: PlatformVoice) => void
+  /** ElevenLabs voice ids already in the catalog — shown as "Added" and not selectable. */
+  addedVoiceIds: Set<string>
   /** Custom trigger element; defaults to a primary "Add voice" button. */
   trigger?: ReactElement
 }
 
-function AddVoiceDialog({ onAdded, trigger }: AddVoiceDialogProps) {
+function AddVoiceDialog({ onAdded, addedVoiceIds, trigger }: AddVoiceDialogProps) {
   const [open, setOpen] = useState(false)
   const [loadStatus, setLoadStatus] = useState<LoadStatus>('idle')
   const [voices, setVoices] = useState<CatalogVoice[]>([])
@@ -199,6 +201,7 @@ function AddVoiceDialog({ onAdded, trigger }: AddVoiceDialogProps) {
                     <p className="py-8 text-center text-sm text-muted-foreground">No voices match.</p>
                   ) : (
                     filtered.map((v) => {
+                      const isAdded = addedVoiceIds.has(v.id)
                       const isSelected = selectedId === v.id
                       return (
                         <button
@@ -206,15 +209,29 @@ function AddVoiceDialog({ onAdded, trigger }: AddVoiceDialogProps) {
                           type="button"
                           role="option"
                           aria-selected={isSelected}
-                          onClick={() => { setSelectedId(v.id); stopPreview() }}
+                          aria-disabled={isAdded}
+                          disabled={isAdded}
+                          onClick={() => {
+                            if (isAdded) return
+                            setSelectedId(v.id)
+                            stopPreview()
+                          }}
                           className={`flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left text-sm transition-colors ${
-                            isSelected
-                              ? 'bg-primary/10 font-medium text-primary ring-1 ring-inset ring-primary/25'
-                              : 'hover:bg-muted'
+                            isAdded
+                              ? 'cursor-not-allowed text-muted-foreground'
+                              : isSelected
+                                ? 'bg-primary/10 font-medium text-primary ring-1 ring-inset ring-primary/25'
+                                : 'hover:bg-muted'
                           }`}
                         >
                           <span className="min-w-0 flex-1 truncate">{v.name}</span>
-                          {isSelected && <CheckIcon className="size-4 shrink-0" aria-hidden="true" />}
+                          {isAdded ? (
+                            <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
+                              <CheckIcon className="size-3" aria-hidden="true" /> Added
+                            </span>
+                          ) : isSelected ? (
+                            <CheckIcon className="size-4 shrink-0 text-primary" aria-hidden="true" />
+                          ) : null}
                         </button>
                       )
                     })
@@ -375,6 +392,7 @@ export function VoicesPanel({ initialVoices }: VoicesPanelProps) {
       <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
         <AddVoiceDialog
           onAdded={handleAdded}
+          addedVoiceIds={new Set(voices.map((v) => v.voice_id))}
           trigger={
             <button
               type="button"
