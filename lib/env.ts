@@ -21,6 +21,11 @@ const envSchema = z.object({
   // gracefully (503) when these are absent, so the app runs without billing.
   STRIPE_SECRET_KEY: z.string().min(1).optional(),
   STRIPE_WEBHOOK_SECRET: z.string().min(1).optional(),
+  // Optional, public (NEXT_PUBLIC_*): analytics & search-engine verification.
+  // Read directly in client/layout code; listed here as the env contract's
+  // single source of truth. GA4 only loads when the ID is present.
+  NEXT_PUBLIC_GA_ID: z.string().min(1).optional(),
+  NEXT_PUBLIC_BING_SITE_VERIFICATION: z.string().min(1).optional(),
 })
 
 export type Env = z.infer<typeof envSchema>

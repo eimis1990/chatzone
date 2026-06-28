@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/next";
+import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 import { SITE_URL, SITE_NAME } from "@/lib/site";
 import {
   Geist,
@@ -42,6 +43,11 @@ const TITLE = "Loqara — AI chat & voice agent for modern stores";
 const DESCRIPTION =
   "Answer every customer, day or night. A chat & voice agent that knows your products, captures leads, looks up orders, and hands off to your team — embedded in one line.";
 
+// Bing Webmaster Tools site verification. Set NEXT_PUBLIC_BING_SITE_VERIFICATION
+// to emit <meta name="msvalidate.01" ...>. Left unset (e.g. if you verify Bing
+// by importing from Google Search Console instead), no tag is rendered.
+const BING_VERIFICATION = process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION;
+
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
@@ -65,6 +71,9 @@ export const metadata: Metadata = {
   // (privacy, terms) don't all canonicalize to the homepage.
   verification: {
     google: "Ju35YHEkl87l80jTznv0fN40cVZIAVGGYWHJ4MRF-QI",
+    ...(BING_VERIFICATION
+      ? { other: { "msvalidate.01": BING_VERIFICATION } }
+      : {}),
   },
   openGraph: {
     title: TITLE,
@@ -105,6 +114,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         {children}
         <Analytics />
+        <GoogleAnalytics />
       </body>
     </html>
   );
