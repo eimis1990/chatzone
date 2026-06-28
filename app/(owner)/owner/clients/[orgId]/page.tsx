@@ -60,7 +60,7 @@ export default async function ClientDetailPage({
   const inviteRows = (invites ?? []) as Pick<Invite, 'id' | 'email' | 'status' | 'expires_at' | 'created_at'>[]
 
   return (
-    <div className="max-w-5xl space-y-8 p-6">
+    <div className="space-y-8 p-6">
       {/* Breadcrumb */}
       <nav className="text-sm text-muted-foreground flex items-center gap-1.5">
         <Link href="/owner/clients" className="hover:text-foreground">
@@ -101,7 +101,7 @@ export default async function ClientDetailPage({
         {botRows.length === 0 ? (
           <p className="text-sm text-muted-foreground">No bots in this organisation yet.</p>
         ) : (
-          <div className="border rounded-lg divide-y">
+          <div className="divide-y overflow-hidden rounded-xl border bg-card shadow-sm">
             {botRows.map((bot) => (
               <div
                 key={bot.id}
@@ -141,7 +141,7 @@ export default async function ClientDetailPage({
       {inviteRows.length > 0 && (
         <div className="space-y-4">
           <h2 className="text-lg font-semibold">Invites</h2>
-          <div className="border rounded-lg divide-y">
+          <div className="divide-y overflow-hidden rounded-xl border bg-card shadow-sm">
             {inviteRows.map((invite) => (
               <div
                 key={invite.id}

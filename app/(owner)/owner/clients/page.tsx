@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { PlusIcon, MessagesSquareIcon, BotIcon, SparklesIcon } from 'lucide-react'
+import { PlusIcon, MessagesSquareIcon, BotIcon, SparklesIcon, type LucideIcon } from 'lucide-react'
 import { requireRole } from '@/lib/auth/guards'
 import { createServerClient } from '@/lib/supabase/server'
 import { Badge } from '@/components/ui/badge'
@@ -77,24 +77,28 @@ export default async function ClientsPage() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                  <span className="inline-flex items-center gap-1.5">
-                    <BotIcon className="size-4 text-primary/70" />
-                    {org.bots}
-                  </span>
-                  <span className="inline-flex items-center gap-1.5">
-                    <MessagesSquareIcon className="size-4 text-primary/70" />
-                    {org.conversations}
-                  </span>
-                  <span className="inline-flex items-center gap-1.5">
-                    <SparklesIcon className="size-4 text-primary/70" />
-                    {org.leads}
-                  </span>
+                <div className="grid grid-cols-3 gap-2">
+                  <StatTile icon={BotIcon} label="Bots" value={org.bots} />
+                  <StatTile icon={MessagesSquareIcon} label="Chats" value={org.conversations} />
+                  <StatTile icon={SparklesIcon} label="Leads" value={org.leads} />
                 </div>
               </CardContent>
             </Card>
           </Link>
         ))}
+      </div>
+    </div>
+  )
+}
+
+/** A single stat cell on a client card — big number over an icon + label. */
+function StatTile({ icon: Icon, label, value }: { icon: LucideIcon; label: string; value: number }) {
+  return (
+    <div className="rounded-lg bg-muted/50 px-2 py-2.5 text-center">
+      <div className="text-xl font-semibold tabular-nums text-foreground">{value.toLocaleString()}</div>
+      <div className="mt-0.5 flex items-center justify-center gap-1 text-[11px] text-muted-foreground">
+        <Icon className="size-3" aria-hidden="true" />
+        {label}
       </div>
     </div>
   )
