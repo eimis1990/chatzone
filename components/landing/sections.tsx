@@ -56,7 +56,7 @@ const FEATURES: Feature[] = [
     body: 'Upload docs, FAQs, or your site and the agent answers only from what it knows — with sources. No hallucinated policies, no made-up prices.',
     bullets: ['Retrieval over your own content', 'Cites the sources it used', 'Graceful fallback + lead capture when unsure'],
     icon: BrainIcon,
-    imageSrc: '/landing/feature-chat.png',
+    imageSrc: '/landing/feature-chat.webp',
   },
   {
     eyebrow: 'VOICE AGENT',
@@ -64,7 +64,7 @@ const FEATURES: Feature[] = [
     body: 'A real-time voice agent answers spoken questions, searches products out loud, and speaks your customer’s language — right inside the widget.',
     bullets: ['Live voice calls in the widget', 'Per-language voices', 'Speaks product results aloud'],
     icon: PhoneCallIcon,
-    imageSrc: '/landing/feature-voice.png',
+    imageSrc: '/landing/feature-voice.webp',
   },
   {
     eyebrow: 'LIVE HANDOFF',
@@ -72,7 +72,7 @@ const FEATURES: Feature[] = [
     body: 'When a customer needs a person, the bot steps aside and your team takes over from a real-time inbox — then hands back when it’s done.',
     bullets: ['Agent inbox with live updates', 'Take over, resolve, or return to bot', 'Auto-escalation when the bot is stuck'],
     icon: HeadsetIcon,
-    imageSrc: '/landing/feature-handoff.png',
+    imageSrc: '/landing/feature-handoff.webp',
   },
   {
     eyebrow: 'ANALYTICS & EVALUATIONS',
@@ -80,7 +80,7 @@ const FEATURES: Feature[] = [
     body: 'Every conversation is summarized, tagged with topics, scored for quality, and rolled up into trends so you can improve fast.',
     bullets: ['Per-conversation summaries + topics', 'AI success rating (1–5) with reasons', 'CSAT, fallback rate, trending topics'],
     icon: BarChart3Icon,
-    imageSrc: '/landing/feature-analytics.png',
+    imageSrc: '/landing/feature-analytics.webp',
   },
   {
     eyebrow: 'COMMERCE SKILLS',
@@ -88,7 +88,7 @@ const FEATURES: Feature[] = [
     body: 'Connect WooCommerce or Shopify and the agent searches your catalog, looks up order status (verified by email), and offers discount codes.',
     bullets: ['Live product search with cards', 'Order status — identity-checked', 'Discount codes on request'],
     icon: ShoppingBagIcon,
-    imageSrc: '/landing/feature-commerce.png',
+    imageSrc: '/landing/feature-commerce.webp',
   },
   {
     eyebrow: 'MULTILINGUAL & EMBEDDABLE',
@@ -96,17 +96,17 @@ const FEATURES: Feature[] = [
     body: 'Match your brand, pick your launcher, and paste a single script tag. The widget themes itself and speaks your customers’ language.',
     bullets: ['EN + LT out of the box', 'Themeable launcher (circle or pill)', 'One-line install on any site'],
     icon: LanguagesIcon,
-    imageSrc: '/landing/feature-widget.png',
+    imageSrc: '/landing/feature-widget.webp',
   },
 ]
 
 function FeatureVisual({ icon: Icon, imageSrc, dark }: { icon: LucideIcon; imageSrc: string; dark?: boolean }) {
   return (
     <div
-      className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl shadow-xl ring-1 ring-black/5"
+      className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl shadow-lg"
       style={{
-        backgroundColor: dark ? '#0f1f16' : '#eef5f0',
-        backgroundImage: `url(${imageSrc}), linear-gradient(135deg, #dcebe1, #b9d9c4)`,
+        backgroundColor: dark ? '#1a120b' : '#faf3ec',
+        backgroundImage: `url(${imageSrc}), linear-gradient(135deg, #fdeee2, #f7d3b5)`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
       }}
