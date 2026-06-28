@@ -6,7 +6,7 @@
  */
 
 import { useState, useRef, useCallback, type ReactElement } from 'react'
-import { TrashIcon, PlayIcon, SquareIcon, LoaderCircleIcon, MicIcon, PlusIcon, AlertCircleIcon, SearchIcon } from 'lucide-react'
+import { TrashIcon, PlayIcon, SquareIcon, LoaderCircleIcon, MicIcon, PlusIcon, AlertCircleIcon, SearchIcon, CheckIcon } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -179,66 +179,81 @@ function AddVoiceDialog({ onAdded, trigger }: AddVoiceDialogProps) {
           {loadStatus === 'ready' && (
             <>
               <div className="relative">
-                <SearchIcon className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" aria-hidden="true" />
+                <SearchIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
                 <Input
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search voices…"
-                  className="pl-8"
+                  className="pl-9"
                   aria-label="Search ElevenLabs voices"
                 />
               </div>
-              <div
-                className="border rounded-lg overflow-y-auto max-h-56"
-                role="listbox"
-                aria-label="ElevenLabs voices"
-              >
-                {filtered.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-6">No voices match.</p>
-                ) : (
-                  filtered.map((v) => (
-                    <button
-                      key={v.id}
-                      type="button"
-                      role="option"
-                      aria-selected={selectedId === v.id}
-                      onClick={() => { setSelectedId(v.id); stopPreview() }}
-                      className={`w-full text-left px-3 py-2 text-sm transition-colors hover:bg-muted ${
-                        selectedId === v.id ? 'bg-primary/10 font-medium' : ''
-                      }`}
-                    >
-                      {v.name}
-                    </button>
-                  ))
-                )}
+
+              <div className="overflow-hidden rounded-xl border bg-muted/20">
+                <div
+                  className="max-h-64 space-y-0.5 overflow-y-auto p-1.5"
+                  role="listbox"
+                  aria-label="ElevenLabs voices"
+                >
+                  {filtered.length === 0 ? (
+                    <p className="py-8 text-center text-sm text-muted-foreground">No voices match.</p>
+                  ) : (
+                    filtered.map((v) => {
+                      const isSelected = selectedId === v.id
+                      return (
+                        <button
+                          key={v.id}
+                          type="button"
+                          role="option"
+                          aria-selected={isSelected}
+                          onClick={() => { setSelectedId(v.id); stopPreview() }}
+                          className={`flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left text-sm transition-colors ${
+                            isSelected
+                              ? 'bg-primary/10 font-medium text-primary ring-1 ring-inset ring-primary/25'
+                              : 'hover:bg-muted'
+                          }`}
+                        >
+                          <span className="min-w-0 flex-1 truncate">{v.name}</span>
+                          {isSelected && <CheckIcon className="size-4 shrink-0" aria-hidden="true" />}
+                        </button>
+                      )
+                    })
+                  )}
+                </div>
               </div>
+
               <div className="space-y-1.5">
                 <Label>Gender</Label>
-                <div className="flex gap-4">
+                <div className="inline-flex rounded-lg border bg-muted/30 p-0.5">
                   {(['male', 'female'] as const).map((g) => (
-                    <label key={g} className="flex items-center gap-2 cursor-pointer text-sm">
-                      <input
-                        type="radio"
-                        name="voice-gender"
-                        value={g}
-                        checked={gender === g}
-                        onChange={() => setGender(g)}
-                        className="accent-primary"
-                      />
+                    <button
+                      key={g}
+                      type="button"
+                      onClick={() => setGender(g)}
+                      aria-pressed={gender === g}
+                      className={`rounded-md px-5 py-1.5 text-sm font-medium transition-colors ${
+                        gender === g
+                          ? 'bg-primary text-primary-foreground shadow-sm'
+                          : 'text-muted-foreground hover:text-foreground'
+                      }`}
+                    >
                       {g === 'male' ? 'Male' : 'Female'}
-                    </label>
+                    </button>
                   ))}
                 </div>
               </div>
+
               {selectedVoice && (
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground flex-1 truncate">
-                    Selected: <span className="font-medium text-foreground">{selectedVoice.name}</span>
+                <div className="flex items-center justify-between gap-3 rounded-lg border bg-muted/30 px-3 py-2.5">
+                  <span className="min-w-0 flex-1 truncate text-sm">
+                    <span className="text-muted-foreground">Selected: </span>
+                    <span className="font-medium text-foreground">{selectedVoice.name}</span>
                   </span>
                   <Button
                     type="button"
                     variant="outline"
                     size="sm"
+                    className="shrink-0"
                     disabled={!selectedVoice.previewUrl || previewState === 'loading'}
                     onClick={handlePreview}
                     aria-label={previewState === 'playing' ? 'Stop preview' : 'Preview voice'}
