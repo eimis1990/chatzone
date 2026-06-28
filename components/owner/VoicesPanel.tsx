@@ -154,12 +154,12 @@ function AddVoiceDialog({ onAdded, trigger }: AddVoiceDialogProps) {
           )
         }
       />
-      <DialogContent className="max-w-md">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Add a voice</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4 py-2">
+        <div className="min-w-0 space-y-4 py-2">
           {loadStatus === 'loading' && (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <LoaderCircleIcon className="size-4 animate-spin" aria-hidden="true" />
@@ -189,9 +189,9 @@ function AddVoiceDialog({ onAdded, trigger }: AddVoiceDialogProps) {
                 />
               </div>
 
-              <div className="overflow-hidden rounded-xl border bg-muted/20">
+              <div className="min-w-0 overflow-hidden rounded-xl border bg-muted/20">
                 <div
-                  className="max-h-64 space-y-0.5 overflow-y-auto p-1.5"
+                  className="max-h-64 space-y-0.5 overflow-y-auto overflow-x-hidden p-1.5"
                   role="listbox"
                   aria-label="ElevenLabs voices"
                 >
