@@ -1,10 +1,8 @@
-import Link from 'next/link'
 import { UsersIcon, BotIcon, MessagesSquareIcon, MessageCircleIcon, SparklesIcon, MailIcon } from 'lucide-react'
 import { requireRole } from '@/lib/auth/guards'
 import { createServerClient } from '@/lib/supabase/server'
 import { StatCard } from '@/components/client/charts/StatCard'
-import { Badge } from '@/components/ui/badge'
-import { formatDistanceToNow } from '@/lib/date-utils'
+import { ClientCard } from '@/components/owner/ClientCard'
 
 interface OwnerStats {
   total_orgs: number
@@ -56,7 +54,7 @@ export default async function OwnerDashboardPage() {
   const orgs = (recentOrgs ?? []) as OrgStatRow[]
 
   return (
-    <div className="max-w-6xl space-y-8 p-6">
+    <div className="space-y-8 p-6">
       <div>
         <h1 className="text-lg font-semibold">Dashboard</h1>
         <p className="text-sm text-muted-foreground">Platform-wide overview across all clients.</p>
@@ -85,28 +83,9 @@ export default async function OwnerDashboardPage() {
         {orgs.length === 0 ? (
           <p className="text-sm text-muted-foreground">No client organisations yet.</p>
         ) : (
-          <div className="divide-y overflow-hidden rounded-xl border bg-card">
+          <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
             {orgs.map((org) => (
-              <Link
-                key={org.org_id}
-                href={`/owner/clients/${org.org_id}`}
-                className="flex items-center justify-between gap-4 px-5 py-3.5 transition-colors hover:bg-muted/40"
-              >
-                <div className="flex min-w-0 items-center gap-3">
-                  <span className="truncate font-medium">{org.org_name}</span>
-                  <Badge variant={org.status === 'active' ? 'default' : 'secondary'} className="shrink-0 capitalize">
-                    {org.status}
-                  </Badge>
-                </div>
-                <div className="flex shrink-0 items-center gap-6 text-xs text-muted-foreground">
-                  <span>{org.bots} bot{org.bots !== 1 ? 's' : ''}</span>
-                  <span>{org.conversations} conv.</span>
-                  <span>{org.leads} leads</span>
-                  <span className="hidden sm:block">
-                    {org.last_activity_at ? formatDistanceToNow(org.last_activity_at) : 'No activity'}
-                  </span>
-                </div>
-              </Link>
+              <ClientCard key={org.org_id} org={org} />
             ))}
           </div>
         )}
