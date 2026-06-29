@@ -57,10 +57,11 @@
   --card-foreground: oklch(0.145 0 0);
   --popover: #ffffff;
   --popover-foreground: oklch(0.145 0 0);
-  /* Brand accent — change this one value to re-skin the whole app. Text on the
-     accent stays near-black #101213 (best contrast on this orange). */
+  /* Brand accent — change this one value to re-skin the whole app. Text/icons on
+     the accent are white (matches the landing CTAs; brand preference over the
+     higher-contrast near-black). */
   --primary: #e97634;
-  --primary-foreground: #101213;
+  --primary-foreground: #ffffff;
   /* Derived accent shades — single source is --primary above. */
   --primary-hover: color-mix(in srgb, var(--primary) 86%, black);
   --primary-soft: color-mix(in srgb, var(--primary) 50%, white);
@@ -83,7 +84,7 @@
   --sidebar: #101213;
   --sidebar-foreground: #f6f6f6;
   --sidebar-primary: #e97634;
-  --sidebar-primary-foreground: #101213;
+  --sidebar-primary-foreground: #ffffff;
   /* Active nav item: a near-opaque white pill that reads on the dark sidebar */
   --sidebar-accent: rgba(255, 255, 255, 0.92);
   --sidebar-accent-foreground: #101213;

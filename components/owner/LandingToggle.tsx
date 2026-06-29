@@ -28,13 +28,8 @@ export function LandingToggle({ botId, initial }: { botId: string; initial: bool
   }
 
   return (
-    <label className="flex cursor-pointer items-center gap-2.5 rounded-lg border bg-background px-3 py-1.5">
-      <span className="text-right leading-tight">
-        <span className="block text-xs font-medium">Show on landing</span>
-        <span className={`block text-[11px] ${on ? 'text-green-600' : 'text-muted-foreground'}`}>
-          {on ? '● Live' : 'Hidden'}
-        </span>
-      </span>
+    <label className="flex h-10 cursor-pointer items-center gap-3 rounded-md border bg-background px-4">
+      <span className="whitespace-nowrap text-sm font-medium">Show on landing</span>
       <Switch
         checked={on}
         onCheckedChange={toggle}
