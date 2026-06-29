@@ -16,13 +16,14 @@ export function Hero() {
         className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#101213] via-[#101213]/70 via-[68%] to-transparent sm:via-[#101213]/45 sm:via-[50%]"
         aria-hidden="true"
       />
-      {/* Mobile-only top scrim — darkens behind the nav/headline without dimming the fox lower-right. */}
+      {/* Mobile-only bottom scrim — the copy sits at the bottom on mobile, so darken
+          there (keeps the freed-up top bright, revealing the fox's face). */}
       <div
-        className="pointer-events-none absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-[#101213]/80 to-transparent sm:hidden"
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-[#101213] via-[#101213]/70 to-transparent sm:hidden"
         aria-hidden="true"
       />
       {/* Copy — overlaid on the darkened left */}
-      <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 items-stretch px-5 pt-28 pb-10 sm:items-center sm:pt-32 sm:pb-16">
+      <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 items-end px-5 pt-28 pb-10 sm:items-center sm:pt-32 sm:pb-16">
         <div className="flex max-w-2xl flex-col">
           <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -78,7 +79,7 @@ export function Hero() {
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.22 }}
-            className="mt-auto pt-8 sm:mt-8 sm:pt-0"
+            className="mt-7 sm:mt-8"
           >
             <EmailCapture source="hero" />
           </motion.div>
