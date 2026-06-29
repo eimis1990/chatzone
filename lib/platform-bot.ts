@@ -61,6 +61,23 @@ export async function getOrCreatePlatformBot(): Promise<PlatformBot> {
 }
 
 /**
+ * Make the owner a member of the platform org so the knowledge upload / ingest
+ * flows (which are RLS-scoped to the signed-in user's org membership via the
+ * browser client) work for the platform bot. Idempotent.
+ */
+export async function ensurePlatformMembership(orgId: string, userId: string): Promise<void> {
+  const svc = createServiceClient()
+  const { data: existing } = await svc
+    .from('organization_members')
+    .select('user_id')
+    .eq('org_id', orgId)
+    .eq('user_id', userId)
+    .maybeSingle()
+  if (existing) return
+  await svc.from('organization_members').insert({ org_id: orgId, user_id: userId, role: 'admin' })
+}
+
+/**
  * Public key of the landing bot iff the owner has toggled it on — else null.
  * Resilient: never throws (returns null) so a build-time/runtime DB hiccup can't
  * break the public landing page render.

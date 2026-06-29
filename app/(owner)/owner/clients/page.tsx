@@ -8,12 +8,16 @@ export default async function ClientsPage() {
   await requireRole('owner')
 
   const supabase = await createServerClient()
-  const { data: orgs } = await supabase
-    .from('org_stats')
-    .select('*')
-    .order('last_activity_at', { ascending: false, nullsFirst: false })
+  const [{ data: orgs }, { data: platformOrg }] = await Promise.all([
+    supabase
+      .from('org_stats')
+      .select('*')
+      .order('last_activity_at', { ascending: false, nullsFirst: false }),
+    supabase.from('organizations').select('id').eq('is_platform', true).maybeSingle<{ id: string }>(),
+  ])
 
-  const rows = (orgs ?? []) as ClientCardOrg[]
+  // Loqara's own (platform) org isn't a client — keep it out of the list.
+  const rows = ((orgs ?? []) as ClientCardOrg[]).filter((o) => o.org_id !== platformOrg?.id)
 
   return (
     <div className="space-y-6 p-6">

@@ -51,7 +51,13 @@ export default async function OwnerDashboardPage() {
     total_messages: 0,
     total_leads: 0,
   }
-  const orgs = (recentOrgs ?? []) as OrgStatRow[]
+  const { data: platformOrg } = await supabase
+    .from('organizations')
+    .select('id')
+    .eq('is_platform', true)
+    .maybeSingle<{ id: string }>()
+  // Loqara's own (platform) org isn't a client — exclude it from recent activity.
+  const orgs = ((recentOrgs ?? []) as OrgStatRow[]).filter((o) => o.org_id !== platformOrg?.id)
 
   return (
     <div className="space-y-8 p-6">
