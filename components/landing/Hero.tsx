@@ -22,8 +22,8 @@ export function Hero() {
         aria-hidden="true"
       />
       {/* Copy — overlaid on the darkened left */}
-      <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 items-center px-5 pt-32 pb-16">
-        <div className="max-w-2xl">
+      <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 items-stretch px-5 pt-28 pb-10 sm:items-center sm:pt-32 sm:pb-16">
+        <div className="flex max-w-2xl flex-col">
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -40,7 +40,7 @@ export function Hero() {
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-            className="text-balance font-[family-name:var(--font-jakarta)] text-5xl font-bold leading-[1.05] tracking-tight sm:text-6xl lg:text-[4.75rem]"
+            className="text-balance font-[family-name:var(--font-jakarta)] text-[2.5rem] font-bold leading-[1.05] tracking-tight sm:text-6xl lg:text-[4.75rem]"
           >
             Answer every customer,
             <br />
@@ -68,7 +68,7 @@ export function Hero() {
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="mt-6 max-w-xl text-lg leading-relaxed text-white/80 sm:text-xl"
+            className="mt-5 max-w-xl text-base leading-relaxed text-white/80 sm:mt-6 sm:text-xl"
           >
             Your always-on AI agent for chat &amp; voice — answering questions, capturing leads, and
             looking up orders 24/7, so customers never wait. Live in one line of code.
@@ -78,7 +78,7 @@ export function Hero() {
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.22 }}
-            className="mt-8"
+            className="mt-auto pt-8 sm:mt-8 sm:pt-0"
           >
             <EmailCapture source="hero" />
           </motion.div>
