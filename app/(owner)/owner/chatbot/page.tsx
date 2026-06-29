@@ -12,15 +12,17 @@ export default async function OwnerChatbotConfigurePage() {
   const bot = await getOrCreatePlatformBot()
 
   return (
-    <ConfigForm
-      botId={bot.id}
-      botName={bot.name}
-      initialConfig={bot.config}
-      canUseAllLanguages
-      canUseLeadCapture
-      canUseVoice
-      onSave={saveClientBotConfig}
-      headerAction={<LandingToggle botId={bot.id} initial={bot.show_on_landing} />}
-    />
+    <div className="min-h-0 flex-1">
+      <ConfigForm
+        botId={bot.id}
+        botName={bot.name}
+        initialConfig={bot.config}
+        canUseAllLanguages
+        canUseLeadCapture
+        canUseVoice
+        onSave={saveClientBotConfig}
+        headerAction={<LandingToggle botId={bot.id} initial={bot.show_on_landing} />}
+      />
+    </div>
   )
 }
