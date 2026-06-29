@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { MenuIcon, XIcon } from 'lucide-react'
-import { LoqaraIcon } from '@/components/LoqaraIcon'
 import { trackEvent } from '@/lib/analytics'
 
 const LINKS = [
@@ -36,8 +35,22 @@ export function LandingNav({ solid = false }: { solid?: boolean }) {
       }`}
     >
       <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5">
-        <Link href="/" className={`flex items-center gap-1 text-xl font-bold ${solidNav ? 'text-gray-900' : 'text-white'}`}>
-          <LoqaraIcon className="size-12" />
+        <Link href="/" className={`flex items-center gap-2 text-xl font-bold ${solidNav ? 'text-gray-900' : 'text-white'}`}>
+          {/* Colored vector over the dark hero; black fox once the bar turns white. Cross-fades with the bar. */}
+          <span className="relative inline-block size-9 shrink-0">
+            <img
+              src="/loqara-logo-vector.svg"
+              alt=""
+              aria-hidden="true"
+              className={`absolute inset-0 size-9 transition-opacity duration-300 ${solidNav ? 'opacity-0' : 'opacity-100'}`}
+            />
+            <img
+              src="/loqara-fox-black.webp"
+              alt=""
+              aria-hidden="true"
+              className={`absolute inset-0 size-9 transition-opacity duration-300 ${solidNav ? 'opacity-100' : 'opacity-0'}`}
+            />
+          </span>
           <span>
             Loqara<span className="text-primary">.</span>
           </span>
