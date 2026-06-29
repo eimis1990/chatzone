@@ -196,6 +196,10 @@ export interface BotConfig {
     tone: string
     verbosity: 'concise' | 'balanced' | 'detailed'
   }
+  /** "Request rich responses" — append a hidden instruction asking the model to
+   *  format replies as Markdown (bold, lists, links). Rendered safely in the
+   *  bubble. Defaults to on (treat undefined as true). */
+  richResponses?: boolean
   model: string
   temperature: number
   leadCapture: {

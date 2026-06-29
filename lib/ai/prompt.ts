@@ -41,11 +41,21 @@ export function buildSystemPrompt(
     config.systemPrompt,
     `Tone: ${config.persona.tone}. Verbosity: ${config.persona.verbosity}.`,
     `Always respond in ${languageName}, regardless of the language the user writes in.`,
-    'Use light Markdown to make text answers easy to read: **bold** for key terms, ' +
-      '"- " bullet lists or numbered lists for multiple items or steps, and [label](url) for ' +
-      'links. Write phone numbers in full international form (e.g. +370 600 12345) so they are ' +
-      'tappable. Keep replies concise — do not over-format short answers.',
   ]
+
+  // "Request rich responses" toggle (default on): ask the model to structure
+  // replies as Markdown so the widget renders them as rich text.
+  if (config.richResponses !== false) {
+    lines.push(
+      'FORMATTING: write replies as clean, well-structured Markdown so they render richly. ' +
+        'Use short paragraphs and **bold** for key terms; group multiple items, options, or ' +
+        'features into "- " bullet lists; use numbered lists for ordered steps; and write links ' +
+        'as [label](https://…). Put phone numbers in full international form (e.g. +370 600 12345) ' +
+        'and emails in plain text so they become tappable. Lead with a brief sentence, then a list ' +
+        'when enumerating things. Keep one-line answers as plain sentences (do not force a list) ' +
+        'and never wrap the whole reply in a code block.',
+    )
+  }
 
   if (commerce) {
     lines.push(

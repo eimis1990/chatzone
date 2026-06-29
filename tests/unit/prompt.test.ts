@@ -57,4 +57,20 @@ describe('buildMessages', () => {
     const msgs = buildMessages(config, [], [], 'q', 'lt')
     expect(msgs[0].content).toContain('respond in Lithuanian')
   })
+
+  it('no longer asks the model to print source ids', () => {
+    const msgs = buildMessages(config, [{ content: 'x', source_id: 's1' }], [], 'q')
+    expect(msgs[0].content).not.toMatch(/cite the sources/i)
+    expect(msgs[0].content).toMatch(/do not (mention|print|reference)/i)
+  })
+
+  it('adds the rich-formatting instruction when richResponses is on (default)', () => {
+    const msgs = buildMessages(config, [], [], 'q')
+    expect(msgs[0].content).toContain('FORMATTING:')
+  })
+
+  it('omits the rich-formatting instruction when richResponses is off', () => {
+    const msgs = buildMessages({ ...config, richResponses: false }, [], [], 'q')
+    expect(msgs[0].content).not.toContain('FORMATTING:')
+  })
 })

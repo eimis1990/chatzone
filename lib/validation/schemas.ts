@@ -132,6 +132,9 @@ export const botConfigFormSchema = z.object({
       verbosity: z.enum(['concise', 'balanced', 'detailed']).default('balanced'),
     })
     .default({ tone: 'friendly', verbosity: 'balanced' }),
+  // Append a hidden instruction asking the model to format replies as rich
+  // Markdown (bold, lists, links). On by default.
+  richResponses: z.boolean().default(true),
   model: z.string().default('gpt-4o-mini'),
   temperature: z.number().min(0).max(2).default(0.3),
   leadCapture: z

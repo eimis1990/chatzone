@@ -427,6 +427,7 @@ export function ConfigForm({
     temperature: watchedValues.temperature,
     systemPrompt: watchedValues.systemPrompt,
     persona: watchedValues.persona,
+    richResponses: watchedValues.richResponses,
     leadCapture: watchedValues.leadCapture,
     allowedDomains: watchedValues.allowedDomains,
     avatarUrl: watchedValues.avatarUrl,
@@ -1100,6 +1101,27 @@ export function ConfigForm({
                 </div>
               )}
             />
+
+            <div className="flex items-center justify-between gap-4">
+              <div className="space-y-0.5">
+                <Label htmlFor="richResponses">Request rich responses</Label>
+                <p className="text-xs text-muted-foreground">
+                  Asks the AI to format answers with bold, bullet/numbered lists, and links so
+                  they render as rich text in the chat bubble.
+                </p>
+              </div>
+              <Controller
+                name="richResponses"
+                control={control}
+                render={({ field }) => (
+                  <Switch
+                    id="richResponses"
+                    checked={field.value ?? true}
+                    onCheckedChange={field.onChange}
+                  />
+                )}
+              />
+            </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-1.5">
