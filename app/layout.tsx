@@ -39,7 +39,7 @@ const fontVariables = [inter, poppins, nunito, jakarta, lora]
   .map((f) => f.variable)
   .join(" ");
 
-const TITLE = "Loqara — AI chat & voice agent for modern stores";
+const TITLE = "Loqara — AI chat & voice agent for any website";
 const DESCRIPTION =
   "Answer every customer, day or night. A chat & voice agent that knows your products, captures leads, looks up orders, and hands off to your team — embedded in one line.";
 
@@ -78,17 +78,17 @@ export const metadata: Metadata = {
   openGraph: {
     title: TITLE,
     description:
-      "AI chat & voice support for e-commerce: grounded answers, product search, order lookups, live handoff, and analytics.",
+      "AI chat & voice support for any website: grounded answers, product search, order lookups, live handoff, and analytics.",
     type: "website",
     url: "/",
     siteName: SITE_NAME,
     locale: "en_US",
     images: [
       {
-        url: "/landing/og.png",
+        url: "/landing/og.png?v=2",
         width: 1200,
         height: 630,
-        alt: "Loqara — AI chat & voice agent for modern stores",
+        alt: "Loqara — AI chat & voice agent for any website",
       },
     ],
   },
@@ -96,8 +96,8 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: TITLE,
     description:
-      "AI chat & voice support for e-commerce: grounded answers, product search, order lookups, live handoff, and analytics.",
-    images: ["/landing/og.png"],
+      "AI chat & voice support for any website: grounded answers, product search, order lookups, live handoff, and analytics.",
+    images: ["/landing/og.png?v=2"],
   },
 };
 
