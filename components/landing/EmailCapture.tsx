@@ -24,7 +24,15 @@ async function celebrate(origin: { x: number; y: number }) {
  * Early-access email capture for the landing page (hero + final CTA). Posts to
  * /api/signup and shows an inline success state. Styled for dark sections.
  */
-export function EmailCapture({ source }: { source: string }) {
+export function EmailCapture({
+  source,
+  className = 'max-w-md',
+}: {
+  source: string
+  /** Width of the form wrapper. Defaults to a compact max-w-md (hero); pass
+   *  e.g. "w-full" to let it fill a wider container (CTA). */
+  className?: string
+}) {
   const [email, setEmail] = useState('')
   const [status, setStatus] = useState<'idle' | 'loading' | 'done' | 'error'>('idle')
   const [error, setError] = useState('')
@@ -69,7 +77,7 @@ export function EmailCapture({ source }: { source: string }) {
 
   if (status === 'done') {
     return (
-      <div className="flex max-w-md items-center gap-2 rounded-full border border-white/10 bg-black/30 px-5 py-3 text-sm font-medium text-white backdrop-blur-md">
+      <div className={`flex ${className} items-center gap-2 rounded-full border border-white/10 bg-black/30 px-5 py-3 text-sm font-medium text-white backdrop-blur-md`}>
         <CheckCircle2Icon className="size-4 flex-shrink-0 text-primary" />
         Thank you! We&apos;ve got your email — we&apos;ll contact you soon.
       </div>
@@ -77,7 +85,7 @@ export function EmailCapture({ source }: { source: string }) {
   }
 
   return (
-    <div className="max-w-md">
+    <div className={className}>
       <form onSubmit={submit} className="flex flex-col gap-3 sm:flex-row">
         <input
           type="email"

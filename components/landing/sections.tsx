@@ -242,18 +242,24 @@ export function HowItWorks() {
 export function CTASection() {
   return (
     <section id="get-started" className="scroll-mt-20 text-white" style={{ backgroundColor: DARK }}>
-      <div className="mx-auto max-w-3xl px-5 py-24 text-center">
+      <div className="mx-auto max-w-6xl px-5 py-24">
         <Reveal>
-          <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-            Put an AI agent on your store today
-          </h2>
-          <p className="mx-auto mt-4 max-w-xl text-lg text-white/75">
-            Free to get started. Set it up in an afternoon and let your customers feel the difference tonight.
-          </p>
-          <div className="mx-auto mt-8 flex justify-center">
-            <EmailCapture source="cta" />
+          {/* Framed like the pricing "Everything included" card so the closing CTA
+              reads as its own contained panel rather than a flat dark band. */}
+          <div className="rounded-3xl border border-white/10 bg-white/[0.03] px-6 py-16 text-center sm:px-10">
+            <h2 className="mx-auto max-w-xl text-balance text-3xl font-semibold tracking-tight sm:text-4xl">
+              Add an AI agent to your site today
+            </h2>
+            <p className="mx-auto mt-4 max-w-lg text-base leading-relaxed text-white/70 sm:text-lg">
+              Free to start and live in one line of code. Set it up this afternoon, and your
+              customers feel the difference tonight.
+            </p>
+            {/* Form spans the title's width (max-w-2xl), so the email field + button
+                line up with the headline above instead of sitting in a narrow pill. */}
+            <div className="mx-auto mt-8 max-w-xl">
+              <EmailCapture source="cta" className="w-full" />
+            </div>
           </div>
-          <p className="mt-4 text-xs text-white/55">No credit card required.</p>
         </Reveal>
       </div>
     </section>
