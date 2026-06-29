@@ -11,7 +11,6 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { LoqaraIcon } from '@/components/LoqaraIcon'
 import { SignOutButton } from '@/components/client/SignOutButton'
 
 const NAV: { label: string; href: string; icon: LucideIcon; exact?: boolean }[] = [
@@ -32,8 +31,8 @@ export function OwnerSidebar({ userEmail }: { userEmail: string }) {
   return (
     <aside className="flex h-full w-64 flex-shrink-0 flex-col bg-transparent text-sidebar-foreground">
       {/* Logo */}
-      <Link href="/owner" className="flex items-center gap-1 px-4 py-4 text-white">
-        <LoqaraIcon className="size-14" />
+      <Link href="/owner" className="flex items-center gap-2 px-4 py-4 text-white">
+        <img src="/loqara-logo-colorful.webp" alt="" aria-hidden="true" className="size-11 shrink-0" />
         <span className="text-2xl font-bold">
           Loqara<span className="text-primary">.owner</span>
         </span>

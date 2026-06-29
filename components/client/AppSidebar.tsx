@@ -20,7 +20,6 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { LoqaraIcon } from '@/components/LoqaraIcon'
 import { SignOutButton } from '@/components/client/SignOutButton'
 
 const SECTIONS: { label: string; href: string; icon: LucideIcon }[] = [
@@ -62,9 +61,9 @@ export function AppSidebar({ bots, userEmail }: { bots: BotLite[]; userEmail: st
       {/* Logo */}
       <Link
         href="/app"
-        className="flex items-center gap-1 px-4 py-4 text-white"
+        className="flex items-center gap-2 px-4 py-4 text-white"
       >
-        <LoqaraIcon className="size-14" />
+        <img src="/loqara-logo-colorful.webp" alt="" aria-hidden="true" className="size-11 shrink-0" />
         <span className="text-2xl font-bold">
           Loqara<span className="text-primary">.</span>
         </span>
