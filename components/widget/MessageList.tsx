@@ -6,6 +6,7 @@ import { ProductCards } from './ProductCards'
 import { OrderStatusCard } from './OrderStatusCard'
 import { ThinkingDots } from './ThinkingDots'
 import { readableTextColor } from '@/lib/utils'
+import { formatMessage, stripCitations } from '@/lib/format-message'
 import type { CommerceProduct, OrderStatus } from '@/lib/commerce/types'
 
 export interface ChatMessage {
@@ -125,7 +126,9 @@ export function MessageList({
               {/* Skip the empty bubble for cards-only (voice search) messages. */}
               {(msg.content || msg.streaming) && (
                 <div
-                  className={`px-3 py-2 text-sm whitespace-pre-wrap ${
+                  className={`px-3 py-2 text-sm ${
+                    msg.role === 'assistant' && !msg.streaming ? '' : 'whitespace-pre-wrap'
+                  } ${
                     msg.role === 'user'
                       ? glassBubbles
                         ? 'backdrop-blur-md'
@@ -151,9 +154,18 @@ export function MessageList({
                 >
                   {msg.streaming && !msg.content ? (
                     <ThinkingDots />
+                  ) : msg.role === 'assistant' && !msg.streaming ? (
+                    // Finished bot reply — render light Markdown (bold, lists,
+                    // links, tel) as sanitized HTML.
+                    <div
+                      className="loqara-md"
+                      dangerouslySetInnerHTML={{ __html: formatMessage(msg.content) }}
+                    />
                   ) : (
+                    // User messages, and bot replies mid-stream, stay plain text
+                    // (partial Markdown would render broken while streaming).
                     <>
-                      {msg.displayContent ?? msg.content}
+                      {stripCitations(msg.displayContent ?? msg.content)}
                       {msg.streaming && (
                         <span className="inline-block w-1.5 h-4 ml-0.5 align-middle animate-pulse bg-current opacity-70" />
                       )}

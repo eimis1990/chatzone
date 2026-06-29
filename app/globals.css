@@ -349,3 +349,61 @@ html.lenis body {
   width: 100%;
   border-radius: 0.75rem;
 }
+
+/* ─── Chat bubble rich text (bot replies rendered from light Markdown) ─── */
+.loqara-md {
+  /* Long URLs/words shouldn't blow out the narrow bubble. */
+  overflow-wrap: anywhere;
+}
+.loqara-md > :first-child {
+  margin-top: 0;
+}
+.loqara-md > :last-child {
+  margin-bottom: 0;
+}
+.loqara-md p {
+  margin: 0.4em 0;
+}
+.loqara-md ul,
+.loqara-md ol {
+  margin: 0.4em 0;
+  padding-left: 1.2em;
+}
+.loqara-md ul {
+  list-style: disc;
+}
+.loqara-md ol {
+  list-style: decimal;
+}
+.loqara-md li {
+  margin: 0.15em 0;
+}
+.loqara-md li > p {
+  margin: 0;
+}
+.loqara-md strong {
+  font-weight: 700;
+}
+.loqara-md a {
+  /* Inherit the bubble's (auto-contrasting) text colour; the underline is the
+     affordance, so links stay legible on the default grey or a custom bubble. */
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  font-weight: 500;
+}
+.loqara-md code {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.85em;
+  background: rgba(0, 0, 0, 0.06);
+  padding: 0.1em 0.3em;
+  border-radius: 4px;
+}
+.loqara-md h1,
+.loqara-md h2,
+.loqara-md h3,
+.loqara-md h4 {
+  font-weight: 700;
+  font-size: 1em;
+  margin: 0.5em 0 0.2em;
+}

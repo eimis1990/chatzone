@@ -41,6 +41,10 @@ export function buildSystemPrompt(
     config.systemPrompt,
     `Tone: ${config.persona.tone}. Verbosity: ${config.persona.verbosity}.`,
     `Always respond in ${languageName}, regardless of the language the user writes in.`,
+    'Use light Markdown to make text answers easy to read: **bold** for key terms, ' +
+      '"- " bullet lists or numbered lists for multiple items or steps, and [label](url) for ' +
+      'links. Write phone numbers in full international form (e.g. +370 600 12345) so they are ' +
+      'tappable. Keep replies concise — do not over-format short answers.',
   ]
 
   if (commerce) {
@@ -92,7 +96,10 @@ export function buildSystemPrompt(
       )
     }
   } else {
-    lines.push('Answer using ONLY the context below. Cite the sources you used by their id.')
+    lines.push(
+      'Answer using ONLY the context below. Do not mention, print, or reference the source ids ' +
+        'in your reply — they are for your reference only.',
+    )
     lines.push(
       `If the answer is not contained in the context, do not invent one — reply with: "${fallback}"`,
     )
