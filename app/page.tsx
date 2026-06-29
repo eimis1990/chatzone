@@ -6,6 +6,8 @@ import { Showcase } from '@/components/landing/Showcase'
 import { Faq } from '@/components/landing/Faq'
 import { FAQ } from '@/components/landing/faq-data'
 import { SmoothScroll } from '@/components/landing/SmoothScroll'
+import { WidgetEmbed } from '@/components/landing/WidgetEmbed'
+import { getLandingBotKey } from '@/lib/platform-bot'
 import { PLANS, DISPLAY_PLANS } from '@/lib/plans-catalog'
 import { SITE_URL, SITE_NAME } from '@/lib/site'
 import type { Metadata } from 'next'
@@ -13,6 +15,10 @@ import type { Metadata } from 'next'
 export const metadata: Metadata = {
   alternates: { canonical: '/' },
 }
+
+// Re-rendered when the owner flips the landing toggle (revalidatePath('/')); the
+// 5-min window is just a backstop so the page otherwise stays cached.
+export const revalidate = 300
 
 const PAID = DISPLAY_PLANS.map((p) => PLANS[p].monthly)
 const LOW_PRICE = Math.min(...PAID)
@@ -83,7 +89,10 @@ const jsonLd = {
   ],
 }
 
-export default function Home() {
+export default async function Home() {
+  // Loqara's own bot, shown only when the owner has toggled it on (Owner → Our chatbot).
+  const landingBotKey = await getLandingBotKey()
+
   return (
     <>
       <script
@@ -103,6 +112,7 @@ export default function Home() {
         <CTASection />
       </main>
       <Footer />
+      {landingBotKey && <WidgetEmbed botKey={landingBotKey} />}
     </>
   )
 }

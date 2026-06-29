@@ -74,6 +74,8 @@ interface ConfigFormProps {
   canUseVoice?: boolean
   /** Save handler — defaults to the client saveConfig; the owner editor injects its own. */
   onSave?: (botId: string, rawConfig: unknown, name?: string) => Promise<SaveConfigResult>
+  /** Optional control rendered next to Save (e.g. the owner's show-on-landing toggle). */
+  headerAction?: ReactNode
 }
 
 // Use botConfigFormSchema (plain, no preprocessing) for the RHF resolver.
@@ -158,6 +160,7 @@ export function ConfigForm({
   canUseLeadCapture = true,
   canUseVoice = true,
   onSave = saveConfig,
+  headerAction,
 }: ConfigFormProps) {
   const router = useRouter()
   // Internal bot name — lives outside the config schema, saved alongside it.
@@ -448,10 +451,13 @@ export function ConfigForm({
             <h2 className="text-base font-semibold leading-tight">Configuration</h2>
             <p className="text-xs text-muted-foreground">Changes go live when you save.</p>
           </div>
-          <Button type="submit" disabled={isSubmitting} className="h-10 rounded-md px-7">
-            <SaveIcon className="size-4" />
-            {isSubmitting ? 'Saving…' : 'Save'}
-          </Button>
+          <div className="flex items-center gap-3">
+            {headerAction}
+            <Button type="submit" disabled={isSubmitting} className="h-10 rounded-md px-7">
+              <SaveIcon className="size-4" />
+              {isSubmitting ? 'Saving…' : 'Save'}
+            </Button>
+          </div>
         </div>
 
         {/* ── Display ── */}

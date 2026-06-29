@@ -14,6 +14,7 @@ function makeBot(config: BotConfig = defaultBotConfig('Bot')): Bot {
     elevenlabs_agent_id: null,
     elevenlabs_agent_hash: null,
     last_seen_at: null,
+    show_on_landing: false,
     created_at: '',
     updated_at: '',
   }

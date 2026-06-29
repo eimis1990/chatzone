@@ -48,6 +48,8 @@ export interface Organization {
   current_period_end: string | null
   cancel_at_period_end: boolean
   voice_addon: boolean
+  /** Loqara's own internal org (not a client) — powers the dogfooded landing bot. */
+  is_platform: boolean
 }
 
 export interface OrganizationMember {
@@ -234,6 +236,8 @@ export interface Bot {
   elevenlabs_agent_hash: string | null
   /** Last time the widget loaded this bot's config (embedded & visited). */
   last_seen_at: string | null
+  /** Owner toggle: show this bot's live widget on Loqara's marketing landing page. */
+  show_on_landing: boolean
   created_at: string
   updated_at: string
 }

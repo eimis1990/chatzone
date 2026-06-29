@@ -8,6 +8,7 @@ import {
   MicVocalIcon,
   MailIcon,
   MegaphoneIcon,
+  BotIcon,
   type LucideIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -16,6 +17,7 @@ import { SignOutButton } from '@/components/client/SignOutButton'
 const NAV: { label: string; href: string; icon: LucideIcon; exact?: boolean }[] = [
   { label: 'Dashboard', href: '/owner', icon: LayoutDashboardIcon, exact: true },
   { label: 'Clients', href: '/owner/clients', icon: UsersIcon },
+  { label: 'Our chatbot', href: '/owner/chatbot', icon: BotIcon },
   { label: 'Voices', href: '/owner/voices', icon: MicVocalIcon },
   { label: 'Signups', href: '/owner/signups', icon: MailIcon },
   { label: 'LinkedIn', href: '/owner/linkedin', icon: MegaphoneIcon },
