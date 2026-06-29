@@ -79,7 +79,7 @@ export function EmailCapture({
     return (
       <div className={`flex ${className} items-center gap-2 rounded-full border border-white/10 bg-black/30 px-5 py-3 text-sm font-medium text-white backdrop-blur-md`}>
         <CheckCircle2Icon className="size-4 flex-shrink-0 text-primary" />
-        Thank you! We&apos;ve got your email — we&apos;ll contact you soon.
+        Thanks! We&apos;ve got your request — we&apos;ll be in touch to set up your demo.
       </div>
     )
   }
@@ -102,7 +102,7 @@ export function EmailCapture({
           disabled={status === 'loading'}
           className="relative inline-flex h-12 items-center justify-center overflow-hidden rounded-full bg-primary px-6 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition-colors hover:bg-primary-hover disabled:opacity-70"
         >
-          <span className="relative z-10">{status === 'loading' ? 'Joining…' : 'Get started'}</span>
+          <span className="relative z-10">{status === 'loading' ? 'Sending…' : 'Request a demo'}</span>
           <Shimmer />
         </button>
       </form>

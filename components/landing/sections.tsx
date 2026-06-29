@@ -254,9 +254,9 @@ export function CTASection() {
               Free to start and live in one line of code. Set it up this afternoon, and your
               customers feel the difference tonight.
             </p>
-            {/* Form spans the title's width (max-w-2xl), so the email field + button
-                line up with the headline above instead of sitting in a narrow pill. */}
-            <div className="mx-auto mt-8 max-w-xl">
+            {/* Form width tuned to the rendered headline text (~551px) so the email
+                field + button together span exactly the title above. */}
+            <div className="mx-auto mt-8 max-w-[34.5rem]">
               <EmailCapture source="cta" className="w-full" />
             </div>
           </div>
