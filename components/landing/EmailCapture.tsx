@@ -86,7 +86,7 @@ export function EmailCapture({ source }: { source: string }) {
           onChange={(e) => setEmail(e.target.value)}
           placeholder="Enter your work email"
           aria-label="Work email"
-          className="h-12 flex-1 rounded-full border border-white/10 bg-black/30 px-5 text-sm text-white backdrop-blur-md placeholder:text-white/50 outline-none focus:border-primary focus:ring-2 focus:ring-primary/40"
+          className="h-12 w-full shrink-0 rounded-full border border-white/10 bg-black/30 px-5 text-sm text-white backdrop-blur-md outline-none placeholder:text-white/50 focus:border-primary focus:ring-2 focus:ring-primary/40 sm:w-auto sm:flex-1"
         />
         <button
           ref={buttonRef}

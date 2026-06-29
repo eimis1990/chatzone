@@ -9,9 +9,16 @@ export function Hero() {
     <section className="relative flex min-h-svh flex-col overflow-hidden bg-[#101213] text-white">
       {/* Full-bleed hero: fox walks in once, then loops idle (see HeroVideo) */}
       <HeroVideo />
-      {/* Slight left-side dark fade so the copy stays legible over the bright scene */}
+      {/* Left-side dark fade so the copy stays legible over the bright scene.
+          Stronger + reaching further right on mobile (text is wider there); the
+          far right stays clear so the fox is still visible. */}
       <div
-        className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#101213] via-[#101213]/45 to-transparent"
+        className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#101213] via-[#101213]/70 via-[68%] to-transparent sm:via-[#101213]/45 sm:via-[50%]"
+        aria-hidden="true"
+      />
+      {/* Mobile-only top scrim — darkens behind the nav/headline without dimming the fox lower-right. */}
+      <div
+        className="pointer-events-none absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-[#101213]/80 to-transparent sm:hidden"
         aria-hidden="true"
       />
       {/* Copy — overlaid on the darkened left */}

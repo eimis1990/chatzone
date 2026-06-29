@@ -21,12 +21,14 @@ export function HeroVideo() {
         src="/loqara-hero-poster.jpg"
         alt=""
         aria-hidden="true"
-        className="absolute inset-0 h-full w-full object-cover object-center"
+        className="absolute inset-0 h-full w-full object-cover object-[72%_center] sm:object-center"
       />
     )
   }
 
-  const base = 'absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-500'
+  // On mobile (tall crop) shift toward the fox on the right; centered on desktop.
+  const base =
+    'absolute inset-0 h-full w-full object-cover object-[72%_center] sm:object-center transition-opacity duration-500'
 
   return (
     <>
