@@ -92,6 +92,20 @@ export interface PlatformVoice {
   created_at: string
 }
 
+export type LinkedInPostStatus = 'idea' | 'draft' | 'posted'
+
+/** Owner-only LinkedIn content tracker entry (see /owner/linkedin). */
+export interface LinkedInPost {
+  id: string
+  title: string
+  body: string
+  link: string | null
+  status: LinkedInPostStatus
+  posted_at: string | null
+  created_at: string
+  updated_at: string
+}
+
 export interface VoiceConfig {
   enabled: boolean
   ttsEnabled: boolean

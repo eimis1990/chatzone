@@ -7,6 +7,7 @@ import {
   UsersIcon,
   MicVocalIcon,
   MailIcon,
+  MegaphoneIcon,
   type LucideIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -18,6 +19,7 @@ const NAV: { label: string; href: string; icon: LucideIcon; exact?: boolean }[] 
   { label: 'Clients', href: '/owner/clients', icon: UsersIcon },
   { label: 'Voices', href: '/owner/voices', icon: MicVocalIcon },
   { label: 'Signups', href: '/owner/signups', icon: MailIcon },
+  { label: 'LinkedIn', href: '/owner/linkedin', icon: MegaphoneIcon },
 ]
 
 export function OwnerSidebar({ userEmail }: { userEmail: string }) {
