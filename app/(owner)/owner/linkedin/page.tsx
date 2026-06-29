@@ -17,7 +17,7 @@ export default async function LinkedInPage() {
   const posts = (data ?? []) as LinkedInPost[]
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="h-full min-h-0 p-6">
       <LinkedInBoard initialPosts={posts} />
     </div>
   )

@@ -136,58 +136,63 @@ export function LinkedInBoard({ initialPosts }: { initialPosts: LinkedInPost[] }
 
   return (
     <>
-      {/* Header */}
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-lg font-semibold">LinkedIn posts</h1>
-          <p className="text-sm text-muted-foreground">
-            Plan posts, draft the copy, and tick them off once they&rsquo;re live.
-          </p>
+      <div className="flex h-full min-h-0 flex-col gap-5">
+        {/* Header — stays static at the top */}
+        <div className="flex shrink-0 items-start justify-between gap-4">
+          <div>
+            <h1 className="text-lg font-semibold">LinkedIn posts</h1>
+            <p className="text-sm text-muted-foreground">
+              Plan posts, draft the copy, and tick them off once they&rsquo;re live.
+            </p>
+          </div>
+          <Button onClick={openNew} className="shrink-0">
+            <PlusIcon className="size-4" /> New post
+          </Button>
         </div>
-        <Button onClick={openNew} className="shrink-0">
-          <PlusIcon className="size-4" /> New post
-        </Button>
-      </div>
 
-      {/* Board */}
-      <div className="grid gap-4 md:grid-cols-3">
-        {COLUMNS.map((col) => {
-          const items = posts.filter((p) => p.status === col.key)
-          return (
-            <div key={col.key} className="rounded-xl bg-muted/40 p-3">
-              <div className="mb-3 flex items-center gap-2 px-1">
-                <span className={`size-2 rounded-full ${col.dot}`} aria-hidden="true" />
-                <span className="text-sm font-semibold">{col.label}</span>
-                <span className="ml-auto rounded-full bg-background px-2 py-0.5 text-xs font-medium text-muted-foreground tabular-nums">
-                  {items.length}
-                </span>
-              </div>
+        {/* Board — fills the rest; on desktop each column scrolls under its static white header */}
+        <div className="flex min-h-0 flex-1 flex-col gap-4 md:flex-row">
+          {COLUMNS.map((col) => {
+            const items = posts.filter((p) => p.status === col.key)
+            return (
+              <div
+                key={col.key}
+                className="flex flex-col rounded-xl bg-muted/40 md:min-h-0 md:min-w-0 md:flex-1 md:overflow-hidden"
+              >
+                <div className="flex shrink-0 items-center gap-2 rounded-t-xl border-b border-border bg-white px-3 py-2.5">
+                  <span className={`size-2 rounded-full ${col.dot}`} aria-hidden="true" />
+                  <span className="text-sm font-semibold">{col.label}</span>
+                  <span className="ml-auto rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground tabular-nums">
+                    {items.length}
+                  </span>
+                </div>
 
-              <div className="flex flex-col gap-3">
-                {items.length === 0 ? (
-                  <p className="px-1 py-6 text-center text-xs text-muted-foreground">Nothing here yet.</p>
-                ) : (
-                  items.map((post) => (
-                    <PostCard
-                      key={post.id}
-                      post={post}
-                      pending={pending}
-                      onEdit={() => openEdit(post)}
-                      onDelete={() => remove(post)}
-                      onCopy={() => copy(post)}
-                      onMove={(s) => move(post, s)}
-                    />
-                  ))
-                )}
+                <div className="flex flex-col gap-3 p-3 md:min-h-0 md:flex-1 md:overflow-y-auto">
+                  {items.length === 0 ? (
+                    <p className="px-1 py-6 text-center text-xs text-muted-foreground">Nothing here yet.</p>
+                  ) : (
+                    items.map((post) => (
+                      <PostCard
+                        key={post.id}
+                        post={post}
+                        pending={pending}
+                        onEdit={() => openEdit(post)}
+                        onDelete={() => remove(post)}
+                        onCopy={() => copy(post)}
+                        onMove={(s) => move(post, s)}
+                      />
+                    ))
+                  )}
+                </div>
               </div>
-            </div>
-          )
-        })}
+            )
+          })}
+        </div>
       </div>
 
       {/* Create / edit dialog */}
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-lg">
+        <DialogContent className="sm:max-w-2xl">
           <DialogHeader>
             <DialogTitle>{form.id ? 'Edit post' : 'New post'}</DialogTitle>
             <DialogDescription>
@@ -214,7 +219,7 @@ export function LinkedInBoard({ initialPosts }: { initialPosts: LinkedInPost[] }
                 value={form.body}
                 onChange={(e) => setForm((f) => ({ ...f, body: e.target.value }))}
                 placeholder="The full post copy…"
-                className="min-h-40 whitespace-pre-wrap"
+                className="min-h-56 whitespace-pre-wrap"
               />
               <span className="text-right text-[11px] text-muted-foreground tabular-nums">
                 {form.body.length} / 3000
