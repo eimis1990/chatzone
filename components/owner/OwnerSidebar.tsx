@@ -60,7 +60,7 @@ export function OwnerSidebar({ userEmail }: { userEmail: string }) {
       <Link href="/owner" className="flex items-center gap-2 px-4 py-4 text-white">
         <img src="/loqara-logo-colorful.webp" alt="" aria-hidden="true" className="size-11 shrink-0" />
         <span className="text-2xl font-bold">
-          Loqara<span className="text-primary">.owner</span>
+          Loqara<span className="font-[family-name:var(--font-lora)] text-[1.6rem] font-medium italic text-primary">.owner</span>
         </span>
       </Link>
 
