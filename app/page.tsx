@@ -34,7 +34,7 @@ const jsonLd = {
       '@id': `${SITE_URL}/#organization`,
       name: SITE_NAME,
       url: SITE_URL,
-      logo: `${SITE_URL}/loqara-icon.svg`,
+      logo: `${SITE_URL}/loqara-logo-colorful.png`,
       image: `${SITE_URL}/landing/og.png?v=2`,
       slogan: 'The AI chat & voice agent for modern stores.',
       description:

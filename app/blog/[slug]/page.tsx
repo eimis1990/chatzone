@@ -55,7 +55,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     publisher: {
       '@type': 'Organization',
       name: SITE_NAME,
-      logo: { '@type': 'ImageObject', url: `${SITE_URL}/loqara-icon.svg` },
+      logo: { '@type': 'ImageObject', url: `${SITE_URL}/loqara-logo-colorful.png` },
     },
     mainEntityOfPage: `${SITE_URL}/blog/${slug}`,
     image: post.image ? `${SITE_URL}${post.image}` : `${SITE_URL}/landing/og.png`,
