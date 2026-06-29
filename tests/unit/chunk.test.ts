@@ -40,6 +40,32 @@ describe('chunkText', () => {
     const firstSentenceOfSecond = out[1].content.split('.')[0]
     expect(out[0].content).not.toContain(firstSentenceOfSecond)
   })
+
+  it('keeps each Markdown section in its own chunk', () => {
+    const md = [
+      '## 4. Supported platforms',
+      '- Shopify',
+      '- WooCommerce',
+      '',
+      '## 10. Company & contact',
+      '- Email: hello@loqara.com',
+    ].join('\n')
+    const out = chunkText(md, { maxTokens: 600 })
+    const contact = out.find((c) => c.content.includes('hello@loqara.com'))
+    const platforms = out.find((c) => c.content.includes('Shopify'))
+    expect(contact).toBeDefined()
+    expect(platforms).toBeDefined()
+    // The contact section must not be diluted by the platforms section.
+    expect(contact).not.toBe(platforms)
+    expect(contact!.content).toContain('## 10')
+    expect(contact!.content).not.toContain('Shopify')
+  })
+
+  it('splits a section larger than the budget into multiple chunks', () => {
+    const out = chunkText(`## Big section\n${sentences(60)}`, { maxTokens: 40, overlap: 0 })
+    expect(out.length).toBeGreaterThan(1)
+    out.forEach((c, i) => expect(c.index).toBe(i))
+  })
 })
 
 describe('estimateTokens', () => {

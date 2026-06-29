@@ -4,7 +4,12 @@ import type { ContextChunk } from '@/lib/ai/prompt'
 import type { MatchedChunk } from '@/lib/types'
 
 export const DEFAULT_K = 5
-export const DEFAULT_MIN_SIMILARITY = 0.3
+// Cosine-similarity floor for a chunk to count as relevant. text-embedding-3-small
+// scores genuinely-relevant pairs ~0.3–0.6, but reworded questions often land in
+// 0.2–0.3, so a 0.3 floor cold-rejected answers that WERE in the KB. The grounding
+// prompt ("answer only from context, else say you're unsure") guards against using
+// a weakly-related chunk, so we keep recall higher and let the model decide.
+export const DEFAULT_MIN_SIMILARITY = 0.2
 
 export interface RetrievalOptions {
   k?: number
