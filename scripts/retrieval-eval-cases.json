@@ -1,0 +1,14 @@
+[
+  { "query": "What is your email or phone number?", "expect": ["kudarauskas", "@"] },
+  { "query": "Give me company contact info", "expect": ["kudarauskas", "Company & contact"] },
+  { "query": "how do I get in touch with sales?", "expect": ["kudarauskas", "sales", "contact"] },
+  { "query": "what platforms do you support?", "expect": ["Shopify", "WooCommerce", "Magento"] },
+  { "query": "do you work with Shopify?", "expect": ["Shopify"] },
+  { "query": "can it run on a site without a store?", "expect": ["knowledge base", "any website", "without a store"] },
+  { "query": "how much does it cost?", "expect": ["month", "plan", "€"] },
+  { "query": "is there a free plan?", "expect": ["Free", "100 conversations"] },
+  { "query": "what languages are supported?", "expect": ["English", "Lithuanian"] },
+  { "query": "where is my data stored?", "expect": ["EU", "host"] },
+  { "query": "can I cancel anytime?", "expect": ["cancel"] },
+  { "query": "do you offer voice support?", "expect": ["voice"] }
+]

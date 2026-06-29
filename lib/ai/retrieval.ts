@@ -21,6 +21,7 @@ export interface RetrievalDeps {
   matchChunks: (
     botId: string,
     embedding: number[],
+    queryText: string,
     k: number,
     minSimilarity: number,
   ) => Promise<MatchedChunk[]>
@@ -43,7 +44,7 @@ export async function retrieveContext(
   const minSimilarity = opts.minSimilarity ?? DEFAULT_MIN_SIMILARITY
 
   const embedding = await deps.embedQuery(query)
-  const matched = await deps.matchChunks(botId, embedding, k, minSimilarity)
+  const matched = await deps.matchChunks(botId, embedding, query, k, minSimilarity)
 
   return {
     matched,
@@ -56,14 +57,17 @@ export async function retrieveContext(
 export function serviceRetrievalDeps(db: SupabaseClient): RetrievalDeps {
   return {
     embedQuery: embedOne,
-    async matchChunks(botId, embedding, k, minSimilarity) {
-      const { data, error } = await db.rpc('match_chunks', {
+    async matchChunks(botId, embedding, queryText, k, minSimilarity) {
+      // Hybrid: vector + full-text, fused with RRF (see migration 0020). Lexical
+      // matches (emails, names, keywords) surface even when cosine is mediocre.
+      const { data, error } = await db.rpc('match_chunks_hybrid', {
         p_bot_id: botId,
         p_query_embedding: embedding,
+        p_query_text: queryText,
         p_match_count: k,
         p_min_similarity: minSimilarity,
       })
-      if (error) throw new Error(`match_chunks failed: ${error.message}`)
+      if (error) throw new Error(`match_chunks_hybrid failed: ${error.message}`)
       return (data ?? []) as MatchedChunk[]
     },
   }

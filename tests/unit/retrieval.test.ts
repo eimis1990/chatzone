@@ -14,6 +14,8 @@ describe('retrieveContext', () => {
     expect(res.isWeak).toBe(false)
     expect(res.chunks).toEqual([{ content: 'open 9-5', source_id: 's1' }])
     expect(embedQuery).toHaveBeenCalledWith('hours?')
+    // The query text is forwarded to the matcher (full-text channel of hybrid).
+    expect(matchChunks).toHaveBeenCalledWith('bot1', expect.any(Array), 'hours?', 5, 0.2)
   })
 
   it('flags isWeak when no chunks clear the threshold', async () => {
@@ -26,6 +28,6 @@ describe('retrieveContext', () => {
   it('passes k and minSimilarity through to the matcher', async () => {
     const matchChunks = vi.fn(async () => [] as MatchedChunk[])
     await retrieveContext('bot1', 'q', { k: 8, minSimilarity: 0.5 }, { embedQuery, matchChunks })
-    expect(matchChunks).toHaveBeenCalledWith('bot1', expect.any(Array), 8, 0.5)
+    expect(matchChunks).toHaveBeenCalledWith('bot1', expect.any(Array), 'q', 8, 0.5)
   })
 })
