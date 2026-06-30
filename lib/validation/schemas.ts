@@ -239,6 +239,14 @@ export const bugReportSchema = z.object({
 export const bugStatusSchema = z.enum(['open', 'in_progress', 'resolved'])
 
 // ---------------------------------------------------------------------------
+// Website crawl (knowledge → "train on the whole site")
+// ---------------------------------------------------------------------------
+export const crawlSchema = z.object({
+  botId: z.string().uuid(),
+  url: z.string().url(),
+})
+
+// ---------------------------------------------------------------------------
 // Public chat request (widget → /api/chat)
 // ---------------------------------------------------------------------------
 export const chatRequestSchema = z.object({
