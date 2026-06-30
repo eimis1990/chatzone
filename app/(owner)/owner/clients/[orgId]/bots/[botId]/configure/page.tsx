@@ -1,5 +1,4 @@
 import { notFound } from 'next/navigation'
-import Link from 'next/link'
 import { requireRole } from '@/lib/auth/guards'
 import { createServiceClient } from '@/lib/supabase/service'
 import { ConfigForm } from '@/components/client/ConfigForm'
@@ -10,7 +9,8 @@ import type { Bot, Plan } from '@/lib/types'
 /**
  * Owner-side bot configurator — lets the platform owner set up a client's bot look
  * (done-for-you). Reuses the client ConfigForm but loads/saves via the service
- * client through `saveClientBotConfig`.
+ * client through `saveClientBotConfig`. The "editing as owner" banner + the
+ * Configure/Knowledge tabs live in the bot-editor layout.
  */
 export default async function OwnerConfigurePage({
   params,
@@ -31,33 +31,20 @@ export default async function OwnerConfigurePage({
 
   const { data: org } = await service
     .from('organizations')
-    .select('name, plan, voice_addon')
+    .select('plan, voice_addon')
     .eq('id', orgId)
-    .single<{ name: string; plan: Plan | null; voice_addon: boolean | null }>()
+    .single<{ plan: Plan | null; voice_addon: boolean | null }>()
   const ent = entitlementsFor(org?.plan ?? 'free')
 
   return (
-    <div className="flex h-full min-h-0 flex-col">
-      <div className="flex shrink-0 flex-wrap items-center gap-x-2 gap-y-1 border-b border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-900">
-        <span>
-          Editing <strong>{bot.name}</strong> for <strong>{org?.name ?? 'client'}</strong> as the
-          platform owner — changes go live on save.
-        </span>
-        <Link href={`/owner/clients/${orgId}`} className="font-medium underline">
-          ← Back to client
-        </Link>
-      </div>
-      <div className="min-h-0 flex-1">
-        <ConfigForm
-          botId={bot.id}
-          botName={bot.name}
-          initialConfig={bot.config}
-          canUseAllLanguages={ent.allLanguages}
-          canUseLeadCapture={ent.leadCapture}
-          canUseVoice={Boolean(org?.voice_addon)}
-          onSave={saveClientBotConfig}
-        />
-      </div>
-    </div>
+    <ConfigForm
+      botId={bot.id}
+      botName={bot.name}
+      initialConfig={bot.config}
+      canUseAllLanguages={ent.allLanguages}
+      canUseLeadCapture={ent.leadCapture}
+      canUseVoice={Boolean(org?.voice_addon)}
+      onSave={saveClientBotConfig}
+    />
   )
 }
