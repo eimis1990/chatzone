@@ -43,8 +43,9 @@ export function Hero() {
             transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
             className="text-balance font-[family-name:var(--font-jakarta)] text-[2.5rem] font-bold leading-[1.05] tracking-tight sm:text-6xl lg:text-[4.75rem]"
           >
-            Answer every customer,
+            Your AI chat &amp; voice agent
             <br />
+            answers every customer,{' '}
             <span className="font-[family-name:var(--font-lora)] font-medium italic tracking-normal text-primary">
               <span className="relative inline-block">
                 day and night

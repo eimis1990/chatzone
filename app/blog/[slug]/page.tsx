@@ -46,19 +46,31 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
   const jsonLd = {
     '@context': 'https://schema.org',
-    '@type': 'BlogPosting',
-    headline: post.title,
-    description: post.description,
-    datePublished: post.date,
-    dateModified: post.date,
-    author: { '@type': 'Person', name: post.author },
-    publisher: {
-      '@type': 'Organization',
-      name: SITE_NAME,
-      logo: { '@type': 'ImageObject', url: `${SITE_URL}/loqara-logo-colorful.png` },
-    },
-    mainEntityOfPage: `${SITE_URL}/blog/${slug}`,
-    image: post.image ? `${SITE_URL}${post.image}` : `${SITE_URL}/landing/og.png`,
+    '@graph': [
+      {
+        '@type': 'BlogPosting',
+        headline: post.title,
+        description: post.description,
+        datePublished: post.date,
+        dateModified: post.updated ?? post.date,
+        author: { '@type': 'Person', name: post.author },
+        publisher: {
+          '@type': 'Organization',
+          name: SITE_NAME,
+          logo: { '@type': 'ImageObject', url: `${SITE_URL}/loqara-logo-colorful.png` },
+        },
+        mainEntityOfPage: `${SITE_URL}/blog/${slug}`,
+        image: post.image ? `${SITE_URL}${post.image}` : `${SITE_URL}/landing/og.png`,
+      },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
+          { '@type': 'ListItem', position: 2, name: 'Blog', item: `${SITE_URL}/blog` },
+          { '@type': 'ListItem', position: 3, name: post.title, item: `${SITE_URL}/blog/${slug}` },
+        ],
+      },
+    ],
   }
 
   return (

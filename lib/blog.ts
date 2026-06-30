@@ -9,6 +9,8 @@ export interface BlogPost {
   description: string
   /** ISO date (yyyy-mm-dd). */
   date: string
+  /** Optional ISO date of the last meaningful edit; feeds schema dateModified. */
+  updated?: string
   author: string
   /** Author's role/title, shown next to their name. */
   authorRole: string
@@ -58,6 +60,7 @@ function fileToPost(filename: string): BlogPost {
     title: data.title ?? 'Untitled',
     description: data.description ?? '',
     date: data.date ?? '1970-01-01',
+    updated: data.updated || undefined,
     author,
     authorRole: data.authorRole ?? 'Founder',
     authorImage: data.authorImage || (author === OWNER ? OWNER_PHOTO : undefined),
