@@ -11,6 +11,12 @@ export function getVoicePriceId(): string | null {
   return process.env.STRIPE_PRICE_VOICE_MONTH ?? null
 }
 
+/** Stripe Price ID for a one-time setup package, or null when not configured. */
+export function getSetupPriceId(id: 'essential' | 'ecommerce'): string | null {
+  const key = id === 'essential' ? 'STRIPE_PRICE_SETUP_ESSENTIAL' : 'STRIPE_PRICE_SETUP_ECOMMERCE'
+  return process.env[key] ?? null
+}
+
 function priceEnvKey(plan: Plan, interval: BillingInterval): string {
   return `STRIPE_PRICE_${plan.toUpperCase()}_${interval === 'year' ? 'YEAR' : 'MONTH'}`
 }

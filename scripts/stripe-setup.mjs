@@ -39,7 +39,17 @@ const PLANS = [
 // Add-ons attach to a base subscription as an extra item (not a separate sub).
 // Voice is a flat monthly fee for now; per-minute metering comes in a later pass.
 const ADDONS = [{ key: 'voice', name: 'Voice agent', monthly: 49 }]
+// One-time "done-for-you" setup packages (no recurring price).
+const SETUP = [
+  { key: 'essential', envKey: 'ESSENTIAL', name: 'Setup — Essential', price: 749 },
+  { key: 'ecommerce', envKey: 'ECOMMERCE', name: 'Setup — E-commerce', price: 995 },
+]
 const CURRENCY = 'eur'
+
+// Webhook target origin (override with `--url <origin>`); skip with `--no-webhook`.
+const urlIdx = process.argv.indexOf('--url')
+const APP_URL = (urlIdx >= 0 ? process.argv[urlIdx + 1] : 'https://www.loqara.com').replace(/\/$/, '')
+const SKIP_WEBHOOK = process.argv.includes('--no-webhook')
 
 const key = process.env.STRIPE_SECRET_KEY
 if (!key) {
@@ -108,6 +118,27 @@ async function findOrCreatePrice(productId, keyBase, interval, amountCents) {
   return created
 }
 
+/** Find a one-time price by lookup_key (and matching shape), or create it. */
+async function findOrCreateOneTimePrice(productId, keyBase, amountCents) {
+  const lookup_key = `loqara_${keyBase}`
+  const existing = await stripe.prices.list({ lookup_keys: [lookup_key], active: true, limit: 1 })
+  const p = existing.data[0]
+  if (p && p.unit_amount === amountCents && p.currency === CURRENCY && !p.recurring) {
+    console.log(`    - one-time: reuse ${p.id} (${lookup_key})`)
+    return p
+  }
+  const created = await stripe.prices.create({
+    product: productId,
+    currency: CURRENCY,
+    unit_amount: amountCents,
+    lookup_key,
+    transfer_lookup_key: true,
+    nickname: `${keyBase} one-time`,
+  })
+  console.log(`    - one-time: created ${created.id} (${lookup_key})`)
+  return created
+}
+
 async function main() {
   console.log(`\nCreating Loqara catalog in ${isLive ? 'LIVE' : 'TEST/sandbox'} mode…\n`)
   const envLines = []
@@ -127,6 +158,34 @@ async function main() {
     const product = await findOrCreateProduct('loqara_addon', key, name)
     const monthPrice = await findOrCreatePrice(product.id, key, 'month', monthly * 100)
     envLines.push(`STRIPE_PRICE_${key.toUpperCase()}_MONTH=${monthPrice.id}`)
+  }
+
+  for (const { key, envKey, name, price } of SETUP) {
+    console.log(`${name} (one-time):`)
+    const product = await findOrCreateProduct('loqara_setup', key, name)
+    const p = await findOrCreateOneTimePrice(product.id, `setup_${key}`, price * 100)
+    envLines.push(`STRIPE_PRICE_SETUP_${envKey}=${p.id}`)
+  }
+
+  // Webhook endpoint → the deployed handler. Its signing secret is only shown
+  // once (at creation), so we print it here to copy into the env.
+  if (!SKIP_WEBHOOK) {
+    const url = `${APP_URL}/api/stripe/webhook`
+    const events = [
+      'checkout.session.completed',
+      'customer.subscription.created',
+      'customer.subscription.updated',
+      'customer.subscription.deleted',
+    ]
+    const list = await stripe.webhookEndpoints.list({ limit: 100 })
+    const match = list.data.find((w) => w.url === url)
+    if (match) {
+      console.log(`\nWebhook already exists for ${url} (${match.id}) — reuse its saved signing secret.`)
+    } else {
+      const wh = await stripe.webhookEndpoints.create({ url, enabled_events: events })
+      console.log(`\nWebhook created: ${wh.id} → ${url}`)
+      envLines.unshift(`STRIPE_WEBHOOK_SECRET=${wh.secret}`)
+    }
   }
 
   console.log('\n✅ Done. Add these to .env.local (and the matching Vercel env):\n')
