@@ -3,6 +3,7 @@ import type Stripe from 'stripe'
 import { getStripe } from '@/lib/stripe/client'
 import { getEnv } from '@/lib/env'
 import { syncSubscriptionToOrg } from '@/lib/stripe/sync'
+import { createServiceClient } from '@/lib/supabase/service'
 
 // Signature verification needs the raw body + Node crypto.
 export const runtime = 'nodejs'
@@ -31,6 +32,21 @@ export async function POST(req: NextRequest) {
     switch (event.type) {
       case 'checkout.session.completed': {
         const session = event.data.object
+        // One-time "done-for-you" setup purchase — record it for the owner.
+        if (session.metadata?.setup_package) {
+          const svc = createServiceClient()
+          await svc.from('setup_orders').upsert(
+            {
+              org_id: session.metadata.org_id ?? null,
+              package: session.metadata.setup_package,
+              amount_cents: session.amount_total ?? 0,
+              currency: session.currency ?? 'eur',
+              stripe_session_id: session.id,
+              status: 'paid',
+            },
+            { onConflict: 'stripe_session_id' },
+          )
+        }
         const sub = session.subscription
         if (sub) {
           const subId = typeof sub === 'string' ? sub : sub.id

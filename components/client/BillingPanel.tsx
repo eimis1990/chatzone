@@ -58,6 +58,15 @@ interface BillingPanelProps {
   ) => Promise<{ url?: string; ok?: boolean; error?: string }>
   setVoice: (enabled: boolean) => Promise<{ ok?: boolean; error?: string }>
   openPortal: () => Promise<{ url?: string; error?: string }>
+  setupPackages?: {
+    id: 'essential' | 'ecommerce'
+    name: string
+    price: number
+    blurb: string
+    features: string[]
+  }[]
+  purchasedSetups?: string[]
+  buySetup?: (pkg: 'essential' | 'ecommerce') => Promise<{ url?: string; error?: string }>
 }
 
 const STATUS_LABEL: Record<SubscriptionStatus, string> = {
@@ -88,6 +97,9 @@ export function BillingPanel({
   selectPlan,
   setVoice,
   openPortal,
+  setupPackages = [],
+  purchasedSetups = [],
+  buySetup,
 }: BillingPanelProps) {
   const router = useRouter()
   const [annual, setAnnual] = useState(interval !== 'month')
@@ -143,6 +155,20 @@ export function BillingPanel({
           await setVoice(enabled),
           enabled ? 'Voice agent added.' : 'Voice agent removed.',
         )
+      } finally {
+        setBusy(null)
+      }
+    })
+  }
+
+  const runSetup = (pkg: 'essential' | 'ecommerce') => {
+    if (!buySetup) return
+    setBusy(`setup-${pkg}`)
+    startTransition(async () => {
+      try {
+        const r = await buySetup(pkg)
+        if (r.url) window.location.href = r.url
+        else toast.error(r.error ?? 'Could not start checkout.')
       } finally {
         setBusy(null)
       }
@@ -447,6 +473,58 @@ export function BillingPanel({
               </div>
             </div>
           </div>
+
+          {/* Done-for-you setup (one-time) */}
+          {setupPackages.length > 0 && (
+            <div className="space-y-4">
+              <div>
+                <h2 className="text-base font-semibold">Done-for-you setup</h2>
+                <p className="text-sm text-muted-foreground">
+                  One-time — we train, configure and install your agent for you. Pay once.
+                </p>
+              </div>
+              <div className="grid gap-5 md:grid-cols-2">
+                {setupPackages.map((s) => {
+                  const owned = purchasedSetups.includes(s.id)
+                  const thisBusy = busy === `setup-${s.id}`
+                  return (
+                    <div key={s.id} className="flex flex-col rounded-2xl border bg-card p-6 shadow-sm">
+                      <div className="flex items-center justify-between">
+                        <h3 className="font-semibold">{s.name}</h3>
+                        {owned && (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+                            <CheckIcon className="size-3" /> Purchased
+                          </span>
+                        )}
+                      </div>
+                      <p className="mt-1 text-sm text-muted-foreground">{s.blurb}</p>
+                      <p className="mt-3 text-2xl font-bold tracking-tight">
+                        €{s.price.toLocaleString('en-US')}
+                        <span className="text-sm font-normal text-muted-foreground"> one-time</span>
+                      </p>
+                      <ul className="mt-4 space-y-2 text-sm text-foreground/80">
+                        {s.features.map((f) => (
+                          <li key={f} className="flex items-start gap-2">
+                            <CheckIcon className="mt-0.5 size-4 flex-shrink-0 text-primary" />
+                            {f}
+                          </li>
+                        ))}
+                      </ul>
+                      <Button
+                        className="mt-5"
+                        variant={owned ? 'outline' : 'default'}
+                        disabled={anyBusy || owned || !buySetup}
+                        onClick={() => runSetup(s.id)}
+                      >
+                        {thisBusy && <Loader2Icon className="size-4 animate-spin" />}
+                        {owned ? 'Purchased' : 'Get this setup'}
+                      </Button>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
 
           <p className="text-center text-sm text-muted-foreground">
             Need higher volume or custom terms?{' '}

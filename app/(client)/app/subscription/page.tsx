@@ -3,7 +3,8 @@ import { createServerClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { BillingPanel } from '@/components/client/BillingPanel'
 import { isStripeConfigured, getStripe } from '@/lib/stripe/client'
-import { getPriceId, getVoicePriceId, PLANS, DISPLAY_PLANS, VOICE_ADDON } from '@/lib/stripe/plans'
+import { getPriceId, getVoicePriceId, getSetupPriceId, PLANS, DISPLAY_PLANS, VOICE_ADDON } from '@/lib/stripe/plans'
+import { SETUP_PACKAGES } from '@/lib/setup-packages'
 import { ensureStripeCustomer } from '@/lib/stripe/customer'
 import {
   changeBasePlan,
@@ -155,6 +156,34 @@ export default async function SubscriptionPage({
     }
   }
 
+  /** Buy a one-time "done-for-you" setup package (Stripe Checkout, mode: payment). */
+  async function buySetup(pkg: 'essential' | 'ecommerce'): Promise<{ url?: string; error?: string }> {
+    'use server'
+    const ids = await getUserOrgIds()
+    const oid = ids[0]
+    if (!oid) return { error: 'No organization found.' }
+    const stripe = getStripe()
+    if (!stripe) return { error: 'Billing is not enabled yet.' }
+    const priceId = getSetupPriceId(pkg)
+    if (!priceId) return { error: 'This setup package isn’t configured yet.' }
+    try {
+      const customerId = await ensureStripeCustomer(oid)
+      const base = process.env.NEXT_PUBLIC_APP_URL ?? ''
+      const session = await stripe.checkout.sessions.create({
+        mode: 'payment',
+        customer: customerId,
+        line_items: [{ price: priceId, quantity: 1 }],
+        success_url: `${base}/app/subscription?setup=success`,
+        cancel_url: `${base}/app/subscription?setup=cancelled`,
+        metadata: { org_id: oid, setup_package: pkg },
+        payment_intent_data: { metadata: { org_id: oid, setup_package: pkg } },
+      })
+      return { url: session.url ?? undefined }
+    } catch (err) {
+      return { error: err instanceof Error ? err.message : 'Could not start checkout.' }
+    }
+  }
+
   /** Add or remove the Voice add-on on the existing subscription. */
   async function setVoice(enabled: boolean): Promise<{ ok?: boolean; error?: string }> {
     'use server'
@@ -204,6 +233,18 @@ export default async function SubscriptionPage({
     }
   }
 
+  // Which one-time setup packages this org has already paid for.
+  let purchasedSetups: string[] = []
+  if (orgId) {
+    const sb = await createServerClient()
+    const { data: orders } = await sb
+      .from('setup_orders')
+      .select('package')
+      .eq('org_id', orgId)
+      .eq('status', 'paid')
+    purchasedSetups = (orders ?? []).map((o) => (o as { package: string }).package)
+  }
+
   return (
     <div className="space-y-8 p-6">
       <div>
@@ -237,8 +278,17 @@ export default async function SubscriptionPage({
           features: [...VOICE_ADDON.features],
         }}
         plans={planOptions}
+        setupPackages={SETUP_PACKAGES.map((p) => ({
+          id: p.id,
+          name: p.name,
+          price: p.price,
+          blurb: p.blurb,
+          features: [...p.features],
+        }))}
+        purchasedSetups={purchasedSetups}
         selectPlan={selectPlan}
         setVoice={setVoice}
+        buySetup={buySetup}
         openPortal={openPortal}
       />
     </div>
