@@ -74,43 +74,55 @@ export function ReportBugButton() {
         Report a bug
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Report a bug</DialogTitle>
-          <DialogDescription>
-            Found something broken? Tell us what happened and we&apos;ll look into it.
-          </DialogDescription>
-        </DialogHeader>
-        <form onSubmit={submit} className="space-y-4">
-          <div className="space-y-1.5">
-            <Label htmlFor="bug-title">Summary</Label>
-            <Input
-              id="bug-title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="e.g. Save button does nothing on the config page"
-              maxLength={140}
-              required
-            />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="bug-desc">What happened?</Label>
-            <Textarea
-              id="bug-desc"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Steps to reproduce, what you expected, and what you saw instead…"
-              className="h-32 resize-none"
-              maxLength={5000}
-              required
-            />
-          </div>
-          <DialogFooter>
-            <Button type="submit" disabled={submitting || tooShort}>
-              {submitting ? 'Sending…' : 'Send report'}
-            </Button>
-          </DialogFooter>
-        </form>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <div className="flex items-center gap-3">
+              <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+                <BugIcon className="size-5" aria-hidden="true" />
+              </span>
+              <div className="space-y-1">
+                <DialogTitle className="text-lg">Bug Report</DialogTitle>
+                <DialogDescription>Found a problem? Let us know so we can fix it.</DialogDescription>
+              </div>
+            </div>
+          </DialogHeader>
+
+          <form onSubmit={submit} className="space-y-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="bug-title">Bug title</Label>
+              <Input
+                id="bug-title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Feedback form submission fails (Chrome desktop)"
+                maxLength={140}
+                required
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="bug-desc">Bug description</Label>
+              <Textarea
+                id="bug-desc"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="What happened, what you expected, and the steps to reproduce it…"
+                className="h-36 resize-none"
+                maxLength={5000}
+                required
+              />
+              <p className="text-xs text-muted-foreground">
+                Describe the issue, steps to reproduce, and browser/device.
+              </p>
+            </div>
+            <DialogFooter className="sm:justify-between">
+              <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={submitting || tooShort}>
+                {submitting ? 'Sending…' : 'Send bug report'}
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
     </>
