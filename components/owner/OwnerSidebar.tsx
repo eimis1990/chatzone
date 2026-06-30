@@ -45,7 +45,13 @@ const NAV: NavItem[] = [
   { label: 'Bug reports', href: '/owner/bugs', icon: BugIcon },
 ]
 
-export function OwnerSidebar({ userEmail }: { userEmail: string }) {
+export function OwnerSidebar({
+  userEmail,
+  openBugs = 0,
+}: {
+  userEmail: string
+  openBugs?: number
+}) {
   const pathname = usePathname()
 
   const itemBase = 'flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm transition-colors'
@@ -81,6 +87,14 @@ export function OwnerSidebar({ userEmail }: { userEmail: string }) {
               >
                 <Icon className="size-4 flex-shrink-0" aria-hidden="true" />
                 <span className="flex-1">{label}</span>
+                {href === '/owner/bugs' && openBugs > 0 && (
+                  <span
+                    className="inline-flex min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-[10px] font-semibold leading-5 text-white"
+                    aria-label={`${openBugs} new bug ${openBugs === 1 ? 'report' : 'reports'}`}
+                  >
+                    {openBugs > 99 ? '99+' : openBugs}
+                  </span>
+                )}
               </Link>
 
               {/* Sub-items — revealed while the section is active, with a vertical line. */}

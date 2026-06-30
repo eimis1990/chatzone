@@ -17,4 +17,6 @@ export async function updateBugStatus(id: string, status: BugStatus) {
     .eq('id', id)
   if (error) throw new Error(error.message)
   revalidatePath('/owner/bugs')
+  // Refresh the sidebar's "new reports" badge (computed in the owner layout).
+  revalidatePath('/owner', 'layout')
 }
