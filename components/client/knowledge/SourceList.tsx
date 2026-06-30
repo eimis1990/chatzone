@@ -10,8 +10,8 @@ import {
   MessageSquareTextIcon,
   LinkIcon,
   PaperclipIcon,
-  DatabaseIcon,
   MoreVerticalIcon,
+  PlusIcon,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -26,6 +26,8 @@ interface SourceListProps {
   sources: KnowledgeSource[]
   onDeleted: (sourceId: string) => void
   onUpdated: (source: KnowledgeSource) => void
+  /** Open the "add a source" panel (the first card in the grid triggers this). */
+  onAddSource: () => void
 }
 
 const POLL_INTERVAL_MS = 3000
@@ -183,7 +185,7 @@ function CardMenu({
   )
 }
 
-export function SourceList({ sources, onDeleted, onUpdated }: SourceListProps) {
+export function SourceList({ sources, onDeleted, onUpdated, onAddSource }: SourceListProps) {
   // Track in-flight delete/retry per source id to disable buttons.
   const inflightRef = useRef<Set<string>>(new Set())
   const pollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -335,23 +337,21 @@ export function SourceList({ sources, onDeleted, onUpdated }: SourceListProps) {
     [onUpdated],
   )
 
-  if (sources.length === 0) {
-    return (
-      <div className="flex flex-col items-center gap-3 px-6 py-14 text-center">
-        <div className="flex size-11 items-center justify-center rounded-full bg-muted text-muted-foreground">
-          <DatabaseIcon className="size-5" aria-hidden="true" />
-        </div>
-        <div className="space-y-0.5">
-          <p className="text-sm font-medium text-foreground">No sources yet</p>
-          <p className="text-sm text-muted-foreground">Add one on the left to start training your bot.</p>
-        </div>
-      </div>
-    )
-  }
-
   return (
     <>
       <div className="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-3 p-4">
+        {/* Add-source card — always first. */}
+        <button
+          type="button"
+          onClick={onAddSource}
+          className="group flex min-h-[150px] flex-col items-center justify-center gap-2 rounded-xl border border-dashed bg-card p-4 text-muted-foreground transition-colors hover:border-primary/50 hover:bg-primary/5 hover:text-primary"
+        >
+          <span className="flex size-10 items-center justify-center rounded-lg bg-muted text-foreground/60 transition-colors group-hover:bg-primary/10 group-hover:text-primary">
+            <PlusIcon className="size-5" aria-hidden="true" />
+          </span>
+          <span className="text-sm font-medium">Add source</span>
+        </button>
+
         {sources.map((source) => {
           const { label, icon: TypeIcon } = TYPE_META[source.type]
           const subtitle = sourceSubtitle(source)
