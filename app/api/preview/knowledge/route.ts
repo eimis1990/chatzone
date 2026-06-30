@@ -31,7 +31,9 @@ export async function POST(req: Request) {
   try {
     const retrieval = await retrieveContext(botId, query, {}, serviceRetrievalDeps(svc))
     if (retrieval.chunks.length) {
-      answer = retrieval.chunks.map((c) => c.content).join('\n\n').slice(0, 1500)
+      // Keep it tight: the voice agent only needs enough context to answer in a
+      // sentence or two — a smaller payload means a faster spoken reply.
+      answer = retrieval.chunks.slice(0, 3).map((c) => c.content).join('\n\n').slice(0, 900)
     }
   } catch {
     // ignore — empty answer signals "not found" to the tool
