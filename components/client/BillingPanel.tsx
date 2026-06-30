@@ -219,49 +219,52 @@ export function BillingPanel({
 
   return (
     <div className="space-y-8">
-      {/* Current-plan banner */}
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-card p-5">
-        <div>
-          <p className="text-sm text-muted-foreground">Current plan</p>
-          <p className="text-xl font-semibold capitalize">
-            {plan}
-            {isPaying && (
-              <span className="ml-2 align-middle text-sm font-normal text-muted-foreground">
-                {STATUS_LABEL[status]}
-                {interval ? ` · billed ${interval === 'year' ? 'annually' : 'monthly'}` : ''}
-                {voiceActive ? ' · Voice add-on' : ''}
-              </span>
-            )}
-          </p>
-          {periodLabel && (status === 'active' || status === 'trialing') && (
-            <p className="mt-1 text-xs text-muted-foreground">
-              {cancelAtPeriodEnd ? `Cancels on ${periodLabel}.` : `Renews ${periodLabel}.`}
+      {/* Plan + usage — one compact card (they belong together) */}
+      <div className="rounded-xl border bg-card p-5">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-sm text-muted-foreground">Current plan</p>
+            <p className="text-xl font-semibold capitalize">
+              {plan}
+              {isPaying && (
+                <span className="ml-2 align-middle text-sm font-normal text-muted-foreground">
+                  {STATUS_LABEL[status]}
+                  {interval ? ` · billed ${interval === 'year' ? 'annually' : 'monthly'}` : ''}
+                  {voiceActive ? ' · Voice add-on' : ''}
+                </span>
+              )}
             </p>
+            {periodLabel && (status === 'active' || status === 'trialing') && (
+              <p className="mt-1 text-xs text-muted-foreground">
+                {cancelAtPeriodEnd ? `Cancels on ${periodLabel}.` : `Renews ${periodLabel}.`}
+              </p>
+            )}
+          </div>
+          {hasCustomer && (
+            <Button variant="outline" onClick={() => runPortal('portal')} disabled={anyBusy}>
+              {busy === 'portal' ? (
+                <Loader2Icon className="size-4 animate-spin" />
+              ) : (
+                <ExternalLinkIcon className="size-4" />
+              )}
+              Manage billing
+            </Button>
           )}
         </div>
-        {hasCustomer && (
-          <Button variant="outline" onClick={() => runPortal('portal')} disabled={anyBusy}>
-            {busy === 'portal' ? (
-              <Loader2Icon className="size-4 animate-spin" />
-            ) : (
-              <ExternalLinkIcon className="size-4" />
-            )}
-            Manage billing
-          </Button>
-        )}
-      </div>
 
-      {/* Usage this month */}
-      <div className="rounded-xl border bg-card p-5">
-        <h2 className="text-base font-semibold">Usage this month</h2>
-        <p className="text-sm text-muted-foreground">Resets on the 1st.</p>
-        <div className="mt-4 space-y-4">
-          <Meter
-            label="Conversations"
-            used={usage.conversationsUsed}
-            limit={usage.conversationsLimit}
-          />
-          <Meter label="Bots" used={usage.botsUsed} limit={usage.botsLimit} />
+        <div className="mt-5 border-t pt-5">
+          <div className="flex items-baseline justify-between">
+            <h2 className="text-base font-semibold">Usage this month</h2>
+            <span className="text-xs text-muted-foreground">Resets on the 1st</span>
+          </div>
+          <div className="mt-4 space-y-4">
+            <Meter
+              label="Conversations"
+              used={usage.conversationsUsed}
+              limit={usage.conversationsLimit}
+            />
+            <Meter label="Bots" used={usage.botsUsed} limit={usage.botsLimit} />
+          </div>
         </div>
       </div>
 
