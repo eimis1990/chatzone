@@ -85,6 +85,8 @@ export const botConfigFormSchema = z.object({
       launcherShowLogo: z.boolean().default(false),
       launcherColor: z.string().optional().or(z.literal('')),
       showCallButton: z.boolean().default(true),
+      // Show the "talk to a person" human-handoff button.
+      showHandoffButton: z.boolean().default(true),
       // Background color for the voice call button (text auto-contrasts).
       callButtonColor: z.string().optional().or(z.literal('')),
       navButtonRadius: z.number().min(0).max(24).default(12),
@@ -112,6 +114,7 @@ export const botConfigFormSchema = z.object({
       launcherStyle: 'circle',
       launcherShowLogo: false,
       showCallButton: true,
+      showHandoffButton: true,
       navButtonRadius: 12,
       backgroundColor: '#ffffff',
       backgroundImageOpacity: 100,

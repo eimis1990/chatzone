@@ -57,6 +57,7 @@ export interface PublicBotConfig {
     launcherShowLogo?: boolean
     launcherColor?: string
     showCallButton?: boolean
+    showHandoffButton?: boolean
     callButtonColor?: string
     navButtonRadius?: number
     backgroundColor?: string
@@ -129,6 +130,7 @@ export function publicBotConfig(
       launcherStyle: config.theme.launcherStyle ?? 'circle',
       launcherShowLogo: config.theme.launcherShowLogo ?? false,
       showCallButton: callAllowed && (config.theme.showCallButton ?? true),
+      showHandoffButton: config.theme.showHandoffButton ?? true,
       navButtonRadius: config.theme.navButtonRadius ?? 12,
       backgroundColor: config.theme.backgroundColor ?? '#ffffff',
       backgroundImageOpacity: config.theme.backgroundImageOpacity ?? 100,

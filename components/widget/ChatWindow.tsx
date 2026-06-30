@@ -746,8 +746,9 @@ export function ChatWindow({ config, transport, initialLanguage }: ChatWindowPro
         )}
 
         {/* Talk to a person — only once the conversation has started (not on the
-            welcome screen) and while the bot is handling the chat */}
-        {handoffStatus === 'bot' && !streaming && messages.length > 0 && (
+            welcome screen), while the bot is handling the chat, and when the
+            client has enabled the handoff button. */}
+        {config.theme.showHandoffButton !== false && handoffStatus === 'bot' && !streaming && messages.length > 0 && (
           <div className="px-4 pt-1 pb-3 flex justify-center flex-shrink-0">
             <button
               type="button"

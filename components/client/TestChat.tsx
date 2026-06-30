@@ -320,6 +320,7 @@ function buildPreviewPublicConfig(config: LiveConfig): PublicBotConfig {
       bubbleRadius: config.theme?.bubbleRadius ?? 16,
       fontFamily: config.theme?.fontFamily ?? 'geist',
       showCallButton: config.theme?.showCallButton ?? true,
+      showHandoffButton: config.theme?.showHandoffButton ?? true,
       navButtonRadius: config.theme?.navButtonRadius ?? 12,
       backgroundColor: config.theme?.backgroundColor ?? '#ffffff',
       ...(config.theme?.callButtonColor ? { callButtonColor: config.theme.callButtonColor } : {}),
@@ -394,6 +395,7 @@ function buildFullConfig(config: LiveConfig): BotConfig {
       bubbleRadius: config.theme?.bubbleRadius ?? 16,
       fontFamily: config.theme?.fontFamily ?? 'geist',
       showCallButton: config.theme?.showCallButton ?? true,
+      showHandoffButton: config.theme?.showHandoffButton ?? true,
       navButtonRadius: config.theme?.navButtonRadius ?? 12,
     },
     voice: {

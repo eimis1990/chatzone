@@ -17,6 +17,7 @@ const fullConfig: BotConfig = {
     launcherLabel: 'Chat with us',
     launcherShowLogo: true,
     showCallButton: true,
+    showHandoffButton: true,
     navButtonRadius: 12,
     backgroundColor: '#ffffff',
     backgroundImageOpacity: 100,

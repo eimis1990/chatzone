@@ -164,6 +164,8 @@ export interface BotConfig {
     launcherColor?: string
     /** Show the "talk with agent" voice call button in the header (when voice on). */
     showCallButton?: boolean
+    /** Show the "talk to a person" human-handoff button (once a chat is underway). */
+    showHandoffButton?: boolean
     /** Background color for the voice call button (text auto-contrasts). */
     callButtonColor?: string
     /** Corner radius (px) for the header nav buttons (call + restart). */

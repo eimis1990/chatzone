@@ -1034,6 +1034,19 @@ export function ConfigForm({
                   )}
                 />
               </div>
+              <div className="flex items-center justify-between gap-4">
+                <div className="space-y-0.5">
+                  <Label htmlFor="showHandoffButton">Show &ldquo;talk to a person&rdquo; button</Label>
+                  <p className="text-xs text-muted-foreground">Lets visitors request a human; appears once a chat is underway.</p>
+                </div>
+                <Controller
+                  name="theme.showHandoffButton"
+                  control={control}
+                  render={({ field }) => (
+                    <Switch id="showHandoffButton" checked={field.value ?? true} onCheckedChange={field.onChange} />
+                  )}
+                />
+              </div>
               <div className="space-y-1.5">
                 <Label>Chat font</Label>
                 <Controller
