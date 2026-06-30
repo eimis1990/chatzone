@@ -13,7 +13,7 @@ export function Hero() {
           Stronger + reaching further right on mobile (text is wider there); the
           far right stays clear so the fox is still visible. */}
       <div
-        className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#101213] via-[#101213]/70 via-[68%] to-transparent sm:via-[#101213]/45 sm:via-[50%]"
+        className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#101213] via-[#101213]/70 via-[68%] to-transparent sm:via-[#101213]/60 sm:via-[58%]"
         aria-hidden="true"
       />
       {/* Mobile-only bottom scrim — the copy sits at the bottom on mobile, so darken
@@ -24,7 +24,7 @@ export function Hero() {
       />
       {/* Copy — overlaid on the darkened left */}
       <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 items-end px-5 pt-28 pb-10 sm:items-center sm:pt-32 sm:pb-16">
-        <div className="flex max-w-2xl flex-col">
+        <div className="flex max-w-2xl flex-col xl:max-w-3xl">
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -41,11 +41,10 @@ export function Hero() {
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-            className="text-balance font-[family-name:var(--font-jakarta)] text-[2.5rem] font-bold leading-[1.05] tracking-tight sm:text-6xl lg:text-[4.75rem]"
+            className="text-balance font-[family-name:var(--font-jakarta)] text-[2.5rem] font-bold leading-[1.05] tracking-tight sm:text-6xl lg:text-[4.75rem] xl:text-[5.5rem] 2xl:text-[6.5rem]"
           >
-            Your AI chat &amp; voice agent
+            Your AI chat &amp; voice agent,
             <br />
-            answers every customer,{' '}
             <span className="font-[family-name:var(--font-lora)] font-medium italic tracking-normal text-primary">
               <span className="relative inline-block">
                 day and night
@@ -70,7 +69,7 @@ export function Hero() {
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="mt-5 max-w-xl text-base leading-relaxed text-white/80 sm:mt-6 sm:text-xl"
+            className="mt-5 max-w-xl text-base leading-relaxed text-white/80 sm:mt-6 sm:text-xl xl:max-w-2xl xl:text-2xl"
           >
             Your always-on AI agent for chat &amp; voice — answering questions, capturing leads, and
             looking up orders 24/7, so customers never wait. Live in one line of code.
@@ -103,6 +102,11 @@ const BRANDS = [
   'Saulė & Co',
 ]
 
+// One marquee copy must be wider than the viewport, or the two-copy -50% loop
+// reveals empty space mid-scroll. Repeating the short brand list guarantees a
+// single copy overflows even ultra-wide screens, so the loop reads as endless.
+const LOOP = [...BRANDS, ...BRANDS, ...BRANDS]
+
 /** Infinite, seamlessly-looping row of brand wordmarks across the hero bottom. */
 function BrandMarquee() {
   const reduce = useReducedMotion()
@@ -113,13 +117,13 @@ function BrandMarquee() {
       <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-24 bg-gradient-to-l from-[#101213] via-[#101213]/85 to-transparent sm:w-40" />
       <div
         className="flex w-max"
-        style={reduce ? undefined : { animation: 'brand-marquee 40s linear infinite' }}
+        style={reduce ? undefined : { animation: 'brand-marquee 120s linear infinite' }}
       >
         {[0, 1].map((copy) => (
           <ul key={copy} className="flex shrink-0 items-center gap-14 pr-14" aria-hidden={copy === 1}>
-            {BRANDS.map((b) => (
+            {LOOP.map((b, i) => (
               <li
-                key={b}
+                key={`${b}-${i}`}
                 className="whitespace-nowrap text-2xl font-semibold tracking-tight text-white/60 transition-colors hover:text-white"
               >
                 {b}

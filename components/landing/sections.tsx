@@ -23,7 +23,7 @@ export function Logos() {
   const names = ['Aromama', 'Nordbaltic', 'ACTION!', 'Klaipėda Goods', 'Baltic Skincare']
   return (
     <section className="border-b bg-white">
-      <div className="mx-auto max-w-6xl px-5 py-10">
+      <div className="mx-auto max-w-7xl px-5 py-10">
         <Reveal>
           <p className="text-center text-sm text-gray-500">Built for modern e-commerce and service teams</p>
           <div className="mt-6 flex flex-wrap items-center justify-center gap-x-10 gap-y-4 opacity-60">
@@ -124,7 +124,7 @@ function FeatureRow({ feature, index }: { feature: Feature; index: number }) {
   const num = String(index + 1).padStart(2, '0')
   return (
     <section className="bg-white text-gray-900">
-      <div className="mx-auto grid max-w-6xl items-center gap-10 px-5 py-14 lg:grid-cols-2 lg:gap-16 lg:py-20">
+      <div className="mx-auto grid max-w-7xl items-center gap-10 px-5 py-14 lg:grid-cols-2 lg:gap-16 lg:py-20">
         <Reveal className={reversed ? 'lg:order-2' : ''}>
           <FeatureVisual icon={Icon} imageSrc={feature.imageSrc} dark={false} />
         </Reveal>
@@ -177,7 +177,7 @@ export function Stats() {
         maxOpacity={0.18}
         flickerChance={0.1}
       />
-      <div className="relative mx-auto grid max-w-6xl grid-cols-2 md:grid-cols-4">
+      <div className="relative mx-auto grid max-w-7xl grid-cols-2 md:grid-cols-4">
         {stats.map((s, i) => (
           <Reveal
             key={s.label}
@@ -204,7 +204,7 @@ export function HowItWorks() {
   ]
   return (
     <section id="how" className="bg-[#f6f8f6]">
-      <div className="mx-auto max-w-6xl px-5 py-24">
+      <div className="mx-auto max-w-7xl px-5 py-24">
         <Reveal className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-semibold tracking-tight text-gray-900 sm:text-4xl">Live in an afternoon</h2>
           <p className="mt-4 text-lg text-gray-600">No engineers required — set it up, preview it, ship it.</p>
@@ -242,7 +242,7 @@ export function HowItWorks() {
 export function CTASection() {
   return (
     <section id="get-started" className="scroll-mt-20 text-white" style={{ backgroundColor: DARK }}>
-      <div className="mx-auto max-w-6xl px-5 py-24">
+      <div className="mx-auto max-w-7xl px-5 py-24">
         <Reveal>
           {/* Framed like the pricing "Everything included" card so the closing CTA
               reads as its own contained panel rather than a flat dark band. */}
@@ -272,7 +272,7 @@ export function Footer() {
     <footer className="relative isolate overflow-hidden text-white" style={{ backgroundColor: DARK }}>
       {/* Faint grid, same as the logged-in app shell */}
       <div className="shell-grid pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-full" aria-hidden="true" />
-      <div className="mx-auto max-w-6xl px-5 pb-12 pt-20 text-center">
+      <div className="mx-auto max-w-7xl px-5 pb-12 pt-20 text-center">
         {/* Oversized brand wordmark */}
         <div
           className="font-semibold leading-none tracking-tight"
