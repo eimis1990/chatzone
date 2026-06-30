@@ -89,3 +89,27 @@ export function formatMessage(raw: string): string {
   if (!cleaned) return ''
   return (md.parse(cleaned, { async: false }) as string).trim()
 }
+
+/**
+ * Convert a bot message into plain, speech-friendly text for TTS — so the same
+ * "rich" reply that renders nicely in the bubble doesn't get read aloud with its
+ * Markdown symbols (no "asterisk asterisk", no spelled-out URLs). Strips
+ * Markdown, drops links' URLs (keeps the label) and bare URLs, and turns line
+ * breaks into sentence pauses.
+ */
+export function toSpeechText(raw: string): string {
+  let t = stripCitations(raw || '')
+  t = t.replace(/```[\s\S]*?```/g, ' ') // code blocks
+  t = t.replace(/!\[[^\]]*\]\([^)]*\)/g, ' ') // images
+  t = t.replace(/\[([^\]]+)\]\([^)]*\)/g, '$1') // links → just the label
+  t = t.replace(/`([^`]+)`/g, '$1') // inline code
+  t = t.replace(/^\s{0,3}#{1,6}\s+/gm, '') // headings
+  t = t.replace(/^\s*>\s?/gm, '') // blockquotes
+  t = t.replace(/^\s*([-*+]|\d+[.)])\s+/gm, '') // list markers
+  t = t.replace(/(\*\*|__|\*|_|~~)/g, '') // bold / italic / strike markers
+  t = t.replace(/https?:\/\/\S+/g, ' ') // leftover bare URLs (don't read aloud)
+  t = t.replace(/[ \t]*\n+[ \t]*/g, '. ') // line breaks → spoken pauses
+  t = t.replace(/([:.!?,;])\s*\.\s/g, '$1 ') // avoid "word:." / "word.."
+  t = t.replace(/\s{2,}/g, ' ').trim()
+  return t
+}

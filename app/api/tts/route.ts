@@ -3,6 +3,7 @@ import { createServiceClient } from '@/lib/supabase/service'
 import { isOriginAllowed, corsHeaders } from '@/lib/widget-auth'
 import { createRateLimiter } from '@/lib/ratelimit'
 import { synthesizeSpeech, ttsModelForLanguage, MissingVoiceKeyError } from '@/lib/ai/tts'
+import { toSpeechText } from '@/lib/format-message'
 import type { Bot } from '@/lib/types'
 
 export const maxDuration = 30
@@ -62,7 +63,9 @@ export async function POST(req: Request) {
   const voiceId = bot.config.voice.voices?.[lang] ?? bot.config.voice.voices?.en ?? ''
 
   try {
-    const audio = await synthesizeSpeech(msg.content, voiceId, { model: ttsModelForLanguage(lang) })
+    const audio = await synthesizeSpeech(toSpeechText(msg.content), voiceId, {
+      model: ttsModelForLanguage(lang),
+    })
     return new Response(audio, {
       headers: { ...cors, 'Content-Type': 'audio/mpeg', 'Cache-Control': 'no-store' },
     })

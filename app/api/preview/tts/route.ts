@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase/server'
 import { previewTtsSchema } from '@/lib/validation/schemas'
 import { synthesizeSpeech, ttsModelForLanguage, MissingVoiceKeyError } from '@/lib/ai/tts'
+import { toSpeechText } from '@/lib/format-message'
 import { createRateLimiter } from '@/lib/ratelimit'
 
 export const maxDuration = 30
@@ -22,7 +23,7 @@ export async function POST(req: Request) {
   if (!parsed.success) return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
 
   try {
-    const audio = await synthesizeSpeech(parsed.data.text, parsed.data.voiceId, {
+    const audio = await synthesizeSpeech(toSpeechText(parsed.data.text), parsed.data.voiceId, {
       model: ttsModelForLanguage(parsed.data.language ?? 'en'),
     })
     return new Response(audio, {

@@ -1,5 +1,38 @@
 import { describe, it, expect } from 'vitest'
-import { formatMessage, stripCitations } from '@/lib/format-message'
+import { formatMessage, stripCitations, toSpeechText } from '@/lib/format-message'
+
+describe('toSpeechText', () => {
+  it('strips bold/italic markers', () => {
+    expect(toSpeechText('This is **important** and _here_.')).toBe('This is important and here.')
+  })
+
+  it('keeps link labels but drops the URL', () => {
+    expect(toSpeechText('See [our docs](https://loqara.com/docs) today')).toBe('See our docs today')
+  })
+
+  it('removes bare URLs', () => {
+    expect(toSpeechText('Visit https://loqara.com now')).not.toContain('http')
+  })
+
+  it('turns a bullet list into spoken sentences without markers', () => {
+    const out = toSpeechText('Platforms:\n- Shopify\n- WooCommerce')
+    expect(out).not.toContain('-')
+    expect(out).toContain('Shopify')
+    expect(out).toContain('WooCommerce')
+  })
+
+  it('strips heading markers and inline code', () => {
+    expect(toSpeechText('# Title\nUse `code` here')).toBe('Title. Use code here')
+  })
+
+  it('keeps phone numbers readable', () => {
+    expect(toSpeechText('Call +370 600 12345')).toContain('+370 600 12345')
+  })
+
+  it('removes [source: …] citations', () => {
+    expect(toSpeechText('Works anywhere. [source: abc-123]')).toBe('Works anywhere.')
+  })
+})
 
 describe('stripCitations', () => {
   it('removes inline [source: …] tags', () => {
