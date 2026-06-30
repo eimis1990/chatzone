@@ -1175,8 +1175,9 @@ export function ConfigForm({
             </div>
           </CardContent>
         </CollapsibleSection>
+        </>)}
 
-        {/* ── Voice ── */}
+        {/* ── Voice ── (clients see it too; TTS/STT toggles are owner-only) */}
         <VoiceSection
           control={control}
           watch={watch}
@@ -1184,8 +1185,8 @@ export function ConfigForm({
           activeLang={activeLang}
           enabledLanguages={watchedLanguages as BotLanguage[]}
           canUseVoice={canUseVoice}
+          audience={audience}
         />
-        </>)}
 
         {/* ── Lead Capture ── */}
         <CollapsibleSection header={<SectionHeader

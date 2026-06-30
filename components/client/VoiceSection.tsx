@@ -84,6 +84,8 @@ interface VoiceSectionProps {
   enabledLanguages: BotLanguage[]
   /** Whether the org has the Voice add-on (else the toggle is locked). */
   canUseVoice?: boolean
+  /** 'client' hides the TTS/STT toggles (owner-managed); 'owner' shows them. */
+  audience?: 'owner' | 'client'
 }
 
 export function VoiceSection({
@@ -93,6 +95,7 @@ export function VoiceSection({
   activeLang,
   enabledLanguages,
   canUseVoice = true,
+  audience = 'owner',
 }: VoiceSectionProps) {
   const voiceEnabled = watch('voice.enabled')
 
@@ -198,37 +201,40 @@ export function VoiceSection({
 
         {voiceEnabled && (
           <div className="space-y-5 rounded-lg border p-4">
-            {/* TTS toggle */}
-            <div className="flex items-center gap-3">
-              <Controller
-                name="voice.ttsEnabled"
-                control={control}
-                render={({ field }) => (
-                  <Switch
-                    checked={field.value ?? true}
-                    onCheckedChange={field.onChange}
-                    id="ttsEnabled"
+            {/* TTS / STT toggles — owner-managed (hidden from clients). */}
+            {audience === 'owner' && (
+              <>
+                <div className="flex items-center gap-3">
+                  <Controller
+                    name="voice.ttsEnabled"
+                    control={control}
+                    render={({ field }) => (
+                      <Switch
+                        checked={field.value ?? true}
+                        onCheckedChange={field.onChange}
+                        id="ttsEnabled"
+                      />
+                    )}
                   />
-                )}
-              />
-              <Label htmlFor="ttsEnabled">Text-to-speech (bot speaks replies)</Label>
-            </div>
+                  <Label htmlFor="ttsEnabled">Text-to-speech (bot speaks replies)</Label>
+                </div>
 
-            {/* STT toggle */}
-            <div className="flex items-center gap-3">
-              <Controller
-                name="voice.sttEnabled"
-                control={control}
-                render={({ field }) => (
-                  <Switch
-                    checked={field.value ?? true}
-                    onCheckedChange={field.onChange}
-                    id="sttEnabled"
+                <div className="flex items-center gap-3">
+                  <Controller
+                    name="voice.sttEnabled"
+                    control={control}
+                    render={({ field }) => (
+                      <Switch
+                        checked={field.value ?? true}
+                        onCheckedChange={field.onChange}
+                        id="sttEnabled"
+                      />
+                    )}
                   />
-                )}
-              />
-              <Label htmlFor="sttEnabled">Speech-to-text (visitor speaks questions)</Label>
-            </div>
+                  <Label htmlFor="sttEnabled">Speech-to-text (visitor speaks questions)</Label>
+                </div>
+              </>
+            )}
 
             {/* Voice status messages */}
             {loadState.status === 'unavailable' && (
