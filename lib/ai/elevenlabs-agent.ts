@@ -154,7 +154,7 @@ export function buildAgentConfig(bot: Bot, toolIds: string[] = []): AgentConfig 
 export function agentConfigHash(bot: Bot, toolIds: string[] = []): string {
   const cfg = bot.config
   const material = JSON.stringify([
-    'v9-knowledge-tool', // bump to force re-sync when the agent payload shape changes
+    'v10-knowledge-expects-response', // bump to force re-sync when the agent payload shape changes
     cfg.languages,
     cfg.content,
     cfg.voice?.voices,
@@ -200,6 +200,10 @@ function buildKnowledgeToolConfig() {
       '(email, phone, address), or any other fact. Call this whenever the user asks something ' +
       'informational and answer ONLY from what it returns; never refuse or claim you lack access ' +
       'before calling it.',
+    // Block the conversation until the client returns the retrieved context, and
+    // pass it to the LLM — without this the agent only gets a generic ack
+    // ("Tool called successfully") and can't answer from the knowledge base.
+    expects_response: true,
     parameters: {
       type: 'object' as const,
       properties: {
