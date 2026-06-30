@@ -1,6 +1,6 @@
 import { readdirSync } from 'fs'
 import { join } from 'path'
-import { ShowcaseMarquee } from './ShowcaseMarquee'
+import { ShowcaseFan } from './ShowcaseFan'
 
 /**
  * Reads every image in public/chatviews at build/render time, so adding a file
@@ -20,5 +20,5 @@ function chatViewImages(): string[] {
 export function Showcase() {
   const images = chatViewImages()
   if (images.length === 0) return null
-  return <ShowcaseMarquee images={images} />
+  return <ShowcaseFan images={images} />
 }
