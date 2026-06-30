@@ -2,6 +2,7 @@ import { LandingNav } from '@/components/landing/LandingNav'
 import { Hero } from '@/components/landing/Hero'
 import { Features, Stats, HowItWorks, CTASection, Footer } from '@/components/landing/sections'
 import { Pricing } from '@/components/landing/Pricing'
+import { SetupPricing } from '@/components/landing/SetupPricing'
 import { Showcase } from '@/components/landing/Showcase'
 import { Faq } from '@/components/landing/Faq'
 import { FAQ } from '@/components/landing/faq-data'
@@ -108,6 +109,7 @@ export default async function Home() {
         <Stats />
         <HowItWorks />
         <Pricing />
+        <SetupPricing />
         <Faq />
         <CTASection />
       </main>
