@@ -221,6 +221,16 @@ function createPreviewTransport(botId: string, getConfig: () => BotConfig): Chat
       return res.json()
     },
 
+    async searchKnowledge(query) {
+      const res = await fetch('/api/preview/knowledge', {
+        method: 'POST',
+        headers: JSON_HEADERS,
+        body: JSON.stringify({ botId, query }),
+      })
+      if (!res.ok) return { answer: '' }
+      return (await res.json()) as { answer: string }
+    },
+
     async runAction({ actionIndex, language }) {
       const config = getConfig()
       const langs = config.languages ?? ['en']

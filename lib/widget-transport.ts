@@ -32,6 +32,8 @@ export interface ChatTransport {
   sendChat(params: SendChatParams): Promise<Response>
   /** Product search for the voice `search_products` client tool. */
   search(query: string): Promise<{ products?: CommerceProduct[]; summary?: string }>
+  /** Knowledge-base lookup for the voice `search_knowledge` tool (spoken answers). */
+  searchKnowledge(query: string): Promise<{ answer: string }>
   /** Run a "fetch URL" quick action: returns the products to render as cards. */
   runAction(params: {
     actionIndex: number
@@ -77,6 +79,16 @@ export function createWidgetTransport(publicKey: string): ChatTransport {
         body: JSON.stringify({ publicKey, query }),
       })
       return (await res.json()) as { products?: CommerceProduct[]; summary?: string }
+    },
+
+    async searchKnowledge(query) {
+      const res = await fetch('/api/widget/knowledge', {
+        method: 'POST',
+        headers: JSON_HEADERS,
+        body: JSON.stringify({ publicKey, query }),
+      })
+      if (!res.ok) return { answer: '' }
+      return (await res.json()) as { answer: string }
     },
 
     async runAction({ actionIndex, language, conversationId, visitorId }) {

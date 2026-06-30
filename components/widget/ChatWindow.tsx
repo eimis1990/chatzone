@@ -227,6 +227,24 @@ export function ChatWindow({ config, transport, initialLanguage }: ChatWindowPro
     }
   }, [transport, activeLang])
 
+  // Voice `search_knowledge` tool: retrieve knowledge-base context so the agent
+  // can answer informational questions out loud (parity with text chat). The
+  // agent speaks the answer, so we just return the retrieved text.
+  const handleVoiceKnowledge = useCallback(
+    async (query: string): Promise<string> => {
+      try {
+        const { answer } = await transport.searchKnowledge(query)
+        return (
+          answer ||
+          "I don't have that information to hand — I can connect you with a person if you'd like."
+        )
+      } catch {
+        return 'That lookup is temporarily unavailable.'
+      }
+    },
+    [transport],
+  )
+
   const primaryColor = config.theme.primaryColor
   const cornerRadius = config.theme.cornerRadius ?? 16
   const bubbleRadius = config.theme.bubbleRadius ?? 16
@@ -647,6 +665,7 @@ export function ChatWindow({ config, transport, initialLanguage }: ChatWindowPro
             onSearch={handleVoiceSearch}
             onOrderStatus={handleVoiceOrder}
             onDiscount={handleVoiceDiscount}
+            onKnowledge={handleVoiceKnowledge}
             className="flex-shrink-0"
           />
         )}

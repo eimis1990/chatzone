@@ -46,6 +46,8 @@ interface VoiceCallButtonProps {
   onOrderStatus?: (orderId: string, email: string) => Promise<string>
   /** Implements `discount_code` — return the discount as a spoken summary. */
   onDiscount?: () => Promise<string>
+  /** Implements `search_knowledge` — retrieve KB context, return a spoken answer. */
+  onKnowledge?: (query: string) => Promise<string>
   /** Corner radius (px) for the call button. */
   radius?: number
   className?: string
@@ -65,6 +67,7 @@ interface InnerProps {
   onSearch?: (query: string) => Promise<string>
   onOrderStatus?: (orderId: string, email: string) => Promise<string>
   onDiscount?: () => Promise<string>
+  onKnowledge?: (query: string) => Promise<string>
   radius?: number
 }
 
@@ -80,6 +83,7 @@ function VoiceCallInner({
   onSearch,
   onOrderStatus,
   onDiscount,
+  onKnowledge,
   radius,
 }: InnerProps) {
   const [callError, setCallError] = useState<string | null>(null)
@@ -127,6 +131,16 @@ function VoiceCallInner({
           return await onDiscount()
         } catch {
           return 'The discount is temporarily unavailable.'
+        }
+      },
+      // Look up the knowledge base and return text the agent answers from.
+      search_knowledge: async (params: { query?: string }) => {
+        const q = params?.query?.trim()
+        if (!q || !onKnowledge) return "I don't have that information right now."
+        try {
+          return await onKnowledge(q)
+        } catch {
+          return 'That lookup is temporarily unavailable.'
         }
       },
     },
@@ -379,6 +393,7 @@ export function VoiceCallButton({
   onSearch,
   onOrderStatus,
   onDiscount,
+  onKnowledge,
   radius,
   className,
 }: VoiceCallButtonProps) {
@@ -397,6 +412,7 @@ export function VoiceCallButton({
           onSearch={onSearch}
           onOrderStatus={onOrderStatus}
           onDiscount={onDiscount}
+          onKnowledge={onKnowledge}
           radius={radius}
         />
       </ConversationProvider>

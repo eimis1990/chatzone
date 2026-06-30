@@ -68,6 +68,7 @@ function buildAgentPrompt(cfg: Bot['config'], toolIds: string[], languages: BotL
   const lt = languages.includes('lt')
   const parts = [
     cfg.systemPrompt,
+    'When the user asks anything informational about this business — its services, policies, hours, pricing, shipping, returns, contact details (email, phone, address), or any other fact — ALWAYS call the `search_knowledge` tool with their question first and answer ONLY from what it returns. Never say you cannot share details or lack access before calling it. If it returns nothing relevant, say you do not have that detail and offer to connect them with a person — never invent an answer.',
     `When the user asks about products, prices, availability, or recommendations, call the \`search_products\` tool. Use a SHORT query — ONLY the product noun${
       lt ? ' in Lithuanian (e.g. "veido kremas" for face cream, "serumas" for serum)' : ''
     }, with NO adjectives like dry/sensitive/hydrating (they return nothing). The matching products are shown to the user automatically as cards, so reply with just ONE short sentence (e.g. "Štai keletas variantų:" / "Here are a few options:") — do NOT read out the product names, prices, or details. If a search returns nothing, retry once with a broader noun; only say a product is unavailable if that also returns nothing.`,
@@ -153,7 +154,7 @@ export function buildAgentConfig(bot: Bot, toolIds: string[] = []): AgentConfig 
 export function agentConfigHash(bot: Bot, toolIds: string[] = []): string {
   const cfg = bot.config
   const material = JSON.stringify([
-    'v8-transactional', // bump to force re-sync when the agent payload shape changes
+    'v9-knowledge-tool', // bump to force re-sync when the agent payload shape changes
     cfg.languages,
     cfg.content,
     cfg.voice?.voices,
@@ -189,6 +190,29 @@ async function setSetting(db: SupabaseClient, key: string, value: string): Promi
  * returns a short summary the agent speaks. (Client tools push UI to the page;
  * a server webhook can't.) The SDK provides the implementation by name.
  */
+function buildKnowledgeToolConfig() {
+  return {
+    type: 'client' as const,
+    name: 'search_knowledge',
+    description:
+      "Look up the business's own knowledge base to answer ANY informational question about the " +
+      'company — its services, policies, opening hours, pricing, shipping, returns, contact details ' +
+      '(email, phone, address), or any other fact. Call this whenever the user asks something ' +
+      'informational and answer ONLY from what it returns; never refuse or claim you lack access ' +
+      'before calling it.',
+    parameters: {
+      type: 'object' as const,
+      properties: {
+        query: {
+          type: 'string' as const,
+          description: "The user's question, in their own words.",
+        },
+      },
+      required: ['query'],
+    },
+  }
+}
+
 function buildSearchToolConfig() {
   return {
     type: 'client' as const,
@@ -266,7 +290,12 @@ async function ensureTool(db: SupabaseClient, key: string, toolConfig: object): 
 
 /** Ensures all applicable client tools for a bot and returns their ids. */
 async function ensureTools(db: SupabaseClient, bot: Bot): Promise<string[]> {
-  const ids = [await ensureTool(db, `cbz_tool_${bot.id}`, buildSearchToolConfig())]
+  // Knowledge lookup is core to every bot; product search is always available too
+  // (its endpoint falls back to knowledge when the store has no match).
+  const ids = [
+    await ensureTool(db, `cbz_tool_kb_${bot.id}`, buildKnowledgeToolConfig()),
+    await ensureTool(db, `cbz_tool_${bot.id}`, buildSearchToolConfig()),
+  ]
   if (orderLookupEnabled(bot.config.commerce)) {
     ids.push(await ensureTool(db, `cbz_tool_order_${bot.id}`, buildOrderToolConfig()))
   }
