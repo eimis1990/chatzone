@@ -21,6 +21,7 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { SignOutButton } from '@/components/client/SignOutButton'
+import { ReportBugButton } from '@/components/ReportBugButton'
 
 const SECTIONS: { label: string; href: string; icon: LucideIcon }[] = [
   { label: 'Configure', href: 'configure', icon: SlidersHorizontalIcon },
@@ -202,8 +203,9 @@ export function AppSidebar({ bots, userEmail }: { bots: BotLite[]; userEmail: st
         </Link>
       </nav>
 
-      {/* Footer — user + sign out, as a solid dark card */}
+      {/* Footer — report a bug + user + sign out, as a solid dark card */}
       <div className="m-3 rounded-xl bg-[#1b1d1f] p-3 ring-1 ring-white/10">
+        <ReportBugButton />
         <p className="truncate px-1 pb-1.5 text-xs text-white/55" title={userEmail}>
           {userEmail}
         </p>

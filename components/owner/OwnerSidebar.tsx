@@ -11,10 +11,12 @@ import {
   BotIcon,
   SlidersHorizontalIcon,
   DatabaseIcon,
+  BugIcon,
   type LucideIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { SignOutButton } from '@/components/client/SignOutButton'
+import { ReportBugButton } from '@/components/ReportBugButton'
 
 interface NavItem {
   label: string
@@ -40,6 +42,7 @@ const NAV: NavItem[] = [
   { label: 'Voices', href: '/owner/voices', icon: MicVocalIcon },
   { label: 'Signups', href: '/owner/signups', icon: MailIcon },
   { label: 'LinkedIn', href: '/owner/linkedin', icon: MegaphoneIcon },
+  { label: 'Bug reports', href: '/owner/bugs', icon: BugIcon },
 ]
 
 export function OwnerSidebar({ userEmail }: { userEmail: string }) {
@@ -105,8 +108,9 @@ export function OwnerSidebar({ userEmail }: { userEmail: string }) {
         })}
       </nav>
 
-      {/* Footer — user + sign out */}
+      {/* Footer — report a bug + user + sign out */}
       <div className="m-3 rounded-xl bg-[#1b1d1f] p-3 ring-1 ring-white/10">
+        <ReportBugButton />
         <p className="truncate px-1 pb-1.5 text-xs text-white/55" title={userEmail}>
           {userEmail}
         </p>

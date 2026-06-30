@@ -328,3 +328,19 @@ export interface MatchedChunk {
   source_id: string
   similarity: number
 }
+
+export type BugStatus = 'open' | 'in_progress' | 'resolved'
+
+export interface BugReport {
+  id: string
+  reporter_id: string | null
+  reporter_email: string | null
+  org_id: string | null
+  title: string
+  description: string
+  page: string | null
+  user_agent: string | null
+  status: BugStatus
+  created_at: string
+  updated_at: string
+}

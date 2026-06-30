@@ -227,6 +227,18 @@ export const createInviteSchema = z.object({
 })
 
 // ---------------------------------------------------------------------------
+// Bug reports (in-app "Report a bug")
+// ---------------------------------------------------------------------------
+export const bugReportSchema = z.object({
+  title: z.string().trim().min(3).max(140),
+  description: z.string().trim().min(10).max(5000),
+  page: z.string().max(512).optional(),
+  userAgent: z.string().max(512).optional(),
+})
+
+export const bugStatusSchema = z.enum(['open', 'in_progress', 'resolved'])
+
+// ---------------------------------------------------------------------------
 // Public chat request (widget → /api/chat)
 // ---------------------------------------------------------------------------
 export const chatRequestSchema = z.object({
