@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { DownloadIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { toCsv } from '@/lib/csv'
 import type { Lead } from '@/lib/types'
@@ -44,12 +45,12 @@ export function ExportLeadsButton({ leads, columns, botName }: ExportLeadsButton
 
   return (
     <Button
-      variant="outline"
-      size="sm"
       onClick={handleExport}
       disabled={exporting || leads.length === 0}
+      className="h-10 rounded-md px-7"
     >
-      {exporting ? 'Exporting…' : 'Export CSV'}
+      <DownloadIcon className="size-4" />
+      {exporting ? 'Exporting…' : 'Export'}
     </Button>
   )
 }

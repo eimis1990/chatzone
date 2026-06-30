@@ -46,7 +46,7 @@ export default async function LeadsPage({
   )
 
   return (
-    <div className="p-6 space-y-4">
+    <div className="space-y-6 p-6">
       <div className="flex items-center justify-between gap-4">
         <div>
           <h2 className="text-lg font-semibold">Leads</h2>
@@ -58,20 +58,25 @@ export default async function LeadsPage({
       </div>
 
       {leads.length === 0 ? (
-        <div className="border rounded-lg p-12 text-center text-muted-foreground">
-          <p className="text-sm">No leads captured yet.</p>
-          <p className="text-xs mt-1">
+        <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed bg-card py-20 text-center">
+          <p className="font-medium text-foreground">No leads captured yet</p>
+          <p className="text-sm text-muted-foreground">
             Leads are captured when visitors fill in your bot&apos;s lead-capture form.
           </p>
         </div>
       ) : (
-        <div className="border rounded-lg overflow-x-auto">
+        <div className="overflow-hidden rounded-xl border bg-card">
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead className="whitespace-nowrap">Captured</TableHead>
+              <TableRow className="hover:bg-transparent">
+                <TableHead className="px-4 text-xs font-medium uppercase tracking-wide whitespace-nowrap text-muted-foreground">
+                  Captured
+                </TableHead>
                 {fieldColumns.map((col) => (
-                  <TableHead key={col} className="whitespace-nowrap capitalize">
+                  <TableHead
+                    key={col}
+                    className="px-4 text-xs font-medium uppercase tracking-wide whitespace-nowrap text-muted-foreground"
+                  >
                     {col}
                   </TableHead>
                 ))}
@@ -80,11 +85,14 @@ export default async function LeadsPage({
             <TableBody>
               {leads.map((lead) => (
                 <TableRow key={lead.id}>
-                  <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
+                  <TableCell
+                    className="px-4 py-3 whitespace-nowrap text-xs text-muted-foreground"
+                    title={new Date(lead.created_at).toLocaleString()}
+                  >
                     {formatDistanceToNow(lead.created_at)}
                   </TableCell>
                   {fieldColumns.map((col) => (
-                    <TableCell key={col} className="text-sm">
+                    <TableCell key={col} className="px-4 py-3 text-sm">
                       {lead.fields[col] ?? '—'}
                     </TableCell>
                   ))}
