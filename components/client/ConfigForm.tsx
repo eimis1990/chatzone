@@ -76,6 +76,9 @@ interface ConfigFormProps {
   onSave?: (botId: string, rawConfig: unknown, name?: string) => Promise<SaveConfigResult>
   /** Optional control rendered next to Save (e.g. the owner's show-on-landing toggle). */
   headerAction?: ReactNode
+  /** 'client' hides the technical sections (AI behaviour, Voice, Store, Allowed
+   *  domains) — those are configured for them by the owner. 'owner' shows all. */
+  audience?: 'owner' | 'client'
 }
 
 // Use botConfigFormSchema (plain, no preprocessing) for the RHF resolver.
@@ -161,8 +164,11 @@ export function ConfigForm({
   canUseVoice = true,
   onSave = saveConfig,
   headerAction,
+  audience = 'owner',
 }: ConfigFormProps) {
   const router = useRouter()
+  // Clients get a trimmed config — the owner manages the technical sections.
+  const showAdvanced = audience === 'owner'
   // Internal bot name — lives outside the config schema, saved alongside it.
   const [name, setName] = useState(botName)
   // Quick-action add/edit dialog.
@@ -1045,6 +1051,7 @@ export function ConfigForm({
         </CollapsibleSection>
 
         {/* ── AI Behaviour ── */}
+        {showAdvanced && (<>
         <CollapsibleSection header={<SectionHeader
               icon={SparklesIcon}
               title="AI behaviour"
@@ -1178,6 +1185,7 @@ export function ConfigForm({
           enabledLanguages={watchedLanguages as BotLanguage[]}
           canUseVoice={canUseVoice}
         />
+        </>)}
 
         {/* ── Lead Capture ── */}
         <CollapsibleSection header={<SectionHeader
@@ -1315,6 +1323,7 @@ export function ConfigForm({
           </CardContent>
         </CollapsibleSection>
 
+        {showAdvanced && (<>
         {/* ── Store / Products ── */}
         <CommerceSection control={control} watch={watch} />
 
@@ -1356,6 +1365,7 @@ export function ConfigForm({
             </p>
           </CardContent>
         </CollapsibleSection>
+        </>)}
 
         </form>
       </ResizablePanel>
