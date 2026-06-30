@@ -70,6 +70,20 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
           { '@type': 'ListItem', position: 3, name: post.title, item: `${SITE_URL}/blog/${slug}` },
         ],
       },
+      // Only when the post has a "Frequently asked questions" section — eligible
+      // for FAQ rich results, and answers AI assistants can quote directly.
+      ...(post.faq.length
+        ? [
+            {
+              '@type': 'FAQPage',
+              mainEntity: post.faq.map((f) => ({
+                '@type': 'Question',
+                name: f.question,
+                acceptedAnswer: { '@type': 'Answer', text: f.answer },
+              })),
+            },
+          ]
+        : []),
     ],
   }
 
