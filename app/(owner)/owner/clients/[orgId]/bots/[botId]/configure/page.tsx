@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import { requireRole } from '@/lib/auth/guards'
 import { createServiceClient } from '@/lib/supabase/service'
 import { ConfigForm } from '@/components/client/ConfigForm'
+import { OwnerBotTabs } from '@/components/owner/OwnerBotTabs'
 import { entitlementsFor } from '@/lib/entitlements'
 import { saveClientBotConfig } from './actions'
 import type { Bot, Plan } from '@/lib/types'
@@ -45,6 +46,7 @@ export default async function OwnerConfigurePage({
       canUseLeadCapture={ent.leadCapture}
       canUseVoice={Boolean(org?.voice_addon)}
       onSave={saveClientBotConfig}
+      topSlot={<OwnerBotTabs orgId={orgId} botId={botId} />}
     />
   )
 }

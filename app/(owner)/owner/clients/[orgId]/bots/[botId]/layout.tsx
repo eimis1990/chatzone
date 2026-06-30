@@ -2,7 +2,6 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { requireRole } from '@/lib/auth/guards'
 import { createServiceClient } from '@/lib/supabase/service'
-import { OwnerBotTabs } from '@/components/owner/OwnerBotTabs'
 
 /**
  * Shell for the owner editing a client's bot (done-for-you). Shows the "editing
@@ -43,7 +42,6 @@ export default async function OwnerBotEditorLayout({
           ← Back to client
         </Link>
       </div>
-      <OwnerBotTabs orgId={orgId} botId={botId} />
       <div className="min-h-0 flex-1">{children}</div>
     </div>
   )

@@ -79,6 +79,9 @@ interface ConfigFormProps {
   /** 'client' hides the technical sections (AI behaviour, Voice, Store, Allowed
    *  domains) — those are configured for them by the owner. 'owner' shows all. */
   audience?: 'owner' | 'client'
+  /** Optional bar at the very top of the config panel (e.g. the owner's
+   *  Configure / Knowledge tabs) — spans the config-panel width. */
+  topSlot?: ReactNode
 }
 
 // Use botConfigFormSchema (plain, no preprocessing) for the RHF resolver.
@@ -165,6 +168,7 @@ export function ConfigForm({
   onSave = saveConfig,
   headerAction,
   audience = 'owner',
+  topSlot,
 }: ConfigFormProps) {
   const router = useRouter()
   // Clients get a trimmed config — the owner manages the technical sections.
@@ -450,6 +454,8 @@ export function ConfigForm({
       {/* ── Config panel — fixed ~half width, scrolls internally ── */}
       <ResizablePanel defaultFraction={0.5} defaultWidth={480} min={380} max={1100} resizable={false}>
         <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="pb-10">
+
+        {topSlot}
 
         {/* Sticky toolbar — title + always-visible Save (fixed height so the
             section headers below can pin exactly beneath it). */}

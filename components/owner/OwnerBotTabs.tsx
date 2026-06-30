@@ -15,7 +15,7 @@ export function OwnerBotTabs({ orgId, botId }: { orgId: string; botId: string })
   ]
 
   return (
-    <nav className="flex shrink-0 gap-1 border-b px-4">
+    <nav className="flex shrink-0 gap-1 border-b bg-card px-4">
       {tabs.map((t) => {
         const active = pathname === t.href
         const Icon = t.icon
