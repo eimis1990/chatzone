@@ -15,10 +15,31 @@ export const maxDuration = 300
 // Discover broadly, but only ingest a batch per crawl (bounds the request time;
 // re-crawling picks up the next batch of fresh pages).
 const DISCOVER_CAP = 60
-const INGEST_CAP = 10
+const INGEST_CAP = 15
 
 // Crawling is expensive — a couple per minute per user.
 const crawlLimiter = createRateLimiter({ capacity: 2, refillPerSec: 0.05 })
+
+// Pages most support questions hit — contact, returns/refunds, terms, privacy,
+// shipping/delivery, payment, warranty, about, FAQ (Lithuanian + English). These
+// are ingested first so a single crawl front-loads the highest-value info.
+const PRIORITY_RE =
+  /(kontakt|contact|susisiek|gr[aą]žin|grazin|return|refund|atsisak|taisykl|s[aą]lyg|salyg|terms|conditions|privatum|privacy|gdpr|slapuk|cookie|pristatym|siunt|delivery|shipping|apmok|mok[eė]jim|payment|garantij|warranty|apie|about|duk|faq|klausim)/i
+const BLOG_RE = /\/(patarimai|blog|straipsn|news|tinklarast|article)\//i
+
+/** Rank a page for ingestion priority: policy/contact pages first, blogs last. */
+function priorityScore(u: string): number {
+  try {
+    const path = new URL(u).pathname.toLowerCase()
+    if (path === '/' || path === '') return 3 // homepage: general store info
+    let score = 0
+    if (PRIORITY_RE.test(path)) score += 5
+    if (BLOG_RE.test(path)) score -= 1 // let policy pages win ties over articles
+    return score
+  } catch {
+    return 0
+  }
+}
 
 /** Derive a short, readable source name from a page URL (its path, else host). */
 function pageName(u: string): string {
@@ -70,7 +91,11 @@ export async function POST(req: Request) {
   const existingUrls = new Set(
     (existing ?? []).map((r) => String((r.metadata as { url?: string })?.url ?? '')),
   )
-  const fresh = pages.filter((p) => !existingUrls.has(p))
+  // Ingest highest-value pages first (policy/contact/etc.), blogs last. Stable
+  // sort keeps sitemap order within the same priority tier.
+  const fresh = pages
+    .filter((p) => !existingUrls.has(p))
+    .sort((a, b) => priorityScore(b) - priorityScore(a))
   if (fresh.length === 0) {
     return NextResponse.json(
       { error: 'All pages found at that site are already in your knowledge base.' },
