@@ -123,7 +123,7 @@ export function ProductListView({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 14 }}
       transition={{ duration: 0.22, ease: [0.25, 0.46, 0.45, 0.94] }}
-      className="absolute inset-0 z-20 flex flex-col bg-background"
+      className="absolute inset-0 z-20 flex flex-col bg-white"
       role="region"
       aria-label={labels.products}
     >
@@ -276,7 +276,7 @@ function ProductRow({ product, bubbleRadius, primaryColor, labels }: ProductRowP
 
   return (
     <div
-      className="border bg-background overflow-hidden"
+      className="border bg-white overflow-hidden"
       style={{ borderRadius: `${rowRadius}px` }}
       role="listitem"
     >
@@ -342,7 +342,7 @@ function ProductRow({ product, bubbleRadius, primaryColor, labels }: ProductRowP
             type="button"
             onClick={() => setExpanded((v) => !v)}
             aria-expanded={expanded}
-            className="flex w-full items-center justify-center gap-1 border border-dashed text-[11px] font-medium py-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground outline-none focus-visible:ring-2"
+            className="flex w-full items-center justify-center gap-1 border border-dashed bg-white text-[11px] font-medium py-1.5 text-muted-foreground transition-colors hover:bg-gray-50 hover:text-foreground outline-none focus-visible:ring-2"
             style={{ borderRadius: `${Math.min(rowRadius, 8)}px` }}
           >
             {labels.details}
