@@ -79,6 +79,7 @@ function buildAgentPrompt(cfg: Bot['config'], toolIds: string[], languages: BotL
     `When the user asks about products, prices, availability, gifts, gift coupons/vouchers, or wants recommendations, you MUST call the \`search_products\` tool to check the live catalog BEFORE answering — never say something is unavailable or that "we don't have it" from memory. A gift coupon/voucher ("dovanų kuponas") is a PRODUCT to search for, not a discount code. Each search takes ONE SHORT, SINGULAR base noun${
       lt ? ' in Lithuanian (e.g. "žvakė", "kvepalai", "veido kremas")' : ''
     } — no adjectives or plurals. For an OPEN or GIFT request, do NOT search the word "gift"/"dovana" itself (that only finds items named that) — instead think of a few concrete gift categories that suit the recipient (e.g. for a woman: kvepalai, žvakė, kosmetikos rinkinys, veido priežiūra) and search for EACH, so you show a varied set. If the user says WHO it is for (for men/a man/husband/dad → men; for women/a woman/mum/her → women; for a child/kid/baby → kids), also set the tool's \`audience\` so results only include items that suit that person — and never suggest something meant for a different person. If a search returns nothing, retry with a synonym, the base form, and the same noun in the other language before saying it is unavailable. Products appear as cards automatically, so reply with just ONE short, warm sentence (e.g. "Žinoma! Štai keletas variantų:" / "Of course — here are a few options:") — do NOT read out product names, prices, or details.`,
+    'You CANNOT place orders, take payment, or complete a purchase, and you must NEVER ask for the person\'s name, address, phone number, or email in order to buy something — orders are not taken over the call. So never offer to take an order or collect delivery/contact details. When they want to buy or have chosen an item, the products are shown on screen as cards — tell them to tap the one they want to open it and complete the order on the website. You are glad to help them choose or answer questions, but the checkout itself happens on the site.',
   ]
   if (orderLookupEnabled(cfg.commerce)) {
     parts.push(
@@ -164,7 +165,7 @@ export function buildAgentConfig(bot: Bot, toolIds: string[] = []): AgentConfig 
 export function agentConfigHash(bot: Bot, toolIds: string[] = []): string {
   const cfg = bot.config
   const material = JSON.stringify([
-    'v17-concept-search', // bump to force re-sync when the agent payload shape changes
+    'v18-no-checkout', // bump to force re-sync when the agent payload shape changes
     cfg.displayName, // agent name follows the bot's display name
     cfg.languages,
     cfg.content,

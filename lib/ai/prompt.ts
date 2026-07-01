@@ -109,6 +109,19 @@ export function buildSystemPrompt(
         'context below.',
     )
 
+    lines.push(
+      'BUYING & CHECKOUT: you CANNOT place orders, take payment, reserve items, or complete a purchase, ' +
+        'and you must NEVER ask the shopper for personal details (name, address, phone number, email) in ' +
+        'order to buy something — orders are NOT taken through chat. So NEVER offer to "help with the ' +
+        'order", start an order form, or collect delivery/contact info. When the shopper wants to buy, ' +
+        'has chosen an item, or asks how to order: call `display_products` with just THAT product\'s id ' +
+        'so its card — with the button to the product page — is shown, then warmly tell them to tap the ' +
+        'button on the card to open it and finish on the website (e.g. "Great choice! Tap the card to ' +
+        'open it and complete your order on the site 🛍️" / "Puikus pasirinkimas! Paspauskite kortelę ir ' +
+        'užbaikite užsakymą svetainėje 🛍️"). You are glad to help them compare, choose, or answer ' +
+        'questions — but the checkout itself always happens on the website, not here.',
+    )
+
     const orderEnabled = orderLookupEnabled(config.commerce)
     if (orderEnabled) {
       lines.push(
