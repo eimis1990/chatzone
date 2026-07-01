@@ -41,6 +41,20 @@ function priorityScore(u: string): number {
   }
 }
 
+// Product & category pages are served by the live store feed (always-current
+// prices + stock), so we do NOT ingest them into the knowledge base — that would
+// duplicate the catalog and, worse, freeze prices at crawl time. We crawl only
+// content pages (policies, FAQ, about, blog). Covers WooCommerce (LT + EN).
+const PRODUCT_URL_RE =
+  /\/(produktas|produkto-kategorija|product|product-category|shop|store|parduotuv|prek[eė])\//i
+function isProductUrl(u: string): boolean {
+  try {
+    return PRODUCT_URL_RE.test(new URL(u).pathname.toLowerCase())
+  } catch {
+    return false
+  }
+}
+
 /** Derive a short, readable source name from a page URL (its path, else host). */
 function pageName(u: string): string {
   try {
@@ -94,7 +108,7 @@ export async function POST(req: Request) {
   // Ingest highest-value pages first (policy/contact/etc.), blogs last. Stable
   // sort keeps sitemap order within the same priority tier.
   const fresh = pages
-    .filter((p) => !existingUrls.has(p))
+    .filter((p) => !existingUrls.has(p) && !isProductUrl(p))
     .sort((a, b) => priorityScore(b) - priorityScore(a))
   if (fresh.length === 0) {
     return NextResponse.json(
