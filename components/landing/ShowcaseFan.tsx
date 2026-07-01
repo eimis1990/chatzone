@@ -4,7 +4,7 @@ import { motion } from 'framer-motion'
 import SocialCards from '@/components/ui/card-fan-carousel'
 import { Shimmer } from './Shimmer'
 
-const TITLE_LINES = ['A widget that fits', 'your brand']
+const TITLE = 'A widget that fits your brand'
 const DESCRIPTION =
   'Tweak colors, shapes, backgrounds, voice and more — then push it live to your site in one click. Want something bespoke? Custom designs on request.'
 
@@ -22,22 +22,15 @@ export function ShowcaseFan({ images }: { images: string[] }) {
     // context so they never paint over the fixed header.
     <section id="showcase" className="isolate overflow-x-clip bg-white text-gray-900 scroll-mt-20">
       <div className="mx-auto max-w-3xl px-5 pt-24 text-center">
+        {/* Large but slim (light-weight) heading — an airy, editorial feel. */}
         <motion.h2
           initial="hidden"
           whileInView="show"
           viewport={{ once: true, amount: 0.4 }}
-          variants={{ hidden: {}, show: { transition: { staggerChildren: 0.07 } } }}
-          className="text-3xl font-semibold tracking-tight text-gray-900 sm:text-4xl"
+          variants={FADE_IN}
+          className="text-balance text-5xl font-light tracking-tight text-gray-900 sm:text-6xl"
         >
-          {TITLE_LINES.map((line, li) => (
-            <span key={li} className="block">
-              {line.split(' ').map((word, wi) => (
-                <motion.span key={wi} variants={FADE_IN} className="inline-block">
-                  {word}&nbsp;
-                </motion.span>
-              ))}
-            </span>
-          ))}
+          {TITLE}
         </motion.h2>
 
         <motion.p
@@ -45,8 +38,8 @@ export function ShowcaseFan({ images }: { images: string[] }) {
           whileInView="show"
           viewport={{ once: true }}
           variants={FADE_IN}
-          transition={{ delay: 0.35 }}
-          className="mx-auto mt-6 max-w-xl text-lg text-gray-600"
+          transition={{ delay: 0.15 }}
+          className="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-gray-500 sm:text-xl"
         >
           {DESCRIPTION}
         </motion.p>

@@ -12,7 +12,7 @@ export function SetupPricing() {
       <div className="mx-auto max-w-5xl px-5 py-20">
         <div className="mx-auto max-w-2xl text-center">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary">Done-for-you setup</p>
-          <h2 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">Setup &amp; Integration</h2>
+          <h2 className="mt-3 text-5xl font-light tracking-tight sm:text-6xl">Setup &amp; Integration</h2>
           <p className="mt-4 text-lg text-white/70">
             One-time investment — we train, configure and install your agent for you.{' '}
             <span className="font-medium text-white/90">Pay once, never again.</span>

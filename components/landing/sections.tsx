@@ -142,7 +142,7 @@ export function Features() {
       <section className="bg-white">
         <div className="mx-auto max-w-3xl px-5 pt-24 pb-4 text-center">
           <Reveal>
-            <h2 className="text-3xl font-semibold tracking-tight text-gray-900 sm:text-4xl">
+            <h2 className="text-5xl font-light tracking-tight text-gray-900 sm:text-6xl">
               One agent. Every part of support.
             </h2>
             <p className="mt-4 text-lg text-gray-600">
@@ -206,7 +206,7 @@ export function HowItWorks() {
     <section id="how" className="bg-[#f6f8f6]">
       <div className="mx-auto max-w-7xl px-5 py-24">
         <Reveal className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-semibold tracking-tight text-gray-900 sm:text-4xl">Live in an afternoon</h2>
+          <h2 className="text-5xl font-light tracking-tight text-gray-900 sm:text-6xl">Live in an afternoon</h2>
           <p className="mt-4 text-lg text-gray-600">No engineers required — set it up, preview it, ship it.</p>
         </Reveal>
         <div className="mt-14 grid gap-6 md:grid-cols-3">
@@ -247,7 +247,7 @@ export function CTASection() {
           {/* Framed like the pricing "Everything included" card so the closing CTA
               reads as its own contained panel rather than a flat dark band. */}
           <div className="rounded-3xl border border-white/10 bg-white/[0.03] px-6 py-16 text-center sm:px-10">
-            <h2 className="mx-auto max-w-xl text-balance text-3xl font-semibold tracking-tight sm:text-4xl">
+            <h2 className="mx-auto max-w-xl text-balance text-5xl font-light tracking-tight sm:text-6xl">
               Add an AI agent to your site today
             </h2>
             <p className="mx-auto mt-4 max-w-lg text-base leading-relaxed text-white/70 sm:text-lg">
