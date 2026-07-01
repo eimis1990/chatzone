@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react'
 import { toast } from 'sonner'
-import { FileTextIcon, MessageSquareTextIcon, LinkIcon, UploadIcon, XIcon, SparklesIcon, SearchCheckIcon } from 'lucide-react'
+import { FileTextIcon, MessageSquareTextIcon, GlobeIcon, UploadIcon, XIcon, SparklesIcon, SearchCheckIcon } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
@@ -22,9 +22,9 @@ interface KnowledgeManagerProps {
 }
 
 const SOURCE_TABS = [
+  { value: 'url', label: 'Website', icon: GlobeIcon },
   { value: 'text', label: 'Text', icon: FileTextIcon },
   { value: 'qa', label: 'Q&A', icon: MessageSquareTextIcon },
-  { value: 'url', label: 'URL', icon: LinkIcon },
   { value: 'file', label: 'File', icon: UploadIcon },
 ] as const
 
@@ -192,7 +192,7 @@ export function KnowledgeManager({ botId, initialSources }: KnowledgeManagerProp
         aria-modal="true"
         aria-label="Add a source"
         className={cn(
-          'fixed inset-y-0 right-0 z-50 flex w-full max-w-md flex-col border-l bg-background shadow-2xl transition-transform duration-300 ease-out',
+          'fixed inset-y-0 right-0 z-50 flex w-full max-w-lg flex-col border-l bg-background shadow-2xl transition-transform duration-300 ease-out',
           addOpen ? 'translate-x-0' : 'translate-x-full',
         )}
       >
@@ -214,13 +214,14 @@ export function KnowledgeManager({ botId, initialSources }: KnowledgeManagerProp
         </div>
 
         <div className="min-h-0 flex-1 overflow-y-auto p-5">
-          <Tabs defaultValue="text">
-            <TabsList className="mb-5 w-full group-data-horizontal/tabs:h-11">
+          <Tabs defaultValue="url">
+            {/* HeroUI-style segmented control: muted track, white active pill w/ soft shadow. */}
+            <TabsList className="mb-5 w-full rounded-xl bg-muted p-1 group-data-horizontal/tabs:h-11">
               {SOURCE_TABS.map(({ value, label, icon: Icon }) => (
                 <TabsTrigger
                   key={value}
                   value={value}
-                  className="gap-1.5 data-active:bg-primary data-active:text-primary-foreground"
+                  className="gap-1.5 rounded-lg data-active:bg-background data-active:font-semibold data-active:text-foreground data-active:shadow-sm"
                 >
                   <Icon className="size-4" aria-hidden="true" />
                   {label}
@@ -228,14 +229,14 @@ export function KnowledgeManager({ botId, initialSources }: KnowledgeManagerProp
               ))}
             </TabsList>
 
+            <TabsContent value="url">
+              <UrlSource botId={botId} onSourceAdded={handleSourceAdded} />
+            </TabsContent>
             <TabsContent value="text">
               <TextSource botId={botId} onSourceAdded={handleSourceAdded} />
             </TabsContent>
             <TabsContent value="qa">
               <QaSource botId={botId} onSourceAdded={handleSourceAdded} />
-            </TabsContent>
-            <TabsContent value="url">
-              <UrlSource botId={botId} onSourceAdded={handleSourceAdded} />
             </TabsContent>
             <TabsContent value="file">
               <FileUpload botId={botId} onSourceAdded={handleSourceAdded} />

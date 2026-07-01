@@ -26,7 +26,8 @@ function isValidUrl(value: string): boolean {
 
 export function UrlSource({ botId, onSourceAdded }: UrlSourceProps) {
   const [url, setUrl] = useState('')
-  const [crawl, setCrawl] = useState(false)
+  // Website training defaults to crawling the whole site — the primary flow here.
+  const [crawl, setCrawl] = useState(true)
   const [loading, setLoading] = useState(false)
   const [urlError, setUrlError] = useState<string | null>(null)
 
@@ -119,8 +120,16 @@ export function UrlSource({ botId, onSourceAdded }: UrlSourceProps) {
 
   return (
     <form onSubmit={handleSubmit} className="max-w-2xl space-y-4">
+      <div className="space-y-1">
+        <h3 className="text-sm font-semibold">Train on your website content</h3>
+        <p className="text-xs text-muted-foreground">
+          We read your site&apos;s key pages — policies, delivery, returns, contact, FAQ, about — and add
+          them to the knowledge base.
+        </p>
+      </div>
+
       <div className="space-y-1.5">
-        <Label htmlFor="url-input">{crawl ? 'Website URL' : 'URL'}</Label>
+        <Label htmlFor="url-input">{crawl ? 'Website URL' : 'Page URL'}</Label>
         <Input
           id="url-input"
           type="url"
@@ -151,6 +160,13 @@ export function UrlSource({ botId, onSourceAdded }: UrlSourceProps) {
         </div>
         <Switch id="crawl-toggle" checked={crawl} onCheckedChange={setCrawl} disabled={loading} />
       </div>
+
+      {crawl && (
+        <p className="rounded-md bg-muted/50 px-3 py-2 text-xs text-muted-foreground">
+          🛍️ Product &amp; category pages are skipped on purpose — your products come from the live store
+          integration (always-current prices &amp; stock). This trains the bot on your general info.
+        </p>
+      )}
 
       <Button type="submit" disabled={!canSubmit}>
         {loading
