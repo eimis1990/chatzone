@@ -35,13 +35,35 @@ export async function POST(req: Request) {
   const { data: bot } = await svc.from('bots').select('*').eq('id', botId).single<Bot>()
   if (!bot) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
+  const writeStatus = (fields: Record<string, unknown>) =>
+    svc
+      .from('catalog_sync_status')
+      .upsert({ bot_id: botId, ...fields, updated_at: new Date().toISOString() })
+
+  // Persist progress for the live UI, but throttle DB writes: always write a
+  // phase change (and 'done'), otherwise at most ~every 800ms.
+  let lastPhase = ''
+  let lastWrite = 0
+  await writeStatus({ phase: 'fetching', processed: 0, total: 0, synced: 0, error: null })
+
   try {
-    const { synced } = await syncProductCatalog(bot, svc)
+    const { synced } = await syncProductCatalog(bot, svc, (p) => {
+      const now = Date.now()
+      if (p.phase === lastPhase && now - lastWrite < 800) return
+      lastPhase = p.phase
+      lastWrite = now
+      void writeStatus({
+        phase: p.phase,
+        processed: p.processed ?? 0,
+        total: p.total ?? 0,
+        synced: p.synced ?? 0,
+      })
+    })
+    await writeStatus({ phase: 'done', synced, processed: synced, total: synced, error: null })
     return NextResponse.json({ synced })
   } catch (err) {
-    return NextResponse.json(
-      { error: err instanceof Error ? err.message : 'Sync failed' },
-      { status: 502 },
-    )
+    const message = err instanceof Error ? err.message : 'Sync failed'
+    await writeStatus({ phase: 'error', error: message })
+    return NextResponse.json({ error: message }, { status: 502 })
   }
 }

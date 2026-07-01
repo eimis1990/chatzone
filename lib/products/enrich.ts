@@ -32,12 +32,16 @@ export interface Enrichment {
 // products) inside the sync time budget without tripping model rate limits.
 const CONCURRENCY = 8
 
-export async function aiEnrich(products: RawProduct[]): Promise<Map<string, Enrichment>> {
+export async function aiEnrich(
+  products: RawProduct[],
+  onProgress?: (processed: number, total: number) => void,
+): Promise<Map<string, Enrichment>> {
   const map = new Map<string, Enrichment>()
   const batches: RawProduct[][] = []
   for (let i = 0; i < products.length; i += BATCH) batches.push(products.slice(i, i + BATCH))
 
   let next = 0
+  let processed = 0
   const runBatch = async (batch: RawProduct[]): Promise<void> => {
     try {
       const { object } = await generateObject({
@@ -60,6 +64,9 @@ export async function aiEnrich(products: RawProduct[]): Promise<Map<string, Enri
       for (const it of object.items) map.set(it.id, { tags: it.tags.slice(0, 8), audience: it.audience })
     } catch {
       // Batch failed → those products keep their derived tags/audience only.
+    } finally {
+      processed += batch.length
+      onProgress?.(processed, products.length)
     }
   }
 

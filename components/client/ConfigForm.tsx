@@ -39,6 +39,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
 import { Scrubber } from '@/components/ui/scrubber'
 import { trackEvent } from '@/lib/analytics'
+import { createBrowserClient } from '@/lib/supabase/browser'
 import {
   CardContent,
   CardTitle,
@@ -1434,9 +1435,35 @@ function CommerceSection({ control, watch, botId }: CommerceSectionProps) {
     synced?: number
     message?: string
   }>({ status: 'idle' })
+  const [syncProgress, setSyncProgress] = useState<{
+    phase: string
+    processed: number
+    total: number
+  } | null>(null)
 
   const handleSync = useCallback(async () => {
     setSyncState({ status: 'loading' })
+    setSyncProgress({ phase: 'fetching', processed: 0, total: 0 })
+
+    // Poll the sync status row for live progress while the request runs.
+    const supabase = createBrowserClient()
+    let polling = true
+    const poll = async () => {
+      while (polling) {
+        const { data } = await supabase
+          .from('catalog_sync_status')
+          .select('phase, processed, total')
+          .eq('bot_id', botId)
+          .single<{ phase: string; processed: number; total: number }>()
+        if (data) {
+          setSyncProgress({ phase: data.phase, processed: data.processed, total: data.total })
+          if (data.phase === 'done' || data.phase === 'error') break
+        }
+        await new Promise((r) => setTimeout(r, 1500))
+      }
+    }
+    void poll()
+
     try {
       const res = await fetch('/api/products/sync', {
         method: 'POST',
@@ -1448,6 +1475,9 @@ function CommerceSection({ control, watch, botId }: CommerceSectionProps) {
       else setSyncState({ status: 'error', message: data.error ?? 'Sync failed.' })
     } catch {
       setSyncState({ status: 'error', message: 'Network error — please try again.' })
+    } finally {
+      polling = false
+      setSyncProgress(null)
     }
   }, [botId])
 
@@ -1733,11 +1763,50 @@ function CommerceSection({ control, watch, botId }: CommerceSectionProps) {
                 {syncState.status === 'error' && (
                   <TestBadge variant="error">{syncState.message}</TestBadge>
                 )}
-                {syncState.status === 'loading' && (
-                  <p className="text-xs text-muted-foreground">
-                    Fetching &amp; enriching your catalog — this can take a minute for large stores.
-                  </p>
-                )}
+                {syncState.status === 'loading' &&
+                  (() => {
+                    const phase = syncProgress?.phase ?? 'fetching'
+                    const label =
+                      (
+                        {
+                          fetching: 'Fetching products from your store…',
+                          enriching: 'Understanding your products…',
+                          embedding: 'Building the search index…',
+                          indexing: 'Saving to the index…',
+                          done: 'Finishing up…',
+                        } as Record<string, string>
+                      )[phase] ?? 'Working…'
+                    const hasBar =
+                      !!syncProgress &&
+                      syncProgress.total > 0 &&
+                      (phase === 'enriching' || phase === 'indexing')
+                    const pct = hasBar
+                      ? Math.min(100, Math.round((100 * syncProgress!.processed) / syncProgress!.total))
+                      : 0
+                    return (
+                      <div className="space-y-1.5">
+                        <div className="flex items-center justify-between text-xs text-muted-foreground">
+                          <span>{label}</span>
+                          {hasBar && (
+                            <span className="tabular-nums">
+                              {syncProgress!.processed.toLocaleString()}/
+                              {syncProgress!.total.toLocaleString()}
+                            </span>
+                          )}
+                        </div>
+                        <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                          {hasBar ? (
+                            <div
+                              className="h-full rounded-full bg-primary transition-all"
+                              style={{ width: `${pct}%` }}
+                            />
+                          ) : (
+                            <div className="h-full w-1/3 animate-pulse rounded-full bg-primary/60" />
+                          )}
+                        </div>
+                      </div>
+                    )
+                  })()}
               </div>
             )}
 
