@@ -18,7 +18,9 @@ export function ShowcaseFan({ images }: { images: string[] }) {
   const cards = images.map((src, i) => ({ imgUrl: src, alt: `Loqara chat widget design ${i + 1}` }))
 
   return (
-    <section id="showcase" className="overflow-x-clip bg-white text-gray-900 scroll-mt-20">
+    // `isolate` keeps the fan cards' z-indexes inside this section's own stacking
+    // context so they never paint over the fixed header.
+    <section id="showcase" className="isolate overflow-x-clip bg-white text-gray-900 scroll-mt-20">
       <div className="mx-auto max-w-3xl px-5 pt-24 text-center">
         <motion.h2
           initial="hidden"
@@ -48,29 +50,30 @@ export function ShowcaseFan({ images }: { images: string[] }) {
         >
           {DESCRIPTION}
         </motion.p>
-
-        <motion.div
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true }}
-          variants={FADE_IN}
-          transition={{ delay: 0.45 }}
-        >
-          <motion.a
-            href="#get-started"
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            className="relative mt-8 inline-flex h-12 items-center justify-center overflow-hidden rounded-full bg-primary px-8 text-base font-semibold text-white shadow-lg shadow-primary/20 transition-colors hover:bg-primary-hover"
-          >
-            <span className="relative z-10">Get started</span>
-            <Shimmer />
-          </motion.a>
-        </motion.div>
       </div>
 
-      <div className="mx-auto mt-16 max-w-6xl px-5 pb-28">
+      <div className="mx-auto mt-14 max-w-6xl px-5">
         <SocialCards cards={cards} />
       </div>
+
+      {/* CTA sits under the carousel + its dots. */}
+      <motion.div
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true }}
+        variants={FADE_IN}
+        className="flex justify-center px-5 pb-28 pt-12"
+      >
+        <motion.a
+          href="#get-started"
+          whileHover={{ scale: 1.03 }}
+          whileTap={{ scale: 0.97 }}
+          className="relative inline-flex h-12 items-center justify-center overflow-hidden rounded-full bg-primary px-8 text-base font-semibold text-white shadow-lg shadow-primary/20 transition-colors hover:bg-primary-hover"
+        >
+          <span className="relative z-10">Get started</span>
+          <Shimmer />
+        </motion.a>
+      </motion.div>
     </section>
   )
 }
