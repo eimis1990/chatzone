@@ -176,9 +176,10 @@ export function ndjsonChatResponse(
     model,
     messages,
     temperature: opts.temperature,
-    // Allow several search steps (one per category for an open need) + a display
-    // step + the final text reply.
-    ...(opts.tools ? { tools: opts.tools, stopWhen: stepCountIs(8) } : {}),
+    // Open/gift needs decompose into ~6 concept searches (one per gift category),
+    // plus retries + a display step + the final text reply — so allow generous
+    // headroom or the reply can get cut off mid-tool-loop.
+    ...(opts.tools ? { tools: opts.tools, stopWhen: stepCountIs(14) } : {}),
   })
 
   const encoder = new TextEncoder()
