@@ -115,6 +115,14 @@ export function buildSystemPrompt(
     )
   }
 
+  // Models reflexively refuse "email address" etc. as personal data. The
+  // business's OWN published contact details are public — share them.
+  lines.push(
+    "The business's own contact details in the context — its email, phone number, website, and " +
+      'address — are PUBLIC information. Share them plainly whenever asked. Never refuse or hedge by ' +
+      "calling the company's own contact details \"personal\", \"private\", or something you \"can't provide\".",
+  )
+
   lines.push('\n--- CONTEXT ---\n' + contextBlock)
   return lines.join('\n\n')
 }

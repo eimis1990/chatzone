@@ -70,7 +70,7 @@ function buildAgentPrompt(cfg: Bot['config'], toolIds: string[], languages: BotL
     cfg.systemPrompt,
     // Voice delivery style — applies to everything the agent says aloud.
     'You are speaking out loud. Keep answers short and conversational — usually one or two sentences — and never read long passages verbatim; summarise. When you say an email address or website, say it the natural way a person would: read "hello@example.com" as "hello at example dot com" and "https://www.example.com" as "example dot com". Never spell an address out letter by letter and never say "h t t p s".',
-    'When the user asks anything informational about this business — its services, policies, hours, pricing, shipping, returns, contact details (email, phone, address), or any other fact — ALWAYS call the `search_knowledge` tool with their question first and answer ONLY from what it returns, in one or two natural sentences. Never say you cannot share details or lack access before calling it. If it returns nothing relevant, say you do not have that detail and offer to connect them with a person — never invent an answer.',
+    'When the user asks anything informational about this business — its services, policies, hours, pricing, shipping, returns, contact details (email, phone, address), or any other fact — ALWAYS call the `search_knowledge` tool with their question first and answer ONLY from what it returns, in one or two natural sentences. The business\'s own email, phone, website and address are PUBLIC contact details — share them plainly when asked; never treat them as personal or private information, and never refuse or say you lack access before calling the tool. If it returns nothing relevant, say you do not have that detail and offer to connect them with a person — never invent an answer.',
     `When the user asks about products, prices, availability, or recommendations, call the \`search_products\` tool. Use a SHORT query — ONLY the product noun${
       lt ? ' in Lithuanian (e.g. "veido kremas" for face cream, "serumas" for serum)' : ''
     }, with NO adjectives like dry/sensitive/hydrating (they return nothing). The matching products are shown to the user automatically as cards, so reply with just ONE short sentence (e.g. "Štai keletas variantų:" / "Here are a few options:") — do NOT read out the product names, prices, or details. If a search returns nothing, retry once with a broader noun; only say a product is unavailable if that also returns nothing.`,
@@ -156,7 +156,7 @@ export function buildAgentConfig(bot: Bot, toolIds: string[] = []): AgentConfig 
 export function agentConfigHash(bot: Bot, toolIds: string[] = []): string {
   const cfg = bot.config
   const material = JSON.stringify([
-    'v11-voice-style', // bump to force re-sync when the agent payload shape changes
+    'v12-public-contact', // bump to force re-sync when the agent payload shape changes
     cfg.languages,
     cfg.content,
     cfg.voice?.voices,
