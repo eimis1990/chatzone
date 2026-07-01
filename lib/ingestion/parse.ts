@@ -1,14 +1,35 @@
-/** Extracts the main readable text from an HTML string. */
+/**
+ * Extracts the main content of a page as **Markdown** — preserving headings,
+ * lists and paragraph breaks. Structured Markdown chunks far better than flat
+ * text (the chunker is heading-aware) and fixes blocks running together (e.g.
+ * "…kasdienybei.Mums svarbu…"). Readability strips nav/boilerplate; Turndown
+ * converts the cleaned HTML to Markdown, falling back to the whole body.
+ */
 export async function extractReadableText(html: string, url: string): Promise<string> {
   // Dynamic imports keep jsdom (ESM-only in recent versions) out of the
   // module graph at build time, avoiding the require()-of-ESM error.
   const { JSDOM } = await import('jsdom')
   const { Readability } = await import('@mozilla/readability')
+  const TurndownService = (await import('turndown')).default
+
   const dom = new JSDOM(html, { url })
-  const reader = new Readability(dom.window.document)
-  const article = reader.parse()
-  const text = article?.textContent ?? dom.window.document.body?.textContent ?? ''
-  return text.replace(/\n{3,}/g, '\n\n').trim()
+  const article = new Readability(dom.window.document).parse()
+
+  const td = new TurndownService({ headingStyle: 'atx', bulletListMarker: '-', codeBlockStyle: 'fenced' })
+  td.remove(['script', 'style', 'noscript'])
+
+  // Prefer Readability's cleaned article HTML; else fall back to the body with
+  // chrome (header/footer/nav) removed.
+  let bodyHtml = article?.content
+  if (!bodyHtml) {
+    td.remove(['header', 'footer', 'nav', 'aside'])
+    bodyHtml = dom.window.document.body?.innerHTML ?? html
+  }
+
+  const title = article?.title?.trim()
+  let md = td.turndown(bodyHtml)
+  if (title && !md.startsWith('#')) md = `# ${title}\n\n${md}`
+  return md.replace(/\n{3,}/g, '\n\n').trim()
 }
 
 /**

@@ -21,27 +21,62 @@ function stripHash(u: URL): string {
   return u.toString()
 }
 
-/** Collect page URLs from sitemap.xml, expanding one level of sitemap-index. */
-async function collectFromSitemap(origin: string, fetchImpl: typeof fetch): Promise<string[]> {
-  const out: string[] = []
+// Common sitemap locations to probe when robots.txt doesn't declare one.
+const COMMON_SITEMAPS = [
+  '/sitemap.xml',
+  '/sitemap_index.xml',
+  '/sitemap-index.xml',
+  '/wp-sitemap.xml',
+  '/sitemap/sitemap.xml',
+]
+
+const sameOriginAs =
+  (origin: string) =>
+  (u: string): boolean => {
+    try {
+      return new URL(u, origin).origin === origin
+    } catch {
+      return false
+    }
+  }
+
+/** Sitemap URLs to try: those declared in robots.txt (same-origin) + common paths. */
+async function sitemapCandidates(origin: string, fetchImpl: typeof fetch): Promise<string[]> {
+  const same = sameOriginAs(origin)
+  const set = new Set<string>()
   try {
-    const res = await fetchImpl(`${origin}/sitemap.xml`)
+    const res = await fetchImpl(`${origin}/robots.txt`)
+    if (res.ok) {
+      const txt = await res.text()
+      for (const m of txt.matchAll(/^\s*sitemap:\s*(\S+)/gim)) {
+        if (same(m[1])) set.add(new URL(m[1], origin).toString())
+      }
+    }
+  } catch {
+    // no robots.txt — fall back to common paths
+  }
+  for (const p of COMMON_SITEMAPS) set.add(`${origin}${p}`)
+  return [...set]
+}
+
+/** Collect page URLs from a sitemap, expanding one level of same-origin sitemap-index. */
+async function collectFromSitemap(
+  sitemapUrl: string,
+  origin: string,
+  fetchImpl: typeof fetch,
+): Promise<string[]> {
+  const out: string[] = []
+  const same = sameOriginAs(origin)
+  try {
+    const res = await fetchImpl(sitemapUrl)
     if (!res.ok) return out
     const xml = await res.text()
     const locs = [...xml.matchAll(LOC_RE)].map((m) => m[1])
-    // Only follow child sitemaps on the SAME origin — a sitemap must not send
-    // the crawler to an arbitrary (possibly internal) host.
-    const sameOrigin = (u: string): boolean => {
-      try {
-        return new URL(u, origin).origin === origin
-      } catch {
-        return false
-      }
-    }
-    const childSitemaps = locs.filter((u) => /\.xml(\?|$)/i.test(u) && sameOrigin(u))
+    // Only follow child sitemaps on the SAME origin (avoids SSRF + off-site).
+    const childSitemaps = locs.filter((u) => /\.xml(\?|$)/i.test(u) && same(u))
     out.push(...locs.filter((u) => !/\.xml(\?|$)/i.test(u)))
 
-    for (const sm of childSitemaps.slice(0, 5)) {
+    for (const sm of childSitemaps.slice(0, 10)) {
       try {
         const r = await fetchImpl(sm)
         if (!r.ok) continue
@@ -52,7 +87,7 @@ async function collectFromSitemap(origin: string, fetchImpl: typeof fetch): Prom
       }
     }
   } catch {
-    // no sitemap / fetch error → fall back to link-following
+    // this candidate sitemap didn't load — try the next
   }
   return out
 }
@@ -91,9 +126,12 @@ export async function discoverPages(
     pages.push(key)
   }
 
-  // 1) Sitemap (preferred).
-  for (const u of await collectFromSitemap(origin, fetchImpl)) {
-    add(u)
+  // 1) Sitemaps (preferred) — from robots.txt + common locations.
+  for (const sitemapUrl of await sitemapCandidates(origin, fetchImpl)) {
+    for (const u of await collectFromSitemap(sitemapUrl, origin, fetchImpl)) {
+      add(u)
+      if (pages.length >= maxPages) break
+    }
     if (pages.length >= maxPages) break
   }
 

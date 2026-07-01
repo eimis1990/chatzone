@@ -58,7 +58,7 @@ export function AppSidebar({ bots, userEmail }: { bots: BotLite[]; userEmail: st
   const idle = 'text-sidebar-foreground/70 hover:bg-white/10 hover:text-white'
 
   return (
-    <aside className="flex h-full w-64 flex-shrink-0 flex-col bg-transparent text-sidebar-foreground">
+    <aside className="flex h-full w-72 flex-shrink-0 flex-col bg-transparent text-sidebar-foreground">
       {/* Logo */}
       <Link
         href="/app"
