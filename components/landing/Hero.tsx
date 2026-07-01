@@ -41,7 +41,7 @@ export function Hero() {
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-            className="text-balance font-[family-name:var(--font-jakarta)] text-[2.5rem] font-bold leading-[1.05] tracking-tight sm:text-6xl lg:text-[4.75rem] xl:text-[5.5rem] 2xl:text-[6.5rem]"
+            className="text-balance font-[family-name:var(--font-archivo-black)] text-[2.5rem] leading-[1.05] tracking-tight sm:text-6xl lg:text-[4.75rem] xl:text-[5.5rem] 2xl:text-[6.5rem]"
           >
             Your AI chat &amp; voice agent,
             <br />

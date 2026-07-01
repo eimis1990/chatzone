@@ -48,8 +48,8 @@ export function makeProductTools(
       }),
       execute: async ({ query, minPrice, maxPrice, audience }) => {
         const products = searchImpl
-          ? await searchImpl({ query, minPrice, maxPrice, limit: 10, audience })
-          : await searchStore(config.commerce, { query, minPrice, maxPrice, limit: 10 })
+          ? await searchImpl({ query, minPrice, maxPrice, limit: 24, audience })
+          : await searchStore(config.commerce, { query, minPrice, maxPrice, limit: 24 })
         products.forEach((p) => candidates.set(p.id, p))
         return products.map((p) => ({
           id: p.id,
@@ -66,7 +66,10 @@ export function makeProductTools(
         'the request (right category/type) — never items that merely share a keyword. Order them ' +
         'BEST FIRST: the first 4 appear as feature cards, the rest behind a "See all" list, so put ' +
         'your strongest / most representative picks first. Prefer VARIETY over near-duplicates ' +
-        '(avoid showing 4 almost-identical items — vary the brand, type, or price). Pass up to 10 ids.',
+        '(avoid showing near-identical items — vary the brand, type, or price). For an OPEN or GIFT ' +
+        'request ("gift ideas for her", "something for the home") be GENEROUS — show a rich, varied ' +
+        'selection (aim for ~12-20 relevant products) so the shopper has plenty to browse. For a ' +
+        'SPECIFIC product ask, a focused handful is enough. Pass up to 20 ids.',
       inputSchema: z.object({
         productIds: z.array(z.string()).describe('Candidate product ids to show, best first'),
       }),
@@ -77,7 +80,7 @@ export function makeProductTools(
           .filter((id) => !seen.has(id) && (seen.add(id), true))
           .map((id) => candidates.get(id))
           .filter((p): p is CommerceProduct => Boolean(p))
-          .slice(0, 10)
+          .slice(0, 20)
         sink.length = 0
         sink.push(...chosen)
         return { shown: chosen.length }

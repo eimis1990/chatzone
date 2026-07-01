@@ -94,7 +94,9 @@ export function buildSystemPrompt(
         'intent AND the recipient (exclude keyword-only matches and wrong-recipient items). The first 4 ' +
         'ids show as cards and the rest sit behind "See all": for an OPEN need make the first 4 span ' +
         'DIFFERENT categories; for a SPECIFIC ask put the best of that type first. Favour VARIETY over ' +
-        'near-duplicates. ' +
+        'near-duplicates. For an OPEN or GIFT request, be GENEROUS — pass a rich, varied set (aim for ' +
+        '~12-20 relevant products) so the shopper has plenty to browse; for a SPECIFIC ask a focused ' +
+        'handful is enough. Search several times / broaden the query if needed to gather that many. ' +
         'The products appear as cards automatically, so reply with ONE short, WARM sentence that ' +
         'acknowledges the request (e.g. "Oh, lovely idea — here are a few he might like: 🎁" / ' +
         '"Žinoma! 😊 Štai keletas variantų:"). NEVER list products, brands, prices, links, or per-category ' +

@@ -186,7 +186,7 @@ export async function POST(req: Request) {
     headers: baseHeaders,
     tools: commerce
       ? makeProductTools(bot.config, productSink, orderSink, (p) =>
-          searchCatalog(bot, p.query, svc, p.limit ?? 10, { audience: p.audience }),
+          searchCatalog(bot, p.query, svc, p.limit ?? 24, { audience: p.audience }),
         )
       : undefined,
     productSink,

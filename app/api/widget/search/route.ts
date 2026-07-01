@@ -44,7 +44,7 @@ export async function POST(req: Request) {
   let products: CommerceProduct[] = []
   if (commerceEnabled(bot.config)) {
     try {
-      products = await searchCatalog(bot, query, svc, 10, { audience })
+      products = await searchCatalog(bot, query, svc, 20, { audience })
     } catch {
       // store search failed — fall through to knowledge
     }

@@ -10,6 +10,7 @@ import {
   Nunito,
   Plus_Jakarta_Sans,
   Lora,
+  Archivo_Black,
 } from "next/font/google";
 import "./globals.css";
 
@@ -35,7 +36,14 @@ const nunito = Nunito({ variable: "--font-nunito", subsets: ["latin"] });
 const jakarta = Plus_Jakarta_Sans({ variable: "--font-jakarta", subsets: ["latin"] });
 const lora = Lora({ variable: "--font-lora", subsets: ["latin"] });
 
-const fontVariables = [inter, poppins, nunito, jakarta, lora]
+// Display face for the landing hero headline (heavy, single-weight).
+const archivoBlack = Archivo_Black({
+  variable: "--font-archivo-black",
+  subsets: ["latin"],
+  weight: "400",
+});
+
+const fontVariables = [inter, poppins, nunito, jakarta, lora, archivoBlack]
   .map((f) => f.variable)
   .join(" ");
 
