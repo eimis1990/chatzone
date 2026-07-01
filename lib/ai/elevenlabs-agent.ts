@@ -71,9 +71,9 @@ function buildAgentPrompt(cfg: Bot['config'], toolIds: string[], languages: BotL
     // Voice delivery style — applies to everything the agent says aloud.
     'You are speaking out loud. Keep answers short and conversational — usually one or two sentences — and never read long passages verbatim; summarise. When you say an email address or website, say it the natural way a person would: read "hello@example.com" as "hello at example dot com" and "https://www.example.com" as "example dot com". Never spell an address out letter by letter and never say "h t t p s".',
     'When the user asks anything informational about this business — its services, policies, hours, pricing, shipping, returns, contact details (email, phone, address), or any other fact — ALWAYS call the `search_knowledge` tool with their question first and answer ONLY from what it returns, in one or two natural sentences. The business\'s own email, phone, website and address are PUBLIC contact details — share them plainly when asked; never treat them as personal or private information, and never refuse or say you lack access before calling the tool. If it returns nothing relevant, say you do not have that detail and offer to connect them with a person — never invent an answer.',
-    `When the user asks about products, prices, availability, or recommendations, call the \`search_products\` tool. Use a SHORT query — ONLY the product noun${
-      lt ? ' in Lithuanian (e.g. "veido kremas" for face cream, "serumas" for serum)' : ''
-    }, with NO adjectives like dry/sensitive/hydrating (they return nothing). The matching products are shown to the user automatically as cards, so reply with just ONE short sentence (e.g. "Štai keletas variantų:" / "Here are a few options:") — do NOT read out the product names, prices, or details. If a search returns nothing, retry once with a broader noun; only say a product is unavailable if that also returns nothing.`,
+    `When the user asks about products, prices, availability, gifts, gift coupons/vouchers, or wants recommendations, you MUST call the \`search_products\` tool to check the live catalog BEFORE answering — never say something is unavailable or that "we don't have it" from memory. A gift coupon/voucher ("dovanų kuponas") is a PRODUCT to search for, not a discount code. Use a SHORT, SINGULAR base noun${
+      lt ? ' in Lithuanian (e.g. "dovana", "kuponas", "veido kremas")' : ''
+    } — no adjectives or plurals (search "dovana", not "dovanos"). If a search returns nothing, retry with a synonym, the base form, and the same noun in the other language before saying it is unavailable. Products appear as cards automatically, so reply with just ONE short sentence (e.g. "Štai keletas variantų:" / "Here are a few options:") — do NOT read out product names, prices, or details.`,
   ]
   if (orderLookupEnabled(cfg.commerce)) {
     parts.push(
@@ -158,7 +158,7 @@ export function buildAgentConfig(bot: Bot, toolIds: string[] = []): AgentConfig 
 export function agentConfigHash(bot: Bot, toolIds: string[] = []): string {
   const cfg = bot.config
   const material = JSON.stringify([
-    'v13-agent-name', // bump to force re-sync when the agent payload shape changes
+    'v14-product-search', // bump to force re-sync when the agent payload shape changes
     cfg.displayName, // agent name follows the bot's display name
     cfg.languages,
     cfg.content,

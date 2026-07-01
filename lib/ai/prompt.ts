@@ -59,26 +59,26 @@ export function buildSystemPrompt(
 
   if (commerce) {
     lines.push(
-      'PRODUCT SEARCH: when the user asks about products, prices, availability, gifts, or wants ' +
-        'recommendations, do this: ' +
-        '(1) Decide the shape of the answer from the request. A SPECIFIC product ask ("do you have a ' +
-        'face cream?") → show several options of THAT type (different brands / price points). An OPEN ' +
-        'NEED or problem ("something for dry skin", "a gift for mum") → assemble a small ROUTINE / mix ' +
-        'across complementary categories (e.g. for skincare: serum, cream, toner, mist, maybe a set), ' +
-        'not several of the same thing. ' +
-        '(2) Call `search_products` with the core product NOUN — keep it SHORT (1-2 words) and drop ' +
-        'adjectives like dry/hydrating ("sausai", "drėkinamasis"), they usually return nothing. Search ' +
-        'in the language the shopper is using. IMPORTANT: a catalog only matches its own language, so if ' +
-        'a search returns nothing you MUST retry the SAME noun translated to the other language ' +
-        '(English ↔ Lithuanian: "pants" ↔ "kelnės", "face cream" ↔ "veido kremas", "dress" ↔ "suknelė") ' +
-        'before concluding an item is unavailable. For an open need, run SEVERAL searches, one per ' +
-        'complementary category, to gather a varied set. ' +
+      'PRODUCT SEARCH: the shopper may ask about products, prices, availability, gifts, gift coupons / ' +
+        'gift cards / vouchers, or want recommendations. You MUST call `search_products` to check the ' +
+        'LIVE catalog BEFORE answering. NEVER tell the shopper an item, gift, coupon, or category is ' +
+        'unavailable — or that "we don\'t have it" / "we don\'t sell that" — based on memory or the ' +
+        'context below. Only say something is unavailable after your searches (including the retries ' +
+        'below) genuinely return nothing. Note: a gift coupon / gift card / voucher ("dovanų kuponas") is ' +
+        'a PRODUCT you search for — it is NOT the same as a promo/discount code. ' +
+        '(1) Decide the shape of the answer. A SPECIFIC ask ("do you have a face cream?") → several ' +
+        'options of that type. An OPEN need ("a gift for mum", "gift ideas for women") → search a BROAD ' +
+        'noun (e.g. "dovana") and assemble a varied mix across complementary categories. ' +
+        '(2) Call `search_products` with the SHORT BASE noun — 1-2 words, SINGULAR, no adjectives or ' +
+        'plurals (search "dovana", NOT "dovanos" or "dovanų idėjos moterims"; "kuponas" / "dovanų ' +
+        'kuponas", NOT "gift coupon for her"). If a search returns nothing, you MUST RETRY before ' +
+        'concluding it is unavailable: try the singular/base form, a close synonym, and the SAME noun ' +
+        'translated to the other language (EN ↔ LT: "gift" ↔ "dovana", "gift card" ↔ "dovanų kuponas", ' +
+        '"face cream" ↔ "veido kremas", "pants" ↔ "kelnės"). For an open need, run SEVERAL searches. ' +
         '(3) Review the candidates and call `display_products` with ONLY ids that genuinely match the ' +
-        'intent (exclude keyword-only matches — never a bath product for a face request). The first 4 ids ' +
-        'show as cards and the rest sit behind "See all", so order carefully: for an OPEN NEED make the ' +
-        'first 4 span DIFFERENT categories (e.g. a cream, a serum, a toner, a mist) so the visible cards ' +
-        'show the whole routine at a glance, then add extra options after; for a SPECIFIC ask put the best ' +
-        'of that type first. Favour VARIETY over near-duplicates. ' +
+        'intent (exclude keyword-only matches). The first 4 ids show as cards and the rest sit behind ' +
+        '"See all": for an OPEN need make the first 4 span DIFFERENT categories; for a SPECIFIC ask put ' +
+        'the best of that type first. Favour VARIETY over near-duplicates. ' +
         'The products appear as cards automatically, so reply with ONE short sentence only ' +
         '(e.g. "Here are a few options:" / "Štai keletas variantų:"). NEVER list products, brands, prices, ' +
         'links, or per-category bullets in your text — the cards already show all of that. ' +
