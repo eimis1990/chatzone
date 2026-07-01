@@ -48,6 +48,11 @@ export async function parseFile(buffer: Buffer, mime: string): Promise<string> {
 
 /** Fetches a URL and extracts its readable text. `fetchImpl` is injectable for tests. */
 export async function parseUrl(url: string, fetchImpl: typeof fetch = fetch): Promise<string> {
+  // SSRF guard on the real-network path only (tests inject a mock fetch).
+  if (fetchImpl === fetch) {
+    const { assertPublicUrl } = await import('@/lib/net/ssrf')
+    await assertPublicUrl(url)
+  }
   const res = await fetchImpl(url)
   if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`)
   const html = await res.text()

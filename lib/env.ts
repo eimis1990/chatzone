@@ -21,6 +21,10 @@ const envSchema = z.object({
   // gracefully (503) when these are absent, so the app runs without billing.
   STRIPE_SECRET_KEY: z.string().min(1).optional(),
   STRIPE_WEBHOOK_SECRET: z.string().min(1).optional(),
+  // Bearer secret Vercel Cron sends to /api/cron/retention. The route fails
+  // CLOSED when this is unset (retention purge simply won't run), so set it in
+  // production to enable the daily purge.
+  CRON_SECRET: z.string().min(1).optional(),
   // Optional, public (NEXT_PUBLIC_*): analytics & search-engine verification.
   // Read directly in client/layout code; listed here as the env contract's
   // single source of truth. GA4 only loads when the ID is present.

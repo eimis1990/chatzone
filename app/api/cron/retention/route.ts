@@ -8,8 +8,10 @@ export const maxDuration = 60
  * older than the window. Secured by CRON_SECRET (Vercel sends it as a Bearer).
  */
 export async function GET(req: Request) {
+  // Fail CLOSED: without a configured secret (or on mismatch) this destructive,
+  // service-role, cross-tenant purge must never run for an anonymous caller.
   const secret = process.env.CRON_SECRET
-  if (secret && req.headers.get('authorization') !== `Bearer ${secret}`) {
+  if (!secret || req.headers.get('authorization') !== `Bearer ${secret}`) {
     return new Response('Unauthorized', { status: 401 })
   }
 

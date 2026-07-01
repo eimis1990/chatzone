@@ -29,7 +29,16 @@ async function collectFromSitemap(origin: string, fetchImpl: typeof fetch): Prom
     if (!res.ok) return out
     const xml = await res.text()
     const locs = [...xml.matchAll(LOC_RE)].map((m) => m[1])
-    const childSitemaps = locs.filter((u) => /\.xml(\?|$)/i.test(u))
+    // Only follow child sitemaps on the SAME origin — a sitemap must not send
+    // the crawler to an arbitrary (possibly internal) host.
+    const sameOrigin = (u: string): boolean => {
+      try {
+        return new URL(u, origin).origin === origin
+      } catch {
+        return false
+      }
+    }
+    const childSitemaps = locs.filter((u) => /\.xml(\?|$)/i.test(u) && sameOrigin(u))
     out.push(...locs.filter((u) => !/\.xml(\?|$)/i.test(u)))
 
     for (const sm of childSitemaps.slice(0, 5)) {

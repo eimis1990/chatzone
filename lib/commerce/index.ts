@@ -21,6 +21,27 @@ import {
   validateMagentoOrderAccess,
 } from '@/lib/commerce/magento'
 import { searchFeed, validateFeed } from '@/lib/commerce/feed'
+import { assertPublicUrl } from '@/lib/net/ssrf'
+
+/**
+ * SSRF guard for connected-store egress. Runs only on the real-network path
+ * (no injected `fetchImpl`) — unit tests inject a fetch and are skipped, while
+ * production routes hit this before any outbound request to a tenant-supplied
+ * store/feed URL. Throws SsrfError for internal/non-public targets.
+ */
+async function guardStoreEgress(
+  cfg: { storeUrl?: string; shopifyDomain?: string; feedUrl?: string },
+  deps: CommerceDeps,
+): Promise<void> {
+  if (deps.fetchImpl) return
+  const targets: string[] = []
+  if (cfg.storeUrl) targets.push(cfg.storeUrl)
+  if (cfg.feedUrl) targets.push(cfg.feedUrl)
+  if (cfg.shopifyDomain) {
+    targets.push(cfg.shopifyDomain.startsWith('http') ? cfg.shopifyDomain : `https://${cfg.shopifyDomain}`)
+  }
+  for (const t of targets) await assertPublicUrl(t)
+}
 
 export interface CommerceConfig {
   enabled: boolean
@@ -65,6 +86,7 @@ export async function searchStore(
   deps: CommerceDeps = {},
 ): Promise<CommerceProduct[]> {
   if (!storeConfigured(config)) return []
+  await guardStoreEgress(config, deps)
   switch (config.provider) {
     case 'woocommerce':
       return searchWooProducts(config.storeUrl, params, deps)
@@ -90,6 +112,7 @@ export async function validateStore(
   },
   deps: CommerceDeps = {},
 ): Promise<{ ok: boolean; total: number }> {
+  await guardStoreEgress(config, deps)
   switch (config.provider) {
     case 'woocommerce':
       return config.storeUrl ? validateWooStore(config.storeUrl, deps) : { ok: false, total: 0 }
@@ -113,6 +136,7 @@ export async function getOrderStatus(
   deps: CommerceDeps = {},
 ): Promise<OrderStatus> {
   if (!config?.enabled || !config.storeUrl) return { found: false, reason: 'not_configured' }
+  await guardStoreEgress(config, deps)
   switch (config.provider) {
     case 'woocommerce':
       return getWooOrderStatus(
@@ -137,6 +161,7 @@ export async function validateOrderAccess(
   restSecret: string,
   deps: CommerceDeps = {},
 ): Promise<{ ok: boolean; error?: string }> {
+  await guardStoreEgress({ storeUrl }, deps)
   switch (provider) {
     case 'woocommerce':
       return validateWooOrderAccess(storeUrl, restKey, restSecret, deps)

@@ -3,6 +3,7 @@ import { createServerClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { ingestSource, makeServiceRepo } from '@/lib/ingestion/pipeline'
 import { discoverPages } from '@/lib/ingestion/crawl'
+import { assertPublicUrl } from '@/lib/net/ssrf'
 import { crawlSchema } from '@/lib/validation/schemas'
 import { createRateLimiter } from '@/lib/ratelimit'
 import type { KnowledgeSource } from '@/lib/types'
@@ -47,6 +48,13 @@ export async function POST(req: Request) {
   // RLS: a missing bot row means the user doesn't own it.
   const { data: bot } = await supabase.from('bots').select('id').eq('id', botId).single()
   if (!bot) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+
+  // SSRF guard: block internal/non-public crawl targets before any fetch.
+  try {
+    await assertPublicUrl(url)
+  } catch {
+    return NextResponse.json({ error: 'That URL is not allowed.' }, { status: 400 })
+  }
 
   const pages = await discoverPages(url, DISCOVER_CAP)
   if (pages.length === 0) {
