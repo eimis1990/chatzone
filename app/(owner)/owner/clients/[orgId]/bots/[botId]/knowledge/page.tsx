@@ -44,7 +44,7 @@ export default async function OwnerBotKnowledgePage({
             Each source is parsed, chunked and embedded automatically.
           </p>
         </div>
-        <KnowledgeManager botId={botId} initialSources={sources ?? []} />
+        <KnowledgeManager botId={botId} initialSources={sources ?? []} audience="owner" />
       </div>
     </div>
   )

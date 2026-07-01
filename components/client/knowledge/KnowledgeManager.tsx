@@ -19,6 +19,12 @@ import type { KnowledgeSource, LintFinding } from '@/lib/types'
 interface KnowledgeManagerProps {
   botId: string
   initialSources: KnowledgeSource[]
+  /**
+   * Who is managing the sources. Website training is a done-for-you (paid,
+   * one-time-setup) feature, so the "Website" tab is owner-only — clients see
+   * only Text / Q&A / File. Defaults to 'owner'.
+   */
+  audience?: 'owner' | 'client'
 }
 
 const SOURCE_TABS = [
@@ -28,7 +34,10 @@ const SOURCE_TABS = [
   { value: 'file', label: 'File', icon: UploadIcon },
 ] as const
 
-export function KnowledgeManager({ botId, initialSources }: KnowledgeManagerProps) {
+export function KnowledgeManager({ botId, initialSources, audience = 'owner' }: KnowledgeManagerProps) {
+  // Clients don't get the "Website" (crawl) tab — that's the owner's paid setup.
+  const tabs = audience === 'client' ? SOURCE_TABS.filter((t) => t.value !== 'url') : SOURCE_TABS
+  const defaultTab = tabs[0].value
   const [sources, setSources] = useState<KnowledgeSource[]>(initialSources)
   const [addOpen, setAddOpen] = useState(false)
   const [summarizing, setSummarizing] = useState(false)
@@ -214,10 +223,10 @@ export function KnowledgeManager({ botId, initialSources }: KnowledgeManagerProp
         </div>
 
         <div className="min-h-0 flex-1 overflow-y-auto p-5">
-          <Tabs defaultValue="url">
+          <Tabs defaultValue={defaultTab}>
             {/* HeroUI-style segmented control: muted track, white active pill w/ soft shadow. */}
             <TabsList className="mb-5 w-full rounded-xl bg-muted p-1 group-data-horizontal/tabs:h-11">
-              {SOURCE_TABS.map(({ value, label, icon: Icon }) => (
+              {tabs.map(({ value, label, icon: Icon }) => (
                 <TabsTrigger
                   key={value}
                   value={value}
@@ -229,9 +238,11 @@ export function KnowledgeManager({ botId, initialSources }: KnowledgeManagerProp
               ))}
             </TabsList>
 
-            <TabsContent value="url">
-              <UrlSource botId={botId} onSourceAdded={handleSourceAdded} />
-            </TabsContent>
+            {audience === 'owner' && (
+              <TabsContent value="url">
+                <UrlSource botId={botId} onSourceAdded={handleSourceAdded} />
+              </TabsContent>
+            )}
             <TabsContent value="text">
               <TextSource botId={botId} onSourceAdded={handleSourceAdded} />
             </TabsContent>

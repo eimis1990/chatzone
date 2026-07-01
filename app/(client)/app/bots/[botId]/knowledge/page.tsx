@@ -39,7 +39,7 @@ export default async function KnowledgePage({ params }: PageProps) {
           Add sources to train your bot. Each source is parsed, chunked, and embedded automatically.
         </p>
       </div>
-      <KnowledgeManager botId={botId} initialSources={sources ?? []} />
+      <KnowledgeManager botId={botId} initialSources={sources ?? []} audience="client" />
     </div>
   )
 }

@@ -29,7 +29,7 @@ export default async function OwnerChatbotKnowledgePage() {
           the <code>.md</code> file.
         </p>
       </div>
-      <KnowledgeManager botId={bot.id} initialSources={sources ?? []} />
+      <KnowledgeManager botId={bot.id} initialSources={sources ?? []} audience="owner" />
     </div>
   )
 }
