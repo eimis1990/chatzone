@@ -27,7 +27,7 @@ export function ShowcaseFan({ images }: { images: string[] }) {
           whileInView="show"
           viewport={{ once: true, amount: 0.4 }}
           variants={{ hidden: {}, show: { transition: { staggerChildren: 0.07 } } }}
-          className="text-5xl font-semibold leading-[1.05] tracking-tight sm:text-6xl md:text-7xl"
+          className="text-3xl font-semibold tracking-tight text-gray-900 sm:text-4xl"
         >
           {TITLE_LINES.map((line, li) => (
             <span key={li} className="block">
