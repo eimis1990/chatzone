@@ -1345,7 +1345,7 @@ export function ConfigForm({
 
         {showAdvanced && (<>
         {/* ── Store / Products ── */}
-        <CommerceSection control={control} watch={watch} />
+        <CommerceSection control={control} watch={watch} botId={botId} />
 
         {/* ── Allowed Domains (Advanced) ── */}
         <CollapsibleSection header={<SectionHeader
@@ -1410,9 +1410,10 @@ export function ConfigForm({
 interface CommerceSectionProps {
   control: Control<FormValues>
   watch: UseFormWatch<FormValues>
+  botId: string
 }
 
-function CommerceSection({ control, watch }: CommerceSectionProps) {
+function CommerceSection({ control, watch, botId }: CommerceSectionProps) {
   const commerceEnabled = watch('commerce.enabled')
   const provider = watch('commerce.provider') ?? 'woocommerce'
   const storeUrl = watch('commerce.storeUrl') ?? ''
@@ -1428,6 +1429,27 @@ function CommerceSection({ control, watch }: CommerceSectionProps) {
     status: 'idle' | 'loading' | 'ok' | 'error'
     message?: string
   }>({ status: 'idle' })
+  const [syncState, setSyncState] = useState<{
+    status: 'idle' | 'loading' | 'ok' | 'error'
+    synced?: number
+    message?: string
+  }>({ status: 'idle' })
+
+  const handleSync = useCallback(async () => {
+    setSyncState({ status: 'loading' })
+    try {
+      const res = await fetch('/api/products/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ botId }),
+      })
+      const data = (await res.json()) as { synced?: number; error?: string }
+      if (res.ok) setSyncState({ status: 'ok', synced: data.synced ?? 0 })
+      else setSyncState({ status: 'error', message: data.error ?? 'Sync failed.' })
+    } catch {
+      setSyncState({ status: 'error', message: 'Network error — please try again.' })
+    }
+  }, [botId])
 
   const handleTestOrders = useCallback(async () => {
     const isMagento = provider === 'magento'
@@ -1680,6 +1702,44 @@ function CommerceSection({ control, watch }: CommerceSectionProps) {
             <p className="text-xs text-muted-foreground bg-muted/50 rounded-md px-3 py-2">
               Your bot will search this store&apos;s catalog live and show product cards in chat.
             </p>
+
+            {/* Semantic catalog index — WooCommerce only for now */}
+            {provider === 'woocommerce' && (
+              <div className="space-y-2 rounded-lg border p-4">
+                <div className="flex items-center justify-between gap-3 flex-wrap">
+                  <div>
+                    <p className="text-sm font-medium">Smart product search</p>
+                    <p className="text-xs text-muted-foreground">
+                      Build a semantic index so the bot understands intent (e.g. &ldquo;gift ideas for
+                      her&rdquo;), not just keywords. Prices &amp; stock stay live at answer time.
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={syncState.status === 'loading' || !storeUrl.trim()}
+                    onClick={handleSync}
+                  >
+                    {syncState.status === 'loading' ? 'Syncing…' : 'Sync catalog'}
+                  </Button>
+                </div>
+                {syncState.status === 'ok' && (
+                  <TestBadge variant="ok">
+                    Indexed {syncState.synced?.toLocaleString() ?? 0} product
+                    {syncState.synced !== 1 ? 's' : ''}
+                  </TestBadge>
+                )}
+                {syncState.status === 'error' && (
+                  <TestBadge variant="error">{syncState.message}</TestBadge>
+                )}
+                {syncState.status === 'loading' && (
+                  <p className="text-xs text-muted-foreground">
+                    Fetching &amp; enriching your catalog — this can take a minute for large stores.
+                  </p>
+                )}
+              </div>
+            )}
 
             {/* Order lookup (optional) — WooCommerce REST credentials (Woo only) */}
             {provider === 'woocommerce' && (

@@ -6,6 +6,7 @@ import { isOriginAllowed, corsHeaders } from '@/lib/widget-auth'
 import { retrieveContext, serviceRetrievalDeps } from '@/lib/ai/retrieval'
 import { buildMessages, contentFor, defaultLanguage, type ChatMessage } from '@/lib/ai/prompt'
 import { commerceEnabled, makeProductTools, ndjsonChatResponse, ndjsonText } from '@/lib/ai/commerce-tool'
+import { searchCatalog } from '@/lib/products/search'
 import { createRateLimiter } from '@/lib/ratelimit'
 import { detectHandoffIntent, HANDOFF_ACK } from '@/lib/handoff'
 import { isOverConversationLimit } from '@/lib/usage'
@@ -183,7 +184,11 @@ export async function POST(req: Request) {
   return ndjsonChatResponse(openai(bot.config.model || 'gpt-4o-mini'), messages, {
     temperature: bot.config.temperature ?? 0.3,
     headers: baseHeaders,
-    tools: commerce ? makeProductTools(bot.config, productSink, orderSink) : undefined,
+    tools: commerce
+      ? makeProductTools(bot.config, productSink, orderSink, (p) =>
+          searchCatalog(bot, p.query, svc, p.limit ?? 10),
+        )
+      : undefined,
     productSink,
     orderSink,
     onText: async (text) => {

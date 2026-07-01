@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { createServerClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { commerceEnabled } from '@/lib/ai/commerce-tool'
-import { searchStore } from '@/lib/commerce'
+import { searchCatalog } from '@/lib/products/search'
 import { retrieveContext, serviceRetrievalDeps } from '@/lib/ai/retrieval'
 import type { Bot } from '@/lib/types'
 import type { CommerceProduct } from '@/lib/commerce/types'
@@ -35,10 +35,7 @@ export async function POST(req: Request) {
   let products: CommerceProduct[] = []
   if (commerceEnabled(bot.config)) {
     try {
-      products = await searchStore(
-        { enabled: true, provider: bot.config.commerce.provider, storeUrl: bot.config.commerce.storeUrl },
-        { query, limit: 10 },
-      )
+      products = await searchCatalog(bot, query, svc, 10)
     } catch {
       // fall through
     }

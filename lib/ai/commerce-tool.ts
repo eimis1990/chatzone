@@ -18,6 +18,13 @@ export function makeProductTools(
   config: BotConfig,
   sink: CommerceProduct[],
   orderSink?: OrderStatus[],
+  /** Optional search impl (semantic + live hydration). Defaults to keyword searchStore. */
+  searchImpl?: (params: {
+    query: string
+    minPrice?: number
+    maxPrice?: number
+    limit?: number
+  }) => Promise<CommerceProduct[]>,
 ): ToolSet {
   const candidates = new Map<string, CommerceProduct>()
   const tools: ToolSet = {
@@ -32,7 +39,9 @@ export function makeProductTools(
         maxPrice: z.number().optional().describe('Maximum price in major units (e.g. euros)'),
       }),
       execute: async ({ query, minPrice, maxPrice }) => {
-        const products = await searchStore(config.commerce, { query, minPrice, maxPrice, limit: 10 })
+        const products = searchImpl
+          ? await searchImpl({ query, minPrice, maxPrice, limit: 10 })
+          : await searchStore(config.commerce, { query, minPrice, maxPrice, limit: 10 })
         products.forEach((p) => candidates.set(p.id, p))
         return products.map((p) => ({
           id: p.id,
