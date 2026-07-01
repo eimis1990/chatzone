@@ -158,7 +158,7 @@ export function SourceDrawer({ source, onClose, onDelete, onRetry }: SourceDrawe
             {/* Content (scrolls) */}
             <div className="min-h-0 flex-1 overflow-y-auto p-5">
               {source.status === 'error' && source.error_message && (
-                <div className="mb-4 rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
+                <div className="mb-4 whitespace-pre-wrap rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive [overflow-wrap:anywhere]">
                   {source.error_message}
                 </div>
               )}

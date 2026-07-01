@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build && (node scripts/indexnow-ping.mjs || true)",
-    "start": "next start",
+    "dev": "NODE_OPTIONS=--experimental-require-module next dev",
+    "build": "NODE_OPTIONS=--experimental-require-module next build && (node scripts/indexnow-ping.mjs || true)",
+    "start": "NODE_OPTIONS=--experimental-require-module next start",
     "indexnow": "node scripts/indexnow-ping.mjs --force",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",

@@ -46,7 +46,7 @@ export default async function OwnerConfigurePage({
       canUseLeadCapture={ent.leadCapture}
       canUseVoice={Boolean(org?.voice_addon)}
       onSave={saveClientBotConfig}
-      topSlot={<OwnerBotTabs orgId={orgId} botId={botId} />}
+      topSlot={<OwnerBotTabs key="owner-bot-tabs" orgId={orgId} botId={botId} />}
     />
   )
 }
