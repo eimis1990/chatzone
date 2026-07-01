@@ -173,9 +173,9 @@ export function ChatWindow({ config, transport, initialLanguage }: ChatWindowPro
   // The agent's `search_products` client tool: fetch products, show them as cards
   // in the chat, and return a short summary for the agent to speak.
   const handleVoiceSearch = useCallback(
-    async (query: string): Promise<string> => {
+    async (query: string, audience?: 'women' | 'men' | 'kids' | 'unisex'): Promise<string> => {
       try {
-        const data = await transport.search(query)
+        const data = await transport.search(query, audience)
         if (data.products?.length) {
           setMessages((prev) => [
             ...prev,

@@ -13,7 +13,11 @@ export const maxDuration = 20
 // Public search for the live-voice `search_products` client tool: returns
 // products (rendered as cards in the widget) + a short summary the agent speaks.
 const limiter = createRateLimiter({ capacity: 20, refillPerSec: 1 })
-const bodySchema = z.object({ publicKey: z.string().min(1), query: z.string().min(1) })
+const bodySchema = z.object({
+  publicKey: z.string().min(1),
+  query: z.string().min(1),
+  audience: z.enum(['women', 'men', 'kids', 'unisex']).optional(),
+})
 
 export async function OPTIONS(req: Request) {
   return new Response(null, { status: 204, headers: corsHeaders(req.headers.get('origin')) })
@@ -27,7 +31,7 @@ export async function POST(req: Request) {
 
   const parsed = bodySchema.safeParse(await req.json().catch(() => null))
   if (!parsed.success) return json({ products: [], summary: 'Invalid request.' }, 400)
-  const { publicKey, query } = parsed.data
+  const { publicKey, query, audience } = parsed.data
 
   const svc = createServiceClient()
   const { data: bot } = await svc.from('bots').select('*').eq('public_key', publicKey).single<Bot>()
@@ -40,7 +44,7 @@ export async function POST(req: Request) {
   let products: CommerceProduct[] = []
   if (commerceEnabled(bot.config)) {
     try {
-      products = await searchCatalog(bot, query, svc, 10)
+      products = await searchCatalog(bot, query, svc, 10, { audience })
     } catch {
       // store search failed — fall through to knowledge
     }

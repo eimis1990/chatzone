@@ -31,7 +31,10 @@ export interface ChatTransport {
   /** Send a turn; returns the streaming NDJSON Response (with x-* headers). */
   sendChat(params: SendChatParams): Promise<Response>
   /** Product search for the voice `search_products` client tool. */
-  search(query: string): Promise<{ products?: CommerceProduct[]; summary?: string }>
+  search(
+    query: string,
+    audience?: 'women' | 'men' | 'kids' | 'unisex',
+  ): Promise<{ products?: CommerceProduct[]; summary?: string }>
   /** Knowledge-base lookup for the voice `search_knowledge` tool (spoken answers). */
   searchKnowledge(query: string): Promise<{ answer: string }>
   /** Run a "fetch URL" quick action: returns the products to render as cards. */
@@ -72,11 +75,11 @@ export function createWidgetTransport(publicKey: string): ChatTransport {
       })
     },
 
-    async search(query) {
+    async search(query, audience) {
       const res = await fetch('/api/widget/search', {
         method: 'POST',
         headers: JSON_HEADERS,
-        body: JSON.stringify({ publicKey, query }),
+        body: JSON.stringify({ publicKey, query, audience }),
       })
       return (await res.json()) as { products?: CommerceProduct[]; summary?: string }
     },

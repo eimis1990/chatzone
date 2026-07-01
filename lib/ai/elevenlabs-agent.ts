@@ -69,11 +69,11 @@ function buildAgentPrompt(cfg: Bot['config'], toolIds: string[], languages: BotL
   const parts = [
     cfg.systemPrompt,
     // Voice delivery style — applies to everything the agent says aloud.
-    'You are speaking out loud. Keep answers short and conversational — usually one or two sentences — and never read long passages verbatim; summarise. When you say an email address or website, say it the natural way a person would: read "hello@example.com" as "hello at example dot com" and "https://www.example.com" as "example dot com". Never spell an address out letter by letter and never say "h t t p s".',
+    'You are speaking out loud. Be warm, friendly and personable — sound genuinely happy to help, acknowledge what the person wants, and never come across as cold, curt, or robotic. Keep answers short and conversational — usually one or two sentences — and never read long passages verbatim; summarise. Do NOT use emojis, asterisks, or other symbols, since everything you say is read aloud. When you say an email address or website, say it the natural way a person would: read "hello@example.com" as "hello at example dot com" and "https://www.example.com" as "example dot com". Never spell an address out letter by letter and never say "h t t p s".',
     'When the user asks anything informational about this business — its services, policies, hours, pricing, shipping, returns, contact details (email, phone, address), or any other fact — ALWAYS call the `search_knowledge` tool with their question first and answer ONLY from what it returns, in one or two natural sentences. The business\'s own email, phone, website and address are PUBLIC contact details — share them plainly when asked; never treat them as personal or private information, and never refuse or say you lack access before calling the tool. If it returns nothing relevant, say you do not have that detail and offer to connect them with a person — never invent an answer.',
     `When the user asks about products, prices, availability, gifts, gift coupons/vouchers, or wants recommendations, you MUST call the \`search_products\` tool to check the live catalog BEFORE answering — never say something is unavailable or that "we don't have it" from memory. A gift coupon/voucher ("dovanų kuponas") is a PRODUCT to search for, not a discount code. Use a SHORT, SINGULAR base noun${
       lt ? ' in Lithuanian (e.g. "dovana", "kuponas", "veido kremas")' : ''
-    } — no adjectives or plurals (search "dovana", not "dovanos"). If a search returns nothing, retry with a synonym, the base form, and the same noun in the other language before saying it is unavailable. Products appear as cards automatically, so reply with just ONE short sentence (e.g. "Štai keletas variantų:" / "Here are a few options:") — do NOT read out product names, prices, or details.`,
+    } — no adjectives or plurals (search "dovana", not "dovanos"). If the user says WHO it is for (for men/a man/husband/dad → men; for women/a woman/mum/her → women; for a child/kid/baby → kids), also set the tool's \`audience\` so the results only include items that suit that person — and never suggest something meant for a different person (e.g. never a child's item when they want a gift for a man). If a search returns nothing, retry with a synonym, the base form, and the same noun in the other language before saying it is unavailable. Products appear as cards automatically, so reply with just ONE short, warm sentence (e.g. "Žinoma! Štai keletas variantų:" / "Of course — here are a few options:") — do NOT read out product names, prices, or details.`,
   ]
   if (orderLookupEnabled(cfg.commerce)) {
     parts.push(
@@ -158,7 +158,7 @@ export function buildAgentConfig(bot: Bot, toolIds: string[] = []): AgentConfig 
 export function agentConfigHash(bot: Bot, toolIds: string[] = []): string {
   const cfg = bot.config
   const material = JSON.stringify([
-    'v14-product-search', // bump to force re-sync when the agent payload shape changes
+    'v15-audience-warmth', // bump to force re-sync when the agent payload shape changes
     cfg.displayName, // agent name follows the bot's display name
     cfg.languages,
     cfg.content,
@@ -230,13 +230,20 @@ function buildSearchToolConfig() {
       "Search the store's products and SHOW them to the user as cards on screen. Call this " +
       'whenever the user asks about products, prices, availability, or recommendations. Pass a ' +
       'SHORT query — just the product noun in the catalog language (e.g. "veido kremas", "serumas") ' +
-      '— never include adjectives like dry/sensitive/hydrating, which return nothing.',
+      '— never include adjectives like dry/sensitive/hydrating, which return nothing. When the user ' +
+      'names who it is for (a gift/product "for men", "for women", "for a child"), ALSO set `audience` ' +
+      'so the results only include items that suit that person.',
     parameters: {
       type: 'object' as const,
       properties: {
         query: {
           type: 'string' as const,
           description: 'Product noun to search for, e.g. "veido kremas".',
+        },
+        audience: {
+          type: 'string' as const,
+          enum: ['women', 'men', 'kids', 'unisex'],
+          description: 'Set ONLY when the user says who the product/gift is for.',
         },
       },
       required: ['query'],

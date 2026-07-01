@@ -41,7 +41,7 @@ interface VoiceCallButtonProps {
   onReady?: (controls: { end: () => void }) => void
   /** Implements the agent's `search_products` client tool — return a short
    *  spoken summary; the host renders the product cards in the chat. */
-  onSearch?: (query: string) => Promise<string>
+  onSearch?: (query: string, audience?: 'women' | 'men' | 'kids' | 'unisex') => Promise<string>
   /** Implements `order_status` — look up an order, return a spoken summary. */
   onOrderStatus?: (orderId: string, email: string) => Promise<string>
   /** Implements `discount_code` — return the discount as a spoken summary. */
@@ -64,7 +64,7 @@ interface InnerProps {
   onStateChange?: (state: CallState) => void
   onTranscript?: (role: 'user' | 'assistant', text: string) => void
   onReady?: (controls: { end: () => void }) => void
-  onSearch?: (query: string) => Promise<string>
+  onSearch?: (query: string, audience?: 'women' | 'men' | 'kids' | 'unisex') => Promise<string>
   onOrderStatus?: (orderId: string, email: string) => Promise<string>
   onDiscount?: () => Promise<string>
   onKnowledge?: (query: string) => Promise<string>
@@ -103,11 +103,12 @@ function VoiceCallInner({
     clientTools: {
       // The agent calls this; the host fetches + renders product cards and we
       // return a short summary for the agent to speak.
-      search_products: async (params: { query?: string }) => {
+      search_products: async (params: { query?: string; audience?: string }) => {
         const q = params?.query?.trim()
         if (!q || !onSearch) return 'No results found.'
+        const audience = (['women', 'men', 'kids', 'unisex'] as const).find((a) => a === params?.audience)
         try {
-          return await onSearch(q)
+          return await onSearch(q, audience)
         } catch {
           return 'The product search is temporarily unavailable.'
         }

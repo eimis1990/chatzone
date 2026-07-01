@@ -1,8 +1,8 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Bot } from '@/lib/types'
 import { embed } from '@/lib/ai/embeddings'
-import { fetchWooCatalog, deriveTags, buildDoc, type RawProduct } from './catalog'
-import { aiTags } from './enrich'
+import { fetchWooCatalog, deriveTags, deriveAudience, buildDoc, type RawProduct } from './catalog'
+import { aiEnrich } from './enrich'
 
 /**
  * Sync a bot's store catalog into the semantic product index: fetch → tag
@@ -24,9 +24,12 @@ export async function syncProductCatalog(
   // Shopify/Magento/feed catalog sync: future — keyword search still works.
   if (products.length === 0) return { synced: 0 }
 
-  const ai = await aiTags(products)
-  const tagsFor = (p: RawProduct) => [...new Set([...deriveTags(p), ...(ai.get(p.id) ?? [])])]
-  const docs = products.map((p) => buildDoc(p, tagsFor(p)))
+  const ai = await aiEnrich(products)
+  const tagsFor = (p: RawProduct) => [...new Set([...deriveTags(p), ...(ai.get(p.id)?.tags ?? [])])]
+  // Explicit store categories win; AI fills the gaps; unknown → 'unisex' (shows
+  // for every audience) so we never wrongly hide a genuinely neutral product.
+  const audienceFor = (p: RawProduct) => deriveAudience(p.categories) ?? ai.get(p.id)?.audience ?? 'unisex'
+  const docs = products.map((p) => buildDoc(p, tagsFor(p), audienceFor(p)))
   const embeddings = await embed(docs)
 
   const rows = products.map((p, i) => ({
@@ -36,6 +39,7 @@ export async function syncProductCatalog(
     url: p.url || null,
     image_url: p.imageUrl ?? null,
     tags: tagsFor(p),
+    audience: audienceFor(p),
     doc: docs[i],
     embedding: embeddings[i],
   }))

@@ -212,11 +212,11 @@ function createPreviewTransport(botId: string, getConfig: () => BotConfig): Chat
       })
     },
 
-    async search(query) {
+    async search(query, audience) {
       const res = await fetch('/api/preview/search', {
         method: 'POST',
         headers: JSON_HEADERS,
-        body: JSON.stringify({ botId, query }),
+        body: JSON.stringify({ botId, query, audience }),
       })
       return res.json()
     },

@@ -11,12 +11,16 @@ import type { CommerceProduct } from '@/lib/commerce/types'
 export const maxDuration = 20
 
 // Authenticated voice-search for the playground's `search_products` client tool.
-const bodySchema = z.object({ botId: z.string().uuid(), query: z.string().min(1) })
+const bodySchema = z.object({
+  botId: z.string().uuid(),
+  query: z.string().min(1),
+  audience: z.enum(['women', 'men', 'kids', 'unisex']).optional(),
+})
 
 export async function POST(req: Request) {
   const parsed = bodySchema.safeParse(await req.json().catch(() => null))
   if (!parsed.success) return NextResponse.json({ products: [], summary: 'Invalid request.' }, { status: 400 })
-  const { botId, query } = parsed.data
+  const { botId, query, audience } = parsed.data
 
   const supabase = await createServerClient()
   const {
@@ -35,7 +39,7 @@ export async function POST(req: Request) {
   let products: CommerceProduct[] = []
   if (commerceEnabled(bot.config)) {
     try {
-      products = await searchCatalog(bot, query, svc, 10)
+      products = await searchCatalog(bot, query, svc, 10, { audience })
     } catch {
       // fall through
     }

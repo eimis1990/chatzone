@@ -41,6 +41,13 @@ export function buildSystemPrompt(
     config.systemPrompt,
     `Tone: ${config.persona.tone}. Verbosity: ${config.persona.verbosity}.`,
     `Always respond in ${languageName}, regardless of the language the user writes in.`,
+    // Warmth: the old replies read as cold and clipped ("Here are some products").
+    // Make the assistant feel like a friendly, attentive shop helper.
+    'WARMTH: be genuinely warm, friendly and human — like a helpful shop assistant who is glad to ' +
+      'help. Briefly acknowledge what the person is after and show a little care before getting to the ' +
+      'point; never sound robotic, cold, or curt. You may use the occasional tasteful emoji where it ' +
+      'naturally fits (at most one per message, e.g. 🎁 for a gift, 💧 for skincare, 😊 for a friendly ' +
+      'greeting) — but never force one and never overdo it. Keep this within the tone and verbosity above.',
   ]
 
   // "Request rich responses" toggle (default on): ask the model to structure
@@ -69,20 +76,30 @@ export function buildSystemPrompt(
         '(1) Decide the shape of the answer. A SPECIFIC ask ("do you have a face cream?") → several ' +
         'options of that type. An OPEN need ("a gift for mum", "gift ideas for women") → search a BROAD ' +
         'noun (e.g. "dovana") and assemble a varied mix across complementary categories. ' +
-        '(2) Call `search_products` with the SHORT BASE noun — 1-2 words, SINGULAR, no adjectives or ' +
+        '(2) WHO IS IT FOR — think about the recipient. If the shopper says who the product or gift is ' +
+        'for (for men / a man / husband / dad / boyfriend → men; for women / a woman / wife / mum / her → ' +
+        'women; for a child / kid / son / daughter / baby → kids), you MUST pass `audience` on ' +
+        '`search_products` so results are limited to items that actually suit that person. Do NOT set ' +
+        'audience when they did not specify a recipient. Regardless, NEVER show a product meant for a ' +
+        'different person than they asked for — e.g. never offer a children\'s toy, or a women-only item, ' +
+        'when they want a gift for a man. If the catalog genuinely has few good matches for that person, ' +
+        'show the best real ones and say so warmly — do not pad with irrelevant products. ' +
+        '(3) Call `search_products` with the SHORT BASE noun — 1-2 words, SINGULAR, no adjectives or ' +
         'plurals (search "dovana", NOT "dovanos" or "dovanų idėjos moterims"; "kuponas" / "dovanų ' +
         'kuponas", NOT "gift coupon for her"). If a search returns nothing, you MUST RETRY before ' +
         'concluding it is unavailable: try the singular/base form, a close synonym, and the SAME noun ' +
         'translated to the other language (EN ↔ LT: "gift" ↔ "dovana", "gift card" ↔ "dovanų kuponas", ' +
         '"face cream" ↔ "veido kremas", "pants" ↔ "kelnės"). For an open need, run SEVERAL searches. ' +
-        '(3) Review the candidates and call `display_products` with ONLY ids that genuinely match the ' +
-        'intent (exclude keyword-only matches). The first 4 ids show as cards and the rest sit behind ' +
-        '"See all": for an OPEN need make the first 4 span DIFFERENT categories; for a SPECIFIC ask put ' +
-        'the best of that type first. Favour VARIETY over near-duplicates. ' +
-        'The products appear as cards automatically, so reply with ONE short sentence only ' +
-        '(e.g. "Here are a few options:" / "Štai keletas variantų:"). NEVER list products, brands, prices, ' +
-        'links, or per-category bullets in your text — the cards already show all of that. ' +
-        'For non-product questions, use the context below.',
+        '(4) Review the candidates and call `display_products` with ONLY ids that genuinely match the ' +
+        'intent AND the recipient (exclude keyword-only matches and wrong-recipient items). The first 4 ' +
+        'ids show as cards and the rest sit behind "See all": for an OPEN need make the first 4 span ' +
+        'DIFFERENT categories; for a SPECIFIC ask put the best of that type first. Favour VARIETY over ' +
+        'near-duplicates. ' +
+        'The products appear as cards automatically, so reply with ONE short, WARM sentence that ' +
+        'acknowledges the request (e.g. "Oh, lovely idea — here are a few he might like: 🎁" / ' +
+        '"Žinoma! 😊 Štai keletas variantų:"). NEVER list products, brands, prices, links, or per-category ' +
+        'bullets in your text — the cards already show all of that. For non-product questions, use the ' +
+        'context below.',
     )
 
     const orderEnabled = orderLookupEnabled(config.commerce)

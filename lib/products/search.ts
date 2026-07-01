@@ -1,9 +1,15 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Bot } from '@/lib/types'
 import type { CommerceProduct } from '@/lib/commerce/types'
+import type { Audience } from './catalog'
 import { embedOne } from '@/lib/ai/embeddings'
 import { searchStore } from '@/lib/commerce'
 import { storeOrigin, normalizeWooProduct } from '@/lib/commerce/woocommerce'
+
+export interface SearchOptions {
+  /** Restrict to this recipient (plus unisex) — e.g. 'men' for "gifts for men". */
+  audience?: Audience
+}
 
 /** Whether this bot has a synced semantic product index. */
 async function hasIndex(botId: string, db: SupabaseClient): Promise<boolean> {
@@ -41,6 +47,7 @@ export async function searchCatalog(
   query: string,
   db: SupabaseClient,
   limit = 8,
+  opts: SearchOptions = {},
 ): Promise<CommerceProduct[]> {
   const c = bot.config.commerce
   if (!c?.enabled) return []
@@ -52,6 +59,7 @@ export async function searchCatalog(
         p_bot_id: bot.id,
         p_embedding: embedding,
         p_k: limit,
+        p_audience: opts.audience ?? null,
       })
       const matches = (data ?? []) as { external_id: string }[]
       if (matches.length) {

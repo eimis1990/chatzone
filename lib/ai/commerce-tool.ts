@@ -24,6 +24,7 @@ export function makeProductTools(
     minPrice?: number
     maxPrice?: number
     limit?: number
+    audience?: 'women' | 'men' | 'kids' | 'unisex'
   }) => Promise<CommerceProduct[]>,
 ): ToolSet {
   const candidates = new Map<string, CommerceProduct>()
@@ -32,15 +33,22 @@ export function makeProductTools(
       description:
         'Search the store catalog and get CANDIDATE products to review (not shown to the user yet). ' +
         'Use the product type/noun in the catalog language (this store is often Lithuanian), e.g. ' +
-        '"veido kremas" for a face cream — avoid vague single adjectives. You may search multiple times.',
+        '"veido kremas" for a face cream — avoid vague single adjectives. When the shopper names a ' +
+        'recipient (a gift/product "for men", "for women", "for kids/a child"), ALSO set `audience` so ' +
+        'results are limited to items that suit that person — this is how you avoid showing, say, a ' +
+        "child's toy for a men's-gift request. You may search multiple times.",
       inputSchema: z.object({
         query: z.string().describe('Product type/keywords in the catalog language'),
         minPrice: z.number().optional().describe('Minimum price in major units (e.g. euros)'),
         maxPrice: z.number().optional().describe('Maximum price in major units (e.g. euros)'),
+        audience: z
+          .enum(['women', 'men', 'kids', 'unisex'])
+          .optional()
+          .describe('Set ONLY when the shopper specifies who the product/gift is for.'),
       }),
-      execute: async ({ query, minPrice, maxPrice }) => {
+      execute: async ({ query, minPrice, maxPrice, audience }) => {
         const products = searchImpl
-          ? await searchImpl({ query, minPrice, maxPrice, limit: 10 })
+          ? await searchImpl({ query, minPrice, maxPrice, limit: 10, audience })
           : await searchStore(config.commerce, { query, minPrice, maxPrice, limit: 10 })
         products.forEach((p) => candidates.set(p.id, p))
         return products.map((p) => ({

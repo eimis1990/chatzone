@@ -6,6 +6,9 @@ const MAX_PRODUCTS = 300
 const PER_PAGE = 100
 const TOP_SELLER_RANK = 20
 
+/** Who a product is intended for. 'unisex' matches every audience at search time. */
+export type Audience = 'women' | 'men' | 'kids' | 'unisex'
+
 /** A catalog product, provider-normalized, ready for tagging + embedding. */
 export interface RawProduct {
   id: string
@@ -79,9 +82,39 @@ export function deriveTags(p: RawProduct): string[] {
   return tags
 }
 
-/** The text embedded for semantic search (title + categories + tags + summary). */
-export function buildDoc(p: RawProduct, tags: string[]): string {
+// Recipient signals in category names (Lithuanian + English). Order matters:
+// kids-only tokens are checked apart from adult gender so a "gift for men"
+// search never returns children's items.
+const KIDS_RE = /vaik|kūdik|kudik|berniuk|mergait|\bkids?\b|\bchild|\bbaby\b|toddler|\bboys?\b|\bgirls?\b/i
+const WOMEN_RE = /moter|mamai|\bmama\b|mergin|\bwom[ae]n\b|ladies|\bher\b|\bshe\b|female/i
+const MEN_RE = /vyr|tėčiui|tetis|tėtis|\bmen\b|\bman\b|\bhim\b|\bhis\b|\bdads?\b|male\b/i
+
+/**
+ * Best-effort audience from category names alone. Explicit store categories are
+ * highly reliable; ambiguous/absent signals return null so the AI classifier can
+ * decide. A product tagged for BOTH genders is treated as unisex.
+ */
+export function deriveAudience(categories: string[]): Audience | null {
+  const cat = categories.join(' ')
+  const kids = KIDS_RE.test(cat)
+  const women = WOMEN_RE.test(cat)
+  const men = MEN_RE.test(cat)
+  if (women && men) return 'unisex'
+  if (kids && !women && !men) return 'kids'
+  if (women) return 'women'
+  if (men) return 'men'
+  if (kids) return 'kids'
+  return null
+}
+
+/** The text embedded for semantic search (title + audience + categories + tags + summary). */
+export function buildDoc(p: RawProduct, tags: string[], audience?: Audience): string {
   const parts = [p.title]
+  if (audience && audience !== 'unisex') {
+    // A natural recipient line so the embedding itself leans toward the right person.
+    const label = { women: 'women', men: 'men', kids: 'children' }[audience]
+    parts.push(`Intended for: ${label}. A good gift for ${label}.`)
+  }
   if (p.categories.length) parts.push('Categories: ' + p.categories.join(', '))
   const uniq = [...new Set(tags)]
   if (uniq.length) parts.push('Tags: ' + uniq.join(', '))
