@@ -126,7 +126,9 @@ export function buildAgentConfig(bot: Bot, toolIds: string[] = []): AgentConfig 
   }
 
   return {
-    name: `cbz-${bot.id}`,
+    // Human-readable name so agents are findable in the ElevenLabs dashboard,
+    // with the bot id appended for an exact match.
+    name: `${cfg.displayName?.trim() || 'Loqara agent'} · ${bot.id}`,
     conversation_config: {
       agent: {
         first_message: defaultContent?.greeting ?? '',
@@ -156,7 +158,8 @@ export function buildAgentConfig(bot: Bot, toolIds: string[] = []): AgentConfig 
 export function agentConfigHash(bot: Bot, toolIds: string[] = []): string {
   const cfg = bot.config
   const material = JSON.stringify([
-    'v12-public-contact', // bump to force re-sync when the agent payload shape changes
+    'v13-agent-name', // bump to force re-sync when the agent payload shape changes
+    cfg.displayName, // agent name follows the bot's display name
     cfg.languages,
     cfg.content,
     cfg.voice?.voices,
@@ -361,6 +364,26 @@ export async function ensureAgent(db: SupabaseClient, bot: Bot): Promise<string>
     .update({ elevenlabs_agent_id: agentId, elevenlabs_agent_hash: hash })
     .eq('id', bot.id)
   return agentId
+}
+
+/**
+ * Best-effort agent re-sync after a config save, so the ElevenLabs agent's name
+ * and prompt track the saved system prompt immediately (not only on the next
+ * voice call). Only runs when voice is enabled; never throws — a config save
+ * must not fail because ElevenLabs is unavailable or unconfigured.
+ */
+export async function syncVoiceAgent(botId: string): Promise<void> {
+  try {
+    // Lazy import: `@/lib/supabase/service` is `server-only`, and this module is
+    // also imported by unit tests for buildAgentConfig/agentConfigHash.
+    const { createServiceClient } = await import('@/lib/supabase/service')
+    const svc = createServiceClient()
+    const { data: bot } = await svc.from('bots').select('*').eq('id', botId).single<Bot>()
+    if (!bot || !bot.config.voice?.enabled) return
+    await ensureAgent(svc, bot)
+  } catch {
+    // Non-fatal: the config is already saved; the next voice call will re-sync.
+  }
 }
 
 /** Mints a short-lived WebRTC conversation token for the client SDK. */

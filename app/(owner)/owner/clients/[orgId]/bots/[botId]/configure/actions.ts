@@ -3,6 +3,7 @@
 import { requireRole } from '@/lib/auth/guards'
 import { createServiceClient } from '@/lib/supabase/service'
 import { botConfigSchema } from '@/lib/validation/schemas'
+import { syncVoiceAgent } from '@/lib/ai/elevenlabs-agent'
 import type { BotConfig } from '@/lib/types'
 import type { SaveConfigResult } from '@/app/(client)/app/bots/[botId]/configure/actions'
 
@@ -36,5 +37,9 @@ export async function saveClientBotConfig(
   const service = createServiceClient()
   const { error } = await service.from('bots').update(update).eq('id', botId)
   if (error) return { success: false, error: error.message }
+
+  // Keep the ElevenLabs voice agent (name + prompt) in sync with the saved config.
+  await syncVoiceAgent(botId)
+
   return { success: true }
 }
