@@ -33,6 +33,11 @@ export interface AgentConfig {
         // custom_llm on a PATCH (ElevenLabs merges; it rejects llm≠CUSTOM_LLM
         // while a custom_llm object is still present).
         custom_llm: null
+        // Explicitly null so a PATCH CLEARS any stale reasoning_effort left by a
+        // previously-selected reasoning model. ElevenLabs merges PATCHes, and
+        // models that don't support reasoning effort (e.g. Qwen) reject the
+        // config with "Not supported reasoning effort" if a stale value remains.
+        reasoning_effort: null
         // Standalone tools (created via /v1/convai/tools) the agent may call.
         tool_ids: string[]
       }
@@ -137,6 +142,7 @@ export function buildAgentConfig(bot: Bot, toolIds: string[] = []): AgentConfig 
           prompt: buildAgentPrompt(cfg, toolIds, languages),
           llm,
           custom_llm: null,
+          reasoning_effort: null,
           tool_ids: toolIds,
         },
       },
@@ -158,7 +164,7 @@ export function buildAgentConfig(bot: Bot, toolIds: string[] = []): AgentConfig 
 export function agentConfigHash(bot: Bot, toolIds: string[] = []): string {
   const cfg = bot.config
   const material = JSON.stringify([
-    'v15-audience-warmth', // bump to force re-sync when the agent payload shape changes
+    'v16-clear-reasoning-effort', // bump to force re-sync when the agent payload shape changes
     cfg.displayName, // agent name follows the bot's display name
     cfg.languages,
     cfg.content,
