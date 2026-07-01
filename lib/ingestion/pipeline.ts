@@ -29,6 +29,10 @@ export interface IngestDeps {
 /** Resolve the raw text for a source according to its type. */
 async function sourceToText(source: KnowledgeSource, deps: IngestDeps): Promise<string> {
   const meta = source.metadata as Record<string, unknown>
+  // A manual edit (from the source drawer) overrides the fetched/parsed content
+  // for ANY type, and persists across re-ingests so "retry" won't clobber it.
+  const override = meta.contentOverride
+  if (typeof override === 'string' && override.trim()) return override
   switch (source.type) {
     case 'text':
       return String(meta.content ?? '')

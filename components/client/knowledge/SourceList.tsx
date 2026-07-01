@@ -416,6 +416,7 @@ export function SourceList({ sources, onDeleted, onUpdated, onAddSource }: Sourc
         source={viewing}
         onClose={() => setViewingId(null)}
         onRetry={handleRetry}
+        onUpdated={onUpdated}
         onDelete={(s) => {
           handleDelete(s)
           setViewingId(null)

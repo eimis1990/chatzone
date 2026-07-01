@@ -1,9 +1,11 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { XIcon, RefreshCwIcon, Trash2Icon, ExternalLinkIcon } from 'lucide-react'
+import { XIcon, RefreshCwIcon, Trash2Icon, ExternalLinkIcon, SaveIcon, Loader2Icon } from 'lucide-react'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
+import { createBrowserClient } from '@/lib/supabase/browser'
 import type { KnowledgeSource } from '@/lib/types'
 import { TYPE_META, StatusBadge } from './SourceList'
 
@@ -12,6 +14,123 @@ interface SourceDrawerProps {
   onClose: () => void
   onDelete: (source: KnowledgeSource) => void
   onRetry: (source: KnowledgeSource) => void
+  onUpdated: (source: KnowledgeSource) => void
+}
+
+/**
+ * Shows the exact text that was indexed for a source (its chunks, joined) and
+ * lets the owner/client edit it. Saving stores the edit as a content override
+ * and re-indexes (re-chunk + re-embed) via /api/ingest.
+ */
+function IndexedContent({
+  source,
+  onUpdated,
+}: {
+  source: KnowledgeSource
+  onUpdated: (s: KnowledgeSource) => void
+}) {
+  const [loading, setLoading] = useState(true)
+  const [original, setOriginal] = useState('')
+  const [text, setText] = useState('')
+  const [chunkCount, setChunkCount] = useState(0)
+  const [saving, setSaving] = useState(false)
+
+  useEffect(() => {
+    let cancelled = false
+    setLoading(true)
+    void (async () => {
+      const supabase = createBrowserClient()
+      const { data } = await supabase
+        .from('document_chunks')
+        .select('content, chunk_index')
+        .eq('source_id', source.id)
+        .order('chunk_index', { ascending: true })
+      const rows = (data ?? []) as { content: string }[]
+      const joined = rows.map((c) => c.content).join('\n\n')
+      if (!cancelled) {
+        setOriginal(joined)
+        setText(joined)
+        setChunkCount(rows.length)
+        setLoading(false)
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [source.id, source.status])
+
+  const dirty = text !== original
+
+  const save = useCallback(async () => {
+    setSaving(true)
+    try {
+      const supabase = createBrowserClient()
+      const meta = { ...((source.metadata ?? {}) as Record<string, unknown>), contentOverride: text }
+      const { data: updated, error } = await supabase
+        .from('knowledge_sources')
+        .update({ metadata: meta, status: 'pending', error_message: null })
+        .eq('id', source.id)
+        .select('*')
+        .single<KnowledgeSource>()
+      if (error || !updated) throw new Error(error?.message ?? 'Save failed')
+      onUpdated(updated)
+      const res = await fetch('/api/ingest', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sourceId: source.id }),
+      })
+      if (!res.ok) throw new Error('Re-index failed')
+      const { data: fin } = await supabase
+        .from('knowledge_sources')
+        .select('*')
+        .eq('id', source.id)
+        .single<KnowledgeSource>()
+      if (fin) onUpdated(fin)
+      setOriginal(text)
+      toast.success('Saved and re-indexed')
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Save failed')
+    } finally {
+      setSaving(false)
+    }
+  }, [source, text, onUpdated])
+
+  if (loading) return <p className="text-sm text-muted-foreground">Loading indexed content…</p>
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-xs font-medium text-muted-foreground">
+          Indexed content · {chunkCount} chunk{chunkCount === 1 ? '' : 's'}
+        </span>
+        {dirty && (
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="sm" onClick={() => setText(original)} disabled={saving}>
+              Cancel
+            </Button>
+            <Button size="sm" onClick={save} disabled={saving}>
+              {saving ? <Loader2Icon className="size-4 animate-spin" /> : <SaveIcon className="size-4" />}
+              Save &amp; re-index
+            </Button>
+          </div>
+        )}
+      </div>
+      <textarea
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        rows={16}
+        spellCheck={false}
+        className="w-full resize-y rounded-lg border bg-background p-3 text-sm leading-relaxed [overflow-wrap:anywhere] focus:outline-none focus:ring-2 focus:ring-primary/30"
+        placeholder={
+          source.status === 'ready' ? 'No text was indexed for this source.' : 'Not indexed yet.'
+        }
+      />
+      <p className="text-xs text-muted-foreground">
+        This is the exact text the AI searches. Edit it and re-index to correct or enrich what the
+        bot knows.
+      </p>
+    </div>
+  )
 }
 
 function formatDate(iso: string): string {
@@ -92,7 +211,7 @@ function SourceContent({ source }: { source: KnowledgeSource }) {
   )
 }
 
-export function SourceDrawer({ source, onClose, onDelete, onRetry }: SourceDrawerProps) {
+export function SourceDrawer({ source, onClose, onDelete, onRetry, onUpdated }: SourceDrawerProps) {
   // Close on Escape.
   useEffect(() => {
     if (!source) return
@@ -156,13 +275,15 @@ export function SourceDrawer({ source, onClose, onDelete, onRetry }: SourceDrawe
             </div>
 
             {/* Content (scrolls) */}
-            <div className="min-h-0 flex-1 overflow-y-auto p-5">
+            <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-5">
               {source.status === 'error' && source.error_message && (
-                <div className="mb-4 whitespace-pre-wrap rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive [overflow-wrap:anywhere]">
+                <div className="whitespace-pre-wrap rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive [overflow-wrap:anywhere]">
                   {source.error_message}
                 </div>
               )}
-              <SourceContent source={source} />
+              {/* Source reference (the URL / file); the indexed text is shown + editable below. */}
+              {(source.type === 'url' || source.type === 'file') && <SourceContent source={source} />}
+              <IndexedContent source={source} onUpdated={onUpdated} />
             </div>
 
             {/* Actions (static) */}
