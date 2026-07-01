@@ -244,8 +244,8 @@ export function CTASection() {
     <section id="get-started" className="scroll-mt-20 text-white" style={{ backgroundColor: DARK }}>
       <div className="mx-auto max-w-7xl px-5 py-24">
         <Reveal>
-          {/* Framed like the pricing "Everything included" card so the closing CTA
-              reads as its own contained panel rather than a flat dark band. */}
+          {/* Framed as its own contained panel so the closing CTA reads as a card
+              rather than a flat dark band. */}
           <div className="rounded-3xl border border-white/10 bg-white/[0.03] px-6 py-16 text-center sm:px-10">
             <h2 className="mx-auto max-w-xl text-balance text-5xl font-light tracking-tight sm:text-6xl">
               Add an AI agent to your site today

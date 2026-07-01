@@ -1,5 +1,4 @@
 import {
-  CheckIcon,
   PhoneCallIcon,
   MessageSquareIcon,
   ArrowUpRightIcon,
@@ -28,12 +27,6 @@ const ADDONS: { icon: LucideIcon; name: string; price: string; desc: string }[] 
   },
 ]
 
-const INCLUDED: [string, string][] = [
-  ['No setup fee', 'Self-serve and live in one line of code — no onboarding invoice.'],
-  ['Live handoff included', 'Hand off to a human from a real-time inbox on every plan.'],
-  ['Multilingual included', 'English + Lithuanian out of the box, more languages at no extra charge.'],
-  ['Analytics included', 'Summaries, topics, CSAT and trends — not a paid upsell.'],
-]
 
 export function Pricing() {
   return (
@@ -87,28 +80,6 @@ export function Pricing() {
                 </div>
               )
             })}
-          </div>
-        </div>
-
-        {/* Everything included */}
-        <div className="mt-16 rounded-2xl border border-white/10 bg-white/[0.02] p-8">
-          <h3 className="max-w-2xl text-2xl font-semibold tracking-tight">
-            Everything included — nothing nickel-and-dimed
-          </h3>
-          <p className="mt-3 max-w-2xl text-white/70">
-            Most done-for-you chat tools charge €1,500+ just to switch on, then bill live handoff and
-            each channel on top. Loqara includes them, and you’re live the same afternoon.
-          </p>
-          <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {INCLUDED.map(([title, body]) => (
-              <div key={title}>
-                <div className="flex items-center gap-2 font-semibold">
-                  <CheckIcon className="size-4 text-primary" aria-hidden="true" />
-                  {title}
-                </div>
-                <p className="mt-2 text-sm leading-relaxed text-white/65">{body}</p>
-              </div>
-            ))}
           </div>
         </div>
       </div>
