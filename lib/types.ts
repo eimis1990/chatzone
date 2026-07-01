@@ -271,6 +271,20 @@ export interface DocumentChunk {
   created_at: string
 }
 
+/** A knowledge-base quality issue surfaced by the lint pass. */
+export type LintFindingType = 'contradiction' | 'stale' | 'gap'
+export type LintSeverity = 'high' | 'medium' | 'low'
+export interface LintFinding {
+  type: LintFindingType
+  severity: LintSeverity
+  /** The support topic this finding belongs to (e.g. "Returns & refunds"). */
+  topic: string
+  summary: string
+  detail: string
+  /** Verbatim snippets from the KB that evidence the issue (e.g. the two conflicting statements). */
+  evidence: string[]
+}
+
 export type HandoffStatus = 'bot' | 'requested' | 'live' | 'resolved'
 
 export interface Conversation {

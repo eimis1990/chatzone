@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react'
 import { toast } from 'sonner'
-import { FileTextIcon, MessageSquareTextIcon, LinkIcon, UploadIcon, XIcon, SparklesIcon } from 'lucide-react'
+import { FileTextIcon, MessageSquareTextIcon, LinkIcon, UploadIcon, XIcon, SparklesIcon, SearchCheckIcon } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
@@ -13,7 +13,8 @@ import { QaSource } from './QaSource'
 import { UrlSource } from './UrlSource'
 import { FileUpload } from './FileUpload'
 import { SourceList } from './SourceList'
-import type { KnowledgeSource } from '@/lib/types'
+import { LintResults } from './LintResults'
+import type { KnowledgeSource, LintFinding } from '@/lib/types'
 
 interface KnowledgeManagerProps {
   botId: string
@@ -31,6 +32,27 @@ export function KnowledgeManager({ botId, initialSources }: KnowledgeManagerProp
   const [sources, setSources] = useState<KnowledgeSource[]>(initialSources)
   const [addOpen, setAddOpen] = useState(false)
   const [summarizing, setSummarizing] = useState(false)
+  const [linting, setLinting] = useState(false)
+  const [lint, setLint] = useState<{ findings: LintFinding[]; scanned: number } | null>(null)
+
+  // Scan the KB for contradictions / stale content / gaps (read-only).
+  const handleCheckIssues = useCallback(async () => {
+    setLinting(true)
+    try {
+      const res = await fetch('/api/knowledge/lint', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ botId }),
+      })
+      const data = (await res.json()) as { findings?: LintFinding[]; scanned?: number; error?: string }
+      if (!res.ok) throw new Error(data.error ?? 'Scan failed')
+      setLint({ findings: data.findings ?? [], scanned: data.scanned ?? 0 })
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Scan failed')
+    } finally {
+      setLinting(false)
+    }
+  }, [botId])
 
   // Re-fetch the full source list (canonical summaries are created server-side).
   const refreshSources = useCallback(async () => {
@@ -114,20 +136,36 @@ export function KnowledgeManager({ botId, initialSources }: KnowledgeManagerProp
                   : `${readyCount} of ${sources.length} ready to use.`}
               </CardDescription>
             </div>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={handleRebuildSummaries}
-              disabled={summarizing || sources.length === 0}
-              title="Synthesize clean answer pages (returns, shipping, contact…) from your content"
-            >
-              <SparklesIcon className={cn('size-4', summarizing && 'animate-pulse')} />
-              {summarizing ? 'Building…' : 'Rebuild answer summaries'}
-            </Button>
+            <div className="flex flex-shrink-0 items-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleCheckIssues}
+                disabled={linting || sources.length === 0}
+                title="Scan your content for contradictions, outdated info, and missing topics"
+              >
+                <SearchCheckIcon className={cn('size-4', linting && 'animate-pulse')} />
+                {linting ? 'Checking…' : 'Check for issues'}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleRebuildSummaries}
+                disabled={summarizing || sources.length === 0}
+                title="Synthesize clean answer pages (returns, shipping, contact…) from your content"
+              >
+                <SparklesIcon className={cn('size-4', summarizing && 'animate-pulse')} />
+                {summarizing ? 'Building…' : 'Rebuild answer summaries'}
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent className="min-h-0 flex-1 overflow-y-auto p-0">
+          {lint && (
+            <LintResults findings={lint.findings} scanned={lint.scanned} onClose={() => setLint(null)} />
+          )}
           <SourceList
             botId={botId}
             sources={sources}
