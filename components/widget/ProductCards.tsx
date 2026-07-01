@@ -127,17 +127,21 @@ export function ProductListView({
       role="region"
       aria-label={labels.products}
     >
-      {/* Sticky sub-header with back + count */}
-      <div className="flex items-center justify-between px-4 py-2.5 border-b flex-shrink-0">
+      {/* Sticky sub-header — matches the main chat header (theme color + text). */}
+      <div
+        className="flex items-center justify-between px-4 py-2.5 flex-shrink-0"
+        style={{ backgroundColor: primaryColor, color: readableTextColor(primaryColor) }}
+      >
         <button
           type="button"
           onClick={onClose}
-          className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors -ml-1"
+          className="flex items-center gap-1 text-sm font-medium -ml-1 transition-opacity hover:opacity-80 outline-none focus-visible:ring-2"
+          style={{ color: readableTextColor(primaryColor) }}
         >
           <BackIcon />
           {labels.back}
         </button>
-        <span className="text-xs text-muted-foreground">
+        <span className="text-xs opacity-80">
           {labels.results} ({products.length})
         </span>
       </div>
