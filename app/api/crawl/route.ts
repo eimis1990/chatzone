@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { ingestSource, makeServiceRepo } from '@/lib/ingestion/pipeline'
+import { generateCanonicalPages } from '@/lib/ingestion/canonical'
 import { discoverPages } from '@/lib/ingestion/crawl'
 import { assertPublicUrl } from '@/lib/net/ssrf'
 import { crawlSchema } from '@/lib/validation/schemas'
@@ -137,6 +138,18 @@ export async function POST(req: Request) {
     await ingestSource(src.id, { repo: makeServiceRepo(svc) })
   }
 
+  // When the site is fully ingested (no pages left), refresh the canonical
+  // answer-summary pages from the freshly-crawled content. Best-effort: a
+  // failure here must not fail the crawl.
+  const remaining = fresh.length - toIngest.length
+  if (remaining === 0) {
+    try {
+      await generateCanonicalPages(botId, svc)
+    } catch {
+      // non-fatal — the user can rebuild summaries manually.
+    }
+  }
+
   const { data: finalRows } = await supabase
     .from('knowledge_sources')
     .select('*')
@@ -150,6 +163,6 @@ export async function POST(req: Request) {
   return NextResponse.json({
     sources: finalRows ?? created,
     added: created.length,
-    remaining: fresh.length - toIngest.length,
+    remaining,
   })
 }

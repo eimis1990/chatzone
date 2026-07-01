@@ -1,10 +1,13 @@
 'use client'
 
 import { useState, useCallback, useEffect } from 'react'
-import { FileTextIcon, MessageSquareTextIcon, LinkIcon, UploadIcon, XIcon } from 'lucide-react'
+import { toast } from 'sonner'
+import { FileTextIcon, MessageSquareTextIcon, LinkIcon, UploadIcon, XIcon, SparklesIcon } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
+import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { createBrowserClient } from '@/lib/supabase/browser'
 import { TextSource } from './TextSource'
 import { QaSource } from './QaSource'
 import { UrlSource } from './UrlSource'
@@ -27,6 +30,43 @@ const SOURCE_TABS = [
 export function KnowledgeManager({ botId, initialSources }: KnowledgeManagerProps) {
   const [sources, setSources] = useState<KnowledgeSource[]>(initialSources)
   const [addOpen, setAddOpen] = useState(false)
+  const [summarizing, setSummarizing] = useState(false)
+
+  // Re-fetch the full source list (canonical summaries are created server-side).
+  const refreshSources = useCallback(async () => {
+    const supabase = createBrowserClient()
+    const { data } = await supabase
+      .from('knowledge_sources')
+      .select('*')
+      .eq('bot_id', botId)
+      .order('created_at', { ascending: false })
+      .returns<KnowledgeSource[]>()
+    if (data) setSources(data)
+  }, [botId])
+
+  // Synthesize/refresh the canonical "answer summary" pages from current content.
+  const handleRebuildSummaries = useCallback(async () => {
+    setSummarizing(true)
+    try {
+      const res = await fetch('/api/knowledge/summarize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ botId }),
+      })
+      const data = (await res.json()) as { built?: number; skipped?: number; error?: string }
+      if (!res.ok) throw new Error(data.error ?? 'Failed to build summaries')
+      await refreshSources()
+      toast.success(
+        data.built
+          ? `Built ${data.built} answer ${data.built === 1 ? 'summary' : 'summaries'}`
+          : 'No topics had enough content to summarize yet',
+      )
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to build summaries')
+    } finally {
+      setSummarizing(false)
+    }
+  }, [botId, refreshSources])
 
   // Called by each add-source component after it creates a row + triggers ingest.
   const handleSourceAdded = useCallback((source: KnowledgeSource) => {
@@ -58,19 +98,34 @@ export function KnowledgeManager({ botId, initialSources }: KnowledgeManagerProp
     <div className="flex min-h-0 flex-1 flex-col">
       <Card className="flex min-h-0 flex-1 flex-col">
         <CardHeader className="flex-shrink-0 border-b">
-          <div className="flex items-center gap-2">
-            <CardTitle>Sources</CardTitle>
-            {sources.length > 0 && (
-              <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
-                {sources.length}
-              </span>
-            )}
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <div className="flex items-center gap-2">
+                <CardTitle>Sources</CardTitle>
+                {sources.length > 0 && (
+                  <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                    {sources.length}
+                  </span>
+                )}
+              </div>
+              <CardDescription>
+                {sources.length === 0
+                  ? 'Everything your bot can draw on to answer questions.'
+                  : `${readyCount} of ${sources.length} ready to use.`}
+              </CardDescription>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleRebuildSummaries}
+              disabled={summarizing || sources.length === 0}
+              title="Synthesize clean answer pages (returns, shipping, contact…) from your content"
+            >
+              <SparklesIcon className={cn('size-4', summarizing && 'animate-pulse')} />
+              {summarizing ? 'Building…' : 'Rebuild answer summaries'}
+            </Button>
           </div>
-          <CardDescription>
-            {sources.length === 0
-              ? 'Everything your bot can draw on to answer questions.'
-              : `${readyCount} of ${sources.length} ready to use.`}
-          </CardDescription>
         </CardHeader>
         <CardContent className="min-h-0 flex-1 overflow-y-auto p-0">
           <SourceList

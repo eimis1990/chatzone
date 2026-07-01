@@ -12,6 +12,7 @@ import {
   PaperclipIcon,
   MoreVerticalIcon,
   PlusIcon,
+  SparklesIcon,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -354,6 +355,11 @@ export function SourceList({ sources, onDeleted, onUpdated, onAddSource }: Sourc
 
         {sources.map((source) => {
           const { label, icon: TypeIcon } = TYPE_META[source.type]
+          // Canonical "answer summary" pages are text sources with a special kind.
+          const canonical = (source.metadata as Record<string, unknown>)?.kind === 'canonical'
+          const Icon = canonical ? SparklesIcon : TypeIcon
+          const tile = canonical ? 'bg-amber-50 text-amber-600' : TYPE_TILE[source.type]
+          const tileLabel = canonical ? 'Answer summary' : label
           const subtitle = sourceSubtitle(source)
           const chunks = counts[source.id]
           return (
@@ -372,13 +378,10 @@ export function SourceList({ sources, onDeleted, onUpdated, onAddSource }: Sourc
             >
               <div className="flex items-start justify-between">
                 <span
-                  className={cn(
-                    'flex size-10 items-center justify-center rounded-lg',
-                    TYPE_TILE[source.type],
-                  )}
-                  title={label}
+                  className={cn('flex size-10 items-center justify-center rounded-lg', tile)}
+                  title={tileLabel}
                 >
-                  <TypeIcon className="size-5" aria-hidden="true" />
+                  <Icon className="size-5" aria-hidden="true" />
                 </span>
                 <CardMenu
                   canRetry={source.status === 'error'}
@@ -389,9 +392,16 @@ export function SourceList({ sources, onDeleted, onUpdated, onAddSource }: Sourc
               </div>
 
               <div className="min-w-0">
-                <p className="truncate font-medium text-foreground" title={source.name}>
-                  {source.name}
-                </p>
+                <div className="flex items-center gap-1.5">
+                  <p className="truncate font-medium text-foreground" title={source.name}>
+                    {source.name}
+                  </p>
+                  {canonical && (
+                    <span className="shrink-0 rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium text-amber-700">
+                      Summary
+                    </span>
+                  )}
+                </div>
                 <p className="mt-0.5 line-clamp-2 text-sm text-muted-foreground">{subtitle}</p>
               </div>
 
