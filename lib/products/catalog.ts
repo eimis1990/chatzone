@@ -1,8 +1,10 @@
 import { storeOrigin, decodeEntities } from '@/lib/commerce/woocommerce'
 
-// Bound a single sync so it fits the function time budget; the most popular
-// products come first (orderby=popularity), so the cap keeps what matters most.
-const MAX_PRODUCTS = 300
+// Index the bulk of the catalog so the semantic search can find ANY relevant
+// product (e.g. a candle for a gift), not just the top sellers. Most-popular
+// first (orderby=popularity), so if a very large store exceeds the cap, the cap
+// still keeps what matters most. Enrichment is parallelized to fit the budget.
+const MAX_PRODUCTS = 3000
 const PER_PAGE = 100
 const TOP_SELLER_RANK = 20
 

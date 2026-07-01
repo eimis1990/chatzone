@@ -28,10 +28,17 @@ export interface Enrichment {
  * Batched to bound cost; resilient (a failed batch just leaves those products
  * with their derived tags/audience). Returns id → enrichment.
  */
+// How many enrichment batches run concurrently. Keeps a large catalog (1000s of
+// products) inside the sync time budget without tripping model rate limits.
+const CONCURRENCY = 8
+
 export async function aiEnrich(products: RawProduct[]): Promise<Map<string, Enrichment>> {
   const map = new Map<string, Enrichment>()
-  for (let i = 0; i < products.length; i += BATCH) {
-    const batch = products.slice(i, i + BATCH)
+  const batches: RawProduct[][] = []
+  for (let i = 0; i < products.length; i += BATCH) batches.push(products.slice(i, i + BATCH))
+
+  let next = 0
+  const runBatch = async (batch: RawProduct[]): Promise<void> => {
     try {
       const { object } = await generateObject({
         model: openai('gpt-4o-mini'),
@@ -55,5 +62,14 @@ export async function aiEnrich(products: RawProduct[]): Promise<Map<string, Enri
       // Batch failed → those products keep their derived tags/audience only.
     }
   }
+
+  // Worker pool: each worker pulls the next batch until they're exhausted.
+  const worker = async (): Promise<void> => {
+    while (next < batches.length) {
+      const batch = batches[next++]
+      await runBatch(batch)
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(CONCURRENCY, batches.length) }, worker))
   return map
 }

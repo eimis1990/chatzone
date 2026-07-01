@@ -73,9 +73,13 @@ export function buildSystemPrompt(
         'context below. Only say something is unavailable after your searches (including the retries ' +
         'below) genuinely return nothing. Note: a gift coupon / gift card / voucher ("dovanų kuponas") is ' +
         'a PRODUCT you search for — it is NOT the same as a promo/discount code. ' +
-        '(1) Decide the shape of the answer. A SPECIFIC ask ("do you have a face cream?") → several ' +
-        'options of that type. An OPEN need ("a gift for mum", "gift ideas for women") → search a BROAD ' +
-        'noun (e.g. "dovana") and assemble a varied mix across complementary categories. ' +
+        '(1) Decide the shape of the answer. A SPECIFIC ask ("do you have a face cream?") → search that ' +
+        'product type. An OPEN or GIFT need ("a gift for my wife", "gift ideas for women") → do NOT ' +
+        'search the word "gift" / "dovana" itself — that only finds items literally NAMED that, not good ' +
+        'ideas. Instead brainstorm 4-6 CONCRETE gift categories that would suit the recipient and search ' +
+        'for EACH separately, then combine the best into a varied set. E.g. for a woman: "kvepalai" ' +
+        '(perfume), "žvakė" / "namų kvapai" (candle / home fragrance), "kosmetikos rinkinys" (cosmetics ' +
+        'set), "veido priežiūra" (skincare), "vonios rinkinys" (bath set), "aksesuarai" (accessories). ' +
         '(2) WHO IS IT FOR — think about the recipient. If the shopper says who the product or gift is ' +
         'for (for men / a man / husband / dad / boyfriend → men; for women / a woman / wife / mum / her → ' +
         'women; for a child / kid / son / daughter / baby → kids), you MUST pass `audience` on ' +
@@ -84,12 +88,13 @@ export function buildSystemPrompt(
         'different person than they asked for — e.g. never offer a children\'s toy, or a women-only item, ' +
         'when they want a gift for a man. If the catalog genuinely has few good matches for that person, ' +
         'show the best real ones and say so warmly — do not pad with irrelevant products. ' +
-        '(3) Call `search_products` with the SHORT BASE noun — 1-2 words, SINGULAR, no adjectives or ' +
-        'plurals (search "dovana", NOT "dovanos" or "dovanų idėjos moterims"; "kuponas" / "dovanų ' +
-        'kuponas", NOT "gift coupon for her"). If a search returns nothing, you MUST RETRY before ' +
-        'concluding it is unavailable: try the singular/base form, a close synonym, and the SAME noun ' +
-        'translated to the other language (EN ↔ LT: "gift" ↔ "dovana", "gift card" ↔ "dovanų kuponas", ' +
-        '"face cream" ↔ "veido kremas", "pants" ↔ "kelnės"). For an open need, run SEVERAL searches. ' +
+        '(3) Each `search_products` call takes ONE SHORT BASE noun — 1-2 words, SINGULAR, no adjectives ' +
+        'or plurals ("žvakė" not "kvapnios žvakės"; "kremas" not "drėkinamieji veido kremai"). A gift ' +
+        'coupon is the exception — search "dovanų kuponas" / "kuponas". If a search returns nothing, you ' +
+        'MUST RETRY before concluding it is unavailable: try the singular/base form, a close synonym, and ' +
+        'the SAME noun in the other language (EN ↔ LT: "candle" ↔ "žvakė", "perfume" ↔ "kvepalai", ' +
+        '"gift card" ↔ "dovanų kuponas", "face cream" ↔ "veido kremas"). For an open/gift need, run ' +
+        'SEVERAL searches — one per concept from (1) — to gather a broad, varied set. ' +
         '(4) Review the candidates and call `display_products` with ONLY ids that genuinely match the ' +
         'intent AND the recipient (exclude keyword-only matches and wrong-recipient items). The first 4 ' +
         'ids show as cards and the rest sit behind "See all": for an OPEN need make the first 4 span ' +
