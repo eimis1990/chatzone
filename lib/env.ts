@@ -25,6 +25,9 @@ const envSchema = z.object({
   // CLOSED when this is unset (retention purge simply won't run), so set it in
   // production to enable the daily purge.
   CRON_SECRET: z.string().min(1).optional(),
+  // Optional: Jina Reader API key for higher crawl limits. URL ingestion works
+  // keyless (IP rate-limited) and falls back to a direct fetch if unavailable.
+  JINA_API_KEY: z.string().min(1).optional(),
   // Optional, public (NEXT_PUBLIC_*): analytics & search-engine verification.
   // Read directly in client/layout code; listed here as the env contract's
   // single source of truth. GA4 only loads when the ID is present.

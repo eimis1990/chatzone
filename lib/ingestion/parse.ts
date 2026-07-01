@@ -69,10 +69,15 @@ export async function parseFile(buffer: Buffer, mime: string): Promise<string> {
 
 /** Fetches a URL and extracts its readable text. `fetchImpl` is injectable for tests. */
 export async function parseUrl(url: string, fetchImpl: typeof fetch = fetch): Promise<string> {
-  // SSRF guard on the real-network path only (tests inject a mock fetch).
+  // Real-network path only (tests inject a mock fetch and get the direct path).
   if (fetchImpl === fetch) {
     const { assertPublicUrl } = await import('@/lib/net/ssrf')
     await assertPublicUrl(url)
+    // Prefer Jina Reader: it renders JS and returns clean Markdown, so JS-heavy
+    // sites yield real content. Falls through to a direct fetch if unavailable.
+    const { readerMarkdown } = await import('@/lib/ingestion/jina-reader')
+    const md = await readerMarkdown(url)
+    if (md) return md
   }
   const res = await fetchImpl(url)
   if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`)
