@@ -110,7 +110,7 @@ describe('publicBotConfig', () => {
 
   it('exposes voice flags but NOT the raw voiceId', () => {
     const pub = publicBotConfig(fullConfig)
-    expect(pub.voice).toEqual({ enabled: true, ttsEnabled: true, sttEnabled: true })
+    expect(pub.voice).toEqual({ enabled: true, ttsEnabled: false, sttEnabled: false })
     expect('voiceId' in pub.voice).toBe(false)
   })
 
@@ -196,11 +196,11 @@ describe('publicBotConfig — plan entitlements gating', () => {
 })
 
 describe('publicBotConfig — Voice add-on gating (call button only)', () => {
-  it('hides the call button when the add-on is absent; TTS/STT untouched', () => {
+  it('hides the call button when the add-on is absent (in-chat tts/stt always off)', () => {
     const pub = publicBotConfig(maxedConfig, entitlementsFor('starter'), false)
     expect(pub.theme.showCallButton).toBe(false)
     // Voice flags pass through — only the live call is gated.
-    expect(pub.voice).toEqual({ enabled: true, ttsEnabled: true, sttEnabled: true })
+    expect(pub.voice).toEqual({ enabled: true, ttsEnabled: false, sttEnabled: false })
   })
 
   it('keeps the call button when the add-on is active', () => {
