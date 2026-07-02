@@ -118,7 +118,10 @@ export async function POST(req: Request) {
   }
 
   // The visitor explicitly asks for a human → escalate + acknowledge (no LLM).
-  if (detectHandoffIntent(message, lang)) {
+  // Checked in EVERY enabled language, not just the active one — visitors type
+  // Lithuanian on the English tab (and vice versa) all the time.
+  const handoffLangs = bot.config.languages?.length ? bot.config.languages : [lang]
+  if (handoffLangs.some((l) => detectHandoffIntent(message, l))) {
     await svc
       .from('conversations')
       .update({ handoff_status: 'requested', handoff_requested_at: new Date().toISOString() })
