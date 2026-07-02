@@ -39,7 +39,7 @@ export function ShowcaseFan({ images }: { images: string[] }) {
           viewport={{ once: true }}
           variants={FADE_IN}
           transition={{ delay: 0.15 }}
-          className="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-gray-500 sm:text-xl"
+          className="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-gray-600"
         >
           {DESCRIPTION}
         </motion.p>

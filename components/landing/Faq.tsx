@@ -24,7 +24,7 @@ export function Faq() {
           </p>
         </div>
 
-        <div className="mt-10 divide-y divide-gray-200 overflow-hidden rounded-xl border border-gray-200 bg-white">
+        <div className="mt-10 divide-y divide-gray-200 overflow-hidden rounded-2xl border border-gray-200 bg-white">
           {FAQ.map(([q, a], i) => {
             const isOpen = open === i
             return (
@@ -36,7 +36,7 @@ export function Faq() {
                     if (!isOpen) trackEvent('faq_opened', { question: q })
                   }}
                   aria-expanded={isOpen}
-                  className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left text-[15px] font-semibold text-gray-900 transition-colors hover:bg-gray-50"
+                  className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left text-base font-semibold text-gray-900 transition-colors hover:bg-gray-50"
                 >
                   {q}
                   <ChevronDownIcon
