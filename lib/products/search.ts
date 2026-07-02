@@ -58,6 +58,7 @@ export async function searchCatalog(
       const { data } = await db.rpc('match_products', {
         p_bot_id: bot.id,
         p_embedding: embedding,
+        p_query_text: query,
         p_k: limit,
         p_audience: opts.audience ?? null,
       })
