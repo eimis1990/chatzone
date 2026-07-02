@@ -75,8 +75,8 @@ export default function PrivacyPage() {
         <h2 className="text-lg font-semibold">Contact</h2>
         <p className="text-sm text-foreground/80">
           Questions about privacy or this page? Email{' '}
-          <a href="mailto:e.kudarauskas@gmail.com" className="font-medium text-foreground underline">
-            e.kudarauskas@gmail.com
+          <a href="mailto:hello@loqara.com" className="font-medium text-foreground underline">
+            hello@loqara.com
           </a>
           .
         </p>

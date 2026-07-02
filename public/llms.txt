@@ -19,6 +19,10 @@
 - Voice agent add-on — €49/mo including ~200 minutes, then €0.20/min
 - No setup fee. Upgrade, downgrade, or cancel anytime.
 
+## Optional done-for-you setup (one-time, self-serve is always free)
+- Essential — €749 — knowledge training on your documents, agent persona & answers configured, installed on your website (~1 week)
+- E-commerce — €995 — everything in Essential plus product catalog connection, order tracking, stock & availability answers (~2 weeks)
+
 ## Channels
 - Website chat widget today
 - WhatsApp, Instagram, and Messenger — coming soon
@@ -28,8 +32,18 @@
 - Pricing: https://www.loqara.com/#pricing
 - FAQ: https://www.loqara.com/#faq
 - Blog (guides): https://www.loqara.com/blog
+
+## Popular guides
+- Best AI chatbot for Shopify: https://www.loqara.com/blog/best-ai-chatbot-for-shopify
+- Best AI chatbot for WooCommerce: https://www.loqara.com/blog/best-ai-chatbot-for-woocommerce
+- Best AI chatbot for e-commerce: https://www.loqara.com/blog/best-ai-chatbot-for-ecommerce
+- How to choose an AI support agent: https://www.loqara.com/blog/how-to-choose-ai-support-agent
+- AI chatbot ↔ human handoff explained: https://www.loqara.com/blog/ai-chatbot-human-handoff
+- Intercom alternatives for e-commerce: https://www.loqara.com/blog/intercom-alternatives-for-ecommerce
+- Gorgias alternatives for e-commerce: https://www.loqara.com/blog/gorgias-alternatives-for-ecommerce
+- AI chatbots & GDPR: https://www.loqara.com/blog/ai-chatbot-gdpr-data-privacy
 - Privacy & data handling: https://www.loqara.com/privacy
 - Terms of service: https://www.loqara.com/terms
 
 ## Contact
-- Email: e.kudarauskas@gmail.com
+- Email: hello@loqara.com

@@ -531,7 +531,7 @@ export function BillingPanel({
 
           <p className="text-center text-sm text-muted-foreground">
             Need higher volume or custom terms?{' '}
-            <a href="mailto:e.kudarauskas@gmail.com" className="text-primary hover:underline">
+            <a href="mailto:hello@loqara.com" className="text-primary hover:underline">
               Talk to us about Enterprise
             </a>
             .

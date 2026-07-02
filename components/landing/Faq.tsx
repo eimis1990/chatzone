@@ -17,7 +17,7 @@ export function Faq() {
           </h2>
           <p className="mx-auto max-w-2xl text-gray-600">
             Everything about plans, limits and getting started. Can’t find your answer?{' '}
-            <a href="mailto:e.kudarauskas@gmail.com" className="text-primary hover:underline">
+            <a href="mailto:hello@loqara.com" className="text-primary hover:underline">
               Email us
             </a>
             .

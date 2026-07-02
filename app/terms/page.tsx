@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   alternates: { canonical: '/terms' },
 }
 
-const CONTACT_EMAIL = 'e.kudarauskas@gmail.com'
+const CONTACT_EMAIL = 'hello@loqara.com'
 
 export default function TermsPage() {
   return (

@@ -53,7 +53,7 @@ export function Pricing() {
             </p>
           </div>
           <a
-            href="mailto:e.kudarauskas@gmail.com?subject=Loqara%20Enterprise"
+            href="mailto:hello@loqara.com?subject=Loqara%20Enterprise"
             className="inline-flex h-11 shrink-0 items-center justify-center rounded-full border border-white/15 px-6 text-sm font-semibold transition-colors hover:bg-white/10"
           >
             Talk to us
