@@ -39,6 +39,9 @@ const Toaster = ({ ...props }: ToasterProps) => {
       toastOptions={{
         classNames: {
           toast: "cn-toast",
+          // Sonner's default description color is too faint against our
+          // popover background — pin it to the app's readable muted tone.
+          description: "!text-muted-foreground",
         },
       }}
       {...props}
