@@ -27,7 +27,9 @@ type Mode =
   | { kind: 'view'; prompt: SystemPrompt }
   | null
 
-const DIALOG_SIZE = 'flex h-[90vh] w-[50vw] max-w-none flex-col max-lg:w-[calc(100vw-2rem)]'
+// Height = 90% of the viewport; width = 80% of that height, so the editor/viewer
+// is a comfortable portrait rectangle rather than a near-square.
+const DIALOG_SIZE = 'flex h-[90vh] w-[72vh] max-w-[calc(100vw-2rem)] flex-col'
 
 export function SystemPromptsManager({ prompts, usage }: Props) {
   const router = useRouter()
@@ -35,12 +37,12 @@ export function SystemPromptsManager({ prompts, usage }: Props) {
 
   return (
     <>
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-3">
+      <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
         {/* Create card — always first (matches the "Add source" pattern). */}
         <button
           type="button"
           onClick={() => setMode({ kind: 'create' })}
-          className="group flex min-h-[150px] flex-col items-center justify-center gap-2 rounded-xl border border-dashed bg-card p-4 text-muted-foreground transition-colors hover:border-primary/50 hover:bg-primary/5 hover:text-primary"
+          className="group flex min-h-[160px] flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border bg-card/40 p-4 text-muted-foreground transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary"
         >
           <span className="flex size-10 items-center justify-center rounded-lg bg-muted text-foreground/60 transition-colors group-hover:bg-primary/10 group-hover:text-primary">
             <PlusIcon className="size-5" aria-hidden="true" />
@@ -53,7 +55,7 @@ export function SystemPromptsManager({ prompts, usage }: Props) {
           return (
             <div
               key={p.id}
-              className="flex flex-col gap-3 rounded-xl border bg-card p-4 text-left transition-all hover:border-foreground/15 hover:shadow-sm"
+              className="flex min-h-[160px] flex-col gap-3 rounded-xl border bg-card p-4 text-left transition-all hover:border-foreground/15 hover:shadow-sm"
             >
               <div className="flex items-start justify-between">
                 <span className="flex size-10 items-center justify-center rounded-lg bg-blue-50 text-blue-600">

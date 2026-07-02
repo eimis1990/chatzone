@@ -29,9 +29,9 @@ export default async function PromptsPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-5xl p-6">
-      <div className="mb-5">
-        <h1 className="text-xl font-semibold">System prompts</h1>
+    <div className="space-y-6 p-6">
+      <div>
+        <h1 className="text-lg font-semibold">System prompts</h1>
         <p className="text-sm text-muted-foreground">
           Create reusable prompts once and assign them to any bot from its configuration — no more
           copy-pasting. Markdown is supported and rendered when you preview.
