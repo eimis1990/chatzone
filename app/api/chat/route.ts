@@ -180,17 +180,25 @@ export async function POST(req: Request) {
   }))
   const productSink: CommerceProduct[] = []
   const orderSink: OrderStatus[] = []
+  // Shared with makeProductTools so the response layer can auto-render a lone
+  // found product when the model forgets to call display_products.
+  const candidates = new Map<string, CommerceProduct>()
 
   return ndjsonChatResponse(openai(bot.config.model || 'gpt-4o-mini'), messages, {
     temperature: bot.config.temperature ?? 0.3,
     headers: baseHeaders,
     tools: commerce
-      ? makeProductTools(bot.config, productSink, orderSink, (p) =>
-          searchCatalog(bot, p.query, svc, p.limit ?? 24, { audience: p.audience }),
+      ? makeProductTools(
+          bot.config,
+          productSink,
+          orderSink,
+          (p) => searchCatalog(bot, p.query, svc, p.limit ?? 24, { audience: p.audience }),
+          candidates,
         )
       : undefined,
     productSink,
     orderSink,
+    candidates,
     onText: async (text) => {
       await svc.from('messages').insert({
         conversation_id: convId,

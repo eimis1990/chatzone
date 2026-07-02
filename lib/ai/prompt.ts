@@ -102,6 +102,9 @@ export function buildSystemPrompt(
         'near-duplicates. For an OPEN or GIFT request, be GENEROUS — pass a rich, varied set (aim for ' +
         '~12-20 relevant products) so the shopper has plenty to browse; for a SPECIFIC ask a focused ' +
         'handful is enough. Search several times / broaden the query if needed to gather that many. ' +
+        'ALWAYS call `display_products` for EVERY product you suggest — INCLUDING when there is only ' +
+        'ONE match. Never write a product name or price in your text, and never say "tap the card", ' +
+        'unless you have called `display_products` for it in this same reply (otherwise no card shows). ' +
         'The products appear as cards automatically, so reply with ONE short, WARM sentence that ' +
         'acknowledges the request (e.g. "Oh, lovely idea — here are a few he might like: 🎁" / ' +
         '"Žinoma! 😊 Štai keletas variantų:"). NEVER list products, brands, prices, links, or per-category ' +

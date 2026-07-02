@@ -26,8 +26,10 @@ export function makeProductTools(
     limit?: number
     audience?: 'women' | 'men' | 'kids' | 'unisex'
   }) => Promise<CommerceProduct[]>,
+  /** Shared candidate store — lets the response layer auto-render a lone found
+   *  product if the model forgets to call display_products. */
+  candidates: Map<string, CommerceProduct> = new Map<string, CommerceProduct>(),
 ): ToolSet {
-  const candidates = new Map<string, CommerceProduct>()
   const tools: ToolSet = {
     search_products: tool({
       description:
@@ -170,6 +172,8 @@ export function ndjsonChatResponse(
     tools?: ToolSet
     productSink?: CommerceProduct[]
     orderSink?: OrderStatus[]
+    /** Candidates gathered via search_products (for the single-result net). */
+    candidates?: Map<string, CommerceProduct>
   } & NdjsonOptions,
 ): Response {
   const result = streamText({
@@ -199,6 +203,12 @@ export function ndjsonChatResponse(
           }
         }
         const products = opts.productSink ?? []
+        // Safety net: the model sometimes describes a single found product in
+        // text (even "tap the card") without calling display_products. If exactly
+        // one candidate was found and nothing was displayed, show that one.
+        if (products.length === 0 && opts.candidates && opts.candidates.size === 1) {
+          products.push(...opts.candidates.values())
+        }
         if (products.length) line({ t: 'products', v: products })
         const order = opts.orderSink ?? []
         if (order.length) line({ t: 'order', v: order[0] })

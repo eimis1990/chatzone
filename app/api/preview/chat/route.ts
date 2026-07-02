@@ -58,12 +58,16 @@ export async function POST(req: Request) {
   ) as ModelMessage[]
   const productSink: CommerceProduct[] = []
   const orderSink: OrderStatus[] = []
+  const candidates = new Map<string, CommerceProduct>()
 
   return ndjsonChatResponse(openai(config.model || 'gpt-4o-mini'), messages, {
     temperature: config.temperature ?? 0.3,
     headers: {},
-    tools: commerce ? makeProductTools(config, productSink, orderSink) : undefined,
+    tools: commerce
+      ? makeProductTools(config, productSink, orderSink, undefined, candidates)
+      : undefined,
     productSink,
     orderSink,
+    candidates,
   })
 }
