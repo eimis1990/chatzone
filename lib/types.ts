@@ -118,16 +118,23 @@ export interface VoiceConfig {
   llmModel?: string
 }
 
+/** Typed quick-action behaviors beyond plain text/url. */
+export type SuggestedQuestionAction = 'handoff' | 'lead'
+
 /**
  * A welcome-screen quick action. A plain string is shorthand for a button whose
  * label and sent message are identical (legacy). The object form lets the label
  * (what the visitor sees) differ from what happens on click:
- *   - `url` set    → the server fetches that endpoint and renders product cards.
- *   - `prompt` set → that message is sent to the bot.
- *   - neither      → the label itself is sent.
- * `url` takes priority over `prompt`.
+ *   - `action: 'handoff'` → request a human (same flow as "Talk to a person").
+ *   - `action: 'lead'`    → open the lead-capture contact form (when enabled).
+ *   - `url` set           → the bot replies with a link button to that URL.
+ *   - `prompt` set        → that message is sent to the bot.
+ *   - none of the above   → the label itself is sent.
+ * Precedence: `action` > `url` > `prompt`.
  */
-export type SuggestedQuestion = string | { label: string; prompt?: string; url?: string }
+export type SuggestedQuestion =
+  | string
+  | { label: string; prompt?: string; url?: string; action?: SuggestedQuestionAction }
 
 /** Visitor-facing content that differs per language. */
 export interface LanguageContent {

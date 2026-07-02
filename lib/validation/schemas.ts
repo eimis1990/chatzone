@@ -21,15 +21,20 @@ const DEFAULT_FALLBACK =
   "I'm not sure about that — let me take your details so someone can follow up."
 
 // A quick action. A plain string is the legacy form (label === message). The
-// object form carries a title (label) plus, optionally, a `prompt` (a richer
-// message sent to the bot) or a `url` (an owner endpoint the server fetches and
-// renders as product cards). url takes priority over prompt.
+// object form carries a title (label) plus, optionally, ONE behavior:
+//   - `action: 'handoff'` → request a human (same flow as "Talk to a person")
+//   - `action: 'lead'`    → open the lead-capture contact form
+//   - `url`               → reply with a link button the visitor can follow
+//   - `prompt`            → send that message to the bot
+//   - none of the above   → send the label itself
+// Precedence when several are set: action > url > prompt.
 export const suggestedQuestionSchema = z.union([
   z.string().min(1),
   z.object({
     label: z.string().min(1).max(80),
     prompt: z.string().max(300).optional().or(z.literal('')),
     url: z.string().url().optional().or(z.literal('')),
+    action: z.enum(['handoff', 'lead']).optional(),
   }),
 ])
 

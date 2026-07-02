@@ -1,4 +1,11 @@
-import type { BotConfig, BotLanguage, LeadField, LeadTrigger, SuggestedQuestion } from '@/lib/types'
+import type {
+  BotConfig,
+  BotLanguage,
+  LeadField,
+  LeadTrigger,
+  SuggestedQuestion,
+  SuggestedQuestionAction,
+} from '@/lib/types'
 import type { Entitlements } from '@/lib/entitlements'
 
 /** The button text for a suggested question. */
@@ -19,9 +26,17 @@ export function sqUrl(q: SuggestedQuestion): string | undefined {
   return u || undefined
 }
 
-/** Behavior of a quick action: fetch a URL, send a prompt, or send the label. */
-export function sqMode(q: SuggestedQuestion): 'url' | 'prompt' | 'message' {
+/** The typed behavior of a quick action ('handoff' | 'lead'), if any. */
+export function sqAction(q: SuggestedQuestion): SuggestedQuestionAction | undefined {
+  if (typeof q === 'string') return undefined
+  return q.action === 'handoff' || q.action === 'lead' ? q.action : undefined
+}
+
+/** Behavior of a quick action. Precedence: action > url > prompt > message. */
+export function sqMode(q: SuggestedQuestion): 'handoff' | 'lead' | 'url' | 'prompt' | 'message' {
   if (typeof q === 'string') return 'message'
+  const action = sqAction(q)
+  if (action) return action
   if (q.url?.trim()) return 'url'
   if (q.prompt?.trim()) return 'prompt'
   return 'message'
