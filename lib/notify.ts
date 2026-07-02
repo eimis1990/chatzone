@@ -16,6 +16,7 @@ import { getEnv } from '@/lib/env'
 export interface OrgNotificationPrefs {
   leadEmails?: boolean
   handoffEmails?: boolean
+  usageEmails?: boolean
 }
 
 /** Per-org toggle; anything unset defaults to ON. */
@@ -139,6 +140,113 @@ export async function notifyLeadCaptured(
     await sendEmail({ to, ...leadEmail(bot.name, fields, link) })
   } catch (err) {
     console.error('[notify] lead email failed:', err)
+  }
+}
+
+export function usageWarningEmail(
+  used: number,
+  limit: number,
+  link: string,
+): { subject: string; html: string } {
+  const pct = Math.round((100 * used) / limit)
+  return {
+    subject: `You've used ${pct}% of this month's conversations`,
+    html: shell(
+      `${used.toLocaleString()} of ${limit.toLocaleString()} conversations used`,
+      `<p style="font-size:14px;margin:0">Your workspace has used <strong>${pct}%</strong> of its monthly conversation allowance. When the limit is reached, your chatbots show an offline message to new visitors until next month — upgrading keeps them answering.</p>`,
+      'View plans',
+      link,
+    ),
+  }
+}
+
+export function signupNotificationEmail(
+  email: string,
+  website: string | null,
+  link: string,
+): { subject: string; html: string } {
+  return {
+    subject: `New Loqara signup: ${email}`,
+    html: shell(
+      'Someone wants to get started',
+      `<table style="border-collapse:collapse">
+        <tr><td style="padding:4px 12px 4px 0;color:#71717a;font-size:14px">Email</td><td style="padding:4px 0;font-size:14px">${esc(email)}</td></tr>
+        <tr><td style="padding:4px 12px 4px 0;color:#71717a;font-size:14px">Website</td><td style="padding:4px 0;font-size:14px">${esc(website || '—')}</td></tr>
+      </table>`,
+      'Open signups',
+      link,
+    ),
+  }
+}
+
+export function clientInviteEmail(
+  companyName: string,
+  inviteUrl: string,
+): { subject: string; html: string } {
+  return {
+    subject: `Your Loqara workspace for ${companyName} is ready`,
+    html: shell(
+      `Welcome to Loqara`,
+      `<p style="font-size:14px;margin:0 0 8px">We've set up a workspace for <strong>${esc(companyName)}</strong> — your AI chat &amp; voice assistant is a few steps away.</p>
+       <p style="font-size:14px;margin:0">Create your account with the button below, and the guided setup will train your assistant on your website, match it to your brand, and give you the install snippet.</p>`,
+      'Create your account',
+      inviteUrl,
+    ),
+  }
+}
+
+/** Emails of PLATFORM owners (Loqara staff) — for new-prospect pings. */
+async function ownerEmails(svc: SupabaseClient): Promise<string[]> {
+  const { data, error } = await svc.from('profiles').select('id').eq('role', 'owner')
+  if (error) {
+    console.error('[notify] owner lookup failed:', error.message)
+    return []
+  }
+  const emails: string[] = []
+  for (const row of (data ?? []) as { id: string }[]) {
+    const { data: u } = await svc.auth.admin.getUserById(row.id)
+    if (u?.user?.email) emails.push(u.user.email)
+  }
+  return emails
+}
+
+/** Ping the platform owner(s) about a new landing-page signup. */
+export async function notifyNewSignup(
+  svc: SupabaseClient,
+  email: string,
+  website: string | null,
+): Promise<void> {
+  try {
+    if (!emailEnabled()) return
+    const to = await ownerEmails(svc)
+    if (!to.length) return
+    const link = `${getEnv().NEXT_PUBLIC_APP_URL}/owner/signups`
+    await sendEmail({ to, ...signupNotificationEmail(email, website, link) })
+  } catch (err) {
+    console.error('[notify] signup email failed:', err)
+  }
+}
+
+/**
+ * Warn an org's admins once per calendar month when they cross 80% of the
+ * conversation allowance. The caller checks + stamps `usage_warned_at`
+ * (see maybeSendUsageWarning) — this just builds and sends.
+ */
+export async function notifyUsageWarning(
+  svc: SupabaseClient,
+  orgId: string,
+  used: number,
+  limit: number,
+): Promise<void> {
+  try {
+    if (!emailEnabled()) return
+    if (!prefEnabled(await orgPrefs(svc, orgId), 'usageEmails')) return
+    const to = await adminEmails(svc, orgId)
+    if (!to.length) return
+    const link = `${getEnv().NEXT_PUBLIC_APP_URL}/app/subscription`
+    await sendEmail({ to, ...usageWarningEmail(used, limit, link) })
+  } catch (err) {
+    console.error('[notify] usage warning failed:', err)
   }
 }
 

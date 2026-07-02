@@ -26,6 +26,7 @@ const RETENTION_OPTIONS = [
 export interface NotificationPrefs {
   leadEmails: boolean
   handoffEmails: boolean
+  usageEmails: boolean
 }
 
 interface SettingsPanelProps {
@@ -113,6 +114,19 @@ export function SettingsPanel({
             id="notif-handoff"
             checked={prefs.handoffEmails}
             onCheckedChange={(on) => onPrefChange('handoffEmails', on)}
+          />
+        </div>
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <Label htmlFor="notif-usage">Usage warning</Label>
+            <p className="text-xs text-muted-foreground">
+              One heads-up per month when you pass 80% of your conversation allowance.
+            </p>
+          </div>
+          <Switch
+            id="notif-usage"
+            checked={prefs.usageEmails}
+            onCheckedChange={(on) => onPrefChange('usageEmails', on)}
           />
         </div>
       </SectionCard>

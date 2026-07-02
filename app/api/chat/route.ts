@@ -12,7 +12,7 @@ import { searchCatalog } from '@/lib/products/search'
 import { createRateLimiter } from '@/lib/ratelimit'
 import { detectHandoffIntent, HANDOFF_ACK } from '@/lib/handoff'
 import { notifyHandoffRequested } from '@/lib/notify'
-import { isOverConversationLimit } from '@/lib/usage'
+import { isOverConversationLimit, maybeSendUsageWarning } from '@/lib/usage'
 import type { Bot, BotLanguage, Citation, HandoffStatus } from '@/lib/types'
 import type { CommerceProduct, OrderStatus } from '@/lib/commerce/types'
 
@@ -98,6 +98,8 @@ export async function POST(req: Request) {
       .select('id')
       .single()
     convId = created!.id as string
+    // One admin nudge per month when the org crosses 80% of its allowance.
+    void maybeSendUsageWarning(svc, bot.org_id)
   }
 
   // Persist the user message; bump conversation activity.

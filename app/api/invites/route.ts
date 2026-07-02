@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getSessionUser } from '@/lib/auth/guards'
 import { createServiceClient } from '@/lib/supabase/service'
 import { createInviteSchema } from '@/lib/validation/schemas'
-import { getEnv } from '@/lib/env'
+import { createClientInvite } from '@/lib/invites'
 
 export async function POST(request: NextRequest) {
   // ── Auth: must be signed in as owner ─────────────────────────────────────
@@ -31,50 +31,11 @@ export async function POST(request: NextRequest) {
   }
 
   const { email, orgName } = parsed.data
-  const env = getEnv()
   const service = createServiceClient()
 
-  // ── Create organization row ───────────────────────────────────────────────
-  const slug = orgName
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '')
-
-  const { data: org, error: orgError } = await service
-    .from('organizations')
-    .insert({ name: orgName, slug, status: 'active', created_by: session.id })
-    .select('id')
-    .single<{ id: string }>()
-
-  if (orgError || !org) {
-    console.error('[invites] org insert error:', orgError)
-    return NextResponse.json({ error: 'Failed to create organization' }, { status: 500 })
+  const result = await createClientInvite(service, { email, orgName, invitedBy: session.id })
+  if ('error' in result) {
+    return NextResponse.json({ error: result.error }, { status: 500 })
   }
-
-  // ── Create invite row ─────────────────────────────────────────────────────
-  // expires_at: 7 days from now
-  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
-
-  const { data: invite, error: inviteError } = await service
-    .from('invites')
-    .insert({
-      org_id: org.id,
-      email,
-      status: 'pending',
-      expires_at: expiresAt,
-      invited_by: session.id,
-    })
-    .select('token')
-    .single<{ token: string }>()
-
-  if (inviteError || !invite) {
-    console.error('[invites] invite insert error:', inviteError)
-    // Best-effort rollback the org we just created.
-    await service.from('organizations').delete().eq('id', org.id)
-    return NextResponse.json({ error: 'Failed to create invite' }, { status: 500 })
-  }
-
-  const inviteUrl = `${env.NEXT_PUBLIC_APP_URL}/accept-invite/${invite.token}`
-
-  return NextResponse.json({ inviteUrl }, { status: 201 })
+  return NextResponse.json({ inviteUrl: result.inviteUrl }, { status: 201 })
 }

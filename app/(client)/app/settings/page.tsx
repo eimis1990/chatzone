@@ -13,7 +13,7 @@ export default async function SettingsPage() {
 
   let retentionDays: number | null = null
   let canCustomRetention = false
-  let notifications: NotificationPrefs = { leadEmails: true, handoffEmails: true }
+  let notifications: NotificationPrefs = { leadEmails: true, handoffEmails: true, usageEmails: true }
   if (orgId) {
     const sb = await createServerClient()
     const { data } = await sb
@@ -26,6 +26,7 @@ export default async function SettingsPage() {
     notifications = {
       leadEmails: prefEnabled(data?.notifications, 'leadEmails'),
       handoffEmails: prefEnabled(data?.notifications, 'handoffEmails'),
+      usageEmails: prefEnabled(data?.notifications, 'usageEmails'),
     }
   }
 
@@ -42,6 +43,7 @@ export default async function SettingsPage() {
         notifications: {
           leadEmails: Boolean(prefs.leadEmails),
           handoffEmails: Boolean(prefs.handoffEmails),
+          usageEmails: Boolean(prefs.usageEmails),
         },
       })
       .eq('id', oid)

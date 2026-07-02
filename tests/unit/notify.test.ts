@@ -45,3 +45,27 @@ describe('email templates', () => {
     expect(html).toContain('&lt;script&gt;')
   })
 })
+
+describe('usage / signup / invite templates', () => {
+  it('usage warning shows the percentage and plan link', async () => {
+    const { usageWarningEmail } = await import('@/lib/notify')
+    const { subject, html } = usageWarningEmail(1200, 1500, 'https://app.test/app/subscription')
+    expect(subject).toContain('80%')
+    expect(html).toContain('1,200')
+    expect(html).toContain('/app/subscription')
+  })
+
+  it('signup notification carries email + website', async () => {
+    const { signupNotificationEmail } = await import('@/lib/notify')
+    const { html } = signupNotificationEmail('ona@shop.lt', 'https://shop.lt', 'https://app.test/owner/signups')
+    expect(html).toContain('ona@shop.lt')
+    expect(html).toContain('https://shop.lt')
+  })
+
+  it('client invite email names the company and links the invite', async () => {
+    const { clientInviteEmail } = await import('@/lib/notify')
+    const { subject, html } = clientInviteEmail('HomeByNB', 'https://app.test/accept-invite/tok')
+    expect(subject).toContain('HomeByNB')
+    expect(html).toContain('/accept-invite/tok')
+  })
+})
