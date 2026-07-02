@@ -197,8 +197,16 @@ export function clientInviteEmail(
   }
 }
 
-/** Emails of PLATFORM owners (Loqara staff) — for new-prospect pings. */
+/** Emails of PLATFORM owners (Loqara staff) — for new-prospect pings.
+ *  OWNER_NOTIFY_EMAILS (comma-separated) overrides the owner login email(s). */
 async function ownerEmails(svc: SupabaseClient): Promise<string[]> {
+  const override = getEnv().OWNER_NOTIFY_EMAILS
+  if (override) {
+    return override
+      .split(',')
+      .map((e) => e.trim())
+      .filter((e) => e.includes('@'))
+  }
   const { data, error } = await svc.from('profiles').select('id').eq('role', 'owner')
   if (error) {
     console.error('[notify] owner lookup failed:', error.message)

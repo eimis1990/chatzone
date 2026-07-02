@@ -34,6 +34,9 @@ const envSchema = z.object({
   // Verified sender, e.g. "Loqara <notifications@loqara.com>". Falls back to
   // Resend's sandbox sender (delivers only to the account owner) when unset.
   EMAIL_FROM: z.string().min(1).optional(),
+  // Optional comma-separated override for platform-owner pings (new signups).
+  // Unset → the owner account's login email is used.
+  OWNER_NOTIFY_EMAILS: z.string().min(1).optional(),
   // Optional, public (NEXT_PUBLIC_*): analytics & search-engine verification.
   // Read directly in client/layout code; listed here as the env contract's
   // single source of truth. GA4 only loads when the ID is present.
