@@ -1,5 +1,6 @@
 'use server'
 
+import { revalidatePath } from 'next/cache'
 import { requireRole } from '@/lib/auth/guards'
 import { createServerClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
@@ -54,6 +55,10 @@ export async function startOnboardingBot(
   if (created.error || !created.id) {
     return { error: created.error ?? 'Failed to create bot. Please try again.' }
   }
+
+  // The sidebar/layout rendered before this bot existed — bust the cache so
+  // "My Bots" shows it on the next navigation.
+  revalidatePath('/app', 'layout')
 
   // Re-read through the user's client — RLS confirms the row is theirs.
   const supabase = await createServerClient()

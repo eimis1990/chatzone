@@ -145,7 +145,10 @@ export function OnboardingWizard({ orgId, appUrl }: { orgId: string; appUrl: str
     if (!bot) return
     completeStep('install', bot.id)
     trackEvent('onboarding_finished', { botId: bot.id })
-    router.push(`/app/bots/${bot.id}/knowledge`)
+    // Home, not the knowledge screen — and refresh so the sidebar/layout
+    // (rendered before the bot existed) picks up the new bot.
+    router.push('/app')
+    router.refresh()
   }, [bot, completeStep, router])
 
   const applyThemePartial = useCallback((partial: Record<string, unknown>) => {

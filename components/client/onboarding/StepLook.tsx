@@ -143,9 +143,11 @@ export function StepLook({
           </div>
         </div>
 
-        {/* Live preview — the exact widget, floating like the real embed */}
+        {/* Live preview — the exact widget, floating like the real embed.
+            Must be taller than the chat window (680px) + its bottom offsets
+            (~96px), or the window's top gets clipped by overflow-hidden. */}
         <div
-          className="relative hidden min-h-[640px] w-[480px] shrink-0 overflow-hidden rounded-xl border bg-dots xl:block"
+          className="relative hidden min-h-[800px] w-[480px] shrink-0 overflow-hidden rounded-xl border bg-dots xl:block"
           role="complementary"
           aria-label="Live widget preview"
         >
