@@ -71,8 +71,9 @@ export default async function BotsPage() {
         </div>
       )}
 
+      {bots.length > 0 && (
       <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-        {orgId && bots.length > 0 && (
+        {orgId && (
           <CreateBotDialog
             orgId={orgId}
             trigger={
@@ -149,6 +150,7 @@ export default async function BotsPage() {
             )
           })}
       </div>
+      )}
     </div>
   )
 }

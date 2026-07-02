@@ -52,6 +52,11 @@ export function StepTeach({ botId, crawlState, onRetryCrawl, onContinue }: StepT
   const canContinue = readyCount >= 1
   const crawlFailed = crawlState.status === 'error'
   const discovering = crawlState.status === 'running' && sources.length === 0
+  // Escape hatch: never trap the user — offer a skip when the crawl failed or
+  // finished without producing a single ready source.
+  const allSettled = sources.every((s) => s.status === 'ready' || s.status === 'error')
+  const showSkip =
+    !canContinue && (crawlFailed || (crawlState.status === 'done' && allSettled))
 
   return (
     <div className="space-y-6">
@@ -129,7 +134,7 @@ export function StepTeach({ botId, crawlState, onRetryCrawl, onContinue }: StepT
       )}
 
       <div className="flex items-center justify-end gap-3">
-        {crawlFailed && sources.length === 0 && (
+        {showSkip && (
           <Button type="button" variant="ghost" onClick={onContinue}>
             Skip for now
           </Button>
