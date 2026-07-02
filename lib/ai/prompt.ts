@@ -57,8 +57,9 @@ export function buildSystemPrompt(
       'FORMATTING: write replies as clean, well-structured Markdown so they render richly. ' +
         'Use short paragraphs and **bold** for key terms; group multiple items, options, or ' +
         'features into "- " bullet lists; use numbered lists for ordered steps; and write links ' +
-        'as [label](https://…). Put phone numbers in full international form (e.g. +370 600 12345) ' +
-        'and emails in plain text so they become tappable. Lead with a brief sentence, then a list ' +
+        'as [label](https://…). Put phone numbers in full international form and emails in plain ' +
+        'text so they become tappable — only ever the exact numbers/emails from the context, ' +
+        'never invented ones. Lead with a brief sentence, then a list ' +
         'when enumerating things. Keep one-line answers as plain sentences (do not force a list) ' +
         'and never wrap the whole reply in a code block.',
     )
@@ -147,6 +148,17 @@ export function buildSystemPrompt(
           'share the code it returns (with its description). Do not invent or guess codes.',
       )
     }
+
+    // Grounding for commerce bots: products come from the tools, but FACTS
+    // (contact details, policies, hours) must still come from the context —
+    // without this the model invents plausible emails and phone numbers.
+    lines.push(
+      'FACTS & POLICIES: for non-product questions (contact details, delivery, returns, payment, ' +
+        'hours, company info), answer ONLY from the context below — copy emails, phone numbers, and ' +
+        `addresses EXACTLY as they appear there, never invent or adjust them. If the context does not ` +
+        `contain the answer, say you are not sure (e.g. "${fallback}") and offer to connect them with ` +
+        'a person — never guess.',
+    )
   } else {
     lines.push(
       'Answer using ONLY the context below. Do not mention, print, or reference the source ids ' +

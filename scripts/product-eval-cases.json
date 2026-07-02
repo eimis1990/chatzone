@@ -1,0 +1,19 @@
+[
+  { "query": "kvapni žvakė", "expect": ["žvak"] },
+  { "query": "kvapnios žvakės namams", "expect": ["žvak", "kvap"] },
+  { "query": "veido kremas", "expect": ["krem", "veid"] },
+  { "query": "veido kremas sausai odai", "expect": ["krem", "veid"] },
+  { "query": "dovanų kuponas", "expect": ["kupon"] },
+  { "query": "gift card", "expect": ["kupon", "gift"] },
+  { "query": "dovana moteriai", "audience": "women", "expect": [] },
+  { "query": "dovana vyrui", "audience": "men", "expect": [] },
+  { "query": "kvepalai namams", "expect": ["kvap", "namų", "difuzor"] },
+  { "query": "pledas", "expect": ["pled"] },
+  { "query": "puodelis", "expect": ["puodel"] },
+  { "query": "scented candle", "expect": ["žvak", "candle"] },
+  { "query": "plaukų džiovintuvas", "expect": ["džiovintuv", "plauk", "dryer"] },
+  { "query": "hair dryer", "expect": ["džiovintuv", "dryer", "plauk"] },
+  { "query": "šampūnas", "expect": ["šampūn", "shampoo"] },
+  { "query": "priemonės riebiems plaukams", "expect": ["plauk"] },
+  { "query": "kvepalai moteriai", "audience": "women", "expect": ["kvepal", "parfum"] }
+]
