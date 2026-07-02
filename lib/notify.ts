@@ -164,12 +164,14 @@ export function signupNotificationEmail(
   email: string,
   website: string | null,
   link: string,
+  company?: string | null,
 ): { subject: string; html: string } {
   return {
-    subject: `New Loqara signup: ${email}`,
+    subject: `New Loqara signup: ${company || email}`,
     html: shell(
       'Someone wants to get started',
       `<table style="border-collapse:collapse">
+        <tr><td style="padding:4px 12px 4px 0;color:#71717a;font-size:14px">Company</td><td style="padding:4px 0;font-size:14px">${esc(company || '—')}</td></tr>
         <tr><td style="padding:4px 12px 4px 0;color:#71717a;font-size:14px">Email</td><td style="padding:4px 0;font-size:14px">${esc(email)}</td></tr>
         <tr><td style="padding:4px 12px 4px 0;color:#71717a;font-size:14px">Website</td><td style="padding:4px 0;font-size:14px">${esc(website || '—')}</td></tr>
       </table>`,
@@ -215,13 +217,14 @@ export async function notifyNewSignup(
   svc: SupabaseClient,
   email: string,
   website: string | null,
+  company?: string | null,
 ): Promise<void> {
   try {
     if (!emailEnabled()) return
     const to = await ownerEmails(svc)
     if (!to.length) return
     const link = `${getEnv().NEXT_PUBLIC_APP_URL}/owner/signups`
-    await sendEmail({ to, ...signupNotificationEmail(email, website, link) })
+    await sendEmail({ to, ...signupNotificationEmail(email, website, link, company) })
   } catch (err) {
     console.error('[notify] signup email failed:', err)
   }

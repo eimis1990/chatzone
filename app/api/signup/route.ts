@@ -14,6 +14,7 @@ const limiter = createRateLimiter({ capacity: 3, refillPerSec: 0.05 })
 
 const bodySchema = z.object({
   email: z.string().email().max(200),
+  company: z.string().max(80).optional(),
   website: z.string().max(200).optional(),
   source: z.string().max(40).optional(),
 })
@@ -25,6 +26,7 @@ export async function POST(req: Request) {
   const parsed = bodySchema.safeParse(await req.json().catch(() => null))
   if (!parsed.success) return json({ error: 'Enter a valid email.' }, 400)
   const email = parsed.data.email.trim().toLowerCase()
+  const company = parsed.data.company?.trim() || null
   const website = parsed.data.website?.trim() || null
 
   if (!limiter.check(email)) return json({ error: 'Please try again shortly.' }, 429)
@@ -32,7 +34,7 @@ export async function POST(req: Request) {
   const svc = createServiceClient()
   const { error } = await svc
     .from('signups')
-    .insert({ email, website, source: parsed.data.source ?? null })
+    .insert({ email, company, website, source: parsed.data.source ?? null })
 
   // 23505 = unique violation → already signed up; treat as success (but don't
   // re-notify the owner about a duplicate).
@@ -41,6 +43,6 @@ export async function POST(req: Request) {
     return json({ error: 'Something went wrong — please try again.' }, 500)
   }
 
-  void notifyNewSignup(svc, email, website)
+  void notifyNewSignup(svc, email, website, company)
   return json({ ok: true })
 }

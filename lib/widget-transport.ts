@@ -37,13 +37,6 @@ export interface ChatTransport {
   ): Promise<{ products?: CommerceProduct[]; summary?: string }>
   /** Knowledge-base lookup for the voice `search_knowledge` tool (spoken answers). */
   searchKnowledge(query: string): Promise<{ answer: string }>
-  /** Run a "fetch URL" quick action: returns the products to render as cards. */
-  runAction(params: {
-    actionIndex: number
-    language: BotLanguage
-    conversationId?: string
-    visitorId: string
-  }): Promise<{ products: CommerceProduct[]; conversationId?: string }>
   /** Short-lived ElevenLabs token for a live voice call. */
   getVoiceToken(language: BotLanguage): Promise<{ token: string; voiceId?: string }>
   /** Real persisted message ids (so feedback can target them). */
@@ -92,16 +85,6 @@ export function createWidgetTransport(publicKey: string): ChatTransport {
       })
       if (!res.ok) return { answer: '' }
       return (await res.json()) as { answer: string }
-    },
-
-    async runAction({ actionIndex, language, conversationId, visitorId }) {
-      const res = await fetch('/api/widget/action', {
-        method: 'POST',
-        headers: JSON_HEADERS,
-        body: JSON.stringify({ publicKey, actionIndex, language, conversationId, visitorId }),
-      })
-      if (!res.ok) return { products: [] }
-      return (await res.json()) as { products: CommerceProduct[]; conversationId?: string }
     },
 
     async getVoiceToken(language) {

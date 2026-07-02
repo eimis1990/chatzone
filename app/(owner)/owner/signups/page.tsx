@@ -7,6 +7,7 @@ import { SignupCard, type SignupCardData } from '@/components/owner/SignupCard'
 interface SignupRow {
   id: string
   email: string
+  company: string | null
   website: string | null
   source: string | null
   status: string | null
@@ -21,7 +22,7 @@ export default async function SignupsPage() {
   const [{ data: signupData }, { data: inviteData }] = await Promise.all([
     supabase
       .from('signups')
-      .select('id, email, website, source, status, invited_at, created_at')
+      .select('id, email, company, website, source, status, invited_at, created_at')
       .order('created_at', { ascending: false }),
     supabase.from('invites').select('email, status, created_at').order('created_at', { ascending: false }),
   ])
@@ -39,7 +40,8 @@ export default async function SignupsPage() {
   const cards: SignupCardData[] = rows.map((s) => ({
     ...s,
     inviteStatus: inviteByEmail.get(s.email.toLowerCase()) ?? null,
-    suggestedName: companyNameFromWebsite(s.website),
+    // Their own stated company name wins; the domain guess is the fallback.
+    suggestedName: s.company?.trim() || companyNameFromWebsite(s.website),
   }))
 
   return (
