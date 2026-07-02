@@ -81,6 +81,8 @@ interface ConfigFormProps {
   canUseLeadCapture?: boolean
   /** Voice add-on gating — disable voice unless the add-on is active. */
   canUseVoice?: boolean
+  /** Free plan: enabling voice opens an upgrade dialog instead of toggling. */
+  voiceLocked?: boolean
   /** Save handler — defaults to the client saveConfig; the owner editor injects its own. */
   onSave?: (botId: string, rawConfig: unknown, name?: string) => Promise<SaveConfigResult>
   /** Optional control rendered next to Save (e.g. the owner's show-on-landing toggle). */
@@ -194,6 +196,7 @@ export function ConfigForm({
   canUseAllLanguages = true,
   canUseLeadCapture = true,
   canUseVoice = true,
+  voiceLocked = false,
   onSave = saveConfig,
   headerAction,
   audience = 'owner',
@@ -968,7 +971,7 @@ export function ConfigForm({
                 <ColorField control={control} name="theme.backgroundColor" label="Chat background" placeholder="#ffffff" swatchDefault="#ffffff" description="Behind the conversation." />
                 <ColorField control={control} name="theme.launcherColor" label="Launcher color" placeholder="Defaults to primary" swatchDefault={watch('theme.primaryColor') || '#4f46e5'} description="Floating bubble; empty = primary." />
                 <ColorField control={control} name="theme.bubbleBorderColor" label="Bubble border color" placeholder="#e5e7eb" swatchDefault="#e5e7eb" description="Used when border width > 0 (see roundness)." />
-                {watch('theme.showCallButton') !== false && (
+                {watch('voice.enabled') && (
                   <ColorField control={control} name="theme.callButtonColor" label="Call button color" placeholder="#22c55e" swatchDefault="#22c55e" description="Voice call button; label adapts for contrast." />
                 )}
               </div>
@@ -1131,19 +1134,6 @@ export function ConfigForm({
               </div>
               <div className="flex items-center justify-between gap-4">
                 <div className="space-y-0.5">
-                  <Label htmlFor="showCallButton">Show &ldquo;talk with agent&rdquo; button</Label>
-                  <p className="text-xs text-muted-foreground">The voice call button in the header (only shows when voice is enabled).</p>
-                </div>
-                <Controller
-                  name="theme.showCallButton"
-                  control={control}
-                  render={({ field }) => (
-                    <Switch id="showCallButton" checked={field.value ?? true} onCheckedChange={field.onChange} />
-                  )}
-                />
-              </div>
-              <div className="flex items-center justify-between gap-4">
-                <div className="space-y-0.5">
                   <Label htmlFor="showHandoffButton">Show &ldquo;talk to a person&rdquo; button</Label>
                   <p className="text-xs text-muted-foreground">Lets visitors request a human; appears once a chat is underway.</p>
                 </div>
@@ -1263,6 +1253,7 @@ export function ConfigForm({
           activeLang={activeLang}
           enabledLanguages={watchedLanguages as BotLanguage[]}
           canUseVoice={canUseVoice}
+          voiceLocked={voiceLocked}
           audience={audience}
         />
 

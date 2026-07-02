@@ -38,6 +38,7 @@ export default async function ConfigurePage({
       canUseAllLanguages={ent.allLanguages}
       canUseLeadCapture={ent.leadCapture}
       canUseVoice={Boolean(org?.voice_addon)}
+      voiceLocked={(org?.plan ?? 'free') === 'free'}
       audience="client"
     />
   )

@@ -144,7 +144,9 @@ export function publicBotConfig(
       fontFamily: config.theme.fontFamily ?? 'geist',
       launcherStyle: config.theme.launcherStyle ?? 'circle',
       launcherShowLogo: config.theme.launcherShowLogo ?? false,
-      showCallButton: callAllowed && (config.theme.showCallButton ?? true),
+      // No separate user toggle anymore: the call button shows exactly when
+      // voice is enabled AND the org's Voice add-on allows live calls.
+      showCallButton: callAllowed && (config.voice?.enabled ?? false),
       showHandoffButton: config.theme.showHandoffButton ?? true,
       navButtonRadius: config.theme.navButtonRadius ?? 12,
       backgroundColor: config.theme.backgroundColor ?? '#ffffff',

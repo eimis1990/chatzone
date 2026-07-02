@@ -12,13 +12,15 @@
  *  - Preview ▶ button per language
  */
 
-import { useEffect, useRef, useReducer, useCallback } from 'react'
+import { useEffect, useRef, useReducer, useCallback, useState } from 'react'
 import { Controller, type Control, type UseFormWatch, type UseFormSetValue } from 'react-hook-form'
+import Link from 'next/link'
 import { PlayIcon, SquareIcon, LoaderCircleIcon, AlertCircleIcon, MicIcon } from 'lucide-react'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
-import { Button } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
 import { CardContent, CardTitle, CardDescription } from '@/components/ui/card'
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog'
 import { CollapsibleSection } from '@/components/client/CollapsibleSection'
 import {
   Select,
@@ -84,6 +86,8 @@ interface VoiceSectionProps {
   enabledLanguages: BotLanguage[]
   /** Whether the org has the Voice add-on (else the toggle is locked). */
   canUseVoice?: boolean
+  /** Free plan: enabling voice opens an upgrade dialog instead of toggling. */
+  voiceLocked?: boolean
   /** 'client' hides the TTS/STT toggles (owner-managed); 'owner' shows them. */
   audience?: 'owner' | 'client'
 }
@@ -95,9 +99,11 @@ export function VoiceSection({
   activeLang,
   enabledLanguages,
   canUseVoice = true,
+  voiceLocked = false,
   audience = 'owner',
 }: VoiceSectionProps) {
   const voiceEnabled = watch('voice.enabled')
+  const [upgradeOpen, setUpgradeOpen] = useState(false)
 
   // When voice is turned on, make sure the sub-flags have real boolean values
   useEffect(() => {
@@ -178,7 +184,8 @@ export function VoiceSection({
       }
     >
       <CardContent className="space-y-4">
-        {/* Master toggle */}
+        {/* Master toggle. On the Free plan enabling opens the upgrade dialog
+            instead — voice is a paid-tier feature (+ the Voice add-on). */}
         <div className="flex items-center gap-3">
           <Controller
             name="voice.enabled"
@@ -186,18 +193,43 @@ export function VoiceSection({
             render={({ field }) => (
               <Switch
                 checked={field.value ?? false}
-                onCheckedChange={field.onChange}
+                onCheckedChange={(on) => {
+                  if (on && voiceLocked) {
+                    setUpgradeOpen(true)
+                    return
+                  }
+                  field.onChange(on)
+                }}
                 id="voiceEnabled"
               />
             )}
           />
           <Label htmlFor="voiceEnabled">Enable voice</Label>
-          {!canUseVoice && (
+          {!voiceLocked && !canUseVoice && (
             <a href="/app/subscription" className="text-xs text-primary hover:underline">
               Live calls need the Voice add-on
             </a>
           )}
         </div>
+
+        <Dialog open={upgradeOpen} onOpenChange={setUpgradeOpen}>
+          <DialogContent className="sm:max-w-sm">
+            <DialogTitle>Voice is a paid feature</DialogTitle>
+            <DialogDescription>
+              Voice answers and live calls are available on the Starter plan and up (live calls
+              also need the Voice add-on). Your changes here stay unsaved until you save — take a
+              look at the plans whenever you&apos;re ready.
+            </DialogDescription>
+            <div className="mt-2 flex justify-end gap-2">
+              <Button variant="ghost" onClick={() => setUpgradeOpen(false)}>
+                Close
+              </Button>
+              <Link href="/app/subscription" className={buttonVariants()}>
+                See plans
+              </Link>
+            </div>
+          </DialogContent>
+        </Dialog>
 
         {voiceEnabled && (
           <div className="space-y-5 rounded-lg border p-4">
