@@ -44,6 +44,14 @@ export interface AnalyticsEvents {
   embed_code_copied: { botId: string }
   /** A knowledge source was added and ingestion started. */
   knowledge_source_added: { type: 'text' | 'qa' | 'url' | 'file' }
+
+  // ── Client onboarding wizard (/app/onboarding) ─────────────────────────
+  /** The onboarding wizard was opened. */
+  onboarding_started: { orgId: string }
+  /** A wizard step was completed (step id, e.g. "business", "teach"). */
+  onboarding_step_completed: { step: string; botId: string | null }
+  /** The wizard was finished (user landed on their new bot). */
+  onboarding_finished: { botId: string }
 }
 
 /**

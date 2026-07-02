@@ -3,6 +3,7 @@ import { Code2Icon, ListChecksIcon, SlidersHorizontalIcon, ShieldAlertIcon } fro
 import { requireRole } from '@/lib/auth/guards'
 import { createServerClient } from '@/lib/supabase/server'
 import { SectionCard } from '@/components/client/SectionCard'
+import { buildEmbedSnippet } from '@/lib/embed-snippet'
 import type { Bot } from '@/lib/types'
 import { SnippetCopy } from './SnippetCopy'
 
@@ -32,11 +33,7 @@ export default async function EmbedSnippetPage({
   if (!data) notFound()
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? ''
-  const snippet = `<script
-  src="${appUrl}/widget.js"
-  data-bot-key="${data.public_key}"
-  async
-></script>`
+  const snippet = buildEmbedSnippet(appUrl, data.public_key)
 
   return (
     <div className="max-w-3xl space-y-6 p-6">
