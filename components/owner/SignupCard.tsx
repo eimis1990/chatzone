@@ -13,7 +13,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { formatDistanceToNow } from '@/lib/date-utils'
-import { sendInvitation, deleteSignup } from '@/app/(owner)/owner/signups/actions'
+import { sendInvitation, resendInvitation, deleteSignup } from '@/app/(owner)/owner/signups/actions'
 
 export interface SignupCardData {
   id: string
@@ -44,6 +44,9 @@ export function SignupCard({ signup }: { signup: SignupCardData }) {
   const [pending, startTransition] = useTransition()
   const badge = statusBadge(signup)
   const canInvite = signup.status !== 'invited' && signup.inviteStatus !== 'accepted'
+  const canResend =
+    (signup.status === 'invited' || signup.inviteStatus === 'expired') &&
+    signup.inviteStatus !== 'accepted'
   const websiteHref = signup.website
     ? /^https?:\/\//i.test(signup.website)
       ? signup.website
@@ -60,6 +63,20 @@ export function SignupCard({ signup }: { signup: SignupCardData }) {
       setInviteUrl(res.inviteUrl)
       toast.success(
         res.emailed ? `Invitation emailed to ${signup.email}` : 'Client created — copy the invite link below',
+      )
+    })
+  }
+
+  const onResend = () => {
+    startTransition(async () => {
+      const res = await resendInvitation(signup.id)
+      if (!res.ok) {
+        toast.error(res.error)
+        return
+      }
+      setInviteUrl(res.inviteUrl)
+      toast.success(
+        res.emailed ? `Invitation re-sent to ${signup.email}` : 'New invite link ready — copy it below',
       )
     })
   }
@@ -163,6 +180,21 @@ export function SignupCard({ signup }: { signup: SignupCardData }) {
                 Send invitation
               </>
             )}
+          </Button>
+        </div>
+      )}
+
+      {canResend && !inviteUrl && (
+        <div className="flex justify-end border-t pt-3">
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-8 gap-1.5"
+            disabled={pending}
+            onClick={onResend}
+          >
+            <SendIcon className="size-3.5" />
+            {pending ? 'Sending…' : 'Resend invitation'}
           </Button>
         </div>
       )}
