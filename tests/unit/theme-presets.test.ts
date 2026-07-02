@@ -10,9 +10,9 @@ import { FONT_OPTIONS } from '@/lib/fonts'
 const themeSchema = botConfigFormSchema.shape.theme
 
 describe('WIDGET_THEME_PRESETS', () => {
-  it('has 5–6 presets with unique ids and names', () => {
-    expect(WIDGET_THEME_PRESETS.length).toBeGreaterThanOrEqual(5)
-    expect(WIDGET_THEME_PRESETS.length).toBeLessThanOrEqual(6)
+  it('has 8 presets with unique ids and names', () => {
+    expect(WIDGET_THEME_PRESETS.length).toBe(8)
+    
     const ids = WIDGET_THEME_PRESETS.map((p) => p.id)
     expect(new Set(ids).size).toBe(ids.length)
     const names = WIDGET_THEME_PRESETS.map((p) => p.name)
@@ -55,11 +55,11 @@ describe('WIDGET_THEME_PRESETS', () => {
 })
 
 describe('light/dark split', () => {
-  it('offers 2 light and 4 dark presets', async () => {
+  it('offers 4 light and 4 dark presets', async () => {
     const { luminance } = await import('@/lib/theme-extract')
     const dark = WIDGET_THEME_PRESETS.filter((p) => luminance(p.theme.backgroundColor!) < 0.5)
     expect(dark).toHaveLength(4)
-    expect(WIDGET_THEME_PRESETS).toHaveLength(6)
+    expect(WIDGET_THEME_PRESETS).toHaveLength(8)
   })
 
   it('presets clear a leftover background image', () => {

@@ -40,6 +40,8 @@ interface MessageListProps {
   bubbleBorderWidth?: number
   /** Bot (assistant) bubble background; text auto-contrasts. Empty = default grey. */
   botBubbleColor?: string
+  /** Dark chat background — glass bubbles switch to a dark-scheme treatment. */
+  darkBackground?: boolean
   onSeeAllProducts?: (products: CommerceProduct[]) => void
   onFeedback?: (messageId: string, value: 'up' | 'down') => void
 }
@@ -57,6 +59,7 @@ export function MessageList({
   bubbleBorderColor = '#e5e7eb',
   bubbleBorderWidth = 0,
   botBubbleColor,
+  darkBackground = false,
   onSeeAllProducts,
   onFeedback,
 }: MessageListProps) {
@@ -134,7 +137,9 @@ export function MessageList({
                         ? 'backdrop-blur-md'
                         : ''
                       : glassBubbles
-                        ? 'bg-white/20 text-gray-900 backdrop-blur-md'
+                        ? darkBackground
+                          ? 'bg-white/10 text-gray-50 backdrop-blur-md'
+                          : 'bg-white/20 text-gray-900 backdrop-blur-md'
                         : 'bg-gray-100 text-gray-900'
                   }`}
                   style={{

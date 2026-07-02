@@ -16,6 +16,7 @@ import type { BotLanguage, HandoffStatus, SuggestedQuestion } from '@/lib/types'
 import type { CommerceProduct, OrderStatus } from '@/lib/commerce/types'
 import { fontStack } from '@/lib/fonts'
 import { readableTextColor, isLightColor } from '@/lib/utils'
+import { tintToward } from '@/lib/theme-extract'
 
 interface ChatWindowProps {
   config: PublicBotConfig
@@ -251,7 +252,13 @@ export function ChatWindow({ config, transport, initialLanguage }: ChatWindowPro
   const glassBubbles = config.theme.glassBubbles ?? false
   const bubbleBorderColor = config.theme.bubbleBorderColor || '#e5e7eb'
   const bubbleBorderWidth = config.theme.bubbleBorderWidth ?? 0
-  const botBubbleColor = config.theme.botBubbleColor || undefined
+  const chatBg = config.theme.backgroundColor || '#ffffff'
+  const darkChat = !isLightColor(chatBg)
+  // On a dark background an unset bot-bubble color must NOT fall back to the
+  // light default (light bubbles on a dark chat) — derive a slightly-lifted
+  // dark surface from the background instead.
+  const botBubbleColor =
+    config.theme.botBubbleColor || (darkChat ? tintToward(chatBg, 0.1) : undefined)
 
   // Restore/generate visitorId from localStorage on mount
   useEffect(() => {
@@ -745,6 +752,7 @@ export function ChatWindow({ config, transport, initialLanguage }: ChatWindowPro
             suggestedQuestions={suggestedQuestions}
             primaryColor={primaryColor}
             backgroundColor={bgColor}
+            botBubbleColor={botBubbleColor}
             bubbleRadius={bubbleRadius}
             glassBubbles={glassBubbles}
             bubbleBorderColor={bubbleBorderColor}
@@ -763,6 +771,7 @@ export function ChatWindow({ config, transport, initialLanguage }: ChatWindowPro
             bubbleBorderColor={bubbleBorderColor}
             bubbleBorderWidth={bubbleBorderWidth}
             botBubbleColor={botBubbleColor}
+            darkBackground={darkChat}
             onSeeAllProducts={setListProducts}
             onFeedback={handleFeedback}
           />

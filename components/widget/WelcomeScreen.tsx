@@ -15,6 +15,9 @@ interface WelcomeScreenProps {
   primaryColor: string
   /** Chat background color — drives readable text color for the non-bubble header. */
   backgroundColor?: string
+  /** Bot bubble surface color — greeting card + action tiles follow it so a
+   *  dark theme stays dark on the welcome screen too. */
+  botBubbleColor?: string
   bubbleRadius?: number
   /** Frosted-glass greeting bubble (translucent + backdrop blur). */
   glassBubbles?: boolean
@@ -41,6 +44,7 @@ export function WelcomeScreen({
   suggestedQuestions,
   primaryColor,
   backgroundColor = '#ffffff',
+  botBubbleColor,
   bubbleRadius = 16,
   glassBubbles = false,
   bubbleBorderColor = '#e5e7eb',
@@ -56,6 +60,18 @@ export function WelcomeScreen({
   // On a dark chat background the name + tagline (which sit directly on the
   // background, not in a bubble) would be dark-on-dark — flip them to light.
   const darkBg = !isLightColor(backgroundColor)
+  // Surface for the greeting card + action tiles: the bot-bubble color when
+  // set, else the scheme-appropriate default. Never light-on-dark.
+  const surface = botBubbleColor || (darkBg ? 'rgba(255,255,255,0.08)' : undefined)
+  const surfaceText = botBubbleColor
+    ? readableTextColor(botBubbleColor)
+    : darkBg
+      ? '#f4f4f5'
+      : undefined
+  const surfaceStyle = !glassBubbles && surface ? { backgroundColor: surface, color: surfaceText } : {}
+  const glassClasses = darkBg
+    ? 'bg-white/10 backdrop-blur-md ring-1 ring-white/15'
+    : 'bg-white/40 backdrop-blur-md ring-1 ring-white/50'
   const visibleQuestions = suggestedQuestions.slice(0, 6)
   // With an odd number of tiles the last one would sit alone in a half-width
   // cell — span it full width instead so the grid never looks lopsided.
@@ -123,10 +139,10 @@ export function WelcomeScreen({
       {/* Welcome message card */}
       {greeting ? (
         <motion.div
-          className={`mt-5 px-4 py-3 text-sm leading-relaxed text-gray-800 whitespace-pre-wrap ${
-            glassBubbles ? 'bg-white/40 backdrop-blur-md ring-1 ring-white/50' : 'bg-gray-100'
-          }`}
-          style={{ borderRadius: radius, ...bubbleBorder }}
+          className={`mt-5 px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap ${
+            glassBubbles ? glassClasses : surface ? '' : 'bg-gray-100'
+          } ${glassBubbles && darkBg ? 'text-gray-50' : surface ? '' : 'text-gray-800'}`}
+          style={{ borderRadius: radius, ...bubbleBorder, ...surfaceStyle }}
           variants={item}
         >
           {greeting}
@@ -146,10 +162,14 @@ export function WelcomeScreen({
                 type="button"
                 onClick={() => onSelect(q, i)}
                 variants={item}
-                className={`group relative flex min-h-[64px] flex-col justify-end overflow-hidden p-3 text-left text-sm font-medium leading-snug text-gray-800 ${
-                  glassBubbles ? 'bg-white/40 backdrop-blur-md ring-1 ring-white/40' : 'border border-gray-200 bg-white'
-                }${fullWidth ? ' col-span-2' : ''}`}
-                style={{ borderRadius: radius, ...bubbleBorder }}
+                className={`group relative flex min-h-[64px] flex-col justify-end overflow-hidden p-3 text-left text-sm font-medium leading-snug ${
+                  glassBubbles
+                    ? glassClasses
+                    : surface
+                      ? ''
+                      : 'border border-gray-200 bg-white'
+                } ${glassBubbles && darkBg ? 'text-gray-50' : surface ? '' : 'text-gray-800'}${fullWidth ? ' col-span-2' : ''}`}
+                style={{ borderRadius: radius, ...bubbleBorder, ...surfaceStyle }}
               >
                 {/* Soft glow in the top-right corner, tinted to the header color.
                     Intensifies on hover instead of a background change. */}
