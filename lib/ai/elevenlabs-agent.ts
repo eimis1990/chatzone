@@ -165,12 +165,12 @@ export function buildAgentConfig(bot: Bot, toolIds: string[] = []): AgentConfig 
 export function agentConfigHash(bot: Bot, toolIds: string[] = []): string {
   const cfg = bot.config
   const material = JSON.stringify([
-    'v18-no-checkout', // bump to force re-sync when the agent payload shape changes
+    'v19-voice-llm-gpt4o', // bump to force re-sync when the agent payload shape changes
     cfg.displayName, // agent name follows the bot's display name
     cfg.languages,
     cfg.content,
     cfg.voice?.voices,
-    cfg.voice?.llmModel ?? 'gpt-4o-mini',
+    cfg.voice?.llmModel ?? DEFAULT_VOICE_LLM,
     cfg.systemPrompt,
     bot.public_key,
     toolIds,

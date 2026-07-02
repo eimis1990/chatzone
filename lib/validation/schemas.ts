@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import type { BotConfig } from '@/lib/types'
 import { DEFAULT_CHAT_MODEL, DEFAULT_TEMPERATURE } from '@/lib/ai/chat-models'
+import { DEFAULT_VOICE_LLM } from '@/lib/ai/voice-models'
 
 /** Max system-prompt length (chars). Generous — detailed prompts with examples
  *  can run long; the same cap is used by the prompt library + bot config. */
@@ -183,14 +184,14 @@ export const botConfigFormSchema = z.object({
       voices: z
         .object({ en: z.string().default(DEFAULT_VOICE_ID), lt: z.string().optional() })
         .default({ en: DEFAULT_VOICE_ID }),
-      llmModel: z.string().default('gpt-4o-mini'),
+      llmModel: z.string().default(DEFAULT_VOICE_LLM),
     })
     .default({
       enabled: false,
       ttsEnabled: true,
       sttEnabled: true,
       voices: { en: DEFAULT_VOICE_ID },
-      llmModel: 'gpt-4o-mini',
+      llmModel: DEFAULT_VOICE_LLM,
     }),
 })
 
