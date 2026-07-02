@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { MenuIcon, XIcon } from 'lucide-react'
+import { GetStartedDialog } from './GetStartedDialog'
 import { trackEvent } from '@/lib/analytics'
 
 const LINKS = [
@@ -81,6 +82,10 @@ export function LandingNav({ solid = false }: { solid?: boolean }) {
           >
             Sign in
           </Link>
+          <GetStartedDialog
+            source="nav"
+            triggerClassName="rounded-full bg-primary px-5 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-primary-hover"
+          />
         </div>
 
         <button
@@ -118,6 +123,11 @@ export function LandingNav({ solid = false }: { solid?: boolean }) {
             >
               Sign in
             </Link>
+            <GetStartedDialog
+              source="nav"
+              onOpen={() => setOpen(false)}
+              triggerClassName="w-full rounded-full bg-primary px-4 py-2 text-center font-semibold text-white transition-colors hover:bg-primary-hover"
+            />
           </div>
         </div>
       )}

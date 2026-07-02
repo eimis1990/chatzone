@@ -1,7 +1,7 @@
 'use client'
 
 import { motion, useReducedMotion } from 'framer-motion'
-import { EmailCapture } from './EmailCapture'
+import { GetStartedDialog } from './GetStartedDialog'
 import { HeroVideo } from './HeroVideo'
 
 export function Hero() {
@@ -81,7 +81,12 @@ export function Hero() {
             transition={{ duration: 0.6, delay: 0.22 }}
             className="mt-7 sm:mt-8"
           >
-            <EmailCapture source="hero" />
+            <GetStartedDialog
+              source="hero"
+              shimmer
+              triggerClassName="relative inline-flex h-12 items-center justify-center overflow-hidden rounded-full bg-primary px-8 text-sm font-semibold text-white shadow-lg shadow-primary/25 transition-colors hover:bg-primary-hover sm:h-14 sm:px-10 sm:text-base"
+            />
+            <p className="mt-3 text-sm text-white/60">Free to start · Live in one line of code</p>
           </motion.div>
         </div>
       </div>

@@ -24,6 +24,8 @@ export interface AnalyticsEvents {
   signup_succeeded: { source: string }
   /** Email rejected or network error. */
   signup_failed: { source: string; reason: string }
+  /** The "Get started" signup dialog was opened (before any submit). */
+  get_started_opened: { source: string }
   /** A top-nav anchor was clicked (Features / How it works / Pricing / FAQ). */
   nav_click: { target: string }
   /** The "Sign in" button was clicked. */
