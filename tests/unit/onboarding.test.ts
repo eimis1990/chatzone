@@ -75,13 +75,15 @@ describe('mergeVisualTheme', () => {
     const merged = mergeVisualTheme(current, {
       position: 'bottom-right',
       launcherLabel: '',
-      backgroundImageUrl: 'https://x.test/bg.png',
+      backgroundImageUrl: '',
       primaryColor: undefined,
     })
     expect(merged.position).toBe('bottom-left')
     expect(merged.launcherLabel).toBe('Chat')
     expect(merged.primaryColor).toBe('#111111')
-    expect('backgroundImageUrl' in merged).toBe(false)
+    // backgroundImageUrl is intentionally NOT preserved anymore: an applied
+    // theme clears any leftover background photo (the preset's '' passes through).
+    expect((merged as Record<string, unknown>).backgroundImageUrl).toBe('')
   })
 
   it('strips every preserved key from a full preset', () => {
