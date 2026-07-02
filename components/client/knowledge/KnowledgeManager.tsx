@@ -34,9 +34,10 @@ const SOURCE_TABS = [
   { value: 'file', label: 'File', icon: UploadIcon },
 ] as const
 
-export function KnowledgeManager({ botId, initialSources, audience = 'owner' }: KnowledgeManagerProps) {
-  // Clients don't get the "Website" (crawl) tab — that's the owner's paid setup.
-  const tabs = audience === 'client' ? SOURCE_TABS.filter((t) => t.value !== 'url') : SOURCE_TABS
+export function KnowledgeManager({ botId, initialSources }: KnowledgeManagerProps) {
+  // Self-serve first: clients crawl their own site (the onboarding wizard
+  // already does), so every source type is available to both audiences.
+  const tabs = SOURCE_TABS
   const defaultTab = tabs[0].value
   const [sources, setSources] = useState<KnowledgeSource[]>(initialSources)
   const [addOpen, setAddOpen] = useState(false)
@@ -238,11 +239,9 @@ export function KnowledgeManager({ botId, initialSources, audience = 'owner' }: 
               ))}
             </TabsList>
 
-            {audience === 'owner' && (
-              <TabsContent value="url">
-                <UrlSource botId={botId} onSourceAdded={handleSourceAdded} />
-              </TabsContent>
-            )}
+            <TabsContent value="url">
+              <UrlSource botId={botId} onSourceAdded={handleSourceAdded} />
+            </TabsContent>
             <TabsContent value="text">
               <TextSource botId={botId} onSourceAdded={handleSourceAdded} />
             </TabsContent>

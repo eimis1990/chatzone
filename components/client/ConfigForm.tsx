@@ -1402,7 +1402,6 @@ export function ConfigForm({
           </CardContent>
         </CollapsibleSection>
 
-        {showAdvanced && (<>
         {/* ── Store / Products ── */}
         <CommerceSection control={control} watch={watch} botId={botId} />
 
@@ -1444,7 +1443,6 @@ export function ConfigForm({
             </p>
           </CardContent>
         </CollapsibleSection>
-        </>)}
 
         </form>
       </ResizablePanel>
