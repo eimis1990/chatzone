@@ -36,8 +36,9 @@ const jsonLd = {
       name: SITE_NAME,
       url: SITE_URL,
       logo: `${SITE_URL}/loqara-logo-colorful.png`,
-      image: `${SITE_URL}/landing/og.png?v=2`,
+      image: `${SITE_URL}/landing/og.jpg?v=4`,
       slogan: 'The AI chat & voice agent for modern stores.',
+      sameAs: ['https://www.linkedin.com/company/loqara/'],
       description:
         'Loqara is an AI chat and voice agent for e-commerce stores: it answers customer questions from your own knowledge, searches your catalog, looks up orders, captures leads, and hands off to a human — embedded in one line of code.',
     },

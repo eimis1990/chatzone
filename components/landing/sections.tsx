@@ -7,6 +7,7 @@ import {
   ShoppingBagIcon,
   LanguagesIcon,
 } from 'lucide-react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { Reveal, RevealSlide } from './Reveal'
 import { FeatureText } from './ScrollRevealText'
@@ -18,27 +19,6 @@ import { FlickeringGrid } from '@/components/magicui/flickering-grid'
 const ACCENT = 'var(--primary)'
 const DARK = '#101213'
 
-// ───────────────────────── Trusted-by strip ─────────────────────────
-export function Logos() {
-  const names = ['Aromama', 'Nordbaltic', 'ACTION!', 'Klaipėda Goods', 'Baltic Skincare']
-  return (
-    <section className="border-b bg-white">
-      <div className="mx-auto max-w-7xl px-5 py-10">
-        <Reveal>
-          <p className="text-center text-sm text-gray-500">Built for modern e-commerce and service teams</p>
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-x-10 gap-y-4 opacity-60">
-            {names.map((n) => (
-              <span key={n} className="text-lg font-semibold tracking-tight text-gray-400">
-                {n}
-              </span>
-            ))}
-          </div>
-        </Reveal>
-      </div>
-    </section>
-  )
-}
-
 // ───────────────────────── Feature rows ─────────────────────────
 interface Feature {
   eyebrow: string
@@ -47,6 +27,7 @@ interface Feature {
   bullets: string[]
   icon: LucideIcon
   imageSrc: string
+  imageAlt: string
 }
 
 const FEATURES: Feature[] = [
@@ -57,6 +38,7 @@ const FEATURES: Feature[] = [
     bullets: ['Retrieval over your own content', 'Cites the sources it used', 'Graceful fallback + lead capture when unsure'],
     icon: BrainIcon,
     imageSrc: '/landing/feature-chat.webp',
+    imageAlt: 'Loqara chat widget answering a return-policy question with an answer grounded in the store’s own knowledge base',
   },
   {
     eyebrow: 'VOICE AGENT',
@@ -65,6 +47,7 @@ const FEATURES: Feature[] = [
     bullets: ['Live voice calls in the widget', 'Per-language voices', 'Speaks product results aloud'],
     icon: PhoneCallIcon,
     imageSrc: '/landing/feature-voice.webp',
+    imageAlt: 'Live voice call in the Loqara widget showing the Listening state while a customer talks to the store',
   },
   {
     eyebrow: 'LIVE HANDOFF',
@@ -73,6 +56,7 @@ const FEATURES: Feature[] = [
     bullets: ['Agent inbox with live updates', 'Take over, resolve, or return to bot', 'Auto-escalation when the bot is stuck'],
     icon: HeadsetIcon,
     imageSrc: '/landing/feature-handoff.webp',
+    imageAlt: 'Loqara agent inbox with an escalated conversation open and the Take over and Return to bot controls',
   },
   {
     eyebrow: 'ANALYTICS & EVALUATIONS',
@@ -81,6 +65,7 @@ const FEATURES: Feature[] = [
     bullets: ['Per-conversation summaries + topics', 'AI success rating (1–5) with reasons', 'CSAT, fallback rate, trending topics'],
     icon: BarChart3Icon,
     imageSrc: '/landing/feature-analytics.webp',
+    imageAlt: 'Loqara analytics dashboard with conversation trends, CSAT, AI success score, top questions and top products',
   },
   {
     eyebrow: 'COMMERCE SKILLS',
@@ -89,6 +74,7 @@ const FEATURES: Feature[] = [
     bullets: ['Live product search with cards', 'Order status — identity-checked', 'Discount codes on request'],
     icon: ShoppingBagIcon,
     imageSrc: '/landing/feature-commerce.webp',
+    imageAlt: 'Loqara chat widget showing live product cards with prices in response to a product question',
   },
   {
     eyebrow: 'MULTILINGUAL & EMBEDDABLE',
@@ -97,20 +83,24 @@ const FEATURES: Feature[] = [
     bullets: ['EN + LT out of the box', 'Themeable launcher (circle or pill)', 'One-line install on any site'],
     icon: LanguagesIcon,
     imageSrc: '/landing/feature-widget.webp',
+    imageAlt: 'Loqara widget configurator with theme presets next to a live branded preview of the chat widget',
   },
 ]
 
-function FeatureVisual({ imageSrc, dark }: { imageSrc: string; dark?: boolean }) {
+function FeatureVisual({ imageSrc, imageAlt }: { imageSrc: string; imageAlt: string }) {
   return (
     <div
       className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl shadow-lg"
-      style={{
-        backgroundColor: dark ? '#1a120b' : '#faf3ec',
-        backgroundImage: `url(${imageSrc}), linear-gradient(135deg, #fdeee2, #f7d3b5)`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-      }}
-    />
+      style={{ backgroundImage: 'linear-gradient(135deg, #fdeee2, #f7d3b5)' }}
+    >
+      <Image
+        src={imageSrc}
+        alt={imageAlt}
+        fill
+        sizes="(min-width: 1024px) 50vw, 100vw"
+        className="object-cover"
+      />
+    </div>
   )
 }
 
@@ -121,7 +111,7 @@ function FeatureRow({ feature, index }: { feature: Feature; index: number }) {
     <section className="bg-white text-gray-900">
       <div className="mx-auto grid max-w-7xl items-center gap-10 px-5 py-14 lg:grid-cols-2 lg:gap-16 lg:py-20">
         <RevealSlide from={reversed ? 'right' : 'left'} className={reversed ? 'lg:order-2' : ''}>
-          <FeatureVisual imageSrc={feature.imageSrc} dark={false} />
+          <FeatureVisual imageSrc={feature.imageSrc} imageAlt={feature.imageAlt} />
         </RevealSlide>
         <div className={reversed ? 'lg:order-1' : ''}>
           <FeatureText number={num} title={feature.title} body={feature.body} accent={ACCENT} />

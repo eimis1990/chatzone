@@ -96,15 +96,17 @@ export function Hero() {
   )
 }
 
+// Real integrations & tech the product runs on — honest credibility, not
+// invented customer logos.
 const BRANDS = [
-  'Aromama',
-  'Nordbaltic',
-  'ACTION!',
-  'Klaipėda Goods',
-  'Baltic Skincare',
-  'Vilnius Roastery',
-  'Lumora',
-  'Saulė & Co',
+  'WooCommerce',
+  'Shopify',
+  'Magento',
+  'WordPress',
+  'OpenAI',
+  'ElevenLabs',
+  'Stripe',
+  'Supabase',
 ]
 
 // One marquee copy must be wider than the viewport, or the two-copy -50% loop
@@ -117,6 +119,9 @@ function BrandMarquee() {
   const reduce = useReducedMotion()
   return (
     <div className="relative z-10 w-full overflow-hidden border-t border-white/10 bg-black/30 py-6 shadow-[0_-1px_0_rgba(255,255,255,0.06)] backdrop-blur-md">
+      <p className="mb-3 text-center text-xs font-semibold uppercase tracking-[0.2em] text-white/40">
+        Works with the tools you already use
+      </p>
       {/* Fade the logos into the dark glass at both edges (dark, not the bright image). */}
       <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-24 bg-gradient-to-r from-[#101213] via-[#101213]/85 to-transparent sm:w-40" />
       <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-24 bg-gradient-to-l from-[#101213] via-[#101213]/85 to-transparent sm:w-40" />

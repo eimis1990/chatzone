@@ -93,7 +93,7 @@ export const metadata: Metadata = {
     locale: "en_US",
     images: [
       {
-        url: "/landing/og.png?v=2",
+        url: "/landing/og.jpg?v=4",
         width: 1200,
         height: 630,
         alt: "Loqara — AI chat & voice agent for any website",
@@ -105,7 +105,7 @@ export const metadata: Metadata = {
     title: TITLE,
     description:
       "AI chat & voice support for any website: grounded answers, product search, order lookups, live handoff, and analytics.",
-    images: ["/landing/og.png?v=2"],
+    images: ["/landing/og.jpg?v=4"],
   },
 };
 
