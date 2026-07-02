@@ -7,6 +7,7 @@ import { retrieveContext, serviceRetrievalDeps } from '@/lib/ai/retrieval'
 import { buildMessages, contentFor, defaultLanguage, type ChatMessage } from '@/lib/ai/prompt'
 import { commerceEnabled, makeProductTools, ndjsonChatResponse, ndjsonText } from '@/lib/ai/commerce-tool'
 import { DEFAULT_CHAT_MODEL, DEFAULT_TEMPERATURE } from '@/lib/ai/chat-models'
+import { rewriteQuery } from '@/lib/ai/query-rewrite'
 import { searchCatalog } from '@/lib/products/search'
 import { createRateLimiter } from '@/lib/ratelimit'
 import { detectHandoffIntent, HANDOFF_ACK } from '@/lib/handoff'
@@ -139,8 +140,17 @@ export async function POST(req: Request) {
     .slice(0, -1) // drop the user message we just inserted; buildMessages adds it as the tail
     .map((m) => ({ role: m.role as ChatMessage['role'], content: m.content as string }))
 
-  // Retrieve grounding context.
-  const retrieval = await retrieveContext(bot.id, message, {}, serviceRetrievalDeps(svc))
+  // Retrieve grounding context; on a miss, retry once with a condensed standalone
+  // query (visitors write elliptical follow-ups like "o kiek kainuoja?" that
+  // embed poorly on their own).
+  let retrieval = await retrieveContext(bot.id, message, {}, serviceRetrievalDeps(svc))
+  if (retrieval.isWeak) {
+    const rewritten = await rewriteQuery(message, history)
+    if (rewritten) {
+      const retry = await retrieveContext(bot.id, rewritten, {}, serviceRetrievalDeps(svc))
+      if (!retry.isWeak) retrieval = retry
+    }
+  }
 
   const commerce = commerceEnabled(bot.config)
   const baseHeaders = { ...handoffHeaders, 'x-handoff': 'bot' }
