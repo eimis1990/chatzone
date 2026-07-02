@@ -8,7 +8,7 @@ import {
   LanguagesIcon,
 } from 'lucide-react'
 import Link from 'next/link'
-import { Reveal } from './Reveal'
+import { Reveal, RevealSlide } from './Reveal'
 import { FeatureText } from './ScrollRevealText'
 import { GetStartedDialog } from './GetStartedDialog'
 import { FlickeringGrid } from '@/components/magicui/flickering-grid'
@@ -100,7 +100,7 @@ const FEATURES: Feature[] = [
   },
 ]
 
-function FeatureVisual({ icon: Icon, imageSrc, dark }: { icon: LucideIcon; imageSrc: string; dark?: boolean }) {
+function FeatureVisual({ imageSrc, dark }: { imageSrc: string; dark?: boolean }) {
   return (
     <div
       className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl shadow-lg"
@@ -110,24 +110,19 @@ function FeatureVisual({ icon: Icon, imageSrc, dark }: { icon: LucideIcon; image
         backgroundSize: 'cover',
         backgroundPosition: 'center',
       }}
-    >
-      <div className="absolute left-4 top-4 flex size-11 items-center justify-center rounded-xl bg-white/90 shadow">
-        <Icon className="size-6" style={{ color: ACCENT }} />
-      </div>
-    </div>
+    />
   )
 }
 
 function FeatureRow({ feature, index }: { feature: Feature; index: number }) {
   const reversed = index % 2 === 1
-  const Icon = feature.icon
   const num = String(index + 1).padStart(2, '0')
   return (
     <section className="bg-white text-gray-900">
       <div className="mx-auto grid max-w-7xl items-center gap-10 px-5 py-14 lg:grid-cols-2 lg:gap-16 lg:py-20">
-        <Reveal className={reversed ? 'lg:order-2' : ''}>
-          <FeatureVisual icon={Icon} imageSrc={feature.imageSrc} dark={false} />
-        </Reveal>
+        <RevealSlide from={reversed ? 'right' : 'left'} className={reversed ? 'lg:order-2' : ''}>
+          <FeatureVisual imageSrc={feature.imageSrc} dark={false} />
+        </RevealSlide>
         <div className={reversed ? 'lg:order-1' : ''}>
           <FeatureText number={num} title={feature.title} body={feature.body} accent={ACCENT} />
         </div>
