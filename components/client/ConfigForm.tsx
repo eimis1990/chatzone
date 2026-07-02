@@ -30,7 +30,11 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { botConfigFormSchema } from '@/lib/validation/schemas'
-import type { BotLanguage, SystemPrompt } from '@/lib/types'
+import {
+  QUICK_ACTION_SUGGESTIONS,
+  buildQuickAction,
+} from '@/lib/quick-action-suggestions'
+import type { BotLanguage, SuggestedQuestionAction, SystemPrompt } from '@/lib/types'
 import type { z } from 'zod'
 import { saveConfig, type SaveConfigResult } from '@/app/(client)/app/bots/[botId]/configure/actions'
 import { Button } from '@/components/ui/button'
@@ -55,7 +59,6 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { TestChat } from '@/components/client/TestChat'
 import { ResizablePanel } from '@/components/ui/resizable-panel'
 import { VoiceSection } from '@/components/client/VoiceSection'
@@ -117,6 +120,26 @@ type CommerceTestState =
   | { status: 'error'; message: string }
 
 const MAX_SUGGESTED_QUESTIONS = 6
+
+// Quick-action type picker (dialog). 'text' and 'url' map to the prompt/url
+// fields; 'handoff' and 'lead' become the typed `action` on the saved item.
+type QaMode = 'text' | 'url' | 'handoff' | 'lead'
+
+const QA_MODE_OPTIONS: { value: QaMode; title: string; description: string }[] = [
+  { value: 'text', title: 'Send a message', description: 'Sends text to the bot' },
+  { value: 'url', title: 'Open a link', description: 'Replies with a link button' },
+  { value: 'handoff', title: 'Talk to a human', description: 'Requests a team member' },
+  { value: 'lead', title: 'Get contact details', description: 'Opens the contact form' },
+]
+
+/** One-line description of what a saved quick action does (list rows). */
+function qaSummary(f: { prompt?: string; url?: string; action?: SuggestedQuestionAction }): string {
+  if (f.action === 'handoff') return 'Requests a human'
+  if (f.action === 'lead') return 'Opens the contact form'
+  if (f.url) return `Opens ${f.url}`
+  if (f.prompt) return `Sends: ${f.prompt}`
+  return 'Sends the title'
+}
 
 const LANG_LABELS: Record<BotLanguage, string> = {
   en: 'English',
@@ -184,7 +207,7 @@ export function ConfigForm({
   // Quick-action add/edit dialog.
   const [qaOpen, setQaOpen] = useState(false)
   const [qaIndex, setQaIndex] = useState<number | null>(null)
-  const [qaMode, setQaMode] = useState<'text' | 'url'>('text')
+  const [qaMode, setQaMode] = useState<QaMode>('text')
   const [qaDraft, setQaDraft] = useState({ label: '', prompt: '', url: '' })
   // Active language tab — drives which content.<lang> fields are shown + live preview.
   // Persisted to localStorage keyed by botId so it survives refresh.
@@ -224,6 +247,7 @@ export function ConfigForm({
                 label: (q as { label?: string }).label ?? '',
                 prompt: (q as { prompt?: string }).prompt ?? '',
                 url: (q as { url?: string }).url ?? '',
+                action: (q as { action?: SuggestedQuestionAction }).action,
               },
         )
       }
@@ -305,9 +329,14 @@ export function ConfigForm({
       setQaDraft({ label: '', prompt: '', url: '' })
       setQaMode('text')
     } else {
-      const f = activeSuggestedField.fields[index] as { label?: string; prompt?: string; url?: string }
+      const f = activeSuggestedField.fields[index] as {
+        label?: string
+        prompt?: string
+        url?: string
+        action?: SuggestedQuestionAction
+      }
       setQaDraft({ label: f.label ?? '', prompt: f.prompt ?? '', url: f.url ?? '' })
-      setQaMode(f.url ? 'url' : 'text')
+      setQaMode(f.action ?? (f.url ? 'url' : 'text'))
     }
     setQaIndex(index)
     setQaOpen(true)
@@ -316,11 +345,12 @@ export function ConfigForm({
   const saveQuickAction = () => {
     const label = qaDraft.label.trim()
     if (!label) return
-    // Either text-to-send OR url-to-open — never both.
+    // Exactly one behavior: text-to-send, url-to-open, or a typed action.
     const value = {
       label,
       prompt: qaMode === 'text' ? qaDraft.prompt.trim() : '',
       url: qaMode === 'url' ? qaDraft.url.trim() : '',
+      action: qaMode === 'handoff' || qaMode === 'lead' ? qaMode : undefined,
     }
     if (qaIndex === null) activeSuggestedField.append(value)
     else activeSuggestedField.update(qaIndex, value)
@@ -677,16 +707,56 @@ export function ConfigForm({
                   </span>
                 </Label>
                 <p className="text-xs text-muted-foreground">
-                  Buttons shown on the welcome screen. Each sends text to the bot, or opens a link.
+                  Buttons shown on the welcome screen. Each sends a message, opens a link,
+                  requests a human, or opens the contact form.
                 </p>
+
+                {/* One-click suggestions, prefilled in the active language */}
+                <div className="space-y-1.5 rounded-lg border border-dashed p-2.5">
+                  <p className="text-xs font-medium text-muted-foreground">Suggestions</p>
+                  {QUICK_ACTION_SUGGESTIONS.map((group) => (
+                    <div key={group.id} className="flex flex-wrap items-center gap-1.5">
+                      <span className="w-20 shrink-0 text-[11px] text-muted-foreground">
+                        {group.title}
+                      </span>
+                      {group.suggestions.map((s) => {
+                        const leadOff = s.action === 'lead' && !leadCaptureEnabled
+                        const disabled =
+                          suggestedCount >= MAX_SUGGESTED_QUESTIONS || leadOff
+                        return (
+                          <button
+                            key={s.id}
+                            type="button"
+                            disabled={disabled}
+                            title={
+                              leadOff
+                                ? 'Enable lead capture below to use this'
+                                : `Add “${s.label[activeLang] ?? s.label.en}”`
+                            }
+                            onClick={() =>
+                              activeSuggestedField.append(buildQuickAction(s, activeLang))
+                            }
+                            className="inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs transition-colors hover:border-primary hover:text-primary disabled:pointer-events-none disabled:opacity-40"
+                          >
+                            <PlusIcon className="size-3" aria-hidden="true" />
+                            {s.label[activeLang] ?? s.label.en}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  ))}
+                </div>
+
                 <div className="space-y-2">
                   {activeSuggestedField.fields.map((field, index) => {
-                    const f = field as { id: string; label?: string; prompt?: string; url?: string }
-                    const summary = f.url
-                      ? `Opens ${f.url}`
-                      : f.prompt
-                        ? `Sends: ${f.prompt}`
-                        : 'Sends the title'
+                    const f = field as {
+                      id: string
+                      label?: string
+                      prompt?: string
+                      url?: string
+                      action?: SuggestedQuestionAction
+                    }
+                    const summary = qaSummary(f)
                     return (
                       <div
                         key={field.id}
@@ -745,50 +815,81 @@ export function ConfigForm({
                       />
                     </div>
 
-                    <Tabs value={qaMode} onValueChange={(v) => setQaMode(v as 'text' | 'url')}>
-                      <TabsList className="mb-3 w-full group-data-horizontal/tabs:h-10">
-                        <TabsTrigger
-                          value="text"
-                          className="data-active:bg-primary data-active:text-primary-foreground"
-                        >
-                          Send text
-                        </TabsTrigger>
-                        <TabsTrigger
-                          value="url"
-                          className="data-active:bg-primary data-active:text-primary-foreground"
-                        >
-                          Open a URL
-                        </TabsTrigger>
-                      </TabsList>
-
-                      {qaMode === 'text' ? (
-                        <div className="space-y-1.5">
-                          <Label htmlFor="qa-text">Action text to send</Label>
-                          <Input
-                            id="qa-text"
-                            value={qaDraft.prompt}
-                            onChange={(e) => setQaDraft((d) => ({ ...d, prompt: e.target.value }))}
-                            placeholder="Message sent to the bot — e.g. Parodyk populiariausias prekes"
-                          />
-                          <p className="text-xs text-muted-foreground">
-                            Sent to the bot when clicked. Leave empty to send the title itself.
-                          </p>
-                        </div>
-                      ) : (
-                        <div className="space-y-1.5">
-                          <Label htmlFor="qa-url">Url to open</Label>
-                          <Input
-                            id="qa-url"
-                            value={qaDraft.url}
-                            onChange={(e) => setQaDraft((d) => ({ ...d, url: e.target.value }))}
-                            placeholder="https://yourstore.com/page"
-                          />
-                          <p className="text-xs text-muted-foreground">
-                            The visitor gets a link button to follow.
-                          </p>
-                        </div>
+                    {/* Action type picker */}
+                    <div className="space-y-1.5">
+                      <Label>When clicked</Label>
+                      <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Action type">
+                        {QA_MODE_OPTIONS.map((opt) => {
+                          const leadOff = opt.value === 'lead' && !leadCaptureEnabled
+                          return (
+                            <button
+                              key={opt.value}
+                              type="button"
+                              role="radio"
+                              aria-checked={qaMode === opt.value}
+                              disabled={leadOff}
+                              onClick={() => setQaMode(opt.value)}
+                              className={cn(
+                                'rounded-lg border p-2.5 text-left transition-colors',
+                                qaMode === opt.value
+                                  ? 'border-primary bg-primary/5'
+                                  : 'hover:border-muted-foreground/40',
+                                leadOff && 'pointer-events-none opacity-40',
+                              )}
+                            >
+                              <p className="text-sm font-medium leading-tight">{opt.title}</p>
+                              <p className="mt-0.5 text-xs text-muted-foreground">{opt.description}</p>
+                            </button>
+                          )
+                        })}
+                      </div>
+                      {!leadCaptureEnabled && (
+                        <p className="text-xs text-muted-foreground">
+                          “Get contact details” needs lead capture enabled (see the Lead capture
+                          section).
+                        </p>
                       )}
-                    </Tabs>
+                    </div>
+
+                    {qaMode === 'text' && (
+                      <div className="space-y-1.5">
+                        <Label htmlFor="qa-text">Action text to send</Label>
+                        <Input
+                          id="qa-text"
+                          value={qaDraft.prompt}
+                          onChange={(e) => setQaDraft((d) => ({ ...d, prompt: e.target.value }))}
+                          placeholder="Message sent to the bot — e.g. Parodyk populiariausias prekes"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Sent to the bot when clicked. Leave empty to send the title itself.
+                        </p>
+                      </div>
+                    )}
+                    {qaMode === 'url' && (
+                      <div className="space-y-1.5">
+                        <Label htmlFor="qa-url">Url to open</Label>
+                        <Input
+                          id="qa-url"
+                          value={qaDraft.url}
+                          onChange={(e) => setQaDraft((d) => ({ ...d, url: e.target.value }))}
+                          placeholder="https://yourstore.com/page"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          The visitor gets a link button to follow.
+                        </p>
+                      </div>
+                    )}
+                    {qaMode === 'handoff' && (
+                      <p className="text-xs text-muted-foreground">
+                        Connects the visitor to your team — the same flow as the
+                        “Talk to a person” button, even when that button is hidden.
+                      </p>
+                    )}
+                    {qaMode === 'lead' && (
+                      <p className="text-xs text-muted-foreground">
+                        Opens the contact form so the visitor can leave their details.
+                      </p>
+                    )}
                   </div>
                   <div className="flex justify-end gap-2">
                     <Button
