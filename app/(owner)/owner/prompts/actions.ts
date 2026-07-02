@@ -1,15 +1,25 @@
 'use server'
 
-import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
 import { requireRole } from '@/lib/auth/guards'
 import { createServerClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { syncVoiceAgent } from '@/lib/ai/elevenlabs-agent'
+import { SYSTEM_PROMPT_MAX } from '@/lib/validation/schemas'
 import type { Bot } from '@/lib/types'
 
-const nameSchema = z.string().trim().min(1).max(120)
-const contentSchema = z.string().max(8000)
+/** Validate name + content, throwing a clean, user-facing message (not a raw ZodError). */
+function clean(name: string, content: string): { name: string; content: string } {
+  const n = name.trim()
+  if (!n) throw new Error('Give the prompt a name.')
+  if (n.length > 120) throw new Error('Name is too long (max 120 characters).')
+  if (content.length > SYSTEM_PROMPT_MAX) {
+    throw new Error(
+      `Prompt is too long — ${content.length.toLocaleString()} / ${SYSTEM_PROMPT_MAX.toLocaleString()} characters. Please shorten it.`,
+    )
+  }
+  return { name: n, content }
+}
 
 /** Bots that reference a given library prompt (via config.systemPromptId). */
 async function referencingBots(id: string) {
@@ -24,26 +34,26 @@ async function referencingBots(id: string) {
 
 export async function createSystemPrompt(name: string, content: string): Promise<void> {
   await requireRole('owner')
+  const fields = clean(name, content)
   const supabase = await createServerClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()
-  const { error } = await supabase.from('system_prompts').insert({
-    name: nameSchema.parse(name),
-    content: contentSchema.parse(content),
-    created_by: user?.id ?? null,
-  })
+  const { error } = await supabase
+    .from('system_prompts')
+    .insert({ ...fields, created_by: user?.id ?? null })
   if (error) throw new Error(error.message)
   revalidatePath('/owner/prompts')
 }
 
 export async function updateSystemPrompt(id: string, name: string, content: string): Promise<void> {
   await requireRole('owner')
-  const parsedContent = contentSchema.parse(content)
+  const fields = clean(name, content)
+  const parsedContent = fields.content
   const supabase = await createServerClient()
   const { error } = await supabase
     .from('system_prompts')
-    .update({ name: nameSchema.parse(name), content: parsedContent })
+    .update({ name: fields.name, content: parsedContent })
     .eq('id', id)
   if (error) throw new Error(error.message)
 

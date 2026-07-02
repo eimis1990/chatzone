@@ -12,6 +12,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { formatDistanceToNow } from '@/lib/date-utils'
 import { cn } from '@/lib/utils'
+import { SYSTEM_PROMPT_MAX } from '@/lib/validation/schemas'
 import type { SystemPrompt } from '@/lib/types'
 import { createSystemPrompt, updateSystemPrompt, deleteSystemPrompt } from '@/app/(owner)/owner/prompts/actions'
 
@@ -204,7 +205,17 @@ function PromptEditor({
           />
         </div>
         <div className="flex min-h-0 flex-1 flex-col space-y-1.5">
-          <Label htmlFor="prompt-content">Prompt (Markdown supported)</Label>
+          <div className="flex items-center justify-between">
+            <Label htmlFor="prompt-content">Prompt (Markdown supported)</Label>
+            <span
+              className={cn(
+                'text-xs tabular-nums',
+                content.length > SYSTEM_PROMPT_MAX ? 'font-medium text-destructive' : 'text-muted-foreground',
+              )}
+            >
+              {content.length.toLocaleString()} / {SYSTEM_PROMPT_MAX.toLocaleString()}
+            </span>
+          </div>
           <Textarea
             id="prompt-content"
             value={content}
@@ -226,7 +237,12 @@ function PromptEditor({
             <Button type="button" variant="outline" size="sm" onClick={onClose} disabled={saving}>
               Cancel
             </Button>
-            <Button type="button" size="sm" onClick={save} disabled={saving}>
+            <Button
+              type="button"
+              size="sm"
+              onClick={save}
+              disabled={saving || content.length > SYSTEM_PROMPT_MAX}
+            >
               {saving ? 'Saving…' : initial ? 'Save changes' : 'Create prompt'}
             </Button>
           </div>

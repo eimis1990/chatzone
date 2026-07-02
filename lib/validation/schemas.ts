@@ -1,6 +1,10 @@
 import { z } from 'zod'
 import type { BotConfig } from '@/lib/types'
 
+/** Max system-prompt length (chars). Generous — detailed prompts with examples
+ *  can run long; the same cap is used by the prompt library + bot config. */
+export const SYSTEM_PROMPT_MAX = 32000
+
 // ---------------------------------------------------------------------------
 // Bot configuration
 // ---------------------------------------------------------------------------
@@ -128,7 +132,7 @@ export const botConfigFormSchema = z.object({
     en: languageContentSchema,
     lt: languageContentSchema.optional(),
   }),
-  systemPrompt: z.string().min(1).max(8000),
+  systemPrompt: z.string().min(1).max(SYSTEM_PROMPT_MAX),
   systemPromptId: z.string().uuid().optional(),
   persona: z
     .object({
