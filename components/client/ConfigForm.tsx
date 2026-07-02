@@ -26,6 +26,7 @@ import {
   ShoppingBagIcon,
   SaveIcon,
   XIcon,
+  GlobeIcon,
   type LucideIcon,
 } from 'lucide-react'
 import { botConfigFormSchema } from '@/lib/validation/schemas'
@@ -61,6 +62,10 @@ import { VoiceSection } from '@/components/client/VoiceSection'
 import { LogoUpload } from '@/components/client/LogoUpload'
 import type { BotConfig } from '@/lib/types'
 import { FONT_OPTIONS, fontStack } from '@/lib/fonts'
+import {
+  WIDGET_THEME_PRESETS,
+  PRESET_PRESERVED_THEME_KEYS,
+} from '@/lib/widget-theme-presets'
 import { cn } from '@/lib/utils'
 
 interface ConfigFormProps {
@@ -850,8 +855,11 @@ export function ConfigForm({
               description="Colors, shape, launcher, and background — grouped."
             />}>
           <CardContent className="space-y-6">
+            {/* ── Presets & match-my-website ── */}
+            <ThemePresetPicker watch={watch} setValue={setValue} />
+
             {/* ── Colors ── */}
-            <div className="space-y-3">
+            <div className="space-y-3 border-t pt-5">
               <h4 className="text-sm font-semibold">Colors</h4>
               <div className="grid gap-4 sm:grid-cols-2">
                 <ColorField control={control} name="theme.primaryColor" label="Primary color" placeholder="#4f46e5" swatchDefault="#4f46e5" clearable={false} description="Brand color: user bubbles, buttons, accents." />
@@ -2119,5 +2127,158 @@ function ColorField({
         )
       }}
     />
+  )
+}
+
+// -------------------------------------------------------------------------
+// ThemePresetPicker — one-click theme presets + "Match my website".
+// Applying writes only *visual* theme keys into the form via setValue
+// (dirty, so Save activates); functional keys (position, uploaded images,
+// launcher text/logo, feature toggles) are preserved, and nothing outside
+// `theme` is ever touched. Every field stays editable afterwards.
+// -------------------------------------------------------------------------
+function ThemePresetPicker({
+  watch,
+  setValue,
+}: {
+  watch: UseFormWatch<FormValues>
+  setValue: UseFormSetValue<FormValues>
+}) {
+  const [matchOpen, setMatchOpen] = useState(false)
+  const [matchUrl, setMatchUrl] = useState('')
+  const [matching, setMatching] = useState(false)
+
+  const applyTheme = useCallback(
+    (partial: Record<string, unknown>, label: string) => {
+      const preserved = PRESET_PRESERVED_THEME_KEYS as readonly string[]
+      for (const [key, value] of Object.entries(partial)) {
+        if (preserved.includes(key) || value === undefined) continue
+        setValue(`theme.${key}` as FieldPath<FormValues>, value as never, {
+          shouldDirty: true,
+          shouldValidate: true,
+        })
+      }
+      toast.success(`${label} applied — save to make it live`)
+    },
+    [setValue],
+  )
+
+  // Pre-fill with the bot's own site when we know it.
+  const openMatchDialog = () => {
+    const store = watch('commerce.storeUrl')
+    const domain = watch('allowedDomains')?.[0]
+    const guess = (store || domain || '').trim()
+    setMatchUrl(guess && !/^https?:\/\//i.test(guess) ? `https://${guess}` : guess)
+    setMatchOpen(true)
+  }
+
+  const runMatch = async () => {
+    const url = matchUrl.trim()
+    if (!url || matching) return
+    setMatching(true)
+    try {
+      const res = await fetch('/api/preview/site-theme', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ url }),
+      })
+      const data = (await res.json().catch(() => null)) as
+        | { theme?: Record<string, unknown>; error?: string }
+        | null
+      if (!res.ok || !data?.theme) {
+        toast.error(data?.error ?? 'Could not read a theme from that site')
+        return
+      }
+      applyTheme(data.theme, 'Website theme')
+      setMatchOpen(false)
+    } catch {
+      toast.error('Could not read a theme from that site')
+    } finally {
+      setMatching(false)
+    }
+  }
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between gap-3">
+        <h4 className="text-sm font-semibold">Presets</h4>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={openMatchDialog}
+          className="h-8 gap-1.5 text-xs"
+        >
+          <GlobeIcon className="size-3.5" />
+          Match my website
+        </Button>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {WIDGET_THEME_PRESETS.map((preset) => (
+          <button
+            key={preset.id}
+            type="button"
+            onClick={() => applyTheme(preset.theme, preset.name)}
+            title={preset.description}
+            className="flex items-center gap-2 rounded-full border border-input bg-background px-3 py-1.5 text-xs font-medium transition-colors hover:border-primary/40 hover:bg-muted"
+          >
+            <span className="flex -space-x-1">
+              {[
+                preset.theme.primaryColor,
+                preset.theme.botBubbleColor || '#f3f4f6',
+                preset.theme.backgroundColor,
+              ].map((color, i) => (
+                <span
+                  key={i}
+                  className="size-3.5 rounded-full ring-1 ring-border"
+                  style={{ backgroundColor: color }}
+                />
+              ))}
+            </span>
+            {preset.name}
+          </button>
+        ))}
+      </div>
+      <p className="text-xs text-muted-foreground">
+        Starting points that restyle colors, shape, and font — pick one, then fine-tune anything below.
+      </p>
+
+      <Dialog open={matchOpen} onOpenChange={setMatchOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Match my website</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <p className="text-sm text-muted-foreground">
+              We&apos;ll read your site&apos;s brand colors and font and apply them to the widget
+              theme. You can tweak everything afterwards.
+            </p>
+            <div className="space-y-1.5">
+              <Label htmlFor="matchWebsiteUrl">Website URL</Label>
+              <Input
+                id="matchWebsiteUrl"
+                value={matchUrl}
+                onChange={(e) => setMatchUrl(e.target.value)}
+                placeholder="https://your-site.com"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault()
+                    void runMatch()
+                  }
+                }}
+              />
+            </div>
+            <div className="flex justify-end gap-2 pt-1">
+              <Button type="button" variant="ghost" onClick={() => setMatchOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="button" onClick={() => void runMatch()} disabled={matching || !matchUrl.trim()}>
+                {matching ? 'Reading site…' : 'Extract theme'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
   )
 }
