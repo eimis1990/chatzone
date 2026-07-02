@@ -8,6 +8,7 @@ import {
   Controller,
   type Control,
   type UseFormWatch,
+  type UseFormSetValue,
   type FieldErrors,
   type FieldPath,
 } from 'react-hook-form'
@@ -24,12 +25,11 @@ import {
   ShieldIcon,
   ShoppingBagIcon,
   SaveIcon,
-  Maximize2Icon,
   XIcon,
   type LucideIcon,
 } from 'lucide-react'
 import { botConfigFormSchema } from '@/lib/validation/schemas'
-import type { BotLanguage } from '@/lib/types'
+import type { BotLanguage, SystemPrompt } from '@/lib/types'
 import type { z } from 'zod'
 import { saveConfig, type SaveConfigResult } from '@/app/(client)/app/bots/[botId]/configure/actions'
 import { Button } from '@/components/ui/button'
@@ -181,8 +181,6 @@ export function ConfigForm({
   const [qaIndex, setQaIndex] = useState<number | null>(null)
   const [qaMode, setQaMode] = useState<'text' | 'url'>('text')
   const [qaDraft, setQaDraft] = useState({ label: '', prompt: '', url: '' })
-  // System-prompt expand dialog.
-  const [promptOpen, setPromptOpen] = useState(false)
   // Active language tab — drives which content.<lang> fields are shown + live preview.
   // Persisted to localStorage keyed by botId so it survives refresh.
   const lsKey = `cbz_cfg_lang_${botId}`
@@ -1078,56 +1076,7 @@ export function ConfigForm({
               description="System prompt and persona."
             />}>
           <CardContent className="space-y-4">
-            <Controller
-              name="systemPrompt"
-              control={control}
-              render={({ field }) => (
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="systemPrompt">System prompt</Label>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setPromptOpen(true)}
-                    >
-                      <Maximize2Icon className="size-3.5" />
-                      Expand
-                    </Button>
-                  </div>
-                  <Textarea
-                    id="systemPrompt"
-                    value={field.value ?? ''}
-                    onChange={field.onChange}
-                    placeholder="You are a helpful assistant…"
-                    className="h-32 resize-none overflow-auto font-mono text-sm"
-                  />
-                  {errors.systemPrompt && (
-                    <p className="text-xs text-destructive">{errors.systemPrompt.message}</p>
-                  )}
-
-                  {/* Expanded editor */}
-                  <Dialog open={promptOpen} onOpenChange={setPromptOpen}>
-                    <DialogContent className="flex max-h-[85vh] w-[calc(100%-2rem)] flex-col sm:max-w-3xl">
-                      <DialogHeader>
-                        <DialogTitle>System prompt</DialogTitle>
-                      </DialogHeader>
-                      <Textarea
-                        value={field.value ?? ''}
-                        onChange={field.onChange}
-                        placeholder="You are a helpful assistant…"
-                        className="min-h-0 flex-1 resize-none font-mono text-sm leading-relaxed"
-                      />
-                      <div className="flex justify-end">
-                        <Button type="button" size="sm" onClick={() => setPromptOpen(false)}>
-                          Done
-                        </Button>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-                </div>
-              )}
-            />
+            <SystemPromptSelect watch={watch} setValue={setValue} errors={errors} />
 
             <div className="flex items-center justify-between gap-4">
               <div className="space-y-0.5">
@@ -1401,6 +1350,107 @@ export function ConfigForm({
           <TestChat botId={botId} config={liveConfig} activeLang={activeLang} />
         </div>
       </div>
+    </div>
+  )
+}
+
+// -------------------------------------------------------------------------
+// SystemPromptSelect — pick a reusable prompt from the owner's library
+// -------------------------------------------------------------------------
+function SystemPromptSelect({
+  watch,
+  setValue,
+  errors,
+}: {
+  watch: UseFormWatch<FormValues>
+  setValue: UseFormSetValue<FormValues>
+  errors: FieldErrors<FormValues>
+}) {
+  const [prompts, setPrompts] = useState<Pick<SystemPrompt, 'id' | 'name' | 'content'>[]>([])
+  const [loaded, setLoaded] = useState(false)
+  const selectedId = watch('systemPromptId')
+  const currentContent = watch('systemPrompt') ?? ''
+
+  useEffect(() => {
+    let cancelled = false
+    const supabase = createBrowserClient()
+    supabase
+      .from('system_prompts')
+      .select('id, name, content')
+      .order('created_at', { ascending: false })
+      .then(({ data }) => {
+        if (!cancelled) {
+          setPrompts((data ?? []) as Pick<SystemPrompt, 'id' | 'name' | 'content'>[])
+          setLoaded(true)
+        }
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  const isCustom = !selectedId && currentContent.trim().length > 0
+  const pick = (id: string | null) => {
+    const p = prompts.find((x) => x.id === id)
+    if (!p) return
+    setValue('systemPromptId', p.id, { shouldDirty: true })
+    setValue('systemPrompt', p.content, { shouldDirty: true, shouldValidate: true })
+  }
+
+  return (
+    <div className="space-y-1.5">
+      <div className="flex items-center justify-between">
+        <Label>System prompt</Label>
+        <a
+          href="/owner/prompts"
+          target="_blank"
+          rel="noreferrer"
+          className="text-xs text-primary hover:underline"
+        >
+          Manage prompts →
+        </a>
+      </div>
+
+      <Select value={selectedId ?? undefined} onValueChange={pick}>
+        <SelectTrigger className="w-full">
+          <SelectValue
+            placeholder={
+              loaded && prompts.length === 0
+                ? 'No prompts yet — create one first'
+                : 'Choose a system prompt'
+            }
+          />
+        </SelectTrigger>
+        <SelectContent>
+          {prompts.map((p) => (
+            <SelectItem key={p.id} value={p.id}>
+              {p.name}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
+      {loaded && prompts.length === 0 && (
+        <p className="text-xs text-muted-foreground">
+          Create prompts in{' '}
+          <a href="/owner/prompts" target="_blank" rel="noreferrer" className="text-primary hover:underline">
+            System prompts
+          </a>
+          , then pick one here.
+        </p>
+      )}
+      {isCustom && (
+        <p className="text-xs text-amber-600">
+          This bot uses a custom prompt that isn&apos;t in your library. Pick one above to replace it.
+        </p>
+      )}
+      {currentContent.trim() && (
+        <div className="max-h-40 overflow-y-auto whitespace-pre-wrap rounded-md border bg-muted/30 p-2 font-mono text-xs text-muted-foreground">
+          {currentContent.slice(0, 1200)}
+          {currentContent.length > 1200 ? '…' : ''}
+        </div>
+      )}
+      {errors.systemPrompt && <p className="text-xs text-destructive">{errors.systemPrompt.message}</p>}
     </div>
   )
 }

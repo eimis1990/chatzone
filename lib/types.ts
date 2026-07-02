@@ -194,6 +194,9 @@ export interface BotConfig {
   /** Per-language content. `en` is always present. */
   content: Partial<Record<BotLanguage, LanguageContent>> & { en: LanguageContent }
   systemPrompt: string
+  /** Id of the reusable system_prompts library entry this bot uses (owner-managed).
+   *  When set, `systemPrompt` holds a snapshot of that entry's content. */
+  systemPromptId?: string
   persona: {
     tone: string
     verbosity: 'concise' | 'balanced' | 'detailed'
@@ -283,6 +286,16 @@ export interface LintFinding {
   detail: string
   /** Verbatim snippets from the KB that evidence the issue (e.g. the two conflicting statements). */
   evidence: string[]
+}
+
+/** A reusable, owner-managed system prompt in the prompt library. */
+export interface SystemPrompt {
+  id: string
+  name: string
+  content: string
+  created_by: string | null
+  created_at: string
+  updated_at: string
 }
 
 export type HandoffStatus = 'bot' | 'requested' | 'live' | 'resolved'

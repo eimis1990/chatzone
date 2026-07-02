@@ -12,6 +12,7 @@ import {
   SlidersHorizontalIcon,
   DatabaseIcon,
   BugIcon,
+  FileTextIcon,
   type LucideIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -39,6 +40,7 @@ const NAV: NavItem[] = [
       { label: 'Knowledge', href: '/owner/chatbot/knowledge', icon: DatabaseIcon },
     ],
   },
+  { label: 'System prompts', href: '/owner/prompts', icon: FileTextIcon },
   { label: 'Voices', href: '/owner/voices', icon: MicVocalIcon },
   { label: 'Signups', href: '/owner/signups', icon: MailIcon },
   { label: 'LinkedIn', href: '/owner/linkedin', icon: MegaphoneIcon },
