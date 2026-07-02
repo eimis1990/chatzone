@@ -2,7 +2,7 @@ import { requireRole, getUserOrgIds } from '@/lib/auth/guards'
 import { createServerClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { BillingPanel } from '@/components/client/BillingPanel'
-import { isStripeConfigured, getStripe } from '@/lib/stripe/client'
+import { isStripeConfigured, getStripe, checkoutTaxParams } from '@/lib/stripe/client'
 import { getPriceId, getVoicePriceId, getSetupPriceId, PLANS, DISPLAY_PLANS, VOICE_ADDON } from '@/lib/stripe/plans'
 import { SETUP_PACKAGES } from '@/lib/setup-packages'
 import { ensureStripeCustomer } from '@/lib/stripe/customer'
@@ -149,6 +149,7 @@ export default async function SubscriptionPage({
         cancel_url: `${base}/app/subscription?billing=cancelled`,
         allow_promotion_codes: true,
         subscription_data: { metadata: { org_id: oid } },
+        ...checkoutTaxParams(),
       })
       return { url: session.url ?? undefined }
     } catch (err) {
@@ -177,6 +178,10 @@ export default async function SubscriptionPage({
         cancel_url: `${base}/app/subscription?setup=cancelled`,
         metadata: { org_id: oid, setup_package: pkg },
         payment_intent_data: { metadata: { org_id: oid, setup_package: pkg } },
+        // One-time payments don't invoice by default — enable so setup
+        // packages produce a proper (tax-itemized) invoice for the client.
+        invoice_creation: { enabled: true },
+        ...checkoutTaxParams(),
       })
       return { url: session.url ?? undefined }
     } catch (err) {

@@ -32,3 +32,24 @@ export function requireStripe(): Stripe {
   if (!stripe) throw new Error('Stripe is not configured (STRIPE_SECRET_KEY missing).')
   return stripe
 }
+
+/**
+ * Checkout params for automatic tax (Stripe Tax). Off until STRIPE_TAX_ENABLED
+ * is set to "true" — flipping it on requires Stripe Tax to be activated in the
+ * dashboard first (origin address + registrations), otherwise session creation
+ * errors. `customer_update` is required by Stripe when combining an existing
+ * customer with automatic_tax/tax_id_collection: it saves the address and
+ * business name collected in Checkout back onto the customer.
+ */
+export function checkoutTaxParams(): Pick<
+  Stripe.Checkout.SessionCreateParams,
+  'automatic_tax' | 'billing_address_collection' | 'tax_id_collection' | 'customer_update'
+> {
+  if (getEnv().STRIPE_TAX_ENABLED !== 'true') return {}
+  return {
+    automatic_tax: { enabled: true },
+    billing_address_collection: 'required',
+    tax_id_collection: { enabled: true },
+    customer_update: { address: 'auto', name: 'auto' },
+  }
+}

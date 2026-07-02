@@ -68,3 +68,42 @@ stripe listen --forward-to localhost:3000/api/stripe/webhook
   with events: `checkout.session.completed`, `customer.subscription.created`,
   `customer.subscription.updated`, `customer.subscription.deleted`.
 - Test and live price IDs differ — production uses the live ones from Vercel.
+
+---
+
+## Tax / VAT (money hygiene)
+
+The code is ready but OFF by default. Checkout only starts collecting tax after
+you set `STRIPE_TAX_ENABLED=true` — and that must come LAST, because enabling
+it before the dashboard setup makes Checkout session creation fail.
+
+Do these in order, in the **live** Stripe dashboard:
+
+1. **Enable Stripe Tax** — Settings → Tax. Confirm your origin address
+   (Lithuania) and activate. Pricing: 0.5% only on transactions where tax is
+   calculated; monitoring is free.
+2. **Add your registration** — Settings → Tax → Registrations. Add Lithuania
+   with your VAT code (if you're VAT-registered). Selling B2C into other EU
+   countries later? Register for OSS (One-Stop Shop) via VMI and add the "EU
+   OSS" registration here. If you're not VAT-registered yet, Stripe Tax still
+   monitors thresholds and tells you when registration becomes required.
+3. **Set the default tax category** — Settings → Tax → set the preset product
+   tax code to "Software as a service (SaaS) — business use". All our prices
+   inherit it; no per-product edits needed.
+4. **Prices stay tax-EXCLUSIVE** (current behavior): €49 + VAT on top. EU
+   businesses that enter a valid VAT ID in Checkout get reverse charge (0%)
+   automatically — that's what `tax_id_collection` enables.
+5. **Invoice emails** — Settings → Billing → Invoices: enable emailing
+   finalized invoices/receipts to customers. Also add your company details
+   (name, address, VAT code) under Settings → Business → Public details so
+   they appear on invoices.
+6. **Flip the switch** — add `STRIPE_TAX_ENABLED=true` in Vercel (Production)
+   and redeploy. From then on Checkout collects billing address + VAT ID and
+   itemizes tax; one-time setup packages also generate proper invoices.
+
+Existing subscriptions created BEFORE this (test purchases) won't have
+automatic tax — only new Checkouts do. Fine while you have no real subscribers;
+any that exist can be recreated.
+
+Talk to your accountant about: whether you must register for VAT now
+(Lithuania's threshold: €45,000/12mo), and OSS timing.

@@ -21,6 +21,11 @@ const envSchema = z.object({
   // gracefully (503) when these are absent, so the app runs without billing.
   STRIPE_SECRET_KEY: z.string().min(1).optional(),
   STRIPE_WEBHOOK_SECRET: z.string().min(1).optional(),
+  // Set to "true" ONLY after Stripe Tax is enabled in the Stripe dashboard
+  // (origin address + registrations). Turns on automatic tax calculation,
+  // billing-address collection, and VAT-ID collection in Checkout — enabling
+  // this without dashboard setup makes Checkout session creation fail.
+  STRIPE_TAX_ENABLED: z.string().min(1).optional(),
   // Bearer secret Vercel Cron sends to /api/cron/retention. The route fails
   // CLOSED when this is unset (retention purge simply won't run), so set it in
   // production to enable the daily purge.

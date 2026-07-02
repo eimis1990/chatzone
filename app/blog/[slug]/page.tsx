@@ -63,7 +63,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
           logo: { '@type': 'ImageObject', url: `${SITE_URL}/loqara-logo-colorful.png` },
         },
         mainEntityOfPage: `${SITE_URL}/blog/${slug}`,
-        image: post.image ? `${SITE_URL}${post.image}` : `${SITE_URL}/landing/og.png`,
+        image: post.image ? `${SITE_URL}${post.image}` : `${SITE_URL}/landing/og.jpg`,
       },
       {
         '@type': 'BreadcrumbList',
