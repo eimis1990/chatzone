@@ -27,9 +27,12 @@ type Mode =
   | { kind: 'view'; prompt: SystemPrompt }
   | null
 
-// Height = 90% of the viewport; width = 80% of that height, so the editor/viewer
-// is a comfortable portrait rectangle rather than a near-square.
-const DIALOG_SIZE = 'flex h-[90vh] w-[72vh] max-w-[calc(100vw-2rem)] flex-col'
+// Height = 90% of the viewport; width = 80% of that height (72vh), so the
+// editor/viewer is a comfortable portrait rectangle rather than a near-square.
+// NB: DialogContent's base `sm:max-w-sm` (384px) must be overridden at the same
+// `sm:` variant, or twMerge keeps it and the dialog stays narrow.
+const DIALOG_SIZE =
+  'flex h-[90vh] w-[72vh] max-w-[calc(100vw-2rem)] sm:max-w-[calc(100vw-2rem)] flex-col'
 
 export function SystemPromptsManager({ prompts, usage }: Props) {
   const router = useRouter()
