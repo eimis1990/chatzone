@@ -2,6 +2,7 @@ import { z } from 'zod'
 import { createServiceClient } from '@/lib/supabase/service'
 import { isOriginAllowed, corsHeaders } from '@/lib/widget-auth'
 import { createRateLimiter } from '@/lib/ratelimit'
+import { notifyLeadCaptured } from '@/lib/notify'
 import type { Bot } from '@/lib/types'
 
 // ~5 lead submissions/min per bot, small burst.
@@ -70,6 +71,9 @@ export async function POST(req: Request) {
     console.error('[lead] insert error', error)
     return json({ error: 'Failed to save lead' }, 500)
   }
+
+  // Fire-and-forget: a failed email must never fail the lead submission.
+  void notifyLeadCaptured(svc, { id: bot.id, org_id: bot.org_id, name: bot.name }, fields)
 
   return json({ id: lead.id }, 201)
 }

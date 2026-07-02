@@ -11,6 +11,7 @@ import { rewriteQuery } from '@/lib/ai/query-rewrite'
 import { searchCatalog } from '@/lib/products/search'
 import { createRateLimiter } from '@/lib/ratelimit'
 import { detectHandoffIntent, HANDOFF_ACK } from '@/lib/handoff'
+import { notifyHandoffRequested } from '@/lib/notify'
 import { isOverConversationLimit } from '@/lib/usage'
 import type { Bot, BotLanguage, Citation, HandoffStatus } from '@/lib/types'
 import type { CommerceProduct, OrderStatus } from '@/lib/commerce/types'
@@ -122,6 +123,7 @@ export async function POST(req: Request) {
       .from('conversations')
       .update({ handoff_status: 'requested', handoff_requested_at: new Date().toISOString() })
       .eq('id', convId)
+    void notifyHandoffRequested(svc, bot, message)
     const ack = HANDOFF_ACK[lang] ?? HANDOFF_ACK.en
     await svc
       .from('messages')
@@ -175,6 +177,7 @@ export async function POST(req: Request) {
         .update({ handoff_status: 'requested', handoff_requested_at: new Date().toISOString() })
         .eq('id', convId)
       handoff = 'requested'
+      void notifyHandoffRequested(svc, bot, message)
     }
     const leadTrigger = bot.config.leadCapture?.enabled && bot.config.leadCapture.trigger === 'on_fallback'
     return ndjsonText(fallback, {

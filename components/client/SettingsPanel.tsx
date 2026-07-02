@@ -1,10 +1,11 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { DownloadIcon, ShieldCheckIcon, Trash2Icon, ClockIcon } from 'lucide-react'
+import { DownloadIcon, ShieldCheckIcon, Trash2Icon, ClockIcon, BellIcon } from 'lucide-react'
 import { SectionCard } from '@/components/client/SectionCard'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
+import { Switch } from '@/components/ui/switch'
 import { cn } from '@/lib/utils'
 import {
   Select,
@@ -22,12 +23,19 @@ const RETENTION_OPTIONS = [
   { value: '365', label: '365 days' },
 ]
 
+export interface NotificationPrefs {
+  leadEmails: boolean
+  handoffEmails: boolean
+}
+
 interface SettingsPanelProps {
   retentionDays: number | null
   setRetention: (days: number | null) => Promise<void>
   deleteData: (scope: 'conversations' | 'leads' | 'all') => Promise<{ ok: boolean }>
   /** Whether the plan allows a configurable retention window (else Scale-gated). */
   canCustomRetention: boolean
+  notifications: NotificationPrefs
+  setNotifications: (prefs: NotificationPrefs) => Promise<void>
 }
 
 export function SettingsPanel({
@@ -35,7 +43,10 @@ export function SettingsPanel({
   setRetention,
   deleteData,
   canCustomRetention,
+  notifications,
+  setNotifications,
 }: SettingsPanelProps) {
+  const [prefs, setPrefs] = useState<NotificationPrefs>(notifications)
   const [value, setValue] = useState(retentionDays == null ? 'forever' : String(retentionDays))
   const [savedMsg, setSavedMsg] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
@@ -59,8 +70,53 @@ export function SettingsPanel({
     })
   }
 
+  const onPrefChange = (key: keyof NotificationPrefs, on: boolean) => {
+    const next = { ...prefs, [key]: on }
+    setPrefs(next)
+    setSavedMsg(null)
+    startTransition(async () => {
+      await setNotifications(next)
+      setSavedMsg('Saved')
+    })
+  }
+
   return (
     <div className="max-w-2xl space-y-6">
+      {/* Email notifications */}
+      <SectionCard
+        icon={BellIcon}
+        title="Email notifications"
+        description="Sent to workspace admins the moment it happens."
+        contentClassName="space-y-4"
+      >
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <Label htmlFor="notif-leads">New lead captured</Label>
+            <p className="text-xs text-muted-foreground">
+              The lead&apos;s details with a link to the leads table.
+            </p>
+          </div>
+          <Switch
+            id="notif-leads"
+            checked={prefs.leadEmails}
+            onCheckedChange={(on) => onPrefChange('leadEmails', on)}
+          />
+        </div>
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <Label htmlFor="notif-handoff">Visitor requests a human</Label>
+            <p className="text-xs text-muted-foreground">
+              Their last message with a link to the inbox — they&apos;re waiting live.
+            </p>
+          </div>
+          <Switch
+            id="notif-handoff"
+            checked={prefs.handoffEmails}
+            onCheckedChange={(on) => onPrefChange('handoffEmails', on)}
+          />
+        </div>
+      </SectionCard>
+
       {/* Retention */}
       <SectionCard
         icon={ClockIcon}

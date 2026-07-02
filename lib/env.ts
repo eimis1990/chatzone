@@ -28,6 +28,12 @@ const envSchema = z.object({
   // Optional: Jina Reader API key for higher crawl limits. URL ingestion works
   // keyless (IP rate-limited) and falls back to a direct fetch if unavailable.
   JINA_API_KEY: z.string().min(1).optional(),
+  // Optional: enables transactional email (lead + handoff notifications).
+  // Without a key, notifications are silently skipped.
+  RESEND_API_KEY: z.string().min(1).optional(),
+  // Verified sender, e.g. "Loqara <notifications@loqara.com>". Falls back to
+  // Resend's sandbox sender (delivers only to the account owner) when unset.
+  EMAIL_FROM: z.string().min(1).optional(),
   // Optional, public (NEXT_PUBLIC_*): analytics & search-engine verification.
   // Read directly in client/layout code; listed here as the env contract's
   // single source of truth. GA4 only loads when the ID is present.

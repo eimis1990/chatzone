@@ -14,6 +14,7 @@ import { z } from 'zod'
 import { createServiceClient } from '@/lib/supabase/service'
 import { isOriginAllowed, corsHeaders } from '@/lib/widget-auth'
 import { createRateLimiter } from '@/lib/ratelimit'
+import { notifyHandoffRequested } from '@/lib/notify'
 import type { Bot, HandoffStatus } from '@/lib/types'
 
 const limiter = createRateLimiter({ capacity: 5, refillPerSec: 0.2 })
@@ -40,9 +41,9 @@ export async function POST(req: Request) {
   const svc = createServiceClient()
   const { data: bot } = await svc
     .from('bots')
-    .select('id, status, config')
+    .select('id, org_id, name, status, config')
     .eq('public_key', publicKey)
-    .single<Pick<Bot, 'id' | 'status' | 'config'>>()
+    .single<Pick<Bot, 'id' | 'org_id' | 'name' | 'status' | 'config'>>()
   if (!bot || bot.status !== 'active') return json({ error: 'Bot not available' }, 404)
   if (!isOriginAllowed(origin, bot.config.allowedDomains ?? [])) {
     return json({ error: 'Origin not allowed' }, 403)
@@ -67,5 +68,19 @@ export async function POST(req: Request) {
     .from('conversations')
     .update({ handoff_status: 'requested', handoff_requested_at: new Date().toISOString() })
     .eq('id', conversationId)
+
+  // Email admins only on a real transition (not a re-tap while already queued).
+  if (current !== 'requested') {
+    const { data: lastMsg } = await svc
+      .from('messages')
+      .select('content')
+      .eq('conversation_id', conversationId)
+      .eq('role', 'user')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle<{ content: string }>()
+    void notifyHandoffRequested(svc, bot, lastMsg?.content ?? '')
+  }
+
   return json({ status: 'requested' })
 }
