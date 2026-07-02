@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { PlusIcon, SettingsIcon } from 'lucide-react'
+import { PlusIcon, SettingsIcon, SparklesIcon, ArrowRightIcon } from 'lucide-react'
 import { requireRole, getUserOrgIds } from '@/lib/auth/guards'
 import { createServerClient } from '@/lib/supabase/server'
 import { CreateBotDialog } from '@/components/client/CreateBotDialog'
@@ -34,8 +34,45 @@ export default async function BotsPage() {
         <p className="text-sm text-muted-foreground">Create and manage your AI chatbots.</p>
       </div>
 
+      {/* First-run: guided onboarding front and center (bots exist → normal grid). */}
+      {orgId && bots.length === 0 && (
+        <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-primary/10 via-background to-background p-8">
+          <div className="max-w-xl">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+              <SparklesIcon className="size-3.5" />
+              Guided setup
+            </span>
+            <h2 className="mt-4 text-2xl font-semibold tracking-tight">Set up your first bot</h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Tell us about your business, we&apos;ll teach the bot from your website, match your
+              brand, and hand you the install snippet — all in about five minutes.
+            </p>
+            <div className="mt-6 flex flex-wrap items-center gap-3">
+              <Link
+                href="/app/onboarding"
+                className="inline-flex h-10 items-center gap-2 rounded-md bg-primary px-6 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                Start guided setup
+                <ArrowRightIcon className="size-4" />
+              </Link>
+              <CreateBotDialog
+                orgId={orgId}
+                trigger={
+                  <button
+                    type="button"
+                    className="text-sm font-medium text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline"
+                  >
+                    or create a blank bot
+                  </button>
+                }
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-        {orgId && (
+        {orgId && bots.length > 0 && (
           <CreateBotDialog
             orgId={orgId}
             trigger={
