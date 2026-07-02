@@ -203,11 +203,12 @@ export function ndjsonChatResponse(
           }
         }
         const products = opts.productSink ?? []
-        // Safety net: the model sometimes describes a single found product in
-        // text (even "tap the card") without calling display_products. If exactly
-        // one candidate was found and nothing was displayed, show that one.
-        if (products.length === 0 && opts.candidates && opts.candidates.size === 1) {
-          products.push(...opts.candidates.values())
+        // Safety net: the model frequently lists found products in text (even
+        // "tap the card") without calling display_products, so no cards render.
+        // If it searched up candidates but displayed nothing, show them as cards
+        // (best-first order preserved, capped) rather than leaving text-only.
+        if (products.length === 0 && opts.candidates && opts.candidates.size >= 1) {
+          products.push(...Array.from(opts.candidates.values()).slice(0, 12))
         }
         if (products.length) line({ t: 'products', v: products })
         const order = opts.orderSink ?? []
