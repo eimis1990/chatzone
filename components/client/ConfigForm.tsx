@@ -1411,7 +1411,8 @@ function SystemPromptSelect({
         </a>
       </div>
 
-      <Select value={selectedId ?? undefined} onValueChange={pick}>
+      {/* `null` (never `undefined`) keeps the Select controlled for its lifetime. */}
+      <Select value={selectedId ?? null} onValueChange={pick}>
         <SelectTrigger className="w-full">
           <SelectValue
             placeholder={
