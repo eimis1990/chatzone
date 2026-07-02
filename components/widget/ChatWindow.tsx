@@ -10,7 +10,7 @@ import { VoiceCallButton, type CallState } from '@/components/voice/VoiceCallBut
 import { LeadForm } from './LeadForm'
 import { WelcomeScreen } from './WelcomeScreen'
 import type { PublicBotConfig } from '@/lib/widget-config'
-import { sqLabel, sqPrompt, sqUrl } from '@/lib/widget-config'
+import { sqLabel, sqMode, sqPrompt, sqUrl } from '@/lib/widget-config'
 import type { ChatTransport } from '@/lib/widget-transport'
 import type { BotLanguage, HandoffStatus, SuggestedQuestion } from '@/lib/types'
 import type { CommerceProduct, OrderStatus } from '@/lib/commerce/types'
@@ -480,20 +480,6 @@ export function ChatWindow({ config, transport, initialLanguage }: ChatWindowPro
     [activeLang],
   )
 
-  /** Welcome-screen quick action: open a link, or send a prompt/label to the bot. */
-  const handleQuickAction = useCallback(
-    (action: SuggestedQuestion) => {
-      const label = sqLabel(action)
-      const url = sqUrl(action)
-      if (url) {
-        showLinkAction(label, url)
-      } else {
-        void sendMessage(sqPrompt(action), label)
-      }
-    },
-    [showLinkAction, sendMessage],
-  )
-
   /** Visitor taps "Talk to a person" → escalate the conversation. */
   const requestHandoff = useCallback(async () => {
     if (handoffStatusRef.current !== 'bot') return
@@ -510,6 +496,37 @@ export function ChatWindow({ config, transport, initialLanguage }: ChatWindowPro
       // Non-critical.
     }
   }, [conversationId, activeLang, transport, sendMessage, updateHandoff])
+
+  /**
+   * Welcome-screen quick action. By mode:
+   *   - 'handoff' → same escalation flow as the "Talk to a person" button
+   *     (works even when that button is hidden by the theme).
+   *   - 'lead'    → open the contact form when lead capture is on; otherwise
+   *     fall back to sending the label as a plain message.
+   *   - 'url'     → reply with a short note + a link button to follow.
+   *   - otherwise → send the prompt (or the label itself) to the bot.
+   */
+  const handleQuickAction = useCallback(
+    (action: SuggestedQuestion) => {
+      const label = sqLabel(action)
+      const mode = sqMode(action)
+      if (mode === 'handoff') {
+        void requestHandoff()
+        return
+      }
+      if (mode === 'lead' && config.leadCapture.enabled && config.leadCapture.fields.length > 0) {
+        setLeadDismissed(false)
+        setShowLeadForm(true)
+        return
+      }
+      if (mode === 'url') {
+        showLinkAction(label, sqUrl(action)!)
+        return
+      }
+      void sendMessage(sqPrompt(action), label)
+    },
+    [showLinkAction, sendMessage, requestHandoff, config.leadCapture.enabled, config.leadCapture.fields.length],
+  )
 
   // While in handoff, poll for the agent's status + new human replies (~4s).
   useEffect(() => {
