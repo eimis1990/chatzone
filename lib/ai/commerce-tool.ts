@@ -49,17 +49,29 @@ export function makeProductTools(
           .describe('Set ONLY when the shopper specifies who the product/gift is for.'),
       }),
       execute: async ({ query, minPrice, maxPrice, audience }) => {
-        const products = searchImpl
-          ? await searchImpl({ query, minPrice, maxPrice, limit: 24, audience })
-          : await searchStore(config.commerce, { query, minPrice, maxPrice, limit: 24 })
-        products.forEach((p) => candidates.set(p.id, p))
-        return products.map((p) => ({
-          id: p.id,
-          title: p.title,
-          price: p.price,
-          inStock: p.inStock,
-          description: p.shortDescription?.slice(0, 140),
-        }))
+        try {
+          const products = searchImpl
+            ? await searchImpl({ query, minPrice, maxPrice, limit: 24, audience })
+            : await searchStore(config.commerce, { query, minPrice, maxPrice, limit: 24 })
+          products.forEach((p) => candidates.set(p.id, p))
+          return products.map((p) => ({
+            id: p.id,
+            title: p.title,
+            price: p.price,
+            inStock: p.inStock,
+            description: p.shortDescription?.slice(0, 140),
+          }))
+        } catch (err) {
+          // An infrastructure failure is NOT "the catalog lacks this item" — tell
+          // the model the truth so it never claims a product is unavailable.
+          console.error('[agent] search_products failed:', err)
+          return {
+            error:
+              'Product search failed temporarily (store API error). Retry the same search once. ' +
+              'If it fails again, tell the shopper you could not check the catalog right now — ' +
+              'do NOT claim the item is unavailable.',
+          }
+        }
       },
     }),
     display_products: tool({
@@ -157,6 +169,9 @@ interface NdjsonOptions {
   headers: Record<string, string>
   /** Called once with the full assistant text when generation finishes (persistence). */
   onText?: (text: string) => Promise<void> | void
+  /** Shown (and persisted) if the stream dies mid-generation — a blank reply
+   *  reads as the bot silently ignoring the visitor. */
+  errorText?: string
 }
 
 /**
@@ -213,8 +228,14 @@ export function ndjsonChatResponse(
         if (products.length) line({ t: 'products', v: products })
         const order = opts.orderSink ?? []
         if (order.length) line({ t: 'order', v: order[0] })
-      } catch {
-        line({ t: 'text', v: '' })
+      } catch (err) {
+        console.error('[agent] chat stream failed:', err)
+        if (!fullText && opts.errorText) {
+          fullText = opts.errorText
+          line({ t: 'text', v: opts.errorText })
+        } else {
+          line({ t: 'text', v: '' })
+        }
       } finally {
         // Persist the assistant turn BEFORE closing the stream. If we close
         // first, the platform can suspend the function before this DB write
@@ -223,8 +244,10 @@ export function ndjsonChatResponse(
         if (opts.onText) {
           try {
             await opts.onText(fullText)
-          } catch {
-            // Swallow — a failed persist must not break the (already-streamed) reply.
+          } catch (err) {
+            // A failed persist must not break the (already-streamed) reply — but
+            // it silently drops the turn from the transcript, so log it.
+            console.error('[agent] failed to persist assistant message:', err)
           }
         }
         controller.close()

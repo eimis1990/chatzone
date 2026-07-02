@@ -68,6 +68,10 @@ export async function searchCatalog(
           c.storeUrl,
           matches.map((m) => m.external_id),
         )
+        // Semantic matches exist but the store API returned nothing → the store
+        // is unreachable, not out of stock. Surface that instead of letting the
+        // keyword fallback hit the same dead store and read as "unavailable".
+        if (live.size === 0) throw new Error('product hydration failed: store API unreachable')
         // Preserve semantic rank order; keep only in-stock, live-priced products.
         const products = matches
           .map((m) => live.get(m.external_id))
@@ -75,8 +79,10 @@ export async function searchCatalog(
         if (products.length) return products
       }
     }
-  } catch {
-    // Any failure → fall back to keyword search below.
+  } catch (err) {
+    if (err instanceof Error && err.message.startsWith('product hydration failed')) throw err
+    // Semantic index errors (RPC/embedding) → log and fall back to keyword search.
+    console.error('[agent] semantic product search failed, falling back to keyword:', err)
   }
 
   return searchStore(c, { query, limit })

@@ -210,6 +210,7 @@ export async function POST(req: Request) {
     productSink,
     orderSink,
     candidates,
+    errorText: contentFor(bot.config, lang).fallbackMessage,
     onText: async (text) => {
       await svc.from('messages').insert({
         conversation_id: convId,
