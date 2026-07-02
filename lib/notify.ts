@@ -91,20 +91,29 @@ export function handoffEmail(
   }
 }
 
-/** Emails of the org's admins (they own the inbox + leads). */
+/** Emails of the org's admins (they own the inbox + leads). Emails live in
+ *  Supabase auth (profiles carries no email column), so resolve each admin
+ *  via the service-role admin API — orgs have a handful of admins at most. */
 async function adminEmails(svc: SupabaseClient, orgId: string): Promise<string[]> {
   const { data, error } = await svc
     .from('organization_members')
-    .select('role, profiles(email)')
+    .select('user_id')
     .eq('org_id', orgId)
     .eq('role', 'admin')
   if (error) {
     console.error('[notify] admin lookup failed:', error.message)
     return []
   }
-  return (data ?? [])
-    .map((r) => (r as { profiles?: { email?: string } | null }).profiles?.email ?? '')
-    .filter(Boolean)
+  const emails: string[] = []
+  for (const row of (data ?? []) as { user_id: string }[]) {
+    const { data: u, error: uErr } = await svc.auth.admin.getUserById(row.user_id)
+    if (uErr) {
+      console.error('[notify] auth user lookup failed:', uErr.message)
+      continue
+    }
+    if (u?.user?.email) emails.push(u.user.email)
+  }
+  return emails
 }
 
 async function orgPrefs(svc: SupabaseClient, orgId: string): Promise<unknown> {
