@@ -86,7 +86,7 @@ describe('mergeVisualTheme', () => {
 
   it('strips every preserved key from a full preset', () => {
     const preset = WIDGET_THEME_PRESETS[0].theme as Record<string, unknown>
-    const merged = mergeVisualTheme({}, preset)
+    const merged = mergeVisualTheme<Record<string, unknown>>({}, preset)
     for (const key of PRESET_PRESERVED_THEME_KEYS) {
       expect(key in merged).toBe(false)
     }
