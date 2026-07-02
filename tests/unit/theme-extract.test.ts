@@ -155,3 +155,52 @@ describe('paletteToTheme', () => {
     expect(paletteToTheme({ colors: [] })).toEqual({})
   })
 })
+
+describe('site background / surface / logo extraction (v2)', () => {
+  const html = `
+    <html><head>
+      <link rel="icon" href="/favicon.ico">
+      <link rel="apple-touch-icon" href="/apple-icon.png">
+    </head><body>
+      <img class="site-logo" src="/img/logo.svg" alt="Acme logo">
+      <style>
+        body { background-color: #101014; color: #fff; }
+        .card { background: #1c1c22; }
+        .btn-primary { background-color: #f59e0b; }
+      </style>
+    </body></html>`
+
+  it('extracts the page background even when it is a neutral', async () => {
+    const { extractSiteTheme } = await import('@/lib/theme-extract')
+    const p = extractSiteTheme(html)
+    expect(p.pageBackground).toBe('#101014')
+    expect(p.surface).toBe('#1c1c22')
+  })
+
+  it('prefers an <img> logo over icons', async () => {
+    const { extractSiteTheme } = await import('@/lib/theme-extract')
+    expect(extractSiteTheme(html).logo).toBe('/img/logo.svg')
+  })
+
+  it('falls back to the apple-touch-icon when no logo img exists', async () => {
+    const { extractSiteTheme } = await import('@/lib/theme-extract')
+    const noImg = html.replace(/<img[^>]*>/, '')
+    expect(extractSiteTheme(noImg).logo).toBe('/apple-icon.png')
+  })
+
+  it('maps a dark site onto a dark widget theme with same-scheme bubbles', async () => {
+    const { extractSiteTheme, paletteToTheme, luminance } = await import('@/lib/theme-extract')
+    const theme = paletteToTheme(extractSiteTheme(html))
+    expect(theme.backgroundColor).toBe('#101014')
+    expect(theme.backgroundImageUrl).toBe('')
+    expect(theme.botBubbleColor).toBe('#1c1c22')
+    expect(theme.primaryColor).toBe('#f59e0b')
+    expect(luminance(theme.bubbleBorderColor!)).toBeLessThan(0.5)
+  })
+
+  it('rejects a cross-scheme surface (inverted footer is not a card)', async () => {
+    const { extractSiteTheme } = await import('@/lib/theme-extract')
+    const lightPage = `<style>body{background:#ffffff}.footer{background:#111111}</style>`
+    expect(extractSiteTheme(lightPage).surface).toBeUndefined()
+  })
+})

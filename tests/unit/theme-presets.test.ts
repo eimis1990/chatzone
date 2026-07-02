@@ -53,3 +53,16 @@ describe('WIDGET_THEME_PRESETS', () => {
     expect(WIDGET_THEME_PRESETS.filter((p) => p.theme.glassBubbles)).toHaveLength(1)
   })
 })
+
+describe('light/dark split', () => {
+  it('offers 2 light and 4 dark presets', async () => {
+    const { luminance } = await import('@/lib/theme-extract')
+    const dark = WIDGET_THEME_PRESETS.filter((p) => luminance(p.theme.backgroundColor!) < 0.5)
+    expect(dark).toHaveLength(4)
+    expect(WIDGET_THEME_PRESETS).toHaveLength(6)
+  })
+
+  it('presets clear a leftover background image', () => {
+    for (const p of WIDGET_THEME_PRESETS) expect(p.theme.backgroundImageUrl).toBe('')
+  })
+})

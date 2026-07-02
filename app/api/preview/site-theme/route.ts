@@ -112,7 +112,22 @@ export async function POST(req: Request) {
 
   const palette = extractSiteTheme(page.text, css)
   const theme = paletteToTheme(palette)
-  if (!theme.primaryColor && !theme.fontFamily) {
+
+  // Site logo → company logo suggestion. We don't fetch it (the visitor's
+  // browser will, from the client's own site) — just resolve + sanity-check it.
+  let logoUrl: string | null = null
+  if (palette.logo) {
+    try {
+      const resolved = new URL(palette.logo, page.finalUrl)
+      if (resolved.protocol === 'https:' || resolved.protocol === 'http:') {
+        logoUrl = resolved.toString()
+      }
+    } catch {
+      // unresolvable logo href — skip
+    }
+  }
+
+  if (!theme.primaryColor && !theme.backgroundColor && !theme.fontFamily && !logoUrl) {
     return NextResponse.json(
       { error: "Couldn't find usable brand colors on that page" },
       { status: 422 },
@@ -121,8 +136,11 @@ export async function POST(req: Request) {
 
   return NextResponse.json({
     theme,
+    logoUrl,
     palette: {
       primary: palette.primary ?? null,
+      background: palette.pageBackground ?? null,
+      surface: palette.surface ?? null,
       colors: palette.colors.slice(0, 6),
       font: palette.font ?? null,
     },

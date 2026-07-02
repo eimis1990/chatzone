@@ -2149,18 +2149,47 @@ function ThemePresetPicker({
   const [matching, setMatching] = useState(false)
 
   const applyTheme = useCallback(
-    (partial: Record<string, unknown>, label: string) => {
+    (partial: Record<string, unknown>, label: string, extras?: { avatarUrl?: string }) => {
+      // Snapshot the whole theme (and logo, when we're about to change it) so
+      // Revert restores EXACTLY what was there — including a background image
+      // the preset clears.
+      const before = structuredClone(watch('theme')) as Record<string, unknown>
+      const beforeAvatar = extras?.avatarUrl !== undefined ? (watch('avatarUrl') ?? '') : undefined
       const preserved = PRESET_PRESERVED_THEME_KEYS as readonly string[]
-      for (const [key, value] of Object.entries(partial)) {
-        if (preserved.includes(key) || value === undefined) continue
+      const write = (key: string, value: unknown) =>
         setValue(`theme.${key}` as FieldPath<FormValues>, value as never, {
           shouldDirty: true,
           shouldValidate: true,
         })
+      for (const [key, value] of Object.entries(partial)) {
+        if (preserved.includes(key) || value === undefined) continue
+        write(key, value)
       }
-      toast.success(`${label} applied — save to make it live`)
+      // A leftover photo behind new preset colors reads as broken — clear it
+      // whenever the applied theme defines its own background.
+      if (partial.backgroundColor !== undefined && partial.backgroundImageUrl === undefined) {
+        write('backgroundImageUrl', '')
+      }
+      if (extras?.avatarUrl) {
+        setValue('avatarUrl', extras.avatarUrl, { shouldDirty: true, shouldValidate: true })
+      }
+      toast.success(`${label} applied`, {
+        description: 'Save to make it live — or revert.',
+        duration: 8000,
+        action: { label: 'Keep', onClick: () => {} },
+        cancel: {
+          label: 'Revert',
+          onClick: () => {
+            for (const [key, value] of Object.entries(before)) write(key, value)
+            if (beforeAvatar !== undefined) {
+              setValue('avatarUrl', beforeAvatar, { shouldDirty: true, shouldValidate: true })
+            }
+            toast.message('Theme reverted')
+          },
+        },
+      })
     },
-    [setValue],
+    [setValue, watch],
   )
 
   // Pre-fill with the bot's own site when we know it.
@@ -2183,13 +2212,13 @@ function ThemePresetPicker({
         body: JSON.stringify({ url }),
       })
       const data = (await res.json().catch(() => null)) as
-        | { theme?: Record<string, unknown>; error?: string }
+        | { theme?: Record<string, unknown>; logoUrl?: string | null; error?: string }
         | null
       if (!res.ok || !data?.theme) {
         toast.error(data?.error ?? 'Could not read a theme from that site')
         return
       }
-      applyTheme(data.theme, 'Website theme')
+      applyTheme(data.theme, 'Website theme', data.logoUrl ? { avatarUrl: data.logoUrl } : undefined)
       setMatchOpen(false)
     } catch {
       toast.error('Could not read a theme from that site')
@@ -2200,19 +2229,7 @@ function ThemePresetPicker({
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between gap-3">
-        <h4 className="text-sm font-semibold">Presets</h4>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={openMatchDialog}
-          className="h-8 gap-1.5 text-xs"
-        >
-          <GlobeIcon className="size-3.5" />
-          Match my website
-        </Button>
-      </div>
+      <h4 className="text-sm font-semibold">Presets</h4>
       <div className="flex flex-wrap gap-2">
         {WIDGET_THEME_PRESETS.map((preset) => (
           <button
@@ -2238,6 +2255,16 @@ function ThemePresetPicker({
             {preset.name}
           </button>
         ))}
+        {/* Rendered as one of the chips so it reads as "another way to theme". */}
+        <button
+          type="button"
+          onClick={openMatchDialog}
+          title="Read your website's brand colors, font, and logo and apply them here"
+          className="flex items-center gap-2 rounded-full border border-dashed border-input bg-background px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:bg-muted hover:text-foreground"
+        >
+          <GlobeIcon className="size-3.5" />
+          Match my website
+        </button>
       </div>
       <p className="text-xs text-muted-foreground">
         Starting points that restyle colors, shape, and font — pick one, then fine-tune anything below.

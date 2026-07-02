@@ -29,12 +29,21 @@ export interface SiteThemePalette {
   themeColorMeta?: string
   /** First concrete (non-generic, non-system) font-family name found. */
   font?: string
+  /** The page's own background color (neutrals allowed — pages are often white/near-black). */
+  pageBackground?: string
+  /** Card/panel/nav surface color — the "subview" background, when distinguishable. */
+  surface?: string
+  /** Site logo candidate (raw src/href as found in the HTML; caller resolves it). */
+  logo?: string
 }
 
 export interface ExtractedWidgetTheme {
   primaryColor?: string
   launcherColor?: string
   botBubbleColor?: string
+  backgroundColor?: string
+  backgroundImageUrl?: string
+  bubbleBorderColor?: string
   fontFamily?: string
 }
 
@@ -135,9 +144,26 @@ function collectColors(
   }
 }
 
+/** Relative luminance 0..1 of a #rrggbb color. */
+export function luminance(hex: string): number {
+  const [r, g, b] = [hex.slice(1, 3), hex.slice(3, 5), hex.slice(5, 7)].map((h) => parseInt(h, 16))
+  return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255
+}
+
+// Selectors describing the page canvas vs. its raised surfaces ("subviews").
+const PAGE_BG_RE = /(?:^|[,\s])(?:html|body|:root|#__next|#root|main)(?![\w-])/i
+const SURFACE_RE = /card|panel|tile|modal|drawer|sheet|popover|dropdown|menu|sidebar|nav|header|footer|section|article|aside|widget|wrapper|container|form/i
+
 export function extractSiteTheme(html: string, css = ''): SiteThemePalette {
   const weights = new Map<string, number>()
   const add = (hex: string, w: number) => weights.set(hex, (weights.get(hex) ?? 0) + w)
+  // Backgrounds are tracked separately from brand colors: the page canvas is
+  // usually a "neutral" (white / near-black) that the brand ranking excludes.
+  const pageBg = new Map<string, number>()
+  const surfaceBg = new Map<string, number>()
+  const anyBg = new Map<string, number>()
+  const bump = (map: Map<string, number>, hex: string, w: number) =>
+    map.set(hex, (map.get(hex) ?? 0) + w)
 
   // 1. <meta name="theme-color" content="…"> — either attribute order.
   let themeColorMeta: string | undefined
@@ -159,6 +185,8 @@ export function extractSiteTheme(html: string, css = ''): SiteThemePalette {
   for (const rule of allCss.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
     const selector = rule[1].trim()
     const ctaBoost = CTA_SELECTOR_RE.test(selector) ? 6 : 0
+    const isPageBg = PAGE_BG_RE.test(selector)
+    const isSurface = SURFACE_RE.test(selector)
     for (const decl of rule[2].split(';')) {
       const idx = decl.indexOf(':')
       if (idx === -1) continue
@@ -169,6 +197,13 @@ export function extractSiteTheme(html: string, css = ''): SiteThemePalette {
       else if (prop === 'background' || prop === 'background-color') w += 2 + ctaBoost
       else if (prop === 'color' || prop === 'fill' || prop === 'border-color') w += 1 + ctaBoost
       collectColors(value, add, w)
+      if (prop === 'background' || prop === 'background-color') {
+        collectColors(value, (hex, bw) => {
+          bump(anyBg, hex, bw)
+          if (isPageBg) bump(pageBg, hex, bw + 30)
+          if (isSurface) bump(surfaceBg, hex, bw + 3)
+        }, 1)
+      }
     }
   }
 
@@ -196,7 +231,53 @@ export function extractSiteTheme(html: string, css = ''): SiteThemePalette {
     if (font) break
   }
 
-  return { primary: colors[0], colors: colors.slice(0, 8), themeColorMeta, font }
+  // 7. Page background: an explicit html/body/:root declaration wins; else the
+  //    most frequent background color anywhere. Neutrals are expected here.
+  const top = (map: Map<string, number>, skip?: string) =>
+    [...map.entries()].filter(([hex]) => hex !== skip).sort((a, b) => b[1] - a[1])[0]?.[0]
+  const pageBackground = top(pageBg) ?? top(anyBg)
+
+  // 8. Surface ("subview") color: the strongest card/panel/nav background that
+  //    differs from the page canvas but lives in the same light/dark scheme —
+  //    a cross-scheme "surface" is usually an inverted footer, not a card.
+  let surface: string | undefined = top(surfaceBg, pageBackground) ?? top(anyBg, pageBackground)
+  if (surface && pageBackground && Math.abs(luminance(surface) - luminance(pageBackground)) > 0.45) {
+    surface = undefined
+  }
+
+  // 9. Logo: an <img> that self-identifies as the logo, else the touch icon /
+  //    favicon. Raw value — the caller resolves it against the final page URL.
+  let logo: string | undefined
+  for (const m of html.matchAll(/<img\b[^>]*>/gi)) {
+    const tag = m[0]
+    if (!/logo/i.test(tag)) continue
+    const src = tag.match(/src\s*=\s*["']([^"']+)["']/i)?.[1]
+    if (src && !src.startsWith('data:')) {
+      logo = src
+      break
+    }
+  }
+  if (!logo) {
+    for (const m of html.matchAll(/<link\b[^>]*>/gi)) {
+      const tag = m[0]
+      const rel = tag.match(/rel\s*=\s*["']([^"']*)["']/i)?.[1]?.toLowerCase() ?? ''
+      if (!/\b(?:apple-touch-icon|icon|shortcut icon)\b/.test(rel)) continue
+      const href = tag.match(/href\s*=\s*["']([^"']+)["']/i)?.[1]
+      if (!href || href.startsWith('data:')) continue
+      logo = href
+      if (rel.includes('apple-touch-icon')) break // best quality — stop looking
+    }
+  }
+
+  return {
+    primary: colors[0],
+    colors: colors.slice(0, 8),
+    themeColorMeta,
+    font,
+    pageBackground,
+    surface,
+    logo,
+  }
 }
 
 // ── Mapping onto the widget theme ───────────────────────────────────────────
@@ -205,6 +286,13 @@ export function extractSiteTheme(html: string, css = ''): SiteThemePalette {
 export function tintToward(hex: string, amount: number): string {
   const [r, g, b] = [hex.slice(1, 3), hex.slice(3, 5), hex.slice(5, 7)].map((h) => parseInt(h, 16))
   const mix = (v: number) => Math.round(v + (255 - v) * amount)
+  return toHex(mix(r), mix(g), mix(b))
+}
+
+/** Mix a hex color toward black; `amount` 0..1 (1 = black). */
+export function shadeToward(hex: string, amount: number): string {
+  const [r, g, b] = [hex.slice(1, 3), hex.slice(3, 5), hex.slice(5, 7)].map((h) => parseInt(h, 16))
+  const mix = (v: number) => Math.round(v * (1 - amount))
   return toHex(mix(r), mix(g), mix(b))
 }
 
@@ -224,8 +312,22 @@ export function paletteToTheme(palette: SiteThemePalette): ExtractedWidgetTheme 
   if (palette.primary) {
     out.primaryColor = palette.primary
     out.launcherColor = palette.primary
-    // Bot bubbles get a very light tint of the brand color so replies feel
-    // on-brand while text stays readable.
+  }
+  if (palette.pageBackground) {
+    // The site's own canvas becomes the chat background (and any previously
+    // uploaded background photo is cleared — it would fight the site's look).
+    out.backgroundColor = palette.pageBackground
+    out.backgroundImageUrl = ''
+    const dark = luminance(palette.pageBackground) < 0.5
+    // Subview/card color → bot bubble; otherwise derive a same-scheme surface.
+    out.botBubbleColor =
+      palette.surface ??
+      (dark ? tintToward(palette.pageBackground, 0.08) : shadeToward(palette.pageBackground, 0.05))
+    out.bubbleBorderColor = dark
+      ? tintToward(palette.pageBackground, 0.18)
+      : shadeToward(palette.pageBackground, 0.12)
+  } else if (palette.primary) {
+    // No canvas found — fall back to a light on-brand bubble tint.
     out.botBubbleColor = tintToward(palette.primary, 0.92)
   }
   if (palette.font) {

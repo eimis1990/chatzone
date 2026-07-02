@@ -20,7 +20,10 @@ export interface WidgetThemePreset {
   theme: WidgetTheme
 }
 
-/** Theme keys a preset (or theme-from-URL) must never override. */
+/** Theme keys a preset (or theme-from-URL) must never override.
+ *  Note: backgroundImageUrl is NOT preserved — a preset defines the full look,
+ *  and a leftover photo behind new colors reads as broken, so applying one
+ *  clears the image (the Revert toast action restores it). */
 export const PRESET_PRESERVED_THEME_KEYS = [
   'position',
   'bubbleIcon',
@@ -28,8 +31,6 @@ export const PRESET_PRESERVED_THEME_KEYS = [
   'launcherShowLogo',
   'showCallButton',
   'showHandoffButton',
-  'backgroundImageUrl',
-  'backgroundImageOpacity',
   'sendIconUrl',
 ] as const
 
@@ -40,6 +41,7 @@ const base = {
   launcherShowLogo: false,
   showCallButton: true,
   showHandoffButton: true,
+  backgroundImageUrl: '',
   backgroundImageOpacity: 100,
   callButtonColor: '',
 } as const satisfies Partial<WidgetTheme>
@@ -122,41 +124,41 @@ export const WIDGET_THEME_PRESETS: WidgetThemePreset[] = [
     },
   },
   {
-    id: 'corporate-blue',
-    name: 'Corporate Blue',
-    description: 'Classic enterprise blue with square-ish corners — safe and familiar.',
+    id: 'graphite',
+    name: 'Graphite',
+    description: 'Neutral charcoal dark with an emerald accent — technical and calm.',
     theme: {
       ...base,
-      primaryColor: '#1d4ed8',
-      launcherColor: '#1d4ed8',
-      botBubbleColor: '#eff6ff',
-      backgroundColor: '#ffffff',
-      bubbleBorderColor: '#dbeafe',
+      primaryColor: '#10b981',
+      launcherColor: '#10b981',
+      botBubbleColor: '#27272a',
+      backgroundColor: '#18181b',
+      bubbleBorderColor: '#3f3f46',
       bubbleBorderWidth: 1,
-      cornerRadius: 8,
-      bubbleRadius: 8,
-      navButtonRadius: 8,
+      cornerRadius: 12,
+      bubbleRadius: 10,
+      navButtonRadius: 10,
       glassBubbles: false,
-      fontFamily: 'inter',
+      fontFamily: 'geist',
     },
   },
   {
-    id: 'playful',
-    name: 'Playful',
-    description: 'Pink pop, extra-round bubbles, and Poppins — friendly and fun.',
+    id: 'mocha-dark',
+    name: 'Mocha Dark',
+    description: 'Warm espresso dark with an amber accent and a serif face — boutique after dark.',
     theme: {
       ...base,
-      primaryColor: '#db2777',
-      launcherColor: '#db2777',
-      botBubbleColor: '#fce7f3',
-      backgroundColor: '#fdf7fb',
-      bubbleBorderColor: '#fbcfe8',
-      bubbleBorderWidth: 0,
-      cornerRadius: 24,
-      bubbleRadius: 22,
-      navButtonRadius: 18,
+      primaryColor: '#f59e0b',
+      launcherColor: '#f59e0b',
+      botBubbleColor: '#3b2f2a',
+      backgroundColor: '#241c19',
+      bubbleBorderColor: '#54453e',
+      bubbleBorderWidth: 1,
+      cornerRadius: 18,
+      bubbleRadius: 16,
+      navButtonRadius: 14,
       glassBubbles: false,
-      fontFamily: 'poppins',
+      fontFamily: 'lora',
     },
   },
 ]
