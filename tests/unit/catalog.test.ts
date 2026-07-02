@@ -31,6 +31,80 @@ describe('buildDoc', () => {
   })
 })
 
+describe('fetchShopifyCatalog', () => {
+  it('paginates with cursors, maps options to attributes, and productType+tags to categories', async () => {
+    const { fetchShopifyCatalog } = await import('@/lib/products/catalog')
+    const page = (nodes: unknown[], hasNextPage: boolean, endCursor: string | null) => ({
+      data: { products: { pageInfo: { hasNextPage, endCursor }, edges: nodes.map((node) => ({ node })) } },
+    })
+    const pages = [
+      page(
+        [
+          {
+            id: 'gid://shopify/Product/1',
+            title: 'Scented Candle',
+            handle: 'scented-candle',
+            onlineStoreUrl: null,
+            description: 'A lovely  candle',
+            productType: 'Candles',
+            tags: ['home', 'gift'],
+            featuredImage: { url: 'https://cdn/img.jpg' },
+            options: [
+              { name: 'Title', values: ['Default Title'] },
+              { name: 'Scent', values: ['Vanilla', 'Lavender'] },
+            ],
+          },
+        ],
+        true,
+        'cur1',
+      ),
+      page([{ id: 'gid://shopify/Product/2', title: 'Mug', handle: 'mug', options: [] }], false, null),
+    ]
+    let call = 0
+    const fetchImpl = (async () => ({ ok: true, json: async () => pages[call++] })) as unknown as typeof fetch
+    const products = await fetchShopifyCatalog('my-store.myshopify.com', 'tok', fetchImpl)
+    expect(products).toHaveLength(2)
+    expect(products[0].id).toBe('gid://shopify/Product/1')
+    expect(products[0].url).toBe('https://my-store.myshopify.com/products/scented-candle')
+    expect(products[0].categories).toEqual(['Candles', 'home', 'gift'])
+    expect(products[0].attributes).toEqual(['Scent: Vanilla, Lavender'])
+    expect(products[0].description).toBe('A lovely candle')
+    expect(products[1].rank).toBe(1)
+  })
+})
+
+describe('fetchMagentoCatalog', () => {
+  it('paginates, uses SKU as the id, and strips description HTML', async () => {
+    const { fetchMagentoCatalog } = await import('@/lib/products/catalog')
+    const pages: Record<number, unknown[]> = {
+      1: [
+        {
+          sku: 'VD01',
+          name: 'Vanil&#279;s žvakė',
+          url_key: 'vaniles-zvake',
+          canonical_url: 'vaniles-zvake.html',
+          short_description: { html: '<p>Kvapni &amp; jauki</p>' },
+          categories: [{ name: 'Namų kvapai' }],
+          small_image: { url: 'https://m/img.jpg' },
+        },
+        { sku: 'VD01', name: 'Duplicate' }, // cross-page dupe guard
+      ],
+      2: [],
+    }
+    const fetchImpl = (async (_url: string, init: { body: string }) => {
+      const page = JSON.parse(init.body).variables.page as number
+      return { ok: true, json: async () => ({ data: { products: { items: pages[page] ?? [] } } }) }
+    }) as unknown as typeof fetch
+    const products = await fetchMagentoCatalog('https://shop.example.lt/store', fetchImpl)
+    expect(products).toHaveLength(1)
+    expect(products[0].id).toBe('VD01')
+    expect(products[0].title).toBe('Vanilės žvakė')
+    expect(products[0].url).toBe('https://shop.example.lt/vaniles-zvake.html')
+    expect(products[0].description).toBe('Kvapni & jauki')
+    expect(products[0].categories).toEqual(['Namų kvapai'])
+  })
+})
+
 describe('fetchWooCatalog', () => {
   it('dedupes products repeated across pages (popularity order shifts)', async () => {
     const { fetchWooCatalog } = await import('@/lib/products/catalog')

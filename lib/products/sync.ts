@@ -1,7 +1,15 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Bot } from '@/lib/types'
 import { embed } from '@/lib/ai/embeddings'
-import { fetchWooCatalog, deriveTags, deriveAudience, buildDoc, type RawProduct } from './catalog'
+import {
+  fetchWooCatalog,
+  fetchShopifyCatalog,
+  fetchMagentoCatalog,
+  deriveTags,
+  deriveAudience,
+  buildDoc,
+  type RawProduct,
+} from './catalog'
 import { aiEnrich } from './enrich'
 
 /** A stage of the sync, reported for the live progress UI. */
@@ -34,8 +42,12 @@ export async function syncProductCatalog(
   let products: RawProduct[] = []
   if (c.provider === 'woocommerce' && c.storeUrl) {
     products = await fetchWooCatalog(c.storeUrl)
+  } else if (c.provider === 'shopify' && c.shopifyDomain && c.shopifyToken) {
+    products = await fetchShopifyCatalog(c.shopifyDomain, c.shopifyToken)
+  } else if (c.provider === 'magento' && c.storeUrl) {
+    products = await fetchMagentoCatalog(c.storeUrl)
   }
-  // Shopify/Magento/feed catalog sync: future — keyword search still works.
+  // 'feed' has no live price/stock API to hydrate from — keyword search only.
   if (products.length === 0) {
     report({ phase: 'done', synced: 0 })
     return { synced: 0 }

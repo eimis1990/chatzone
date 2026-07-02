@@ -1,5 +1,6 @@
 import { createServiceClient } from '@/lib/supabase/service'
 import { syncProductCatalog } from '@/lib/products/sync'
+import { semanticIndexSupported } from '@/lib/products/search'
 import type { Bot } from '@/lib/types'
 
 export const maxDuration = 300
@@ -23,7 +24,7 @@ export async function GET(req: Request) {
   const results: Record<string, string> = {}
   for (const bot of (bots ?? []) as Bot[]) {
     const c = bot.config.commerce
-    if (!c?.enabled || c.provider !== 'woocommerce' || !c.storeUrl) continue
+    if (!c?.enabled || !semanticIndexSupported(c)) continue
     const { count } = await svc
       .from('product_embeddings')
       .select('id', { count: 'exact', head: true })

@@ -143,6 +143,40 @@ export async function searchMagentoProducts(
   return items.map((it) => normalizeMagentoProduct(it, base))
 }
 
+const SKUS_QUERY = `query BySkus($skus: [String!], $n: Int!) {
+  products(filter: { sku: { in: $skus } }, pageSize: $n) {
+    items {
+      uid
+      sku
+      name
+      url_key
+      canonical_url
+      stock_status
+      short_description { html }
+      small_image { url }
+      price_range { minimum_price { final_price { value currency } } }
+    }
+  }
+}`
+
+/**
+ * Fetch products by SKU for LIVE price/stock hydration of the semantic index.
+ * Product ids are rewritten to the SKU so they line up with the index's
+ * external_id (uid is not filterable in the GraphQL API).
+ */
+export async function fetchMagentoProductsBySkus(
+  storeUrl: string,
+  skus: string[],
+  deps: CommerceDeps = {},
+): Promise<CommerceProduct[]> {
+  if (skus.length === 0) return []
+  const base = magentoBase(storeUrl)
+  const json = await graphql(base, SKUS_QUERY, { skus, n: skus.length }, deps)
+  return (json.data?.products?.items ?? [])
+    .filter((it) => (it.sku ?? '').trim())
+    .map((it) => ({ ...normalizeMagentoProduct(it, base), id: String(it.sku) }))
+}
+
 /** Validate the GraphQL catalog is reachable; return a best-effort product count. */
 export async function validateMagentoStore(
   storeUrl: string,

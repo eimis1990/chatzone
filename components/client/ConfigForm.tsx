@@ -1784,8 +1784,8 @@ function CommerceSection({ control, watch, botId }: CommerceSectionProps) {
               Your bot will search this store&apos;s catalog live and show product cards in chat.
             </p>
 
-            {/* Semantic catalog index — WooCommerce only for now */}
-            {provider === 'woocommerce' && (
+            {/* Semantic catalog index — WooCommerce/Shopify/Magento (feed has no live price/stock API) */}
+            {provider !== 'feed' && (
               <div className="space-y-2 rounded-lg border p-4">
                 <div className="flex items-center justify-between gap-3 flex-wrap">
                   <div>
@@ -1799,7 +1799,7 @@ function CommerceSection({ control, watch, botId }: CommerceSectionProps) {
                     type="button"
                     variant="outline"
                     size="sm"
-                    disabled={syncState.status === 'loading' || !storeUrl.trim()}
+                    disabled={syncState.status === 'loading' || !testReady}
                     onClick={handleSync}
                   >
                     {syncState.status === 'loading' ? 'Syncing…' : 'Sync catalog'}

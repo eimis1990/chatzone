@@ -5,6 +5,8 @@ import type { Audience } from './catalog'
 import { embedOne } from '@/lib/ai/embeddings'
 import { searchStore } from '@/lib/commerce'
 import { storeOrigin, normalizeWooProduct } from '@/lib/commerce/woocommerce'
+import { fetchShopifyProductsByIds } from '@/lib/commerce/shopify'
+import { fetchMagentoProductsBySkus } from '@/lib/commerce/magento'
 
 export interface SearchOptions {
   /** Restrict to this recipient (plus unisex) — e.g. 'men' for "gifts for men". */
@@ -37,6 +39,28 @@ async function hydrateWoo(storeUrl: string, ids: string[]): Promise<Map<string, 
   return map
 }
 
+type Commerce = NonNullable<Bot['config']['commerce']>
+
+/** True when the provider supports a synced semantic index + live hydration. */
+export function semanticIndexSupported(c: Commerce): boolean {
+  if (c.provider === 'woocommerce') return Boolean(c.storeUrl)
+  if (c.provider === 'shopify') return Boolean(c.shopifyDomain && c.shopifyToken)
+  if (c.provider === 'magento') return Boolean(c.storeUrl)
+  return false // 'feed' has no live price/stock API to hydrate from
+}
+
+/** Live price/stock hydration for semantic matches, keyed by the index's external_id. */
+async function hydrateLive(c: Commerce, ids: string[]): Promise<Map<string, CommerceProduct>> {
+  if (c.provider === 'woocommerce') return hydrateWoo(c.storeUrl, ids)
+  const map = new Map<string, CommerceProduct>()
+  const products =
+    c.provider === 'shopify'
+      ? await fetchShopifyProductsByIds(c.shopifyDomain!, c.shopifyToken!, ids)
+      : await fetchMagentoProductsBySkus(c.storeUrl, ids)
+  for (const p of products) map.set(p.id, p)
+  return map
+}
+
 /**
  * Product search for a bot: semantic (concept-level) match against the synced
  * index, hydrated with LIVE prices/stock — falls back to live keyword search
@@ -53,7 +77,7 @@ export async function searchCatalog(
   if (!c?.enabled) return []
 
   try {
-    if (c.provider === 'woocommerce' && c.storeUrl && (await hasIndex(bot.id, db))) {
+    if (semanticIndexSupported(c) && (await hasIndex(bot.id, db))) {
       const embedding = await embedOne(query)
       const { data } = await db.rpc('match_products', {
         p_bot_id: bot.id,
@@ -64,8 +88,8 @@ export async function searchCatalog(
       })
       const matches = (data ?? []) as { external_id: string }[]
       if (matches.length) {
-        const live = await hydrateWoo(
-          c.storeUrl,
+        const live = await hydrateLive(
+          c,
           matches.map((m) => m.external_id),
         )
         // Semantic matches exist but the store API returned nothing → the store

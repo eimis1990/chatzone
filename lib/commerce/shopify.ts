@@ -111,6 +111,43 @@ export async function searchShopifyProducts(
   return edges.map((e) => normalizeShopifyProduct(e.node, domain))
 }
 
+const NODES_QUERY = `query Nodes($ids: [ID!]!) {
+  nodes(ids: $ids) {
+    ... on Product {
+      id
+      title
+      handle
+      onlineStoreUrl
+      availableForSale
+      description
+      featuredImage { url }
+      priceRange { minVariantPrice { amount currencyCode } }
+    }
+  }
+}`
+
+interface ShopifyNodesResponse {
+  data?: { nodes?: Array<ShopifyProductNode | null> }
+  errors?: unknown
+}
+
+/**
+ * Fetch products by Storefront GID for LIVE price/stock hydration of the
+ * semantic index (which intentionally stores no prices).
+ */
+export async function fetchShopifyProductsByIds(
+  domain: string,
+  token: string,
+  ids: string[],
+  deps: CommerceDeps = {},
+): Promise<CommerceProduct[]> {
+  if (ids.length === 0) return []
+  const json = (await storefront(domain, token, NODES_QUERY, { ids }, deps)) as ShopifyNodesResponse
+  return (json.data?.nodes ?? [])
+    .filter((n): n is ShopifyProductNode => Boolean(n?.id))
+    .map((n) => normalizeShopifyProduct(n, domain))
+}
+
 /** Connectivity/credential check. `total` is a best-effort (0/1) — Storefront has no count. */
 export async function validateShopifyStore(
   domain: string,

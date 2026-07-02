@@ -1,4 +1,6 @@
 import { storeOrigin, decodeEntities } from '@/lib/commerce/woocommerce'
+import { shopifyDomain } from '@/lib/commerce/shopify'
+import { magentoBase } from '@/lib/commerce/magento'
 
 // Index the bulk of the catalog so the semantic search can find ANY relevant
 // product (e.g. a candle for a gift), not just the top sellers. Most-popular
@@ -88,6 +90,167 @@ export async function fetchWooCatalog(
       if (out.length >= MAX_PRODUCTS) break
     }
     if (rows.length < PER_PAGE) break
+  }
+  return out
+}
+
+// ---------------------------------------------------------------------------
+// Shopify catalog (Storefront GraphQL, cursor pagination, best-sellers first).
+// ---------------------------------------------------------------------------
+
+interface ShopifyCatalogNode {
+  id: string
+  title?: string
+  handle?: string
+  onlineStoreUrl?: string | null
+  description?: string
+  productType?: string
+  tags?: string[]
+  featuredImage?: { url?: string } | null
+  options?: Array<{ name?: string; values?: string[] }>
+}
+
+const SHOPIFY_CATALOG_QUERY = `query Catalog($first: Int!, $after: String) {
+  products(first: $first, after: $after, sortKey: BEST_SELLING) {
+    pageInfo { hasNextPage endCursor }
+    edges { node {
+      id title handle onlineStoreUrl description productType tags
+      featuredImage { url }
+      options { name values }
+    } }
+  }
+}`
+
+/** Fetch the Shopify catalog via the Storefront API, best-sellers first. */
+export async function fetchShopifyCatalog(
+  domain: string,
+  token: string,
+  fetchImpl: typeof fetch = fetch,
+): Promise<RawProduct[]> {
+  const base = `https://${shopifyDomain(domain)}/api/2024-07/graphql.json`
+  const out: RawProduct[] = []
+  const seen = new Set<string>()
+  let after: string | null = null
+  while (out.length < MAX_PRODUCTS) {
+    const res = await fetchImpl(base, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Shopify-Storefront-Access-Token': token },
+      body: JSON.stringify({ query: SHOPIFY_CATALOG_QUERY, variables: { first: PER_PAGE, after } }),
+    })
+    if (!res.ok) break
+    const json = (await res.json()) as {
+      data?: {
+        products?: {
+          pageInfo?: { hasNextPage?: boolean; endCursor?: string }
+          edges?: Array<{ node: ShopifyCatalogNode }>
+        }
+      }
+    }
+    const conn = json.data?.products
+    const edges = conn?.edges ?? []
+    if (!edges.length) break
+    for (const { node } of edges) {
+      if (!node?.id || seen.has(node.id)) continue
+      seen.add(node.id)
+      out.push({
+        id: node.id,
+        title: node.title ?? '',
+        url: node.onlineStoreUrl || `https://${shopifyDomain(domain)}/products/${node.handle ?? ''}`,
+        imageUrl: node.featuredImage?.url ?? undefined,
+        description: (node.description ?? '').replace(/\s+/g, ' ').trim(),
+        // Shopify has no category tree on the Storefront API; productType + tags
+        // carry the same topical/audience signal for tagging + audience detection.
+        categories: [node.productType ?? '', ...(node.tags ?? []).slice(0, 10)].filter(Boolean),
+        attributes: (node.options ?? [])
+          .filter((o) => o.name && o.name !== 'Title' && (o.values?.length ?? 0) > 0)
+          .map((o) => `${o.name}: ${(o.values ?? []).join(', ')}`)
+          .slice(0, 8),
+        onSale: false,
+        featured: false,
+        rank: out.length,
+      })
+      if (out.length >= MAX_PRODUCTS) break
+    }
+    if (!conn?.pageInfo?.hasNextPage || !conn.pageInfo.endCursor) break
+    after = conn.pageInfo.endCursor
+  }
+  return out
+}
+
+// ---------------------------------------------------------------------------
+// Magento catalog (GraphQL Storefront, page pagination). id = SKU — the only
+// stable identifier we can later filter by for live price/stock hydration.
+// ---------------------------------------------------------------------------
+
+interface MagentoCatalogItem {
+  sku?: string
+  name?: string
+  url_key?: string
+  canonical_url?: string | null
+  description?: { html?: string } | null
+  short_description?: { html?: string } | null
+  small_image?: { url?: string } | null
+  categories?: Array<{ name?: string }>
+}
+
+const MAGENTO_CATALOG_QUERY = `query Catalog($n: Int!, $page: Int!) {
+  products(filter: { price: { from: "0" } }, pageSize: $n, currentPage: $page) {
+    total_count
+    items {
+      sku name url_key canonical_url
+      short_description { html }
+      description { html }
+      small_image { url }
+      categories { name }
+    }
+  }
+}`
+
+/** Fetch the Magento catalog via the GraphQL Storefront API (no auth). */
+export async function fetchMagentoCatalog(
+  storeUrl: string,
+  fetchImpl: typeof fetch = fetch,
+): Promise<RawProduct[]> {
+  const base = magentoBase(storeUrl)
+  const out: RawProduct[] = []
+  const seen = new Set<string>()
+  for (let page = 1; out.length < MAX_PRODUCTS; page++) {
+    const res = await fetchImpl(`${base}/graphql`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({ query: MAGENTO_CATALOG_QUERY, variables: { n: PER_PAGE, page } }),
+    })
+    if (!res.ok) break
+    const json = (await res.json()) as {
+      data?: { products?: { items?: MagentoCatalogItem[]; total_count?: number } }
+    }
+    const items = json.data?.products?.items ?? []
+    if (!items.length) break
+    for (const p of items) {
+      const sku = (p.sku ?? '').trim()
+      if (!sku || seen.has(sku)) continue
+      seen.add(sku)
+      out.push({
+        id: sku,
+        title: decodeEntities(p.name ?? ''),
+        url: p.canonical_url
+          ? /^https?:\/\//.test(p.canonical_url)
+            ? p.canonical_url
+            : `${base}/${p.canonical_url.replace(/^\/+/, '')}`
+          : p.url_key
+            ? `${base}/${p.url_key}`
+            : base,
+        imageUrl: p.small_image?.url ?? undefined,
+        description: stripHtml(p.short_description?.html) || stripHtml(p.description?.html),
+        categories: (p.categories ?? []).map((c) => decodeEntities(c.name ?? '')).filter(Boolean),
+        attributes: [],
+        onSale: false,
+        featured: false,
+        rank: out.length,
+      })
+      if (out.length >= MAX_PRODUCTS) break
+    }
+    if (items.length < PER_PAGE) break
   }
   return out
 }
