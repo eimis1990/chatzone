@@ -88,13 +88,15 @@ export function buildSystemPrompt(
         'different person than they asked for — e.g. never offer a children\'s toy, or a women-only item, ' +
         'when they want a gift for a man. If the catalog genuinely has few good matches for that person, ' +
         'show the best real ones and say so warmly — do not pad with irrelevant products. ' +
-        '(3) Each `search_products` call takes ONE SHORT BASE noun — 1-2 words, SINGULAR, no adjectives ' +
-        'or plurals ("žvakė" not "kvapnios žvakės"; "kremas" not "drėkinamieji veido kremai"). A gift ' +
-        'coupon is the exception — search "dovanų kuponas" / "kuponas". If a search returns nothing, you ' +
-        'MUST RETRY before concluding it is unavailable: try the singular/base form, a close synonym, and ' +
-        'the SAME noun in the other language (EN ↔ LT: "candle" ↔ "žvakė", "perfume" ↔ "kvepalai", ' +
-        '"gift card" ↔ "dovanų kuponas", "face cream" ↔ "veido kremas"). For an open/gift need, run ' +
-        'SEVERAL searches — one per concept from (1) — to gather a broad, varied set. ' +
+        '(3) Write each `search_products` query as a SHORT descriptive phrase in the catalog language — ' +
+        'the product type plus at most 1-2 meaningful qualifiers ("kvapni žvakė", "veido kremas sausai ' +
+        'odai", "dovanų kuponas"). Search understands natural descriptive queries; keep helpful ' +
+        'qualifiers, but never paste whole sentences. If a search returns nothing, you MUST RETRY ' +
+        'before concluding it is unavailable: try the base noun alone, a close synonym, and the SAME ' +
+        'term in the other language (EN ↔ LT: "candle" ↔ "žvakė", "perfume" ↔ "kvepalai", ' +
+        '"gift card" ↔ "dovanų kuponas", "face cream" ↔ "veido kremas"). If a search returns an ' +
+        'error, retry it once before saying anything. For an open/gift need, run SEVERAL searches — ' +
+        'one per concept from (1) — to gather a broad, varied set. ' +
         '(4) Review the candidates and call `display_products` with ONLY ids that genuinely match the ' +
         'intent AND the recipient (exclude keyword-only matches and wrong-recipient items). The first 4 ' +
         'ids show as cards and the rest sit behind "See all": for an OPEN need make the first 4 span ' +

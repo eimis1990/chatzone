@@ -34,11 +34,13 @@ export function makeProductTools(
     search_products: tool({
       description:
         'Search the store catalog and get CANDIDATE products to review (not shown to the user yet). ' +
-        'Use the product type/noun in the catalog language (this store is often Lithuanian), e.g. ' +
-        '"veido kremas" for a face cream — avoid vague single adjectives. When the shopper names a ' +
-        'recipient (a gift/product "for men", "for women", "for kids/a child"), ALSO set `audience` so ' +
-        'results are limited to items that suit that person — this is how you avoid showing, say, a ' +
-        "child's toy for a men's-gift request. You may search multiple times.",
+        'Use a short descriptive phrase in the catalog language (this store is often Lithuanian) — ' +
+        'the product type plus at most 1-2 qualifiers, e.g. "kvapni žvakė" or "veido kremas sausai ' +
+        'odai". If it returns an { error }, retry the same search once before telling the shopper ' +
+        'anything. When the shopper names a recipient (a gift/product "for men", "for women", ' +
+        '"for kids/a child"), ALSO set `audience` so results are limited to items that suit that ' +
+        "person — this is how you avoid showing, say, a child's toy for a men's-gift request. " +
+        'You may search multiple times.',
       inputSchema: z.object({
         query: z.string().describe('Product type/keywords in the catalog language'),
         minPrice: z.number().optional().describe('Minimum price in major units (e.g. euros)'),
