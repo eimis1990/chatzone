@@ -3,7 +3,10 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { LandingNav } from '@/components/landing/LandingNav'
 import { Footer } from '@/components/landing/sections'
-import { getAllPosts, getPostBySlug } from '@/lib/blog'
+import { ArticleAside } from '@/components/blog/ArticleAside'
+import { RelatedGuides } from '@/components/blog/RelatedGuides'
+import { LinkedinIcon } from '@/components/blog/social-icons'
+import { getAllPosts, getPostBySlug, getRelatedPosts } from '@/lib/blog'
 import { SITE_URL, SITE_NAME } from '@/lib/site'
 
 export function generateStaticParams() {
@@ -87,62 +90,86 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     ],
   }
 
+  const related = getRelatedPosts(slug)
+  const postUrl = `${SITE_URL}/blog/${slug}`
+
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <LandingNav solid />
-      <main className="mx-auto min-h-svh max-w-2xl px-5 pb-24 pt-28">
+      <main className="mx-auto min-h-svh max-w-[60rem] px-5 pb-24 pt-28">
         <Link href="/blog" className="text-sm font-medium text-primary hover:underline">
           ← All posts
         </Link>
-        <header className="mb-8 mt-6">
-          <p className="text-xs uppercase tracking-wide text-gray-500">
-            {formatDate(post.date)} · {post.readingMinutes} min read
-          </p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight text-gray-900 sm:text-4xl">
-            {post.title}
-          </h1>
-          <div className="mt-5 flex items-center gap-3">
-            {post.authorImage ? (
+
+        <div className="mt-6 lg:grid lg:grid-cols-[minmax(0,1fr)_15rem] lg:gap-12">
+          <article className="min-w-0">
+            <header className="mb-8">
+              <p className="text-xs uppercase tracking-wide text-gray-500">
+                {formatDate(post.date)} · {post.readingMinutes} min read
+              </p>
+              <h1 className="mt-2 text-3xl font-semibold tracking-tight text-gray-900 sm:text-4xl">
+                {post.title}
+              </h1>
+              <div className="mt-5 flex items-center gap-3">
+                {post.authorImage ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={post.authorImage}
+                    alt={post.author}
+                    width={40}
+                    height={40}
+                    className="size-10 rounded-full object-cover ring-1 ring-black/[0.06]"
+                  />
+                ) : null}
+                <span className="text-sm leading-tight">
+                  <span className="font-semibold text-gray-900">{post.author}</span>
+                  <span className="text-gray-500"> • {post.authorRole}</span>
+                </span>
+                {post.authorLinkedin && (
+                  <a
+                    href={post.authorLinkedin}
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label={`${post.author} on LinkedIn`}
+                    title={`${post.author} on LinkedIn`}
+                    className="text-gray-400 transition-colors hover:text-[#0A66C2]"
+                  >
+                    <LinkedinIcon className="size-4" />
+                  </a>
+                )}
+              </div>
+            </header>
+
+            {post.image && (
               // eslint-disable-next-line @next/next/no-img-element
               <img
-                src={post.authorImage}
-                alt={post.author}
-                width={40}
-                height={40}
-                className="size-10 rounded-full object-cover ring-1 ring-black/[0.06]"
+                src={post.image}
+                alt={post.title}
+                width={1200}
+                height={675}
+                className="mb-10 aspect-video w-full rounded-2xl object-cover"
               />
-            ) : null}
-            <span className="text-sm leading-tight">
-              <span className="font-semibold text-gray-900">{post.author}</span>
-              <span className="text-gray-500"> • {post.authorRole}</span>
-            </span>
-          </div>
-        </header>
+            )}
 
-        {post.image && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={post.image}
-            alt={post.title}
-            width={1200}
-            height={675}
-            className="mb-10 aspect-video w-full rounded-2xl object-cover"
-          />
-        )}
+            <div className="article" dangerouslySetInnerHTML={{ __html: post.html }} />
 
-        <div className="article" dangerouslySetInnerHTML={{ __html: post.html }} />
+            <aside className="mt-12 rounded-2xl border bg-gray-50 p-6 text-center">
+              <p className="text-lg font-semibold text-gray-900">See Loqara on your store</p>
+              <p className="mt-1 text-sm text-gray-600">AI chat &amp; voice support, embedded in one line.</p>
+              <Link
+                href="/#get-started"
+                className="mt-4 inline-flex h-11 items-center justify-center rounded-full bg-primary px-6 text-sm font-semibold text-white transition-colors hover:bg-primary-hover"
+              >
+                Get started
+              </Link>
+            </aside>
+          </article>
 
-        <aside className="mt-12 rounded-2xl border bg-gray-50 p-6 text-center">
-          <p className="text-lg font-semibold text-gray-900">See Loqara on your store</p>
-          <p className="mt-1 text-sm text-gray-600">AI chat &amp; voice support, embedded in one line.</p>
-          <Link
-            href="/#get-started"
-            className="mt-4 inline-flex h-11 items-center justify-center rounded-full bg-primary px-6 text-sm font-semibold text-white transition-colors hover:bg-primary-hover"
-          >
-            Get started
-          </Link>
-        </aside>
+          <ArticleAside title={post.title} headings={post.headings} url={postUrl} />
+        </div>
+
+        <RelatedGuides posts={related} />
       </main>
       <Footer />
     </>

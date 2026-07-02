@@ -22,13 +22,36 @@ export interface BlogPost {
   readingMinutes: number
   /** Rendered HTML body (frontmatter stripped). */
   html: string
+  /** H2 section headings (with anchor ids) for the on-this-page table of contents. */
+  headings: Heading[]
   /** Q&A pulled from the post's "Frequently asked questions" section, for FAQ schema. */
   faq: FaqItem[]
+  /** Explicit related-post slugs (frontmatter `related:`); else recent posts are used. */
+  related?: string[]
+  /** Author's LinkedIn profile URL, shown as a button in the byline. */
+  authorLinkedin?: string
+}
+
+export interface Heading {
+  id: string
+  text: string
+  level: number
 }
 
 export interface FaqItem {
   question: string
   answer: string
+}
+
+/** URL-safe slug for a heading anchor (unicode letters/numbers kept). */
+function slugify(s: string): string {
+  return s
+    .toLowerCase()
+    .trim()
+    .replace(/[^\p{L}\p{N}\s-]/gu, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
 }
 
 /** Rough reading time at ~200 words/min, floored at 1. */
@@ -37,12 +60,28 @@ function readingTime(markdown: string): number {
   return Math.max(1, Math.round(words / 200))
 }
 
-/** Render Markdown to HTML, then wrap tables so wide ones scroll on mobile. */
-function renderBody(body: string): string {
-  const html = marked.parse(body, { async: false }) as string
-  return html
+/**
+ * Render Markdown to HTML: inject anchor ids on H2/H3 (collecting H2s for the
+ * table of contents) and wrap tables so wide ones scroll on mobile.
+ */
+function renderBody(body: string): { html: string; headings: Heading[] } {
+  let html = marked.parse(body, { async: false }) as string
+  const headings: Heading[] = []
+  const seen = new Map<string, number>()
+  // marked emits bare <h2>/<h3> (no attributes) — add ids for anchor links.
+  html = html.replace(/<h([23])>([\s\S]*?)<\/h\1>/g, (_m, depth: string, inner: string) => {
+    const label = inner.replace(/<[^>]+>/g, '').trim()
+    let id = slugify(label) || 'section'
+    const n = seen.get(id) ?? 0
+    seen.set(id, n + 1)
+    if (n) id = `${id}-${n}`
+    if (depth === '2') headings.push({ id, text: label, level: 2 })
+    return `<h${depth} id="${id}">${inner}</h${depth}>`
+  })
+  html = html
     .replace(/<table>/g, '<div class="table-wrap"><table>')
     .replace(/<\/table>/g, '</table></div>')
+  return { html, headings }
 }
 
 /** Strip light inline Markdown so an FAQ answer reads as clean text in schema. */
@@ -102,6 +141,7 @@ function extractFaq(body: string): FaqItem[] {
 // The site owner writes the posts; show their headshot unless a post overrides it.
 const OWNER = 'Eimantas Kudarauskas'
 const OWNER_PHOTO = '/ceo.webp'
+const OWNER_LINKEDIN = 'https://www.linkedin.com/in/ekudarauskas/'
 
 const BLOG_DIR = join(process.cwd(), 'content', 'blog')
 
@@ -124,6 +164,7 @@ function fileToPost(filename: string): BlogPost {
   const raw = readFileSync(join(BLOG_DIR, filename), 'utf8')
   const { data, body } = parseFrontmatter(raw)
   const author = data.author ?? 'Loqara'
+  const { html, headings } = renderBody(body)
   return {
     slug: filename.replace(/\.mdx?$/, ''),
     title: data.title ?? 'Untitled',
@@ -133,9 +174,14 @@ function fileToPost(filename: string): BlogPost {
     author,
     authorRole: data.authorRole ?? 'Founder',
     authorImage: data.authorImage || (author === OWNER ? OWNER_PHOTO : undefined),
+    authorLinkedin: data.authorLinkedin || (author === OWNER ? OWNER_LINKEDIN : undefined),
     image: data.image || undefined,
     readingMinutes: readingTime(body),
-    html: renderBody(body),
+    html,
+    headings,
+    related: data.related
+      ? data.related.split(',').map((s) => s.trim()).filter(Boolean)
+      : undefined,
     faq: extractFaq(body),
   }
 }
@@ -153,4 +199,25 @@ export function getAllPosts(): BlogPost[] {
 
 export function getPostBySlug(slug: string): BlogPost | null {
   return getAllPosts().find((p) => p.slug === slug) ?? null
+}
+
+/**
+ * Posts to feature as "related guides" under a post: the explicit `related:`
+ * slugs first (in order), then the most recent other posts to fill up to `limit`.
+ */
+export function getRelatedPosts(slug: string, limit = 3): BlogPost[] {
+  const all = getAllPosts()
+  const current = all.find((p) => p.slug === slug)
+  if (!current) return []
+  const bySlug = new Map(all.map((p) => [p.slug, p]))
+  const picks: BlogPost[] = []
+  const add = (p?: BlogPost) => {
+    if (p && p.slug !== slug && !picks.some((x) => x.slug === p.slug)) picks.push(p)
+  }
+  for (const rel of current.related ?? []) add(bySlug.get(rel))
+  for (const p of all) {
+    if (picks.length >= limit) break
+    add(p)
+  }
+  return picks.slice(0, limit)
 }

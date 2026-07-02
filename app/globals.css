@@ -280,6 +280,11 @@ html.lenis body {
   font-size: 1rem;
   line-height: 1.75;
 }
+/* Anchored TOC jumps land below the fixed nav, not under it. */
+.article h2,
+.article h3 {
+  scroll-margin-top: 6.5rem;
+}
 .article h2 {
   margin-top: 2.5rem;
   margin-bottom: 0.75rem;
