@@ -6,6 +6,7 @@ import { isOriginAllowed, corsHeaders } from '@/lib/widget-auth'
 import { retrieveContext, serviceRetrievalDeps } from '@/lib/ai/retrieval'
 import { buildMessages, contentFor, defaultLanguage, type ChatMessage } from '@/lib/ai/prompt'
 import { commerceEnabled, makeProductTools, ndjsonChatResponse, ndjsonText } from '@/lib/ai/commerce-tool'
+import { DEFAULT_CHAT_MODEL, DEFAULT_TEMPERATURE } from '@/lib/ai/chat-models'
 import { searchCatalog } from '@/lib/products/search'
 import { createRateLimiter } from '@/lib/ratelimit'
 import { detectHandoffIntent, HANDOFF_ACK } from '@/lib/handoff'
@@ -184,8 +185,8 @@ export async function POST(req: Request) {
   // found product when the model forgets to call display_products.
   const candidates = new Map<string, CommerceProduct>()
 
-  return ndjsonChatResponse(openai(bot.config.model || 'gpt-4o-mini'), messages, {
-    temperature: bot.config.temperature ?? 0.3,
+  return ndjsonChatResponse(openai(bot.config.model || DEFAULT_CHAT_MODEL), messages, {
+    temperature: bot.config.temperature ?? DEFAULT_TEMPERATURE,
     headers: baseHeaders,
     tools: commerce
       ? makeProductTools(

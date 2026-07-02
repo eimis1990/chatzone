@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import type { BotConfig } from '@/lib/types'
+import { DEFAULT_CHAT_MODEL, DEFAULT_TEMPERATURE } from '@/lib/ai/chat-models'
 
 /** Max system-prompt length (chars). Generous — detailed prompts with examples
  *  can run long; the same cap is used by the prompt library + bot config. */
@@ -143,8 +144,8 @@ export const botConfigFormSchema = z.object({
   // Append a hidden instruction asking the model to format replies as rich
   // Markdown (bold, lists, links). On by default.
   richResponses: z.boolean().default(true),
-  model: z.string().default('gpt-4o-mini'),
-  temperature: z.number().min(0).max(2).default(0.3),
+  model: z.string().default(DEFAULT_CHAT_MODEL),
+  temperature: z.number().min(0).max(2).default(DEFAULT_TEMPERATURE),
   leadCapture: z
     .object({
       enabled: z.boolean().default(false),

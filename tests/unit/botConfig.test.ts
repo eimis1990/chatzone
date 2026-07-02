@@ -1,24 +1,36 @@
 import { describe, it, expect } from 'vitest'
 import { botConfigSchema, botConfigFormSchema, defaultBotConfig } from '@/lib/validation/schemas'
+import { DEFAULT_CHAT_MODEL, DEFAULT_TEMPERATURE } from '@/lib/ai/chat-models'
 
 describe('defaultBotConfig', () => {
   it('produces a config that satisfies the schema', () => {
     const cfg = defaultBotConfig('Acme Assistant')
     expect(() => botConfigSchema.parse(cfg)).not.toThrow()
     expect(cfg.displayName).toBe('Acme Assistant')
-    expect(cfg.model).toBe('gpt-4o-mini')
+    expect(cfg.model).toBe(DEFAULT_CHAT_MODEL)
   })
 })
 
 describe('botConfigSchema', () => {
+  it('defaults new bot configs to the strong chat model', () => {
+    const parsed = botConfigSchema.parse({
+      displayName: 'Bot',
+      greeting: 'Hi',
+      systemPrompt: 'You are helpful.',
+    })
+    expect(DEFAULT_CHAT_MODEL).toBe('gpt-4.1')
+    expect(parsed.model).toBe(DEFAULT_CHAT_MODEL)
+    expect(parsed.temperature).toBe(DEFAULT_TEMPERATURE)
+  })
+
   it('applies defaults for omitted optional fields', () => {
     const parsed = botConfigSchema.parse({
       displayName: 'Bot',
       greeting: 'Hi',
       systemPrompt: 'You are helpful.',
     })
-    expect(parsed.model).toBe('gpt-4o-mini')
-    expect(parsed.temperature).toBe(0.3)
+    expect(parsed.model).toBe(DEFAULT_CHAT_MODEL)
+    expect(parsed.temperature).toBe(DEFAULT_TEMPERATURE)
     expect(parsed.theme.position).toBe('bottom-right')
     expect(parsed.theme.cornerRadius).toBe(16)
     expect(parsed.theme.bubbleRadius).toBe(16)
