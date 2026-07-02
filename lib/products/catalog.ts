@@ -52,6 +52,9 @@ export async function fetchWooCatalog(
 ): Promise<RawProduct[]> {
   const base = storeOrigin(storeUrl)
   const out: RawProduct[] = []
+  // Popularity ordering can shift between page fetches, so the same product may
+  // appear on two pages — dedupe or the index insert hits its unique constraint.
+  const seen = new Set<string>()
   for (let page = 1; out.length < MAX_PRODUCTS; page++) {
     const res = await fetchImpl(
       `${base}/wp-json/wc/store/v1/products?per_page=${PER_PAGE}&page=${page}&orderby=popularity&order=desc`,
@@ -60,8 +63,11 @@ export async function fetchWooCatalog(
     const rows = (await res.json()) as WooCatalogItem[]
     if (!Array.isArray(rows) || rows.length === 0) break
     for (const p of rows) {
+      const id = String(p.id)
+      if (seen.has(id)) continue
+      seen.add(id)
       out.push({
-        id: String(p.id),
+        id,
         title: decodeEntities(p.name ?? ''),
         url: p.permalink ?? '',
         imageUrl: p.images?.[0]?.src ?? p.images?.[0]?.thumbnail,
