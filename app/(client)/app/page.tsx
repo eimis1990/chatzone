@@ -1,7 +1,11 @@
 import Link from 'next/link'
-import { PlusIcon, SettingsIcon, SparklesIcon, ArrowRightIcon } from 'lucide-react'
+import { PlusIcon, SettingsIcon, SparklesIcon, ArrowRightIcon, ZapIcon } from 'lucide-react'
 import { requireRole, getUserOrgIds } from '@/lib/auth/guards'
 import { createServerClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/service'
+import { entitlementsFor } from '@/lib/entitlements'
+import { conversationsThisMonth } from '@/lib/usage'
+import type { Plan } from '@/lib/types'
 import { CreateBotDialog } from '@/components/client/CreateBotDialog'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
@@ -16,6 +20,7 @@ export default async function BotsPage() {
   const orgId = orgIds[0] ?? null
 
   let bots: Bot[] = []
+  let freeTier: { used: number; limit: number } | null = null
 
   if (orgId) {
     const supabase = await createServerClient()
@@ -25,6 +30,20 @@ export default async function BotsPage() {
       .eq('org_id', orgId)
       .order('created_at', { ascending: false })
     bots = (data ?? []) as Bot[]
+
+    // Free-tier nudge: live usage + what upgrading unlocks (only once a bot exists).
+    const { data: org } = await supabase
+      .from('organizations')
+      .select('plan')
+      .eq('id', orgId)
+      .single<{ plan: Plan | null }>()
+    if ((org?.plan ?? 'free') === 'free' && bots.length > 0) {
+      const limit = entitlementsFor('free').conversations
+      if (Number.isFinite(limit)) {
+        const used = await conversationsThisMonth(createServiceClient(), orgId)
+        freeTier = { used, limit }
+      }
+    }
   }
 
   return (
@@ -68,6 +87,37 @@ export default async function BotsPage() {
               />
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Free-tier reminder: live usage + one-line pitch, never blocking. */}
+      {freeTier && (
+        <div className="flex flex-wrap items-center gap-4 rounded-xl border bg-gradient-to-r from-primary/10 via-card to-card p-4">
+          <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary">
+            <ZapIcon className="size-4" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-medium">
+              You&apos;re on the Free plan — {freeTier.used.toLocaleString()} of{' '}
+              {freeTier.limit.toLocaleString()} conversations used this month
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Starter unlocks 1,500 conversations, all languages, and lead capture.
+            </p>
+            <div className="mt-2 h-1.5 w-full max-w-xs overflow-hidden rounded-full bg-muted">
+              <div
+                className="h-full rounded-full bg-primary"
+                style={{ width: `${Math.min(100, Math.round((100 * freeTier.used) / freeTier.limit))}%` }}
+              />
+            </div>
+          </div>
+          <Link
+            href="/app/subscription"
+            className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/80"
+          >
+            See plans
+            <ArrowRightIcon className="size-3.5" />
+          </Link>
         </div>
       )}
 

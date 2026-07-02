@@ -2,20 +2,22 @@ import { CheckIcon } from 'lucide-react'
 import { SETUP_PACKAGES } from '@/lib/setup-packages'
 
 /**
- * One-time "done-for-you" setup & integration packages on the landing page.
- * Deliberately shows ONLY the one-time fee — no monthly/annual mention here —
- * so visitors understand they pay once and never repeat it.
+ * OPTIONAL one-time "done-for-you" setup packages. Positioned as concierge
+ * convenience, never a requirement — the free guided onboarding is the default
+ * path, and this section must not make self-serve look hard. Shows ONLY the
+ * one-time fee so visitors understand they pay once and never repeat it.
  */
 export function SetupPricing() {
   return (
     <section id="setup" className="scroll-mt-20 bg-[#101213] text-white">
       <div className="mx-auto max-w-5xl px-5 py-20">
         <div className="mx-auto max-w-2xl text-center">
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary">Done-for-you setup</p>
-          <h2 className="mt-3 text-5xl font-light tracking-tight sm:text-6xl">Setup &amp; Integration</h2>
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary">Optional concierge</p>
+          <h2 className="mt-3 text-5xl font-light tracking-tight sm:text-6xl">Prefer it done for you?</h2>
           <p className="mt-4 text-lg text-white/70">
-            One-time investment — we train, configure and install your agent for you.{' '}
-            <span className="font-medium text-white/90">Pay once, never again.</span>
+            Most businesses go live themselves in minutes — free, with our guided setup. Too busy?
+            Our team trains, fine-tunes and installs your agent end to end.{' '}
+            <span className="font-medium text-white/90">One-time fee, completely optional.</span>
           </p>
         </div>
 
@@ -51,7 +53,7 @@ export function SetupPricing() {
                 href="#get-started"
                 className="mt-7 inline-flex h-11 items-center justify-center rounded-full bg-primary px-6 text-sm font-semibold text-white transition-colors hover:bg-primary-hover"
               >
-                Get started
+                Request setup
               </a>
             </div>
           ))}
