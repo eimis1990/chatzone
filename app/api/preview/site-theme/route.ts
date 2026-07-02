@@ -3,8 +3,12 @@ import { z } from 'zod'
 import { createServerClient } from '@/lib/supabase/server'
 import { assertPublicUrl, SsrfError } from '@/lib/net/ssrf'
 import { extractSiteTheme, paletteToTheme } from '@/lib/theme-extract'
+import { createRateLimiter } from '@/lib/ratelimit'
 
 export const maxDuration = 30
+
+// This route makes outbound fetches on the user's behalf — keep it slow.
+const limiter = createRateLimiter({ capacity: 5, refillPerSec: 0.2 })
 
 // "Match my website" for the configurator's Appearance section: fetch the
 // given page (SSRF-guarded) plus its first same-origin stylesheet, extract a
@@ -70,6 +74,9 @@ export async function POST(req: Request) {
     data: { user },
   } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Not signed in' }, { status: 401 })
+  if (!limiter.check(user.id)) {
+    return NextResponse.json({ error: 'Please wait a moment and try again.' }, { status: 429 })
+  }
 
   // Accept bare domains ("example.com") the way users type them.
   const raw = parsed.data.url.trim()
