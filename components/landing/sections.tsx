@@ -10,7 +10,7 @@ import {
 import Link from 'next/link'
 import { Reveal } from './Reveal'
 import { FeatureText } from './ScrollRevealText'
-import { EmailCapture } from './EmailCapture'
+import { GetStartedDialog } from './GetStartedDialog'
 import { FlickeringGrid } from '@/components/magicui/flickering-grid'
 
 // Brand accent for inline styles — resolves to the --primary CSS variable so
@@ -254,10 +254,13 @@ export function CTASection() {
               Free to start and live in one line of code. Set it up this afternoon, and your
               customers feel the difference tonight.
             </p>
-            {/* Form width tuned to the rendered headline text (~551px) so the email
-                field + button together span exactly the title above. */}
-            <div className="mx-auto mt-8 max-w-[34.5rem]">
-              <EmailCapture source="cta" className="w-full" />
+            <div className="mt-8 flex flex-col items-center gap-3">
+              <GetStartedDialog
+                source="cta"
+                shimmer
+                triggerClassName="relative inline-flex h-12 items-center justify-center overflow-hidden rounded-full bg-primary px-10 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition-colors hover:bg-primary-hover sm:h-14 sm:px-12 sm:text-base"
+              />
+              <p className="text-sm text-white/50">No credit card needed — we reach out within a day.</p>
             </div>
           </div>
         </Reveal>
