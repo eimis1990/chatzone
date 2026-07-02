@@ -7,6 +7,19 @@ import { createClientInvite } from '@/lib/invites'
 import { sendEmail, emailEnabled } from '@/lib/email'
 import { clientInviteEmail } from '@/lib/notify'
 
+/** Remove a signup from the list entirely (does not touch any created org/invite). */
+export async function deleteSignup(signupId: string): Promise<{ ok: boolean; error?: string }> {
+  const session = await getSessionUser()
+  if (!session || session.profile.role !== 'owner') {
+    return { ok: false, error: 'Owner role required' }
+  }
+  const svc = createServiceClient()
+  const { error } = await svc.from('signups').delete().eq('id', signupId)
+  if (error) return { ok: false, error: error.message }
+  revalidatePath('/owner/signups')
+  return { ok: true }
+}
+
 /**
  * One click from /owner/signups: turn a prospect into a client — create their
  * organization, generate the 7-day invite, and email them the signup link.

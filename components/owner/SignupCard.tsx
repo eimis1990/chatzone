@@ -1,13 +1,19 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { GlobeIcon, MailIcon, SendIcon, CheckIcon, CopyIcon } from 'lucide-react'
+import { GlobeIcon, MailIcon, SendIcon, CheckIcon, CopyIcon, Trash2Icon } from 'lucide-react'
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { formatDistanceToNow } from '@/lib/date-utils'
-import { sendInvitation } from '@/app/(owner)/owner/signups/actions'
+import { sendInvitation, deleteSignup } from '@/app/(owner)/owner/signups/actions'
 
 export interface SignupCardData {
   id: string
@@ -34,6 +40,7 @@ function statusBadge(s: SignupCardData): { label: string; variant: 'default' | '
 export function SignupCard({ signup }: { signup: SignupCardData }) {
   const [name, setName] = useState(signup.suggestedName)
   const [inviteUrl, setInviteUrl] = useState<string | null>(null)
+  const [confirmOpen, setConfirmOpen] = useState(false)
   const [pending, startTransition] = useTransition()
   const badge = statusBadge(signup)
   const canInvite = signup.status !== 'invited' && signup.inviteStatus !== 'accepted'
@@ -54,6 +61,18 @@ export function SignupCard({ signup }: { signup: SignupCardData }) {
       toast.success(
         res.emailed ? `Invitation emailed to ${signup.email}` : 'Client created — copy the invite link below',
       )
+    })
+  }
+
+  const onDelete = () => {
+    startTransition(async () => {
+      const res = await deleteSignup(signup.id)
+      if (!res.ok) {
+        toast.error(res.error ?? 'Failed to remove signup')
+        return
+      }
+      setConfirmOpen(false)
+      toast.success(`Removed ${signup.email}`)
     })
   }
 
@@ -91,11 +110,40 @@ export function SignupCard({ signup }: { signup: SignupCardData }) {
         </Badge>
       </div>
 
-      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
-        <span className="rounded bg-muted px-1.5 py-0.5 font-medium">{signup.source ?? 'unknown'}</span>
-        <span>· signed up {formatDistanceToNow(signup.created_at)}</span>
-        {signup.invited_at && <span>· invited {formatDistanceToNow(signup.invited_at)}</span>}
+      <div className="flex items-center gap-2">
+        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+          <span className="rounded bg-muted px-1.5 py-0.5 font-medium">{signup.source ?? 'unknown'}</span>
+          <span>· signed up {formatDistanceToNow(signup.created_at)}</span>
+          {signup.invited_at && <span>· invited {formatDistanceToNow(signup.invited_at)}</span>}
+        </div>
+        <button
+          type="button"
+          onClick={() => setConfirmOpen(true)}
+          aria-label={`Remove ${signup.email} from signups`}
+          title="Remove signup"
+          className="flex size-7 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+        >
+          <Trash2Icon className="size-3.5" />
+        </button>
       </div>
+
+      <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogTitle>Remove this signup?</DialogTitle>
+          <DialogDescription>
+            <span className="font-medium text-foreground">{signup.email}</span> will be removed
+            from the list permanently. Any client or invitation you already created stays intact.
+          </DialogDescription>
+          <div className="mt-2 flex justify-end gap-2">
+            <Button variant="ghost" onClick={() => setConfirmOpen(false)} disabled={pending}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={onDelete} disabled={pending}>
+              {pending ? 'Removing…' : 'Remove'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {canInvite && !inviteUrl && (
         <div className="flex gap-2 border-t pt-3">

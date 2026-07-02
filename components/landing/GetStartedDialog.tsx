@@ -11,7 +11,6 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { LoqaraIcon } from '@/components/LoqaraIcon'
 import { Shimmer } from './Shimmer'
 import { trackEvent } from '@/lib/analytics'
 
@@ -78,11 +77,13 @@ export function GetStartedDialog({
 }) {
   const websiteId = useId()
   const emailId = useId()
+  const companyId = useId()
   const [open, setOpen] = useState(false)
   const [step, setStep] = useState<'form' | 'done'>('form')
+  const [company, setCompany] = useState('')
   const [website, setWebsite] = useState('')
   const [email, setEmail] = useState('')
-  const [doneDomain, setDoneDomain] = useState<string | null>(null)
+  const [doneName, setDoneName] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const submitRef = useRef<HTMLButtonElement>(null)
@@ -93,6 +94,7 @@ export function GetStartedDialog({
     // A fresh visit after a completed signup starts back at the form.
     if (step === 'done') {
       setStep('form')
+      setCompany('')
       setWebsite('')
       setEmail('')
     }
@@ -104,6 +106,11 @@ export function GetStartedDialog({
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (loading) return
+    const cleanCompany = company.trim()
+    if (!cleanCompany) {
+      setError('Please enter your company name.')
+      return
+    }
     const cleanEmail = email.trim()
     if (!EMAIL_RE.test(cleanEmail)) {
       setError('Please enter a valid email address.')
@@ -117,7 +124,12 @@ export function GetStartedDialog({
       const res = await fetch('/api/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: cleanEmail, ...(site ? { website: site } : {}), source }),
+        body: JSON.stringify({
+          email: cleanEmail,
+          company: cleanCompany,
+          ...(site ? { website: site } : {}),
+          source,
+        }),
       })
       const data = (await res.json().catch(() => ({}))) as { ok?: boolean; error?: string }
       if (res.ok && data.ok) {
@@ -130,7 +142,7 @@ export function GetStartedDialog({
               y: (rect.top + rect.height / 2) / window.innerHeight,
             }
           : { x: 0.5, y: 0.55 }
-        setDoneDomain(domainOf(site))
+        setDoneName(cleanCompany || domainOf(site))
         setStep('done')
         void celebrate(origin)
       } else {
@@ -167,31 +179,30 @@ export function GetStartedDialog({
       <DialogContent className="gap-0 p-6 sm:max-w-md sm:p-8">
         {step === 'form' ? (
           <>
-            <div className="flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-              <LoqaraIcon className="size-9" />
-            </div>
+            <img
+              src="/loqara-logo-colorful.webp"
+              alt=""
+              aria-hidden="true"
+              className="mx-auto size-16 object-contain"
+            />
             <DialogTitle className="mt-4 text-xl tracking-tight sm:text-2xl">
               Let&apos;s get your assistant started
             </DialogTitle>
             <DialogDescription className="mt-1.5">
-              Tell us where to find you — we&apos;ll set everything up and reach out within a day.
+              Tell us who you are — we&apos;ll set everything up and reach out within a day.
             </DialogDescription>
             <form onSubmit={submit} noValidate className="mt-6 flex flex-col gap-4">
               <div className="flex flex-col gap-2">
-                <Label htmlFor={websiteId}>
-                  Your website{' '}
-                  <span className="font-normal text-muted-foreground">(optional)</span>
-                </Label>
+                <Label htmlFor={companyId}>Company name</Label>
                 <Input
-                  id={websiteId}
+                  id={companyId}
                   type="text"
-                  inputMode="url"
-                  autoComplete="url"
-                  maxLength={200}
-                  placeholder="https://your-store.com"
-                  value={website}
-                  onChange={(e) => setWebsite(e.target.value)}
-                  onBlur={() => setWebsite((w) => normalizeWebsite(w))}
+                  required
+                  autoComplete="organization"
+                  maxLength={80}
+                  placeholder="e.g. Home by NB"
+                  value={company}
+                  onChange={(e) => setCompany(e.target.value)}
                   className="h-11"
                 />
               </div>
@@ -207,6 +218,24 @@ export function GetStartedDialog({
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   aria-invalid={error ? true : undefined}
+                  className="h-11"
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor={websiteId}>
+                  Your website{' '}
+                  <span className="font-normal text-muted-foreground">(optional)</span>
+                </Label>
+                <Input
+                  id={websiteId}
+                  type="text"
+                  inputMode="url"
+                  autoComplete="url"
+                  maxLength={200}
+                  placeholder="https://your-store.com"
+                  value={website}
+                  onChange={(e) => setWebsite(e.target.value)}
+                  onBlur={() => setWebsite((w) => normalizeWebsite(w))}
                   className="h-11"
                 />
               </div>
@@ -233,15 +262,18 @@ export function GetStartedDialog({
           </>
         ) : (
           <div className="flex flex-col items-center py-4 text-center">
-            <div className="flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-              <LoqaraIcon className="size-10" />
-            </div>
+            <img
+              src="/loqara-logo-colorful.webp"
+              alt=""
+              aria-hidden="true"
+              className="size-16 object-contain"
+            />
             <DialogTitle className="mt-5 text-xl tracking-tight sm:text-2xl">
               You&apos;re on the list! 🎉
             </DialogTitle>
             <DialogDescription className="mt-2 max-w-xs text-balance">
               We&apos;ll reach out within a day to get{' '}
-              <span className="font-medium text-foreground">{doneDomain ?? 'your site'}</span>{' '}
+              <span className="font-medium text-foreground">{doneName ?? 'your site'}</span>{' '}
               talking.
             </DialogDescription>
             <p className="mt-5 text-xs text-muted-foreground/80">
