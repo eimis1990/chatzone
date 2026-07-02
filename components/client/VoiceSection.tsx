@@ -4,9 +4,8 @@
  * VoiceSection — Voice configuration block for ConfigForm.
  *
  * Renders:
- *  - Master enable toggle (voice.enabled)
- *  - TTS toggle (voice.ttsEnabled)
- *  - STT toggle (voice.sttEnabled)
+ *  - Master enable toggle (voice.enabled) — the live-call conversational agent
+ *    (visitors talk with the assistant; the transcript shows in chat)
  *  - Per-language voice picker (voice.voices.<lang>) for each enabled language
  *    → two <optgroup> sections: Men / Women
  *  - Preview ▶ button per language
@@ -88,7 +87,7 @@ interface VoiceSectionProps {
   canUseVoice?: boolean
   /** Free plan: enabling voice opens an upgrade dialog instead of toggling. */
   voiceLocked?: boolean
-  /** 'client' hides the TTS/STT toggles (owner-managed); 'owner' shows them. */
+  /** Reserved for owner-only controls (none currently). */
   audience?: 'owner' | 'client'
 }
 
@@ -178,7 +177,7 @@ export function VoiceSection({
           </span>
           <div>
             <CardTitle className="text-sm font-semibold leading-tight">Voice</CardTitle>
-            <CardDescription className="text-xs leading-tight">TTS, STT, and per-language voice settings.</CardDescription>
+            <CardDescription className="text-xs leading-tight">Live voice calls with your assistant — pick a voice per language.</CardDescription>
           </div>
         </div>
       }
@@ -214,11 +213,11 @@ export function VoiceSection({
 
         <Dialog open={upgradeOpen} onOpenChange={setUpgradeOpen}>
           <DialogContent className="sm:max-w-sm">
-            <DialogTitle>Voice is a paid feature</DialogTitle>
+            <DialogTitle>Voice calls are a paid feature</DialogTitle>
             <DialogDescription>
-              Voice answers and live calls are available on the Starter plan and up (live calls
-              also need the Voice add-on). Your changes here stay unsaved until you save — take a
-              look at the plans whenever you&apos;re ready.
+              Live voice calls with your assistant are available on paid plans with the Voice
+              add-on. Your changes here stay unsaved until you save — take a look at the plans
+              whenever you&apos;re ready.
             </DialogDescription>
             <div className="mt-2 flex justify-end gap-2">
               <Button variant="ghost" onClick={() => setUpgradeOpen(false)}>
@@ -233,41 +232,6 @@ export function VoiceSection({
 
         {voiceEnabled && (
           <div className="space-y-5 rounded-lg border p-4">
-            {/* TTS / STT toggles — owner-managed (hidden from clients). */}
-            {audience === 'owner' && (
-              <>
-                <div className="flex items-center gap-3">
-                  <Controller
-                    name="voice.ttsEnabled"
-                    control={control}
-                    render={({ field }) => (
-                      <Switch
-                        checked={field.value ?? true}
-                        onCheckedChange={field.onChange}
-                        id="ttsEnabled"
-                      />
-                    )}
-                  />
-                  <Label htmlFor="ttsEnabled">Text-to-speech (bot speaks replies)</Label>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <Controller
-                    name="voice.sttEnabled"
-                    control={control}
-                    render={({ field }) => (
-                      <Switch
-                        checked={field.value ?? true}
-                        onCheckedChange={field.onChange}
-                        id="sttEnabled"
-                      />
-                    )}
-                  />
-                  <Label htmlFor="sttEnabled">Speech-to-text (visitor speaks questions)</Label>
-                </div>
-              </>
-            )}
-
             {/* Voice status messages */}
             {loadState.status === 'unavailable' && (
               <div className="flex items-start gap-2 rounded-md bg-amber-50 border border-amber-200 px-3 py-2 text-sm text-amber-800">

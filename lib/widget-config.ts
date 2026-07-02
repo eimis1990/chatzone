@@ -177,8 +177,10 @@ export function publicBotConfig(
     // Only flags — never the raw voiceId (TTS runs server-side).
     voice: {
       enabled: config.voice?.enabled ?? false,
-      ttsEnabled: config.voice?.ttsEnabled ?? false,
-      sttEnabled: config.voice?.sttEnabled ?? false,
+      // Voice = the live-call conversational agent only (transcript shown in
+      // chat). Standalone in-chat TTS/STT is retired — always off.
+      ttsEnabled: false,
+      sttEnabled: false,
     },
   }
 
