@@ -9,6 +9,7 @@ import { commerceEnabled, makeProductTools, ndjsonChatResponse, ndjsonText } fro
 import type { BotConfig } from '@/lib/types'
 import type { CommerceProduct, OrderStatus } from '@/lib/commerce/types'
 import { createRateLimiter } from '@/lib/ratelimit'
+import { DEFAULT_CHAT_MODEL, DEFAULT_TEMPERATURE } from '@/lib/ai/chat-models'
 
 export const maxDuration = 60
 
@@ -60,8 +61,8 @@ export async function POST(req: Request) {
   const orderSink: OrderStatus[] = []
   const candidates = new Map<string, CommerceProduct>()
 
-  return ndjsonChatResponse(openai(config.model || 'gpt-4o-mini'), messages, {
-    temperature: config.temperature ?? 0.3,
+  return ndjsonChatResponse(openai(config.model || DEFAULT_CHAT_MODEL), messages, {
+    temperature: config.temperature ?? DEFAULT_TEMPERATURE,
     headers: {},
     tools: commerce
       ? makeProductTools(config, productSink, orderSink, undefined, candidates)

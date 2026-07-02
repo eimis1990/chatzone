@@ -32,18 +32,21 @@ export async function POST(req: Request) {
   const { data: bot } = await svc.from('bots').select('*').eq('public_key', publicKey).single<Bot>()
   if (!bot || bot.status !== 'active') return json({ answer: '' }, 404)
   if (!isOriginAllowed(origin, bot.config.allowedDomains ?? [])) return json({ answer: '' }, 403)
-  if (!limiter.check(bot.id)) return json({ answer: '' }, 429)
+  // Per-visitor (IP) key: a per-bot key let one busy visitor throttle everyone.
+  const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown'
+  if (!limiter.check(`${bot.id}:${ip}`)) return json({ answer: '' }, 429)
 
   let answer = ''
   try {
     const retrieval = await retrieveContext(bot.id, query, {}, serviceRetrievalDeps(svc))
     if (retrieval.chunks.length) {
-      // Keep it tight: the voice agent only needs enough context to answer in a
-      // sentence or two — a smaller payload means a faster spoken reply.
-      answer = retrieval.chunks.slice(0, 3).map((c) => c.content).join('\n\n').slice(0, 900)
+      // Same top-5 evidence as text chat so spoken and typed answers agree; the
+      // voice prompt tells the agent to summarise, so a fuller payload is fine.
+      answer = retrieval.chunks.map((c) => c.content).join('\n\n').slice(0, 4000)
     }
-  } catch {
-    // retrieval unavailable — return empty so the tool tells the user it can't find it
+  } catch (err) {
+    // Return empty so the tool tells the user it can't find it — but log it.
+    console.error('[agent] voice knowledge retrieval failed:', err)
   }
   return json({ answer })
 }

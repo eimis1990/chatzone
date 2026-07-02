@@ -10,5 +10,8 @@
   { "query": "what languages are supported?", "expect": ["English", "Lithuanian"] },
   { "query": "where is my data stored?", "expect": ["EU", "host"] },
   { "query": "can I cancel anytime?", "expect": ["cancel"] },
-  { "query": "do you offer voice support?", "expect": ["voice"] }
+  { "query": "do you offer voice support?", "expect": ["voice"] },
+  { "query": "per kiek laiko pristatote prekes?", "expect": ["pristat"] },
+  { "query": "kaip grąžinti prekę?", "expect": ["grąžin", "grazin"] },
+  { "query": "kokiais būdais galiu apmokėti?", "expect": ["apmok", "mokėj"] }
 ]

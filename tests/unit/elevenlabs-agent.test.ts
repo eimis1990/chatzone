@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { buildAgentConfig, agentConfigHash } from '@/lib/ai/elevenlabs-agent'
+import { DEFAULT_VOICE_LLM, isValidVoiceLlm } from '@/lib/ai/voice-models'
 import { defaultBotConfig } from '@/lib/validation/schemas'
 import type { Bot, BotConfig } from '@/lib/types'
 
@@ -39,8 +40,10 @@ describe('buildAgentConfig', () => {
     const cfg = buildAgentConfig(bot)
     expect(cfg.conversation_config.agent.first_message).toBe(bot.config.content.en.greeting)
     expect(cfg.conversation_config.agent.language).toBe('en')
-    // Defaults to gpt-4o-mini when no llmModel is set.
-    expect(cfg.conversation_config.agent.prompt.llm).toBe('gpt-4o-mini')
+    // Defaults to the strong voice LLM when no llmModel is set.
+    expect(DEFAULT_VOICE_LLM).toBe('gpt-4o')
+    expect(isValidVoiceLlm(DEFAULT_VOICE_LLM)).toBe(true)
+    expect(cfg.conversation_config.agent.prompt.llm).toBe(DEFAULT_VOICE_LLM)
     expect(cfg.conversation_config.tts.model_id).toBe('eleven_v3_conversational')
     expect(cfg.conversation_config.tts.expressive_mode).toBe(true)
     expect(cfg.conversation_config.tts.voice_id).toBe(bot.config.voice.voices.en)

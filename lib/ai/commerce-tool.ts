@@ -34,11 +34,13 @@ export function makeProductTools(
     search_products: tool({
       description:
         'Search the store catalog and get CANDIDATE products to review (not shown to the user yet). ' +
-        'Use the product type/noun in the catalog language (this store is often Lithuanian), e.g. ' +
-        '"veido kremas" for a face cream — avoid vague single adjectives. When the shopper names a ' +
-        'recipient (a gift/product "for men", "for women", "for kids/a child"), ALSO set `audience` so ' +
-        'results are limited to items that suit that person — this is how you avoid showing, say, a ' +
-        "child's toy for a men's-gift request. You may search multiple times.",
+        'Use a short descriptive phrase in the catalog language (this store is often Lithuanian) — ' +
+        'the product type plus at most 1-2 qualifiers, e.g. "kvapni žvakė" or "veido kremas sausai ' +
+        'odai". If it returns an { error }, retry the same search once before telling the shopper ' +
+        'anything. When the shopper names a recipient (a gift/product "for men", "for women", ' +
+        '"for kids/a child"), ALSO set `audience` so results are limited to items that suit that ' +
+        "person — this is how you avoid showing, say, a child's toy for a men's-gift request. " +
+        'You may search multiple times.',
       inputSchema: z.object({
         query: z.string().describe('Product type/keywords in the catalog language'),
         minPrice: z.number().optional().describe('Minimum price in major units (e.g. euros)'),
@@ -49,17 +51,29 @@ export function makeProductTools(
           .describe('Set ONLY when the shopper specifies who the product/gift is for.'),
       }),
       execute: async ({ query, minPrice, maxPrice, audience }) => {
-        const products = searchImpl
-          ? await searchImpl({ query, minPrice, maxPrice, limit: 24, audience })
-          : await searchStore(config.commerce, { query, minPrice, maxPrice, limit: 24 })
-        products.forEach((p) => candidates.set(p.id, p))
-        return products.map((p) => ({
-          id: p.id,
-          title: p.title,
-          price: p.price,
-          inStock: p.inStock,
-          description: p.shortDescription?.slice(0, 140),
-        }))
+        try {
+          const products = searchImpl
+            ? await searchImpl({ query, minPrice, maxPrice, limit: 24, audience })
+            : await searchStore(config.commerce, { query, minPrice, maxPrice, limit: 24 })
+          products.forEach((p) => candidates.set(p.id, p))
+          return products.map((p) => ({
+            id: p.id,
+            title: p.title,
+            price: p.price,
+            inStock: p.inStock,
+            description: p.shortDescription?.slice(0, 140),
+          }))
+        } catch (err) {
+          // An infrastructure failure is NOT "the catalog lacks this item" — tell
+          // the model the truth so it never claims a product is unavailable.
+          console.error('[agent] search_products failed:', err)
+          return {
+            error:
+              'Product search failed temporarily (store API error). Retry the same search once. ' +
+              'If it fails again, tell the shopper you could not check the catalog right now — ' +
+              'do NOT claim the item is unavailable.',
+          }
+        }
       },
     }),
     display_products: tool({
@@ -157,6 +171,9 @@ interface NdjsonOptions {
   headers: Record<string, string>
   /** Called once with the full assistant text when generation finishes (persistence). */
   onText?: (text: string) => Promise<void> | void
+  /** Shown (and persisted) if the stream dies mid-generation — a blank reply
+   *  reads as the bot silently ignoring the visitor. */
+  errorText?: string
 }
 
 /**
@@ -213,8 +230,14 @@ export function ndjsonChatResponse(
         if (products.length) line({ t: 'products', v: products })
         const order = opts.orderSink ?? []
         if (order.length) line({ t: 'order', v: order[0] })
-      } catch {
-        line({ t: 'text', v: '' })
+      } catch (err) {
+        console.error('[agent] chat stream failed:', err)
+        if (!fullText && opts.errorText) {
+          fullText = opts.errorText
+          line({ t: 'text', v: opts.errorText })
+        } else {
+          line({ t: 'text', v: '' })
+        }
       } finally {
         // Persist the assistant turn BEFORE closing the stream. If we close
         // first, the platform can suspend the function before this DB write
@@ -223,8 +246,10 @@ export function ndjsonChatResponse(
         if (opts.onText) {
           try {
             await opts.onText(fullText)
-          } catch {
-            // Swallow — a failed persist must not break the (already-streamed) reply.
+          } catch (err) {
+            // A failed persist must not break the (already-streamed) reply — but
+            // it silently drops the turn from the transcript, so log it.
+            console.error('[agent] failed to persist assistant message:', err)
           }
         }
         controller.close()

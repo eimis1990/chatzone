@@ -39,14 +39,17 @@ export async function POST(req: Request) {
   if (!isOriginAllowed(origin, bot.config.allowedDomains ?? [])) {
     return json({ products: [], summary: 'Origin not allowed.' }, 403)
   }
-  if (!limiter.check(bot.id)) return json({ products: [], summary: 'Too many requests.' }, 429)
+  // Per-visitor (IP) key: a per-bot key let one busy visitor throttle everyone.
+  const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown'
+  if (!limiter.check(`${bot.id}:${ip}`)) return json({ products: [], summary: 'Too many requests.' }, 429)
 
   let products: CommerceProduct[] = []
   if (commerceEnabled(bot.config)) {
     try {
       products = await searchCatalog(bot, query, svc, 20, { audience })
-    } catch {
+    } catch (err) {
       // store search failed — fall through to knowledge
+      console.error('[agent] voice product search failed:', err)
     }
   }
 
@@ -56,8 +59,8 @@ export async function POST(req: Request) {
     try {
       const retrieval = await retrieveContext(bot.id, query, {}, serviceRetrievalDeps(svc))
       if (retrieval.chunks.length) info = retrieval.chunks.map((c) => c.content).join(' ').slice(0, 500)
-    } catch {
-      // ignore
+    } catch (err) {
+      console.error('[agent] voice search knowledge fallback failed:', err)
     }
   }
 

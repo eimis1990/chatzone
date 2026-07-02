@@ -14,6 +14,7 @@ import { useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { MessageCircleIcon, XIcon } from 'lucide-react'
 import { ChatWindow } from '@/components/widget/ChatWindow'
+import { DEFAULT_CHAT_MODEL, DEFAULT_TEMPERATURE } from '@/lib/ai/chat-models'
 import { detectHandoffIntent, HANDOFF_ACK } from '@/lib/handoff'
 import type { ChatTransport } from '@/lib/widget-transport'
 import type { PublicBotConfig } from '@/lib/widget-config'
@@ -425,8 +426,8 @@ function buildFullConfig(config: LiveConfig): BotConfig {
       tone: config.persona?.tone ?? 'friendly',
       verbosity: config.persona?.verbosity ?? 'balanced',
     },
-    model: config.model ?? 'gpt-4o-mini',
-    temperature: config.temperature ?? 0.3,
+    model: config.model ?? DEFAULT_CHAT_MODEL,
+    temperature: config.temperature ?? DEFAULT_TEMPERATURE,
     leadCapture: {
       enabled: config.leadCapture?.enabled ?? false,
       trigger: config.leadCapture?.trigger ?? 'on_fallback',

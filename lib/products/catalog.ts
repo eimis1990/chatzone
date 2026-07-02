@@ -19,6 +19,8 @@ export interface RawProduct {
   imageUrl?: string
   description: string
   categories: string[]
+  /** Display attributes, one line per attribute: "Spalva: raudona, mėlyna". */
+  attributes: string[]
   onSale: boolean
   featured: boolean
   /** 0-based popularity rank (lower = more popular). */
@@ -40,6 +42,7 @@ interface WooCatalogItem {
   featured?: boolean
   images?: Array<{ src?: string; thumbnail?: string }>
   categories?: Array<{ name?: string }>
+  attributes?: Array<{ name?: string; terms?: Array<{ name?: string }> }>
 }
 
 /** Fetch the WooCommerce catalog via the public Store API, most-popular first. */
@@ -49,6 +52,9 @@ export async function fetchWooCatalog(
 ): Promise<RawProduct[]> {
   const base = storeOrigin(storeUrl)
   const out: RawProduct[] = []
+  // Popularity ordering can shift between page fetches, so the same product may
+  // appear on two pages — dedupe or the index insert hits its unique constraint.
+  const seen = new Set<string>()
   for (let page = 1; out.length < MAX_PRODUCTS; page++) {
     const res = await fetchImpl(
       `${base}/wp-json/wc/store/v1/products?per_page=${PER_PAGE}&page=${page}&orderby=popularity&order=desc`,
@@ -57,13 +63,24 @@ export async function fetchWooCatalog(
     const rows = (await res.json()) as WooCatalogItem[]
     if (!Array.isArray(rows) || rows.length === 0) break
     for (const p of rows) {
+      const id = String(p.id)
+      if (seen.has(id)) continue
+      seen.add(id)
       out.push({
-        id: String(p.id),
+        id,
         title: decodeEntities(p.name ?? ''),
         url: p.permalink ?? '',
         imageUrl: p.images?.[0]?.src ?? p.images?.[0]?.thumbnail,
         description: stripHtml(p.short_description) || stripHtml(p.description),
         categories: (p.categories ?? []).map((c) => decodeEntities(c.name ?? '')).filter(Boolean),
+        attributes: (p.attributes ?? [])
+          .map((a) => {
+            const name = decodeEntities(a.name ?? '')
+            const terms = (a.terms ?? []).map((t) => decodeEntities(t.name ?? '')).filter(Boolean)
+            return name && terms.length ? `${name}: ${terms.join(', ')}` : ''
+          })
+          .filter(Boolean)
+          .slice(0, 8),
         onSale: Boolean(p.on_sale),
         featured: Boolean(p.featured),
         rank: out.length,
@@ -109,7 +126,7 @@ export function deriveAudience(categories: string[]): Audience | null {
   return null
 }
 
-/** The text embedded for semantic search (title + audience + categories + tags + summary). */
+/** The text embedded for semantic search (title + audience + categories + tags + attributes + summary). */
 export function buildDoc(p: RawProduct, tags: string[], audience?: Audience): string {
   const parts = [p.title]
   if (audience && audience !== 'unisex') {
@@ -120,6 +137,9 @@ export function buildDoc(p: RawProduct, tags: string[], audience?: Audience): st
   if (p.categories.length) parts.push('Categories: ' + p.categories.join(', '))
   const uniq = [...new Set(tags)]
   if (uniq.length) parts.push('Tags: ' + uniq.join(', '))
+  // Store attributes (color, scent, size, material…) let descriptive queries
+  // ("kvapni žvakė vanilės kvapo") match products whose titles don't say it.
+  if (p.attributes.length) parts.push('Attributes: ' + p.attributes.join('; '))
   if (p.description) parts.push(p.description.slice(0, 500))
   return parts.join('\n')
 }

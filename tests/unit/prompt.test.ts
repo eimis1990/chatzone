@@ -73,4 +73,15 @@ describe('buildMessages', () => {
     const msgs = buildMessages({ ...config, richResponses: false }, [], [], 'q')
     expect(msgs[0].content).not.toContain('FORMATTING:')
   })
+
+  it('allows natural descriptive product queries (hybrid search handles them)', () => {
+    const commerceConfig = {
+      ...config,
+      commerce: { ...config.commerce, enabled: true, provider: 'woocommerce' as const, storeUrl: 'https://x.lt' },
+    }
+    const msgs = buildMessages(commerceConfig, [], [], 'q')
+    expect(msgs[0].content).toContain('PRODUCT SEARCH')
+    expect(msgs[0].content).not.toContain('no adjectives')
+    expect(msgs[0].content).toContain('descriptive')
+  })
 })

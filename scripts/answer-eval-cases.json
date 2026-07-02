@@ -1,0 +1,52 @@
+[
+  {
+    "question": "Kada gausiu užsakymą Lietuvoje?",
+    "mustInclude": ["order prepared/handed to courier within 1-3 work days", "delivery in Lithuania takes about 1-2 more work days"],
+    "language": "lt"
+  },
+  {
+    "question": "Ar galiu grąžinti prekę?",
+    "mustInclude": ["returns accepted within 14 days", "item must be unused with intact packaging"],
+    "language": "lt"
+  },
+  {
+    "question": "Kaip su jumis susisiekti?",
+    "mustInclude": ["phone +370 634 58888", "email uzsakymai@homebynb.lt"],
+    "language": "lt"
+  },
+  {
+    "question": "Kokiu el. paštu kreiptis dėl grąžinimo?",
+    "mustInclude": ["uzsakymai@homebynb.lt"],
+    "language": "lt"
+  },
+  {
+    "question": "Kas apmoka grąžinimo siuntimą?",
+    "mustInclude": ["the buyer pays return shipping costs"],
+    "language": "lt"
+  },
+  {
+    "question": "Kur yra jūsų fizinė parduotuvė?",
+    "mustInclude": ["Vikingų g. 5C-36, Vilnius"],
+    "language": "lt"
+  },
+  {
+    "question": "Hi, I look for face cream for dry skin",
+    "mustInclude": ["offers/announces face-cream product suggestions (cards) instead of claiming nothing is available or refusing"],
+    "language": "en"
+  },
+  {
+    "question": "Sveiki, reikėtų kvepalų dovanai žmonai",
+    "mustInclude": ["warmly offers gift/perfume suggestions for a woman (cards)", "does not ask for personal details or claim unavailability"],
+    "language": "lt"
+  },
+  {
+    "question": "do you have hair dryers?",
+    "mustInclude": ["offers hair-dryer product suggestions (cards) or, only after searching, honestly says none were found — never invents products"],
+    "language": "en"
+  },
+  {
+    "question": "Ar turite dovanų kuponų?",
+    "mustInclude": ["treats a gift coupon as a product to search for and offers it (or honestly reports none found after searching)"],
+    "language": "lt"
+  }
+]
