@@ -1,9 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
 import { CheckIcon } from 'lucide-react'
-import { Shimmer } from './Shimmer'
+import { GetStartedDialog } from './GetStartedDialog'
 import { trackEvent } from '@/lib/analytics'
 import { PLANS, DISPLAY_PLANS, POPULAR_PLAN } from '@/lib/plans-catalog'
 
@@ -70,24 +69,23 @@ export function PricingTable() {
               {p.conversations.toLocaleString()} conversations / mo
             </p>
 
-            <Link
-              href="#get-started"
-              onClick={() =>
+            <GetStartedDialog
+              source="pricing"
+              label={p.monthly === 0 ? 'Start free' : 'Get started'}
+              shimmer={popular}
+              onOpen={() =>
                 trackEvent('pricing_plan_click', {
                   plan: p.name,
                   period: annual ? 'annual' : 'monthly',
                   price: perMonth(p.monthly),
                 })
               }
-              className={`relative mt-5 inline-flex h-11 items-center justify-center overflow-hidden rounded-full px-5 text-sm font-semibold transition-colors ${
+              triggerClassName={`relative mt-5 inline-flex h-11 items-center justify-center overflow-hidden rounded-full px-5 text-sm font-semibold transition-colors ${
                 popular
                   ? 'bg-primary text-white hover:bg-primary-hover'
                   : 'border border-white/15 text-white hover:bg-white/10'
               }`}
-            >
-              <span className="relative z-10">{p.monthly === 0 ? 'Start free' : 'Get started'}</span>
-              {popular && <Shimmer />}
-            </Link>
+            />
 
             <ul className="mt-6 space-y-2.5 text-sm text-white/75">
               {p.features.map((f) => (
