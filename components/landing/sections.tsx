@@ -108,7 +108,7 @@ function FeatureRow({ feature, index }: { feature: Feature; index: number }) {
   const reversed = index % 2 === 1
   const num = String(index + 1).padStart(2, '0')
   return (
-    <section className="bg-white text-gray-900">
+    <section className="overflow-x-clip bg-white text-gray-900">
       <div className="mx-auto grid max-w-7xl items-center gap-10 px-5 py-14 lg:grid-cols-2 lg:gap-16 lg:py-20">
         <RevealSlide from={reversed ? 'right' : 'left'} className={reversed ? 'lg:order-2' : ''}>
           <FeatureVisual imageSrc={feature.imageSrc} imageAlt={feature.imageAlt} />

@@ -97,7 +97,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <LandingNav solid />
-      <main className="mx-auto min-h-svh max-w-[60rem] px-5 pb-24 pt-28">
+      <main className="mx-auto w-full min-h-svh max-w-[60rem] px-5 pb-24 pt-28">
         <Link href="/blog" className="text-sm font-medium text-primary hover:underline">
           ← All posts
         </Link>
