@@ -109,7 +109,12 @@ export function buildAgentConfig(bot: Bot, toolIds: string[] = []): AgentConfig 
   // fall back to the default rather than break voice for the bot.
   const llm = isValidVoiceLlm(cfg.voice?.llmModel) ? cfg.voice!.llmModel! : DEFAULT_VOICE_LLM
   const languages: BotLanguage[] = cfg.languages?.length ? cfg.languages : ['en']
-  const defaultLang = languages[0]
+  // The agent's default language follows the bot's primary (defaultLanguage),
+  // not array order — languages[] is stored as ['en','lt'] regardless of primary.
+  const defaultLang =
+    cfg.defaultLanguage && languages.includes(cfg.defaultLanguage)
+      ? cfg.defaultLanguage
+      : languages[0]
   const enContent = cfg.content?.en
   const defaultContent = cfg.content?.[defaultLang] ?? enContent
   const voices = cfg.voice?.voices ?? { en: DEFAULT_VOICE_ID }
@@ -165,9 +170,10 @@ export function buildAgentConfig(bot: Bot, toolIds: string[] = []): AgentConfig 
 export function agentConfigHash(bot: Bot, toolIds: string[] = []): string {
   const cfg = bot.config
   const material = JSON.stringify([
-    'v19-voice-llm-gpt4o', // bump to force re-sync when the agent payload shape changes
+    'v20-default-language', // bump to force re-sync when the agent payload shape changes
     cfg.displayName, // agent name follows the bot's display name
     cfg.languages,
+    cfg.defaultLanguage ?? null,
     cfg.content,
     cfg.voice?.voices,
     cfg.voice?.llmModel ?? DEFAULT_VOICE_LLM,
