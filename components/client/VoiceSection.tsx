@@ -30,6 +30,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { VOICE_LLM_OPTIONS, DEFAULT_VOICE_LLM } from '@/lib/ai/voice-models'
 import type { BotLanguage } from '@/lib/types'
 import type { z } from 'zod'
 import type { botConfigFormSchema } from '@/lib/validation/schemas'
@@ -87,7 +88,7 @@ interface VoiceSectionProps {
   canUseVoice?: boolean
   /** Free plan: enabling voice opens an upgrade dialog instead of toggling. */
   voiceLocked?: boolean
-  /** Reserved for owner-only controls (none currently). */
+  /** Owner-only controls: TTS/STT toggles + the voice AI model picker. */
   audience?: 'owner' | 'client'
 }
 
@@ -274,6 +275,39 @@ export function VoiceSection({
                     isActive={lang === activeLang}
                   />
                 ))}
+              </div>
+            )}
+
+            {/* Voice AI model — owner-only. Controls which LLM the ElevenLabs
+                agent thinks with; clients only pick voices. */}
+            {audience === 'owner' && (
+              <div className="space-y-1.5">
+                <Label>AI model (voice)</Label>
+                <Controller
+                  name="voice.llmModel"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      value={field.value ?? DEFAULT_VOICE_LLM}
+                      onValueChange={field.onChange}
+                    >
+                      <SelectTrigger className="w-full max-w-sm">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {VOICE_LLM_OPTIONS.map((o) => (
+                          <SelectItem key={o.value} value={o.value}>
+                            {o.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+                <p className="text-xs text-muted-foreground">
+                  The model the voice agent thinks with. Stronger models follow instructions and
+                  use the knowledge tool more reliably; faster ones cut latency. Owner-only.
+                </p>
               </div>
             )}
           </div>

@@ -28,7 +28,7 @@ function ChannelBadge({ channel }: { channel: ConversationChannel }) {
       title={voice ? 'Voice call' : 'Text chat'}
     >
       <Icon className="size-2.5" aria-hidden="true" />
-      {voice ? 'Voice' : 'Chat'}
+      {voice ? 'Voice conversation' : 'Chat conversation'}
     </span>
   )
 }
@@ -160,20 +160,20 @@ export function TranscriptView({ conversations, loadMessages, analyze }: Transcr
               const isActive = conv.id === selectedId
               const s = scoreStyle(conv.success_score)
               return (
-                <li key={conv.id}>
-                  <div
+                <li key={conv.id} className="relative">
+                  {/* Whole cell selects the conversation… */}
+                  <button
+                    type="button"
+                    onClick={() => handleSelect(conv.id)}
                     className={[
-                      'flex items-start gap-1.5 px-2.5 py-3 transition-colors',
+                      'block w-full px-3 py-3 text-left transition-colors',
                       isActive ? 'bg-muted' : 'hover:bg-muted/50',
                     ].join(' ')}
                   >
-                    <CopyButton value={conv.visitor_id} label="Copy conversation ID" />
-                    <button
-                      type="button"
-                      onClick={() => handleSelect(conv.id)}
-                      className="min-w-0 flex-1 text-left"
-                    >
-                      <div className="flex items-center gap-1.5">
+                    {/* Top row: channel badge (+ attention dot) · score + message count */}
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="flex min-w-0 items-center gap-1.5">
+                        <ChannelBadge channel={conv.channel} />
                         {conv.needs_attention && (
                           <span
                             className="size-1.5 shrink-0 rounded-full bg-destructive"
@@ -181,31 +181,40 @@ export function TranscriptView({ conversations, loadMessages, analyze }: Transcr
                             aria-label="Needs attention"
                           />
                         )}
-                        <span className="truncate font-mono text-xs text-foreground/80">
-                          {conv.visitor_id}
-                        </span>
-                        <ChannelBadge channel={conv.channel} />
-                      </div>
-                      <div className="mt-1.5 flex items-center justify-between gap-2">
-                        <span className="text-xs text-muted-foreground">
-                          {formatDistanceToNow(conv.last_message_at)}
-                        </span>
-                        <span className="flex items-center gap-1.5">
-                          {s && (
-                            <span
-                              className={`rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${s.cls}`}
-                              title={`AI handling: ${s.label}`}
-                            >
-                              {conv.success_score}/5
-                            </span>
-                          )}
-                          <span className="text-xs text-muted-foreground">
-                            {conv.message_count} message{conv.message_count !== 1 ? 's' : ''}
+                      </span>
+                      <span className="flex shrink-0 items-center gap-1.5">
+                        {s && (
+                          <span
+                            className={`rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${s.cls}`}
+                            title={`AI handling: ${s.label}`}
+                          >
+                            {conv.success_score}/5
                           </span>
+                        )}
+                        <span className="text-xs text-muted-foreground">
+                          {conv.message_count} message{conv.message_count !== 1 ? 's' : ''}
                         </span>
-                      </div>
-                    </button>
-                  </div>
+                      </span>
+                    </div>
+
+                    {/* Bottom row: time · truncated id (copy button overlays on the right) */}
+                    <div className="mt-2 flex items-center justify-between gap-2">
+                      <span className="shrink-0 text-xs text-muted-foreground">
+                        {formatDistanceToNow(conv.last_message_at)}
+                      </span>
+                      <span
+                        className="min-w-0 max-w-[110px] truncate pr-7 text-right font-mono text-[11px] text-muted-foreground/70"
+                        style={{ direction: 'rtl' }}
+                        title={conv.id}
+                      >
+                        {conv.id}
+                      </span>
+                    </div>
+                  </button>
+                  {/* …except the copy control, absolutely placed bottom-right. */}
+                  <span className="absolute bottom-2.5 right-2">
+                    <CopyButton value={conv.id} label="Copy conversation ID" />
+                  </span>
                 </li>
               )
             })}
