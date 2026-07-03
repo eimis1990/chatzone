@@ -665,7 +665,8 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
   const showCallButton = config.theme.showCallButton !== false
   const callButtonColor = config.theme.callButtonColor || '#22c55e'
   const navButtonRadius = config.theme.navButtonRadius ?? 12
-  const headerBorderRadius = `${cornerRadius}px ${cornerRadius}px 0 0`
+  // Full-screen mobile sheet has square top corners (it meets the screen edge).
+  const headerBorderRadius = isMobile ? '0' : `${cornerRadius}px ${cornerRadius}px 0 0`
   // Auto-contrast: keep header text/icons legible on any chosen color.
   const headerFg = readableTextColor(primaryColor)
   // Header shows the company logo (brand); message bubbles show the bot avatar.
@@ -688,7 +689,7 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
   return (
     <div
       className="flex flex-col h-full bg-white overflow-hidden"
-      style={{ borderRadius: `${cornerRadius}px`, fontFamily: fontStack(config.theme.fontFamily) }}
+      style={{ borderRadius: isMobile ? 0 : `${cornerRadius}px`, fontFamily: fontStack(config.theme.fontFamily) }}
     >
       {/* Header */}
       <div
@@ -764,6 +765,7 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
             callColor={callButtonColor}
             language={activeLang}
             radius={navButtonRadius}
+            shortLabel={isMobile}
             onStateChange={handleCallState}
             onTranscript={handleVoiceTranscript}
             onReady={handleVoiceReady}

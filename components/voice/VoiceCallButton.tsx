@@ -50,6 +50,8 @@ interface VoiceCallButtonProps {
   onKnowledge?: (query: string) => Promise<string>
   /** Corner radius (px) for the call button. */
   radius?: number
+  /** Use the shorter idle label ("Call Agent") — for the tight mobile header. */
+  shortLabel?: boolean
   className?: string
 }
 
@@ -69,6 +71,7 @@ interface InnerProps {
   onDiscount?: () => Promise<string>
   onKnowledge?: (query: string) => Promise<string>
   radius?: number
+  shortLabel?: boolean
 }
 
 function VoiceCallInner({
@@ -85,6 +88,7 @@ function VoiceCallInner({
   onDiscount,
   onKnowledge,
   radius,
+  shortLabel,
 }: InnerProps) {
   const [callError, setCallError] = useState<string | null>(null)
   const [micDenied, setMicDenied] = useState(false)
@@ -285,7 +289,13 @@ function VoiceCallInner({
         style={callStyle}
       >
         <FilledPhoneIcon />
-        {lt ? 'Kalbėti su Agentu' : 'Talk with Agent'}
+        {shortLabel
+          ? lt
+            ? 'Skambinti'
+            : 'Call Agent'
+          : lt
+            ? 'Kalbėti su Agentu'
+            : 'Talk with Agent'}
       </button>
     )
   }
@@ -396,6 +406,7 @@ export function VoiceCallButton({
   onDiscount,
   onKnowledge,
   radius,
+  shortLabel,
   className,
 }: VoiceCallButtonProps) {
   return (
@@ -415,6 +426,7 @@ export function VoiceCallButton({
           onDiscount={onDiscount}
           onKnowledge={onKnowledge}
           radius={radius}
+          shortLabel={shortLabel}
         />
       </ConversationProvider>
     </div>
