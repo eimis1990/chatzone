@@ -116,7 +116,7 @@
     var st = document.createElement('style')
     st.textContent =
       '@keyframes cbz-pulse{0%{transform:scale(1);opacity:.5}25%{transform:scale(2.2);opacity:0}100%{transform:scale(2.2);opacity:0}}' +
-      '@keyframes cbz-breathe{0%{transform:scale(1)}6.25%{transform:scale(.9)}10%{transform:scale(1.03)}12.5%{transform:scale(1)}100%{transform:scale(1)}}'
+      '@keyframes cbz-breathe{0%{transform:scale(1)}6.25%{transform:scale(.9)}11%{transform:scale(1.03)}15%{transform:scale(1)}100%{transform:scale(1)}}'
     document.head.appendChild(st)
   }
   function makeRing(delay) {
@@ -138,8 +138,9 @@
     r.style[isRight ? 'right' : 'left'] = OFFSET + 'px'
     return r
   }
-  // Two rings 0.5s apart = a double wave, emitted just after the breath bounce.
-  var pulseRings = [makeRing('0.8s'), makeRing('1.3s')]
+  // Two rings emitted at the contraction bottom (0.5s) so they appear around the
+  // shrunken button and radiate out as it springs back — a tight double wave.
+  var pulseRings = [makeRing('0.5s'), makeRing('0.7s')]
 
   // Launcher icons (themed by renderLauncher via currentColor).
   var CHAT_ICON =
