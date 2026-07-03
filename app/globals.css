@@ -261,21 +261,39 @@
     transform: translateX(-50%);
   }
 }
-/* Widget launcher pulse — a ring expands & fades over ~2s, then stays invisible
-   for the rest of the ~7.5s cycle (a calm ~5s pause between bursts). Two rings
-   staggered 0.5s apart read as a double wave. The live widget.js has its own copy. */
+/* Widget launcher "breathe + pulse" — one synced 8s cycle:
+   1) the button contracts to 0.9 (~0.5s), bounces back past 1.0 and settles (~0.5s),
+   2) two rings then radiate out & fade over ~2s (a double wave), emitted on the
+      "exhale" (delayed ~0.8s), 3) a calm ~5s pause. The live widget.js has its own copy. */
 @keyframes cbzPulse {
   0% {
     transform: scale(1);
     opacity: 0.5;
   }
-  27% {
+  25% {
     transform: scale(2.2);
     opacity: 0;
   }
   100% {
     transform: scale(2.2);
     opacity: 0;
+  }
+}
+@keyframes cbzBreathe {
+  0% {
+    transform: scale(1);
+  }
+  6.25% {
+    transform: scale(0.9);
+  }
+  10% {
+    transform: scale(1.03);
+  }
+  12.5% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1);
   }
 }
 /* Lenis smooth-scroll (landing). Note: intentionally NO `iframe { pointer-events:

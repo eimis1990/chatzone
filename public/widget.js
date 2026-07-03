@@ -115,7 +115,8 @@
     pulseStyleInjected = true
     var st = document.createElement('style')
     st.textContent =
-      '@keyframes cbz-pulse{0%{transform:scale(1);opacity:.5}27%{transform:scale(2.2);opacity:0}100%{transform:scale(2.2);opacity:0}}'
+      '@keyframes cbz-pulse{0%{transform:scale(1);opacity:.5}25%{transform:scale(2.2);opacity:0}100%{transform:scale(2.2);opacity:0}}' +
+      '@keyframes cbz-breathe{0%{transform:scale(1)}6.25%{transform:scale(.9)}10%{transform:scale(1.03)}12.5%{transform:scale(1)}100%{transform:scale(1)}}'
     document.head.appendChild(st)
   }
   function makeRing(delay) {
@@ -129,15 +130,16 @@
       zIndex: Z_INDEX - 1,
       pointerEvents: 'none',
       display: 'none',
-      // ~2s expand, then invisible for the rest of the 7.5s cycle (~5s pause).
-      animation: 'cbz-pulse 7.5s ease-out infinite',
+      // ~2s expand, then invisible for the rest of the 8s cycle (~5s pause).
+      // Delayed so the wave emits on the button's "exhale" (see cbz-breathe).
+      animation: 'cbz-pulse 8s ease-out infinite',
       animationDelay: delay,
     })
     r.style[isRight ? 'right' : 'left'] = OFFSET + 'px'
     return r
   }
-  // Two rings 0.5s apart = a double wave, then a calm pause before the next burst.
-  var pulseRings = [makeRing('0s'), makeRing('0.5s')]
+  // Two rings 0.5s apart = a double wave, emitted just after the breath bounce.
+  var pulseRings = [makeRing('0.8s'), makeRing('1.3s')]
 
   // Launcher icons (themed by renderLauncher via currentColor).
   var CHAT_ICON =
@@ -284,13 +286,15 @@
     launcher.style.backgroundColor = pc
     launcher.style.color = readable(pc)
 
-    // Pulse rings: circle style only, and never while the chat is open.
+    // Pulse rings + button breathing: circle style only, never while chat is open.
     var doPulse = !!theme.launcherPulse && theme.launcherStyle !== 'pill' && !isOpen
     if (doPulse) ensurePulseKeyframes()
     for (var ri = 0; ri < pulseRings.length; ri++) {
       pulseRings[ri].style.backgroundColor = pc
       pulseRings[ri].style.display = doPulse ? 'block' : 'none'
     }
+    // The launcher "breathes" (contract → bounce back), then emits the wave.
+    launcher.style.animation = doPulse ? 'cbz-breathe 8s ease-in-out infinite' : ''
 
     var label = theme.launcherLabel || ''
     var asPill = theme.launcherStyle === 'pill' && !!label && !isOpen

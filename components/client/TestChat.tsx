@@ -157,12 +157,12 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
         {pulse && (
           <>
             <span
-              className="absolute inset-0 -z-10 rounded-full motion-safe:animate-[cbzPulse_7.5s_ease-out_infinite]"
+              className="absolute inset-0 -z-10 rounded-full motion-safe:animate-[cbzPulse_8s_ease-out_infinite] [animation-delay:0.8s]"
               style={{ backgroundColor: launcherColor }}
               aria-hidden="true"
             />
             <span
-              className="absolute inset-0 -z-10 rounded-full motion-safe:animate-[cbzPulse_7.5s_ease-out_infinite] [animation-delay:0.5s]"
+              className="absolute inset-0 -z-10 rounded-full motion-safe:animate-[cbzPulse_8s_ease-out_infinite] [animation-delay:1.3s]"
               style={{ backgroundColor: launcherColor }}
               aria-hidden="true"
             />
@@ -174,7 +174,7 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
           aria-label={isOpen ? 'Close chat preview' : 'Open chat preview'}
           className={`relative flex h-14 items-center justify-center gap-2 shadow-lg transition-transform hover:scale-105 active:scale-95 ${
             asPill ? 'rounded-full px-5' : 'w-14 overflow-hidden rounded-full'
-          }`}
+          } ${pulse ? 'motion-safe:animate-[cbzBreathe_8s_ease-in-out_infinite]' : ''}`}
           style={{ backgroundColor: launcherColor, color: readableTextColor(launcherColor) }}
         >
           {isOpen ? (
