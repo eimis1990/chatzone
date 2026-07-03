@@ -98,9 +98,10 @@ describe('widget.js loader', () => {
       const launcher = document.querySelector<HTMLElement>('[data-cbz-launcher]')
       const wrapper = document.querySelector<HTMLElement>('[data-cbz-wrapper]')
 
-      // First click — open (shown immediately, animates in)
+      // First click — open (shown immediately, animates in). The wrapper is a
+      // flex column (iframe + powered-by) so it can stretch to full-screen on mobile.
       launcher!.click()
-      expect(wrapper?.style.display).toBe('block')
+      expect(wrapper?.style.display).toBe('flex')
       expect(launcher?.getAttribute('aria-expanded')).toBe('true')
 
       // Second click — close (animates out, then hides after the transition)
@@ -111,7 +112,7 @@ describe('widget.js loader', () => {
 
       // Third click — open again (cancels any pending hide)
       launcher!.click()
-      expect(wrapper?.style.display).toBe('block')
+      expect(wrapper?.style.display).toBe('flex')
       expect(launcher?.getAttribute('aria-expanded')).toBe('true')
     } finally {
       vi.useRealTimers()

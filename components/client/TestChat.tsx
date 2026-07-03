@@ -147,6 +147,7 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
                 config={publicConfig}
                 transport={transport}
                 initialLanguage={activeLang}
+                onRequestClose={() => setIsOpen(false)}
               />
             </div>
 

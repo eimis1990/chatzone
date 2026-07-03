@@ -202,19 +202,24 @@
 
   // Responsive sizing: a floating card on desktop, a near-full-screen sheet on
   // phones. Re-run on resize/rotate so it adapts live.
+  function isMobile() {
+    return window.innerWidth <= MOBILE_BP
+  }
   function sizeWidget() {
-    var mobile = window.innerWidth <= MOBILE_BP
-    if (mobile) {
-      // Fill the width (small margins), from a small top gap down to just above
-      // the launcher, so the composer never sits under the launcher bubble.
+    if (isMobile()) {
+      // True full screen — max real estate for the on-screen keyboard. Edge to
+      // edge, no radius/shadow; the in-header ✕ (rendered by ChatWindow) closes it.
       wrapper.style.width = 'auto'
-      wrapper.style.left = '10px'
-      wrapper.style.right = '10px'
-      wrapper.style.top = '12px'
-      wrapper.style.bottom = LAUNCHER_SIZE + OFFSET + 8 + 'px'
+      wrapper.style.left = '0px'
+      wrapper.style.right = '0px'
+      wrapper.style.top = '0px'
+      wrapper.style.bottom = '0px'
       iframeContainer.style.flex = '1 1 auto'
       iframeContainer.style.minHeight = '0'
       iframeContainer.style.height = 'auto'
+      iframeContainer.style.borderRadius = '0px'
+      iframeContainer.style.boxShadow = 'none'
+      poweredBy.style.display = 'none'
     } else {
       wrapper.style.width = IFRAME_WIDTH + 'px'
       wrapper.style.top = 'auto'
@@ -226,10 +231,19 @@
       iframeContainer.style.minHeight = ''
       // Cap to the viewport so it never overflows short screens (matches preview).
       iframeContainer.style.height = 'min(' + IFRAME_HEIGHT + 'px, calc(100dvh - 112px))'
+      iframeContainer.style.boxShadow = '0 8px 40px rgba(0,0,0,0.18)'
+      poweredBy.style.display = config && config.hideBadge ? 'none' : ''
+      // borderRadius restored below from config.cornerRadius (or its 16px default).
+      iframeContainer.style.borderRadius =
+        (config && config.theme && typeof config.theme.cornerRadius === 'number'
+          ? config.theme.cornerRadius
+          : 16) + 'px'
     }
+    // Keep launcher visibility correct across a rotation/resize while open.
+    if (isOpen) launcher.style.display = isMobile() ? 'none' : 'flex'
+    // Keep the iframe's header (✕ vs avatar) in sync across rotation/resize.
+    sendViewport()
   }
-  sizeWidget()
-  window.addEventListener('resize', sizeWidget)
 
   // ── Powered-by link (below the iframe, right-aligned) ─────────────────────
   // No separate close button: the launcher bubble toggles open/close.
@@ -250,8 +264,24 @@
   wrapper.appendChild(iframeContainer)
   wrapper.appendChild(poweredBy)
 
+  // Size the wrapper now that all its children exist (sizeWidget reads poweredBy).
+  sizeWidget()
+  window.addEventListener('resize', sizeWidget)
+
   var iframe = null
   var isOpen = false
+
+  // Tell the iframe whether we're a full-screen mobile sheet, so its header can
+  // show a ✕ instead of the avatar. The iframe can't tell on its own — its own
+  // width is always narrow regardless of the outer viewport.
+  function sendViewport() {
+    if (iframe && iframe.contentWindow) {
+      iframe.contentWindow.postMessage(
+        { type: 'cbz-viewport', mobile: isMobile() },
+        '*'
+      )
+    }
+  }
 
   function openWidget() {
     if (!iframe) {
@@ -269,6 +299,7 @@
         border: 'none',
         display: 'block',
       })
+      iframe.addEventListener('load', sendViewport)
       iframeContainer.appendChild(iframe)
     }
     if (closeTimer) {
@@ -284,6 +315,9 @@
     isOpen = true
     launcher.setAttribute('aria-expanded', 'true')
     launcher.setAttribute('aria-label', 'Close chat')
+    // On mobile the panel is full screen with its own in-header ✕, so hide the
+    // floating launcher (it would cover the composer). Desktop keeps it.
+    if (isMobile()) launcher.style.display = 'none'
     renderLauncher()
   }
 
@@ -299,6 +333,7 @@
       closeTimer = null
     }, 300)
     isOpen = false
+    launcher.style.display = 'flex' // restore (was hidden on mobile while open)
     launcher.setAttribute('aria-expanded', 'false')
     launcher.setAttribute('aria-label', 'Open chat')
     renderLauncher()
@@ -385,6 +420,18 @@
   // Keyboard: close on Escape when widget is open
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape' && isOpen) closeWidget()
+  })
+
+  // The in-iframe header ✕ (mobile) asks us to close via postMessage. Only trust
+  // messages coming from our own iframe's window.
+  window.addEventListener('message', function (e) {
+    if (!iframe || e.source !== iframe.contentWindow || !e.data) return
+    if (e.data.type === 'cbz-close') {
+      closeWidget()
+    } else if (e.data.type === 'cbz-ready') {
+      // Iframe mounted and is asking for the current viewport.
+      sendViewport()
+    }
   })
 
   // ── Mount ─────────────────────────────────────────────────────────────────

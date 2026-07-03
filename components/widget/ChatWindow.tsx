@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useRef, useEffect } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { HeadsetIcon, RotateCcwIcon } from 'lucide-react'
+import { HeadsetIcon, RotateCcwIcon, XIcon } from 'lucide-react'
 import { MessageList, type ChatMessage } from './MessageList'
 import { ProductListView } from './ProductCards'
 import { Composer } from './Composer'
@@ -23,6 +23,20 @@ interface ChatWindowProps {
   transport: ChatTransport
   /** Display language override (preview). Live widget uses config.defaultLanguage. */
   initialLanguage?: BotLanguage
+  /**
+   * When set, a close (✕) button replaces the header avatar on mobile — used by
+   * the full-screen mobile embed (posts a message to the parent) and the
+   * configurator preview (closes the preview card). Desktop keeps the avatar.
+   */
+  onRequestClose?: () => void
+  /**
+   * True full-screen-mobile signal from the embedding parent (widget.js), which
+   * knows the real outer viewport. The iframe's own width is always narrow
+   * (~420px on desktop), so an in-iframe media query can't tell desktop from
+   * mobile — when provided this overrides it. Omitted in the in-app preview,
+   * which falls back to its own media query.
+   */
+  isMobileOverride?: boolean
 }
 
 function generateId() {
@@ -85,8 +99,23 @@ const RESTART_CONFIRM: Record<BotLanguage, { title: string; cancel: string; conf
 
 const POLL_INTERVAL_MS = 4000
 
-export function ChatWindow({ config, transport, initialLanguage }: ChatWindowProps) {
+export function ChatWindow({ config, transport, initialLanguage, onRequestClose, isMobileOverride }: ChatWindowProps) {
   const languages = config.languages ?? ['en']
+
+  // Narrow viewport → the widget is a full-screen sheet, so show an in-header
+  // close button (mobile has no room for the floating launcher). The parent's
+  // signal (isMobileOverride) wins when present; otherwise fall back to our own
+  // media query (in-app preview, not iframed).
+  const [mqMobile, setMqMobile] = useState(false)
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 640px)')
+    const update = () => setMqMobile(mq.matches)
+    update()
+    mq.addEventListener('change', update)
+    return () => mq.removeEventListener('change', update)
+  }, [])
+  const isMobile = isMobileOverride ?? mqMobile
+  const showClose = isMobile && !!onRequestClose
 
   // Starting language: preview override > saved default > first configured.
   // Visitors can switch between the bot's configured languages via the header
@@ -671,7 +700,22 @@ export function ChatWindow({ config, transport, initialLanguage }: ChatWindowPro
           borderBottom: `1px solid color-mix(in srgb, ${headerFg} 14%, transparent)`,
         }}
       >
-        {headerAvatar ? (
+        {showClose ? (
+          // Mobile: close (✕) replaces the avatar — same style as the restart button.
+          <button
+            type="button"
+            onClick={onRequestClose}
+            title={activeLang === 'lt' ? 'Uždaryti' : 'Close'}
+            aria-label={activeLang === 'lt' ? 'Uždaryti' : 'Close'}
+            className="flex size-8 flex-shrink-0 items-center justify-center transition hover:brightness-90"
+            style={{
+              backgroundColor: 'color-mix(in srgb, currentColor 15%, transparent)',
+              borderRadius: `${navButtonRadius}px`,
+            }}
+          >
+            <XIcon className="size-4" aria-hidden="true" />
+          </button>
+        ) : headerAvatar ? (
           <img
             src={headerAvatar}
             alt={config.displayName}
