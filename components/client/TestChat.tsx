@@ -94,13 +94,17 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
   const showLauncherLogo = (config.theme?.launcherShowLogo ?? false) && !!launcherAvatar
   const asPill = launcherStyleCfg === 'pill' && !!launcherLabel && !isOpen
   // Preview pulse: unlike the live widget (which pulses whenever closed), the
-  // in-app preview only plays a short demo burst right after the toggle turns
-  // on — a permanently pulsing launcher is distracting while configuring.
+  // in-app preview plays a short demo burst ONLY when the user actively flips
+  // the Pulse toggle on — never just from opening/returning to Configure — so
+  // a launcher never keeps pulsing while you work elsewhere in the app.
   const pulseEnabled = (config.theme?.launcherPulse ?? false) && launcherStyleCfg === 'circle'
   const [pulseDemo, setPulseDemo] = useState(false)
+  const prevPulseEnabled = useRef(pulseEnabled) // seed with mount value → no demo on mount
   useEffect(() => {
-    if (!pulseEnabled) {
-      setPulseDemo(false)
+    const turnedOn = pulseEnabled && !prevPulseEnabled.current
+    prevPulseEnabled.current = pulseEnabled
+    if (!turnedOn) {
+      if (!pulseEnabled) setPulseDemo(false)
       return
     }
     setPulseDemo(true)
