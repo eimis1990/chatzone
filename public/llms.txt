@@ -42,6 +42,11 @@
 - Intercom alternatives for e-commerce: https://www.loqara.com/blog/intercom-alternatives-for-ecommerce
 - Gorgias alternatives for e-commerce: https://www.loqara.com/blog/gorgias-alternatives-for-ecommerce
 - AI chatbots & GDPR: https://www.loqara.com/blog/ai-chatbot-gdpr-data-privacy
+- The 10 best chatbot platforms in 2026: https://www.loqara.com/blog/best-chatbot-platforms
+- Conversational AI vs chatbots: https://www.loqara.com/blog/conversational-ai-vs-chatbot
+- AI voice agents explained: https://www.loqara.com/blog/ai-voice-agents-explained
+- Zendesk AI review (2026): https://www.loqara.com/blog/zendesk-ai-review
+- Tidio vs Zendesk: https://www.loqara.com/blog/tidio-vs-zendesk
 - Privacy & data handling: https://www.loqara.com/privacy
 - Terms of service: https://www.loqara.com/terms
 
