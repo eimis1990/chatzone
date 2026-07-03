@@ -10,7 +10,7 @@
  * "Start over", and the "Powered by" footer.
  */
 
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { MessageCircleIcon, XIcon } from 'lucide-react'
 import { ChatWindow } from '@/components/widget/ChatWindow'
@@ -93,7 +93,21 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
   const launcherLabel = config.theme?.launcherLabel ?? ''
   const showLauncherLogo = (config.theme?.launcherShowLogo ?? false) && !!launcherAvatar
   const asPill = launcherStyleCfg === 'pill' && !!launcherLabel && !isOpen
-  const pulse = (config.theme?.launcherPulse ?? false) && launcherStyleCfg === 'circle' && !isOpen
+  // Preview pulse: unlike the live widget (which pulses whenever closed), the
+  // in-app preview only plays a short demo burst right after the toggle turns
+  // on — a permanently pulsing launcher is distracting while configuring.
+  const pulseEnabled = (config.theme?.launcherPulse ?? false) && launcherStyleCfg === 'circle'
+  const [pulseDemo, setPulseDemo] = useState(false)
+  useEffect(() => {
+    if (!pulseEnabled) {
+      setPulseDemo(false)
+      return
+    }
+    setPulseDemo(true)
+    const t = setTimeout(() => setPulseDemo(false), 13000) // ~2 breathe cycles
+    return () => clearTimeout(t)
+  }, [pulseEnabled])
+  const pulse = pulseEnabled && pulseDemo && !isOpen
 
   const transport = useMemo<ChatTransport>(
     () => createPreviewTransport(botId, () => buildFullConfig(configRef.current)),
