@@ -30,6 +30,12 @@ function generateId() {
 }
 
 // Header status while a live call is active.
+/** Flag + native name for the header language picker. */
+const LANG_META: Record<string, { flag: string; label: string }> = {
+  en: { flag: '🇬🇧', label: 'English' },
+  lt: { flag: '🇱🇹', label: 'Lietuvių' },
+}
+
 const VOICE_STATUS: Record<'en' | 'lt', Record<'connecting' | 'listening' | 'speaking', string>> = {
   en: { connecting: 'Connecting…', listening: 'Listening…', speaking: 'Speaking…' },
   lt: { connecting: 'Jungiamasi…', listening: 'Klausosi…', speaking: 'Kalba…' },
@@ -82,14 +88,45 @@ const POLL_INTERVAL_MS = 4000
 export function ChatWindow({ config, transport, initialLanguage }: ChatWindowProps) {
   const languages = config.languages ?? ['en']
 
-  // Display language is fixed by configuration; visitors can't switch it.
-  // Preview passes initialLanguage; the live widget uses the saved default.
-  const activeLang: BotLanguage =
+  // Starting language: preview override > saved default > first configured.
+  // Visitors can switch between the bot's configured languages via the header
+  // picker (multilingual bots only); the choice persists per visitor.
+  const startLang: BotLanguage =
     initialLanguage && languages.includes(initialLanguage)
       ? initialLanguage
       : config.defaultLanguage && languages.includes(config.defaultLanguage)
         ? config.defaultLanguage
         : languages[0] ?? 'en'
+  const [activeLang, setActiveLang] = useState<BotLanguage>(startLang)
+  const [langMenuOpen, setLangMenuOpen] = useState(false)
+
+  // Preview: follow the configurator's language toggle.
+  useEffect(() => {
+    if (initialLanguage && languages.includes(initialLanguage)) setActiveLang(initialLanguage)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialLanguage])
+
+  // Live widget: restore the visitor's last language choice (if still offered).
+  useEffect(() => {
+    if (initialLanguage) return
+    try {
+      const saved = localStorage.getItem('cbz_lang') as BotLanguage | null
+      if (saved && languages.includes(saved)) setActiveLang(saved)
+    } catch {
+      /* storage unavailable — keep default */
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const pickLanguage = (lang: BotLanguage) => {
+    setActiveLang(lang)
+    setLangMenuOpen(false)
+    try {
+      localStorage.setItem('cbz_lang', lang)
+    } catch {
+      /* ignore */
+    }
+  }
 
   // Derived per-language content
   const langContent = config.content[activeLang] ?? config.content[languages[0]] ?? { greeting: '', suggestedQuestions: [] }
@@ -692,6 +729,57 @@ export function ChatWindow({ config, transport, initialLanguage }: ChatWindowPro
             onKnowledge={handleVoiceKnowledge}
             className="flex-shrink-0"
           />
+        )}
+
+        {/* Language picker — flag-only square, multilingual bots only. Disabled
+            during a voice call (the call is bound to the language it started in). */}
+        {languages.length > 1 && (
+          <div className="relative flex-shrink-0">
+            <button
+              type="button"
+              onClick={() => setLangMenuOpen((o) => !o)}
+              disabled={callState !== 'idle'}
+              title={LANG_META[activeLang]?.label ?? activeLang}
+              aria-label={activeLang === 'lt' ? 'Pakeisti kalbą' : 'Change language'}
+              aria-expanded={langMenuOpen}
+              className="flex size-8 items-center justify-center text-base transition hover:brightness-90 disabled:opacity-50"
+              style={{
+                backgroundColor: 'color-mix(in srgb, currentColor 15%, transparent)',
+                borderRadius: `${navButtonRadius}px`,
+              }}
+            >
+              <span aria-hidden="true">{LANG_META[activeLang]?.flag ?? '🌐'}</span>
+            </button>
+            {langMenuOpen && (
+              <>
+                {/* invisible backdrop to close on outside tap */}
+                <div className="fixed inset-0 z-40" onClick={() => setLangMenuOpen(false)} aria-hidden="true" />
+                <div
+                  className="absolute right-0 top-full z-50 mt-1.5 min-w-36 overflow-hidden bg-white py-1 text-gray-900 shadow-xl ring-1 ring-black/10"
+                  style={{ borderRadius: `${Math.min(navButtonRadius + 2, 14)}px` }}
+                  role="listbox"
+                  aria-label="Language"
+                >
+                  {languages.map((lang) => (
+                    <button
+                      key={lang}
+                      type="button"
+                      role="option"
+                      aria-selected={lang === activeLang}
+                      onClick={() => pickLanguage(lang)}
+                      className={`flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm transition-colors hover:bg-gray-100 ${
+                        lang === activeLang ? 'font-semibold' : ''
+                      }`}
+                    >
+                      <span aria-hidden="true">{LANG_META[lang]?.flag ?? '🌐'}</span>
+                      <span className="flex-1">{LANG_META[lang]?.label ?? lang.toUpperCase()}</span>
+                      {lang === activeLang && <span aria-hidden="true" className="text-xs">✓</span>}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
         )}
 
         {/* Restart — asks for confirmation before clearing the conversation */}
