@@ -116,8 +116,8 @@ The trade-offs are control and cost accounting. Customisation of the AI's behavi
 ## 6. Loqara — grounded chat + voice for online stores (that's us)
 
 <figure>
-<img src="/landing/feature-chat.webp" alt="Loqara chat widget answering a store customer's question with cited sources from the store's own content" width="1200" height="750" loading="lazy" />
-<figcaption>The Loqara widget on a live store — answers come only from the store's own content, with citations.</figcaption>
+<img src="/blog/loqara-hero.webp" alt="Loqara landing page: an AI chat and voice agent for online stores, with a fox mascot and integration logos for Shopify, WooCommerce and Magento" width="1200" height="750" loading="lazy" />
+<figcaption>Loqara (screenshot: loqara.com, July 2026)</figcaption>
 </figure>
 
 Full disclosure: Loqara is our product, so read this section with that in mind. What it does: a grounded AI agent that answers *only* from your store's own content and cites its sources, live product search, identity-checked order lookup on Shopify, WooCommerce, and Magento, lead capture, human handoff on every plan, and AI analytics (conversation summaries, topics, 1–5 quality scores, CSAT). The unusual part is voice: an add-on (€49/month including ~200 minutes, then €0.20/min) lets customers literally talk to your store in the same widget. Install is one line; pricing is per conversation — Free at €0 for 100 conversations/month, then €149/€249/€449 tiers, no setup fees.
