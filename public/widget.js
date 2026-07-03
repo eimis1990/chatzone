@@ -115,8 +115,8 @@
     pulseStyleInjected = true
     var st = document.createElement('style')
     st.textContent =
-      '@keyframes cbz-pulse{0%{transform:scale(1);opacity:.5}25%{transform:scale(2.2);opacity:0}100%{transform:scale(2.2);opacity:0}}' +
-      '@keyframes cbz-breathe{0%{transform:scale(1)}6.25%{transform:scale(.9)}11%{transform:scale(1.03)}15%{transform:scale(1)}100%{transform:scale(1)}}'
+      '@keyframes cbz-pulse{0%{transform:scale(1);opacity:0}82.9%{transform:scale(1);opacity:0}83%{transform:scale(1);opacity:.5}100%{transform:scale(2.2);opacity:0}}' +
+      '@keyframes cbz-breathe{0%{transform:scale(1)}83%{transform:scale(.9)}88%{transform:scale(1.03)}93%{transform:scale(1)}100%{transform:scale(1)}}'
     document.head.appendChild(st)
   }
   function makeRing(delay) {
@@ -130,17 +130,17 @@
       zIndex: Z_INDEX - 1,
       pointerEvents: 'none',
       display: 'none',
-      // ~2s expand, then invisible for the rest of the 8s cycle (~5s pause).
-      // Delayed so the wave emits on the button's "exhale" (see cbz-breathe).
-      animation: 'cbz-pulse 8s ease-out infinite',
+      // Invisible during the 5s shrink (opacity 0 in the keyframe), then radiates
+      // out over the last ~1s — firing exactly on the button's spring-back.
+      animation: 'cbz-pulse 6s ease-out infinite',
       animationDelay: delay,
+      animationFillMode: 'backwards',
     })
     r.style[isRight ? 'right' : 'left'] = OFFSET + 'px'
     return r
   }
-  // Two rings emitted at the contraction bottom (0.5s) so they appear around the
-  // shrunken button and radiate out as it springs back — a tight double wave.
-  var pulseRings = [makeRing('0.5s'), makeRing('0.7s')]
+  // Second ring 0.25s behind the first = a tight double wave on the bounce.
+  var pulseRings = [makeRing('0s'), makeRing('0.25s')]
 
   // Launcher icons (themed by renderLauncher via currentColor).
   var CHAT_ICON =
@@ -294,8 +294,9 @@
       pulseRings[ri].style.backgroundColor = pc
       pulseRings[ri].style.display = doPulse ? 'block' : 'none'
     }
-    // The launcher "breathes" (contract → bounce back), then emits the wave.
-    launcher.style.animation = doPulse ? 'cbz-breathe 8s ease-in-out infinite' : ''
+    // The launcher slowly shrinks (~5s) then springs back — the wave fires on
+    // that spring-back (same 6s cycle, see cbz-pulse rings above).
+    launcher.style.animation = doPulse ? 'cbz-breathe 6s ease-in-out infinite' : ''
 
     var label = theme.launcherLabel || ''
     var asPill = theme.launcherStyle === 'pill' && !!label && !isOpen

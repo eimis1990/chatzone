@@ -261,18 +261,24 @@
     transform: translateX(-50%);
   }
 }
-/* Widget launcher "breathe + pulse" — one synced 8s cycle:
-   1) the button contracts to 0.9 (~0.5s), bounces back past 1.0 and settles (~0.5s),
-   2) two rings then radiate out & fade over ~2s (a double wave), emitted on the
-      "exhale" (delayed ~0.8s), 3) a calm ~5s pause. The live widget.js has its own copy. */
+/* Widget launcher "breathe + pulse" — one synced 6s cycle:
+   1) the button shrinks slowly from 1.0 → 0.9 over ~5s (a long inhale),
+   2) at 5s it springs back past 1.0 and settles, and AT THE SAME MOMENT the two
+      rings radiate out & fade (a double wave). The rings stay invisible during
+      the shrink (opacity 0) so the wave and the bounce read as one event.
+   The live widget.js has its own copy of these keyframes. */
 @keyframes cbzPulse {
   0% {
     transform: scale(1);
-    opacity: 0.5;
-  }
-  25% {
-    transform: scale(2.2);
     opacity: 0;
+  }
+  82.9% {
+    transform: scale(1);
+    opacity: 0;
+  }
+  83% {
+    transform: scale(1);
+    opacity: 0.5;
   }
   100% {
     transform: scale(2.2);
@@ -283,13 +289,13 @@
   0% {
     transform: scale(1);
   }
-  6.25% {
+  83% {
     transform: scale(0.9);
   }
-  11% {
+  88% {
     transform: scale(1.03);
   }
-  15% {
+  93% {
     transform: scale(1);
   }
   100% {
