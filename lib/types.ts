@@ -167,6 +167,8 @@ export interface BotConfig {
     launcherLabel?: string
     /** Show the company logo in the launcher instead of the default chat icon. */
     launcherShowLogo?: boolean
+    /** Animated pulse rings radiating from the circle launcher (circle style only). */
+    launcherPulse?: boolean
     /** Launcher background color; falls back to primaryColor when unset. */
     launcherColor?: string
     /** Show the "talk with agent" voice call button in the header (when voice on). */

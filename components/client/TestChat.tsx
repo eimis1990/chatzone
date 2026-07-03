@@ -93,6 +93,7 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
   const launcherLabel = config.theme?.launcherLabel ?? ''
   const showLauncherLogo = (config.theme?.launcherShowLogo ?? false) && !!launcherAvatar
   const asPill = launcherStyleCfg === 'pill' && !!launcherLabel && !isOpen
+  const pulse = (config.theme?.launcherPulse ?? false) && launcherStyleCfg === 'circle' && !isOpen
 
   const transport = useMemo<ChatTransport>(
     () => createPreviewTransport(botId, () => buildFullConfig(configRef.current)),
@@ -150,35 +151,52 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
         )}
       </AnimatePresence>
 
-      {/* Launcher bubble — circle or pill, optional company logo */}
-      <button
-        type="button"
-        onClick={() => setIsOpen((v) => !v)}
-        aria-label={isOpen ? 'Close chat preview' : 'Open chat preview'}
-        className={`flex h-14 items-center justify-center gap-2 shadow-lg transition-transform hover:scale-105 active:scale-95 pointer-events-auto ${
-          asPill ? 'rounded-full px-5' : 'w-14 rounded-full'
-        }`}
-        style={{ backgroundColor: launcherColor, color: readableTextColor(launcherColor) }}
-      >
-        {isOpen ? (
-          <XIcon className="size-6" aria-hidden="true" />
-        ) : (
+      {/* Launcher bubble — circle or pill, optional company logo + pulse */}
+      <div className="relative pointer-events-auto">
+        {/* Pulse rings — two expanding, fading circles behind the button */}
+        {pulse && (
           <>
-            {showLauncherLogo ? (
-              <img
-                src={launcherAvatar}
-                alt={config.displayName ?? 'Bot'}
-                className="size-8 rounded-full object-cover"
-              />
-            ) : (
-              <MessageCircleIcon className="size-7" aria-hidden="true" />
-            )}
-            {asPill && (
-              <span className="whitespace-nowrap text-[15px] font-semibold">{launcherLabel}</span>
-            )}
+            <span
+              className="absolute inset-0 -z-10 rounded-full motion-safe:animate-[cbzPulse_2s_ease-out_infinite]"
+              style={{ backgroundColor: launcherColor }}
+              aria-hidden="true"
+            />
+            <span
+              className="absolute inset-0 -z-10 rounded-full motion-safe:animate-[cbzPulse_2s_ease-out_infinite] [animation-delay:1s]"
+              style={{ backgroundColor: launcherColor }}
+              aria-hidden="true"
+            />
           </>
         )}
-      </button>
+        <button
+          type="button"
+          onClick={() => setIsOpen((v) => !v)}
+          aria-label={isOpen ? 'Close chat preview' : 'Open chat preview'}
+          className={`relative flex h-14 items-center justify-center gap-2 shadow-lg transition-transform hover:scale-105 active:scale-95 ${
+            asPill ? 'rounded-full px-5' : 'w-14 overflow-hidden rounded-full'
+          }`}
+          style={{ backgroundColor: launcherColor, color: readableTextColor(launcherColor) }}
+        >
+          {isOpen ? (
+            <XIcon className="size-6" aria-hidden="true" />
+          ) : (
+            <>
+              {showLauncherLogo ? (
+                <img
+                  src={launcherAvatar}
+                  alt={config.displayName ?? 'Bot'}
+                  className={asPill ? 'size-8 rounded-full object-cover' : 'size-full rounded-full object-cover'}
+                />
+              ) : (
+                <MessageCircleIcon className="size-7" aria-hidden="true" />
+              )}
+              {asPill && (
+                <span className="whitespace-nowrap text-[15px] font-semibold">{launcherLabel}</span>
+              )}
+            </>
+          )}
+        </button>
+      </div>
     </div>
   )
 }

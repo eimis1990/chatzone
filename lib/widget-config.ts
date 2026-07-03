@@ -70,6 +70,7 @@ export interface PublicBotConfig {
     launcherStyle?: 'circle' | 'pill'
     launcherLabel?: string
     launcherShowLogo?: boolean
+    launcherPulse?: boolean
     launcherColor?: string
     showCallButton?: boolean
     showHandoffButton?: boolean
@@ -146,6 +147,7 @@ export function publicBotConfig(
       fontFamily: config.theme.fontFamily ?? 'geist',
       launcherStyle: config.theme.launcherStyle ?? 'circle',
       launcherShowLogo: config.theme.launcherShowLogo ?? false,
+      launcherPulse: config.theme.launcherPulse ?? false,
       // No separate user toggle anymore: the call button shows exactly when
       // voice is enabled AND the org's Voice add-on allows live calls.
       showCallButton: callAllowed && (config.voice?.enabled ?? false),

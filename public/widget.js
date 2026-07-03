@@ -106,6 +106,37 @@
     launcher.style.left = OFFSET + 'px'
   }
 
+  // ── Pulse rings ─────────────────────────────────────────────────────────
+  // Two expanding, fading circles behind the launcher (circle style only).
+  // Injected once; shown/hidden + colored by renderLauncher().
+  var pulseStyleInjected = false
+  function ensurePulseKeyframes() {
+    if (pulseStyleInjected) return
+    pulseStyleInjected = true
+    var st = document.createElement('style')
+    st.textContent =
+      '@keyframes cbz-pulse{0%{transform:scale(1);opacity:.55}70%{opacity:0}100%{transform:scale(2.2);opacity:0}}'
+    document.head.appendChild(st)
+  }
+  function makeRing(delay) {
+    var r = document.createElement('span')
+    css(r, {
+      position: 'fixed',
+      bottom: OFFSET + 'px',
+      width: LAUNCHER_SIZE + 'px',
+      height: LAUNCHER_SIZE + 'px',
+      borderRadius: '50%',
+      zIndex: Z_INDEX - 1,
+      pointerEvents: 'none',
+      display: 'none',
+      animation: 'cbz-pulse 2s ease-out infinite',
+      animationDelay: delay,
+    })
+    r.style[isRight ? 'right' : 'left'] = OFFSET + 'px'
+    return r
+  }
+  var pulseRings = [makeRing('0s'), makeRing('1s')]
+
   // Launcher icons (themed by renderLauncher via currentColor).
   var CHAT_ICON =
     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="26" height="26" aria-hidden="true">' +
@@ -251,6 +282,14 @@
     launcher.style.backgroundColor = pc
     launcher.style.color = readable(pc)
 
+    // Pulse rings: circle style only, and never while the chat is open.
+    var doPulse = !!theme.launcherPulse && theme.launcherStyle !== 'pill' && !isOpen
+    if (doPulse) ensurePulseKeyframes()
+    for (var ri = 0; ri < pulseRings.length; ri++) {
+      pulseRings[ri].style.backgroundColor = pc
+      pulseRings[ri].style.display = doPulse ? 'block' : 'none'
+    }
+
     var label = theme.launcherLabel || ''
     var asPill = theme.launcherStyle === 'pill' && !!label && !isOpen
     var showLogo = !!theme.launcherShowLogo && !!(config && config.avatarUrl)
@@ -318,6 +357,8 @@
   // ── Mount ─────────────────────────────────────────────────────────────────
   renderLauncher()
   document.body.appendChild(wrapper)
+  document.body.appendChild(pulseRings[0])
+  document.body.appendChild(pulseRings[1])
   document.body.appendChild(launcher)
 
   // Safety net: reveal with the default look if config is slow or unreachable,

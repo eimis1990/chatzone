@@ -94,6 +94,8 @@ export const botConfigFormSchema = z.object({
       launcherStyle: z.enum(['circle', 'pill']).default('circle'),
       launcherLabel: z.string().max(40).optional().or(z.literal('')),
       launcherShowLogo: z.boolean().default(false),
+      // Animated pulse rings radiating from the circle launcher (circle style only).
+      launcherPulse: z.boolean().default(false),
       launcherColor: z.string().optional().or(z.literal('')),
       showCallButton: z.boolean().default(true),
       // Show the "talk to a person" human-handoff button.
@@ -124,6 +126,7 @@ export const botConfigFormSchema = z.object({
       fontFamily: 'geist',
       launcherStyle: 'circle',
       launcherShowLogo: false,
+      launcherPulse: false,
       showCallButton: true,
       showHandoffButton: true,
       navButtonRadius: 12,

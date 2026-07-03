@@ -1084,6 +1084,26 @@ export function ConfigForm({
                   )}
                 />
               </div>
+              <div className="flex items-center justify-between gap-4">
+                <div className="space-y-0.5">
+                  <Label htmlFor="launcherPulse">Pulse effect</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Animated rings radiate from the button to draw the eye. Circle style only.
+                  </p>
+                </div>
+                <Controller
+                  name="theme.launcherPulse"
+                  control={control}
+                  render={({ field }) => (
+                    <Switch
+                      id="launcherPulse"
+                      checked={field.value ?? false}
+                      onCheckedChange={field.onChange}
+                      disabled={watch('theme.launcherStyle') === 'pill'}
+                    />
+                  )}
+                />
+              </div>
             </div>
 
             {/* ── Background & images ── */}

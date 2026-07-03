@@ -16,6 +16,7 @@ const fullConfig: BotConfig = {
     launcherStyle: 'pill',
     launcherLabel: 'Chat with us',
     launcherShowLogo: true,
+    launcherPulse: false,
     showCallButton: true,
     showHandoffButton: true,
     navButtonRadius: 12,
