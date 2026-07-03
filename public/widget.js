@@ -51,6 +51,8 @@
   // ── Styles ────────────────────────────────────────────────────────────────
   var LAUNCHER_SIZE = 56
   var IFRAME_WIDTH = 420
+  // At/below this viewport width the panel becomes a near-full-screen sheet.
+  var MOBILE_BP = 640
   // Keep this in sync with the preview cap in components/client/TestChat.tsx so
   // the embedded widget matches exactly what the owner sees in the configurator.
   var IFRAME_HEIGHT = 680
@@ -176,8 +178,11 @@
   css(wrapper, {
     position: 'fixed',
     zIndex: Z_INDEX,
-    width: IFRAME_WIDTH + 'px',
-    display: 'none', // hidden until first open
+    // A flex column so the iframe container can flex to fill on mobile while
+    // the "Powered by" line keeps its natural height. Size is set by
+    // sizeWidget() (responsive) rather than fixed here.
+    display: 'none', // hidden until first open (flex applied on open)
+    flexDirection: 'column',
     // Open/close animation (scale + fade from the launcher corner).
     opacity: '0',
     transform: 'translateY(12px) scale(0.96)',
@@ -186,26 +191,45 @@
     willChange: 'opacity, transform',
   })
 
-  if (isRight) {
-    wrapper.style.right = OFFSET + 'px'
-  } else {
-    wrapper.style.left = OFFSET + 'px'
-  }
-
-  // Position wrapper bottom so it sits above the launcher
-  wrapper.style.bottom = (LAUNCHER_SIZE + OFFSET + 8) + 'px'
-
   // ── Iframe container ──────────────────────────────────────────────────────
-  // Cap to the viewport so it never overflows on short screens (matches preview).
-  var CONTAINER_HEIGHT = 'min(' + IFRAME_HEIGHT + 'px, calc(100dvh - 112px))'
   var iframeContainer = document.createElement('div')
   css(iframeContainer, {
     width: '100%',
-    height: CONTAINER_HEIGHT,
     borderRadius: '16px', // updated from config.theme.cornerRadius once loaded
     boxShadow: '0 8px 40px rgba(0,0,0,0.18)',
     overflow: 'hidden',
   })
+
+  // Responsive sizing: a floating card on desktop, a near-full-screen sheet on
+  // phones. Re-run on resize/rotate so it adapts live.
+  function sizeWidget() {
+    var mobile = window.innerWidth <= MOBILE_BP
+    if (mobile) {
+      // Fill the width (small margins), from a small top gap down to just above
+      // the launcher, so the composer never sits under the launcher bubble.
+      wrapper.style.width = 'auto'
+      wrapper.style.left = '10px'
+      wrapper.style.right = '10px'
+      wrapper.style.top = '12px'
+      wrapper.style.bottom = LAUNCHER_SIZE + OFFSET + 8 + 'px'
+      iframeContainer.style.flex = '1 1 auto'
+      iframeContainer.style.minHeight = '0'
+      iframeContainer.style.height = 'auto'
+    } else {
+      wrapper.style.width = IFRAME_WIDTH + 'px'
+      wrapper.style.top = 'auto'
+      wrapper.style.left = 'auto'
+      wrapper.style.right = 'auto'
+      wrapper.style[isRight ? 'right' : 'left'] = OFFSET + 'px'
+      wrapper.style.bottom = LAUNCHER_SIZE + OFFSET + 8 + 'px'
+      iframeContainer.style.flex = '0 0 auto'
+      iframeContainer.style.minHeight = ''
+      // Cap to the viewport so it never overflows short screens (matches preview).
+      iframeContainer.style.height = 'min(' + IFRAME_HEIGHT + 'px, calc(100dvh - 112px))'
+    }
+  }
+  sizeWidget()
+  window.addEventListener('resize', sizeWidget)
 
   // ── Powered-by link (below the iframe, right-aligned) ─────────────────────
   // No separate close button: the launcher bubble toggles open/close.
@@ -251,7 +275,8 @@
       clearTimeout(closeTimer)
       closeTimer = null
     }
-    wrapper.style.display = 'block'
+    sizeWidget() // re-apply responsive sizing in case the viewport changed while closed
+    wrapper.style.display = 'flex'
     // Force a reflow so the transition runs from the hidden state, then animate in.
     void wrapper.offsetHeight
     wrapper.style.opacity = '1'
