@@ -13,6 +13,9 @@ import {
   DatabaseIcon,
   BugIcon,
   FileTextIcon,
+  InboxIcon,
+  MessagesSquareIcon,
+  BarChart3Icon,
   type LucideIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -38,6 +41,10 @@ const NAV: NavItem[] = [
     children: [
       { label: 'Configure', href: '/owner/chatbot', icon: SlidersHorizontalIcon, exact: true },
       { label: 'Knowledge', href: '/owner/chatbot/knowledge', icon: DatabaseIcon },
+      { label: 'Inbox', href: '/owner/chatbot/inbox', icon: InboxIcon },
+      { label: 'Conversations', href: '/owner/chatbot/conversations', icon: MessagesSquareIcon },
+      { label: 'Leads', href: '/owner/chatbot/leads', icon: UsersIcon },
+      { label: 'Analytics', href: '/owner/chatbot/analytics', icon: BarChart3Icon },
     ],
   },
   { label: 'System prompts', href: '/owner/prompts', icon: FileTextIcon },
