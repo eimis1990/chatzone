@@ -115,7 +115,7 @@
     pulseStyleInjected = true
     var st = document.createElement('style')
     st.textContent =
-      '@keyframes cbz-pulse{0%{transform:scale(1);opacity:.55}70%{opacity:0}100%{transform:scale(2.2);opacity:0}}'
+      '@keyframes cbz-pulse{0%{transform:scale(1);opacity:.5}27%{transform:scale(2.2);opacity:0}100%{transform:scale(2.2);opacity:0}}'
     document.head.appendChild(st)
   }
   function makeRing(delay) {
@@ -129,13 +129,15 @@
       zIndex: Z_INDEX - 1,
       pointerEvents: 'none',
       display: 'none',
-      animation: 'cbz-pulse 2s ease-out infinite',
+      // ~2s expand, then invisible for the rest of the 7.5s cycle (~5s pause).
+      animation: 'cbz-pulse 7.5s ease-out infinite',
       animationDelay: delay,
     })
     r.style[isRight ? 'right' : 'left'] = OFFSET + 'px'
     return r
   }
-  var pulseRings = [makeRing('0s'), makeRing('1s')]
+  // Two rings 0.5s apart = a double wave, then a calm pause before the next burst.
+  var pulseRings = [makeRing('0s'), makeRing('0.5s')]
 
   // Launcher icons (themed by renderLauncher via currentColor).
   var CHAT_ICON =

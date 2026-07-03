@@ -261,14 +261,16 @@
     transform: translateX(-50%);
   }
 }
-/* Widget launcher pulse — expanding, fading ring behind the circle button
-   (used by the configurator preview; the live widget.js has its own copy). */
+/* Widget launcher pulse — a ring expands & fades over ~2s, then stays invisible
+   for the rest of the ~7.5s cycle (a calm ~5s pause between bursts). Two rings
+   staggered 0.5s apart read as a double wave. The live widget.js has its own copy. */
 @keyframes cbzPulse {
   0% {
     transform: scale(1);
-    opacity: 0.55;
+    opacity: 0.5;
   }
-  70% {
+  27% {
+    transform: scale(2.2);
     opacity: 0;
   }
   100% {

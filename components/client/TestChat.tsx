@@ -157,12 +157,12 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
         {pulse && (
           <>
             <span
-              className="absolute inset-0 -z-10 rounded-full motion-safe:animate-[cbzPulse_2s_ease-out_infinite]"
+              className="absolute inset-0 -z-10 rounded-full motion-safe:animate-[cbzPulse_7.5s_ease-out_infinite]"
               style={{ backgroundColor: launcherColor }}
               aria-hidden="true"
             />
             <span
-              className="absolute inset-0 -z-10 rounded-full motion-safe:animate-[cbzPulse_2s_ease-out_infinite] [animation-delay:1s]"
+              className="absolute inset-0 -z-10 rounded-full motion-safe:animate-[cbzPulse_7.5s_ease-out_infinite] [animation-delay:0.5s]"
               style={{ backgroundColor: launcherColor }}
               aria-hidden="true"
             />
