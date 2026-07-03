@@ -1,5 +1,6 @@
 import { CheckIcon } from 'lucide-react'
 import { SETUP_PACKAGES } from '@/lib/setup-packages'
+import { GetStartedDialog } from './GetStartedDialog'
 
 /**
  * OPTIONAL one-time "done-for-you" setup packages. Positioned as concierge
@@ -49,12 +50,11 @@ export function SetupPricing() {
                 ))}
               </ul>
 
-              <a
-                href="#get-started"
-                className="mt-7 inline-flex h-11 items-center justify-center rounded-full bg-primary px-6 text-sm font-semibold text-white transition-colors hover:bg-primary-hover"
-              >
-                Request setup
-              </a>
+              <GetStartedDialog
+                source="setup"
+                label="Request setup"
+                triggerClassName="mt-7 inline-flex h-11 items-center justify-center rounded-full bg-primary px-6 text-sm font-semibold text-white transition-colors hover:bg-primary-hover"
+              />
             </div>
           ))}
         </div>

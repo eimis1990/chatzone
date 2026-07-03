@@ -1,6 +1,6 @@
 'use client'
 
-import { useId, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { LoaderCircleIcon } from 'lucide-react'
 import {
   Dialog,
@@ -64,6 +64,7 @@ export function GetStartedDialog({
   triggerClassName,
   shimmer = false,
   onOpen,
+  openOnHash,
 }: {
   /** Where the trigger lives ("hero" | "cta" | "nav") — sent to the API + analytics. */
   source: string
@@ -74,6 +75,13 @@ export function GetStartedDialog({
   shimmer?: boolean
   /** Called when the dialog opens — e.g. to close the mobile nav menu behind it. */
   onOpen?: () => void
+  /**
+   * URL-driven opening: when set (e.g. "#get-started"), the dialog opens as soon
+   * as the location hash matches — on initial load and on hashchange. This is the
+   * link contract for places that can't render the trigger (blog CTAs, links in
+   * chat replies): they href to the hash and the dialog pops instead of scrolling.
+   */
+  openOnHash?: string
 }) {
   const websiteId = useId()
   const emailId = useId()
@@ -102,6 +110,24 @@ export function GetStartedDialog({
     trackEvent('get_started_opened', { source })
     onOpen?.()
   }
+
+  // URL-driven opening: when a link points at `openOnHash` (e.g. blog CTAs or a
+  // link in a chat reply → "/#get-started"), open the dialog instead of letting
+  // the page jump/scroll. Fires on initial load and on hashchange, then clears
+  // the hash so the same link re-triggers next time.
+  useEffect(() => {
+    if (!openOnHash) return
+    const check = () => {
+      if (window.location.hash !== openOnHash) return
+      history.replaceState(null, '', window.location.pathname + window.location.search)
+      handleOpenChange(true)
+    }
+    check()
+    window.addEventListener('hashchange', check)
+    return () => window.removeEventListener('hashchange', check)
+    // handleOpenChange is stable enough for this one-shot listener.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [openOnHash])
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()

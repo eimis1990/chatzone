@@ -225,8 +225,11 @@ export function HowItWorks() {
 
 // ───────────────────────── Big CTA band ─────────────────────────
 export function CTASection() {
+  // No `id="get-started"` on this section: links pointing at `#get-started`
+  // (blog CTAs, links in chat replies) must OPEN the signup dialog, not scroll
+  // to this band. The dialog below owns that hash via `openOnHash`.
   return (
-    <section id="get-started" className="scroll-mt-20 text-white" style={{ backgroundColor: DARK }}>
+    <section className="text-white" style={{ backgroundColor: DARK }}>
       <div className="mx-auto max-w-7xl px-5 py-24">
         <Reveal>
           {/* Framed as its own contained panel so the closing CTA reads as a card
@@ -243,6 +246,7 @@ export function CTASection() {
               <GetStartedDialog
                 source="cta"
                 shimmer
+                openOnHash="#get-started"
                 triggerClassName="relative inline-flex h-12 items-center justify-center overflow-hidden rounded-full bg-primary px-10 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition-colors hover:bg-primary-hover sm:h-14 sm:px-12 sm:text-base"
               />
               <p className="text-sm text-white/50">No credit card needed — we reach out within a day.</p>
