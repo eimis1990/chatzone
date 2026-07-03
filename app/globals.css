@@ -329,6 +329,65 @@
     transform: scale(1);
   }
 }
+
+/* Widget loading indicator — a 3×3 grid of scaling cubes, tinted with the bot's
+   accent color via --cbz-loader-color. Adapted from Uiverse.io (PriyanshuGupta28). */
+.cbz-grid-loader {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  transform: rotate(45deg);
+  opacity: 0;
+  animation: cbzLoaderFadeIn 0.5s ease-out forwards;
+}
+@keyframes cbzLoaderFadeIn {
+  to {
+    opacity: 1;
+  }
+}
+.cbz-grid-loader .cbz-cube {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  background: var(--cbz-loader-color, #e2650f);
+  box-shadow: 0 0 15px
+    color-mix(in srgb, var(--cbz-loader-color, #e2650f) 30%, transparent);
+  transform: scale(0);
+  opacity: 0;
+  animation: cbzCubeScale 1.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+@keyframes cbzCubeScale {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0);
+    opacity: 0;
+  }
+}
+.cbz-grid-loader .cbz-cube:nth-child(1) { animation-delay: 0.2s; }
+.cbz-grid-loader .cbz-cube:nth-child(2) { animation-delay: 0.4s; }
+.cbz-grid-loader .cbz-cube:nth-child(3) { animation-delay: 0.6s; }
+.cbz-grid-loader .cbz-cube:nth-child(4) { animation-delay: 0.8s; }
+.cbz-grid-loader .cbz-cube:nth-child(5) { animation-delay: 1s; }
+.cbz-grid-loader .cbz-cube:nth-child(6) { animation-delay: 1.2s; }
+.cbz-grid-loader .cbz-cube:nth-child(7) { animation-delay: 1.4s; }
+.cbz-grid-loader .cbz-cube:nth-child(8) { animation-delay: 1.6s; }
+.cbz-grid-loader .cbz-cube:nth-child(9) { animation-delay: 1.8s; }
+@media (prefers-reduced-motion: reduce) {
+  .cbz-grid-loader,
+  .cbz-grid-loader .cbz-cube {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    opacity: 1;
+    transform: none;
+  }
+}
 /* Lenis smooth-scroll (landing). Note: intentionally NO `iframe { pointer-events:
    none }` rule — that would break the embedded chat widget. */
 html.lenis,

@@ -289,9 +289,16 @@
       iframe.setAttribute('data-cbz-iframe', '')
       iframe.setAttribute('title', 'Chat')
       iframe.setAttribute('allow', 'clipboard-write; microphone; autoplay')
+      // Pass the accent color (if config already loaded) so the embed's loading
+      // indicator is themed from the first frame, before it fetches config itself.
+      var loaderTheme = (config && config.theme) || {}
+      var loaderColor = loaderTheme.launcherColor || loaderTheme.primaryColor
       iframe.setAttribute(
         'src',
-        appUrl + '/embed/' + encodeURIComponent(botKey)
+        appUrl +
+          '/embed/' +
+          encodeURIComponent(botKey) +
+          (loaderColor ? '?c=' + encodeURIComponent(loaderColor.replace('#', '')) : '')
       )
       css(iframe, {
         width: '100%',

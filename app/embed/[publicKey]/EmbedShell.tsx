@@ -18,6 +18,17 @@ export function EmbedShell({ publicKey }: EmbedShellProps) {
   const [parentMobile, setParentMobile] = useState<boolean | undefined>(undefined)
   const transport = useMemo(() => createWidgetTransport(publicKey), [publicKey])
 
+  // The loading indicator shows before config arrives, so it can't read the
+  // theme yet. widget.js passes the accent color as ?c= so the loader is tinted
+  // correctly; the bot's real color takes over once loaded. Read it in an effect
+  // (not during render) so SSR and the first client render agree — no hydration
+  // mismatch — then update to the real color a frame later.
+  const [loaderColor, setLoaderColor] = useState('#e2650f')
+  useEffect(() => {
+    const c = new URLSearchParams(window.location.search).get('c')
+    if (c && /^#?[0-9a-fA-F]{3,8}$/.test(c)) setLoaderColor(c.startsWith('#') ? c : `#${c}`)
+  }, [])
+
   useEffect(() => {
     const onMessage = (e: MessageEvent) => {
       if (e.source === window.parent && e.data?.type === 'cbz-viewport') {
@@ -52,11 +63,15 @@ export function EmbedShell({ publicKey }: EmbedShellProps) {
     return (
       <div className="h-full flex items-center justify-center">
         <div
-          className="w-6 h-6 rounded-full border-2 border-t-transparent animate-spin"
-          style={{ borderColor: '#6366f1', borderTopColor: 'transparent' }}
+          className="cbz-grid-loader"
+          style={{ ['--cbz-loader-color' as string]: loaderColor }}
           role="status"
           aria-label="Loading"
-        />
+        >
+          {Array.from({ length: 9 }).map((_, i) => (
+            <span key={i} className="cbz-cube" />
+          ))}
+        </div>
       </div>
     )
   }
