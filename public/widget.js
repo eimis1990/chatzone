@@ -93,7 +93,10 @@
     justifyContent: 'center',
     padding: '0',
     lineHeight: '1',
-    transition: 'transform 0.15s ease, box-shadow 0.15s ease',
+    // Start hidden so the visitor never sees the placeholder color: the launcher
+    // fades in once its real theme color is known (see revealLauncher()).
+    opacity: '0',
+    transition: 'transform 0.15s ease, box-shadow 0.15s ease, opacity 0.2s ease',
     outline: 'none',
   })
 
@@ -252,15 +255,13 @@
     var asPill = theme.launcherStyle === 'pill' && !!label && !isOpen
     var showLogo = !!theme.launcherShowLogo && !!(config && config.avatarUrl)
 
-    var iconHtml
-    if (isOpen) {
-      iconHtml = CLOSE_ICON
-    } else if (showLogo) {
-      iconHtml =
-        '<img src="' + config.avatarUrl + '" alt="" ' +
-        'style="width:30px;height:30px;border-radius:50%;object-fit:cover;display:block" />'
-    } else {
-      iconHtml = CHAT_ICON
+    // Logo image. `fill` = fill the whole circular launcher (edge to edge);
+    // otherwise a small badge that sits next to the pill label.
+    function logoImg(fill) {
+      var s = fill
+        ? 'width:100%;height:100%;border-radius:50%;object-fit:cover;display:block'
+        : 'width:28px;height:28px;border-radius:50%;object-fit:cover;display:block'
+      return '<img src="' + config.avatarUrl + '" alt="" style="' + s + '" />'
     }
 
     if (asPill) {
@@ -270,9 +271,10 @@
         borderRadius: '26px',
         padding: '0 18px 0 14px',
         gap: '8px',
+        overflow: 'visible',
       })
       launcher.innerHTML =
-        iconHtml +
+        (showLogo ? logoImg(false) : CHAT_ICON) +
         '<span style="font-size:15px;font-weight:600;white-space:nowrap;' +
         'font-family:system-ui,-apple-system,sans-serif">' +
         escapeHtml(label) +
@@ -284,9 +286,20 @@
         borderRadius: '50%',
         padding: '0',
         gap: '0',
+        // Clip a filling logo to a crisp circle.
+        overflow: showLogo && !isOpen ? 'hidden' : 'visible',
       })
-      launcher.innerHTML = iconHtml
+      launcher.innerHTML = isOpen ? CLOSE_ICON : showLogo ? logoImg(true) : CHAT_ICON
     }
+  }
+
+  // Fade the launcher in once its real theme color is known (or on fallback),
+  // so the placeholder color never flashes on first paint / reload.
+  var launcherRevealed = false
+  function revealLauncher() {
+    if (launcherRevealed) return
+    launcherRevealed = true
+    launcher.style.opacity = '1'
   }
 
   launcher.addEventListener('click', function () {
@@ -306,6 +319,10 @@
   renderLauncher()
   document.body.appendChild(wrapper)
   document.body.appendChild(launcher)
+
+  // Safety net: reveal with the default look if config is slow or unreachable,
+  // so the launcher never stays invisible.
+  var revealTimer = setTimeout(revealLauncher, 1500)
 
   // Fetch theme/launcher config and repaint the launcher once it arrives.
   try {
@@ -328,7 +345,13 @@
         }
       })
       .catch(function () {})
+      .then(function () {
+        clearTimeout(revealTimer)
+        revealLauncher()
+      })
   } catch (_) {
     // Non-critical — launcher keeps its default look.
+    clearTimeout(revealTimer)
+    revealLauncher()
   }
 })()
