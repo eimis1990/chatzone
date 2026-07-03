@@ -1,17 +1,36 @@
 'use client'
 
 import { useState } from 'react'
-import { CopyIcon, CheckIcon } from 'lucide-react'
+import { CopyIcon, CheckIcon, PhoneIcon, MessageSquareIcon } from 'lucide-react'
 import { formatDistanceToNow } from '@/lib/date-utils'
-import type { Conversation, Message } from '@/lib/types'
+import type { Conversation, ConversationChannel, Message } from '@/lib/types'
 
-interface ConversationRow extends Pick<Conversation, 'id' | 'visitor_id' | 'started_at' | 'last_message_at'> {
+interface ConversationRow
+  extends Pick<Conversation, 'id' | 'visitor_id' | 'started_at' | 'last_message_at'> {
   message_count: number
   summary: string | null
   topics: string[] | null
   needs_attention: boolean
   success_score: number | null
   success_reason: string | null
+  channel: ConversationChannel
+}
+
+/** Small pill marking whether a conversation was a voice call or a text chat. */
+function ChannelBadge({ channel }: { channel: ConversationChannel }) {
+  const voice = channel === 'voice'
+  const Icon = voice ? PhoneIcon : MessageSquareIcon
+  return (
+    <span
+      className={`inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-medium ${
+        voice ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'
+      }`}
+      title={voice ? 'Voice call' : 'Text chat'}
+    >
+      <Icon className="size-2.5" aria-hidden="true" />
+      {voice ? 'Voice' : 'Chat'}
+    </span>
+  )
 }
 
 interface Analysis {
@@ -165,6 +184,7 @@ export function TranscriptView({ conversations, loadMessages, analyze }: Transcr
                         <span className="truncate font-mono text-xs text-foreground/80">
                           {conv.visitor_id}
                         </span>
+                        <ChannelBadge channel={conv.channel} />
                       </div>
                       <div className="mt-1.5 flex items-center justify-between gap-2">
                         <span className="text-xs text-muted-foreground">

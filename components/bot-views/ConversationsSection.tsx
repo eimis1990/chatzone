@@ -20,6 +20,7 @@ interface ConversationRow
   needs_attention: boolean
   success_score: number | null
   success_reason: string | null
+  channel: 'chat' | 'voice'
 }
 
 export interface ConversationAnalysisResult {
@@ -36,7 +37,7 @@ export async function ConversationsSection({ botId }: { botId: string }) {
   const { data: rawConvs } = await supabase
     .from('conversations')
     .select(
-      'id, visitor_id, started_at, last_message_at, summary, topics, had_fallback, success_score, success_reason',
+      'id, visitor_id, started_at, last_message_at, summary, topics, had_fallback, success_score, success_reason, channel',
     )
     .eq('bot_id', botId)
     .order('last_message_at', { ascending: false })
@@ -52,6 +53,7 @@ export async function ConversationsSection({ botId }: { botId: string }) {
     | 'had_fallback'
     | 'success_score'
     | 'success_reason'
+    | 'channel'
   >[]
 
   // Message counts + which conversations got a thumbs-down, in two queries.
@@ -91,6 +93,7 @@ export async function ConversationsSection({ botId }: { botId: string }) {
     needs_attention: Boolean(c.had_fallback) || negative.has(c.id),
     success_score: c.success_score ?? null,
     success_reason: c.success_reason ?? null,
+    channel: c.channel ?? 'chat',
   }))
 
   /**

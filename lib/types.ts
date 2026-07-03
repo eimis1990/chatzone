@@ -311,6 +311,8 @@ export interface SystemPrompt {
 
 export type HandoffStatus = 'bot' | 'requested' | 'live' | 'resolved'
 
+export type ConversationChannel = 'chat' | 'voice'
+
 export interface Conversation {
   id: string
   bot_id: string
@@ -318,6 +320,8 @@ export interface Conversation {
   metadata: Record<string, unknown>
   started_at: string
   last_message_at: string
+  /** How the conversation happened: text chat (default) or a voice call. */
+  channel?: ConversationChannel
   // Conversation intelligence (Phase 1)
   summary?: string | null
   topics?: string[] | null
