@@ -302,6 +302,33 @@
     transform: scale(1);
   }
 }
+/* One-shot variants for the configurator PREVIEW: play a single quick
+   breathe + double-wave when the Pulse toggle turns on, then the element is
+   removed (see TestChat). No long quiet phase, no infinite loop. */
+@keyframes cbzPulseOnce {
+  0% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(2.3);
+    opacity: 0;
+  }
+}
+@keyframes cbzBreatheOnce {
+  0% {
+    transform: scale(1);
+  }
+  22% {
+    transform: scale(0.9);
+  }
+  55% {
+    transform: scale(1.04);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
 /* Lenis smooth-scroll (landing). Note: intentionally NO `iframe { pointer-events:
    none }` rule — that would break the embedded chat widget. */
 html.lenis,

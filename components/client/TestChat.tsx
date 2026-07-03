@@ -93,25 +93,24 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
   const launcherLabel = config.theme?.launcherLabel ?? ''
   const showLauncherLogo = (config.theme?.launcherShowLogo ?? false) && !!launcherAvatar
   const asPill = launcherStyleCfg === 'pill' && !!launcherLabel && !isOpen
-  // Preview pulse: unlike the live widget (which pulses whenever closed), the
-  // in-app preview plays a short demo burst ONLY when the user actively flips
-  // the Pulse toggle on — never just from opening/returning to Configure — so
-  // a launcher never keeps pulsing while you work elsewhere in the app.
+  // Preview pulse: a ONE-SHOT demo. The live widget pulses forever; here it
+  // plays a single breathe + wave the moment the Pulse toggle turns on, then
+  // removes itself. Never auto-plays on mount/return, and toggling off→on
+  // replays it once. (The live behavior is unchanged — see public/widget.js.)
   const pulseEnabled = (config.theme?.launcherPulse ?? false) && launcherStyleCfg === 'circle'
   const [pulseDemo, setPulseDemo] = useState(false)
   const prevPulseEnabled = useRef(pulseEnabled) // seed with mount value → no demo on mount
+  const pulseTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   useEffect(() => {
     const turnedOn = pulseEnabled && !prevPulseEnabled.current
     prevPulseEnabled.current = pulseEnabled
-    if (!turnedOn) {
-      if (!pulseEnabled) setPulseDemo(false)
-      return
-    }
+    if (!turnedOn) return
     setPulseDemo(true)
-    const t = setTimeout(() => setPulseDemo(false), 13000) // ~2 breathe cycles
-    return () => clearTimeout(t)
+    // Fallback cleanup in case animationend never fires (e.g. reduced-motion).
+    if (pulseTimer.current) clearTimeout(pulseTimer.current)
+    pulseTimer.current = setTimeout(() => setPulseDemo(false), 2200)
   }, [pulseEnabled])
-  const pulse = pulseEnabled && pulseDemo && !isOpen
+  useEffect(() => () => { if (pulseTimer.current) clearTimeout(pulseTimer.current) }, [])
 
   const transport = useMemo<ChatTransport>(
     () => createPreviewTransport(botId, () => buildFullConfig(configRef.current)),
@@ -169,20 +168,24 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
         )}
       </AnimatePresence>
 
-      {/* Launcher bubble — circle or pill, optional company logo + pulse */}
+      {/* Launcher bubble — circle or pill, optional company logo + one-shot pulse.
+          The launcher is always h-14/w-14 (circle) — the pulse rings are inset-0
+          of THIS wrapper so they stay perfectly centered on the button. */}
       <div className="relative pointer-events-auto">
-        {/* Pulse rings — two expanding, fading circles behind the button */}
-        {pulse && (
+        {/* One-shot pulse: a double wave that plays once then removes itself
+            (onAnimationEnd on the trailing ring clears pulseDemo). */}
+        {pulseDemo && (
           <>
             <span
-              className="absolute inset-0 -z-10 rounded-full motion-safe:animate-[cbzPulse_6s_ease-out_infinite_backwards]"
+              className="pointer-events-none absolute inset-0 -z-10 rounded-full motion-safe:animate-[cbzPulseOnce_1.3s_ease-out_0.2s_1_both]"
               style={{ backgroundColor: launcherColor }}
               aria-hidden="true"
             />
             <span
-              className="absolute inset-0 -z-10 rounded-full motion-safe:animate-[cbzPulse_6s_ease-out_0.25s_infinite_backwards]"
+              className="pointer-events-none absolute inset-0 -z-10 rounded-full motion-safe:animate-[cbzPulseOnce_1.3s_ease-out_0.4s_1_both]"
               style={{ backgroundColor: launcherColor }}
               aria-hidden="true"
+              onAnimationEnd={() => setPulseDemo(false)}
             />
           </>
         )}
@@ -192,7 +195,7 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
           aria-label={isOpen ? 'Close chat preview' : 'Open chat preview'}
           className={`relative flex h-14 items-center justify-center gap-2 shadow-lg transition-transform hover:scale-105 active:scale-95 ${
             asPill ? 'rounded-full px-5' : 'w-14 overflow-hidden rounded-full'
-          } ${pulse ? 'motion-safe:animate-[cbzBreathe_6s_ease-in-out_infinite]' : ''}`}
+          } ${pulseDemo ? 'motion-safe:animate-[cbzBreatheOnce_0.9s_ease-in-out_1_both]' : ''}`}
           style={{ backgroundColor: launcherColor, color: readableTextColor(launcherColor) }}
         >
           {isOpen ? (
