@@ -196,6 +196,8 @@ export interface BotConfig {
   voice: VoiceConfig
   /** Enabled languages. Always includes 'en'; the first entry is the default. */
   languages: BotLanguage[]
+  /** Widget shows a visitor-facing language picker (multilingual bots only). */
+  showLanguageSelector?: boolean
   /** Language the widget opens in (must be one of `languages`; defaults to the first). */
   defaultLanguage?: BotLanguage
   /** Per-language content. `en` is always present. */

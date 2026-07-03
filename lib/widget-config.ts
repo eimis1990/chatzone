@@ -86,6 +86,8 @@ export interface PublicBotConfig {
   }
   languages: BotLanguage[]
   defaultLanguage?: BotLanguage
+  /** Visitor-facing language picker (only meaningful when languages.length > 1). */
+  showLanguageSelector: boolean
   content: Partial<Record<BotLanguage, PublicLanguageContent>>
   leadCapture: {
     enabled: boolean
@@ -167,6 +169,7 @@ export function publicBotConfig(
       config.defaultLanguage && languages.includes(config.defaultLanguage)
         ? config.defaultLanguage
         : languages[0],
+    showLanguageSelector: languages.length > 1 && (config.showLanguageSelector ?? false),
     content,
     leadCapture: {
       enabled: leadCaptureEnabled,

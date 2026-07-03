@@ -731,9 +731,10 @@ export function ChatWindow({ config, transport, initialLanguage }: ChatWindowPro
           />
         )}
 
-        {/* Language picker — flag-only square, multilingual bots only. Disabled
-            during a voice call (the call is bound to the language it started in). */}
-        {languages.length > 1 && (
+        {/* Language picker — flag-only square, multilingual bots with the
+            selector enabled. Disabled during a voice call (the call is bound
+            to the language it started in). */}
+        {languages.length > 1 && config.showLanguageSelector && (
           <div className="relative flex-shrink-0">
             <button
               type="button"

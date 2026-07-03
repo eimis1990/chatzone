@@ -135,6 +135,9 @@ export const botConfigFormSchema = z.object({
     }),
   languages: z.array(z.enum(['en', 'lt'])).min(1).default(['en']),
   defaultLanguage: z.enum(['en', 'lt']).optional(),
+  // Show the widget's visitor-facing language picker (multilingual bots only).
+  // Off = the widget stays locked to defaultLanguage.
+  showLanguageSelector: z.boolean().default(false),
   content: z.object({
     en: languageContentSchema,
     lt: languageContentSchema.optional(),

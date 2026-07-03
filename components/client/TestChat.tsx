@@ -27,6 +27,7 @@ const DEFAULT_VOICE_ID = '21m00Tcm4TlvDq8ikWAM'
 type LiveConfig = {
   displayName?: string
   tagline?: string
+  showLanguageSelector?: boolean
   theme?: Partial<BotConfig['theme']>
   voice?: {
     enabled?: boolean
@@ -302,6 +303,7 @@ function buildPreviewPublicConfig(config: LiveConfig): PublicBotConfig {
 
   const result: PublicBotConfig = {
     displayName: config.displayName || 'Your Bot',
+    showLanguageSelector: (config.languages ?? []).length > 1 && (config.showLanguageSelector ?? false),
     tagline: config.tagline,
     theme: {
       primaryColor: config.theme?.primaryColor ?? '#4f46e5',
