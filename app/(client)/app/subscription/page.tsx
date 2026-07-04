@@ -59,18 +59,58 @@ export default async function SubscriptionPage({
     }
   }
 
-  let billing = orgId
-    ? await loadBilling(orgId)
-    : {
-        plan: 'free' as Plan,
-        status: 'inactive' as SubscriptionStatus,
-        interval: null as BillingInterval | null,
-        currentPeriodEnd: null as string | null,
-        cancelAtPeriodEnd: false,
-        hasCustomer: false,
-        voiceActive: false,
-        subscriptionId: null as string | null,
-      }
+  // Usage this calendar month: conversations started + bots in use vs the plan.
+  async function loadUsage(oid: string) {
+    const sb = await createServerClient()
+    const { data: bots } = await sb.from('bots').select('id').eq('org_id', oid)
+    const botIds = (bots ?? []).map((b) => (b as { id: string }).id)
+    if (!botIds.length) return { conversationsUsed: 0, botsUsed: 0 }
+    const now = new Date()
+    const monthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString()
+    const { count } = await sb
+      .from('conversations')
+      .select('id', { count: 'exact', head: true })
+      .in('bot_id', botIds)
+      .gte('started_at', monthStart)
+    return { conversationsUsed: count ?? 0, botsUsed: botIds.length }
+  }
+
+  // Which one-time setup packages this org has already paid for.
+  async function loadPurchasedSetups(oid: string) {
+    const sb = await createServerClient()
+    const { data: orders } = await sb
+      .from('setup_orders')
+      .select('package')
+      .eq('org_id', oid)
+      .eq('status', 'paid')
+    return (orders ?? []).map((o) => (o as { package: string }).package)
+  }
+
+  // These three reads are independent — fetch them in one round-trip batch
+  // instead of three sequential awaits.
+  let billing
+  let usage: { conversationsUsed: number; botsUsed: number }
+  let purchasedSetups: string[]
+  if (orgId) {
+    ;[billing, usage, purchasedSetups] = await Promise.all([
+      loadBilling(orgId),
+      loadUsage(orgId),
+      loadPurchasedSetups(orgId),
+    ])
+  } else {
+    billing = {
+      plan: 'free' as Plan,
+      status: 'inactive' as SubscriptionStatus,
+      interval: null as BillingInterval | null,
+      currentPeriodEnd: null as string | null,
+      cancelAtPeriodEnd: false,
+      hasCustomer: false,
+      voiceActive: false,
+      subscriptionId: null as string | null,
+    }
+    usage = { conversationsUsed: 0, botsUsed: 0 }
+    purchasedSetups = []
+  }
 
   // Sync from Stripe on return from Checkout, OR self-heal a missed webhook
   // (we have a Stripe customer but the row says "not paying"). Then re-read.
@@ -81,26 +121,7 @@ export default async function SubscriptionPage({
   }
 
   const isPaying = PAYING.includes(billing.status) && Boolean(billing.subscriptionId)
-
-  // Usage this calendar month: conversations started + bots in use vs the plan.
   const ent = entitlementsFor(billing.plan)
-  const usage = { conversationsUsed: 0, botsUsed: 0 }
-  if (orgId) {
-    const sb = await createServerClient()
-    const { data: bots } = await sb.from('bots').select('id').eq('org_id', orgId)
-    const botIds = (bots ?? []).map((b) => (b as { id: string }).id)
-    usage.botsUsed = botIds.length
-    if (botIds.length) {
-      const now = new Date()
-      const monthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString()
-      const { count } = await sb
-        .from('conversations')
-        .select('id', { count: 'exact', head: true })
-        .in('bot_id', botIds)
-        .gte('started_at', monthStart)
-      usage.conversationsUsed = count ?? 0
-    }
-  }
 
   const planOptions = DISPLAY_PLANS.map((pl) => ({
     plan: pl,
@@ -236,18 +257,6 @@ export default async function SubscriptionPage({
     } catch (err) {
       return { error: err instanceof Error ? err.message : 'Could not open billing portal.' }
     }
-  }
-
-  // Which one-time setup packages this org has already paid for.
-  let purchasedSetups: string[] = []
-  if (orgId) {
-    const sb = await createServerClient()
-    const { data: orders } = await sb
-      .from('setup_orders')
-      .select('package')
-      .eq('org_id', orgId)
-      .eq('status', 'paid')
-    purchasedSetups = (orders ?? []).map((o) => (o as { package: string }).package)
   }
 
   return (
