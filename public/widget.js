@@ -123,6 +123,7 @@
   }
   function makeRing(delay) {
     var r = document.createElement('span')
+    r.setAttribute('data-cbz-pulse', '')
     css(r, {
       position: 'fixed',
       bottom: OFFSET + 'px',

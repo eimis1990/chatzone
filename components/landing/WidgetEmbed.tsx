@@ -21,7 +21,7 @@ export function WidgetEmbed({ botKey, position = 'bottom-right' }: { botKey: str
     // the launcher + iframe to <body>, outside React, so remove them explicitly.
     return () => {
       document
-        .querySelectorAll('[data-cbz-launcher], [data-cbz-wrapper], script[data-cbz-embed]')
+        .querySelectorAll('[data-cbz-launcher], [data-cbz-wrapper], [data-cbz-pulse], script[data-cbz-embed]')
         .forEach((el) => el.remove())
     }
   }, [botKey, position])
