@@ -12,6 +12,8 @@ interface ProductCardsProps {
   language?: 'en' | 'lt'
   /** Open the full-height list overlay for this message's products. */
   onSeeAll?: (products: CommerceProduct[]) => void
+  /** Analytics: the visitor followed a product link out of the chat. */
+  onProductClick?: (product: CommerceProduct) => void
 }
 
 /** How many products are shown as cards before the rest move behind "See all". */
@@ -55,6 +57,7 @@ export function ProductCards({
   primaryColor = '#4f46e5',
   language = 'en',
   onSeeAll,
+  onProductClick,
 }: ProductCardsProps) {
   if (!products || products.length === 0) return null
   const labels = labelsFor(language)
@@ -76,6 +79,7 @@ export function ProductCards({
             primaryColor={primaryColor}
             viewMoreLabel={labels.viewMore}
             outOfStockLabel={labels.outOfStock}
+            onProductClick={onProductClick}
           />
         ))}
       </div>
@@ -101,6 +105,8 @@ interface ProductListViewProps {
   primaryColor?: string
   language?: 'en' | 'lt'
   onClose: () => void
+  /** Analytics: the visitor followed a product link out of the chat. */
+  onProductClick?: (product: CommerceProduct) => void
 }
 
 /**
@@ -114,6 +120,7 @@ export function ProductListView({
   primaryColor = '#4f46e5',
   language = 'en',
   onClose,
+  onProductClick,
 }: ProductListViewProps) {
   const labels = labelsFor(language)
 
@@ -156,6 +163,7 @@ export function ProductListView({
               bubbleRadius={bubbleRadius}
               primaryColor={primaryColor}
               labels={labels}
+              onProductClick={onProductClick}
             />
           ))}
         </div>
@@ -170,6 +178,7 @@ interface ProductCardProps {
   primaryColor: string
   viewMoreLabel: string
   outOfStockLabel: string
+  onProductClick?: (product: CommerceProduct) => void
 }
 
 function ProductCard({
@@ -178,6 +187,7 @@ function ProductCard({
   primaryColor,
   viewMoreLabel,
   outOfStockLabel,
+  onProductClick,
 }: ProductCardProps) {
   // Card takes ~80% of the chat width so the next card peeks (signals scroll).
   const cardRadius = bubbleRadius
@@ -251,6 +261,7 @@ function ProductCard({
           href={product.url}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={() => onProductClick?.(product)}
           className="mt-auto flex items-center justify-center rounded text-sm font-medium py-2 px-2 transition-opacity hover:opacity-85 active:opacity-70 focus-visible:ring-2 focus-visible:ring-offset-1 outline-none"
           style={{
             backgroundColor: primaryColor,
@@ -271,9 +282,10 @@ interface ProductRowProps {
   bubbleRadius: number
   primaryColor: string
   labels: Labels
+  onProductClick?: (product: CommerceProduct) => void
 }
 
-function ProductRow({ product, bubbleRadius, primaryColor, labels }: ProductRowProps) {
+function ProductRow({ product, bubbleRadius, primaryColor, labels, onProductClick }: ProductRowProps) {
   const [expanded, setExpanded] = useState(false)
   const rowRadius = Math.min(bubbleRadius, 14)
   const hasDescription = Boolean(product.shortDescription)
@@ -326,6 +338,7 @@ function ProductRow({ product, bubbleRadius, primaryColor, labels }: ProductRowP
             href={product.url}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() => onProductClick?.(product)}
             aria-label={labels.viewMore}
             title={labels.viewMore}
             className="flex items-center justify-center size-9 shrink-0 transition-opacity hover:opacity-85 active:opacity-70 outline-none focus-visible:ring-2"

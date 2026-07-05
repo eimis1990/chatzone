@@ -22,14 +22,16 @@ interface LeadsChartProps {
 export function LeadsChart({ data }: LeadsChartProps) {
   if (data.length === 0) {
     return (
-      <div className="flex items-center justify-center h-40 text-muted-foreground text-sm">
+      <div className="flex items-center justify-center h-full min-h-40 text-muted-foreground text-sm">
         No leads captured yet
       </div>
     )
   }
 
+  // Fills the parent panel so the card doesn't leave dead space when its grid
+  // row is stretched taller by a neighbouring panel.
   return (
-    <ResponsiveContainer width="100%" height={160}>
+    <ResponsiveContainer width="100%" height="100%" minHeight={160}>
       <AreaChart data={data} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
         <defs>
           <linearGradient id="leadsGradient" x1="0" y1="0" x2="0" y2="1">

@@ -85,6 +85,16 @@ export function AppSidebar({ bots, userEmail }: { bots: BotLite[]; userEmail: st
           <span className="flex-1">Home</span>
         </Link>
 
+        {/* Org-wide analytics — every bot side by side */}
+        <Link
+          href="/app/analytics"
+          aria-current={pathname === '/app/analytics' ? 'page' : undefined}
+          className={cn(itemBase, 'mb-0.5', pathname === '/app/analytics' ? solidGreen : idle)}
+        >
+          <BarChart3Icon className="size-4 flex-shrink-0" aria-hidden="true" />
+          <span className="flex-1">Analytics</span>
+        </Link>
+
         {/* My Bots — collapsible group; turns green while a bot is selected */}
         <button
           type="button"

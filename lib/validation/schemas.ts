@@ -83,6 +83,13 @@ export const botConfigFormSchema = z.object({
   avatarUrl: z.string().url().optional().or(z.literal('')),
   botAvatarUrl: z.string().url().optional().or(z.literal('')),
   privacyUrl: z.string().url().optional().or(z.literal('')),
+  // Working hours (Mon–Fri) — used by analytics to split after-hours activity.
+  businessHours: z
+    .object({
+      start: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Use HH:MM'),
+      end: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Use HH:MM'),
+    })
+    .default({ start: '08:00', end: '17:00' }),
   theme: z
     .object({
       primaryColor: z.string().default('#4f46e5'),

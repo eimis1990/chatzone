@@ -153,6 +153,8 @@ export interface BotConfig {
   botAvatarUrl?: string
   /** Optional privacy-policy URL; shows a consent line in the widget when set. */
   privacyUrl?: string
+  /** Business working hours (Mon–Fri, "HH:MM"); drives the after-hours analytics. */
+  businessHours?: { start: string; end: string }
   theme: {
     primaryColor: string
     position: 'bottom-right' | 'bottom-left'

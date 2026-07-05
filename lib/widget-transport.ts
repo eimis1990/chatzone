@@ -27,6 +27,14 @@ export interface PollResult {
   messages?: { id: string; content: string }[]
 }
 
+/** Fire-and-forget widget interaction event (proof-of-value analytics). */
+export interface WidgetEventInput {
+  type: 'product_click' | 'link_click' | 'suggested_question_click' | 'widget_open'
+  conversationId?: string
+  messageId?: string
+  payload?: Record<string, string>
+}
+
 export interface ChatTransport {
   /** Send a turn; returns the streaming NDJSON Response (with x-* headers). */
   sendChat(params: SendChatParams): Promise<Response>
@@ -53,6 +61,12 @@ export interface ChatTransport {
   lookupOrder(orderId: string, email: string): Promise<{ found: boolean; order?: OrderStatus; summary: string }>
   /** Voice `discount_code` tool: fetch the configured discount. */
   getDiscountInfo(): Promise<{ available: boolean; code?: string; description?: string; summary: string }>
+  /**
+   * Record a widget interaction event (analytics). Fire-and-forget: must never
+   * block or break the UI. Optional — the configurator preview omits it so
+   * preview clicks never pollute a bot's real metrics.
+   */
+  trackEvent?(event: WidgetEventInput): void
 }
 
 const JSON_HEADERS = { 'Content-Type': 'application/json' }
@@ -168,6 +182,21 @@ export function createWidgetTransport(publicKey: string): ChatTransport {
       })
       if (!res.ok) return { available: false, summary: 'No discount is available right now.' }
       return (await res.json()) as { available: boolean; code?: string; description?: string; summary: string }
+    },
+
+    trackEvent(event) {
+      try {
+        const body = JSON.stringify({ publicKey, ...event })
+        // sendBeacon survives the page/iframe unloading right after a link
+        // click; keepalive fetch is the fallback for older browsers.
+        if (typeof navigator !== 'undefined' && typeof navigator.sendBeacon === 'function') {
+          navigator.sendBeacon('/api/events', new Blob([body], { type: 'application/json' }))
+          return
+        }
+        void fetch('/api/events', { method: 'POST', headers: JSON_HEADERS, body, keepalive: true }).catch(() => {})
+      } catch {
+        // Analytics must never break the widget.
+      }
     },
   }
 }

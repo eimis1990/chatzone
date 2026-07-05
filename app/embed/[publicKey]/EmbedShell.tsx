@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { ChatWindow } from '@/components/widget/ChatWindow'
 import { createWidgetTransport } from '@/lib/widget-transport'
 import type { PublicBotConfig } from '@/lib/widget-config'
@@ -40,6 +40,15 @@ export function EmbedShell({ publicKey }: EmbedShellProps) {
     window.parent?.postMessage({ type: 'cbz-ready' }, '*')
     return () => window.removeEventListener('message', onMessage)
   }, [])
+
+  // widget.js lazy-creates this iframe on the visitor's first launcher click,
+  // so one mount = one real widget open (toggles just hide/show the iframe).
+  const openTracked = useRef(false)
+  useEffect(() => {
+    if (!config || openTracked.current) return
+    openTracked.current = true
+    transport.trackEvent?.({ type: 'widget_open' })
+  }, [config, transport])
 
   useEffect(() => {
     fetch(`/api/widget-config?key=${encodeURIComponent(publicKey)}`)

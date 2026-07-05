@@ -43,6 +43,9 @@ function generateId() {
   return Math.random().toString(36).slice(2)
 }
 
+// Only persisted (synced) message ids are UUIDs; local ids stay out of events.
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
 // Header status while a live call is active.
 /** Flag + native name for the header language picker. */
 const LANG_META: Record<string, { flag: string; label: string }> = {
@@ -378,6 +381,34 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
     [transport],
   )
 
+  /** Fire-and-forget analytics event (no-op in the configurator preview). */
+  const track = useCallback(
+    (
+      type: 'product_click' | 'link_click' | 'suggested_question_click',
+      payload: Record<string, string>,
+      messageId?: string,
+    ) => {
+      transport.trackEvent?.({
+        type,
+        conversationId,
+        messageId: messageId && UUID_RE.test(messageId) ? messageId : undefined,
+        payload,
+      })
+    },
+    [transport, conversationId],
+  )
+
+  const trackProductClick = useCallback(
+    (p: CommerceProduct, messageId?: string) =>
+      track('product_click', { productId: p.id, title: p.title, price: p.price, url: p.url }, messageId),
+    [track],
+  )
+
+  const trackLinkClick = useCallback(
+    (url: string, kind: 'answer' | 'action', messageId?: string) => track('link_click', { url, kind }, messageId),
+    [track],
+  )
+
   const sendMessage = useCallback(
     async (text: string, displayText?: string) => {
       if (streaming) return
@@ -583,6 +614,7 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
     (action: SuggestedQuestion) => {
       const label = sqLabel(action)
       const mode = sqMode(action)
+      track('suggested_question_click', { question: label, mode: mode ?? 'prompt' })
       if (mode === 'handoff') {
         void requestHandoff()
         return
@@ -598,7 +630,7 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
       }
       void sendMessage(sqPrompt(action), label)
     },
-    [showLinkAction, sendMessage, requestHandoff, config.leadCapture.enabled, config.leadCapture.fields.length],
+    [showLinkAction, sendMessage, requestHandoff, track, config.leadCapture.enabled, config.leadCapture.fields.length],
   )
 
   // While in handoff, poll for the agent's status + new human replies (~4s).
@@ -909,6 +941,8 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
             darkBackground={darkChat}
             onSeeAllProducts={setListProducts}
             onFeedback={handleFeedback}
+            onProductClick={trackProductClick}
+            onLinkClick={trackLinkClick}
           />
         )}
 
@@ -985,6 +1019,7 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
               primaryColor={primaryColor}
               language={activeLang}
               onClose={() => setListProducts(null)}
+              onProductClick={trackProductClick}
             />
           )}
         </AnimatePresence>

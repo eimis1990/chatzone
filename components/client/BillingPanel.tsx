@@ -310,7 +310,8 @@ export function BillingPanel({
                 label = 'Current plan'
                 action = null
               } else if (isFree) {
-                label = 'Cancel plan'
+                // Reads as "move down to the free tier", not "cancel the product".
+                label = 'Downgrade to Free'
                 action = 'portal'
               } else if (samePlan) {
                 label = `Switch to ${annual ? 'annual' : 'monthly'}`

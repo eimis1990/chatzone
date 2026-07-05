@@ -187,6 +187,9 @@ const FIELD_LABELS: Record<string, string> = {
   avatarUrl: 'Company logo',
   botAvatarUrl: 'Bot avatar',
   privacyUrl: 'Privacy policy URL',
+  businessHours: 'Working hours',
+  start: 'Working hours start',
+  end: 'Working hours end',
   systemPrompt: 'System prompt',
   greeting: 'Greeting',
   fallbackMessage: 'Fallback message',
@@ -262,6 +265,8 @@ export function ConfigForm({
       }
     }
     if (cfg.showLanguageSelector === undefined) cfg.showLanguageSelector = false
+    // Bots created before the working-hours field get the default on first edit.
+    if (!cfg.businessHours) cfg.businessHours = { start: '08:00', end: '17:00' }
     return cfg as FormValues
   }, [initialConfig])
 
@@ -575,6 +580,30 @@ export function ConfigForm({
               />
               <p className="text-xs text-muted-foreground">
                 When set, the widget shows a short consent line linking to it.
+              </p>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="businessHoursStart">Working hours</Label>
+              <div className="flex items-center gap-2">
+                <Input
+                  id="businessHoursStart"
+                  type="time"
+                  className="w-32"
+                  {...register('businessHours.start')}
+                />
+                <span className="text-sm text-muted-foreground">–</span>
+                <Input
+                  id="businessHoursEnd"
+                  type="time"
+                  className="w-32"
+                  aria-label="Working hours end"
+                  {...register('businessHours.end')}
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Mon–Fri. Analytics uses this to show how many conversations the bot handles after
+                hours.
               </p>
             </div>
           </CardContent>

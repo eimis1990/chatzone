@@ -44,6 +44,10 @@ interface MessageListProps {
   darkBackground?: boolean
   onSeeAllProducts?: (products: CommerceProduct[]) => void
   onFeedback?: (messageId: string, value: 'up' | 'down') => void
+  /** Analytics: a product card link was followed (messageId = persisted id when known). */
+  onProductClick?: (product: CommerceProduct, messageId?: string) => void
+  /** Analytics: a link inside a bot answer (or a quick-action link button) was followed. */
+  onLinkClick?: (url: string, kind: 'answer' | 'action', messageId?: string) => void
 }
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -62,6 +66,8 @@ export function MessageList({
   darkBackground = false,
   onSeeAllProducts,
   onFeedback,
+  onProductClick,
+  onLinkClick,
 }: MessageListProps) {
   // Custom bot bubble color applies only outside glass mode (glass is its own style).
   const botBubbleStyle =
@@ -164,6 +170,13 @@ export function MessageList({
                     // links, tel) as sanitized HTML.
                     <div
                       className="loqara-md"
+                      // Markdown renders as sanitized HTML, so link clicks are
+                      // caught here by delegation rather than per-anchor props.
+                      onClick={(e) => {
+                        const a = (e.target as HTMLElement).closest('a')
+                        const href = a?.getAttribute('href')
+                        if (href) onLinkClick?.(href, 'answer', UUID_RE.test(msg.id) ? msg.id : undefined)
+                      }}
                       dangerouslySetInnerHTML={{ __html: formatMessage(msg.content) }}
                     />
                   ) : (
@@ -224,6 +237,7 @@ export function MessageList({
                 primaryColor={primaryColor}
                 language={activeLang}
                 onSeeAll={onSeeAllProducts}
+                onProductClick={(p) => onProductClick?.(p, UUID_RE.test(msg.id) ? msg.id : undefined)}
               />
             )}
 
@@ -246,6 +260,7 @@ export function MessageList({
                 href={msg.link.url}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() => onLinkClick?.(msg.link!.url, 'action')}
                 className="inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium transition-[filter] hover:brightness-95"
                 style={{
                   backgroundColor: primaryColor,
