@@ -50,6 +50,50 @@ function host(url: string): string {
   }
 }
 
+/** Chance score as a ~270° arc gauge showing just the percentage. */
+function ScoreGauge({ value }: { value: number }) {
+  const pct = Math.max(0, Math.min(100, value))
+  // 270° sweep with a gap at the bottom, starting bottom-left (135°).
+  const R = 15
+  const C = 2 * Math.PI * R
+  const sweep = 0.75 // 270° of the full circle
+  const dash = C * sweep
+  return (
+    <span className="inline-flex flex-col items-center" title={`${pct} / 100`}>
+      <svg width="44" height="38" viewBox="0 0 40 40" aria-hidden="true">
+        <g transform="rotate(135 20 20)">
+          <circle
+            cx="20" cy="20" r={R} fill="none" strokeWidth="5" strokeLinecap="round"
+            className="stroke-muted" strokeDasharray={`${dash} ${C}`}
+          />
+          <circle
+            cx="20" cy="20" r={R} fill="none" strokeWidth="5" strokeLinecap="round"
+            className="stroke-primary" strokeDasharray={`${(dash * pct) / 100} ${C}`}
+          />
+        </g>
+        <text x="20" y="20" textAnchor="middle" dominantBaseline="central" className="fill-foreground text-[11px] font-semibold tabular-nums">
+          {pct}%
+        </text>
+      </svg>
+    </span>
+  )
+}
+
+const PLATFORM_STYLE: Record<string, string> = {
+  WooCommerce: 'bg-[#7f54b3]/12 text-[#7f54b3] dark:text-[#c9a6ec]',
+  Shopify: 'bg-[#5e8e3e]/15 text-[#4a7a2f] dark:text-[#95bf47]',
+  Magento: 'bg-[#ee672f]/15 text-[#d1571f] dark:text-[#f5915f]',
+}
+function PlatformBadge({ platform }: { platform: string | null }) {
+  if (!platform) return null
+  const cls = PLATFORM_STYLE[platform] ?? 'bg-muted text-muted-foreground'
+  return (
+    <span className={cn('rounded px-1.5 py-0.5 text-[10px] font-medium leading-none', cls)}>
+      {platform}
+    </span>
+  )
+}
+
 /** Existing-chatbot indicator. No bot = green (easy win); has bot = amber (switch). */
 function BotBadge({ has }: { has: boolean | null }) {
   if (has === null) return <span className="text-muted-foreground/50">—</span>
@@ -254,22 +298,13 @@ export function SalesLeadsTable({ leads: initialLeads }: { leads: SalesLead[] })
                   <div className="font-medium">{l.name}</div>
                   {(l.platform || l.legal_name) && (
                     <div className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
-                      {l.platform && (
-                        <span className="rounded border px-1.5 py-0.5 text-[10px] leading-none">
-                          {l.platform}
-                        </span>
-                      )}
+                      <PlatformBadge platform={l.platform} />
                       {l.legal_name && <span>{l.legal_name}</span>}
                     </div>
                   )}
                 </td>
                 <td className="px-3 py-2.5">
-                  <span className="inline-flex items-center gap-2 tabular-nums">
-                    <b>{l.score}</b>
-                    <span className="h-1.5 w-10 overflow-hidden rounded-full bg-muted">
-                      <span className="block h-full bg-primary" style={{ width: `${l.score}%` }} />
-                    </span>
-                  </span>
+                  <ScoreGauge value={l.score} />
                 </td>
                 <td className="px-3 py-2.5">
                   <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium">{l.vertical}</span>
