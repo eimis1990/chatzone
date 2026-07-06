@@ -8,6 +8,8 @@ import {
   CheckIcon,
   MailIcon,
   ExternalLinkIcon,
+  BotIcon,
+  SparklesIcon,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
@@ -46,6 +48,20 @@ function host(url: string): string {
   } catch {
     return url
   }
+}
+
+/** Existing-chatbot indicator. No bot = green (easy win); has bot = amber (switch). */
+function BotBadge({ has }: { has: boolean | null }) {
+  if (has === null) return <span className="text-muted-foreground/50">—</span>
+  return has ? (
+    <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2 py-0.5 text-xs font-medium text-amber-700 dark:text-amber-400">
+      <BotIcon className="size-3" /> Has bot
+    </span>
+  ) : (
+    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-2 py-0.5 text-xs font-medium text-emerald-700 dark:text-emerald-400">
+      <SparklesIcon className="size-3" /> Open
+    </span>
+  )
 }
 
 function CopyButton({ text, label }: { text: string; label?: string }) {
@@ -105,6 +121,7 @@ export function SalesLeadsTable({ leads: initialLeads }: { leads: SalesLead[] })
   const [query, setQuery] = useState('')
   const [vertical, setVertical] = useState<string | null>(null)
   const [statusFilter, setStatusFilter] = useState<SalesLeadStatus | 'all'>('all')
+  const [botFilter, setBotFilter] = useState<'all' | 'no' | 'yes'>('all')
   const [openLead, setOpenLead] = useState<SalesLead | null>(null)
   const [, startTransition] = useTransition()
 
@@ -129,6 +146,8 @@ export function SalesLeadsTable({ leads: initialLeads }: { leads: SalesLead[] })
     let list = leads
     if (vertical) list = list.filter((l) => l.vertical === vertical)
     if (statusFilter !== 'all') list = list.filter((l) => l.status === statusFilter)
+    if (botFilter === 'no') list = list.filter((l) => !l.has_chatbot)
+    else if (botFilter === 'yes') list = list.filter((l) => l.has_chatbot)
     if (query.trim()) {
       const q = query.trim().toLowerCase()
       list = list.filter((l) =>
@@ -140,7 +159,9 @@ export function SalesLeadsTable({ leads: initialLeads }: { leads: SalesLead[] })
       )
     }
     return list
-  }, [leads, vertical, statusFilter, query])
+  }, [leads, vertical, statusFilter, botFilter, query])
+
+  const noBotCount = useMemo(() => leads.filter((l) => !l.has_chatbot).length, [leads])
 
   const chip = (active: boolean) =>
     cn(
@@ -179,6 +200,16 @@ export function SalesLeadsTable({ leads: initialLeads }: { leads: SalesLead[] })
             ))}
           </SelectContent>
         </Select>
+        <Select value={botFilter} onValueChange={(v) => setBotFilter(v as 'all' | 'no' | 'yes')}>
+          <SelectTrigger aria-label="Filter by existing chatbot" className="w-52 bg-card">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Any chatbot status</SelectItem>
+            <SelectItem value="no">No chatbot — easy win ({noBotCount})</SelectItem>
+            <SelectItem value="yes">Has chatbot — switch ({leads.length - noBotCount})</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
       <div className="flex flex-wrap gap-1.5">
         <button type="button" className={chip(vertical === null)} onClick={() => setVertical(null)}>
@@ -206,6 +237,7 @@ export function SalesLeadsTable({ leads: initialLeads }: { leads: SalesLead[] })
               <th className="px-3 py-2.5 font-medium">Chance</th>
               <th className="px-3 py-2.5 font-medium">Category</th>
               <th className="px-3 py-2.5 font-medium">City</th>
+              <th className="px-3 py-2.5 font-medium">Bot</th>
               <th className="px-3 py-2.5 font-medium">Contact</th>
               <th className="px-3 py-2.5 font-medium">Status</th>
             </tr>
@@ -244,6 +276,9 @@ export function SalesLeadsTable({ leads: initialLeads }: { leads: SalesLead[] })
                 </td>
                 <td className="px-3 py-2.5">{l.city ?? <span className="text-muted-foreground/50">—</span>}</td>
                 <td className="px-3 py-2.5">
+                  <BotBadge has={l.has_chatbot} />
+                </td>
+                <td className="px-3 py-2.5">
                   <div className="text-xs">
                     {l.email ? (
                       <span className="inline-flex items-center">
@@ -262,7 +297,7 @@ export function SalesLeadsTable({ leads: initialLeads }: { leads: SalesLead[] })
             ))}
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-3 py-10 text-center text-muted-foreground">
+                <td colSpan={8} className="px-3 py-10 text-center text-muted-foreground">
                   No leads match the current filters.
                 </td>
               </tr>
@@ -318,6 +353,7 @@ export function SalesLeadsTable({ leads: initialLeads }: { leads: SalesLead[] })
                   ['Phone', openLead.phone],
                   ['Size', openLead.size_info],
                   ['Platform', openLead.platform],
+                  ['Existing chatbot', openLead.has_chatbot === null ? null : openLead.has_chatbot ? 'Yes — switch target' : 'No — easy win'],
                 ].map(([k, v]) => (
                   <div key={k}>
                     <dt className="text-xs uppercase tracking-wide text-muted-foreground">{k}</dt>

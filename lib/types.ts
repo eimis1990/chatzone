@@ -403,6 +403,8 @@ export interface SalesLead {
   score_why: string | null
   email_subject: string | null
   email_body: string | null
+  /** Whether the prospect already runs a chatbot (null = unknown). */
+  has_chatbot: boolean | null
   status: SalesLeadStatus
   created_at: string
   updated_at: string
