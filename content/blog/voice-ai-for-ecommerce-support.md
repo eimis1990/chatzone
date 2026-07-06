@@ -11,6 +11,8 @@ Voice AI has crossed the line from gimmick to genuinely useful. A good voice age
 
 But "you can add voice" and "you should add voice" are different questions, and the honest answer is that voice isn't right for every store. The intelligence behind a voice agent is the same as a good text [chatbot for your online store](/blog/ai-chatbot-for-online-store) — what changes is the channel, the cost, and the contexts where it helps. This guide walks through what a voice agent actually is, the use cases where talking beats typing, where text chat still wins, and how to add voice to your store without overcommitting.
 
+<blockquote class="quick-answer">Voice AI is worth it when <em>speaking genuinely beats typing</em> for your customers — hands-busy shopping, accessibility, higher-consideration buys, and phone-first audiences. It <em>isn't</em> worth it for noisy or public browsing, or for stores that haven't yet proven chat deflects real volume. Ground a text agent first; voice is an amplifier, not a foundation. In Loqara it's an optional paid add-on on the same grounded agent.</blockquote>
+
 <div class="takeaways">
 <p class="takeaways-title">Quick take</p>
 <ul>
@@ -27,7 +29,7 @@ But "you can add voice" and "you should add voice" are different questions, and 
 <figcaption>Voice lets customers just talk to your store — hands-free, in their own language.</figcaption>
 </figure>
 
-## What voice AI for e-commerce actually is
+## What is voice AI for e-commerce, actually?
 
 A modern voice agent isn't a phone tree, and it isn't the menu-driven IVR you remember shouting "representative" at. It listens, understands, and responds out loud in real time, grounded in the same knowledge your chat agent uses. The customer talks the way they'd talk to a person in the aisle, and the agent answers in a natural voice, 24/7.
 

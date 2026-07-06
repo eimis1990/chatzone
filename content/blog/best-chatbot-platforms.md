@@ -10,6 +10,8 @@ Search for "best chatbot platforms" and you'll find twenty near-identical lists,
 
 One honest note before we start: "best" depends entirely on what you're building. A five-person Shopify store, a 200-agent enterprise support org, and an agency building bots for clients need three completely different tools. So instead of pretending there's one winner, each section ends with a clear "Best for:" line — find yours and skip the rest.
 
+<blockquote class="quick-answer">There's no single best platform — it depends on your size and use case. <strong>Zendesk AI</strong> or <strong>Intercom Fin</strong> lead for enterprise, <strong>Gorgias</strong> for established e-commerce teams, <strong>Tidio</strong> for small-business DIY, and <strong>Voiceflow</strong> or <strong>Chatbase</strong> for builders. <strong>Loqara</strong> (our product) fits stores wanting grounded chat and voice without a full helpdesk. Avoid starting anything new on Drift — it's sunsetting.</blockquote>
+
 <div class="takeaways">
 <p class="takeaways-title">Quick take</p>
 <ul>
@@ -178,7 +180,7 @@ That flexibility is the cost. You are the builder: answer quality, integrations,
 
 **Best for:** agencies and product teams building custom agents for clients or complex use cases.
 
-## How to actually choose
+## How do I actually choose?
 
 <div class="callout">
 <p class="callout-title">Match the platform to your situation, not the hype</p>

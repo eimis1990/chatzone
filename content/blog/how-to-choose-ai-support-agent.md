@@ -11,6 +11,8 @@ Every AI support tool demos beautifully. You type a question, it answers in a fr
 
 This is a buyer's checklist, written by people who build one of these tools (Loqara) but would rather you pick the right one than the wrong one. It's vendor-neutral on purpose: the questions below apply whether you're looking at Loqara, an incumbent helpdesk, or a flow-builder. Work through them in order, run the math on your own numbers, and the field narrows fast.
 
+<blockquote class="quick-answer">Choose by what decides value, not the feature list: the <strong>pricing model</strong> (per-resolution, per-conversation, and per-seat can be <strong>3–4× apart</strong> on the same traffic), <em>grounding</em> so it answers only from your content, real store actions like product search and order lookup, clean human handoff, and a one-line install. Then test it on real traffic before you pay.</blockquote>
+
 <div class="takeaways">
 <p class="takeaways-title">Quick take</p>
 <ul>

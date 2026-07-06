@@ -11,6 +11,8 @@ Ask people why they hate chatbots and you'll hear the same story almost word for
 
 The fix isn't a smarter model. It's a better **human handoff** — knowing when to step aside, doing it cleanly, and handing back when the human is done. Get this right and the same AI customers tolerate becomes one they trust, because they can feel there's a real person behind it when it counts. This guide covers when a bot should escalate, what a clean shared-inbox handoff looks like, and the practical do's and don'ts that separate a chatbot people trust from one they rage-quit.
 
+<blockquote class="quick-answer">A chatbot should hand off when continuing would mean <em>guessing</em> — unknown answers, repeated failures, sensitive or emotional issues, out-of-scope actions, or an explicit request for a person. Done right, it's clean: the full transcript carries into a <strong>shared inbox</strong>, a teammate takes over in real time, and can hand the thread back to the bot. Off-hours, a missed handoff becomes a captured lead, never a dead end.</blockquote>
+
 <div class="takeaways">
 <p class="takeaways-title">Quick take</p>
 <ul>
@@ -35,7 +37,7 @@ Think of the AI's job as removing **repetition**, not removing **people**. Most 
 
 When the bot hands off cleanly, you get faster first replies, fewer escalations that turn into complaints, and a team that spends its energy on conversations that actually need a brain. When it doesn't, you get the worst of both worlds — angry customers *and* a team firefighting the fallout. Handoff quality is one of [the metrics that actually tell you if your agent is working](/blog/chatbot-roi-metrics-that-matter), not a nice-to-have you bolt on later.
 
-## When the bot should hand off
+## When should the bot hand off?
 
 A good agent escalates on clear, observable signals rather than vibes. The rule of thumb: hand off when continuing would mean **guessing**, when the topic carries **risk or emotion**, or when the customer simply **wants a person**. Here are the triggers worth wiring up from day one:
 

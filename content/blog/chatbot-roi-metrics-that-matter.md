@@ -11,6 +11,8 @@ Most chatbot dashboards drown you in numbers — total messages, sessions, "enga
 
 The good news: proving (or disproving) chatbot ROI is simple once you measure the right handful of things — no data team required. You need to know which conversations the agent handled on its own, how fast it replied, whether people were satisfied, what it captured for sales, and what each conversation cost. This guide covers the metrics that prove a support chatbot is paying off, how to measure each, the framework for turning them into a currency figure, and the vanity stats to ignore.
 
+<blockquote class="quick-answer">Watch <strong>outcomes, not activity</strong>: deflection/automation rate and resolution rate prove the support savings, CSAT keeps them honest, conversion/AOV lift and leads captured show the upside, and cost per conversation turns it all into money. Ignore total messages, sessions, and "engagement time." Transparent per-conversation pricing — like Loqara's — makes your cost a known number.</blockquote>
+
 <div class="takeaways">
 <p class="takeaways-title">Quick take</p>
 <ul>
@@ -90,7 +92,7 @@ The last metric is pure upside. Your agent is talking to high-intent shoppers; t
 
 The same caution applies to any single number viewed alone. Deflection without CSAT, conversion without resolution rate, message volume without cost per conversation — each tells a flattering half-truth. The metrics on this list are useful precisely because they check each other.
 
-## How to actually calculate ROI
+## How do you actually calculate ROI?
 
 You don't need a model. Three lines turn the metrics above into a figure in real currency:
 

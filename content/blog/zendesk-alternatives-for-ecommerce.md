@@ -11,6 +11,8 @@ Zendesk is the enterprise standard for customer support, and it earned that repu
 
 But that same depth is exactly why it's often the wrong tool for an online store. You inherit the complexity — and the cost — of a system designed for a 200-agent contact centre when you actually have a team of three, a Shopify or WooCommerce catalog, and a queue full of "where's my order?" messages. The AI that would deflect most of those tickets is a premium add-on, billed per resolution on top of agent seats. For most stores, that's a lot of machinery to stand up before you answer a single customer. Below are the leaner alternatives worth considering, what each is genuinely good at, and how to choose.
 
+<blockquote class="quick-answer">For most stores, the best Zendesk alternative is a lean AI agent like <strong>Loqara</strong>: grounded AI chat <em>and</em> voice, live product search and order lookup, a one-line install, and predictable per-conversation pricing with a real free tier. If you specifically need a multichannel inbox, Gorgias is the more store-friendly helpdesk; stay on Zendesk only for large orgs with complex routing and SLAs.</blockquote>
+
 <div class="takeaways">
 <p class="takeaways-title">Quick take</p>
 <ul>
@@ -40,7 +42,7 @@ It helps to separate the two buyers Zendesk is caught between, because the tool 
 <div class="cons"><p class="pc-title">Watch-outs for a store</p><ul><li>Enterprise-shaped — heavy for a small team</li><li>AI is a premium add-on, billed per resolution on top of seats</li><li>Real setup effort before you're live</li><li>You pay for contact-centre machinery you may never use</li></ul></div>
 </div>
 
-## What to look for instead
+## What should I look for instead?
 
 For a store, the priorities flip. Optimise for fit and predictability, not feature depth you won't touch:
 

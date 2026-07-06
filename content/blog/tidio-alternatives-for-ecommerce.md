@@ -11,6 +11,8 @@ Tidio is one of the most popular live-chat tools for small businesses, and for g
 
 The friction shows up later. The moment you actually want **AI** answering customers — not scripted flows you maintain by hand, but an agent that reads a question and replies from your real policies and catalog — Tidio's economics shift. Its Lyro AI is a separate paid add-on rather than the heart of the product, and the tiers jump steeply as you grow. So stores outgrow Tidio not because it's bad, but because they came for chat and now need *grounded AI included*, not bolted on. Here's an honest look at the alternatives — including where staying on Tidio is the right call.
 
+<blockquote class="quick-answer">For most stores that came to Tidio for chat but now need real AI, the best alternative is <strong>Loqara</strong>: grounded AI chat <em>and</em> voice included from the start, live product search and order lookup, and predictable per-conversation pricing with a real monthly free tier. Stay on Tidio if you mainly want live chat with hand-built flows and don't yet need AI doing the heavy lifting.</blockquote>
+
 <div class="takeaways">
 <p class="takeaways-title">Quick take</p>
 <ul>
@@ -27,7 +29,7 @@ The friction shows up later. The moment you actually want **AI** answering custo
 <figcaption>Grounded AI answers from your own knowledge beat hand-built flows for most stores.</figcaption>
 </figure>
 
-## When Tidio is enough — and when to switch
+## Is Tidio enough, or should I switch?
 
 Tidio is a legitimately good product for a specific stage. Be honest about where you are before switching anything.
 

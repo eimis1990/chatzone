@@ -11,6 +11,8 @@ Search "best AI chatbot for e-commerce" and you'll get a dozen lists that all ra
 
 Yes, Loqara is on the list (we built it). And yes, we'll tell you when a different tool fits your store better.
 
+<blockquote class="quick-answer">There's no single winner. For most small-to-mid stores, <strong>Loqara</strong> is the best all-rounder — grounded AI chat <em>and</em> voice, live product search and order lookup, a one-line install, and predictable per-conversation pricing with a real free tier. Busy multichannel teams are better served by <strong>Gorgias</strong>, and large orgs by <strong>Intercom (Fin)</strong> or <strong>Zendesk</strong>.</blockquote>
+
 <div class="takeaways">
 <p class="takeaways-title">Quick take</p>
 <ul>
@@ -111,7 +113,7 @@ Powerful and endlessly configurable, but heavy and costly for most stores, with 
 
 A growing class of AI agents built specifically for online retail — catalog-aware, often managed for you. They can be a strong fit if you want a hands-off setup, though pricing tends to be per resolution or custom, so model your volume before committing.
 
-## How to choose between them
+## How do I choose between them?
 
 Match the tool to your stage, not the longest feature list:
 

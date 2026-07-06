@@ -11,6 +11,8 @@ Most online stores lose sales the same quiet way: a shopper has a question at 11
 
 This is the foundational explainer: what an AI chatbot for an online store actually is in 2026, why **grounding** matters far more than which model is under the hood, what a good one can do, and how to get value from it without an engineering project. Once you understand these ideas, the [platform comparisons](/blog/best-ai-chatbot-for-shopify) and [setup guides](/blog/add-ai-agent-to-woocommerce) make a lot more sense.
 
+<blockquote class="quick-answer">Add an AI chatbot to your online store with a <strong>one-line embed</strong>: add your content, connect your store so it can search live products and look up orders, customise the widget, and paste a single <code>&lt;script&gt;</code> tag before <code>&lt;/body&gt;</code>. Choose one that's <em>grounded</em> — answering only from your real content, with sources — and you can be live the same afternoon.</blockquote>
+
 <div class="takeaways">
 <p class="takeaways-title">Quick take</p>
 <ul>
@@ -26,7 +28,7 @@ This is the foundational explainer: what an AI chatbot for an online store actua
 <figcaption>Grounded answers come from your real content — not the model's imagination.</figcaption>
 </figure>
 
-## What an AI chatbot for an online store actually does
+## What does an AI chatbot for an online store actually do?
 
 Plenty of "chatbots" are really an FAQ search box with a friendly avatar. A modern AI chatbot for an online store is an **agent**: it understands a question in plain language and takes an action to resolve it. For e-commerce specifically, that work breaks down into five jobs.
 

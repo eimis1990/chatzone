@@ -11,6 +11,8 @@ Most stores treat chat as a cost center — a place to deflect support tickets a
 
 The problem is that the old playbook — gate the conversation behind a form, collect the email, follow up cold — kills the very intent that made the lead valuable. This guide is about the other way: capturing leads inside a real conversation, after you've actually helped, so the ask feels like a favour rather than a toll booth. We'll cover why forms leak leads, what to ask and when, how to qualify and route automatically, and how an AI agent does all of this 24/7 without ever being pushy.
 
+<blockquote class="quick-answer"><strong>Help first, capture second.</strong> Answer the visitor's question, then ask for one detail — leading with value, once, and skippable. Because chat reaches people mid-decision, the lead arrives pre-qualified with the product and objection attached. An AI agent like Loqara does this 24/7 and hands off to a human with the full thread, so nothing gets lost.</blockquote>
+
 <div class="takeaways">
 <p class="takeaways-title">Quick take</p>
 <ul>
@@ -59,7 +61,7 @@ Timing is the whole game. Ask too early and you're a toll booth; ask at the righ
 <p>Help before you ask. Every other tactic on this page is a variation of it. A visitor who has just been given a real answer will happily leave an email; a visitor who is asked for one before getting anything will leave the site. If you only change one thing about how your store captures leads, change the order — answer first, capture second.</p>
 </div>
 
-## Qualify and route automatically
+## How do you qualify and route leads automatically?
 
 A captured email sitting in a dashboard isn't a lead — it's a missed one. The value is realised only when the right person follows up while the intent is still warm, and that means qualifying and routing need to happen without anyone babysitting the inbox.
 

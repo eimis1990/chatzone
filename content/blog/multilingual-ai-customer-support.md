@@ -11,6 +11,8 @@ Your product page ships worldwide. Your support does not. The moment a shopper i
 
 Hiring native speakers for every market doesn't scale, and bolting a "Translate" widget onto a help center just turns your English FAQ into slightly-wrong Lithuanian. An AI support agent takes a different route: it understands the question in whatever language it arrives, answers from your real content, and replies in the shopper's language — the same way a good bilingual assistant would.
 
+<blockquote class="quick-answer">An AI support agent answers every shopper in their own language, day and night, <em>without adding headcount per market</em>. It reads intent across languages and replies <strong>from your grounded content</strong> — not a word-for-word translation of a stale FAQ. Keep a human for legal wording, nuanced complaints, and high-value B2B, with a clean handoff. Setup is one embed: pick the languages you serve, done the same day.</blockquote>
+
 <div class="takeaways">
 <p class="takeaways-title">Quick take</p>
 <ul>
@@ -39,7 +41,7 @@ People buy in the language they think in. Research on cross-border commerce cons
 
 The trap most stores fall into is treating language as a translation problem instead of a support problem. Auto-translating your website is fine for static pages. But support is a *conversation* — a shopper asks something specific, in their own words, often with a typo or slang, and expects an answer grounded in your actual policies. Machine-translating a canned FAQ can't do that. It answers a question nobody asked, in stilted phrasing, and erodes exactly the trust you were trying to build.
 
-## How AI multilingual support actually works
+## How does AI multilingual support work?
 
 A modern AI agent handles language in three moves, and understanding them tells you what to expect (and what to check before you switch it on).
 

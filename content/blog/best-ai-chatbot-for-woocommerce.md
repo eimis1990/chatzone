@@ -11,6 +11,8 @@ Most "best WooCommerce chatbot" lists rank whoever pays for the placement. This 
 
 Yes, Loqara is on the list — we built it. But we'll say plainly when something else suits you better, because recommending the wrong tool helps no one, least of all us. The thing to settle first is that "AI chatbot for WooCommerce" covers two very different products, and once you sort that out the shortlist gets short fast.
 
+<blockquote class="quick-answer">For most growing WooCommerce stores, <strong>Loqara</strong> is the best fit — grounded AI chat <em>and</em> voice, a live WooCommerce connector for product search and order lookup, a one-line embed, and predictable per-conversation pricing with a real free tier. Established support teams may prefer <strong>Gorgias</strong>; if you just want a cheap FAQ widget, a native WordPress plugin is fine.</blockquote>
+
 <div class="takeaways">
 <p class="takeaways-title">Quick take</p>
 <ul>
@@ -119,7 +121,7 @@ Powerful and endlessly configurable, Zendesk can absolutely serve a WooCommerce 
 <p>"$X per resolution" and "$X per conversation" are not the same thing, and the gap can be 3–4× on identical traffic. A "resolution" is defined by the vendor and can be triggered generously; a "conversation" is one customer thread. Before you commit, model your real monthly volume against each pricing unit — and remember a native plugin's "free" cost still consumes your WordPress hosting. Our <a href="/blog/how-to-choose-ai-support-agent">buyer's checklist</a> walks through the questions that actually decide it.</p>
 </div>
 
-## How to add an AI chatbot to your WooCommerce store
+## How do I add an AI chatbot to my WooCommerce store?
 
 Whichever tool you pick, the path is roughly the same four steps:
 

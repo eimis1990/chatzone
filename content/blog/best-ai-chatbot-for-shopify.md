@@ -11,6 +11,8 @@ Most "best Shopify chatbot" lists rank whoever pays the most for the placement. 
 
 Yes, Loqara is on the list (we built it). But we'll tell you plainly when something else suits you better — because recommending the wrong tool helps no one, least of all us.
 
+<blockquote class="quick-answer">For most small and growing Shopify stores, Loqara is the best fit: grounded AI chat <em>and</em> voice, live product search and order lookup, a one-line install, and per-conversation pricing with a real free tier. Larger teams handling high ticket volume may prefer Gorgias or Intercom (Fin).</blockquote>
+
 <div class="takeaways">
 <p class="takeaways-title">Quick take</p>
 <ul>
@@ -26,7 +28,7 @@ Yes, Loqara is on the list (we built it). But we'll tell you plainly when someth
 <figcaption>A good Shopify chatbot does three jobs at once — answers from your real content, searches your catalog, and looks up orders.</figcaption>
 </figure>
 
-## What "best" actually means for a Shopify store
+## What makes an AI chatbot good for a Shopify store?
 
 Feature checklists are mostly noise. For a Shopify store specifically, three things separate a chatbot that deflects tickets and lifts sales from one that frustrates customers into leaving:
 
@@ -103,7 +105,7 @@ Re:amaze is a capable multichannel helpdesk with native Shopify order actions ri
 
 Powerful and endlessly configurable, but heavy and expensive for most Shopify stores. Worth it mainly if you're already standardised on Zendesk company-wide. See [Zendesk alternatives](/blog/zendesk-alternatives-for-ecommerce) if it feels like overkill.
 
-## How to choose between them
+## How do I choose the right Shopify chatbot?
 
 Match the tool to your stage, not the longest feature list:
 

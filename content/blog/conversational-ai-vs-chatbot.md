@@ -10,6 +10,8 @@ image: /blog/conversational-ai-vs-chatbot.webp
 
 Here's the honest version: "chatbot" describes anything that chats in a widget, from a row of buttons to a genuinely intelligent agent. "Conversational AI" describes a capability level — software that understands whatever a person actually types (or says), holds a real back-and-forth, and answers accurately. Plenty of things sold as conversational AI are chatbots in the old sense. This post lays out the real taxonomy, so you can tell which one you're being sold.
 
+<blockquote class="quick-answer"><strong>"Chatbot"</strong> is the umbrella term for anything that chats in a widget; <strong>conversational AI</strong> is a capability level — software that understands free-typed language, keeps context, and generates answers instead of playing back scripts. Every conversational AI is a chatbot, but most chatbots aren't conversational AI. The line that matters is <em>grounding</em>: does it answer from <em>your</em> content and admit when it doesn't know?</blockquote>
+
 <div class="takeaways">
 <p class="takeaways-title">Quick take</p>
 <ul>

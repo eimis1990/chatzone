@@ -11,6 +11,8 @@ WooCommerce gives you control over your store — but that control usually stops
 
 This guide walks through it end to end: what you need before you start, how to feed the agent your content, how to connect your live WooCommerce products and orders, how to style the widget so it looks native to your store, and the single line of code that puts it live. By the end you'll have a grounded AI agent — and optionally a real-time voice agent — answering customers the same afternoon, no theme rebuild required.
 
+<blockquote class="quick-answer">Adding an AI agent to WooCommerce is a <strong>single script tag</strong> — no dedicated plugin or theme rebuild. Feed Loqara your policy and FAQ pages so answers stay <em>grounded</em>, connect your WooCommerce catalog and order lookup with a read-only REST API key, customise the widget, then paste one line before <code>&lt;/body&gt;</code>. You can be live the same afternoon.</blockquote>
+
 <div class="takeaways">
 <p class="takeaways-title">Quick take</p>
 <ul>
@@ -26,7 +28,7 @@ This guide walks through it end to end: what you need before you start, how to f
 <figcaption>Adding an AI agent is a one-line embed, not a six-week integration project.</figcaption>
 </figure>
 
-## Why WooCommerce stores especially benefit
+## Why do WooCommerce stores especially benefit?
 
 WooCommerce stores tend to be lean — often a founder plus a small team, or an agency managing several shops. That's exactly the setup where repetitive support hurts most: there's no overnight team, and every hour spent answering "where's my order?" is an hour not spent on the business. An always-on agent that answers from your real content gives a small team the coverage of a much larger one.
 

@@ -11,6 +11,8 @@ Gorgias is one of the best-known helpdesks in e-commerce, and deservedly so — 
 
 The friction is usually weight and cost. Gorgias is a full multichannel helpdesk priced for teams, and its AI Agent bills **per resolution** on top of a ticket-based plan — math that's hard to forecast when you're a lean store doing a few hundred conversations a month. So the real question is rarely "is Gorgias good?" It is. The question is "is it the right *weight* for my store right now?" Below is an honest look at the best alternatives in 2026, who each one actually suits, and how to choose.
 
+<blockquote class="quick-answer">For most lean and growing stores, the best Gorgias alternative is <strong>Loqara</strong>: grounded AI chat <em>and</em> voice, live product search and order lookup, a one-line install, and predictable per-conversation pricing with a real free tier. Stay on Gorgias if you run a busy multichannel team where its per-resolution AI math already pays off.</blockquote>
+
 <div class="takeaways">
 <p class="takeaways-title">Quick take</p>
 <ul>
@@ -38,7 +40,7 @@ It's the wrong call when you're a small or growing store that mostly needs to de
 <div class="cons"><p class="pc-title">Why small stores look elsewhere</p><ul><li>AI billed <em>per resolution</em> on top of a ticket-based plan — hard to forecast</li><li>A resolved AI conversation can also count as a ticket</li><li>Full helpdesk weight most small stores don't need yet</li><li>Priced and billed in USD, around a team workflow</li></ul></div>
 </div>
 
-## What to look for in an alternative
+## What should I look for in an alternative?
 
 - **Predictable pricing** — a flat plan with a clear conversation allowance beats per-resolution math you can't forecast.
 - **Grounded answers** — the agent should only answer from your real content, not guess. (See [why grounding matters more than the model](/blog/ai-chatbot-for-online-store).)

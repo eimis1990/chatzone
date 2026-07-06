@@ -476,6 +476,17 @@ html.lenis body {
   font-style: italic;
   color: #4b5563;
 }
+/* Quick answer — a direct 40–60 word answer to the article's main question,
+   placed high up for featured snippets and AI-engine citations. */
+.article blockquote.quick-answer {
+  font-style: normal;
+  font-weight: 500;
+  color: #1f2937;
+  background: color-mix(in srgb, var(--primary) 6%, white);
+  border-left-width: 4px;
+  border-radius: 0 0.5rem 0.5rem 0;
+  padding: 1rem 1.25rem;
+}
 .article code {
   background: #f3f4f6;
   border-radius: 4px;

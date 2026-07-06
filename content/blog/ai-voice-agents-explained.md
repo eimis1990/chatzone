@@ -10,6 +10,8 @@ For most of the past decade, "talking to a website" meant one of two disappointm
 
 This post explains what an AI voice agent actually is, how it works in plain words, what changed to make it real, what it honestly still can't do, and what it costs. No hype — including about the parts we sell.
 
+<blockquote class="quick-answer">An <strong>AI voice agent</strong> (or voice chatbot) lets a customer <em>speak</em> to a business and hear a spoken answer in real time — no human on the line. The pipeline is speech-to-text, an LLM <strong>grounded in the business's own content</strong>, then text-to-speech, with tool calls for orders and products. Real-time speech models made it conversational in 2026; it's typically billed per minute.</blockquote>
+
 <div class="takeaways">
 <p class="takeaways-title">Quick take</p>
 <ul>
@@ -20,7 +22,7 @@ This post explains what an AI voice agent actually is, how it works in plain wor
 </ul>
 </div>
 
-## What an AI voice agent actually is
+## What is an AI voice agent, actually?
 
 Strip the jargon and it's this: software that lets a customer *speak* to a business and hear a spoken answer, in real time, with no human on the other end — and, crucially, with answers that come from the business's real content rather than a script or a model's imagination.
 
@@ -77,7 +79,7 @@ Anyone selling voice agents without this section is selling too hard.
 
 One place voice earns its cost quickly: customers who struggle with typing — and language. Because the LLM's understanding is multilingual, a voice agent can hold the call in the customer's own language, which pairs naturally with [multilingual text support](/blog/multilingual-ai-customer-support).
 
-## What it costs
+## What does an AI voice agent cost?
 
 The industry unit for voice is the **conversation minute**, covering the whole pipeline — transcription, model, synthesis. Across platforms in 2026, all-in costs typically land somewhere between roughly €0.05 and €0.30 per minute depending on voice quality, model, and volume, and vendor pricing usually wraps that in a monthly plan with included minutes plus an overage rate.
 

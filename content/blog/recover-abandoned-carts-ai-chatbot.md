@@ -11,6 +11,8 @@ Roughly seven in ten carts are abandoned. Most stores respond with an email an h
 
 Cart recovery emails chase people who already left. A support agent that answers instantly keeps them from leaving in the first place. Used together, they compound — but the real-time layer is the one most stores are missing.
 
+<blockquote class="quick-answer">Most carts are abandoned over a <strong>stalled question</strong> — shipping, returns, fit, or trust — not sticker shock. A grounded AI chatbot recovers the sale by answering that question in seconds <em>while the cart is still open</em>, drawing on your real policies and live catalog. It can also surface a better-fit product or capture the lead if they still leave.</blockquote>
+
 <div class="takeaways">
 <p class="takeaways-title">Quick take</p>
 <ul>
@@ -26,7 +28,7 @@ Cart recovery emails chase people who already left. A support agent that answers
 <figcaption>The cheapest cart to recover is the one that never gets abandoned — because the shopper's question got answered on the spot.</figcaption>
 </figure>
 
-## Why carts really get abandoned
+## Why do carts really get abandoned?
 
 Some abandonment is unavoidable — people browse, compare, and save for later. But a large chunk is fixable, and the reasons are remarkably consistent. Most of them are questions your store could answer in a sentence, if only someone were there to ask.
 

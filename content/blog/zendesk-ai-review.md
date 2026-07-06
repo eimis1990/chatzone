@@ -12,6 +12,8 @@ The real question isn't whether Zendesk AI is good. It's whether it's good *for 
 
 Below is what Zendesk AI actually includes in 2026, what it costs plan by plan, how the per-resolution billing really works, and — honestly — the situations where it's the right call versus the situations where it's overkill.
 
+<blockquote class="quick-answer">It depends who you are. <strong>Zendesk AI is genuinely strong</strong> — and worth it — for support orgs with 10+ agents, multiple channels, and compliance needs. For most small and mid-size stores, it's usually <em>overkill</em>: seat fees stack with unpredictable per-resolution charges, and a purpose-built e-commerce agent delivers grounded answers, order lookup, and handoff at a price you can forecast.</blockquote>
+
 <div class="takeaways">
 <p class="takeaways-title">Quick take</p>
 <ul>
@@ -60,7 +62,7 @@ Two things the table doesn't show. First, the interesting AI features cluster at
 
 For a rough sense of scale: independent cost breakdowns of real deployments put a 20-agent team handling a few thousand tickets a month somewhere in the $6,000–$8,000/month range all-in once add-ons and resolutions are counted. Your mileage will vary a lot, but the direction of travel is clear — Zendesk bills grow in several dimensions at once.
 
-## How per-resolution pricing really works
+## How does per-resolution pricing really work?
 
 This is the part worth slowing down on, because it decides whether Zendesk AI is affordable for you.
 

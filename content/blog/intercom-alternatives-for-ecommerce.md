@@ -11,6 +11,8 @@ Intercom is one of the most polished support platforms on the market, and its Fi
 
 Because Intercom is built for large SaaS and support organisations, and the price reflects that. You pay per seat *and* per resolution, on top of a platform that's designed around product tours, complex multi-step workflows, and big support teams living in the inbox all day. If you're a five-person store that mostly needs to answer "where's my order?" and "does this come in blue?", you're renting a cathedral to host a coffee morning. Below is an honest look at the lighter alternatives — what each does well, how the pricing models actually behave, and who each one genuinely fits.
 
+<blockquote class="quick-answer">For a store rather than a large SaaS, the best Intercom alternative is <strong>Loqara</strong>: a store-shaped agent built around your catalog and orders, with grounded AI chat <em>and</em> voice, a one-line install, and predictable per-conversation pricing plus a real free tier. Intercom and Fin stay excellent if you're a larger support org where the per-resolution math pays off.</blockquote>
+
 <div class="takeaways">
 <p class="takeaways-title">Quick take</p>
 <ul>
@@ -40,7 +42,7 @@ The trouble is the pricing *model*, not the sticker price. Intercom bills per se
 
 Intercom isn't "too expensive" in a vacuum — it's priced for a different buyer. The honest question is whether you're that buyer *yet*.
 
-## What to look for in a store-shaped alternative
+## What should I look for in a store-shaped alternative?
 
 If you're moving away from Intercom because it's SaaS-shaped, the replacement should be store-shaped. Four things matter more than feature count:
 

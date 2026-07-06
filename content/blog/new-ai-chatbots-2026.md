@@ -10,6 +10,8 @@ Every few months a new wave of AI chatbots arrives with a press cycle claiming e
 
 This post is our attempt to separate the four trends that actually matter from the launch-week hype, and — because most of our readers run online stores — to end with what, concretely, you should do about any of it. We build an AI agent ourselves (Loqara), so we'll disclose where our perspective is biased and keep the vendor talk to a minimum.
 
+<blockquote class="quick-answer">The new AI chatbots of 2026 are less about single products than a settled direction: <strong>Nvidia</strong> now sells the infrastructure (ACE, NIM) others build on, <strong>voice agents</strong> went production-ready, the frontier moved from answering to <em>acting</em>, and <strong>vertical agents</strong> are beating generalists. For store owners: ignore the infrastructure layer, adopt a grounded vertical agent, and trial voice on real traffic.</blockquote>
+
 <div class="takeaways">
 <p class="takeaways-title">Quick take</p>
 <ul>
@@ -59,7 +61,7 @@ The first generation of AI chatbots was horizontal: one bot, any business, just 
 
 The reason is mundane and decisive: the last 20% of usefulness is domain work. A generic bot can summarise your shipping policy; a vertical one connects to Shopify, WooCommerce, or Magento, searches the live catalog with real prices and stock, and checks an order after verifying the customer's identity — because its builders spent their whole roadmap on exactly those jobs. Full disclosure: Loqara, our product, is one example of this pattern — an agent that only does e-commerce, grounded in the store's own content with citations, which is precisely why it can go deeper than a general-purpose platform on store problems (and why we'd send a SaaS company elsewhere). The same logic applies whatever your industry: the agent that knows your vertical's ten most common jobs will beat the smartest generalist. Our [e-commerce chatbot comparison](/blog/best-ai-chatbot-for-ecommerce) shows how stark that gap already is in our vertical.
 
-## 5. What store owners should actually do
+## 5. What should store owners actually do?
 
 Trends are entertainment unless they change your Monday. Here's what we'd actually do with the above, in order:
 

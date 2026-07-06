@@ -11,6 +11,8 @@ Support volume in e-commerce is surprisingly predictable. Look at a month of tic
 
 That predictability is the opportunity. When questions repeat and the answers don't change, you don't need a human typing the same reply forty times a day. You need a grounded AI agent that answers from your real content and *takes real actions* on your store — and a clean way to hand the rest to a person. This guide breaks down which ticket types AI can deflect, how it actually closes them (grounding plus store actions, not guesswork), and a practical playbook to cut volume without quietly wrecking your customer experience.
 
+<blockquote class="quick-answer">A grounded AI agent cuts tickets by handling the <strong>few repetitive question types</strong> that dominate e-commerce volume — order status, returns and shipping policy, sizing, and stock. It <em>looks up the real order</em> and <em>searches your live catalog</em> rather than keyword-matching an article, and hands the hard cases — disputes, damage, upset customers — straight to a human.</blockquote>
+
 <div class="takeaways">
 <p class="takeaways-title">Quick take</p>
 <ul>
@@ -27,7 +29,7 @@ That predictability is the opportunity. When questions repeat and the answers do
 <figcaption>Most repetitive tickets — order status, returns, sizing — can be deflected without hurting CX.</figcaption>
 </figure>
 
-## Which tickets AI can actually deflect
+## Which tickets can AI actually deflect?
 
 Not every ticket is a deflection candidate, and pretending otherwise is how stores end up with a bot that frustrates people. The useful question is narrower: *which question types are repetitive, answerable from known facts, and don't need human judgment?* Those are the ones a grounded agent with store access can close on its own.
 

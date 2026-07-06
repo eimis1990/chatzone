@@ -13,6 +13,8 @@ This guide walks through what data a support chatbot actually touches, the oblig
 
 <p><em>This is general information for store owners, not legal advice. For your specific situation — especially anything involving special-category data or large-scale processing — talk to a qualified data-protection professional.</em></p>
 
+<blockquote class="quick-answer">Yes — an AI chatbot is <strong>GDPR-compliant when handled correctly</strong>. You're the data controller, so you need a lawful basis, transparency in your privacy policy, a DPA with the vendor, data minimization, and sensible retention. The three things to verify: where data is stored, whether it trains anyone's models, and how long it's kept. Loqara builds these in as EU-first defaults.</blockquote>
+
 <div class="takeaways">
 <p class="takeaways-title">Quick take</p>
 <ul>
@@ -49,7 +51,7 @@ Two rules make the rest simpler. First, **a support chatbot should never handle 
 <div class="stat"><div class="stat-num">Minimize</div><div class="stat-label">The single most effective privacy practice</div></div>
 </div>
 
-## Your obligations, in plain English
+## What are your obligations, in plain English?
 
 You don't need to memorize the regulation. For a support chatbot, the duties that actually matter come down to a short list.
 
