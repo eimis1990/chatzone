@@ -375,6 +375,33 @@ export interface MatchedChunk {
   similarity: number
 }
 
+export type SalesLeadStatus = 'ready' | 'email_sent' | 'rejected' | 'accepted' | 'client'
+
+/** Owner outreach pipeline row (researched prospect company). */
+export interface SalesLead {
+  id: string
+  name: string
+  legal_name: string | null
+  website: string
+  city: string | null
+  vertical: string
+  ceo: string | null
+  email: string | null
+  phone: string | null
+  size_info: string | null
+  platform: string | null
+  hook: string | null
+  fit_note: string | null
+  source: string | null
+  score: number
+  score_why: string | null
+  email_subject: string | null
+  email_body: string | null
+  status: SalesLeadStatus
+  created_at: string
+  updated_at: string
+}
+
 export type BugStatus = 'open' | 'in_progress' | 'resolved'
 
 export interface BugReport {

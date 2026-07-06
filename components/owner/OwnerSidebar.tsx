@@ -16,6 +16,7 @@ import {
   InboxIcon,
   MessagesSquareIcon,
   BarChart3Icon,
+  TargetIcon,
   type LucideIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -50,6 +51,7 @@ const NAV: NavItem[] = [
   { label: 'System prompts', href: '/owner/prompts', icon: FileTextIcon },
   { label: 'Voices', href: '/owner/voices', icon: MicVocalIcon },
   { label: 'Signups', href: '/owner/signups', icon: MailIcon },
+  { label: 'Sales leads', href: '/owner/leads', icon: TargetIcon },
   { label: 'LinkedIn', href: '/owner/linkedin', icon: MegaphoneIcon },
   { label: 'Bug reports', href: '/owner/bugs', icon: BugIcon },
 ]
