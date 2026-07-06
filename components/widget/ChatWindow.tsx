@@ -1008,6 +1008,9 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
           radius={navButtonRadius}
           backgroundColor={bgColor}
           sendIconUrl={config.theme.sendIconUrl}
+          fieldColor={config.theme.composerFieldColor}
+          fieldBorderColor={config.theme.composerBorderColor}
+          sendColor={config.theme.sendButtonColor}
         />
 
         {/* Full-height product list overlay (covers messages + composer) */}

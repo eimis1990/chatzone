@@ -119,6 +119,12 @@ export const botConfigFormSchema = z.object({
       glassBubbles: z.boolean().default(false),
       // Optional custom send-button icon (uploaded image URL).
       sendIconUrl: z.string().url().optional().or(z.literal('')),
+      // Composer message-field background; text/placeholder auto-contrast.
+      composerFieldColor: z.string().optional().or(z.literal('')),
+      // Composer message-field border; empty = auto from field color.
+      composerBorderColor: z.string().optional().or(z.literal('')),
+      // Send button background; empty = primary. Radius follows navButtonRadius.
+      sendButtonColor: z.string().optional().or(z.literal('')),
       // Bot (assistant) message bubble background; text auto-contrasts. Empty = default grey.
       botBubbleColor: z.string().optional().or(z.literal('')),
       // Border for message bubbles + suggested-action tiles (width 0 = none).

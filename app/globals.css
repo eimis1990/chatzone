@@ -379,6 +379,18 @@
 .cbz-grid-loader .cbz-cube:nth-child(7) { animation-delay: 1.4s; }
 .cbz-grid-loader .cbz-cube:nth-child(8) { animation-delay: 1.6s; }
 .cbz-grid-loader .cbz-cube:nth-child(9) { animation-delay: 1.8s; }
+
+/* Compact variant — smaller cubes, tighter gap, softer glow (dialog overlays). */
+.cbz-grid-loader--sm {
+  gap: 5px;
+}
+.cbz-grid-loader--sm .cbz-cube {
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  box-shadow: 0 0 6px
+    color-mix(in srgb, var(--cbz-loader-color, #e2650f) 25%, transparent);
+}
 @media (prefers-reduced-motion: reduce) {
   .cbz-grid-loader,
   .cbz-grid-loader .cbz-cube {
@@ -723,4 +735,10 @@ html.lenis body {
   font-weight: 700;
   font-size: 1em;
   margin: 0.5em 0 0.2em;
+}
+
+/* Widget composer: placeholder inherits an auto-contrast color derived from
+   the configured message-field background (set inline as --cbz-ph-color). */
+.cbz-composer-input::placeholder {
+  color: var(--cbz-ph-color, #9ca3af);
 }

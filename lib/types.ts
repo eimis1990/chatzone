@@ -191,6 +191,12 @@ export interface BotConfig {
     glassBubbles?: boolean
     /** Optional custom send-button icon (uploaded image URL). */
     sendIconUrl?: string
+    /** Composer message-field background; text/placeholder auto-contrast. */
+    composerFieldColor?: string
+    /** Composer message-field border; empty = auto from field color. */
+    composerBorderColor?: string
+    /** Send button background; empty = primary color. Radius follows navButtonRadius. */
+    sendButtonColor?: string
     /** Border on message bubbles + suggested-action tiles. */
     /** Bot (assistant) bubble background; text auto-contrasts. Empty = default grey. */
     botBubbleColor?: string

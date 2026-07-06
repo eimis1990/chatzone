@@ -1006,6 +1006,9 @@ export function ConfigForm({
                 <ColorField control={control} name="theme.backgroundColor" label="Chat background" placeholder="#ffffff" swatchDefault="#ffffff" description="Behind the conversation." />
                 <ColorField control={control} name="theme.launcherColor" label="Launcher color" placeholder="Defaults to primary" swatchDefault={watch('theme.primaryColor') || '#4f46e5'} description="Floating bubble; empty = primary." />
                 <ColorField control={control} name="theme.bubbleBorderColor" label="Bubble border color" placeholder="#e5e7eb" swatchDefault="#e5e7eb" description="Used when border width > 0 (see roundness)." />
+                <ColorField control={control} name="theme.composerFieldColor" label="Message field color" placeholder="#ffffff" swatchDefault="#ffffff" description="Composer input background; text adapts for contrast." />
+                <ColorField control={control} name="theme.composerBorderColor" label="Message field border" placeholder="Auto" swatchDefault="#e5e7eb" description="Field border; empty = subtle auto border." />
+                <ColorField control={control} name="theme.sendButtonColor" label="Send button color" placeholder="Defaults to primary" swatchDefault={watch('theme.primaryColor') || '#4f46e5'} description="Send button; empty = primary. Roundness follows buttons." />
                 {watch('voice.enabled') && (
                   <ColorField control={control} name="theme.callButtonColor" label="Call button color" placeholder="#22c55e" swatchDefault="#22c55e" description="Voice call button; label adapts for contrast." />
                 )}

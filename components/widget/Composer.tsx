@@ -15,6 +15,12 @@ interface ComposerProps {
   backgroundColor?: string
   /** Optional custom send-button icon (replaces the default arrow). */
   sendIconUrl?: string
+  /** Message-field background; text/placeholder auto-contrast. Empty = white. */
+  fieldColor?: string
+  /** Message-field border; empty = auto (subtle, derived from field color). */
+  fieldBorderColor?: string
+  /** Send button background; empty = primary color. */
+  sendColor?: string
 }
 
 export function Composer({
@@ -25,9 +31,17 @@ export function Composer({
   radius = 12,
   backgroundColor = '#ffffff',
   sendIconUrl,
+  fieldColor,
+  fieldBorderColor,
+  sendColor,
 }: ComposerProps) {
   // Match the chat background color so a dark theme doesn't leave a white bar.
   const lightBar = isLightColor(backgroundColor)
+  // Field text must stay readable on any chosen field background.
+  const fieldBg = fieldColor || '#ffffff'
+  const lightField = isLightColor(fieldBg)
+  const fieldFg = readableTextColor(fieldBg)
+  const sendBg = sendColor || primaryColor
   const [value, setValue] = useState('')
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -78,8 +92,21 @@ export function Composer({
           disabled={disabled}
           rows={1}
           aria-label="Message input"
-          className="flex-1 resize-none border border-gray-200 bg-white px-3 py-2 text-sm leading-5 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-0 disabled:opacity-50 overflow-hidden"
-          style={{ maxHeight: '120px', borderRadius: `${radius}px`, '--tw-ring-color': primaryColor } as React.CSSProperties}
+          className="cbz-composer-input flex-1 resize-none border px-3 py-2 text-sm leading-5 focus:outline-none focus:ring-2 focus:ring-offset-0 disabled:opacity-50 overflow-hidden"
+          style={
+            {
+              maxHeight: '120px',
+              borderRadius: `${radius}px`,
+              backgroundColor: fieldBg,
+              color: fieldFg,
+              borderColor:
+                fieldBorderColor || (lightField ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.22)'),
+              // Placeholder = the text color at reduced opacity (see globals.css).
+              '--cbz-ph-color': `color-mix(in srgb, ${fieldFg} 55%, transparent)`,
+              caretColor: fieldFg,
+              '--tw-ring-color': primaryColor,
+            } as React.CSSProperties
+          }
         />
 
         {/* Send button — icon auto-contrasts; a light button gets a border so
@@ -88,10 +115,16 @@ export function Composer({
           type="submit"
           disabled={disabled || !value.trim()}
           aria-label="Send message"
-          className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 transition-opacity hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed ${
-            isLightColor(primaryColor) ? 'border border-gray-300' : ''
+          // 38px matches the single-line field height (20px line + 16px padding + borders).
+          className={`h-[38px] w-[38px] flex items-center justify-center flex-shrink-0 transition-opacity hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed ${
+            isLightColor(sendBg) ? 'border border-gray-300' : ''
           }`}
-          style={{ backgroundColor: primaryColor, color: readableTextColor(primaryColor) }}
+          // Radius follows the theme's button roundness (a 38px button caps at 19 = circle).
+          style={{
+            backgroundColor: sendBg,
+            color: readableTextColor(sendBg),
+            borderRadius: `${Math.min(radius, 19)}px`,
+          }}
         >
           {sendIconUrl ? (
             // eslint-disable-next-line @next/next/no-img-element

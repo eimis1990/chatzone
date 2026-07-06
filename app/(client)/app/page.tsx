@@ -7,6 +7,7 @@ import { entitlementsFor } from '@/lib/entitlements'
 import { conversationsThisMonth } from '@/lib/usage'
 import type { Plan } from '@/lib/types'
 import { CreateBotDialog } from '@/components/client/CreateBotDialog'
+import { DeleteBotButton } from '@/components/client/DeleteBotButton'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { LiveIndicator } from '@/components/LiveIndicator'
@@ -154,7 +155,7 @@ export default async function BotsPage() {
                 href={`/app/bots/${bot.id}/configure`}
                 className="group block focus:outline-none"
               >
-                <Card className="h-full transition-all group-hover:-translate-y-0.5 group-hover:shadow-md group-focus-visible:ring-2 group-focus-visible:ring-ring">
+                <Card className="flex h-full flex-col transition-all group-hover:-translate-y-0.5 group-hover:shadow-md group-focus-visible:ring-2 group-focus-visible:ring-ring">
                   <CardHeader>
                     <div className="flex items-start gap-3">
                       {avatar ? (
@@ -191,9 +192,14 @@ export default async function BotsPage() {
                       </div>
                     </div>
                   </CardHeader>
-                  <CardContent className="space-y-3">
+                  {/* Greeting grows; the status + delete row pins to the card bottom
+                      so short and long greetings align across the grid. */}
+                  <CardContent className="flex flex-1 flex-col gap-3">
                     <p className="line-clamp-2 text-sm text-muted-foreground">{greeting}</p>
-                    <LiveIndicator lastSeenAt={bot.last_seen_at} />
+                    <div className="mt-auto flex items-center justify-between">
+                      <LiveIndicator lastSeenAt={bot.last_seen_at} />
+                      <DeleteBotButton botId={bot.id} botName={bot.name} />
+                    </div>
                   </CardContent>
                 </Card>
               </Link>

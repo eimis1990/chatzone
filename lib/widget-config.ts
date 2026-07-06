@@ -81,6 +81,9 @@ export interface PublicBotConfig {
     backgroundImageOpacity?: number
     glassBubbles?: boolean
     sendIconUrl?: string
+    composerFieldColor?: string
+    composerBorderColor?: string
+    sendButtonColor?: string
     botBubbleColor?: string
     bubbleBorderColor?: string
     bubbleBorderWidth?: number
@@ -165,6 +168,9 @@ export function publicBotConfig(
       ...(config.theme.botBubbleColor ? { botBubbleColor: config.theme.botBubbleColor } : {}),
       ...(config.theme.backgroundImageUrl ? { backgroundImageUrl: config.theme.backgroundImageUrl } : {}),
       ...(config.theme.sendIconUrl ? { sendIconUrl: config.theme.sendIconUrl } : {}),
+      ...(config.theme.composerFieldColor ? { composerFieldColor: config.theme.composerFieldColor } : {}),
+      ...(config.theme.composerBorderColor ? { composerBorderColor: config.theme.composerBorderColor } : {}),
+      ...(config.theme.sendButtonColor ? { sendButtonColor: config.theme.sendButtonColor } : {}),
     },
     languages,
     defaultLanguage:

@@ -14,8 +14,11 @@ import {
   DialogTrigger,
   DialogFooter,
 } from '@/components/ui/dialog'
+import { GridLoader } from '@/components/ui/GridLoader'
 import { createBot } from '@/lib/actions/createBot'
 import { trackEvent } from '@/lib/analytics'
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
 interface CreateBotDialogProps {
   orgId: string
@@ -36,20 +39,26 @@ export function CreateBotDialog({ orgId, trigger }: CreateBotDialogProps) {
 
     setError(null)
     setLoading(true)
+    // Swap the dialog for the loader overlay immediately — no in-button state.
+    setOpen(false)
 
-    const res = await createBot(name)
+    // Creation is fast — hold the loader ~2s so the transition reads as
+    // deliberate rather than a flicker, then land on the new bot.
+    const [res] = await Promise.all([createBot(name), sleep(2000)])
 
     if (res.error || !res.id) {
-      setError(res.error ?? 'Failed to create bot. Please try again.')
+      // Bring the dialog back with the error so the user can retry.
       setLoading(false)
+      setError(res.error ?? 'Failed to create bot. Please try again.')
+      setOpen(true)
       return
     }
 
     trackEvent('bot_created', { orgId })
-    setOpen(false)
-    setName('')
+    // Keep `name` — the overlay shows it as its title until navigation lands.
     router.push(`/app/bots/${res.id}/configure`)
     router.refresh()
+    // Keep `loading` true — the overlay stays up until navigation unmounts us.
   }
 
   function handleOpenChange(next: boolean) {
@@ -63,7 +72,24 @@ export function CreateBotDialog({ orgId, trigger }: CreateBotDialogProps) {
   }
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
+    <>
+      {/* Creation overlay — compact white card with the grid-cube loader. */}
+      {loading && (
+        <div
+          className="fixed inset-0 z-[70] flex items-center justify-center bg-black/20 backdrop-blur-[2px] duration-200 animate-in fade-in-0"
+          role="status"
+          aria-label={`Creating ${name.trim()}`}
+        >
+          <div className="flex min-w-48 max-w-64 flex-col items-center rounded-2xl bg-white px-8 pb-9 pt-6 shadow-2xl duration-200 animate-in zoom-in-95">
+            <p className="max-w-full truncate text-base font-semibold text-gray-900">
+              {name.trim()}
+            </p>
+            <GridLoader size="sm" className="mt-7 h-auto" />
+          </div>
+        </div>
+      )}
+
+      <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger
         render={
           trigger ?? (
@@ -102,11 +128,12 @@ export function CreateBotDialog({ orgId, trigger }: CreateBotDialogProps) {
 
           <DialogFooter>
             <Button type="submit" disabled={loading || !name.trim()}>
-              {loading ? 'Creating…' : 'Create bot'}
+              Create bot
             </Button>
           </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>
+    </>
   )
 }
