@@ -95,10 +95,15 @@ export function GetStartedDialog({
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const submitRef = useRef<HTMLButtonElement>(null)
+  // Bot filters: a hidden field real users never see, and the time the form
+  // opened (instant submits are scripts, not people reading the dialog).
+  const [honeypot, setHoneypot] = useState('')
+  const openedAtRef = useRef(0)
 
   const handleOpenChange = (next: boolean) => {
     setOpen(next)
     if (!next) return
+    openedAtRef.current = Date.now()
     // A fresh visit after a completed signup starts back at the form.
     if (step === 'done') {
       setStep('form')
@@ -155,6 +160,8 @@ export function GetStartedDialog({
           company: cleanCompany,
           ...(site ? { website: site } : {}),
           source,
+          confirm_url: honeypot,
+          t: openedAtRef.current ? Date.now() - openedAtRef.current : undefined,
         }),
       })
       const data = (await res.json().catch(() => ({}))) as { ok?: boolean; error?: string }
@@ -226,10 +233,24 @@ export function GetStartedDialog({
                   required
                   autoComplete="organization"
                   maxLength={80}
-                  placeholder="e.g. Home by NB"
+                  placeholder="e.g. Saulės grožio studija"
                   value={company}
                   onChange={(e) => setCompany(e.target.value)}
                   className="h-11"
+                />
+              </div>
+
+              {/* Honeypot — invisible to people, irresistible to form bots. */}
+              <div className="sr-only" aria-hidden="true">
+                <label htmlFor={`${companyId}-confirm`}>Confirm URL</label>
+                <input
+                  id={`${companyId}-confirm`}
+                  type="text"
+                  name="confirm_url"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  value={honeypot}
+                  onChange={(e) => setHoneypot(e.target.value)}
                 />
               </div>
               <div className="flex flex-col gap-2">
