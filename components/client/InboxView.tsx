@@ -210,12 +210,12 @@ export function InboxView({
   const selectedStatus = selected?.handoff_status ?? 'bot'
 
   return (
-    <div className="flex min-h-0 flex-1 gap-4">
-      {/* Conversation list — full-width on mobile; hidden once a thread is open
-          (single-pane). Fixed side column at md+. */}
+    <div className="flex min-h-0 flex-1 gap-0 md:gap-4">
+      {/* Conversation list — full-bleed on mobile (no card border/radius);
+          bordered side column at md+. Hidden once a thread is open. */}
       <div
         className={cn(
-          'flex min-h-0 w-full flex-shrink-0 flex-col overflow-hidden rounded-xl border bg-card md:w-80',
+          'flex min-h-0 w-full flex-shrink-0 flex-col overflow-hidden border-0 bg-card md:w-80 md:rounded-xl md:border',
           selectedId && 'hidden md:flex',
         )}
       >
@@ -280,10 +280,10 @@ export function InboxView({
         </div>
       </div>
 
-      {/* Thread — hidden on mobile until a conversation is picked (single-pane). */}
+      {/* Thread — full-bleed on mobile; hidden until a conversation is picked. */}
       <div
         className={cn(
-          'flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-xl border bg-card',
+          'flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden border-0 bg-card md:rounded-xl md:border',
           !selectedId && 'hidden md:flex',
         )}
       >

@@ -99,8 +99,9 @@ export default async function OrgInboxPage() {
   }
 
   return (
-    <div className="flex h-full flex-col gap-4 overflow-hidden p-5">
-      <div className="flex-shrink-0">
+    <div className="flex h-full flex-col gap-0 overflow-hidden p-0 md:gap-4 md:p-5">
+      {/* Header is desktop-only; on mobile the list runs full-bleed. */}
+      <div className="hidden flex-shrink-0 md:block">
         <h1 className="text-lg font-semibold">Inbox</h1>
         <p className="text-sm text-muted-foreground">
           Take over live conversations across your bots. The bot pauses while you reply.

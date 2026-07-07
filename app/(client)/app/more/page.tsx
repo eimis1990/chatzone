@@ -19,7 +19,7 @@ export default async function MorePage() {
   const row = 'flex items-center justify-between gap-3 rounded-xl border bg-card px-4 py-3 transition-colors hover:bg-muted/40'
 
   return (
-    <div className="space-y-6 p-5">
+    <div className="flex min-h-full flex-col gap-6 p-5">
       <h1 className="text-lg font-semibold">More</h1>
 
       {bots.length > 0 && (
@@ -53,19 +53,20 @@ export default async function MorePage() {
       )}
 
       {/* Everything build-related lives on desktop. */}
-      <div className="flex items-start gap-3 rounded-xl border border-dashed bg-muted/30 p-4">
-        <MonitorIcon className="mt-0.5 size-5 shrink-0 text-muted-foreground" aria-hidden="true" />
-        <div className="text-sm">
-          <p className="font-medium">Set up on a computer</p>
-          <p className="mt-0.5 text-muted-foreground">
-            Configuring bots, knowledge, embedding, team and billing works best on the desktop
-            version at <span className="font-medium text-foreground">app.loqara.com</span>.
-          </p>
+      <div className="rounded-2xl border border-primary/20 bg-primary/5 p-5">
+        <div className="mb-3 flex size-10 items-center justify-center rounded-xl bg-primary/15 text-primary">
+          <MonitorIcon className="size-5" aria-hidden="true" />
         </div>
+        <p className="font-semibold">Set up on a computer</p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Configuring bots, knowledge, embedding, team and billing works best on the desktop
+          version at <span className="font-medium text-foreground">app.loqara.com</span>.
+        </p>
       </div>
 
-      <div className="space-y-3 border-t pt-5">
-        <p className="truncate px-1 text-sm text-muted-foreground" title={user.email ?? ''}>
+      {/* Account pinned to the bottom, centered above the tab bar. */}
+      <div className="mt-auto flex flex-col items-center gap-3 border-t pt-6 text-center">
+        <p className="max-w-full truncate text-sm text-muted-foreground" title={user.email ?? ''}>
           {user.email}
         </p>
         <SignOutButton />
