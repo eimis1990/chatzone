@@ -17,6 +17,7 @@ import type { CommerceProduct, OrderStatus } from '@/lib/commerce/types'
 import { fontStack } from '@/lib/fonts'
 import { readableTextColor, isLightColor } from '@/lib/utils'
 import { tintToward } from '@/lib/theme-extract'
+import { languageMeta } from '@/lib/i18n/languages'
 
 interface ChatWindowProps {
   config: PublicBotConfig
@@ -47,12 +48,6 @@ function generateId() {
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 // Header status while a live call is active.
-/** Flag + native name for the header language picker. */
-const LANG_META: Record<string, { flag: string; label: string }> = {
-  en: { flag: '🇬🇧', label: 'English' },
-  lt: { flag: '🇱🇹', label: 'Lietuvių' },
-}
-
 const VOICE_STATUS: Record<'en' | 'lt', Record<'connecting' | 'listening' | 'speaking', string>> = {
   en: { connecting: 'Connecting…', listening: 'Listening…', speaking: 'Speaking…' },
   lt: { connecting: 'Jungiamasi…', listening: 'Klausosi…', speaking: 'Kalba…' },
@@ -818,7 +813,7 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
               type="button"
               onClick={() => setLangMenuOpen((o) => !o)}
               disabled={callState !== 'idle'}
-              title={LANG_META[activeLang]?.label ?? activeLang}
+              title={languageMeta(activeLang).nativeLabel}
               aria-label={activeLang === 'lt' ? 'Pakeisti kalbą' : 'Change language'}
               aria-expanded={langMenuOpen}
               className="flex size-8 items-center justify-center text-base transition hover:brightness-90 disabled:opacity-50"
@@ -827,7 +822,7 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
                 borderRadius: `${navButtonRadius}px`,
               }}
             >
-              <span aria-hidden="true">{LANG_META[activeLang]?.flag ?? '🌐'}</span>
+              <span aria-hidden="true">{languageMeta(activeLang).flag}</span>
             </button>
             {langMenuOpen && (
               <>
@@ -850,8 +845,8 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
                         lang === activeLang ? 'font-semibold' : ''
                       }`}
                     >
-                      <span aria-hidden="true">{LANG_META[lang]?.flag ?? '🌐'}</span>
-                      <span className="flex-1">{LANG_META[lang]?.label ?? lang.toUpperCase()}</span>
+                      <span aria-hidden="true">{languageMeta(lang).flag}</span>
+                      <span className="flex-1">{languageMeta(lang).nativeLabel}</span>
                       {lang === activeLang && <span aria-hidden="true" className="text-xs">✓</span>}
                     </button>
                   ))}
