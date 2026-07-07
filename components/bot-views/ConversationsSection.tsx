@@ -163,8 +163,10 @@ export async function ConversationsSection({ botId }: { botId: string }) {
   }
 
   return (
-    <div className="flex h-full flex-col gap-4 overflow-hidden p-6">
-      <div className="flex-shrink-0">
+    <div className="flex h-full flex-col gap-0 overflow-hidden p-0 md:gap-4 md:p-6">
+      {/* Header is desktop-only; on mobile the list is full-bleed under the
+          back nav so it reads as an app screen, not a card. */}
+      <div className="hidden flex-shrink-0 md:block">
         <h2 className="text-lg font-semibold">Conversations</h2>
         <p className="text-sm text-muted-foreground">
           Browse chat transcripts and visitor interactions

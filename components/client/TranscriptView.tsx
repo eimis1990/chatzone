@@ -131,11 +131,11 @@ export function TranscriptView({ conversations, loadMessages, analyze }: Transcr
   const attentionCount = conversations.filter((c) => c.needs_attention).length
 
   return (
-    <div className="flex min-h-0 flex-1 gap-6">
-      {/* Conversation list — full-width on mobile; hidden once a transcript is
-          open (single-pane). Fixed side column at md+. */}
+    <div className="flex min-h-0 flex-1 gap-0 md:gap-6">
+      {/* Conversation list — full-bleed on mobile (no card border/radius); a
+          bordered side column at md+. Hidden once a transcript is open. */}
       <div
-        className={`flex min-h-0 w-full shrink-0 flex-col overflow-hidden rounded-lg border bg-card md:w-80 ${selectedId ? 'hidden md:flex' : ''}`}
+        className={`flex min-h-0 w-full shrink-0 flex-col overflow-hidden border-0 bg-card md:w-80 md:rounded-lg md:border ${selectedId ? 'hidden md:flex' : ''}`}
       >
         <div className="flex flex-shrink-0 items-center justify-between gap-2 border-b bg-muted/30 px-4 py-3">
           <p className="text-sm font-medium">
@@ -231,9 +231,10 @@ export function TranscriptView({ conversations, loadMessages, analyze }: Transcr
         )}
       </div>
 
-      {/* Transcript panel — hidden on mobile until a conversation is picked. */}
+      {/* Transcript panel — full-bleed on mobile; hidden until a conversation
+          is picked. Bordered card at md+. */}
       <div
-        className={`flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border bg-card ${!selectedId ? 'hidden md:flex' : ''}`}
+        className={`flex min-h-0 flex-1 flex-col overflow-hidden border-0 bg-card md:rounded-lg md:border ${!selectedId ? 'hidden md:flex' : ''}`}
       >
         {!selectedId ? (
           <div className="flex min-h-0 flex-1 items-center justify-center text-sm text-muted-foreground">
