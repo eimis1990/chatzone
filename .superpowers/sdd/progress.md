@@ -1,29 +1,24 @@
-# ChatbotZone Cycle 1 — Progress Ledger
+# Language Selection Feature — Progress Ledger
 
-Base commit: 4a58e08f264ae9d6829900bdb00443cfbb8f470f
-Branch: feat/cycle1-foundation
+Base commit: 02b337dccc1cbc2e8f3f03cf59d80d5ece70aa0d
+Branch: feat/language-selection
+Plan: docs/superpowers/plans/2026-07-07-language-selection.md
 
 ## Tasks
 (none complete yet)
-Task 0.1: complete (commit a4e8f6a, scaffold + vitest)
-Task 0.2: complete (commit, shadcn)
-Task 0.3: complete (commit, env + supabase clients)
-PHASE 0 COMPLETE
-Task 1.1/1.2/1.3: complete (migrations pushed to live project, RLS+match_chunks integration tests PASS)
-PHASE 1 COMPLETE & VERIFIED (project ref ucslcxscrgpcgnhnoano)
-Task 2.1: complete (auth guards + routeDecision, unit tested)
-Task 2.2: complete (middleware wiring)
-Task 4.2: complete (botConfig + invite + chat schemas, unit tested)
-Task 5.1: complete (chunker, unit tested)
-Task 5.2/5.3/5.4: complete (parsers, embeddings, pipeline + /api/ingest, storage bucket)
-Task 6.1/6.2: complete (retrieval, prompt, /api/chat streaming) + 9.1 rate limiter
-PHASES 5 & 6 backend COMPLETE (UI 5.5 + widget pending)
-Task 2.3/2.4: complete (login, reset, invites API+accept, owner seed script) — via subagent, reviewed
-Task 3.1/3.2/3.3: complete (owner panel) — subagent, verified in browser
-Task 4.1/4.3: complete (portal shell + configurator) — subagent
-Task 5.5: complete (KB manager UI) — subagent
-Task 7.1/7.2/7.3/7.4: complete (widget config, embed UI, loader, snippet) — subagent
-Task 8.1/8.2/8.3: complete (conversations, leads+CSV, analytics) — subagent
-Task 9.1/9.2/9.3: complete (rate limits, E2E, README/DEPLOY)
-PHASE 2-9 COMPLETE. Owner login + invite flow verified live in browser. RAG verified live.
-CYCLE 1 COMPLETE.
+Task 1: complete (commit 7c9fd40, review clean)
+  Minor (for final review): ChatWindow languageMeta() falls back to English for out-of-union codes vs old '🌐' fallback — cosmetic, only en/lt exist.
+Task 2: complete (commit ad27ad9, review clean)
+Task 3: complete (commit d373b7b, review clean)
+  Deviation from plan (reviewer-approved): clamp reorders primary-first ONLY when limit<configured.length, else config order passes through — keeps paid-plan order + pre-existing tests green. Plan's literal snippet would have reordered always.
+Task 4: complete (commits 77a299c + b05aa2a, review clean after comment fix)
+  Beyond brief (reviewer-approved): fixed lib/ai/prompt.ts contentFor fallback (real latent bug exposed by optional content.en). Important finding fixed: stale lib/types.ts comments.
+Task 5: complete (commit af1e0a9, review clean)
+Task 6: complete (commits 03d4870 + dd2125e, review clean after free-tier-lock fix)
+  Important fixed: free-tier controls now gate on entitlement + initial languages clamped to maxLanguages (downgrade-safe).
+ALL TASKS COMPLETE — pending final whole-branch review.
+Minor roll-up for final review:
+  - ChatWindow languageMeta() English fallback for out-of-union codes (cosmetic, only en/lt exist)
+  - tests/unit/botConfig.test.ts:132 stale comment references removed withEnabledLanguagesOnly
+  - Defense-in-depth: saveConfig does NOT clamp stored languages to maxLanguages (free bot could persist 2 langs on re-save; live widget still clamps via publicBotConfig, so visitor-safe)
+FINAL WHOLE-BRANCH REVIEW: Ready to merge — Yes (no Critical/Important). Minor #3 (stale comment) fixed in follow-up commit. Minor #1 (saveConfig server clamp) + informational (free re-save prunes non-primary content, vs spec §4 reversibility) left for user decision.

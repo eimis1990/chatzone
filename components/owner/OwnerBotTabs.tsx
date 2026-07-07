@@ -2,16 +2,17 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { SlidersHorizontalIcon, DatabaseIcon } from 'lucide-react'
+import { SlidersHorizontalIcon, DatabaseIcon, Code2Icon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-/** Configure / Knowledge tabs for the owner editing a client's bot. */
+/** Configure / Knowledge / Embed tabs for the owner editing a client's bot. */
 export function OwnerBotTabs({ orgId, botId }: { orgId: string; botId: string }) {
   const pathname = usePathname()
   const base = `/owner/clients/${orgId}/bots/${botId}`
   const tabs = [
     { label: 'Configure', href: `${base}/configure`, icon: SlidersHorizontalIcon },
     { label: 'Knowledge', href: `${base}/knowledge`, icon: DatabaseIcon },
+    { label: 'Embed', href: `${base}/embed`, icon: Code2Icon },
   ]
 
   return (

@@ -5,7 +5,7 @@ import { PartyPopperIcon, RadarIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { createBrowserClient } from '@/lib/supabase/browser'
 import { buildEmbedSnippet } from '@/lib/embed-snippet'
-import { SnippetCopy } from '@/app/(client)/app/bots/[botId]/embed/SnippetCopy'
+import { SnippetCopy } from '@/components/client/embed/SnippetCopy'
 
 const POLL_MS = 3000
 
