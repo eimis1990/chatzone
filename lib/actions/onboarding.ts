@@ -6,6 +6,7 @@ import { createServerClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { botConfigSchema } from '@/lib/validation/schemas'
 import { createBot } from '@/lib/actions/createBot'
+import { allowedDomainToHost } from '@/lib/widget-auth'
 import {
   templateNameFor,
   normalizeWebsiteUrl,
@@ -69,9 +70,21 @@ export async function startOnboardingBot(
     .single<Pick<Bot, 'id' | 'public_key' | 'config'>>()
   if (!bot) return { error: 'Bot not found after creation.' }
 
-  // Copy the chosen template's prompt into the bot. Clients can't read
-  // system_prompts (owner-only RLS), so the lookup uses the service client;
-  // the write still goes through the user's RLS-scoped client.
+  // Build the config patch: default the widget's allowed domain to the client's
+  // own site (so it can't be embedded elsewhere / rack up their quota), and copy
+  // the chosen prompt template. Only set allowedDomains when the client hasn't
+  // set one — never override an existing restriction.
+  const config: BotConfig = { ...bot.config }
+  let changed = false
+
+  const host = allowedDomainToHost(normalizeWebsiteUrl(input.websiteUrl) ?? '')
+  if (host && (bot.config.allowedDomains?.length ?? 0) === 0) {
+    config.allowedDomains = [host]
+    changed = true
+  }
+
+  // Prompt template: clients can't read system_prompts (owner-only RLS), so the
+  // lookup uses the service client; the write still goes through the user's client.
   const templateName = templateNameFor(input.businessType)
   if (templateName) {
     const svc = createServiceClient()
@@ -80,17 +93,17 @@ export async function startOnboardingBot(
       .select('id, content')
       .eq('name', templateName)
       .maybeSingle<{ id: string; content: string }>()
-
     if (template?.content) {
-      const config: BotConfig = {
-        ...bot.config,
-        systemPrompt: template.content,
-        systemPromptId: template.id,
-      }
-      const { error } = await supabase.from('bots').update({ config }).eq('id', bot.id)
-      if (error) return { error: error.message }
+      config.systemPrompt = template.content
+      config.systemPromptId = template.id
+      changed = true
     }
     // Missing template row is non-fatal — the bot keeps the default prompt.
+  }
+
+  if (changed) {
+    const { error } = await supabase.from('bots').update({ config }).eq('id', bot.id)
+    if (error) return { error: error.message }
   }
 
   return { id: bot.id, publicKey: bot.public_key }

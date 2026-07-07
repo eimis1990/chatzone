@@ -1,5 +1,19 @@
 import { describe, it, expect } from 'vitest'
-import { isOriginAllowed, originHost } from '@/lib/widget-auth'
+import { isOriginAllowed, originHost, allowedDomainToHost } from '@/lib/widget-auth'
+
+describe('allowedDomainToHost', () => {
+  it('normalizes full URLs, www, paths and ports to a bare host', () => {
+    expect(allowedDomainToHost('https://www.loqara.com/')).toBe('loqara.com')
+    expect(allowedDomainToHost('http://acme.lt/embed?x=1')).toBe('acme.lt')
+    expect(allowedDomainToHost('www.acme.lt')).toBe('acme.lt')
+    expect(allowedDomainToHost('acme.lt:3000/path')).toBe('acme.lt')
+    expect(allowedDomainToHost('  ACME.LT  ')).toBe('acme.lt')
+  })
+  it('returns null for empty entries', () => {
+    expect(allowedDomainToHost('')).toBeNull()
+    expect(allowedDomainToHost('   ')).toBeNull()
+  })
+})
 
 describe('originHost', () => {
   it('extracts the host from an origin', () => {
@@ -21,6 +35,13 @@ describe('isOriginAllowed', () => {
     expect(isOriginAllowed('https://acme.com', ['acme.com'])).toBe(true)
     expect(isOriginAllowed('https://www.acme.com', ['acme.com'])).toBe(true)
     expect(isOriginAllowed('https://acme.com', ['www.acme.com'])).toBe(true)
+  })
+
+  it('matches even when the domain was entered as a full URL (regression)', () => {
+    // The Configure field lets users paste a full URL; it must still match the
+    // bare origin host rather than silently blocking the widget.
+    expect(isOriginAllowed('https://www.loqara.com', ['https://www.loqara.com/'])).toBe(true)
+    expect(isOriginAllowed('https://loqara.com', ['https://www.loqara.com/'])).toBe(true)
   })
 
   it('rejects an unlisted host', () => {

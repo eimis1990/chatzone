@@ -1461,6 +1461,15 @@ export function ConfigForm({
               description="Restrict which websites can embed this widget. Leave empty to allow any domain."
             />}>
           <CardContent className="space-y-3">
+            {allowedDomainsField.fields.length === 0 && (
+              <div className="flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-800 dark:text-amber-300">
+                <ShieldIcon className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+                <span>
+                  Your widget can currently be embedded on <strong>any</strong> website. Add your
+                  domain to restrict it to your own site and protect your conversation usage.
+                </span>
+              </div>
+            )}
             {allowedDomainsField.fields.map((field, index) => (
               <div key={field.id} className="flex items-center gap-2">
                 <Input
@@ -1488,7 +1497,8 @@ export function ConfigForm({
               Add domain
             </Button>
             <p className="text-xs text-muted-foreground">
-              Not recommended to leave empty in production.
+              A bare domain works best (e.g. <code>example.com</code>); www and https:// are handled
+              automatically.
             </p>
           </CardContent>
         </CollapsibleSection>

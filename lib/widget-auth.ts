@@ -10,17 +10,41 @@ export function originHost(origin: string | null): string | null {
 }
 
 /**
+ * Reduce a stored allowed-domain entry to a bare host for comparison. Accepts
+ * whatever a user typed into the Configure field: a bare host ("acme.lt"), a
+ * host with www, or a full URL with scheme/path/port ("https://www.acme.lt/").
+ * Without this, a pasted full URL would never match the bare origin host and
+ * the allowlist would silently block the bot's own widget.
+ */
+export function allowedDomainToHost(entry: string): string | null {
+  const raw = (entry || '').trim().toLowerCase()
+  if (!raw) return null
+  let host = raw
+  if (raw.includes('://')) {
+    try {
+      host = new URL(raw).hostname
+    } catch {
+      return null
+    }
+  } else {
+    // Bare entry — drop any path, port, or query the user may have included.
+    host = raw.split('/')[0].split('?')[0].split(':')[0]
+  }
+  host = host.replace(/^www\./, '')
+  return host || null
+}
+
+/**
  * Whether a request origin is allowed for a bot. An empty allowlist means the
  * bot has not restricted domains yet, so all origins are permitted (useful
  * during setup); once domains are listed, the origin host must match one of
- * them (www-insensitive).
+ * them (www-insensitive, scheme/path-insensitive).
  */
 export function isOriginAllowed(origin: string | null, allowedDomains: string[]): boolean {
   if (allowedDomains.length === 0) return true
   const host = originHost(origin)
   if (!host) return false
-  const normalized = allowedDomains.map((d) => d.toLowerCase().replace(/^www\./, ''))
-  return normalized.includes(host)
+  return allowedDomains.some((d) => allowedDomainToHost(d) === host)
 }
 
 /** CORS headers permitting the given origin (or any during setup). */

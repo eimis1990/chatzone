@@ -57,11 +57,23 @@ export async function POST(req: Request) {
     return json({ error: 'Rate limit exceeded' }, 429)
   }
 
+  // A supplied conversation must belong to this bot (parity with events/poll);
+  // otherwise store the lead unlinked rather than persist a foreign id.
+  let linkedConversationId: string | null = null
+  if (conversationId) {
+    const { data: conv } = await svc
+      .from('conversations')
+      .select('id, bot_id')
+      .eq('id', conversationId)
+      .single<{ id: string; bot_id: string }>()
+    if (conv && conv.bot_id === bot.id) linkedConversationId = conversationId
+  }
+
   const { data: lead, error } = await svc
     .from('leads')
     .insert({
       bot_id: bot.id,
-      conversation_id: conversationId ?? null,
+      conversation_id: linkedConversationId,
       fields,
     })
     .select('id')
