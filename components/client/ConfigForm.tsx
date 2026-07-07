@@ -247,8 +247,25 @@ export function ConfigForm({
     if (cfg.showLanguageSelector === undefined) cfg.showLanguageSelector = false
     // Bots created before the working-hours field get the default on first edit.
     if (!cfg.businessHours) cfg.businessHours = { start: '08:00', end: '17:00' }
+
+    // Clamp to the plan entitlement so a bot downgraded since it was last saved
+    // (e.g. paid → free with 2 languages still stored) never loads with more
+    // languages selected than it's allowed. Mirrors the server-side clamp in
+    // publicBotConfig — leave the order untouched when nothing needs clamping.
+    const cfgLanguages = (cfg.languages as BotLanguage[] | undefined) ?? ['en']
+    if (maxLanguages < cfgLanguages.length) {
+      const cfgDefaultLanguage = cfg.defaultLanguage as BotLanguage | undefined
+      const primary =
+        cfgDefaultLanguage && cfgLanguages.includes(cfgDefaultLanguage)
+          ? cfgDefaultLanguage
+          : (cfgLanguages[0] ?? 'en')
+      const clamped = [primary, ...cfgLanguages.filter((l) => l !== primary)].slice(0, maxLanguages)
+      cfg.languages = clamped
+      if (!clamped.includes(cfg.defaultLanguage as BotLanguage)) cfg.defaultLanguage = clamped[0]
+      if (clamped.length < 2) cfg.showLanguageSelector = false
+    }
     return cfg as FormValues
-  }, [initialConfig])
+  }, [initialConfig, maxLanguages])
 
   const form = useForm<FormValues>({
     resolver: (values, context, options) =>
@@ -683,7 +700,7 @@ export function ConfigForm({
                     <Select
                       value={field.value ?? selectedLanguages[0] ?? 'en'}
                       onValueChange={field.onChange}
-                      disabled={selectedLanguages.length < 2}
+                      disabled={!canUseMultiple || selectedLanguages.length < 2}
                     >
                       <SelectTrigger className="w-full max-w-xs">
                         <SelectValue />
@@ -713,7 +730,7 @@ export function ConfigForm({
                       onCheckedChange={field.onChange}
                       id="showLanguageSelector"
                       size="sm"
-                      disabled={selectedLanguages.length < 2}
+                      disabled={!canUseMultiple || selectedLanguages.length < 2}
                     />
                   )}
                 />
