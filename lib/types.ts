@@ -204,13 +204,13 @@ export interface BotConfig {
     bubbleBorderWidth?: number
   }
   voice: VoiceConfig
-  /** Enabled languages. Always includes 'en'; the first entry is the default. */
+  /** Languages the bot offers visitors (at least one; first entry is the default). */
   languages: BotLanguage[]
   /** Widget shows a visitor-facing language picker (multilingual bots only). */
   showLanguageSelector?: boolean
   /** Language the widget opens in (must be one of `languages`; defaults to the first). */
   defaultLanguage?: BotLanguage
-  /** Per-language content. `en` is always present. */
+  /** Per-language content (required for each language in `languages[]`; not English-anchored). */
   content: Partial<Record<BotLanguage, LanguageContent>>
   systemPrompt: string
   /** Id of the reusable system_prompts library entry this bot uses (owner-managed).
