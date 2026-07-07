@@ -42,7 +42,7 @@ export async function GET(req: Request) {
     return json({ error: 'Origin not allowed' }, 403)
   }
 
-  // Apply plan entitlements (English-only / lead capture / badge) + the Voice
+  // Apply plan entitlements (language limit / lead capture / badge) + the Voice
   // add-on for the org.
   const { data: org } = await svc
     .from('organizations')

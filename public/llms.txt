@@ -12,7 +12,7 @@
 - One-line `<script>` embed — live in minutes, no engineers
 
 ## Pricing (EUR per month, billed monthly or annually)
-- Free — €0 — 100 conversations/mo, 1 bot, English, live handoff, basic analytics
+- Free — €0 — 100 conversations/mo, 1 bot, single language (your choice), live handoff, basic analytics
 - Starter — €149 — 1,500 conversations/mo, 2 bots, all languages, lead capture, product search & order lookup, remove Loqara badge
 - Growth — €249 — 4,000 conversations/mo, up to 5 bots, priority support, advanced analytics
 - Scale — €449 — 12,000 conversations/mo, unlimited bots, teams & roles, custom data retention, priority SLA

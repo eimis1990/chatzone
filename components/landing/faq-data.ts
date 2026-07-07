@@ -12,5 +12,5 @@ export const FAQ: [question: string, answer: string][] = [
   ['What if I hit my conversation limit?', 'Conversations already in progress keep going. New ones pause until you upgrade or the monthly limit resets — nothing is ever charged automatically, so there are no surprise overage bills.'],
   ['Which languages are supported?', 'English and Lithuanian out of the box, with more on the way — additional languages are included, not charged per language.'],
   ['Is my visitors’ data handled safely?', 'Yes — conversations are stored securely, isolated per account, and never used to train other customers’ bots. See our privacy policy for the full details on what we collect and for how long.'],
-  ['Is there a free plan?', 'Yes — the Free plan gives you 100 conversations a month, one bot, and live human handoff, with no credit card required. Paid plans start at €149/mo and add more conversations, extra bots, all languages, lead capture, and order lookup as you grow.'],
+  ['Is there a free plan?', 'Yes — the Free plan gives you 100 conversations a month, one bot, one language of your choice, and live human handoff, with no credit card required. Paid plans start at €149/mo and add more conversations, extra bots, all languages, lead capture, and order lookup as you grow.'],
 ]

@@ -30,7 +30,7 @@ export const PLANS: Record<Plan, PlanMeta> = {
     monthly: 0,
     conversations: 100,
     blurb: 'Try Loqara on your store.',
-    features: ['1 bot', 'English only', 'Live handoff to your team', 'Basic analytics'],
+    features: ['1 bot', 'Single language', 'Live handoff to your team', 'Basic analytics'],
     purchasable: false,
   },
   starter: {

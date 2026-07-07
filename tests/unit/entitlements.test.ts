@@ -3,7 +3,7 @@ import { entitlementsFor } from '@/lib/entitlements'
 import type { Plan } from '@/lib/types'
 
 describe('entitlementsFor — plan limits', () => {
-  it('Free: 1 bot, English only, no lead capture / badge / retention / teams', () => {
+  it('Free: 1 bot, single language, no lead capture / badge / retention / teams', () => {
     const e = entitlementsFor('free')
     expect(e.maxBots).toBe(1)
     expect(e.maxLanguages).toBe(1)
