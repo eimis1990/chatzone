@@ -158,14 +158,21 @@ const maxedConfig: BotConfig = {
 }
 
 describe('publicBotConfig — plan entitlements gating', () => {
-  it('Free plan: English only, no lead capture, badge shown', () => {
+  it('Free plan: clamps to the chosen primary language (may be non-English)', () => {
     const pub = publicBotConfig(maxedConfig, entitlementsFor('free'))
-    expect(pub.languages).toEqual(['en'])
-    expect(pub.defaultLanguage).toBe('en') // lt default falls back to en
-    expect(pub.content.lt).toBeUndefined()
-    expect(pub.content.en).toBeDefined()
+    expect(pub.languages).toEqual(['lt']) // maxedConfig.defaultLanguage === 'lt'
+    expect(pub.defaultLanguage).toBe('lt')
+    expect(pub.content.lt).toBeDefined()
+    expect(pub.content.en).toBeUndefined()
+    expect(pub.showLanguageSelector).toBe(false)
     expect(pub.leadCapture.enabled).toBe(false)
     expect(pub.hideBadge).toBe(false)
+  })
+
+  it('Free plan with an English-only bot still serves English', () => {
+    const pub = publicBotConfig(fullConfig, entitlementsFor('free'))
+    expect(pub.languages).toEqual(['en'])
+    expect(pub.defaultLanguage).toBe('en')
   })
 
   it('Starter plan: all languages, lead capture, badge hidden', () => {

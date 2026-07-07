@@ -124,10 +124,20 @@ export function publicBotConfig(
   entitlements?: Entitlements,
   voiceAddon?: boolean,
 ): PublicBotConfig {
-  // Plan-gating: free plans are English-only and can't capture leads or hide
-  // the badge. Enforced here, the single public entry point for the widget.
+  // Plan-gating: cap the number of visitor languages at the plan's limit,
+  // keeping the bot's chosen primary first so a single-language plan serves
+  // exactly that language (not a hardcoded English). Below the limit, leave
+  // the configured order untouched (no gating in effect).
+  const configured = config.languages ?? ['en']
+  const limit = entitlements?.maxLanguages ?? Infinity
+  const primary =
+    config.defaultLanguage && configured.includes(config.defaultLanguage)
+      ? config.defaultLanguage
+      : (configured[0] ?? 'en')
   const languages: BotLanguage[] =
-    entitlements && !entitlements.allLanguages ? ['en'] : (config.languages ?? ['en'])
+    limit >= configured.length
+      ? configured
+      : [primary, ...configured.filter((l) => l !== primary)].slice(0, limit)
   const leadCaptureEnabled =
     config.leadCapture.enabled && (entitlements ? entitlements.leadCapture : true)
   // The live voice CALL is a paid add-on. When the add-on is explicitly absent
