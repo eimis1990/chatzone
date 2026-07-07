@@ -2,13 +2,15 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { requireRole } from '@/lib/auth/guards'
 import { createServerClient } from '@/lib/supabase/server'
-import { createServiceClient } from '@/lib/supabase/service'
 import { StatCard } from '@/components/client/charts/StatCard'
 import { LiveIndicator } from '@/components/LiveIndicator'
 import { Badge } from '@/components/ui/badge'
 import { buttonVariants } from '@/components/ui/button'
 import { formatDistanceToNow } from '@/lib/date-utils'
 import { SuspendToggle } from '@/components/owner/SuspendToggle'
+import { CreateBotDialog } from '@/components/client/CreateBotDialog'
+import { Button } from '@/components/ui/button'
+import { createBotForOrg } from './actions'
 import type { Bot, Invite } from '@/lib/types'
 
 interface OrgStatRow {
@@ -29,6 +31,12 @@ export default async function ClientDetailPage({
 }) {
   await requireRole('owner')
   const { orgId } = await params
+
+  // Inline server action bound to this client's org, passed to the create dialog.
+  async function createBot(name: string) {
+    'use server'
+    return createBotForOrg(orgId, name)
+  }
 
   const supabase = await createServerClient()
 
@@ -97,9 +105,24 @@ export default async function ClientDetailPage({
 
       {/* Bots list */}
       <div className="space-y-4">
-        <h2 className="text-lg font-semibold">Bots</h2>
+        <div className="flex items-center justify-between gap-4">
+          <h2 className="text-lg font-semibold">Bots</h2>
+          <CreateBotDialog
+            orgId={orgId}
+            action={createBot}
+            configureBase={`/owner/clients/${orgId}/bots`}
+            trigger={
+              <Button variant="outline" size="sm">
+                New bot
+              </Button>
+            }
+          />
+        </div>
         {botRows.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No bots in this organisation yet.</p>
+          <p className="text-sm text-muted-foreground">
+            No bots in this organisation yet. Use <span className="font-medium">New bot</span> to
+            create one for this client, then configure it.
+          </p>
         ) : (
           <div className="divide-y overflow-hidden rounded-xl border bg-card shadow-sm">
             {botRows.map((bot) => (

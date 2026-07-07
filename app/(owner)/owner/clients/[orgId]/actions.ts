@@ -2,6 +2,7 @@
 
 import { requireRole } from '@/lib/auth/guards'
 import { createServiceClient } from '@/lib/supabase/service'
+import { createBotInOrg } from '@/lib/bots/create'
 import type { OrgStatus } from '@/lib/types'
 
 /**
@@ -25,4 +26,17 @@ export async function toggleOrgStatus(
   if (error) {
     throw new Error(`Failed to update organisation status: ${error.message}`)
   }
+}
+
+/**
+ * Create a bot for a client org on the client's behalf (owner "done-for-you"
+ * setup) — used when a client accepted their invite but never created a first
+ * bot. Owner-only; enforces the client plan's bot limit like the client flow.
+ */
+export async function createBotForOrg(
+  orgId: string,
+  name: string,
+): Promise<{ id?: string; error?: string }> {
+  await requireRole('owner')
+  return createBotInOrg(orgId, name)
 }

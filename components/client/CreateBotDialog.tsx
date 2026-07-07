@@ -24,9 +24,22 @@ interface CreateBotDialogProps {
   orgId: string
   /** Custom trigger element. Falls back to the default "Create BOT" button. */
   trigger?: React.ReactElement
+  /**
+   * Server action that creates the bot and returns its id. Defaults to the
+   * client action (own org). The owner console passes a bound action that
+   * creates the bot for a client org instead.
+   */
+  action?: (name: string) => Promise<{ id?: string; error?: string }>
+  /** Base path for the post-create configure redirect. Default: /app/bots. */
+  configureBase?: string
 }
 
-export function CreateBotDialog({ orgId, trigger }: CreateBotDialogProps) {
+export function CreateBotDialog({
+  orgId,
+  trigger,
+  action = createBot,
+  configureBase = '/app/bots',
+}: CreateBotDialogProps) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [name, setName] = useState('')
@@ -44,7 +57,7 @@ export function CreateBotDialog({ orgId, trigger }: CreateBotDialogProps) {
 
     // Creation is fast — hold the loader ~2s so the transition reads as
     // deliberate rather than a flicker, then land on the new bot.
-    const [res] = await Promise.all([createBot(name), sleep(2000)])
+    const [res] = await Promise.all([action(name), sleep(2000)])
 
     if (res.error || !res.id) {
       // Bring the dialog back with the error so the user can retry.
@@ -56,7 +69,7 @@ export function CreateBotDialog({ orgId, trigger }: CreateBotDialogProps) {
 
     trackEvent('bot_created', { orgId })
     // Keep `name` — the overlay shows it as its title until navigation lands.
-    router.push(`/app/bots/${res.id}/configure`)
+    router.push(`${configureBase}/${res.id}/configure`)
     router.refresh()
     // Keep `loading` true — the overlay stays up until navigation unmounts us.
   }
