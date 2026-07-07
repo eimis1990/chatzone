@@ -129,7 +129,7 @@ describe('botConfigSchema', () => {
 // reverted on refresh. Root cause — RHF materialized a half-built content.lt
 // (greeting === undefined) when the Lithuanian field array mounted, and the form
 // schema validated it strictly even on an English-only bot, silently blocking
-// Save. The fix (withEnabledLanguagesOnly) drops content for disabled languages.
+// Save. The fix (normalizeLanguageSelection) drops content for unselected languages.
 describe('botConfigFormSchema — per-language content', () => {
   const enContent = { greeting: 'Hi', suggestedQuestions: [], fallbackMessage: 'x' }
 
