@@ -19,9 +19,11 @@ export function defaultLanguage(config: BotConfig): BotLanguage {
   return config.languages?.[0] ?? 'en'
 }
 
+const EMPTY_CONTENT: LanguageContent = { greeting: '', suggestedQuestions: [], fallbackMessage: '' }
+
 /** Resolve content for a language, falling back to English then to the first available. */
 export function contentFor(config: BotConfig, lang: BotLanguage): LanguageContent {
-  return config.content[lang] ?? config.content.en
+  return config.content[lang] ?? config.content.en ?? Object.values(config.content)[0] ?? EMPTY_CONTENT
 }
 
 /** Builds the grounding system prompt (persona + language + retrieved context). */

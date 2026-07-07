@@ -38,7 +38,7 @@ describe('buildAgentConfig', () => {
   it('maps the bot config to a v3 conversational agent with a built-in LLM', () => {
     const bot = makeBot()
     const cfg = buildAgentConfig(bot)
-    expect(cfg.conversation_config.agent.first_message).toBe(bot.config.content.en.greeting)
+    expect(cfg.conversation_config.agent.first_message).toBe(bot.config.content.en!.greeting)
     expect(cfg.conversation_config.agent.language).toBe('en')
     // Defaults to the strong voice LLM when no llmModel is set.
     expect(DEFAULT_VOICE_LLM).toBe('gpt-4o')

@@ -67,8 +67,8 @@ describe('botConfigSchema', () => {
       voice: { voiceId: 'v123' },
     })
     expect(parsed.languages).toEqual(['en'])
-    expect(parsed.content.en.greeting).toBe('Legacy hi')
-    expect(parsed.content.en.suggestedQuestions).toEqual(['q1'])
+    expect(parsed.content.en!.greeting).toBe('Legacy hi')
+    expect(parsed.content.en!.suggestedQuestions).toEqual(['q1'])
     expect(parsed.voice.voices.en).toBe('v123')
   })
 
@@ -153,5 +153,43 @@ describe('botConfigFormSchema — per-language content', () => {
         content: { en: enContent },
       }),
     ).not.toThrow()
+  })
+})
+
+describe('botConfigSchema — language rules', () => {
+  const base = {
+    displayName: 'Bot',
+    systemPrompt: 'You are helpful.',
+  }
+
+  it('accepts a Lithuanian-only bot (no English content)', () => {
+    const parsed = botConfigSchema.parse({
+      ...base,
+      languages: ['lt'],
+      defaultLanguage: 'lt',
+      content: { lt: { greeting: 'Labas!', suggestedQuestions: [], fallbackMessage: 'Ne.' } },
+    })
+    expect(parsed.languages).toEqual(['lt'])
+    expect(parsed.content.en).toBeUndefined()
+    expect(parsed.content.lt?.greeting).toBe('Labas!')
+  })
+
+  it('rejects an enabled language with no content', () => {
+    const res = botConfigSchema.safeParse({
+      ...base,
+      languages: ['en', 'lt'],
+      content: { en: { greeting: 'Hi', suggestedQuestions: [], fallbackMessage: 'No.' } },
+    })
+    expect(res.success).toBe(false)
+  })
+
+  it('rejects a primary language that is not enabled', () => {
+    const res = botConfigSchema.safeParse({
+      ...base,
+      languages: ['en'],
+      defaultLanguage: 'lt',
+      content: { en: { greeting: 'Hi', suggestedQuestions: [], fallbackMessage: 'No.' } },
+    })
+    expect(res.success).toBe(false)
   })
 })

@@ -211,7 +211,7 @@ export interface BotConfig {
   /** Language the widget opens in (must be one of `languages`; defaults to the first). */
   defaultLanguage?: BotLanguage
   /** Per-language content. `en` is always present. */
-  content: Partial<Record<BotLanguage, LanguageContent>> & { en: LanguageContent }
+  content: Partial<Record<BotLanguage, LanguageContent>>
   systemPrompt: string
   /** Id of the reusable system_prompts library entry this bot uses (owner-managed).
    *  When set, `systemPrompt` holds a snapshot of that entry's content. */

@@ -154,8 +154,10 @@ export const botConfigFormSchema = z.object({
   // Show the widget's visitor-facing language picker (multilingual bots only).
   // Off = the widget stays locked to defaultLanguage.
   showLanguageSelector: z.boolean().default(false),
+  // Per-language content. All optional at the field level; botConfigSchema's
+  // superRefine requires content for each language in `languages[]`.
   content: z.object({
-    en: languageContentSchema,
+    en: languageContentSchema.optional(),
     lt: languageContentSchema.optional(),
   }),
   systemPrompt: z.string().min(1).max(SYSTEM_PROMPT_MAX),
@@ -231,6 +233,14 @@ export const botConfigSchema = z
           path: ['content', lang],
         })
       }
+    }
+    // Primary language must be one of the enabled languages.
+    if (cfg.defaultLanguage && !cfg.languages.includes(cfg.defaultLanguage)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Primary language must be one of the enabled languages',
+        path: ['defaultLanguage'],
+      })
     }
   })
 

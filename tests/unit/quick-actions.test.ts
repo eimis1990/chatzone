@@ -47,9 +47,9 @@ describe('suggestedQuestionSchema — typed actions', () => {
         },
       },
     })
-    expect(parsed.content.en.suggestedQuestions).toHaveLength(3)
-    expect(parsed.content.en.suggestedQuestions[1]).toMatchObject({ action: 'handoff' })
-    expect(parsed.content.en.suggestedQuestions[2]).toMatchObject({ action: 'lead' })
+    expect(parsed.content.en!.suggestedQuestions).toHaveLength(3)
+    expect(parsed.content.en!.suggestedQuestions[1]).toMatchObject({ action: 'handoff' })
+    expect(parsed.content.en!.suggestedQuestions[2]).toMatchObject({ action: 'lead' })
   })
 })
 
@@ -126,7 +126,7 @@ const baseConfig: BotConfig = {
 describe('publicBotConfig — quick-action pass-through', () => {
   it('passes the action field through per language', () => {
     const pub = publicBotConfig(baseConfig)
-    expect(pub.content.en?.suggestedQuestions).toEqual(baseConfig.content.en.suggestedQuestions)
+    expect(pub.content.en?.suggestedQuestions).toEqual(baseConfig.content.en!.suggestedQuestions)
     expect(pub.content.lt?.suggestedQuestions?.[0]).toMatchObject({ action: 'handoff' })
   })
 })
