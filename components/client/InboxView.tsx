@@ -9,6 +9,7 @@ import {
   HandIcon,
   RefreshCwIcon,
   CircleDotIcon,
+  ChevronLeftIcon,
 } from 'lucide-react'
 import { createBrowserClient } from '@/lib/supabase/browser'
 import { Button } from '@/components/ui/button'
@@ -210,8 +211,14 @@ export function InboxView({
 
   return (
     <div className="flex min-h-0 flex-1 gap-4">
-      {/* Conversation list */}
-      <div className="flex w-80 min-h-0 flex-shrink-0 flex-col overflow-hidden rounded-xl border bg-card">
+      {/* Conversation list — full-width on mobile; hidden once a thread is open
+          (single-pane). Fixed side column at md+. */}
+      <div
+        className={cn(
+          'flex min-h-0 w-full flex-shrink-0 flex-col overflow-hidden rounded-xl border bg-card md:w-80',
+          selectedId && 'hidden md:flex',
+        )}
+      >
         <div className="flex flex-shrink-0 items-center justify-between gap-2 border-b p-3">
           <div className="flex gap-1">
             {(['open', 'resolved', 'all'] as Filter[]).map((f) => (
@@ -273,8 +280,13 @@ export function InboxView({
         </div>
       </div>
 
-      {/* Thread */}
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-xl border bg-card">
+      {/* Thread — hidden on mobile until a conversation is picked (single-pane). */}
+      <div
+        className={cn(
+          'flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-xl border bg-card',
+          !selectedId && 'hidden md:flex',
+        )}
+      >
         {!selected ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-2 text-muted-foreground">
             <HeadsetIcon className="size-8 opacity-40" />
@@ -283,8 +295,16 @@ export function InboxView({
         ) : (
           <>
             {/* Thread header + controls */}
-            <div className="flex flex-shrink-0 items-center justify-between gap-2 border-b p-3">
-              <div className="flex items-center gap-2">
+            <div className="flex flex-shrink-0 flex-wrap items-center justify-between gap-2 border-b p-3">
+              <div className="flex min-w-0 items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setSelectedId(null)}
+                  aria-label="Back to list"
+                  className="-ml-1 shrink-0 text-muted-foreground hover:text-foreground md:hidden"
+                >
+                  <ChevronLeftIcon className="size-5" />
+                </button>
                 <CircleDotIcon
                   className={cn(
                     'size-4',
