@@ -29,7 +29,8 @@ export interface InboxItem {
 type Filter = 'open' | 'resolved' | 'all'
 
 interface InboxViewProps {
-  botId: string
+  /** Scope the realtime channel to one bot; omit for a cross-bot (org) inbox. */
+  botId?: string | null
   initialList: InboxItem[]
   loadList: () => Promise<InboxItem[]>
   loadThread: (conversationId: string) => Promise<Message[]>
@@ -87,7 +88,10 @@ export function InboxView({
     return true
   })
 
-  // Realtime: refresh the list when any conversation for this bot changes.
+  // Realtime: refresh the list when a relevant conversation changes. With a
+  // botId we filter to that bot; without one (cross-bot org inbox) we listen to
+  // all conversation changes — RLS still limits payloads to the user's orgs,
+  // and the poll below covers any gaps.
   useEffect(() => {
     const supabase = createBrowserClient()
     let cancelled = false
@@ -96,10 +100,15 @@ export function InboxView({
       await supabase.auth.getSession()
       if (cancelled) return
       channel = supabase
-        .channel(`inbox:${botId}`)
+        .channel(botId ? `inbox:${botId}` : 'inbox:org')
         .on(
           'postgres_changes',
-          { event: '*', schema: 'public', table: 'conversations', filter: `bot_id=eq.${botId}` },
+          {
+            event: '*',
+            schema: 'public',
+            table: 'conversations',
+            ...(botId ? { filter: `bot_id=eq.${botId}` } : {}),
+          },
           () => {
             refresh()
           },

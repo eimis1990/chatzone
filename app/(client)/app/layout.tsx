@@ -1,6 +1,8 @@
 import { requireRole, getUserOrgIds } from '@/lib/auth/guards'
 import { createServerClient } from '@/lib/supabase/server'
 import { AppSidebar, type BotLite } from '@/components/client/AppSidebar'
+import { MobileTabBar } from '@/components/client/MobileTabBar'
+import { MobileTopBar } from '@/components/client/MobileTopBar'
 import { Toaster } from '@/components/ui/sonner'
 
 export default async function ClientLayout({
@@ -39,16 +41,24 @@ export default async function ClientLayout({
     }
   }
 
+  // Total across bots — drives the mobile Inbox tab badge.
+  const inboxTotal = bots.reduce((sum, b) => sum + (b.inboxCount ?? 0), 0)
+
   // The whole shell carries the green mesh; the content is a white rounded card
   // floating on top, with the mesh showing through the gutter around it.
+  // Below md: the sidebar becomes a bottom tab bar + top bar (mobile portal).
   return (
-    <div className="relative isolate flex h-svh overflow-hidden bg-sidebar-mesh">
+    <div className="relative isolate flex h-svh flex-col overflow-hidden bg-sidebar-mesh md:flex-row">
       {/* Decorative grid fading up from the bottom of the dark shell */}
       <div className="shell-grid pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-[42vh]" aria-hidden="true" />
-      <AppSidebar bots={bots} userEmail={user.email ?? ''} />
-      <main className="flex-1 min-h-0 min-w-0 m-3 overflow-y-auto rounded-2xl bg-background shadow-sm">
+      <div className="hidden md:flex">
+        <AppSidebar bots={bots} userEmail={user.email ?? ''} />
+      </div>
+      <MobileTopBar />
+      <main className="min-h-0 min-w-0 flex-1 overflow-y-auto bg-background pb-20 md:m-3 md:rounded-2xl md:pb-0 md:shadow-sm">
         {children}
       </main>
+      <MobileTabBar inboxCount={inboxTotal} />
       <Toaster />
     </div>
   )

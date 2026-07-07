@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { PlusIcon, SettingsIcon, SparklesIcon, ArrowRightIcon, ZapIcon } from 'lucide-react'
+import { PlusIcon, SettingsIcon, SparklesIcon, ArrowRightIcon, ZapIcon, BarChart3Icon, MonitorIcon } from 'lucide-react'
 import { requireRole, getUserOrgIds } from '@/lib/auth/guards'
 import { createServerClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
@@ -48,15 +48,30 @@ export default async function BotsPage() {
   }
 
   return (
-    <div className="max-w-6xl space-y-6 p-6">
+    <div className="max-w-6xl space-y-6 p-4 md:p-6">
       <div>
         <h1 className="text-lg font-semibold">Home</h1>
         <p className="text-sm text-muted-foreground">Create and manage your AI chatbots.</p>
       </div>
 
-      {/* First-run: guided onboarding front and center (bots exist → normal grid). */}
+      {/* Zero-bots on mobile: bot creation is a desktop job, so point them there. */}
       {orgId && bots.length === 0 && (
-        <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-primary/10 via-background to-background p-8">
+        <div className="flex items-start gap-3 rounded-xl border border-dashed bg-muted/30 p-4 md:hidden">
+          <MonitorIcon className="mt-0.5 size-5 shrink-0 text-muted-foreground" aria-hidden="true" />
+          <div className="text-sm">
+            <p className="font-medium">Create your first bot on a computer</p>
+            <p className="mt-0.5 text-muted-foreground">
+              Setting up a bot works best on the desktop version at{' '}
+              <span className="font-medium text-foreground">app.loqara.com</span>. Once it&apos;s live,
+              monitor and reply from here.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* First-run: guided onboarding front and center (desktop only). */}
+      {orgId && bots.length === 0 && (
+        <div className="relative hidden overflow-hidden rounded-2xl border bg-gradient-to-br from-primary/10 via-background to-background p-8 md:block">
           <div className="max-w-xl">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
               <SparklesIcon className="size-3.5" />
@@ -123,14 +138,15 @@ export default async function BotsPage() {
       )}
 
       {bots.length > 0 && (
-      <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 md:gap-5 xl:grid-cols-3">
         {orgId && (
+          // Creating a bot is a desktop (build) task — hide the tile on mobile.
           <CreateBotDialog
             orgId={orgId}
             trigger={
               <button
                 type="button"
-                className="group flex h-full min-h-[152px] w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border bg-card/40 text-muted-foreground transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="group hidden h-full min-h-[152px] w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border bg-card/40 text-muted-foreground transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-ring md:flex"
               >
                 <span className="flex size-11 items-center justify-center rounded-lg border border-dashed border-current">
                   <PlusIcon className="size-5" />
@@ -149,60 +165,66 @@ export default async function BotsPage() {
             // text the same way the chat widget does.
             const primaryColor = bot.config.theme?.primaryColor ?? '#4f46e5'
             const isActive = bot.status === 'active'
-            return (
-              <Link
-                key={bot.id}
-                href={`/app/bots/${bot.id}/configure`}
-                className="group block focus:outline-none"
-              >
-                <Card className="flex h-full flex-col transition-all group-hover:-translate-y-0.5 group-hover:shadow-md group-focus-visible:ring-2 group-focus-visible:ring-ring">
-                  <CardHeader>
-                    <div className="flex items-start gap-3">
-                      {avatar ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={avatar}
-                          alt=""
-                          className="size-11 shrink-0 rounded-lg object-cover ring-1 ring-black/5"
-                        />
-                      ) : (
-                        <div className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-lg font-bold text-primary">
-                          {bot.name.charAt(0).toUpperCase()}
-                        </div>
-                      )}
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-start justify-between gap-2">
-                          <CardTitle className="line-clamp-1">{bot.name}</CardTitle>
-                          <Badge
-                            variant={isActive ? 'default' : 'secondary'}
-                            className="shrink-0 capitalize"
-                            style={
-                              isActive
-                                ? { backgroundColor: primaryColor, color: readableTextColor(primaryColor) }
-                                : undefined
-                            }
-                          >
-                            {bot.status}
-                          </Badge>
-                        </div>
-                        <CardDescription className="mt-0.5 flex items-center gap-1 text-xs">
-                          <SettingsIcon className="size-3" />
-                          Configure
-                        </CardDescription>
+            // Same card, two tap targets: Configure on desktop (build), Analytics
+            // on mobile (monitor). Only one link is visible per breakpoint.
+            const card = (Icon: typeof SettingsIcon, label: string) => (
+              <Card className="flex h-full flex-col transition-all group-hover:-translate-y-0.5 group-hover:shadow-md group-focus-visible:ring-2 group-focus-visible:ring-ring">
+                <CardHeader>
+                  <div className="flex items-start gap-3">
+                    {avatar ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={avatar}
+                        alt=""
+                        className="size-11 shrink-0 rounded-lg object-cover ring-1 ring-black/5"
+                      />
+                    ) : (
+                      <div className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-lg font-bold text-primary">
+                        {bot.name.charAt(0).toUpperCase()}
                       </div>
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-start justify-between gap-2">
+                        <CardTitle className="line-clamp-1">{bot.name}</CardTitle>
+                        <Badge
+                          variant={isActive ? 'default' : 'secondary'}
+                          className="shrink-0 capitalize"
+                          style={
+                            isActive
+                              ? { backgroundColor: primaryColor, color: readableTextColor(primaryColor) }
+                              : undefined
+                          }
+                        >
+                          {bot.status}
+                        </Badge>
+                      </div>
+                      <CardDescription className="mt-0.5 flex items-center gap-1 text-xs">
+                        <Icon className="size-3" />
+                        {label}
+                      </CardDescription>
                     </div>
-                  </CardHeader>
-                  {/* Greeting grows; the status + delete row pins to the card bottom
-                      so short and long greetings align across the grid. */}
-                  <CardContent className="flex flex-1 flex-col gap-3">
-                    <p className="line-clamp-2 text-sm text-muted-foreground">{greeting}</p>
-                    <div className="mt-auto flex items-center justify-between">
-                      <LiveIndicator lastSeenAt={bot.last_seen_at} />
-                      <DeleteBotButton botId={bot.id} botName={bot.name} />
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
+                  </div>
+                </CardHeader>
+                {/* Greeting grows; the status + delete row pins to the card bottom
+                    so short and long greetings align across the grid. */}
+                <CardContent className="flex flex-1 flex-col gap-3">
+                  <p className="line-clamp-2 text-sm text-muted-foreground">{greeting}</p>
+                  <div className="mt-auto flex items-center justify-between">
+                    <LiveIndicator lastSeenAt={bot.last_seen_at} />
+                    <DeleteBotButton botId={bot.id} botName={bot.name} />
+                  </div>
+                </CardContent>
+              </Card>
+            )
+            return (
+              <div key={bot.id}>
+                <Link href={`/app/bots/${bot.id}/configure`} className="group hidden focus:outline-none md:block">
+                  {card(SettingsIcon, 'Configure')}
+                </Link>
+                <Link href={`/app/bots/${bot.id}/analytics`} className="group block focus:outline-none md:hidden">
+                  {card(BarChart3Icon, 'View analytics')}
+                </Link>
+              </div>
             )
           })}
       </div>
