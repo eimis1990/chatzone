@@ -42,7 +42,7 @@ export default async function MobileLeadsPage() {
   const leads = (rawLeads ?? []) as Lead[]
 
   return (
-    <div className="space-y-4 p-4">
+    <div className="space-y-4 p-5">
       <div>
         <h1 className="text-lg font-semibold">Leads</h1>
         <p className="text-sm text-muted-foreground">

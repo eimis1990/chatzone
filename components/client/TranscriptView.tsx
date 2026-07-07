@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { CopyIcon, CheckIcon, PhoneIcon, MessageSquareIcon } from 'lucide-react'
+import { CopyIcon, CheckIcon, PhoneIcon, MessageSquareIcon, ChevronLeftIcon } from 'lucide-react'
 import { formatDistanceToNow } from '@/lib/date-utils'
 import type { Conversation, ConversationChannel, Message } from '@/lib/types'
 
@@ -129,8 +129,11 @@ export function TranscriptView({ conversations, loadMessages, analyze }: Transcr
 
   return (
     <div className="flex min-h-0 flex-1 gap-6">
-      {/* Conversation list */}
-      <div className="flex w-80 min-h-0 shrink-0 flex-col overflow-hidden rounded-lg border bg-card">
+      {/* Conversation list — full-width on mobile; hidden once a transcript is
+          open (single-pane). Fixed side column at md+. */}
+      <div
+        className={`flex min-h-0 w-full shrink-0 flex-col overflow-hidden rounded-lg border bg-card md:w-80 ${selectedId ? 'hidden md:flex' : ''}`}
+      >
         <div className="flex flex-shrink-0 items-center justify-between gap-2 border-b bg-muted/30 px-4 py-3">
           <p className="text-sm font-medium">
             {visible.length} conversation{visible.length !== 1 ? 's' : ''}
@@ -222,8 +225,10 @@ export function TranscriptView({ conversations, loadMessages, analyze }: Transcr
         )}
       </div>
 
-      {/* Transcript panel */}
-      <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border bg-card">
+      {/* Transcript panel — hidden on mobile until a conversation is picked. */}
+      <div
+        className={`flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border bg-card ${!selectedId ? 'hidden md:flex' : ''}`}
+      >
         {!selectedId ? (
           <div className="flex min-h-0 flex-1 items-center justify-center text-sm text-muted-foreground">
             Select a conversation to view its transcript
@@ -232,6 +237,14 @@ export function TranscriptView({ conversations, loadMessages, analyze }: Transcr
           <>
             <div className="flex flex-shrink-0 items-center justify-between gap-2 border-b bg-muted/30 px-4 py-3">
               <div className="flex min-w-0 items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setSelectedId(null)}
+                  aria-label="Back to list"
+                  className="-ml-1 shrink-0 text-muted-foreground hover:text-foreground md:hidden"
+                >
+                  <ChevronLeftIcon className="size-5" />
+                </button>
                 <span className="truncate font-mono text-sm font-medium">
                   {selected?.visitor_id}
                 </span>

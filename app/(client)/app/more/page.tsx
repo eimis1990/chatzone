@@ -19,7 +19,7 @@ export default async function MorePage() {
   const row = 'flex items-center justify-between gap-3 rounded-xl border bg-card px-4 py-3 transition-colors hover:bg-muted/40'
 
   return (
-    <div className="space-y-6 p-4">
+    <div className="space-y-6 p-5">
       <h1 className="text-lg font-semibold">More</h1>
 
       {bots.length > 0 && (

@@ -99,7 +99,7 @@ export default async function OrgInboxPage() {
   }
 
   return (
-    <div className="flex h-full flex-col gap-4 overflow-hidden p-4">
+    <div className="flex h-full flex-col gap-4 overflow-hidden p-5">
       <div className="flex-shrink-0">
         <h1 className="text-lg font-semibold">Inbox</h1>
         <p className="text-sm text-muted-foreground">
