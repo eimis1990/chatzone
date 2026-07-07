@@ -35,7 +35,7 @@ export default async function ConfigurePage({
       botId={data.id}
       botName={data.name}
       initialConfig={data.config}
-      canUseAllLanguages={ent.allLanguages}
+      maxLanguages={ent.maxLanguages}
       canUseLeadCapture={ent.leadCapture}
       canUseVoice={Boolean(org?.voice_addon)}
       voiceLocked={(org?.plan ?? 'free') === 'free'}

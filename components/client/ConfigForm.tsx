@@ -70,6 +70,8 @@ import {
   PRESET_PRESERVED_THEME_KEYS,
 } from '@/lib/widget-theme-presets'
 import { cn } from '@/lib/utils'
+import { normalizeLanguageSelection } from '@/lib/validation/normalize-languages'
+import { SUPPORTED_LANGUAGES, languageMeta } from '@/lib/i18n/languages'
 
 interface ConfigFormProps {
   botId: string
@@ -77,7 +79,8 @@ interface ConfigFormProps {
   botName: string
   initialConfig: BotConfig
   /** Plan gating — disable controls the org's plan doesn't include. */
-  canUseAllLanguages?: boolean
+  /** Plan's max visitor languages (1 = free/single-language). */
+  maxLanguages?: number
   canUseLeadCapture?: boolean
   /** Voice add-on gating — disable voice unless the add-on is active. */
   canUseVoice?: boolean
@@ -98,25 +101,6 @@ interface ConfigFormProps {
 // Use botConfigFormSchema (plain, no preprocessing) for the RHF resolver.
 // FormValues = what RHF stores (Zod input type, with optionals).
 type FormValues = z.input<typeof botConfigFormSchema>
-
-// Only consider per-language content for languages that are actually enabled —
-// mirrors the server's superRefine. Without this, a half-materialized content.lt
-// (e.g. greeting === undefined, which RHF creates when the Lithuanian
-// suggested-questions field array mounts) fails languageContentSchema and
-// silently blocks Save on an English-only bot. Operates on a copy.
-function withEnabledLanguagesOnly(values: FormValues): FormValues {
-  // Lithuanian is "on" when its greeting is filled — no separate enable toggle.
-  const ltFilled = Boolean(values.content?.lt?.greeting?.trim())
-  const languages: FormValues['languages'] = ltFilled ? ['en', 'lt'] : ['en']
-  const content = values.content ? { ...values.content } : values.content
-  if (content && !ltFilled) delete content.lt
-  return {
-    ...values,
-    languages,
-    content,
-    ...(ltFilled ? {} : { defaultLanguage: 'en' as const, showLanguageSelector: false }),
-  }
-}
 
 const baseConfigResolver = zodResolver(botConfigFormSchema)
 
@@ -147,11 +131,6 @@ function qaSummary(f: { prompt?: string; url?: string; action?: SuggestedQuestio
   if (f.url) return `Opens ${f.url}`
   if (f.prompt) return `Sends: ${f.prompt}`
   return 'Sends the title'
-}
-
-const LANG_LABELS: Record<BotLanguage, string> = {
-  en: 'English',
-  lt: 'Lithuanian',
 }
 
 /** Consistent section header: an accent icon chip beside the title + description. */
@@ -202,7 +181,7 @@ export function ConfigForm({
   botId,
   botName,
   initialConfig,
-  canUseAllLanguages = true,
+  maxLanguages = Infinity,
   canUseLeadCapture = true,
   canUseVoice = true,
   voiceLocked = false,
@@ -214,6 +193,7 @@ export function ConfigForm({
   const router = useRouter()
   // Clients get a trimmed config — the owner manages the technical sections.
   const showAdvanced = audience === 'owner'
+  const canUseMultiple = maxLanguages > 1
   // Internal bot name — lives outside the config schema, saved alongside it.
   const [name, setName] = useState(botName)
   // Quick-action add/edit dialog.
@@ -272,7 +252,7 @@ export function ConfigForm({
 
   const form = useForm<FormValues>({
     resolver: (values, context, options) =>
-      baseConfigResolver(withEnabledLanguagesOnly(values), context, options),
+      baseConfigResolver(normalizeLanguageSelection(values), context, options),
     defaultValues: initialFormValues,
     mode: 'onChange',
   })
@@ -286,9 +266,11 @@ export function ConfigForm({
     formState: { errors, isSubmitting },
   } = form
 
-  // Lithuanian is considered enabled when its greeting has content; the
-  // languages array is derived from that at save time (withEnabledLanguagesOnly).
-  const ltFilled = Boolean(watch('content.lt.greeting')?.trim())
+  const watchedLanguages = watch('languages')
+  const selectedLanguages = useMemo(
+    () => (watchedLanguages ?? ['en']) as BotLanguage[],
+    [watchedLanguages],
+  )
 
   // Select a language tab AND persist it. Persisting only on explicit selection
   // (never in a mount effect) avoids a remount race that clobbered the saved value.
@@ -304,23 +286,20 @@ export function ConfigForm({
     [lsKey],
   )
 
-  // If the plan doesn't allow extra languages, never leave the tab on LT.
+  // Never leave the tab on a language that's no longer selected.
   useEffect(() => {
-    if (!canUseAllLanguages && activeLang === 'lt') {
-      selectLang('en')
-    }
-  }, [canUseAllLanguages, activeLang, selectLang])
+    if (!selectedLanguages.includes(activeLang)) selectLang(selectedLanguages[0] ?? 'en')
+  }, [selectedLanguages, activeLang, selectLang])
 
   // Keep defaultLanguage a concrete, committed value. The select only *displays*
   // a fallback when it's unset, so without this it would persist as undefined and
   // the live widget would silently open in English regardless of enabled languages.
   const watchedDefaultLanguage = watch('defaultLanguage')
   useEffect(() => {
-    const effective: BotLanguage[] = ltFilled ? ['en', 'lt'] : ['en']
-    if (!watchedDefaultLanguage || !effective.includes(watchedDefaultLanguage)) {
-      setValue('defaultLanguage', 'en', { shouldDirty: false })
+    if (!watchedDefaultLanguage || !selectedLanguages.includes(watchedDefaultLanguage)) {
+      setValue('defaultLanguage', selectedLanguages[0] ?? 'en', { shouldDirty: false })
     }
-  }, [watchedDefaultLanguage, ltFilled, setValue])
+  }, [watchedDefaultLanguage, selectedLanguages, setValue])
 
   // Watch all values for the live preview
   const watchedValues = watch()
@@ -402,10 +381,32 @@ export function ConfigForm({
     selectLang('lt')
   }, [watch, setValue, selectLang])
 
+  // Toggle a language in/out of the selection. On free (single) plans, selecting
+  // replaces the current choice; on paid plans it adds/removes (min one).
+  const toggleLanguage = useCallback(
+    (lang: BotLanguage) => {
+      const current = (watch('languages') ?? ['en']) as BotLanguage[]
+      let next: BotLanguage[]
+      if (!canUseMultiple) {
+        next = [lang]
+      } else if (current.includes(lang)) {
+        next = current.filter((l) => l !== lang)
+        if (next.length === 0) next = [lang] // never empty
+      } else {
+        next = [...current, lang]
+      }
+      setValue('languages', next, { shouldDirty: true })
+      // Seed content for a newly-selected language so validation passes.
+      if (next.includes('lt') && !current.includes('lt')) openLtTab()
+      if (!next.includes(activeLang)) selectLang(next[0])
+    },
+    [watch, setValue, canUseMultiple, openLtTab, activeLang, selectLang],
+  )
+
   const onSubmit = useCallback(
     async (values: FormValues) => {
       try {
-        const result = await onSave(botId, withEnabledLanguagesOnly(values), name.trim())
+        const result = await onSave(botId, normalizeLanguageSelection(values), name.trim())
         if (result.success) {
           toast.success('Configuration saved')
           trackEvent('bot_config_saved', { botId })
@@ -472,7 +473,7 @@ export function ConfigForm({
     avatarUrl: watchedValues.avatarUrl,
     botAvatarUrl: watchedValues.botAvatarUrl,
     privacyUrl: watchedValues.privacyUrl,
-    languages: (ltFilled ? ['en', 'lt'] : ['en']) as BotLanguage[],
+    languages: selectedLanguages,
     defaultLanguage: watchedValues.defaultLanguage,
     showLanguageSelector: watchedValues.showLanguageSelector ?? false,
     content: watchedValues.content,
@@ -616,98 +617,116 @@ export function ConfigForm({
               description="Greeting, suggested questions, and fallback message — per language."
             />}>
           <CardContent className="space-y-4">
-            {/* Language segmented control */}
-            <div className="space-y-3">
-              <div className="flex items-center gap-3 rounded-lg bg-muted p-1 w-fit">
-                {(['en', 'lt'] as BotLanguage[]).map((lang) => {
-                  const locked = lang === 'lt' && !canUseAllLanguages
+            {/* Available languages — which languages visitors can use. */}
+            <div className="space-y-2">
+              <Label>Available languages</Label>
+              <div className="flex flex-wrap gap-2">
+                {SUPPORTED_LANGUAGES.map((l) => {
+                  const on = selectedLanguages.includes(l.code)
                   return (
                     <button
-                      key={lang}
+                      key={l.code}
                       type="button"
-                      onClick={() => {
-                        if (locked) return
-                        if (lang === 'lt') openLtTab()
-                        else selectLang(lang)
-                      }}
-                      disabled={locked}
+                      onClick={() => toggleLanguage(l.code)}
+                      aria-pressed={on}
                       className={cn(
-                        'px-4 py-1 text-sm font-medium rounded-md transition-all',
-                        activeLang === lang
-                          ? 'bg-background text-foreground shadow-sm'
-                          : 'text-muted-foreground hover:text-foreground',
-                        locked && 'opacity-40 cursor-not-allowed',
+                        'flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm transition-colors',
+                        on
+                          ? 'border-primary bg-primary/10 text-foreground'
+                          : 'border-input text-muted-foreground hover:text-foreground',
                       )}
-                      aria-pressed={activeLang === lang}
                     >
-                      {LANG_LABELS[lang]}
+                      <span>{l.flag}</span>
+                      {l.label}
                     </button>
                   )
                 })}
               </div>
-
-              {!canUseAllLanguages && (
+              {!canUseMultiple && (
                 <p className="text-xs text-muted-foreground">
-                  Lithuanian is available on paid plans.{' '}
+                  Your plan includes one language. Pick the one you want —{' '}
                   <a href="/app/subscription" className="text-primary hover:underline">
-                    Upgrade for more languages
+                    upgrade to offer more
                   </a>
+                  .
                 </p>
               )}
             </div>
 
-            {/* Primary language + visitor language picker — meaningful once
-                Lithuanian content exists (LT is "on" when its greeting is filled). */}
-            {canUseAllLanguages && ltFilled && (
-              <div className="space-y-4">
-                <div className="space-y-1.5">
-                  <Label>Primary language</Label>
-                  <Controller
-                    name="defaultLanguage"
-                    control={control}
-                    render={({ field }) => (
-                      <Select value={field.value ?? 'en'} onValueChange={field.onChange}>
-                        <SelectTrigger className="w-full max-w-xs">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {(['en', 'lt'] as BotLanguage[]).map((l) => (
-                            <SelectItem key={l} value={l}>
-                              {LANG_LABELS[l]}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    )}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    The language the widget opens in for visitors.
-                  </p>
-                </div>
+            {/* Content-language tabs — one per selected language. */}
+            <div className="flex items-center gap-3 rounded-lg bg-muted p-1 w-fit">
+              {selectedLanguages.map((lang) => (
+                <button
+                  key={lang}
+                  type="button"
+                  onClick={() => selectLang(lang)}
+                  className={cn(
+                    'px-4 py-1 text-sm font-medium rounded-md transition-all',
+                    activeLang === lang
+                      ? 'bg-background text-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground',
+                  )}
+                  aria-pressed={activeLang === lang}
+                >
+                  {languageMeta(lang).label}
+                </button>
+              ))}
+            </div>
 
-                <div className="flex items-center gap-2.5">
-                  <Controller
-                    name="showLanguageSelector"
-                    control={control}
-                    render={({ field }) => (
-                      <Switch
-                        checked={field.value ?? false}
-                        onCheckedChange={field.onChange}
-                        id="showLanguageSelector"
-                        size="sm"
-                      />
-                    )}
-                  />
-                  <Label htmlFor="showLanguageSelector" className="text-sm font-normal cursor-pointer">
-                    Let visitors switch language
-                  </Label>
-                </div>
-                <p className="-mt-2 text-xs text-muted-foreground">
-                  Shows a flag button in the widget header. Off = the widget stays in the primary
-                  language.
+            <div className="space-y-4">
+              <div className="space-y-1.5">
+                <Label>Primary language</Label>
+                <Controller
+                  name="defaultLanguage"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      value={field.value ?? selectedLanguages[0] ?? 'en'}
+                      onValueChange={field.onChange}
+                      disabled={selectedLanguages.length < 2}
+                    >
+                      <SelectTrigger className="w-full max-w-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {selectedLanguages.map((l) => (
+                          <SelectItem key={l} value={l}>
+                            {languageMeta(l).label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+                <p className="text-xs text-muted-foreground">
+                  The language the widget opens in for visitors.
                 </p>
               </div>
-            )}
+
+              <div className="flex items-center gap-2.5">
+                <Controller
+                  name="showLanguageSelector"
+                  control={control}
+                  render={({ field }) => (
+                    <Switch
+                      checked={(field.value ?? false) && selectedLanguages.length > 1}
+                      onCheckedChange={field.onChange}
+                      id="showLanguageSelector"
+                      size="sm"
+                      disabled={selectedLanguages.length < 2}
+                    />
+                  )}
+                />
+                <Label htmlFor="showLanguageSelector" className="text-sm font-normal cursor-pointer">
+                  Let visitors switch language
+                </Label>
+              </div>
+              <p className="-mt-2 text-xs text-muted-foreground">
+                {selectedLanguages.length < 2
+                  ? 'Add a second language to let visitors switch.'
+                  : 'Shows a flag button in the widget header. Off = the widget stays in the primary language.'}
+              </p>
+            </div>
 
             {/* Per-language content fields */}
             <div className="space-y-4 pt-1">
@@ -716,7 +735,7 @@ export function ConfigForm({
                 <Label htmlFor={`greeting-${activeLang}`}>
                   Greeting message
                   <span className="ml-1.5 text-xs text-muted-foreground font-normal">
-                    ({LANG_LABELS[activeLang]})
+                    ({languageMeta(activeLang).label})
                   </span>
                 </Label>
                 <Textarea
@@ -739,7 +758,7 @@ export function ConfigForm({
                 <Label>
                   Quick actions
                   <span className="ml-1.5 text-xs font-normal text-muted-foreground">
-                    ({LANG_LABELS[activeLang]}, max {MAX_SUGGESTED_QUESTIONS})
+                    ({languageMeta(activeLang).label}, max {MAX_SUGGESTED_QUESTIONS})
                   </span>
                 </Label>
                 <p className="text-xs text-muted-foreground">
@@ -953,7 +972,7 @@ export function ConfigForm({
                 <Label htmlFor={`fallback-${activeLang}`}>
                   Fallback message
                   <span className="ml-1.5 text-xs text-muted-foreground font-normal">
-                    ({LANG_LABELS[activeLang]})
+                    ({languageMeta(activeLang).label})
                   </span>
                 </Label>
                 <Textarea
@@ -975,14 +994,6 @@ export function ConfigForm({
                 )}
               </div>
 
-              {/* LT helper note */}
-              {activeLang === 'lt' && (
-                <p className="text-xs text-muted-foreground bg-muted/50 rounded-md px-3 py-2">
-                  {ltFilled
-                    ? 'Lithuanian is offered to visitors because its greeting is filled. Clear the greeting to make the bot English-only.'
-                    : 'Fill the Lithuanian greeting to offer Lithuanian in the widget — leave it empty to keep the bot English-only.'}
-                </p>
-              )}
             </div>
           </CardContent>
         </CollapsibleSection>
@@ -1309,7 +1320,7 @@ export function ConfigForm({
           watch={watch}
           setValue={setValue}
           activeLang={activeLang}
-          enabledLanguages={(ltFilled ? ['en', 'lt'] : ['en']) as BotLanguage[]}
+          enabledLanguages={selectedLanguages}
           canUseVoice={canUseVoice}
           voiceLocked={voiceLocked}
           audience={audience}

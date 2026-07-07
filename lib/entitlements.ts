@@ -8,8 +8,6 @@ import type { Plan } from '@/lib/types'
 export interface Entitlements {
   /** Max bots an org can create (Infinity = unlimited). */
   maxBots: number
-  /** Multiple languages (false = English only). */
-  allLanguages: boolean
   /** Max distinct visitor languages a bot may offer (1 = single language). */
   maxLanguages: number
   /** Lead-capture form in the widget. */
@@ -27,7 +25,6 @@ export interface Entitlements {
 const ENTITLEMENTS: Record<Plan, Entitlements> = {
   free: {
     maxBots: 1,
-    allLanguages: false,
     maxLanguages: 1,
     leadCapture: false,
     removeBadge: false,
@@ -37,7 +34,6 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
   },
   starter: {
     maxBots: 2,
-    allLanguages: true,
     maxLanguages: Infinity,
     leadCapture: true,
     removeBadge: true,
@@ -47,7 +43,6 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
   },
   growth: {
     maxBots: 5,
-    allLanguages: true,
     maxLanguages: Infinity,
     leadCapture: true,
     removeBadge: true,
@@ -57,7 +52,6 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
   },
   scale: {
     maxBots: Infinity,
-    allLanguages: true,
     maxLanguages: Infinity,
     leadCapture: true,
     removeBadge: true,
@@ -67,7 +61,6 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
   },
   enterprise: {
     maxBots: Infinity,
-    allLanguages: true,
     maxLanguages: Infinity,
     leadCapture: true,
     removeBadge: true,

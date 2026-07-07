@@ -17,7 +17,7 @@ export default async function OwnerChatbotConfigurePage() {
         botId={bot.id}
         botName={bot.name}
         initialConfig={bot.config}
-        canUseAllLanguages
+        maxLanguages={Infinity}
         canUseLeadCapture
         canUseVoice
         onSave={saveClientBotConfig}

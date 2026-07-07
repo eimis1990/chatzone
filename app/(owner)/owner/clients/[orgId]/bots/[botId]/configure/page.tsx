@@ -42,7 +42,7 @@ export default async function OwnerConfigurePage({
       botId={bot.id}
       botName={bot.name}
       initialConfig={bot.config}
-      canUseAllLanguages={ent.allLanguages}
+      maxLanguages={ent.maxLanguages}
       canUseLeadCapture={ent.leadCapture}
       canUseVoice={Boolean(org?.voice_addon)}
       onSave={saveClientBotConfig}

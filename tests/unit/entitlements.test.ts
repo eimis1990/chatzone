@@ -6,7 +6,6 @@ describe('entitlementsFor — plan limits', () => {
   it('Free: 1 bot, English only, no lead capture / badge / retention / teams', () => {
     const e = entitlementsFor('free')
     expect(e.maxBots).toBe(1)
-    expect(e.allLanguages).toBe(false)
     expect(e.maxLanguages).toBe(1)
     expect(e.leadCapture).toBe(false)
     expect(e.removeBadge).toBe(false)
@@ -18,7 +17,6 @@ describe('entitlementsFor — plan limits', () => {
   it('Starter: 2 bots, languages + lead capture + badge removal', () => {
     const e = entitlementsFor('starter')
     expect(e.maxBots).toBe(2)
-    expect(e.allLanguages).toBe(true)
     expect(e.maxLanguages).toBe(Infinity)
     expect(e.leadCapture).toBe(true)
     expect(e.removeBadge).toBe(true)
