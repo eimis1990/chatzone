@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { isOriginAllowed, originHost, allowedDomainToHost } from '@/lib/widget-auth'
+import { SITE_URL } from '@/lib/site'
 
 describe('allowedDomainToHost', () => {
   it('normalizes full URLs, www, paths and ports to a bare host', () => {
@@ -48,7 +49,20 @@ describe('isOriginAllowed', () => {
     expect(isOriginAllowed('https://evil.com', ['acme.com'])).toBe(false)
   })
 
-  it('rejects a null origin when domains are configured', () => {
-    expect(isOriginAllowed(null, ['acme.com'])).toBe(false)
+  it('allows a null origin — the widget’s own embed fetches config same-origin, so the browser sends no Origin header', () => {
+    // First-party: the iframe (served by this app) fetches /api/widget-config
+    // same-origin; a same-origin GET carries no Origin header. Blocking it broke
+    // every bot that had restricted its domains.
+    expect(isOriginAllowed(null, ['acme.com'])).toBe(true)
+  })
+
+  it('allows the app’s own origin regardless of allowlist (first-party embed POSTs)', () => {
+    // The embed iframe’s same-origin POSTs (chat, actions) send the app host as
+    // Origin; those must pass whatever the customer’s domain allowlist is.
+    expect(isOriginAllowed(SITE_URL, ['acme.com'])).toBe(true)
+  })
+
+  it('still rejects a third-party browser origin not in the allowlist', () => {
+    expect(isOriginAllowed('https://evil.com', ['acme.com'])).toBe(false)
   })
 })

@@ -1,3 +1,5 @@
+import { SITE_URL } from '@/lib/site'
+
 /** Extracts the bare host (without a leading www.) from an Origin header. */
 export function originHost(origin: string | null): string | null {
   if (!origin) return null
@@ -41,9 +43,14 @@ export function allowedDomainToHost(entry: string): string | null {
  * them (www-insensitive, scheme/path-insensitive).
  */
 export function isOriginAllowed(origin: string | null, allowedDomains: string[]): boolean {
-  if (allowedDomains.length === 0) return true
   const host = originHost(origin)
-  if (!host) return false
+  // First-party requests from the widget's OWN embed (served by this app) must
+  // always pass: the iframe fetches config same-origin (a GET with no Origin
+  // header → host null) and its POSTs send this app's own host. The
+  // customer-domain allowlist governs THIRD-PARTY parent sites embedding via
+  // widget.js — those always carry a cross-origin Origin header.
+  if (!host || host === originHost(SITE_URL)) return true
+  if (allowedDomains.length === 0) return true
   return allowedDomains.some((d) => allowedDomainToHost(d) === host)
 }
 
