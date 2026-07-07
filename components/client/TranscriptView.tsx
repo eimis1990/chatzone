@@ -83,6 +83,9 @@ interface TranscriptViewProps {
 
 export function TranscriptView({ conversations, loadMessages, analyze }: TranscriptViewProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null)
+  // Mobile: chat transcript vs AI review are shown one at a time via a segmented
+  // control (desktop shows both side by side).
+  const [mobileTab, setMobileTab] = useState<'chat' | 'review'>('chat')
   const [messages, setMessages] = useState<Message[]>([])
   const [loading, setLoading] = useState(false)
   const [attentionOnly, setAttentionOnly] = useState(false)
@@ -167,7 +170,10 @@ export function TranscriptView({ conversations, loadMessages, analyze }: Transcr
                   {/* Whole cell selects the conversation… */}
                   <button
                     type="button"
-                    onClick={() => handleSelect(conv.id)}
+                    onClick={() => {
+                      handleSelect(conv.id)
+                      setMobileTab('chat')
+                    }}
                     className={[
                       'block w-full px-3 py-3 text-left transition-colors',
                       isActive ? 'bg-muted' : 'hover:bg-muted/50',
@@ -257,9 +263,29 @@ export function TranscriptView({ conversations, loadMessages, analyze }: Transcr
               {selected && <CopyButton value={selected.visitor_id} label="Copy conversation ID" />}
             </div>
 
-            {/* Body: transcript (60%) + AI review (40%), each scrolls on its own */}
+            {/* Mobile: switch between chat and review (desktop shows both). */}
+            <div className="flex flex-shrink-0 gap-1 border-b p-2 md:hidden">
+              {(['chat', 'review'] as const).map((t) => (
+                <button
+                  key={t}
+                  type="button"
+                  onClick={() => setMobileTab(t)}
+                  className={[
+                    'flex-1 rounded-md py-1.5 text-sm font-medium capitalize transition-colors',
+                    mobileTab === t ? 'bg-primary/15 text-primary' : 'text-muted-foreground',
+                  ].join(' ')}
+                >
+                  {t === 'chat' ? 'Chat' : 'Review'}
+                </button>
+              ))}
+            </div>
+
+            {/* Body: transcript (60%) + AI review (40%), each scrolls on its own.
+                On mobile only the segmented-tab-selected pane shows. */}
             <div className="flex min-h-0 flex-1">
-              <div className="min-h-0 flex-[3] space-y-4 overflow-y-auto p-4">
+              <div
+                className={`min-h-0 flex-[3] space-y-4 overflow-y-auto p-4 md:block ${mobileTab === 'chat' ? 'block' : 'hidden'}`}
+              >
                 {loading ? (
                   <div className="flex h-32 items-center justify-center text-sm text-muted-foreground">
                     Loading…
@@ -274,8 +300,10 @@ export function TranscriptView({ conversations, loadMessages, analyze }: Transcr
               </div>
 
               {/* AI review / evaluation */}
-              <aside className="flex min-h-0 flex-[2] flex-col border-l bg-muted/10">
-                <div className="flex-shrink-0 border-b px-4 py-3">
+              <aside
+                className={`min-h-0 flex-[2] flex-col border-l bg-muted/10 md:flex ${mobileTab === 'review' ? 'flex' : 'hidden'}`}
+              >
+                <div className="hidden flex-shrink-0 border-b px-4 py-3 md:block">
                   <h3 className="text-sm font-semibold">Conversation review</h3>
                 </div>
                 <div className="min-h-0 flex-1 space-y-3 overflow-y-auto p-4">
