@@ -10,6 +10,8 @@ export interface Entitlements {
   maxBots: number
   /** Multiple languages (false = English only). */
   allLanguages: boolean
+  /** Max distinct visitor languages a bot may offer (1 = single language). */
+  maxLanguages: number
   /** Lead-capture form in the widget. */
   leadCapture: boolean
   /** Hide the "Powered by Loqara" badge in the widget. */
@@ -26,6 +28,7 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
   free: {
     maxBots: 1,
     allLanguages: false,
+    maxLanguages: 1,
     leadCapture: false,
     removeBadge: false,
     customRetention: false,
@@ -35,6 +38,7 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
   starter: {
     maxBots: 2,
     allLanguages: true,
+    maxLanguages: Infinity,
     leadCapture: true,
     removeBadge: true,
     customRetention: false,
@@ -44,6 +48,7 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
   growth: {
     maxBots: 5,
     allLanguages: true,
+    maxLanguages: Infinity,
     leadCapture: true,
     removeBadge: true,
     customRetention: false,
@@ -53,6 +58,7 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
   scale: {
     maxBots: Infinity,
     allLanguages: true,
+    maxLanguages: Infinity,
     leadCapture: true,
     removeBadge: true,
     customRetention: true,
@@ -62,6 +68,7 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
   enterprise: {
     maxBots: Infinity,
     allLanguages: true,
+    maxLanguages: Infinity,
     leadCapture: true,
     removeBadge: true,
     customRetention: true,

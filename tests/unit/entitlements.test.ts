@@ -7,6 +7,7 @@ describe('entitlementsFor — plan limits', () => {
     const e = entitlementsFor('free')
     expect(e.maxBots).toBe(1)
     expect(e.allLanguages).toBe(false)
+    expect(e.maxLanguages).toBe(1)
     expect(e.leadCapture).toBe(false)
     expect(e.removeBadge).toBe(false)
     expect(e.customRetention).toBe(false)
@@ -18,10 +19,18 @@ describe('entitlementsFor — plan limits', () => {
     const e = entitlementsFor('starter')
     expect(e.maxBots).toBe(2)
     expect(e.allLanguages).toBe(true)
+    expect(e.maxLanguages).toBe(Infinity)
     expect(e.leadCapture).toBe(true)
     expect(e.removeBadge).toBe(true)
     expect(e.customRetention).toBe(false)
     expect(e.conversations).toBe(1500)
+  })
+
+  it('language limit: 1 on free, unlimited on every paid tier', () => {
+    expect(entitlementsFor('free').maxLanguages).toBe(1)
+    for (const p of ['starter', 'growth', 'scale', 'enterprise'] as const) {
+      expect(entitlementsFor(p).maxLanguages).toBe(Infinity)
+    }
   })
 
   it('Growth: 5 bots', () => {
