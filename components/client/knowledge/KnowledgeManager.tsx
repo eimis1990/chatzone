@@ -44,6 +44,9 @@ export function KnowledgeManager({ botId, initialSources }: KnowledgeManagerProp
   const [summarizing, setSummarizing] = useState(false)
   const [linting, setLinting] = useState(false)
   const [lint, setLint] = useState<{ findings: LintFinding[]; scanned: number } | null>(null)
+  // A knowledge-check finding's "Fix" opens that source in the editor.
+  const [fixSourceId, setFixSourceId] = useState<string | null>(null)
+  const handleFixOpened = useCallback(() => setFixSourceId(null), [])
 
   // Scan the KB for contradictions / stale content / gaps (read-only).
   const handleCheckIssues = useCallback(async () => {
@@ -63,6 +66,27 @@ export function KnowledgeManager({ botId, initialSources }: KnowledgeManagerProp
       setLinting(false)
     }
   }, [botId])
+
+  // Dismiss a finding: remove it now (optimistic) and persist per bot so it
+  // stays gone across scans/sessions. A failed persist just means the next scan
+  // may resurface it — not worth blocking the UI on.
+  const handleDismiss = useCallback(
+    async (fingerprint: string) => {
+      setLint((prev) =>
+        prev ? { ...prev, findings: prev.findings.filter((f) => f.id !== fingerprint) } : prev,
+      )
+      try {
+        await fetch('/api/knowledge/lint/dismiss', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ botId, fingerprint }),
+        })
+      } catch {
+        // Optimistic — persistence is best-effort.
+      }
+    },
+    [botId],
+  )
 
   // Re-fetch the full source list (canonical summaries are created server-side).
   const refreshSources = useCallback(async () => {
@@ -174,7 +198,13 @@ export function KnowledgeManager({ botId, initialSources }: KnowledgeManagerProp
         </CardHeader>
         <CardContent className="min-h-0 flex-1 overflow-y-auto p-0">
           {lint && (
-            <LintResults findings={lint.findings} scanned={lint.scanned} onClose={() => setLint(null)} />
+            <LintResults
+              findings={lint.findings}
+              scanned={lint.scanned}
+              onClose={() => setLint(null)}
+              onFix={setFixSourceId}
+              onDismiss={handleDismiss}
+            />
           )}
           <SourceList
             botId={botId}
@@ -182,6 +212,8 @@ export function KnowledgeManager({ botId, initialSources }: KnowledgeManagerProp
             onDeleted={handleSourceDeleted}
             onUpdated={handleSourceUpdated}
             onAddSource={() => setAddOpen(true)}
+            openSourceId={fixSourceId}
+            onOpened={handleFixOpened}
           />
         </CardContent>
       </Card>

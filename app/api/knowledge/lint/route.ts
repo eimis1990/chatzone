@@ -32,7 +32,14 @@ export async function POST(req: Request) {
 
   try {
     const result = await generateKbLint(botId, createServiceClient())
-    return NextResponse.json(result)
+    // Drop findings the owner has already dismissed (persisted per bot).
+    const { data: dismissedRows } = await supabase
+      .from('knowledge_lint_dismissals')
+      .select('fingerprint')
+      .eq('bot_id', botId)
+    const dismissed = new Set((dismissedRows ?? []).map((r) => r.fingerprint as string))
+    const findings = result.findings.filter((f) => !dismissed.has(f.id))
+    return NextResponse.json({ ...result, findings })
   } catch (err) {
     return NextResponse.json(
       { error: err instanceof Error ? err.message : 'Scan failed' },

@@ -1,6 +1,15 @@
 'use client'
 
-import { XIcon, AlertTriangleIcon, ClockIcon, CircleHelpIcon, CheckCircle2Icon } from 'lucide-react'
+import {
+  XIcon,
+  AlertTriangleIcon,
+  ClockIcon,
+  CircleHelpIcon,
+  CheckCircle2Icon,
+  Wand2Icon,
+  PencilIcon,
+  EyeOffIcon,
+} from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { LintFinding, LintFindingType, LintSeverity } from '@/lib/types'
@@ -21,9 +30,13 @@ interface LintResultsProps {
   findings: LintFinding[]
   scanned: number
   onClose: () => void
+  /** Open a source in the editor so the owner can fix the conflicting text. */
+  onFix: (sourceId: string) => void
+  /** Dismiss a finding (persisted per bot by its fingerprint). */
+  onDismiss: (fingerprint: string) => void
 }
 
-export function LintResults({ findings, scanned, onClose }: LintResultsProps) {
+export function LintResults({ findings, scanned, onClose, onFix, onDismiss }: LintResultsProps) {
   const issues = findings.filter((f) => f.type !== 'gap')
   const gaps = findings.filter((f) => f.type === 'gap')
 
@@ -43,7 +56,7 @@ export function LintResults({ findings, scanned, onClose }: LintResultsProps) {
         <button
           type="button"
           onClick={onClose}
-          aria-label="Dismiss"
+          aria-label="Close"
           className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
         >
           <XIcon className="size-4" />
@@ -57,10 +70,10 @@ export function LintResults({ findings, scanned, onClose }: LintResultsProps) {
         </div>
       ) : (
         <ul className="mt-3 space-y-2">
-          {findings.map((f, i) => {
+          {findings.map((f) => {
             const { label, icon: Icon } = TYPE_META[f.type]
             return (
-              <li key={i} className="rounded-lg border bg-card p-3">
+              <li key={f.id} className="rounded-lg border bg-card p-3">
                 <div className="flex flex-wrap items-center gap-2">
                   <span
                     className={cn(
@@ -87,6 +100,38 @@ export function LintResults({ findings, scanned, onClose }: LintResultsProps) {
                     ))}
                   </div>
                 )}
+
+                {f.suggestedFix && (
+                  <div className="mt-2 flex items-start gap-1.5 rounded-md bg-primary/5 p-2 text-xs text-foreground">
+                    <Wand2Icon className="mt-0.5 size-3.5 shrink-0 text-primary" aria-hidden="true" />
+                    <span>
+                      <span className="font-medium">Suggested fix:</span> {f.suggestedFix}
+                    </span>
+                  </div>
+                )}
+
+                {/* Actions: jump to the offending source(s) to edit, or dismiss. */}
+                <div className="mt-2.5 flex flex-wrap items-center gap-2">
+                  {f.sources.map((s) => (
+                    <button
+                      key={s.id}
+                      type="button"
+                      onClick={() => onFix(s.id)}
+                      className="inline-flex max-w-full items-center gap-1 rounded-md border bg-card px-2 py-1 text-xs font-medium text-foreground transition-colors hover:bg-muted"
+                    >
+                      <PencilIcon className="size-3 shrink-0" aria-hidden="true" />
+                      <span className="truncate">Fix in {s.title}</span>
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => onDismiss(f.id)}
+                    className="ml-auto inline-flex shrink-0 items-center gap-1 rounded-md px-2 py-1 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                  >
+                    <EyeOffIcon className="size-3" aria-hidden="true" />
+                    Dismiss
+                  </button>
+                </div>
               </li>
             )
           })}

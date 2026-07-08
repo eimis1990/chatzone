@@ -297,6 +297,8 @@ export interface DocumentChunk {
 export type LintFindingType = 'contradiction' | 'stale' | 'gap'
 export type LintSeverity = 'high' | 'medium' | 'low'
 export interface LintFinding {
+  /** Stable fingerprint (type + topic + evidence) — used to dismiss/persist. */
+  id: string
   type: LintFindingType
   severity: LintSeverity
   /** The support topic this finding belongs to (e.g. "Returns & refunds"). */
@@ -305,6 +307,10 @@ export interface LintFinding {
   detail: string
   /** Verbatim snippets from the KB that evidence the issue (e.g. the two conflicting statements). */
   evidence: string[]
+  /** The knowledge sources the conflicting excerpts came from — where to go to fix it. */
+  sources: { id: string; title: string }[]
+  /** One-line concrete resolution the AI suggests (e.g. which value is authoritative). */
+  suggestedFix?: string
 }
 
 /** A reusable, owner-managed system prompt in the prompt library. */

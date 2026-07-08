@@ -74,6 +74,21 @@ How a bot's answers stay grounded in the client's own content.
 > point-in-time eval run, not something re-derivable from the code — rerun
 > `eval-answers.mjs` against a live bot to reconfirm current accuracy.
 
+## Knowledge check (lint) + resolution (`lib/ingestion/lint.ts`)
+
+- `generateKbLint` audits the bot's OWN content per canonical topic for
+  contradictions / stale content / gaps (grounded, conservative, `gpt-4o-mini`).
+  Read-only scan behind `POST /api/knowledge/lint` + the "Check for issues" button.
+- Each finding carries the **source(s)** its excerpts came from (mapped from the
+  model's `excerptRefs` → `support[i].source_id`), an AI **`suggestedFix`**, and a
+  stable **`id`** fingerprint (hash of type+topic+evidence).
+- Resolution UI (`LintResults` → `KnowledgeManager` → `SourceList`): **Fix** opens
+  the offending source's editor (`contentOverride` → re-ingest); **Dismiss**
+  persists to `knowledge_lint_dismissals` (migration `0038`) so it stays hidden
+  across scans — a changed fingerprint (changed content) resurfaces it.
+- The lint route tolerates a **missing** dismissals table (ignores the query
+  error → no filtering), so it's safe to deploy before migration `0038` is applied.
+
 ## Products vs. chunks
 
 Product search is a **separate** index — see [commerce](commerce.md). RAG

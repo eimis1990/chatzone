@@ -29,6 +29,10 @@ interface SourceListProps {
   onUpdated: (source: KnowledgeSource) => void
   /** Open the "add a source" panel (the first card in the grid triggers this). */
   onAddSource: () => void
+  /** When set, open this source's details drawer (used by the knowledge-check "Fix"). */
+  openSourceId?: string | null
+  /** Called once the requested source has been opened, so the parent can reset. */
+  onOpened?: () => void
 }
 
 const POLL_INTERVAL_MS = 3000
@@ -186,7 +190,14 @@ function CardMenu({
   )
 }
 
-export function SourceList({ sources, onDeleted, onUpdated, onAddSource }: SourceListProps) {
+export function SourceList({
+  sources,
+  onDeleted,
+  onUpdated,
+  onAddSource,
+  openSourceId,
+  onOpened,
+}: SourceListProps) {
   // Track in-flight delete/retry per source id to disable buttons.
   const inflightRef = useRef<Set<string>>(new Set())
   const pollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -202,6 +213,14 @@ export function SourceList({ sources, onDeleted, onUpdated, onAddSource }: Sourc
   // the list updates from polling).
   const [viewingId, setViewingId] = useState<string | null>(null)
   const viewing = sources.find((s) => s.id === viewingId) ?? null
+
+  // The knowledge-check "Fix" action asks us to open a specific source's editor.
+  useEffect(() => {
+    if (openSourceId) {
+      setViewingId(openSourceId)
+      onOpened?.()
+    }
+  }, [openSourceId, onOpened])
 
   // Fetch chunk counts for newly-ready sources; prune stale ones (so a
   // re-indexed source refetches a fresh count once it settles again).
