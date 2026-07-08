@@ -45,6 +45,7 @@ export function LintResolveDialog({ finding, botId, onResolved, onSourcesChanged
         })
         toast.success('Marked as resolved')
         onResolved(finding.id)
+        onClose()
         return
       }
 
@@ -73,6 +74,7 @@ export function LintResolveDialog({ finding, botId, onResolved, onSourcesChanged
       toast.success(data.edited ? 'Fixed and re-indexed' : 'Marked as resolved')
       onSourcesChanged?.()
       onResolved(finding.id)
+      onClose()
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Could not apply the fix')
       setSaving(false)
