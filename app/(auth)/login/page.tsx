@@ -64,7 +64,7 @@ export default function LoginPage() {
       {reduce ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
-          src="/loqara-hero-poster.jpg"
+          src="/loqara-hero-poster.webp"
           alt=""
           aria-hidden="true"
           className="absolute inset-0 -z-10 size-full scale-105 object-cover blur-md"
@@ -72,7 +72,7 @@ export default function LoginPage() {
       ) : (
         <video
           src="/loqara-hero-loop.mp4"
-          poster="/loqara-hero-poster.jpg"
+          poster="/loqara-hero-poster.webp"
           autoPlay
           muted
           loop

@@ -18,7 +18,7 @@ export function HeroVideo() {
     return (
       // eslint-disable-next-line @next/next/no-img-element
       <img
-        src="/loqara-hero-poster.jpg"
+        src="/loqara-hero-poster.webp"
         alt=""
         aria-hidden="true"
         className="absolute inset-0 h-full w-full object-cover object-[72%_center] sm:object-center"
@@ -36,7 +36,7 @@ export function HeroVideo() {
       <video
         ref={loopRef}
         src="/loqara-hero-loop.mp4"
-        poster="/loqara-hero-poster.jpg"
+        poster="/loqara-hero-poster.webp"
         muted
         loop
         playsInline
@@ -48,7 +48,7 @@ export function HeroVideo() {
           standing pose; autoplays once, then hands off to the loop. */}
       <video
         src="/loqara-hero-intro.mp4"
-        poster="/loqara-hero-empty-poster.jpg"
+        poster="/loqara-hero-empty-poster.webp"
         autoPlay
         muted
         playsInline
