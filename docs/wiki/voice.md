@@ -31,8 +31,14 @@ on **ElevenLabs Conversational AI**.
   "Žinoma"/"Of course" — that repetition was a real complaint, fixed 2026-07-08).
   ⚠️ **gotcha:** `agentConfigHash` hashes `cfg.systemPrompt` but NOT the hardcoded
   voice-block text, so when you change `buildAgentPrompt` you must bump its version
-  marker (`agentConfigHash`, currently `v21-voice-prompt-variety`) or live agents
+  marker (`agentConfigHash`, currently `v22-voice-language-lock`) or live agents
   won't re-sync.
+- **Language lock:** `buildAgentPrompt` injects the bot's available language names
+  (from `languages[]`) and forbids replying in anything outside that set — added
+  after gpt-4o code-switched a Russian word into a Lithuanian reply. It also tells
+  the agent not to switch languages unless the customer does. (ElevenLabs' own V3
+  auto-detection is a separate layer we don't currently constrain in config — if
+  drift persists, that's the next lever.)
 - The agent answers knowledge questions via a `search_knowledge` **client
   tool** (`buildKnowledgeToolConfig`, `lib/ai/elevenlabs-agent.ts:211-236`),
   implemented browser-side in `components/voice/VoiceCallButton.tsx:142`
