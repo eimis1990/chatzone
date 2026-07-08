@@ -1,0 +1,10 @@
+# Wiki log
+
+Append-only, chronological. One line per entry, newest at the bottom.
+Format: `YYYY-MM-DD TAG — note`. Tags: `INGEST` (new/updated knowledge),
+`LINT` (health check), `DECISION` (a choice + its why), `FIX` (bug learning).
+
+- 2026-07-08 INGEST — Wiki created (Karpathy LLM-wiki pattern). Seeded architecture, conventions, gotchas, widget-and-embed, bot-config, plans-and-entitlements, languages-i18n, rag-and-knowledge, commerce, access-model, blog-and-seo, voice from this session + prior working notes. rag/commerce/voice marked ⚠️ verify.
+- 2026-07-08 FIX — Widget "currently unavailable": embed iframe's same-origin config fetch (no Origin header) was rejected by a non-empty allowlist; first-party requests now bypass it (`lib/widget-auth.ts`). See gotchas.
+- 2026-07-08 DECISION — Free tier = one language of the client's choice (not English-only). `maxLanguages` entitlement; content de-anchored from `content.en`. See languages-i18n.
+- 2026-07-08 LINT — Hardened rag-and-knowledge, commerce, voice against the code (removed ⚠️ verify seeds). Corrections worth knowing: in-chat TTS/STT are RETIRED — `publicBotConfig` hardcodes them off, only the live-call agent works (`lib/widget-config.ts:199-205`); order lookup works only for woocommerce + magento, and the chat "discount" is a static configured code, not a live coupon API (`lib/commerce/index.ts`); the `api/widget/{order,search,discount}` routes back the VOICE agent, not the text chat tools; RAG has a canonical-pages subsystem (`lib/ingestion/canonical.ts`) the notes missed. Residual ⚠️ verify: voice per-minute metering (none in-repo), RAG eval "10/10" is point-in-time.
