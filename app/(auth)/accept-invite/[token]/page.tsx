@@ -51,8 +51,16 @@ export default async function AcceptInvitePage({ params }: Props) {
 
   return (
     <main className="flex min-h-svh items-center justify-center bg-background px-4">
+      <CornerBrand />
       <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
+        <CardHeader className="items-center space-y-2 text-center">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/loqara-logo-colorful.webp"
+            alt=""
+            aria-hidden="true"
+            className="size-14 object-contain"
+          />
           <CardTitle className="text-2xl font-bold">Create your account</CardTitle>
           <CardDescription>
             You have been invited to join <strong>{orgName}</strong>. Set a password to get started.
@@ -66,9 +74,28 @@ export default async function AcceptInvitePage({ params }: Props) {
   )
 }
 
+/** Brand lockup pinned to the top-left corner: colorful fox + black "Loqara." */
+function CornerBrand() {
+  return (
+    <div className="fixed left-6 top-6 flex items-center gap-2">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/loqara-logo-colorful.webp"
+        alt=""
+        aria-hidden="true"
+        className="size-7 object-contain"
+      />
+      <span className="text-lg font-bold tracking-tight text-gray-900">
+        Loqara<span className="text-primary">.</span>
+      </span>
+    </div>
+  )
+}
+
 function InviteError({ message }: { message: string }) {
   return (
     <main className="flex min-h-svh items-center justify-center bg-background px-4">
+      <CornerBrand />
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold">Invalid invite</CardTitle>

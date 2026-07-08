@@ -1,15 +1,35 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Button } from '@/components/ui/button'
+import { LoaderCircleIcon } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Shimmer } from '@/components/landing/Shimmer'
 
 interface Props {
   token: string
   email: string
   orgName: string
+}
+
+/**
+ * Celebratory burst on a successful account creation — same canvas-confetti
+ * recipe and brand tint as the landing Get Started dialog.
+ */
+async function celebrate(origin: { x: number; y: number }) {
+  const { default: confetti } = await import('canvas-confetti')
+  confetti({
+    particleCount: 110,
+    spread: 80,
+    startVelocity: 42,
+    origin,
+    colors: ['#e97634', '#ffffff', '#f3b89a', '#4ade80'],
+    scalar: 0.9,
+    ticks: 220,
+    zIndex: 100,
+    disableForReducedMotion: true,
+  })
 }
 
 export function AcceptInviteForm({ token, email, orgName }: Props) {
@@ -19,6 +39,7 @@ export function AcceptInviteForm({ token, email, orgName }: Props) {
   const [confirm, setConfirm] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const submitRef = useRef<HTMLButtonElement>(null)
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -49,7 +70,17 @@ export function AcceptInviteForm({ token, email, orgName }: Props) {
       return
     }
 
-    router.push('/login?invited=1')
+    // Celebrate from the button's position, then hand off to sign-in. Stay in
+    // the loading state so the form stays disabled while the confetti plays.
+    const rect = submitRef.current?.getBoundingClientRect()
+    const origin = rect
+      ? {
+          x: (rect.left + rect.width / 2) / window.innerWidth,
+          y: (rect.top + rect.height / 2) / window.innerHeight,
+        }
+      : { x: 0.5, y: 0.6 }
+    void celebrate(origin)
+    setTimeout(() => router.push('/login?invited=1'), 900)
   }
 
   return (
@@ -127,9 +158,18 @@ export function AcceptInviteForm({ token, email, orgName }: Props) {
         </p>
       )}
 
-      <Button type="submit" className="w-full" disabled={loading}>
-        {loading ? 'Creating account…' : 'Create account'}
-      </Button>
+      <button
+        ref={submitRef}
+        type="submit"
+        disabled={loading}
+        className="relative mt-1 inline-flex h-12 w-full items-center justify-center overflow-hidden rounded-full bg-primary text-sm font-semibold text-white shadow-lg shadow-primary/20 transition-colors hover:bg-primary-hover disabled:opacity-70"
+      >
+        <span className="relative z-10 inline-flex items-center gap-2">
+          {loading && <LoaderCircleIcon className="size-4 animate-spin" aria-hidden="true" />}
+          {loading ? 'Creating account…' : 'Create account'}
+        </span>
+        <Shimmer />
+      </button>
     </form>
   )
 }
