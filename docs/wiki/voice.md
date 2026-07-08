@@ -23,6 +23,16 @@ on **ElevenLabs Conversational AI**.
   (`{ en, lt? }`, `lib/validation/schemas.ts:210-212`). LLM is a built-in
   ElevenLabs model id chosen from `VOICE_LLM_OPTIONS`
   (`lib/ai/voice-models.ts:14-21`), default `gpt-4o`.
+- **Prompt** = `buildAgentPrompt` (`lib/ai/elevenlabs-agent.ts:71`): the bot's
+  `cfg.systemPrompt` + hardcoded voice blocks (spoken-delivery style + per-tool
+  guidance for search/knowledge/order/discount). Product results render as cards,
+  so the prompt tells the agent NOT to read names/prices aloud and to reply in one
+  or two short, *varied*, warm sentences (do not habitually open with
+  "Žinoma"/"Of course" — that repetition was a real complaint, fixed 2026-07-08).
+  ⚠️ **gotcha:** `agentConfigHash` hashes `cfg.systemPrompt` but NOT the hardcoded
+  voice-block text, so when you change `buildAgentPrompt` you must bump its version
+  marker (`agentConfigHash`, currently `v21-voice-prompt-variety`) or live agents
+  won't re-sync.
 - The agent answers knowledge questions via a `search_knowledge` **client
   tool** (`buildKnowledgeToolConfig`, `lib/ai/elevenlabs-agent.ts:211-236`),
   implemented browser-side in `components/voice/VoiceCallButton.tsx:142`
