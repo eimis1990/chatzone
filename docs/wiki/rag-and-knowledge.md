@@ -88,6 +88,12 @@ How a bot's answers stay grounded in the client's own content.
   across scans — a changed fingerprint (changed content) resurfaces it.
 - The lint route tolerates a **missing** dismissals table (ignores the query
   error → no filtering), so it's safe to deploy before migration `0038` is applied.
+- The lint prompt is **date-aware** — it injects today's date + current year so it
+  never flags the current year as "future"/stale (gpt-4o-mini otherwise assumes a
+  training-cutoff year and would call a correct `© {year}` outdated).
+- `SourceDrawer` shows the indexed text as a rendered **markdown preview** (via
+  `marked` + the `.article` styles) with a Preview↔Edit toggle; editing → raw
+  textarea → Save & re-index (`contentOverride`).
 
 ## Products vs. chunks
 

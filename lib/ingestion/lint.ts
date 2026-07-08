@@ -51,15 +51,22 @@ interface RawFinding {
 }
 
 function buildPrompt(topic: string, excerpts: string): string {
+  const now = new Date()
+  const today = now.toISOString().slice(0, 10)
+  const year = now.getUTCFullYear()
   return (
     `You are auditing an online store's knowledge base for QUALITY ISSUES. All excerpts below relate ` +
     `to "${topic}".\n\n` +
+    `Today's date is ${today}. The current year is ${year}. Treat ${year} (and this year's dates) as ` +
+    `CURRENT, never as "future" or outdated — a copyright or "as of" ${year} is correct. Only content ` +
+    `dated BEFORE today, or scheduled for a year AFTER ${year}, can be stale/misdated.\n\n` +
     'Report ONLY:\n' +
     '1) CONTRADICTIONS — two excerpts stating genuinely incompatible facts about the SAME thing ' +
     '(e.g. different return windows, different phone numbers or emails, different prices, thresholds, ' +
     'or timeframes). Put BOTH conflicting statements, quoted verbatim, in "evidence".\n' +
-    '2) STALE content — explicit past dates or years, expired promotions, or "coming soon" / ' +
-    '"temporarily" notes that appear outdated. Quote the stale text in "evidence".\n\n' +
+    `2) STALE content — dates/years clearly in the PAST relative to ${today}, expired promotions, or ` +
+    '"coming soon" / "temporarily" notes that appear outdated. Quote the stale text in "evidence". ' +
+    `Do NOT flag ${year} or current dates as future/stale.\n\n` +
     'STRICT RULES:\n' +
     '- A contradiction requires TWO excerpts that BOTH make a claim about the same specific fact, and ' +
     'those claims are mutually incompatible (e.g. "14 days" vs "30 days"). If one excerpt states a fact ' +

@@ -2,7 +2,8 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { XIcon, RefreshCwIcon, Trash2Icon, ExternalLinkIcon, SaveIcon, Loader2Icon } from 'lucide-react'
+import { XIcon, RefreshCwIcon, Trash2Icon, ExternalLinkIcon, SaveIcon, Loader2Icon, PencilIcon, EyeIcon } from 'lucide-react'
+import { marked } from 'marked'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { createBrowserClient } from '@/lib/supabase/browser'
@@ -34,6 +35,7 @@ function IndexedContent({
   const [text, setText] = useState('')
   const [chunkCount, setChunkCount] = useState(0)
   const [saving, setSaving] = useState(false)
+  const [editing, setEditing] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -97,38 +99,81 @@ function IndexedContent({
 
   if (loading) return <p className="text-sm text-muted-foreground">Loading indexed content…</p>
 
+  const hasText = text.trim().length > 0
+
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between gap-2">
         <span className="text-xs font-medium text-muted-foreground">
           Indexed content · {chunkCount} chunk{chunkCount === 1 ? '' : 's'}
         </span>
-        {dirty && (
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" onClick={() => setText(original)} disabled={saving}>
-              Cancel
-            </Button>
-            <Button size="sm" onClick={save} disabled={saving}>
-              {saving ? <Loader2Icon className="size-4 animate-spin" /> : <SaveIcon className="size-4" />}
-              Save &amp; re-index
-            </Button>
-          </div>
-        )}
+        {/* Preview ↔ edit toggle. */}
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setEditing((e) => !e)}
+          aria-pressed={editing}
+          className="h-7 gap-1.5 px-2 text-xs"
+        >
+          {editing ? (
+            <>
+              <EyeIcon className="size-3.5" /> Preview
+            </>
+          ) : (
+            <>
+              <PencilIcon className="size-3.5" /> Edit
+            </>
+          )}
+        </Button>
       </div>
-      <textarea
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-        rows={16}
-        spellCheck={false}
-        className="w-full resize-y rounded-lg border bg-background p-3 text-sm leading-relaxed [overflow-wrap:anywhere] focus:outline-none focus:ring-2 focus:ring-primary/30"
-        placeholder={
-          source.status === 'ready' ? 'No text was indexed for this source.' : 'Not indexed yet.'
-        }
-      />
+
+      {editing ? (
+        <textarea
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          rows={20}
+          spellCheck={false}
+          autoFocus
+          className="w-full resize-y rounded-lg border bg-background p-3 font-mono text-sm leading-relaxed [overflow-wrap:anywhere] focus:outline-none focus:ring-2 focus:ring-primary/30"
+          placeholder={
+            source.status === 'ready' ? 'No text was indexed for this source.' : 'Not indexed yet.'
+          }
+        />
+      ) : hasText ? (
+        <div
+          className="article max-h-[60vh] overflow-y-auto rounded-lg border bg-card p-4 text-sm"
+          dangerouslySetInnerHTML={{ __html: marked.parse(text, { async: false }) as string }}
+        />
+      ) : (
+        <p className="rounded-lg border bg-card p-4 text-sm text-muted-foreground">
+          {source.status === 'ready' ? 'No text was indexed for this source.' : 'Not indexed yet.'}
+        </p>
+      )}
+
       <p className="text-xs text-muted-foreground">
         This is the exact text the AI searches. Edit it and re-index to correct or enrich what the
         bot knows.
       </p>
+
+      {dirty && (
+        <div className="flex items-center justify-end gap-2 pt-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setText(original)
+              setEditing(false)
+            }}
+            disabled={saving}
+          >
+            Cancel
+          </Button>
+          <Button size="sm" onClick={save} disabled={saving}>
+            {saving ? <Loader2Icon className="size-4 animate-spin" /> : <SaveIcon className="size-4" />}
+            Save &amp; re-index
+          </Button>
+        </div>
+      )}
     </div>
   )
 }
@@ -243,7 +288,7 @@ export function SourceDrawer({ source, onClose, onDelete, onRetry, onUpdated }: 
             role="dialog"
             aria-modal="true"
             aria-label={`Source: ${source.name}`}
-            className="fixed inset-y-0 right-0 z-50 flex w-full max-w-md flex-col bg-background shadow-2xl"
+            className="fixed inset-y-0 right-0 z-50 flex w-full max-w-2xl flex-col bg-background shadow-2xl"
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
