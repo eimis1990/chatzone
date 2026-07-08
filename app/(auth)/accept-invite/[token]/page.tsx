@@ -59,11 +59,14 @@ export default async function AcceptInvitePage({ params }: Props) {
             src="/loqara-logo-colorful.webp"
             alt=""
             aria-hidden="true"
-            className="size-14 object-contain"
+            className="mx-auto size-20 object-contain"
           />
           <CardTitle className="text-2xl font-bold">Create your account</CardTitle>
           <CardDescription>
-            You have been invited to join <strong>{orgName}</strong>. Set a password to get started.
+            You have been invited to join{' '}
+            <strong className="text-primary">{orgName}</strong>.
+            <br />
+            Set a password to get started.
           </CardDescription>
         </CardHeader>
         <CardContent>
