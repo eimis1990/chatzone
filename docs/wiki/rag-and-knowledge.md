@@ -82,10 +82,15 @@ How a bot's answers stay grounded in the client's own content.
 - Each finding carries the **source(s)** its excerpts came from (mapped from the
   model's `excerptRefs` → `support[i].source_id`), an AI **`suggestedFix`**, and a
   stable **`id`** fingerprint (hash of type+topic+evidence).
-- Resolution UI (`LintResults` → `KnowledgeManager` → `SourceList`): **Fix** opens
-  the offending source's editor (`contentOverride` → re-ingest); **Dismiss**
-  persists to `knowledge_lint_dismissals` (migration `0038`) so it stays hidden
-  across scans — a changed fingerprint (changed content) resurfaces it.
+- Resolution UI: each finding has **Resolve** (opens `LintResolveDialog` — pick the
+  correct conflicting line, or "keep both") and **Dismiss**. "Keep both" just
+  records the dismissal; picking a line calls `POST /api/knowledge/lint/resolve`,
+  which asks the model for **verbatim find/replace edits** (not a whole-doc
+  rewrite — that would truncate large docs), applies the ones that match to the
+  affected source(s)' `contentOverride`, re-ingests via `ingestSource`, and
+  dismisses the finding.
+- **Dismiss** persists to `knowledge_lint_dismissals` (migration `0038`) so it
+  stays hidden across scans — a changed fingerprint (changed content) resurfaces it.
 - The lint route tolerates a **missing** dismissals table (ignores the query
   error → no filtering), so it's safe to deploy before migration `0038` is applied.
 - The lint prompt is **date-aware** — it injects today's date + current year so it

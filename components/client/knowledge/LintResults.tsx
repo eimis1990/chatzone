@@ -30,13 +30,13 @@ interface LintResultsProps {
   findings: LintFinding[]
   scanned: number
   onClose: () => void
-  /** Open a source in the editor so the owner can fix the conflicting text. */
-  onFix: (sourceId: string) => void
+  /** Open the guided resolution dialog for a finding. */
+  onResolve: (finding: LintFinding) => void
   /** Dismiss a finding (persisted per bot by its fingerprint). */
   onDismiss: (fingerprint: string) => void
 }
 
-export function LintResults({ findings, scanned, onClose, onFix, onDismiss }: LintResultsProps) {
+export function LintResults({ findings, scanned, onClose, onResolve, onDismiss }: LintResultsProps) {
   const issues = findings.filter((f) => f.type !== 'gap')
   const gaps = findings.filter((f) => f.type === 'gap')
 
@@ -110,19 +110,18 @@ export function LintResults({ findings, scanned, onClose, onFix, onDismiss }: Li
                   </div>
                 )}
 
-                {/* Actions: jump to the offending source(s) to edit, or dismiss. */}
+                {/* Actions: open the guided resolution dialog, or dismiss. */}
                 <div className="mt-2.5 flex flex-wrap items-center gap-2">
-                  {f.sources.map((s) => (
+                  {f.type !== 'gap' && (
                     <button
-                      key={s.id}
                       type="button"
-                      onClick={() => onFix(s.id)}
-                      className="inline-flex max-w-full items-center gap-1 rounded-md border bg-card px-2 py-1 text-xs font-medium text-foreground transition-colors hover:bg-muted"
+                      onClick={() => onResolve(f)}
+                      className="inline-flex items-center gap-1 rounded-md border bg-card px-2 py-1 text-xs font-medium text-foreground transition-colors hover:bg-muted"
                     >
                       <PencilIcon className="size-3 shrink-0" aria-hidden="true" />
-                      <span className="truncate">Fix in {s.title}</span>
+                      Resolve
                     </button>
-                  ))}
+                  )}
                   <button
                     type="button"
                     onClick={() => onDismiss(f.id)}

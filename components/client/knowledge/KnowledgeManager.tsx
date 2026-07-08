@@ -14,6 +14,7 @@ import { UrlSource } from './UrlSource'
 import { FileUpload } from './FileUpload'
 import { SourceList } from './SourceList'
 import { LintResults } from './LintResults'
+import { LintResolveDialog } from './LintResolveDialog'
 import type { KnowledgeSource, LintFinding } from '@/lib/types'
 
 interface KnowledgeManagerProps {
@@ -44,9 +45,15 @@ export function KnowledgeManager({ botId, initialSources }: KnowledgeManagerProp
   const [summarizing, setSummarizing] = useState(false)
   const [linting, setLinting] = useState(false)
   const [lint, setLint] = useState<{ findings: LintFinding[]; scanned: number } | null>(null)
-  // A knowledge-check finding's "Fix" opens that source in the editor.
-  const [fixSourceId, setFixSourceId] = useState<string | null>(null)
-  const handleFixOpened = useCallback(() => setFixSourceId(null), [])
+  // The finding open in the guided resolution dialog.
+  const [resolving, setResolving] = useState<LintFinding | null>(null)
+
+  // Remove a finding from the panel (after it's resolved or dismissed).
+  const removeFinding = useCallback((fingerprint: string) => {
+    setLint((prev) =>
+      prev ? { ...prev, findings: prev.findings.filter((f) => f.id !== fingerprint) } : prev,
+    )
+  }, [])
 
   // Scan the KB for contradictions / stale content / gaps (read-only).
   const handleCheckIssues = useCallback(async () => {
@@ -72,9 +79,7 @@ export function KnowledgeManager({ botId, initialSources }: KnowledgeManagerProp
   // may resurface it — not worth blocking the UI on.
   const handleDismiss = useCallback(
     async (fingerprint: string) => {
-      setLint((prev) =>
-        prev ? { ...prev, findings: prev.findings.filter((f) => f.id !== fingerprint) } : prev,
-      )
+      removeFinding(fingerprint)
       try {
         await fetch('/api/knowledge/lint/dismiss', {
           method: 'POST',
@@ -85,7 +90,7 @@ export function KnowledgeManager({ botId, initialSources }: KnowledgeManagerProp
         // Optimistic — persistence is best-effort.
       }
     },
-    [botId],
+    [botId, removeFinding],
   )
 
   // Re-fetch the full source list (canonical summaries are created server-side).
@@ -202,7 +207,7 @@ export function KnowledgeManager({ botId, initialSources }: KnowledgeManagerProp
               findings={lint.findings}
               scanned={lint.scanned}
               onClose={() => setLint(null)}
-              onFix={setFixSourceId}
+              onResolve={setResolving}
               onDismiss={handleDismiss}
             />
           )}
@@ -212,8 +217,6 @@ export function KnowledgeManager({ botId, initialSources }: KnowledgeManagerProp
             onDeleted={handleSourceDeleted}
             onUpdated={handleSourceUpdated}
             onAddSource={() => setAddOpen(true)}
-            openSourceId={fixSourceId}
-            onOpened={handleFixOpened}
           />
         </CardContent>
       </Card>
@@ -286,6 +289,16 @@ export function KnowledgeManager({ botId, initialSources }: KnowledgeManagerProp
           </Tabs>
         </div>
       </aside>
+
+      {resolving && (
+        <LintResolveDialog
+          finding={resolving}
+          botId={botId}
+          onResolved={removeFinding}
+          onSourcesChanged={refreshSources}
+          onClose={() => setResolving(null)}
+        />
+      )}
     </div>
   )
 }
