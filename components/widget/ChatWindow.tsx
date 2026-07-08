@@ -242,10 +242,20 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
       try {
         const data = await transport.search(query, audience)
         if (data.products?.length) {
-          setMessages((prev) => [
-            ...prev,
-            { id: generateId(), role: 'assistant', content: '', products: data.products },
-          ])
+          const found = data.products
+          setMessages((prev) => {
+            // Collapse a burst of searches for the SAME request into one card
+            // list instead of stacking a new list per search. Only merge when the
+            // previous message is already a products-only bubble (no spoken reply
+            // or new question since), so separate requests still get their own list.
+            const last = prev[prev.length - 1]
+            if (last && last.role === 'assistant' && !last.content && last.products?.length) {
+              const seen = new Set(last.products.map((p) => p.id))
+              const merged = [...last.products, ...found.filter((p) => !seen.has(p.id))]
+              return [...prev.slice(0, -1), { ...last, products: merged }]
+            }
+            return [...prev, { id: generateId(), role: 'assistant', content: '', products: found }]
+          })
         }
         return data.summary ?? 'Here are a few options.'
       } catch {

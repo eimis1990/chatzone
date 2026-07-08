@@ -39,6 +39,11 @@ on **ElevenLabs Conversational AI**.
   the agent not to switch languages unless the customer does. (ElevenLabs' own V3
   auto-detection is a separate layer we don't currently constrain in config — if
   drift persists, that's the next lever.)
+- **One list per request:** on voice, every `search_products` call renders its
+  own card list (`ChatWindow` `handleVoiceSearch`), so the prompt tells the agent
+  to run ONE search per request (not fan out across gift categories) and to ask a
+  clarifying question instead; the widget also merges a burst of searches into a
+  single list. Prevents stacking several carousels for one question (fixed 2026-07-08).
 - The agent answers knowledge questions via a `search_knowledge` **client
   tool** (`buildKnowledgeToolConfig`, `lib/ai/elevenlabs-agent.ts:211-236`),
   implemented browser-side in `components/voice/VoiceCallButton.tsx:142`
