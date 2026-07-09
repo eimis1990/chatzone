@@ -44,6 +44,16 @@ export default async function SignupsPage() {
     suggestedName: s.company?.trim() || companyNameFromWebsite(s.website),
   }))
 
+  // Group by lifecycle stage so each section's cards are uniform (New cards have
+  // an invite form, Invited have a resend, Accepted are done) — no ragged rows.
+  const isAccepted = (c: SignupCardData) => c.inviteStatus === 'accepted'
+  const isInvited = (c: SignupCardData) =>
+    !isAccepted(c) &&
+    (c.status === 'invited' || c.inviteStatus === 'pending' || c.inviteStatus === 'expired')
+  const newCards = cards.filter((c) => !isAccepted(c) && !isInvited(c))
+  const invitedCards = cards.filter(isInvited)
+  const acceptedCards = cards.filter(isAccepted)
+
   return (
     <div className="space-y-6 p-6">
       <div className="flex items-start justify-between gap-4">
@@ -64,12 +74,30 @@ export default async function SignupsPage() {
           </p>
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {cards.map((s) => (
-            <SignupCard key={s.id} signup={s} />
-          ))}
+        <div className="space-y-8">
+          <SignupSection title="New" cards={newCards} />
+          <SignupSection title="Invited" cards={invitedCards} />
+          <SignupSection title="Accepted" cards={acceptedCards} />
         </div>
       )}
     </div>
+  )
+}
+
+/** A labelled group of signup cards (hidden when empty). */
+function SignupSection({ title, cards }: { title: string; cards: SignupCardData[] }) {
+  if (cards.length === 0) return null
+  return (
+    <section className="space-y-3">
+      <h2 className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+        {title}
+        <span className="rounded-full bg-muted px-1.5 py-0.5 text-xs font-medium">{cards.length}</span>
+      </h2>
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        {cards.map((s) => (
+          <SignupCard key={s.id} signup={s} />
+        ))}
+      </div>
+    </section>
   )
 }

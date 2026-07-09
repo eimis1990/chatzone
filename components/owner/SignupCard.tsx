@@ -12,6 +12,7 @@ import {
   DialogDescription,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { cn } from '@/lib/utils'
 import { formatDistanceToNow } from '@/lib/date-utils'
 import { sendInvitation, resendInvitation, deleteSignup } from '@/app/(owner)/owner/signups/actions'
 
@@ -29,12 +30,13 @@ export interface SignupCardData {
   suggestedName: string
 }
 
-function statusBadge(s: SignupCardData): { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' } {
-  if (s.inviteStatus === 'accepted') return { label: 'Accepted', variant: 'default' }
-  if (s.inviteStatus === 'expired') return { label: 'Invite expired', variant: 'destructive' }
+/** A clean, colour-coded status pill per signup state. */
+function statusBadge(s: SignupCardData): { label: string; className: string } {
+  if (s.inviteStatus === 'accepted') return { label: 'Accepted', className: 'bg-green-100 text-green-700' }
+  if (s.inviteStatus === 'expired') return { label: 'Invite expired', className: 'bg-red-100 text-red-700' }
   if (s.status === 'invited' || s.inviteStatus === 'pending')
-    return { label: 'Invited — waiting', variant: 'secondary' }
-  return { label: 'New', variant: 'outline' }
+    return { label: 'Invited', className: 'bg-amber-100 text-amber-700' }
+  return { label: 'New', className: 'bg-slate-100 text-slate-600' }
 }
 
 export function SignupCard({ signup }: { signup: SignupCardData }) {
@@ -43,6 +45,7 @@ export function SignupCard({ signup }: { signup: SignupCardData }) {
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [pending, startTransition] = useTransition()
   const badge = statusBadge(signup)
+  const accepted = signup.inviteStatus === 'accepted'
   const canInvite = signup.status !== 'invited' && signup.inviteStatus !== 'accepted'
   const canResend =
     (signup.status === 'invited' || signup.inviteStatus === 'expired') &&
@@ -94,10 +97,24 @@ export function SignupCard({ signup }: { signup: SignupCardData }) {
   }
 
   return (
-    <div className="flex flex-col gap-3 rounded-xl border bg-card p-4 shadow-sm transition-shadow hover:shadow-md">
+    <div
+      className={cn(
+        'flex flex-col gap-3 rounded-2xl border p-5 shadow-sm transition-shadow hover:shadow-md',
+        accepted ? 'bg-muted/30' : 'bg-card',
+      )}
+    >
       <div className="flex items-start gap-3">
-        <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
-          {(signup.suggestedName || signup.email).charAt(0).toUpperCase()}
+        <div
+          className={cn(
+            'flex size-10 shrink-0 items-center justify-center rounded-full text-sm font-bold',
+            accepted ? 'bg-green-100 text-green-700' : 'bg-primary/10 text-primary',
+          )}
+        >
+          {accepted ? (
+            <CheckIcon className="size-5" />
+          ) : (
+            (signup.suggestedName || signup.email).charAt(0).toUpperCase()
+          )}
         </div>
         <div className="min-w-0 flex-1">
           <p className="truncate font-medium" title={signup.email}>
@@ -122,7 +139,7 @@ export function SignupCard({ signup }: { signup: SignupCardData }) {
             </a>
           )}
         </div>
-        <Badge variant={badge.variant} className="shrink-0 whitespace-nowrap">
+        <Badge className={cn('shrink-0 whitespace-nowrap border-transparent', badge.className)}>
           {badge.label}
         </Badge>
       </div>
