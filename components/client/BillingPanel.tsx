@@ -492,15 +492,13 @@ export function BillingPanel({
                   const owned = purchasedSetups.includes(s.id)
                   const thisBusy = busy === `setup-${s.id}`
                   return (
-                    <div key={s.id} className="flex flex-col rounded-2xl border bg-card p-6 shadow-sm">
-                      <div className="flex items-center justify-between">
-                        <h3 className="font-semibold">{s.name}</h3>
-                        {owned && (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
-                            <CheckIcon className="size-3" /> Purchased
-                          </span>
-                        )}
-                      </div>
+                    <div key={s.id} className="relative flex flex-col rounded-2xl border bg-card p-6 shadow-sm">
+                      {owned && (
+                        <span className="absolute right-4 top-4 inline-flex items-center gap-1 rounded-full bg-green-100 px-2.5 py-1 text-xs font-semibold text-green-700">
+                          <CheckIcon className="size-3.5" /> Paid
+                        </span>
+                      )}
+                      <h3 className="font-semibold">{s.name}</h3>
                       <p className="mt-1 text-sm text-muted-foreground">{s.blurb}</p>
                       <p className="mt-3 text-2xl font-bold tracking-tight">
                         €{s.price.toLocaleString('en-US')}

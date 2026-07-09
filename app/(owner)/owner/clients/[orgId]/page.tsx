@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { BotIcon, MailIcon } from 'lucide-react'
+import { BotIcon, MailIcon, SparklesIcon } from 'lucide-react'
 import { requireRole } from '@/lib/auth/guards'
 import { createServerClient } from '@/lib/supabase/server'
 import { StatCard } from '@/components/client/charts/StatCard'
@@ -13,7 +13,23 @@ import { ResendInviteButton } from '@/components/owner/ResendInviteButton'
 import { CreateBotDialog } from '@/components/client/CreateBotDialog'
 import { Button } from '@/components/ui/button'
 import { createBotForOrg } from './actions'
+import { SETUP_PACKAGES } from '@/lib/setup-packages'
 import type { Bot, Invite } from '@/lib/types'
+
+interface SetupOrderRow {
+  id: string
+  package: string
+  amount_cents: number
+  currency: string
+  status: string
+  created_at: string
+}
+
+const setupName = (pkg: string) => SETUP_PACKAGES.find((p) => p.id === pkg)?.name ?? pkg
+const money = (cents: number, currency: string) =>
+  new Intl.NumberFormat('en-US', { style: 'currency', currency: (currency || 'eur').toUpperCase() }).format(
+    cents / 100,
+  )
 
 interface OrgStatRow {
   org_id: string
@@ -43,23 +59,29 @@ export default async function ClientDetailPage({
   const supabase = await createServerClient()
 
   // Owner sees all rows via RLS — parallel fetches
-  const [{ data: orgStat }, { data: bots }, { data: invites }] = await Promise.all([
-    supabase
-      .from('org_stats')
-      .select('*')
-      .eq('org_id', orgId)
-      .single<OrgStatRow>(),
-    supabase
-      .from('bots')
-      .select('id, name, status, config, created_at, public_key, last_seen_at')
-      .eq('org_id', orgId)
-      .order('created_at', { ascending: false }),
-    supabase
-      .from('invites')
-      .select('id, email, status, expires_at, created_at')
-      .eq('org_id', orgId)
-      .order('created_at', { ascending: false }),
-  ])
+  const [{ data: orgStat }, { data: bots }, { data: invites }, { data: setupOrders }] =
+    await Promise.all([
+      supabase
+        .from('org_stats')
+        .select('*')
+        .eq('org_id', orgId)
+        .single<OrgStatRow>(),
+      supabase
+        .from('bots')
+        .select('id, name, status, config, created_at, public_key, last_seen_at')
+        .eq('org_id', orgId)
+        .order('created_at', { ascending: false }),
+      supabase
+        .from('invites')
+        .select('id, email, status, expires_at, created_at')
+        .eq('org_id', orgId)
+        .order('created_at', { ascending: false }),
+      supabase
+        .from('setup_orders')
+        .select('id, package, amount_cents, currency, status, created_at')
+        .eq('org_id', orgId)
+        .order('created_at', { ascending: false }),
+    ])
 
   if (!orgStat) notFound()
 
@@ -68,6 +90,7 @@ export default async function ClientDetailPage({
     'id' | 'name' | 'status' | 'config' | 'created_at' | 'public_key' | 'last_seen_at'
   >[]
   const inviteRows = (invites ?? []) as Pick<Invite, 'id' | 'email' | 'status' | 'expires_at' | 'created_at'>[]
+  const setupRows = (setupOrders ?? []) as SetupOrderRow[]
 
   return (
     <div className="space-y-8 p-6">
@@ -216,6 +239,38 @@ export default async function ClientDetailPage({
                 </div>
               )
             })}
+          </div>
+        </div>
+      )}
+
+      {/* Done-for-you setup purchases */}
+      {setupRows.length > 0 && (
+        <div className="space-y-4">
+          <h2 className="text-lg font-semibold">Setup</h2>
+          <div className="divide-y overflow-hidden rounded-2xl border bg-card shadow-sm">
+            {setupRows.map((o) => (
+              <div key={o.id} className="flex items-center gap-4 px-5 py-4">
+                <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-green-100 text-green-700">
+                  <SparklesIcon className="size-5" aria-hidden="true" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="font-medium truncate">{setupName(o.package)} setup</p>
+                  <p className="text-xs text-muted-foreground">
+                    {money(o.amount_cents, o.currency)} · {formatDistanceToNow(o.created_at)}
+                  </p>
+                </div>
+                <Badge
+                  className={
+                    o.status === 'paid'
+                      ? 'border-transparent bg-green-100 text-green-700 capitalize'
+                      : 'capitalize'
+                  }
+                  variant={o.status === 'paid' ? undefined : 'secondary'}
+                >
+                  {o.status === 'paid' ? 'Paid' : o.status}
+                </Badge>
+              </div>
+            ))}
           </div>
         </div>
       )}
