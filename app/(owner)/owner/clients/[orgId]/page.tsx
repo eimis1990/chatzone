@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import { BotIcon, MailIcon } from 'lucide-react'
 import { requireRole } from '@/lib/auth/guards'
 import { createServerClient } from '@/lib/supabase/server'
 import { StatCard } from '@/components/client/charts/StatCard'
@@ -113,25 +114,33 @@ export default async function ClientDetailPage({
             action={createBot}
             configureBase={`/owner/clients/${orgId}/bots`}
             trigger={
-              <Button variant="outline" size="sm">
+              <Button size="sm" className="bg-primary text-white hover:bg-primary-hover">
                 New bot
               </Button>
             }
           />
         </div>
         {botRows.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
-            No bots in this organisation yet. Use <span className="font-medium">New bot</span> to
-            create one for this client, then configure it.
-          </p>
+          <div className="rounded-2xl border border-dashed bg-card p-8 text-center">
+            <span className="mx-auto mb-3 flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <BotIcon className="size-5" />
+            </span>
+            <p className="text-sm text-muted-foreground">
+              No bots in this organisation yet. Use <span className="font-medium">New bot</span> to
+              create one for this client, then configure it.
+            </p>
+          </div>
         ) : (
-          <div className="divide-y overflow-hidden rounded-xl border bg-card shadow-sm">
+          <div className="divide-y overflow-hidden rounded-2xl border bg-card shadow-sm">
             {botRows.map((bot) => (
               <div
                 key={bot.id}
-                className="flex items-center justify-between px-4 py-3 gap-4"
+                className="flex items-center gap-4 px-5 py-4 transition-colors hover:bg-muted/40"
               >
-                <div className="min-w-0 space-y-0.5">
+                <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <BotIcon className="size-5" aria-hidden="true" />
+                </span>
+                <div className="min-w-0 flex-1 space-y-0.5">
                   <p className="font-medium truncate">{bot.name}</p>
                   <p className="text-xs text-muted-foreground font-mono truncate">
                     {bot.public_key}
@@ -165,17 +174,20 @@ export default async function ClientDetailPage({
       {inviteRows.length > 0 && (
         <div className="space-y-4">
           <h2 className="text-lg font-semibold">Invites</h2>
-          <div className="divide-y overflow-hidden rounded-xl border bg-card shadow-sm">
+          <div className="divide-y overflow-hidden rounded-2xl border bg-card shadow-sm">
             {inviteRows.map((invite) => {
               const isExpired =
                 invite.status === 'expired' || new Date(invite.expires_at) <= new Date()
               return (
                 <div
                   key={invite.id}
-                  className="flex items-center justify-between px-4 py-3 gap-4"
+                  className="flex items-center gap-4 px-5 py-4 transition-colors hover:bg-muted/40"
                 >
-                  <div className="min-w-0">
-                    <p className="text-sm truncate">{invite.email}</p>
+                  <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-muted text-muted-foreground">
+                    <MailIcon className="size-5" aria-hidden="true" />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium">{invite.email}</p>
                     <p className="text-xs text-muted-foreground">
                       {invite.status === 'accepted'
                         ? 'Accepted'
