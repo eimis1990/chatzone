@@ -6,8 +6,9 @@ import { StatCard } from '@/components/client/charts/StatCard'
 import { LiveIndicator } from '@/components/LiveIndicator'
 import { Badge } from '@/components/ui/badge'
 import { buttonVariants } from '@/components/ui/button'
-import { formatDistanceToNow } from '@/lib/date-utils'
+import { formatDistanceToNow, formatTimeUntil } from '@/lib/date-utils'
 import { SuspendToggle } from '@/components/owner/SuspendToggle'
+import { ResendInviteButton } from '@/components/owner/ResendInviteButton'
 import { CreateBotDialog } from '@/components/client/CreateBotDialog'
 import { Button } from '@/components/ui/button'
 import { createBotForOrg } from './actions'
@@ -165,31 +166,44 @@ export default async function ClientDetailPage({
         <div className="space-y-4">
           <h2 className="text-lg font-semibold">Invites</h2>
           <div className="divide-y overflow-hidden rounded-xl border bg-card shadow-sm">
-            {inviteRows.map((invite) => (
-              <div
-                key={invite.id}
-                className="flex items-center justify-between px-4 py-3 gap-4"
-              >
-                <div className="min-w-0">
-                  <p className="text-sm truncate">{invite.email}</p>
-                  <p className="text-xs text-muted-foreground">
-                    Expires {formatDistanceToNow(invite.expires_at)}
-                  </p>
-                </div>
-                <Badge
-                  variant={
-                    invite.status === 'accepted'
-                      ? 'default'
-                      : invite.status === 'expired'
-                        ? 'destructive'
-                        : 'secondary'
-                  }
-                  className="capitalize shrink-0"
+            {inviteRows.map((invite) => {
+              const isExpired =
+                invite.status === 'expired' || new Date(invite.expires_at) <= new Date()
+              return (
+                <div
+                  key={invite.id}
+                  className="flex items-center justify-between px-4 py-3 gap-4"
                 >
-                  {invite.status}
-                </Badge>
-              </div>
-            ))}
+                  <div className="min-w-0">
+                    <p className="text-sm truncate">{invite.email}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {invite.status === 'accepted'
+                        ? 'Accepted'
+                        : isExpired
+                          ? 'Expired'
+                          : `Expires ${formatTimeUntil(invite.expires_at)}`}
+                    </p>
+                  </div>
+                  <div className="flex shrink-0 items-center gap-2">
+                    {invite.status !== 'accepted' && (
+                      <ResendInviteButton inviteId={invite.id} expired={isExpired} />
+                    )}
+                    <Badge
+                      variant={
+                        invite.status === 'accepted'
+                          ? 'default'
+                          : invite.status === 'expired'
+                            ? 'destructive'
+                            : 'secondary'
+                      }
+                      className="capitalize"
+                    >
+                      {invite.status}
+                    </Badge>
+                  </div>
+                </div>
+              )
+            })}
           </div>
         </div>
       )}

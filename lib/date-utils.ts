@@ -25,6 +25,24 @@ export function formatDistanceToNow(isoString: string): string {
 }
 
 /**
+ * Human-readable time UNTIL a future date, e.g. "in 6 days" / "in 3 hours".
+ * Returns "expired" for a past date. (formatDistanceToNow only handles the
+ * past, so it wrongly reports future dates as "just now".)
+ */
+export function formatTimeUntil(isoString: string): string {
+  const diffMs = new Date(isoString).getTime() - Date.now()
+  if (diffMs <= 0) return 'expired'
+  const diffMin = Math.floor(diffMs / 60000)
+  const diffHrs = Math.floor(diffMin / 60)
+  // Round days so a fresh 7-day invite reads "in 7 days", not "in 6".
+  const diffDays = Math.round(diffHrs / 24)
+
+  if (diffMin < 60) return 'in under an hour'
+  if (diffHrs < 24) return `in ${diffHrs} ${diffHrs === 1 ? 'hour' : 'hours'}`
+  return `in ${diffDays} ${diffDays === 1 ? 'day' : 'days'}`
+}
+
+/**
  * Formats an ISO date string as YYYY-MM-DD.
  */
 export function toDateString(isoString: string): string {
