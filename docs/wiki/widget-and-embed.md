@@ -38,6 +38,10 @@ timer. Entrance/exit motion is opacity/transform-only and the entrance is skippe
 for `prefers-reduced-motion` (`public/widget.js:159`, `public/widget.js:247`,
 `public/widget.js:305`, `public/widget.js:642`).
 
+The greeting dismiss control uses its own 16px/2px-stroke X so it matches the
+configurator preview. Do not reuse the launcher's 24px close icon here; that icon
+is intentionally larger for the launcher control (`public/widget.js:158`).
+
 The configurator preview is deterministic: it shows the first non-empty variant
 for the active language rather than randomizing on each form render
 (`components/client/TestChat.tsx:120`).

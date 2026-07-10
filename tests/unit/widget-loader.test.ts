@@ -156,6 +156,11 @@ describe('widget.js loader', () => {
       expect(greeting?.textContent).toContain('Welcome! How can we help?')
       expect(window.sessionStorage.getItem('cbz_greeting_GREETING_KEY')).toBe('1')
 
+      const dismissIcon = greeting?.querySelector<HTMLButtonElement>('[aria-label="Dismiss greeting"] svg')
+      expect(dismissIcon?.getAttribute('width')).toBe('16')
+      expect(dismissIcon?.getAttribute('height')).toBe('16')
+      expect(dismissIcon?.getAttribute('stroke-width')).toBe('2')
+
       const openButton = greeting?.querySelector<HTMLButtonElement>('button:not([aria-label])')
       openButton?.click()
       expect(document.querySelector('[data-cbz-iframe]')).not.toBeNull()
