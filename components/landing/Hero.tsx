@@ -52,7 +52,7 @@ export function Hero() {
               talk to your store.
             </span>{' '}
             <span
-              className="inline-flex rotate-3 items-center justify-center rounded-xl bg-white/10 px-1.5 align-middle text-[0.62em] ring-1 ring-white/15"
+              className="inline-flex rotate-3 items-center justify-center rounded-xl bg-white px-1.5 align-middle text-[0.62em] shadow-sm ring-1 ring-black/10"
               aria-hidden="true"
             >
               🎙️
@@ -67,7 +67,7 @@ export function Hero() {
           >
             Loqara gives your store a real voice agent — shoppers ask out loud and hear answers
             from your products, policies, and live order status. Prefer to type? The same AI handles
-            chat. Live in one line of code.
+            chat. <span className="font-medium text-primary">Live in one line of code.</span>
           </motion.p>
 
           <motion.div
