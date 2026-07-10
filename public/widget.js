@@ -58,7 +58,7 @@
   var IFRAME_HEIGHT = 680
   var OFFSET = 20
   var Z_INDEX = 2147483647 // max z-index
-  var POWERED_BY_URL = 'https://loqara.app'
+  var POWERED_BY_URL = 'https://www.loqara.com'
 
   var isRight = position !== 'bottom-left'
 

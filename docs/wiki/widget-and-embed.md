@@ -42,6 +42,12 @@ The greeting dismiss control uses its own 16px/2px-stroke X so it matches the
 configurator preview. Do not reuse the launcher's 24px close icon here; that icon
 is intentionally larger for the launcher control (`public/widget.js:158`).
 
+On Loqara's landing page, `WidgetEmbed` owns the loader lifecycle. Because the
+loader mounts outside React under `<body>`, its effect cleanup must remove every
+widget surface together: launcher, greeting, iframe wrapper, pulse rings, and
+the injected script. Missing the independently mounted greeting leaves an
+orphan prompt after client-side navigation (`components/landing/WidgetEmbed.tsx:19`).
+
 The configurator preview is deterministic: it shows the first non-empty variant
 for the active language rather than randomizing on each form render
 (`components/client/TestChat.tsx:120`).
@@ -65,4 +71,4 @@ for the active language rather than randomizing on each form render
   (+ `SnippetCopy.tsx`), rendered by the client's Embed page **and** the owner's
   Embed tab ([access-model](access-model.md)).
 
-_Last verified: 2026-07-08 (66f6bb8)._
+_Last verified: 2026-07-10._

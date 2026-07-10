@@ -30,6 +30,7 @@ Add a line here. How the wiki works: [README.md](README.md).
 ## Related docs (not in the wiki — linked, not duplicated)
 
 - `docs/DEPLOY.md`, `docs/SECURITY.md`, `docs/ROADMAP.md`
+- `docs/CHANNELS_IMPLEMENTATION.md` — paid messaging-channel plan, starting with Messenger
 - `docs/seo-content-loop.md` — weekly GSC content loop + article format
 - `docs/loqara-vs-parnidia.md` — competitor comparison
 - `docs/prompt-templates/` — bot system-prompt templates

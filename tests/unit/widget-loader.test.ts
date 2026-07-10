@@ -75,6 +75,15 @@ describe('widget.js loader', () => {
     ).toBeTruthy()
   })
 
+  it('links the Powered by Loqara badge to the marketing website', () => {
+    const { document } = setupDOM('TEST_KEY_123')
+    const poweredBy = Array.from(document.querySelectorAll<HTMLAnchorElement>('a')).find(
+      (link) => link.textContent === 'Loqara',
+    )
+
+    expect(poweredBy?.href).toBe('https://www.loqara.com/')
+  })
+
   it('does NOT mount an iframe before the launcher is clicked', () => {
     const { document } = setupDOM('TEST_KEY_456')
     const iframe = document.querySelector('[data-cbz-iframe]')
