@@ -52,7 +52,7 @@ export function Hero() {
               talk to your store.
             </span>{' '}
             <span
-              className="inline-flex rotate-3 items-center justify-center rounded-xl bg-white/10 px-2 py-0.5 align-middle text-[0.5em] ring-1 ring-white/15"
+              className="inline-flex rotate-3 items-center justify-center rounded-xl bg-white/25 px-2.5 py-1 align-middle text-[0.56em] ring-1 ring-white/25"
               aria-hidden="true"
             >
               🎙️
