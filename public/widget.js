@@ -156,6 +156,171 @@
     'stroke-width="2.5" stroke-linecap="round" width="24" height="24" aria-hidden="true">' +
     '<path d="M6 6l12 12M18 6L6 18" /></svg>'
 
+  // ── Proactive greeting ─────────────────────────────────────────────────
+  // A small, dismissible prompt above the closed launcher. It lives in the
+  // host page (not the lazy iframe), so it can appear before chat is opened.
+  var proactiveGreeting = document.createElement('div')
+  proactiveGreeting.setAttribute('data-cbz-greeting', '')
+  proactiveGreeting.setAttribute('role', 'status')
+  proactiveGreeting.setAttribute('aria-live', 'polite')
+  css(proactiveGreeting, {
+    position: 'fixed',
+    bottom: OFFSET + LAUNCHER_SIZE + 12 + 'px',
+    zIndex: Z_INDEX,
+    width: 'min(280px, calc(100vw - 40px))',
+    display: 'none',
+    alignItems: 'flex-start',
+    boxSizing: 'border-box',
+    boxShadow: '0 8px 28px rgba(0,0,0,0.16)',
+    opacity: '0',
+    transform: 'translateY(8px) scale(0.97)',
+    transformOrigin: isRight ? 'bottom right' : 'bottom left',
+    transition: 'opacity 0.2s ease-out, transform 0.2s ease-out',
+  })
+  proactiveGreeting.style[isRight ? 'right' : 'left'] = OFFSET + 'px'
+
+  var proactiveMessageButton = document.createElement('button')
+  proactiveMessageButton.setAttribute('type', 'button')
+  css(proactiveMessageButton, {
+    minWidth: '0',
+    minHeight: '48px',
+    flex: '1 1 auto',
+    padding: '12px 8px 12px 16px',
+    border: '0',
+    background: 'transparent',
+    color: 'inherit',
+    font: 'inherit',
+    fontSize: '14px',
+    lineHeight: '20px',
+    textAlign: 'left',
+    cursor: 'pointer',
+  })
+
+  var proactiveDismiss = document.createElement('button')
+  proactiveDismiss.setAttribute('type', 'button')
+  proactiveDismiss.setAttribute('aria-label', 'Dismiss greeting')
+  proactiveDismiss.innerHTML = CLOSE_ICON
+  css(proactiveDismiss, {
+    width: '44px',
+    height: '44px',
+    flex: '0 0 auto',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '0',
+    border: '0',
+    borderRadius: '50%',
+    background: 'transparent',
+    color: 'inherit',
+    opacity: '0.6',
+    cursor: 'pointer',
+  })
+
+  var proactiveTail = document.createElement('span')
+  proactiveTail.setAttribute('aria-hidden', 'true')
+  css(proactiveTail, {
+    position: 'absolute',
+    bottom: '-6px',
+    width: '12px',
+    height: '12px',
+    transform: 'rotate(45deg)',
+  })
+  proactiveTail.style[isRight ? 'right' : 'left'] = '22px'
+
+  proactiveGreeting.appendChild(proactiveMessageButton)
+  proactiveGreeting.appendChild(proactiveDismiss)
+  proactiveGreeting.appendChild(proactiveTail)
+
+  var proactiveTimer = null
+  var proactiveHideTimer = null
+  var proactiveVisible = false
+
+  function greetingFont(fontKey, chatFontKey) {
+    var key = fontKey === 'inherit' ? chatFontKey : fontKey
+    var stacks = {
+      geist: 'Geist, system-ui, -apple-system, sans-serif',
+      inter: 'Inter, system-ui, -apple-system, sans-serif',
+      poppins: 'Poppins, system-ui, -apple-system, sans-serif',
+      nunito: 'Nunito, system-ui, -apple-system, sans-serif',
+      jakarta: '"Plus Jakarta Sans", system-ui, -apple-system, sans-serif',
+      lora: 'Lora, Georgia, serif',
+    }
+    return stacks[key] || 'system-ui, -apple-system, sans-serif'
+  }
+
+  function dismissProactiveGreeting() {
+    if (proactiveTimer) {
+      clearTimeout(proactiveTimer)
+      proactiveTimer = null
+    }
+    if (proactiveHideTimer) clearTimeout(proactiveHideTimer)
+    proactiveVisible = false
+    proactiveGreeting.style.opacity = '0'
+    proactiveGreeting.style.transform = 'translateY(4px) scale(0.98)'
+    proactiveHideTimer = setTimeout(function () {
+      if (!proactiveVisible) proactiveGreeting.style.display = 'none'
+      proactiveHideTimer = null
+    }, 220)
+  }
+
+  function showProactiveGreeting(settings) {
+    if (isOpen || !settings || !settings.messages || !settings.messages.length) return
+    var message = settings.messages[Math.floor(Math.random() * settings.messages.length)]
+    if (!message) return
+
+    proactiveMessageButton.textContent = message
+    proactiveGreeting.style.backgroundColor = settings.backgroundColor || '#ffffff'
+    proactiveGreeting.style.color = settings.textColor || '#111827'
+    proactiveGreeting.style.borderRadius = (settings.cornerRadius || 0) + 'px'
+    proactiveGreeting.style.fontFamily = greetingFont(
+      settings.fontFamily,
+      config && config.theme && config.theme.fontFamily
+    )
+    proactiveTail.style.backgroundColor = settings.backgroundColor || '#ffffff'
+    proactiveGreeting.style.display = 'flex'
+    proactiveVisible = true
+
+    try {
+      if (settings.frequency === 'once_per_session') {
+        window.sessionStorage.setItem('cbz_greeting_' + botKey, '1')
+      }
+    } catch {}
+
+    var reducedMotion =
+      window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (reducedMotion) {
+      proactiveGreeting.style.transition = 'none'
+      proactiveGreeting.style.opacity = '1'
+      proactiveGreeting.style.transform = 'none'
+    } else {
+      var animateGreeting = window.requestAnimationFrame || function (callback) { setTimeout(callback, 0) }
+      animateGreeting(function () {
+        proactiveGreeting.style.opacity = '1'
+        proactiveGreeting.style.transform = 'translateY(0) scale(1)'
+      })
+    }
+  }
+
+  function scheduleProactiveGreeting() {
+    var settings = config && config.proactiveGreeting
+    if (!settings || !settings.enabled || !settings.messages || !settings.messages.length) return
+    if (settings.frequency === 'once_per_session') {
+      try {
+        if (window.sessionStorage.getItem('cbz_greeting_' + botKey)) return
+      } catch {}
+    }
+    proactiveTimer = setTimeout(function () {
+      proactiveTimer = null
+      showProactiveGreeting(settings)
+    }, Math.max(0, settings.delaySeconds || 0) * 1000)
+  }
+
+  proactiveMessageButton.addEventListener('click', function () {
+    dismissProactiveGreeting()
+    openWidget()
+  })
+  proactiveDismiss.addEventListener('click', dismissProactiveGreeting)
+
   // Near-black or white, whichever reads better on the launcher color.
   function readable(hex) {
     var h = String(hex || '').replace('#', '')
@@ -285,6 +450,7 @@
   }
 
   function openWidget() {
+    dismissProactiveGreeting()
     if (!iframe) {
       iframe = document.createElement('iframe')
       iframe.setAttribute('data-cbz-iframe', '')
@@ -447,6 +613,7 @@
   document.body.appendChild(wrapper)
   document.body.appendChild(pulseRings[0])
   document.body.appendChild(pulseRings[1])
+  document.body.appendChild(proactiveGreeting)
   document.body.appendChild(launcher)
 
   // Safety net: reveal with the default look if config is slow or unreachable,
@@ -471,6 +638,7 @@
             poweredBy.style.display = 'none'
           }
           renderLauncher()
+          scheduleProactiveGreeting()
         }
       })
       .catch(function () {})

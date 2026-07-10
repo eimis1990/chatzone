@@ -93,6 +93,16 @@ export interface PublicBotConfig {
   /** Visitor-facing language picker (only meaningful when languages.length > 1). */
   showLanguageSelector: boolean
   content: Partial<Record<BotLanguage, PublicLanguageContent>>
+  proactiveGreeting: {
+    enabled: boolean
+    delaySeconds: number
+    frequency: 'once_per_session' | 'every_page'
+    messages: string[]
+    backgroundColor: string
+    textColor: string
+    cornerRadius: number
+    fontFamily: string
+  }
   leadCapture: {
     enabled: boolean
     trigger: LeadTrigger
@@ -189,6 +199,18 @@ export function publicBotConfig(
         : languages[0],
     showLanguageSelector: languages.length > 1 && (config.showLanguageSelector ?? false),
     content,
+    proactiveGreeting: {
+      enabled: config.proactiveGreeting?.enabled ?? false,
+      delaySeconds: config.proactiveGreeting?.delaySeconds ?? 3,
+      frequency: config.proactiveGreeting?.frequency ?? 'once_per_session',
+      messages: (config.proactiveGreeting?.messages?.[primary] ?? [])
+        .map((message) => message.text.trim())
+        .filter(Boolean),
+      backgroundColor: config.proactiveGreeting?.backgroundColor ?? '#ffffff',
+      textColor: config.proactiveGreeting?.textColor ?? '#111827',
+      cornerRadius: config.proactiveGreeting?.cornerRadius ?? 14,
+      fontFamily: config.proactiveGreeting?.fontFamily ?? 'inherit',
+    },
     leadCapture: {
       enabled: leadCaptureEnabled,
       trigger: config.leadCapture.trigger,

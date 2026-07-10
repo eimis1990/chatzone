@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/next";
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { SITE_URL, SITE_NAME } from "@/lib/site";
 import {
   Geist,
@@ -120,7 +121,7 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} ${fontVariables} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        {children}
+        <TooltipProvider>{children}</TooltipProvider>
         <Analytics />
         <GoogleAnalytics />
       </body>

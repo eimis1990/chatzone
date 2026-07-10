@@ -143,6 +143,42 @@ describe('publicBotConfig', () => {
     expect('sendIconUrl' in pub.theme).toBe(false)
     expect(pub.theme.bubbleBorderWidth).toBe(0)
   })
+
+  it('publishes only the primary-language proactive greeting text', () => {
+    const pub = publicBotConfig({
+      ...fullConfig,
+      languages: ['en', 'lt'],
+      defaultLanguage: 'lt',
+      content: {
+        en: fullConfig.content.en,
+        lt: { greeting: 'Labas!', suggestedQuestions: [], fallbackMessage: 'Ne.' },
+      },
+      proactiveGreeting: {
+        enabled: true,
+        delaySeconds: 4,
+        frequency: 'once_per_session',
+        messages: {
+          en: [{ text: 'English greeting' }],
+          lt: [{ text: 'Labas!' }, { text: 'Kuo galime padėti?' }],
+        },
+        backgroundColor: '#123456',
+        textColor: '#ffffff',
+        cornerRadius: 18,
+        fontFamily: 'lora',
+      },
+    })
+
+    expect(pub.proactiveGreeting).toEqual({
+      enabled: true,
+      delaySeconds: 4,
+      frequency: 'once_per_session',
+      messages: ['Labas!', 'Kuo galime padėti?'],
+      backgroundColor: '#123456',
+      textColor: '#ffffff',
+      cornerRadius: 18,
+      fontFamily: 'lora',
+    })
+  })
 })
 
 // A bot configured with everything ON — used to verify plan gating strips it.

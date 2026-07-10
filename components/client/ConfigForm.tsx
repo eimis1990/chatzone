@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useCallback, useEffect, useMemo, useRef, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 import { useRouter } from 'next/navigation'
 import {
   useForm,
@@ -25,8 +26,10 @@ import {
   ShieldIcon,
   ShoppingBagIcon,
   SaveIcon,
-  XIcon,
   GlobeIcon,
+  ChevronDownIcon,
+  ChevronRightIcon,
+  InfoIcon,
   type LucideIcon,
 } from 'lucide-react'
 import { botConfigFormSchema } from '@/lib/validation/schemas'
@@ -42,23 +45,37 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Scrubber } from '@/components/ui/scrubber'
 import { trackEvent } from '@/lib/analytics'
 import { createBrowserClient } from '@/lib/supabase/browser'
 import {
   CardContent,
+  Card,
+  CardAction,
+  CardHeader,
   CardTitle,
   CardDescription,
 } from '@/components/ui/card'
 import { CollapsibleSection } from '@/components/client/CollapsibleSection'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { TestChat } from '@/components/client/TestChat'
 import { ResizablePanel } from '@/components/ui/resizable-panel'
 import { VoiceSection } from '@/components/client/VoiceSection'
@@ -145,8 +162,8 @@ export function SectionHeader({
 }) {
   return (
     <div className="relative z-10 flex items-center gap-2.5">
-      <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground">
-        <Icon className="size-4" aria-hidden="true" />
+      <span className="flex size-7 shrink-0 items-center justify-center text-primary">
+        <Icon className="size-5" aria-hidden="true" />
       </span>
       <div>
         <CardTitle className="text-sm font-semibold leading-tight">{title}</CardTitle>
@@ -196,6 +213,8 @@ export function ConfigForm({
   const canUseMultiple = maxLanguages > 1
   // Internal bot name — lives outside the config schema, saved alongside it.
   const [name, setName] = useState(botName)
+  const [savedName, setSavedName] = useState(botName)
+  const [previewMounted, setPreviewMounted] = useState(false)
   // Quick-action add/edit dialog.
   const [qaOpen, setQaOpen] = useState(false)
   const [qaIndex, setQaIndex] = useState<number | null>(null)
@@ -211,6 +230,8 @@ export function ConfigForm({
   const [activeLang, setActiveLang] = useState<BotLanguage>(
     (initialConfig.languages?.[0] as BotLanguage) ?? 'en',
   )
+
+  useEffect(() => setPreviewMounted(true), [])
 
   // After mount: restore the persisted language if it's still enabled.
   useEffect(() => {
@@ -245,6 +266,18 @@ export function ConfigForm({
       }
     }
     if (cfg.showLanguageSelector === undefined) cfg.showLanguageSelector = false
+    if (!cfg.proactiveGreeting) {
+      cfg.proactiveGreeting = {
+        enabled: false,
+        delaySeconds: 3,
+        frequency: 'once_per_session',
+        messages: { en: [{ text: 'Hi! How can we help?' }] },
+        backgroundColor: '#ffffff',
+        textColor: '#111827',
+        cornerRadius: 14,
+        fontFamily: 'inherit',
+      }
+    }
     // Bots created before the working-hours field get the default on first edit.
     if (!cfg.businessHours) cfg.businessHours = { start: '08:00', end: '17:00' }
 
@@ -278,9 +311,10 @@ export function ConfigForm({
     register,
     control,
     handleSubmit,
+    reset,
     watch,
     setValue,
-    formState: { errors, isSubmitting },
+    formState: { errors, isDirty, isSubmitting },
   } = form
 
   const watchedLanguages = watch('languages')
@@ -330,6 +364,32 @@ export function ConfigForm({
     control,
     name: 'content.lt.suggestedQuestions',
   })
+
+  const proactiveMessagesEn = useFieldArray({
+    control,
+    name: 'proactiveGreeting.messages.en',
+  })
+  const proactiveMessagesLt = useFieldArray({
+    control,
+    name: 'proactiveGreeting.messages.lt',
+  })
+  const activeProactiveMessages =
+    activeLang === 'lt' ? proactiveMessagesLt : proactiveMessagesEn
+
+  const setProactiveGreetingEnabled = (enabled: boolean) => {
+    setValue('proactiveGreeting.enabled', enabled, { shouldDirty: true, shouldValidate: true })
+    if (!enabled) return
+
+    for (const lang of selectedLanguages) {
+      const fieldArray = lang === 'lt' ? proactiveMessagesLt : proactiveMessagesEn
+      if (!fieldArray.fields.length) {
+        const seeded = {
+          text: lang === 'lt' ? 'Sveiki! Kaip galime padėti?' : 'Hi! How can we help?',
+        }
+        fieldArray.replace([seeded])
+      }
+    }
+  }
 
   const activeSuggestedField =
     activeLang === 'lt' ? suggestedQuestionsFieldLt : suggestedQuestionsFieldEn
@@ -415,6 +475,13 @@ export function ConfigForm({
       setValue('languages', next, { shouldDirty: true })
       // Seed content for a newly-selected language so validation passes.
       if (next.includes('lt') && !current.includes('lt')) openLtTab()
+      if (!current.includes(lang) && watch('proactiveGreeting.enabled')) {
+        setValue(
+          `proactiveGreeting.messages.${lang}`,
+          [{ text: lang === 'lt' ? 'Sveiki! Kaip galime padėti?' : 'Hi! How can we help?' }],
+          { shouldDirty: true, shouldValidate: true },
+        )
+      }
       if (!next.includes(activeLang)) selectLang(next[0])
     },
     [watch, setValue, canUseMultiple, openLtTab, activeLang, selectLang],
@@ -425,6 +492,8 @@ export function ConfigForm({
       try {
         const result = await onSave(botId, normalizeLanguageSelection(values), name.trim())
         if (result.success) {
+          reset(values)
+          setSavedName(name.trim())
           toast.success('Configuration saved')
           trackEvent('bot_config_saved', { botId })
           // Refresh so the sidebar reflects a renamed bot.
@@ -437,7 +506,7 @@ export function ConfigForm({
         toast.error(err instanceof Error ? err.message : 'Failed to save configuration')
       }
     },
-    [botId, name, router],
+    [botId, name, onSave, reset, router],
   )
 
   // Called when the form fails client-side validation. Without this, react-hook-form
@@ -468,6 +537,7 @@ export function ConfigForm({
   }, [])
 
   const leadCaptureEnabled = watch('leadCapture.enabled')
+  const hasChanges = isDirty || name.trim() !== savedName.trim()
 
   // Build a live config for the preview — typed to match TestChat's LiveConfig.
   // Mirror the add-on gate so the preview matches the live widget: hide the
@@ -495,6 +565,7 @@ export function ConfigForm({
     showLanguageSelector: watchedValues.showLanguageSelector ?? false,
     content: watchedValues.content,
     commerce: watchedValues.commerce,
+    proactiveGreeting: watchedValues.proactiveGreeting,
   }
 
   return (
@@ -518,9 +589,9 @@ export function ConfigForm({
                 {headerAction}
               </span>
             )}
-            <Button type="submit" disabled={isSubmitting} className="h-10 rounded-md px-7">
-              <SaveIcon className="size-4" />
-              {isSubmitting ? 'Saving…' : 'Save'}
+            <Button type="submit" size="lg" disabled={isSubmitting || !hasChanges} className="px-4">
+              <SaveIcon data-icon="inline-start" />
+              {isSubmitting ? 'Publishing…' : 'Save & Publish'}
             </Button>
           </div>
         </div>
@@ -531,8 +602,10 @@ export function ConfigForm({
               title="Display"
               description="Bot name and avatar shown to visitors."
             />}>
-          <CardContent className="space-y-4">
-            <div className="space-y-1.5">
+          <CardContent className="flex flex-col gap-3 bg-muted/70 py-3">
+            <SettingsGroup title="Names and introduction" description="How this bot is identified in the dashboard and widget.">
+              <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-1.5 sm:col-span-2">
               <Label htmlFor="botName">Bot name</Label>
               <Input
                 id="botName"
@@ -565,12 +638,13 @@ export function ConfigForm({
                 {...register('tagline')}
                 placeholder="Virtual assistant"
               />
-              <p className="text-xs text-muted-foreground">
-                Short subtitle under the name on the welcome screen.
-              </p>
             </div>
+              </div>
+            </SettingsGroup>
 
-            <LogoUpload
+            <SettingsGroup title="Brand imagery" description="Choose the images visitors see in the header and conversation.">
+              <div className="grid gap-4 sm:grid-cols-2">
+              <LogoUpload
               botId={botId}
               control={control}
               setValue={setValue}
@@ -586,23 +660,32 @@ export function ConfigForm({
               name="botAvatarUrl"
               label="Bot avatar (optional)"
               filePrefix="bot"
-              description="Shown next to the bot's replies. If empty, the company logo is used."
+              description="Shown next to replies"
             />
+              </div>
+            </SettingsGroup>
 
+            <SettingsGroup title="Privacy and availability" description="Set the consent link and hours used by reporting.">
+              <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
-              <Label htmlFor="privacyUrl">Privacy policy URL (optional)</Label>
+              <InfoLabel
+                htmlFor="privacyUrl"
+                label="Privacy policy URL (optional)"
+                tooltip="When set, the widget shows a short consent line linking to it."
+              />
               <Input
                 id="privacyUrl"
                 {...register('privacyUrl')}
                 placeholder="https://yourstore.com/privacy"
               />
-              <p className="text-xs text-muted-foreground">
-                When set, the widget shows a short consent line linking to it.
-              </p>
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="businessHoursStart">Working hours</Label>
+              <InfoLabel
+                htmlFor="businessHoursStart"
+                label="Working hours"
+                tooltip="Mon–Fri. Analytics uses this to show how many conversations the bot handles after hours."
+              />
               <div className="flex items-center gap-2">
                 <Input
                   id="businessHoursStart"
@@ -619,11 +702,9 @@ export function ConfigForm({
                   {...register('businessHours.end')}
                 />
               </div>
-              <p className="text-xs text-muted-foreground">
-                Mon–Fri. Analytics uses this to show how many conversations the bot handles after
-                hours.
-              </p>
             </div>
+              </div>
+            </SettingsGroup>
           </CardContent>
         </CollapsibleSection>
 
@@ -633,32 +714,47 @@ export function ConfigForm({
               title="Language & content"
               description="Greeting, suggested questions, and fallback message — per language."
             />}>
-          <CardContent className="space-y-4">
+          <CardContent className="flex flex-col gap-3 bg-muted/70 py-3">
+            <SettingsGroup title="Language setup" description="Choose available languages and the visitor’s default experience.">
             {/* Available languages — which languages visitors can use. */}
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <Label>Available languages</Label>
-              <div className="flex flex-wrap gap-2">
-                {SUPPORTED_LANGUAGES.map((l) => {
-                  const on = selectedLanguages.includes(l.code)
-                  return (
-                    <button
-                      key={l.code}
+              <Popover>
+                <PopoverTrigger
+                  render={
+                    <Button
                       type="button"
-                      onClick={() => toggleLanguage(l.code)}
-                      aria-pressed={on}
-                      className={cn(
-                        'flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm transition-colors',
-                        on
-                          ? 'border-primary bg-primary/10 text-foreground'
-                          : 'border-input text-muted-foreground hover:text-foreground',
-                      )}
-                    >
-                      <span>{l.flag}</span>
-                      {l.label}
-                    </button>
-                  )
-                })}
-              </div>
+                      variant="outline"
+                      className="h-10 w-full max-w-xs justify-between px-3 font-normal"
+                    />
+                  }
+                >
+                  <span className="truncate">
+                    {selectedLanguages.map((lang) => languageMeta(lang).label).join(', ')}
+                  </span>
+                  <ChevronDownIcon data-icon="inline-end" />
+                </PopoverTrigger>
+                <PopoverContent align="start" className="w-72 gap-1 p-1.5">
+                  {SUPPORTED_LANGUAGES.map((language) => {
+                    const selected = selectedLanguages.includes(language.code)
+                    return (
+                      <label
+                        key={language.code}
+                        className="flex min-h-10 cursor-pointer items-center gap-3 rounded-md px-2.5 py-2 text-sm transition-colors hover:bg-accent"
+                      >
+                        <Checkbox
+                          checked={selected}
+                          onCheckedChange={() => toggleLanguage(language.code)}
+                          aria-label={`${selected ? 'Remove' : 'Add'} ${language.label}`}
+                        />
+                        <span aria-hidden="true">{language.flag}</span>
+                        <span className="flex-1">{language.label}</span>
+                        {selected ? <span className="text-xs text-muted-foreground">Selected</span> : null}
+                      </label>
+                    )
+                  })}
+                </PopoverContent>
+              </Popover>
               {!canUseMultiple && (
                 <p className="text-xs text-muted-foreground">
                   Your plan includes one language. Pick the one you want —{' '}
@@ -670,27 +766,7 @@ export function ConfigForm({
               )}
             </div>
 
-            {/* Content-language tabs — one per selected language. */}
-            <div className="flex items-center gap-3 rounded-lg bg-muted p-1 w-fit">
-              {selectedLanguages.map((lang) => (
-                <button
-                  key={lang}
-                  type="button"
-                  onClick={() => selectLang(lang)}
-                  className={cn(
-                    'px-4 py-1 text-sm font-medium rounded-md transition-all',
-                    activeLang === lang
-                      ? 'bg-background text-foreground shadow-sm'
-                      : 'text-muted-foreground hover:text-foreground',
-                  )}
-                  aria-pressed={activeLang === lang}
-                >
-                  {languageMeta(lang).label}
-                </button>
-              ))}
-            </div>
-
-            <div className="space-y-4">
+            <div className="mt-5 space-y-4">
               <div className="space-y-1.5">
                 <Label>Primary language</Label>
                 <Controller
@@ -744,9 +820,31 @@ export function ConfigForm({
                   : 'Shows a flag button in the widget header. Off = the widget stays in the primary language.'}
               </p>
             </div>
+            </SettingsGroup>
 
             {/* Per-language content fields */}
+            <SettingsGroup title={`Widget content · ${languageMeta(activeLang).label}`} description="Edit the welcome copy and actions for the selected language.">
             <div className="space-y-4 pt-1">
+              {selectedLanguages.length > 1 ? (
+                <div className="flex w-fit items-center gap-1 rounded-lg bg-muted p-1" aria-label="Language to edit">
+                  {selectedLanguages.map((lang) => (
+                    <button
+                      key={lang}
+                      type="button"
+                      onClick={() => selectLang(lang)}
+                      className={cn(
+                        'rounded-md px-3 py-1.5 text-sm font-medium transition-all',
+                        activeLang === lang
+                          ? 'bg-background text-foreground shadow-sm'
+                          : 'text-muted-foreground hover:text-foreground',
+                      )}
+                      aria-pressed={activeLang === lang}
+                    >
+                      {languageMeta(lang).label}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
               {/* Greeting */}
               <div className="space-y-1.5">
                 <Label htmlFor={`greeting-${activeLang}`}>
@@ -1012,6 +1110,7 @@ export function ConfigForm({
               </div>
 
             </div>
+            </SettingsGroup>
           </CardContent>
         </CollapsibleSection>
 
@@ -1019,237 +1118,221 @@ export function ConfigForm({
         <CollapsibleSection header={<SectionHeader
               icon={PaletteIcon}
               title="Appearance"
-              description="Colors, shape, launcher, and background — grouped."
+              description="Make the widget feel at home on your website."
             />}>
-          <CardContent className="space-y-6">
-            {/* ── Presets & match-my-website ── */}
-            <ThemePresetPicker watch={watch} setValue={setValue} />
+          <CardContent className="flex flex-col gap-3 bg-muted/70 py-3">
+            <SettingsGroup
+              title="Choose a starting point"
+              description="Apply a complete look, then fine-tune only what you need."
+            >
+              <ThemePresetPicker watch={watch} setValue={setValue} />
+            </SettingsGroup>
 
-            {/* ── Colors ── */}
-            <div className="space-y-3 border-t pt-5">
-              <h4 className="text-sm font-semibold">Colors</h4>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <ColorField control={control} name="theme.primaryColor" label="Primary color" placeholder="#4f46e5" swatchDefault="#4f46e5" clearable={false} description="Brand color: user bubbles, buttons, accents." />
-                <ColorField control={control} name="theme.botBubbleColor" label="Bot bubble color" placeholder="Default grey" swatchDefault="#f3f4f6" description="Assistant message bubbles. Text adapts; empty = grey." />
-                <ColorField control={control} name="theme.backgroundColor" label="Chat background" placeholder="#ffffff" swatchDefault="#ffffff" description="Behind the conversation." />
-                <ColorField control={control} name="theme.launcherColor" label="Launcher color" placeholder="Defaults to primary" swatchDefault={watch('theme.primaryColor') || '#4f46e5'} description="Floating bubble; empty = primary." />
-                <ColorField control={control} name="theme.bubbleBorderColor" label="Bubble border color" placeholder="#e5e7eb" swatchDefault="#e5e7eb" description="Used when border width > 0 (see roundness)." />
-                <ColorField control={control} name="theme.composerFieldColor" label="Message field color" placeholder="#ffffff" swatchDefault="#ffffff" description="Composer input background; text adapts for contrast." />
-                <ColorField control={control} name="theme.composerBorderColor" label="Message field border" placeholder="Auto" swatchDefault="#e5e7eb" description="Field border; empty = subtle auto border." />
-                <ColorField control={control} name="theme.sendButtonColor" label="Send button color" placeholder="Defaults to primary" swatchDefault={watch('theme.primaryColor') || '#4f46e5'} description="Send button; empty = primary. Roundness follows buttons." />
-                {watch('voice.enabled') && (
-                  <ColorField control={control} name="theme.callButtonColor" label="Call button color" placeholder="#22c55e" swatchDefault="#22c55e" description="Voice call button; label adapts for contrast." />
-                )}
+            <SettingsGroup
+              title="Color palette"
+              description="The four colors that define most of the widget."
+            >
+              <div className="grid gap-2 sm:grid-cols-2">
+                <ColorField control={control} name="theme.primaryColor" label="Brand color" swatchDefault="#4f46e5" clearable={false} description="Buttons and user bubbles" />
+                <ColorField control={control} name="theme.backgroundColor" label="Chat background" swatchDefault="#ffffff" clearable={false} description="Conversation canvas" />
+                <ColorField control={control} name="theme.botBubbleColor" label="Assistant messages" swatchDefault="#f3f4f6" defaultLabel="Soft grey" description="Bot reply bubbles" />
+                <ColorField control={control} name="theme.launcherColor" label="Launcher" swatchDefault={watch('theme.primaryColor') || '#4f46e5'} defaultLabel="Uses brand color" description="Floating chat button" />
               </div>
-            </div>
+              <AdvancedColorFields
+                control={control}
+                primaryColor={watch('theme.primaryColor') || '#4f46e5'}
+                voiceEnabled={watch('voice.enabled') ?? false}
+              />
+            </SettingsGroup>
 
-            {/* ── Corners & roundness ── */}
-            <div className="space-y-5 border-t pt-5">
-              <h4 className="text-sm font-semibold">Corners &amp; roundness</h4>
-              <div className="space-y-2">
-                <Controller
-                  control={control}
-                  name="theme.cornerRadius"
-                  render={({ field }) => (
-                    <Scrubber label="Chat window roundness" min={0} max={32} step={1} decimals={0} suffix="px" value={field.value ?? 16} onValueChange={(v) => field.onChange(v)} />
-                  )}
-                />
-                <div className="flex justify-between text-xs text-muted-foreground"><span>Square</span><span>Rounded</span></div>
+            <SettingsGroup
+              title="Shape"
+              description="Adjust the widget’s visual softness."
+            >
+              <div className="grid gap-3 sm:grid-cols-2">
+                <SliderField label="Window corners"><Controller control={control} name="theme.cornerRadius" render={({ field }) => (
+                  <Scrubber size="sm" showLabel={false} label="Window corners" min={0} max={32} step={1} decimals={0} suffix="px" value={field.value ?? 16} onValueChange={field.onChange} />
+                )} /></SliderField>
+                <SliderField label="Message corners"><Controller control={control} name="theme.bubbleRadius" render={({ field }) => (
+                  <Scrubber size="sm" showLabel={false} label="Message corners" min={0} max={24} step={1} decimals={0} suffix="px" value={field.value ?? 16} onValueChange={field.onChange} />
+                )} /></SliderField>
+                <SliderField label="Button corners"><Controller control={control} name="theme.navButtonRadius" render={({ field }) => (
+                  <Scrubber size="sm" showLabel={false} label="Button corners" min={0} max={24} step={1} decimals={0} suffix="px" value={field.value ?? 12} onValueChange={field.onChange} />
+                )} /></SliderField>
+                <SliderField label="Message border"><Controller control={control} name="theme.bubbleBorderWidth" render={({ field }) => (
+                  <Scrubber size="sm" showLabel={false} label="Message border width" min={0} max={6} step={1} decimals={0} suffix="px" value={field.value ?? 0} onValueChange={field.onChange} />
+                )} /></SliderField>
               </div>
-              <div className="space-y-2">
-                <Controller
-                  control={control}
-                  name="theme.bubbleRadius"
-                  render={({ field }) => (
-                    <Scrubber label="Bubble roundness" min={0} max={24} step={1} decimals={0} suffix="px" value={field.value ?? 16} onValueChange={(v) => field.onChange(v)} />
-                  )}
-                />
-                <div className="flex justify-between text-xs text-muted-foreground"><span>Square</span><span>Pill</span></div>
-              </div>
-              <div className="space-y-2">
-                <Controller
-                  control={control}
-                  name="theme.navButtonRadius"
-                  render={({ field }) => (
-                    <Scrubber label="Button roundness" min={0} max={24} step={1} decimals={0} suffix="px" value={field.value ?? 12} onValueChange={(v) => field.onChange(v)} />
-                  )}
-                />
-                <div className="flex justify-between text-xs text-muted-foreground"><span>Square</span><span>Round</span></div>
-                <p className="text-xs text-muted-foreground">Corner radius of the header buttons (call &amp; restart).</p>
-              </div>
-              <div className="space-y-2">
-                <Controller
-                  control={control}
-                  name="theme.bubbleBorderWidth"
-                  render={({ field }) => (
-                    <Scrubber label="Bubble border width" min={0} max={6} step={1} decimals={0} suffix="px" value={field.value ?? 0} onValueChange={(v) => field.onChange(v)} />
-                  )}
-                />
-                <p className="text-xs text-muted-foreground">A border around message bubbles and suggested-action tiles. 0 = none; set its color above.</p>
-              </div>
-            </div>
+            </SettingsGroup>
 
-            {/* ── Launcher ── */}
-            <div className="space-y-4 border-t pt-5">
-              <h4 className="text-sm font-semibold">Launcher</h4>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-1.5">
-                  <Label>Position</Label>
-                  <Controller
-                    name="theme.position"
-                    control={control}
-                    render={({ field }) => (
+            <SettingsGroup
+              title="Launcher"
+              description="The button visitors use to open chat."
+            >
+              <div className="flex flex-col gap-3">
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="flex flex-col gap-1.5">
+                    <Label>Position</Label>
+                    <Controller name="theme.position" control={control} render={({ field }) => (
                       <Select value={field.value} onValueChange={field.onChange}>
                         <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
-                        <SelectContent>
+                        <SelectContent><SelectGroup>
                           <SelectItem value="bottom-right">Bottom right</SelectItem>
                           <SelectItem value="bottom-left">Bottom left</SelectItem>
-                        </SelectContent>
+                        </SelectGroup></SelectContent>
                       </Select>
-                    )}
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label>Style</Label>
-                  <Controller
-                    name="theme.launcherStyle"
-                    control={control}
-                    render={({ field }) => (
+                    )} />
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <Label>Style</Label>
+                    <Controller name="theme.launcherStyle" control={control} render={({ field }) => (
                       <Select value={field.value ?? 'circle'} onValueChange={field.onChange}>
                         <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="circle">Circle (icon only)</SelectItem>
-                          <SelectItem value="pill">Pill (icon + text)</SelectItem>
-                        </SelectContent>
+                        <SelectContent><SelectGroup>
+                          <SelectItem value="circle">Circle</SelectItem>
+                          <SelectItem value="pill">Pill with text</SelectItem>
+                        </SelectGroup></SelectContent>
                       </Select>
-                    )}
-                  />
+                    )} />
+                  </div>
+                </div>
+                {watch('theme.launcherStyle') === 'pill' && (
+                  <div className="flex flex-col gap-1.5">
+                    <Label htmlFor="launcherLabel">Button text</Label>
+                    <Input id="launcherLabel" {...register('theme.launcherLabel')} placeholder="Chat with us" />
+                  </div>
+                )}
+                <div className="grid gap-2 sm:grid-cols-2">
+                  <CompactToggle label="Use company logo" description="Replace the chat icon">
+                    <Controller name="theme.launcherShowLogo" control={control} render={({ field }) => (
+                      <Switch aria-label="Use company logo" checked={field.value ?? false} onCheckedChange={field.onChange} />
+                    )} />
+                  </CompactToggle>
+                  <CompactToggle label="Pulse effect" description="Draw attention gently">
+                    <Controller name="theme.launcherPulse" control={control} render={({ field }) => (
+                      <Switch aria-label="Pulse effect" checked={field.value ?? false} onCheckedChange={field.onChange} disabled={watch('theme.launcherStyle') === 'pill'} />
+                    )} />
+                  </CompactToggle>
                 </div>
               </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="launcherLabel">Launcher text</Label>
-                <Input id="launcherLabel" {...register('theme.launcherLabel')} placeholder="Chat with us" disabled={watch('theme.launcherStyle') !== 'pill'} />
-                <p className="text-xs text-muted-foreground">Shown next to the icon when the style is a pill.</p>
-              </div>
-              <div className="flex items-center justify-between gap-4">
-                <div className="space-y-0.5">
-                  <Label htmlFor="launcherShowLogo">Show company logo in launcher</Label>
-                  <p className="text-xs text-muted-foreground">Use the company logo instead of the default chat icon.</p>
-                </div>
-                <Controller
-                  name="theme.launcherShowLogo"
-                  control={control}
-                  render={({ field }) => (
-                    <Switch id="launcherShowLogo" checked={field.value ?? false} onCheckedChange={field.onChange} />
-                  )}
-                />
-              </div>
-              <div className="flex items-center justify-between gap-4">
-                <div className="space-y-0.5">
-                  <Label htmlFor="launcherPulse">Pulse effect</Label>
-                  <p className="text-xs text-muted-foreground">
-                    Animated rings radiate from the button to draw the eye. Circle style only.
-                  </p>
-                </div>
-                <Controller
-                  name="theme.launcherPulse"
-                  control={control}
-                  render={({ field }) => (
-                    <Switch
-                      id="launcherPulse"
-                      checked={field.value ?? false}
-                      onCheckedChange={field.onChange}
-                      disabled={watch('theme.launcherStyle') === 'pill'}
-                    />
-                  )}
-                />
-              </div>
-            </div>
+            </SettingsGroup>
 
-            {/* ── Background & images ── */}
-            <div className="space-y-4 border-t pt-5">
-              <h4 className="text-sm font-semibold">Background &amp; images</h4>
-              <LogoUpload
-                botId={botId}
-                control={control}
-                setValue={setValue}
-                name="theme.backgroundImageUrl"
-                label="Chat background image (optional)"
-                filePrefix="bg"
-                description="Shown behind the conversation, layered on top of the background color."
-              />
-              {watch('theme.backgroundImageUrl') ? (
-                <div className="space-y-2">
-                  <Controller
-                    control={control}
-                    name="theme.backgroundImageOpacity"
-                    render={({ field }) => (
-                      <Scrubber label="Background image opacity" min={0} max={100} step={1} decimals={0} suffix="%" value={field.value ?? 100} onValueChange={(v) => field.onChange(v)} />
-                    )}
-                  />
-                  <div className="flex justify-between text-xs text-muted-foreground"><span>Subtle</span><span>Full</span></div>
-                  <p className="text-xs text-muted-foreground">Lower the opacity to blend the image into your background color and keep messages readable.</p>
+            <SettingsGroup
+              title="Greeting prompt"
+              description="Invite visitors to start a conversation."
+              action={
+                <Controller name="proactiveGreeting.enabled" control={control} render={({ field }) => (
+                  <Switch aria-label="Enable greeting prompt" checked={field.value ?? false} onCheckedChange={setProactiveGreetingEnabled} />
+                )} />
+              }
+            >
+              {watch('proactiveGreeting.enabled') ? (
+                <div className="flex flex-col gap-4">
+                  <div className="flex flex-col gap-2">
+                    <div>
+                      <p className="text-sm font-medium">Messages <span className="font-normal text-muted-foreground">· {languageMeta(activeLang).label}</span></p>
+                      <p className="text-xs text-muted-foreground">One variant is chosen randomly when the greeting appears.</p>
+                    </div>
+                    {activeProactiveMessages.fields.map((field, index) => (
+                      <div key={field.id} className="flex items-start gap-2">
+                        <Textarea
+                          aria-label={`Greeting variant ${index + 1}`}
+                          {...register(`proactiveGreeting.messages.${activeLang}.${index}.text`)}
+                          defaultValue={(field as { text?: string }).text ?? ''}
+                          maxLength={160}
+                          rows={2}
+                          className="min-h-16"
+                          placeholder={activeLang === 'lt' ? 'Sveiki! Kaip galime padėti?' : 'Hi! How can we help?'}
+                        />
+                        <Button type="button" variant="ghost" size="icon" onClick={() => activeProactiveMessages.remove(index)} disabled={activeProactiveMessages.fields.length === 1} aria-label={`Remove greeting variant ${index + 1}`}>
+                          <TrashIcon />
+                        </Button>
+                      </div>
+                    ))}
+                    <Button type="button" variant="outline" size="sm" className="self-start" onClick={() => activeProactiveMessages.append({ text: '' })} disabled={activeProactiveMessages.fields.length >= 5}>
+                      <PlusIcon data-icon="inline-start" /> Add another
+                    </Button>
+                  </div>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="flex flex-col gap-1.5">
+                      <Label>Show</Label>
+                      <Controller name="proactiveGreeting.frequency" control={control} render={({ field }) => (
+                        <Select value={field.value ?? 'once_per_session'} onValueChange={field.onChange}>
+                          <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                          <SelectContent><SelectGroup>
+                            <SelectItem value="once_per_session">Once per session</SelectItem>
+                            <SelectItem value="every_page">On every page</SelectItem>
+                          </SelectGroup></SelectContent>
+                        </Select>
+                      )} />
+                    </div>
+                    <SliderField label="Delay time"><Controller control={control} name="proactiveGreeting.delaySeconds" render={({ field }) => (
+                      <Scrubber size="sm" showLabel={false} label="Delay time" min={0} max={30} step={1} decimals={0} suffix="s" value={field.value ?? 3} onValueChange={field.onChange} />
+                    )} /></SliderField>
+                    <ColorField control={control} name="proactiveGreeting.backgroundColor" label="Greeting background" swatchDefault="#ffffff" clearable={false} description="Prompt surface" />
+                    <ColorField control={control} name="proactiveGreeting.textColor" label="Greeting text" swatchDefault="#111827" clearable={false} description="Prompt copy" />
+                    <div className="flex flex-col gap-1.5">
+                      <Label>Font</Label>
+                      <Controller name="proactiveGreeting.fontFamily" control={control} render={({ field }) => (
+                        <Select value={field.value ?? 'inherit'} onValueChange={field.onChange}>
+                          <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                          <SelectContent><SelectGroup>
+                            <SelectItem value="inherit">Same as chat</SelectItem>
+                            {FONT_OPTIONS.map((font) => <SelectItem key={font.value} value={font.value} style={{ fontFamily: font.stack }}>{font.label}</SelectItem>)}
+                          </SelectGroup></SelectContent>
+                        </Select>
+                      )} />
+                    </div>
+                    <SliderField label="Corner radius"><Controller control={control} name="proactiveGreeting.cornerRadius" render={({ field }) => (
+                      <Scrubber size="sm" showLabel={false} label="Greeting corner radius" min={0} max={24} step={1} decimals={0} suffix="px" value={field.value ?? 14} onValueChange={field.onChange} />
+                    )} /></SliderField>
+                  </div>
                 </div>
-              ) : null}
-              <LogoUpload
-                botId={botId}
-                control={control}
-                setValue={setValue}
-                name="theme.sendIconUrl"
-                label="Send button icon (optional)"
-                description="Replaces the default arrow in the composer. A small square icon works best."
-                filePrefix="sendicon"
-              />
-            </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">Turn this on to configure messages, timing, and styling.</p>
+              )}
+            </SettingsGroup>
 
-            {/* ── Display options ── */}
-            <div className="space-y-4 border-t pt-5">
-              <h4 className="text-sm font-semibold">Display options</h4>
-              <div className="flex items-center justify-between gap-4">
-                <div className="space-y-0.5">
-                  <Label htmlFor="glassBubbles">Glass message bubbles</Label>
-                  <p className="text-xs text-muted-foreground">Frosted, translucent chat bubbles — looks best over a background image or color.</p>
+            <SettingsGroup
+              title="Chat surface"
+              description="Typography, imagery, and in-chat controls."
+            >
+              <div className="flex flex-col gap-4">
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="flex flex-col gap-1.5">
+                    <Label>Chat font</Label>
+                    <Controller name="theme.fontFamily" control={control} render={({ field }) => (
+                      <Select value={field.value ?? 'geist'} onValueChange={field.onChange}>
+                        <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                        <SelectContent><SelectGroup>
+                          {FONT_OPTIONS.map((font) => <SelectItem key={font.value} value={font.value} style={{ fontFamily: font.stack }}>{font.label}</SelectItem>)}
+                        </SelectGroup></SelectContent>
+                      </Select>
+                    )} />
+                  </div>
+                  <p className="flex items-end pb-1 text-sm text-muted-foreground" style={{ fontFamily: fontStack(watch('theme.fontFamily')) }}>The quick brown fox jumps over the lazy dog.</p>
                 </div>
-                <Controller
-                  name="theme.glassBubbles"
-                  control={control}
-                  render={({ field }) => (
-                    <Switch id="glassBubbles" checked={field.value ?? false} onCheckedChange={field.onChange} />
-                  )}
-                />
-              </div>
-              <div className="flex items-center justify-between gap-4">
-                <div className="space-y-0.5">
-                  <Label htmlFor="showHandoffButton">Show &ldquo;talk to a person&rdquo; button</Label>
-                  <p className="text-xs text-muted-foreground">Lets visitors request a human; appears once a chat is underway.</p>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  <CompactToggle label="Glass bubbles" description="Frosted message surfaces">
+                    <Controller name="theme.glassBubbles" control={control} render={({ field }) => (
+                      <Switch aria-label="Glass bubbles" checked={field.value ?? false} onCheckedChange={field.onChange} />
+                    )} />
+                  </CompactToggle>
+                  <CompactToggle label="Human handoff" description="Show talk-to-a-person option">
+                    <Controller name="theme.showHandoffButton" control={control} render={({ field }) => (
+                      <Switch aria-label="Human handoff" checked={field.value ?? true} onCheckedChange={field.onChange} />
+                    )} />
+                  </CompactToggle>
                 </div>
-                <Controller
-                  name="theme.showHandoffButton"
-                  control={control}
-                  render={({ field }) => (
-                    <Switch id="showHandoffButton" checked={field.value ?? true} onCheckedChange={field.onChange} />
-                  )}
-                />
+                <LogoUpload botId={botId} control={control} setValue={setValue} name="theme.backgroundImageUrl" label="Chat background image (optional)" filePrefix="bg" description="Shown behind the conversation." />
+                {watch('theme.backgroundImageUrl') ? (
+                  <Controller control={control} name="theme.backgroundImageOpacity" render={({ field }) => (
+                    <Scrubber size="sm" label="Image opacity" min={0} max={100} step={1} decimals={0} suffix="%" value={field.value ?? 100} onValueChange={field.onChange} />
+                  )} />
+                ) : null}
+                <LogoUpload botId={botId} control={control} setValue={setValue} name="theme.sendIconUrl" label="Send button icon (optional)" description="Replaces the default arrow in the composer." filePrefix="sendicon" />
               </div>
-              <div className="space-y-1.5">
-                <Label>Chat font</Label>
-                <Controller
-                  name="theme.fontFamily"
-                  control={control}
-                  render={({ field }) => (
-                    <Select value={field.value ?? 'geist'} onValueChange={field.onChange}>
-                      <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        {FONT_OPTIONS.map((f) => (
-                          <SelectItem key={f.value} value={f.value} style={{ fontFamily: f.stack }}>{f.label}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-                <p className="text-sm text-muted-foreground" style={{ fontFamily: fontStack(watch('theme.fontFamily')) }}>The quick brown fox jumps over the lazy dog</p>
-              </div>
-            </div>
+            </SettingsGroup>
           </CardContent>
         </CollapsibleSection>
 
@@ -1260,10 +1343,13 @@ export function ConfigForm({
               title="AI behaviour"
               description="System prompt and persona."
             />}>
-          <CardContent className="space-y-4">
-            <SystemPromptSelect watch={watch} setValue={setValue} errors={errors} />
+          <CardContent className="flex flex-col gap-3 bg-muted/70 py-3">
+            <SettingsGroup title="Core instructions" description="Define the assistant’s role, knowledge boundaries, and priorities.">
+              <SystemPromptSelect watch={watch} setValue={setValue} errors={errors} />
+            </SettingsGroup>
 
-            <div className="flex items-center justify-between gap-4">
+            <SettingsGroup title="Response style" description="Control how answers sound and how much structure they use.">
+            <div className="flex items-center justify-between gap-4 rounded-xl bg-muted/60 px-3 py-2.5">
               <div className="space-y-0.5">
                 <Label htmlFor="richResponses">Request rich responses</Label>
                 <p className="text-xs text-muted-foreground">
@@ -1327,6 +1413,7 @@ export function ConfigForm({
               </div>
 
             </div>
+            </SettingsGroup>
           </CardContent>
         </CollapsibleSection>
         </>)}
@@ -1349,7 +1436,8 @@ export function ConfigForm({
               title="Lead capture"
               description="Collect visitor contact information during the conversation."
             />}>
-          <CardContent className="space-y-4">
+          <CardContent className="flex flex-col gap-3 bg-muted/70 py-3">
+            <SettingsGroup title="Capture status" description="Invite visitors to leave contact details when the conversation needs a follow-up.">
             <div className="flex items-center gap-3">
               <Controller
                 name="leadCapture.enabled"
@@ -1370,9 +1458,11 @@ export function ConfigForm({
                 </a>
               )}
             </div>
+            </SettingsGroup>
 
             {leadCaptureEnabled && (
-              <div className="space-y-4 rounded-lg border p-4">
+              <SettingsGroup title="Trigger and form" description="Choose when the form appears and which details it requests.">
+              <div className="space-y-4">
                 <div className="space-y-1.5">
                   <Label>Trigger</Label>
                   <Controller
@@ -1475,6 +1565,7 @@ export function ConfigForm({
                   </Button>
                 </div>
               </div>
+              </SettingsGroup>
             )}
           </CardContent>
         </CollapsibleSection>
@@ -1486,9 +1577,11 @@ export function ConfigForm({
         <CollapsibleSection header={<SectionHeader
               icon={ShieldIcon}
               title="Allowed domains"
-              description="Restrict which websites can embed this widget. Leave empty to allow any domain."
+              description="Choose which websites can embed this widget."
             />}>
-          <CardContent className="space-y-3">
+          <CardContent className="flex flex-col gap-3 bg-muted/70 py-3">
+            <SettingsGroup title="Embedding access" description="Allow the widget everywhere, or limit it to trusted websites.">
+            <div className="space-y-3">
             {allowedDomainsField.fields.length === 0 && (
               <div className="flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-800 dark:text-amber-300">
                 <ShieldIcon className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
@@ -1528,22 +1621,32 @@ export function ConfigForm({
               A bare domain works best (e.g. <code>example.com</code>); www and https:// are handled
               automatically.
             </p>
+            </div>
+            </SettingsGroup>
           </CardContent>
         </CollapsibleSection>
 
         </form>
       </ResizablePanel>
 
-      {/* ── Live Preview — fixed overlay, bottom-right, like the real embed widget ── */}
+      {/* ── Live Preview canvas. The widget itself is portaled to <body> so it
+          can sit between a color dialog's backdrop and content layers. ── */}
       <div
         className="relative flex-1 min-w-0 overflow-hidden bg-dots"
-        aria-label="Live preview"
-        role="complementary"
-      >
-        <div className="absolute bottom-6 right-6 z-20 pointer-events-none">
+        aria-hidden="true"
+      />
+      {previewMounted
+        ? createPortal(
+          <div
+            className="pointer-events-none fixed bottom-6 right-6 z-[45]"
+            aria-label="Live preview"
+            role="complementary"
+          >
           <TestChat botId={botId} config={liveConfig} activeLang={activeLang} />
-        </div>
-      </div>
+          </div>,
+          document.body,
+        )
+        : null}
     </div>
   )
 }
@@ -1810,9 +1913,10 @@ function CommerceSection({ control, watch, botId }: CommerceSectionProps) {
     <CollapsibleSection header={<SectionHeader
           icon={ShoppingBagIcon}
           title="Store / products"
-          description="Connect your store (WooCommerce, Shopify, or Magento) so the bot can search your catalog and show product cards."
+          description="Connect your store so the bot can recommend products."
         />}>
-      <CardContent className="space-y-4">
+      <CardContent className="flex flex-col gap-3 bg-muted/70 py-3">
+        <SettingsGroup title="Integration status" description="Connect a catalog when you want the assistant to recommend live products.">
         <div className="flex items-center gap-3">
           <Controller
             name="commerce.enabled"
@@ -1827,9 +1931,11 @@ function CommerceSection({ control, watch, botId }: CommerceSectionProps) {
           />
           <Label htmlFor="commerceEnabled">Enable store integration</Label>
         </div>
+        </SettingsGroup>
 
         {commerceEnabled && (
-          <div className="space-y-4 rounded-lg border p-4">
+          <SettingsGroup title="Store connection" description="Choose a provider, verify access, and keep product search up to date.">
+          <div className="space-y-4">
             {/* Provider */}
             <div className="space-y-1.5">
               <Label>Provider</Label>
@@ -2226,6 +2332,7 @@ function CommerceSection({ control, watch, botId }: CommerceSectionProps) {
               )}
             </div>
           </div>
+          </SettingsGroup>
         )}
       </CardContent>
     </CollapsibleSection>
@@ -2248,71 +2355,286 @@ function TestBadge({ variant, children }: { variant: 'ok' | 'error'; children: R
   )
 }
 
-// -------------------------------------------------------------------------
-// ColorField — swatch + hex input, with an optional clear button (React
-// equivalent of a "clearable" color picker). Clearing sets '' so the widget
-// falls back to its default for that color.
-// -------------------------------------------------------------------------
+function SettingsGroup({
+  title,
+  description,
+  action,
+  children,
+}: {
+  title: string
+  description: string
+  action?: ReactNode
+  children: ReactNode
+}) {
+  return (
+    <Card size="sm" className="gap-0 py-0 shadow-none">
+      <CardHeader className="py-3">
+        <CardTitle>{title}</CardTitle>
+        <CardDescription className="text-xs">{description}</CardDescription>
+        {action ? <CardAction>{action}</CardAction> : null}
+      </CardHeader>
+      <CardContent className="border-t py-3">{children}</CardContent>
+    </Card>
+  )
+}
+
+function SliderField({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <Label>{label}</Label>
+      {children}
+    </div>
+  )
+}
+
+function InfoLabel({
+  htmlFor,
+  label,
+  tooltip,
+}: {
+  htmlFor: string
+  label: string
+  tooltip: string
+}) {
+  return (
+    <div className="flex items-center gap-1.5">
+      <Label htmlFor={htmlFor}>{label}</Label>
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <button
+              type="button"
+              className="flex size-5 items-center justify-center rounded-full text-muted-foreground outline-none transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+              aria-label={`About ${label}`}
+            />
+          }
+        >
+          <InfoIcon className="size-3.5" aria-hidden="true" />
+        </TooltipTrigger>
+        <TooltipContent className="max-w-72 leading-relaxed">{tooltip}</TooltipContent>
+      </Tooltip>
+    </div>
+  )
+}
+
+function CompactToggle({
+  label,
+  description,
+  children,
+}: {
+  label: string
+  description: string
+  children: ReactNode
+}) {
+  return (
+    <div className="flex min-h-14 items-center justify-between gap-3 rounded-xl bg-muted/60 px-3 py-2">
+      <div className="min-w-0">
+        <p className="text-sm font-medium">{label}</p>
+        <p className="truncate text-xs text-muted-foreground">{description}</p>
+      </div>
+      {children}
+    </div>
+  )
+}
+
+function normalizeHexColor(value: string): string | null {
+  const trimmed = value.trim()
+  if (/^#[0-9a-fA-F]{6}$/.test(trimmed)) return trimmed.toLowerCase()
+  if (/^#[0-9a-fA-F]{3}$/.test(trimmed)) {
+    return `#${trimmed.slice(1).split('').map((char) => char + char).join('')}`.toLowerCase()
+  }
+  return null
+}
+
+// Compact color card. The technical hex value stays in a focused dialog so
+// the main settings page can emphasize color roles instead of implementation.
 function ColorField({
   control,
   name,
   label,
-  placeholder = '#000000',
   swatchDefault = '#000000',
   description,
   clearable = true,
+  defaultLabel = 'Automatic',
 }: {
   control: Control<FormValues>
   name: FieldPath<FormValues>
-  label?: string
-  placeholder?: string
+  label: string
   /** Color shown in the swatch when the value is empty. */
   swatchDefault?: string
   description?: string
   clearable?: boolean
+  defaultLabel?: string
 }) {
+  const [open, setOpen] = useState(false)
+  const [draft, setDraft] = useState(swatchDefault)
+  const [invalid, setInvalid] = useState(false)
+  const originalValueRef = useRef('')
+  const committedRef = useRef(false)
+
   return (
     <Controller
       name={name}
       control={control}
       render={({ field }) => {
         const value = typeof field.value === 'string' ? field.value : ''
+        const resolved = normalizeHexColor(value) ?? normalizeHexColor(swatchDefault) ?? '#000000'
+        const openEditor = () => {
+          originalValueRef.current = value
+          committedRef.current = false
+          setDraft(resolved)
+          setInvalid(false)
+          setOpen(true)
+        }
+        const closeEditor = (commit: boolean) => {
+          if (!commit) field.onChange(originalValueRef.current)
+          committedRef.current = commit
+          setOpen(false)
+          field.onBlur()
+        }
+        const applyDraft = () => {
+          const normalized = normalizeHexColor(draft)
+          if (!normalized) {
+            setInvalid(true)
+            return
+          }
+          field.onChange(normalized)
+          closeEditor(true)
+        }
         return (
-          <div className="space-y-1.5">
-            {label && <Label htmlFor={name}>{label}</Label>}
-            <div className="flex items-center gap-2">
+          <>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={openEditor}
+              className="h-auto w-full justify-start rounded-xl px-3 py-2.5 text-left"
+              aria-label={`Edit ${label.toLowerCase()}`}
+            >
+              <span
+                className="size-9 shrink-0 rounded-lg border border-black/10 shadow-sm"
+                style={{ backgroundColor: resolved }}
+                aria-hidden="true"
+              />
+              <span className="min-w-0 flex-1">
+                <span className="block text-sm font-medium">{label}</span>
+                <span className="block truncate text-xs font-normal text-muted-foreground">
+                  {value ? description : defaultLabel}
+                </span>
+              </span>
+              <ChevronRightIcon data-icon="inline-end" className="text-muted-foreground" />
+            </Button>
+
+            <Dialog
+              open={open}
+              onOpenChange={(next) => {
+                if (!next && !committedRef.current) {
+                  field.onChange(originalValueRef.current)
+                  field.onBlur()
+                }
+                setOpen(next)
+              }}
+            >
+              <DialogContent className="sm:max-w-sm" overlayStyle={{ zIndex: 40 }}>
+                <DialogHeader>
+                  <DialogTitle>{label}</DialogTitle>
+                  <DialogDescription>
+                    Pick visually or enter an exact hex value.
+                  </DialogDescription>
+                </DialogHeader>
               <input
-                id={name}
+                id={`${name}-picker`}
                 type="color"
-                value={value || swatchDefault}
-                onChange={(e) => field.onChange(e.target.value)}
-                className="h-8 w-10 flex-shrink-0 cursor-pointer rounded border border-input bg-transparent p-0.5"
-                aria-label={label ? `Pick ${label.toLowerCase()}` : 'Pick color'}
+                value={normalizeHexColor(draft) ?? resolved}
+                onChange={(event) => {
+                  setDraft(event.target.value)
+                  field.onChange(event.target.value)
+                  setInvalid(false)
+                }}
+                className="h-28 w-full cursor-pointer rounded-xl border border-input bg-transparent p-1"
+                aria-label={`Pick ${label.toLowerCase()}`}
               />
-              <Input
-                value={value}
-                onChange={(e) => field.onChange(e.target.value)}
-                onBlur={field.onBlur}
-                placeholder={placeholder}
-                className="flex-1 font-mono text-sm"
-              />
-              {clearable && value ? (
-                <button
-                  type="button"
-                  onClick={() => field.onChange('')}
-                  className="flex size-8 flex-shrink-0 items-center justify-center rounded border border-input text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                  aria-label="Clear color"
-                  title="Clear"
-                >
-                  <XIcon className="size-4" />
-                </button>
-              ) : null}
-            </div>
-            {description && <p className="text-xs text-muted-foreground">{description}</p>}
-          </div>
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor={`${name}-hex`}>Hex color</Label>
+                  <Input
+                    id={`${name}-hex`}
+                    value={draft}
+                    onChange={(event) => {
+                      const next = event.target.value
+                      setDraft(next)
+                      const normalized = normalizeHexColor(next)
+                      if (normalized) field.onChange(normalized)
+                      setInvalid(false)
+                    }}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter') {
+                        event.preventDefault()
+                        applyDraft()
+                      }
+                    }}
+                    aria-invalid={invalid}
+                    className="font-mono"
+                    placeholder="#4f46e5"
+                  />
+                  {invalid ? <p className="text-xs text-destructive">Use a 3- or 6-digit hex color.</p> : null}
+                </div>
+                <DialogFooter>
+                  {clearable && value ? (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={() => {
+                        field.onChange('')
+                        closeEditor(true)
+                      }}
+                      className="sm:mr-auto"
+                    >
+                      Use default
+                    </Button>
+                  ) : null}
+                  <Button type="button" variant="outline" onClick={() => closeEditor(false)}>Cancel</Button>
+                  <Button type="button" onClick={applyDraft}>Apply color</Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </>
         )
       }}
     />
+  )
+}
+
+function AdvancedColorFields({
+  control,
+  primaryColor,
+  voiceEnabled,
+}: {
+  control: Control<FormValues>
+  primaryColor: string
+  voiceEnabled: boolean
+}) {
+  const [open, setOpen] = useState(false)
+  return (
+    <div className="mt-2 border-t pt-2">
+      <Button
+        type="button"
+        variant="ghost"
+        className="w-full justify-between"
+        aria-expanded={open}
+        onClick={() => setOpen((current) => !current)}
+      >
+        Advanced colors
+        <ChevronDownIcon data-icon="inline-end" className={cn('transition-transform', open && 'rotate-180')} />
+      </Button>
+      {open ? (
+        <div className="mt-2 grid gap-2 sm:grid-cols-2">
+          <ColorField control={control} name="theme.composerFieldColor" label="Message field" swatchDefault="#ffffff" description="Composer surface" />
+          <ColorField control={control} name="theme.composerBorderColor" label="Field border" swatchDefault="#e5e7eb" defaultLabel="Automatic" description="Composer outline" />
+          <ColorField control={control} name="theme.sendButtonColor" label="Send button" swatchDefault={primaryColor} defaultLabel="Uses brand color" description="Composer action" />
+          <ColorField control={control} name="theme.bubbleBorderColor" label="Bubble border" swatchDefault="#e5e7eb" description="Message outlines" />
+          {voiceEnabled ? <ColorField control={control} name="theme.callButtonColor" label="Call button" swatchDefault="#22c55e" description="Voice action" /> : null}
+        </div>
+      ) : null}
+    </div>
   )
 }
 
@@ -2414,18 +2736,18 @@ function ThemePresetPicker({
   }
 
   return (
-    <div className="space-y-3">
-      <h4 className="text-sm font-semibold">Presets</h4>
-      <div className="flex flex-wrap gap-2">
+    <div className="flex flex-col gap-2">
+      <div className="grid gap-2 sm:grid-cols-2">
         {WIDGET_THEME_PRESETS.map((preset) => (
-          <button
+          <Button
             key={preset.id}
             type="button"
+            variant="outline"
             onClick={() => applyTheme(preset.theme, preset.name)}
             title={preset.description}
-            className="flex items-center gap-2 rounded-full border border-input bg-background px-3 py-1.5 text-xs font-medium transition-colors hover:border-primary/40 hover:bg-muted"
+            className="h-auto justify-start rounded-xl px-3 py-3"
           >
-            <span className="flex -space-x-1">
+            <span className="flex -space-x-1.5">
               {[
                 preset.theme.primaryColor,
                 preset.theme.botBubbleColor || '#f3f4f6',
@@ -2433,28 +2755,25 @@ function ThemePresetPicker({
               ].map((color, i) => (
                 <span
                   key={i}
-                  className="size-3.5 rounded-full ring-1 ring-border"
+                  className="size-5 rounded-full ring-2 ring-background"
                   style={{ backgroundColor: color }}
                 />
               ))}
             </span>
-            {preset.name}
-          </button>
+            <span className="truncate">{preset.name}</span>
+          </Button>
         ))}
-        {/* Rendered as one of the chips so it reads as "another way to theme". */}
-        <button
+        <Button
           type="button"
+          variant="outline"
           onClick={openMatchDialog}
           title="Read your website's brand colors, font, and logo and apply them here"
-          className="flex items-center gap-2 rounded-full border border-dashed border-input bg-background px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:bg-muted hover:text-foreground"
+          className="h-auto justify-start rounded-xl border-dashed px-3 py-3 text-muted-foreground sm:col-span-2"
         >
-          <GlobeIcon className="size-3.5" />
+          <GlobeIcon data-icon="inline-start" />
           Match my website
-        </button>
+        </Button>
       </div>
-      <p className="text-xs text-muted-foreground">
-        Starting points that restyle colors, shape, and font — pick one, then fine-tune anything below.
-      </p>
 
       <Dialog open={matchOpen} onOpenChange={setMatchOpen}>
         <DialogContent className="sm:max-w-md">

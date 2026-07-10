@@ -2,7 +2,7 @@
 
 import { cn } from '@/lib/utils'
 import { motion, useReducedMotion } from 'framer-motion'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 
 export interface ScrubberProps {
   /** Additional CSS classes */
@@ -13,6 +13,8 @@ export interface ScrubberProps {
   defaultValue?: number
   /** Label displayed on the left side of the track */
   label?: string
+  /** Hide the visual label while retaining it as the accessible slider name. */
+  showLabel?: boolean
   /** Maximum value */
   max?: number
   /** Minimum value */
@@ -27,6 +29,8 @@ export interface ScrubberProps {
   ticks?: number
   /** Controlled value */
   value?: number
+  /** Denser presentation for settings grids. */
+  size?: 'default' | 'sm'
 }
 
 const clamp = (val: number, min: number, max: number) => Math.min(Math.max(val, min), max)
@@ -36,6 +40,7 @@ const roundToStep = (val: number, step: number, min: number) =>
 
 const Scrubber = ({
   label = 'Value',
+  showLabel = true,
   value: controlledValue,
   defaultValue = 0,
   onValueChange,
@@ -46,27 +51,20 @@ const Scrubber = ({
   suffix = '',
   ticks = 9,
   className,
+  size = 'default',
 }: ScrubberProps) => {
   const shouldReduceMotion = useReducedMotion()
   const trackRef = useRef<HTMLDivElement>(null)
   const [internalValue, setInternalValue] = useState(defaultValue)
   const [isDragging, setIsDragging] = useState(false)
   const [isHovering, setIsHovering] = useState(false)
-  const [isHoverDevice, setIsHoverDevice] = useState(false)
 
   const isControlled = controlledValue !== undefined
   const value = isControlled ? controlledValue : internalValue
   const range = max - min
   const percentage = range > 0 ? ((value - min) / range) * 100 : 0
-  const isActive = isDragging || (isHoverDevice && isHovering)
-
-  useEffect(() => {
-    const mq = window.matchMedia('(hover: hover) and (pointer: fine)')
-    setIsHoverDevice(mq.matches)
-    const onChange = (e: MediaQueryListEvent) => setIsHoverDevice(e.matches)
-    mq.addEventListener('change', onChange)
-    return () => mq.removeEventListener('change', onChange)
-  }, [])
+  const isActive = isDragging || isHovering
+  const compact = size === 'sm'
 
   const setValue = useCallback(
     (newValue: number) => {
@@ -164,8 +162,8 @@ const Scrubber = ({
         ref={trackRef}
         role="slider"
         style={{
-          height: 52,
-          borderRadius: 12,
+          height: compact ? 40 : 52,
+          borderRadius: compact ? 'var(--radius-md)' : 12,
           touchAction: 'none',
         }}
         tabIndex={0}
@@ -174,7 +172,7 @@ const Scrubber = ({
         <div
           className="pointer-events-none absolute inset-y-0 left-0 bg-foreground/14"
           style={{
-            borderRadius: 12,
+            borderRadius: compact ? 'var(--radius-md)' : 12,
             width: `${percentage}%`,
             transition: isDragging ? 'none' : 'width 150ms cubic-bezier(0.23, 1, 0.32, 1)',
           }}
@@ -187,7 +185,7 @@ const Scrubber = ({
               const pos = ((i + 1) / (ticks + 1)) * 100
               return (
                 <div
-                  className="absolute top-1/2 bg-foreground/25"
+                  className={cn('absolute bg-foreground/25', compact ? 'top-[72%]' : 'top-1/2')}
                   key={pos}
                   style={{
                     left: `${pos}%`,
@@ -206,7 +204,7 @@ const Scrubber = ({
         <div
           className="pointer-events-none absolute"
           style={{
-            top: '50%',
+            top: compact ? '72%' : '50%',
             left: `${percentage}%`,
             transform: 'translateX(-50%) translateY(-50%)',
             marginLeft: -6,
@@ -226,7 +224,7 @@ const Scrubber = ({
             )}
             style={{
               width: 5,
-              height: 34,
+              height: compact ? 12 : 34,
               borderRadius: 999,
             }}
             transition={springConfig}
@@ -234,24 +232,35 @@ const Scrubber = ({
         </div>
 
         {/* Label */}
-        <div
-          className="pointer-events-none absolute top-1/2 left-[18px] -translate-y-1/2 whitespace-nowrap text-foreground"
-          style={{
-            fontSize: 17,
-            zIndex: 4,
-          }}
-        >
-          {label}
-        </div>
+        {showLabel ? (
+          <div
+            className={cn(
+              'pointer-events-none absolute whitespace-nowrap text-foreground',
+              compact ? 'top-1.5' : 'top-1/2 -translate-y-1/2',
+            )}
+            style={{
+              left: compact ? 14 : 18,
+              fontSize: compact ? 14 : 17,
+              fontWeight: compact ? 500 : 400,
+              zIndex: 4,
+            }}
+          >
+            {label}
+          </div>
+        ) : null}
 
         {/* Value display */}
         <div
-          className="pointer-events-none absolute top-1/2 right-[14px] -translate-y-1/2 text-foreground"
+          className={cn(
+            'pointer-events-none absolute text-foreground',
+            compact ? 'top-1.5' : 'top-1/2 -translate-y-1/2',
+          )}
           style={{
+            right: compact ? 12 : 14,
             zIndex: 4,
             fontFamily: 'ui-monospace, monospace',
             fontVariantNumeric: 'tabular-nums',
-            fontSize: 15,
+            fontSize: compact ? 13 : 15,
             fontWeight: 500,
           }}
         >

@@ -11,7 +11,7 @@
  */
 
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { MessageCircleIcon, XIcon } from 'lucide-react'
 import { ChatWindow } from '@/components/widget/ChatWindow'
 import { DEFAULT_CHAT_MODEL, DEFAULT_TEMPERATURE } from '@/lib/ai/chat-models'
@@ -20,6 +20,7 @@ import type { ChatTransport } from '@/lib/widget-transport'
 import type { PublicBotConfig } from '@/lib/widget-config'
 import type { BotConfig, BotLanguage, SuggestedQuestion } from '@/lib/types'
 import { POWERED_BY_URL, readableTextColor } from '@/lib/utils'
+import { fontStack } from '@/lib/fonts'
 
 const DEFAULT_VOICE_ID = '21m00Tcm4TlvDq8ikWAM'
 
@@ -57,6 +58,16 @@ type LiveConfig = {
       { greeting?: string; suggestedQuestions?: SuggestedQuestion[]; fallbackMessage?: string }
     >
   >
+  proactiveGreeting?: {
+    enabled?: boolean
+    delaySeconds?: number
+    frequency?: 'once_per_session' | 'every_page'
+    messages?: Partial<Record<BotLanguage, Array<{ text?: string }>>>
+    backgroundColor?: string
+    textColor?: string
+    cornerRadius?: number
+    fontFamily?: string
+  }
   commerce?: {
     enabled?: boolean
     provider?: 'woocommerce' | 'shopify' | 'magento' | 'feed'
@@ -78,7 +89,20 @@ interface TestChatProps {
 }
 
 export function TestChat({ botId, config, activeLang }: TestChatProps) {
-  const [isOpen, setIsOpen] = useState(true)
+  const proactiveEnabled = config.proactiveGreeting?.enabled ?? false
+  const prefersReducedMotion = useReducedMotion()
+  const [isOpen, setIsOpen] = useState(() => !proactiveEnabled)
+  const [previewGreetingDismissed, setPreviewGreetingDismissed] = useState(false)
+  const previousProactiveEnabled = useRef(proactiveEnabled)
+
+  useEffect(() => {
+    const turnedOn = proactiveEnabled && !previousProactiveEnabled.current
+    previousProactiveEnabled.current = proactiveEnabled
+    if (turnedOn) {
+      setIsOpen(false)
+      setPreviewGreetingDismissed(false)
+    }
+  }, [proactiveEnabled])
 
   // Always read the latest config inside the (stable) transport.
   const configRef = useRef(config)
@@ -93,6 +117,16 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
   const launcherLabel = config.theme?.launcherLabel ?? ''
   const showLauncherLogo = (config.theme?.launcherShowLogo ?? false) && !!launcherAvatar
   const asPill = launcherStyleCfg === 'pill' && !!launcherLabel && !isOpen
+  const proactiveMessage = config.proactiveGreeting?.messages?.[activeLang]
+    ?.map((variant) => variant.text?.trim())
+    .find(Boolean)
+  const proactiveBackground = config.proactiveGreeting?.backgroundColor || '#ffffff'
+  const proactiveText = config.proactiveGreeting?.textColor || '#111827'
+  const proactiveRadius = config.proactiveGreeting?.cornerRadius ?? 14
+  const proactiveFont =
+    config.proactiveGreeting?.fontFamily === 'inherit' || !config.proactiveGreeting?.fontFamily
+      ? fontStack(config.theme?.fontFamily)
+      : fontStack(config.proactiveGreeting.fontFamily)
   // Preview pulse: a ONE-SHOT demo. The live widget pulses forever; here it
   // plays a single breathe + wave the moment the Pulse toggle turns on, then
   // removes itself. Never auto-plays on mount/return, and toggling off→on
@@ -165,6 +199,47 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
                 </a>
               </p>
             </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence initial={false}>
+        {!isOpen && proactiveEnabled && proactiveMessage && !previewGreetingDismissed && (
+          <motion.div
+            key="proactive-greeting"
+            initial={prefersReducedMotion ? false : { opacity: 0, y: 8, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 4, scale: 0.98 }}
+            transition={{ duration: prefersReducedMotion ? 0 : 0.2, ease: 'easeOut' }}
+            className="absolute bottom-[72px] right-0 flex w-[min(280px,calc(100vw-40px))] items-start shadow-lg pointer-events-auto"
+            style={{
+              backgroundColor: proactiveBackground,
+              color: proactiveText,
+              borderRadius: `${proactiveRadius}px`,
+              fontFamily: proactiveFont,
+            }}
+            role="status"
+          >
+            <button
+              type="button"
+              className="min-h-12 min-w-0 flex-1 cursor-pointer px-4 py-3 text-left text-sm leading-5"
+              onClick={() => setIsOpen(true)}
+            >
+              {proactiveMessage}
+            </button>
+            <button
+              type="button"
+              className="flex size-11 shrink-0 items-center justify-center rounded-full opacity-60 transition-opacity hover:opacity-100"
+              onClick={() => setPreviewGreetingDismissed(true)}
+              aria-label="Dismiss greeting preview"
+            >
+              <XIcon className="size-4" aria-hidden="true" />
+            </button>
+            <span
+              className="absolute -bottom-1.5 right-5 size-3 rotate-45"
+              style={{ backgroundColor: proactiveBackground }}
+              aria-hidden="true"
+            />
           </motion.div>
         )}
       </AnimatePresence>
@@ -371,6 +446,18 @@ function buildPreviewPublicConfig(config: LiveConfig): PublicBotConfig {
     languages,
     defaultLanguage: config.defaultLanguage,
     content,
+    proactiveGreeting: {
+      enabled: config.proactiveGreeting?.enabled ?? false,
+      delaySeconds: config.proactiveGreeting?.delaySeconds ?? 3,
+      frequency: config.proactiveGreeting?.frequency ?? 'once_per_session',
+      messages: (config.proactiveGreeting?.messages?.[config.defaultLanguage ?? languages[0]] ?? [])
+        .map((variant) => variant.text?.trim() ?? '')
+        .filter(Boolean),
+      backgroundColor: config.proactiveGreeting?.backgroundColor ?? '#ffffff',
+      textColor: config.proactiveGreeting?.textColor ?? '#111827',
+      cornerRadius: config.proactiveGreeting?.cornerRadius ?? 14,
+      fontFamily: config.proactiveGreeting?.fontFamily ?? 'inherit',
+    },
     leadCapture: {
       enabled: config.leadCapture?.enabled ?? false,
       trigger: config.leadCapture?.trigger ?? 'on_fallback',
@@ -445,6 +532,27 @@ function buildFullConfig(config: LiveConfig): BotConfig {
     languages,
     defaultLanguage: config.defaultLanguage,
     content,
+    proactiveGreeting: {
+      enabled: config.proactiveGreeting?.enabled ?? false,
+      delaySeconds: config.proactiveGreeting?.delaySeconds ?? 3,
+      frequency: config.proactiveGreeting?.frequency ?? 'once_per_session',
+      messages: {
+        en: (config.proactiveGreeting?.messages?.en ?? []).map((variant) => ({
+          text: variant.text?.trim() ?? '',
+        })),
+        ...(config.proactiveGreeting?.messages?.lt
+          ? {
+              lt: config.proactiveGreeting.messages.lt.map((variant) => ({
+                text: variant.text?.trim() ?? '',
+              })),
+            }
+          : {}),
+      },
+      backgroundColor: config.proactiveGreeting?.backgroundColor ?? '#ffffff',
+      textColor: config.proactiveGreeting?.textColor ?? '#111827',
+      cornerRadius: config.proactiveGreeting?.cornerRadius ?? 14,
+      fontFamily: config.proactiveGreeting?.fontFamily ?? 'inherit',
+    },
     systemPrompt: config.systemPrompt ?? 'You are a helpful assistant.',
     persona: {
       tone: config.persona?.tone ?? 'friendly',

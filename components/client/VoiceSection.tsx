@@ -11,14 +11,14 @@
  *  - Preview ▶ button per language
  */
 
-import { useEffect, useRef, useReducer, useCallback, useState } from 'react'
+import { useEffect, useRef, useReducer, useCallback, useState, type ReactNode } from 'react'
 import { Controller, type Control, type UseFormWatch, type UseFormSetValue } from 'react-hook-form'
 import Link from 'next/link'
 import { PlayIcon, SquareIcon, LoaderCircleIcon, AlertCircleIcon, MicIcon } from 'lucide-react'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Button, buttonVariants } from '@/components/ui/button'
-import { CardContent, CardTitle, CardDescription } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog'
 import { CollapsibleSection } from '@/components/client/CollapsibleSection'
 import {
@@ -173,8 +173,8 @@ export function VoiceSection({
     <CollapsibleSection
       header={
         <div className="relative z-10 flex items-center gap-2.5">
-          <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground">
-            <MicIcon className="size-4" aria-hidden="true" />
+          <span className="flex size-7 shrink-0 items-center justify-center text-primary">
+            <MicIcon className="size-5" aria-hidden="true" />
           </span>
           <div>
             <CardTitle className="text-sm font-semibold leading-tight">Voice</CardTitle>
@@ -183,9 +183,10 @@ export function VoiceSection({
         </div>
       }
     >
-      <CardContent className="space-y-4">
+      <CardContent className="flex flex-col gap-3 bg-muted/70 py-3">
         {/* Master toggle. On the Free plan enabling opens the upgrade dialog
             instead — voice is a paid-tier feature (+ the Voice add-on). */}
+        <VoiceSettingsGroup title="Voice status" description="Let visitors start a live voice conversation from the widget.">
         <div className="flex items-center gap-3">
           <Controller
             name="voice.enabled"
@@ -211,6 +212,7 @@ export function VoiceSection({
             </a>
           )}
         </div>
+        </VoiceSettingsGroup>
 
         <Dialog open={upgradeOpen} onOpenChange={setUpgradeOpen}>
           <DialogContent className="sm:max-w-sm">
@@ -232,7 +234,8 @@ export function VoiceSection({
         </Dialog>
 
         {voiceEnabled && (
-          <div className="space-y-5 rounded-lg border p-4">
+          <VoiceSettingsGroup title="Voices and model" description="Pick a voice for each language and tune the voice agent.">
+          <div className="space-y-5">
             {/* Voice status messages */}
             {loadState.status === 'unavailable' && (
               <div className="flex items-start gap-2 rounded-md bg-amber-50 border border-amber-200 px-3 py-2 text-sm text-amber-800">
@@ -311,9 +314,30 @@ export function VoiceSection({
               </div>
             )}
           </div>
+          </VoiceSettingsGroup>
         )}
       </CardContent>
     </CollapsibleSection>
+  )
+}
+
+function VoiceSettingsGroup({
+  title,
+  description,
+  children,
+}: {
+  title: string
+  description: string
+  children: ReactNode
+}) {
+  return (
+    <Card size="sm" className="gap-0 py-0 shadow-none">
+      <CardHeader className="py-3">
+        <CardTitle>{title}</CardTitle>
+        <CardDescription className="text-xs">{description}</CardDescription>
+      </CardHeader>
+      <CardContent className="border-t py-3">{children}</CardContent>
+    </Card>
   )
 }
 

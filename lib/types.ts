@@ -143,6 +143,20 @@ export interface LanguageContent {
   fallbackMessage: string
 }
 
+export interface ProactiveGreetingConfig {
+  enabled: boolean
+  /** Seconds after launcher load; 0 shows immediately. */
+  delaySeconds: number
+  frequency: 'once_per_session' | 'every_page'
+  /** Editable objects keep React Hook Form field arrays stable. */
+  messages: Partial<Record<BotLanguage, Array<{ text: string }>>>
+  backgroundColor: string
+  textColor: string
+  cornerRadius: number
+  /** `inherit` follows the main chat font. */
+  fontFamily: string
+}
+
 export interface BotConfig {
   displayName: string
   /** Short subtitle under the name on the welcome screen (e.g. "Virtual assistant"). */
@@ -212,6 +226,8 @@ export interface BotConfig {
   defaultLanguage?: BotLanguage
   /** Per-language content (required for each language in `languages[]`; not English-anchored). */
   content: Partial<Record<BotLanguage, LanguageContent>>
+  /** Dismissible message shown above the closed launcher before chat opens. */
+  proactiveGreeting?: ProactiveGreetingConfig
   systemPrompt: string
   /** Id of the reusable system_prompts library entry this bot uses (owner-managed).
    *  When set, `systemPrompt` holds a snapshot of that entry's content. */

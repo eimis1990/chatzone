@@ -44,6 +44,39 @@ export const languageContentSchema = z.object({
   fallbackMessage: z.string().min(1).default(DEFAULT_FALLBACK),
 })
 
+const proactiveGreetingMessageSchema = z.object({
+  text: z.string().trim().min(1, 'Greeting message cannot be empty').max(160),
+})
+
+const proactiveGreetingSchema = z
+  .object({
+    enabled: z.boolean().default(false),
+    // 0 = show as soon as the launcher config has loaded.
+    delaySeconds: z.number().int().min(0).max(30).default(3),
+    frequency: z.enum(['once_per_session', 'every_page']).default('once_per_session'),
+    messages: z
+      .object({
+        en: z.array(proactiveGreetingMessageSchema).max(5).optional(),
+        lt: z.array(proactiveGreetingMessageSchema).max(5).optional(),
+      })
+      .default({ en: [{ text: 'Hi! How can we help?' }] }),
+    backgroundColor: z.string().default('#ffffff'),
+    textColor: z.string().default('#111827'),
+    cornerRadius: z.number().min(0).max(24).default(14),
+    // `inherit` follows theme.fontFamily; any other value is a FONT_OPTIONS key.
+    fontFamily: z.string().default('inherit'),
+  })
+  .default({
+    enabled: false,
+    delaySeconds: 3,
+    frequency: 'once_per_session',
+    messages: { en: [{ text: 'Hi! How can we help?' }] },
+    backgroundColor: '#ffffff',
+    textColor: '#111827',
+    cornerRadius: 14,
+    fontFamily: 'inherit',
+  })
+
 /**
  * Upgrades a stored config from the pre-multilanguage shape (top-level
  * greeting/suggestedQuestions/fallbackMessage/language, voice.voiceId) to the
@@ -160,6 +193,7 @@ export const botConfigFormSchema = z.object({
     en: languageContentSchema.optional(),
     lt: languageContentSchema.optional(),
   }),
+  proactiveGreeting: proactiveGreetingSchema,
   systemPrompt: z.string().min(1).max(SYSTEM_PROMPT_MAX),
   systemPromptId: z.string().uuid().optional(),
   persona: z
@@ -241,6 +275,19 @@ export const botConfigSchema = z
         message: 'Primary language must be one of the enabled languages',
         path: ['defaultLanguage'],
       })
+    }
+    if (cfg.proactiveGreeting.enabled) {
+      const greetingLanguage = cfg.defaultLanguage ?? cfg.languages[0]
+      const variants = greetingLanguage
+        ? cfg.proactiveGreeting.messages[greetingLanguage]
+        : undefined
+      if (!variants?.length) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Add at least one proactive greeting for the primary language',
+          path: ['proactiveGreeting', 'messages', greetingLanguage ?? 'en'],
+        })
+      }
     }
   })
 

@@ -22,6 +22,25 @@ allowedDomains) and applies plan entitlements:
   to its primary). See [languages-i18n](languages-i18n.md).
 - Lead capture / badge / voice-call button gated per
   [entitlements](plans-and-entitlements.md) + the Voice add-on.
+- Proactive greeting config is reduced to the chosen primary language before it
+  reaches the browser; only trimmed text variants and display/style options are
+  public (`lib/widget-config.ts:202`).
+
+## Proactive launcher greeting
+
+`public/widget.js` renders the greeting directly on the customer page, above the
+closed launcher, so the chat iframe remains lazy. It starts its immediate/delayed
+timer only after config loads, randomly chooses a variant, opens chat when the
+message is clicked, and has a separate 44px dismiss target. `once_per_session`
+uses `sessionStorage` keyed by public bot key; the key is written when the bubble
+actually appears, not when it is merely scheduled. Opening chat cancels a pending
+timer. Entrance/exit motion is opacity/transform-only and the entrance is skipped
+for `prefers-reduced-motion` (`public/widget.js:159`, `public/widget.js:247`,
+`public/widget.js:305`, `public/widget.js:642`).
+
+The configurator preview is deterministic: it shows the first non-empty variant
+for the active language rather than randomizing on each form render
+(`components/client/TestChat.tsx:120`).
 
 ## Origin allowlist — `isOriginAllowed` (`lib/widget-auth.ts`)
 

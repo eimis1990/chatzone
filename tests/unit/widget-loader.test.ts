@@ -12,7 +12,7 @@ import { JSDOM } from 'jsdom'
 
 const widgetSrc = readFileSync(resolve(process.cwd(), 'public/widget.js'), 'utf8')
 
-function setupDOM(botKey: string, position = 'bottom-right') {
+function setupDOM(botKey: string, position = 'bottom-right', widgetConfig?: unknown) {
   const dom = new JSDOM('<!DOCTYPE html><html><body></body></html>', {
     url: 'https://example.com',
     runScripts: 'dangerously',
@@ -38,12 +38,24 @@ function setupDOM(botKey: string, position = 'bottom-right') {
     configurable: true,
   })
 
+  const fetchMock = widgetConfig
+    ? vi.fn().mockResolvedValue({ ok: true, json: async () => widgetConfig })
+    : vi.fn().mockResolvedValue({ ok: false })
+  window.fetch = fetchMock as unknown as typeof window.fetch
+
   // Run the script code
   // eslint-disable-next-line no-new-func
-  const fn = new Function('window', 'document', widgetSrc)
-  fn(window, document)
+  const fn = new Function('window', 'document', 'fetch', widgetSrc)
+  fn(window, document, fetchMock)
 
   return { dom, window, document }
+}
+
+async function flushPromises() {
+  await Promise.resolve()
+  await Promise.resolve()
+  await Promise.resolve()
+  await Promise.resolve()
 }
 
 describe('widget.js loader', () => {
@@ -114,6 +126,66 @@ describe('widget.js loader', () => {
       launcher!.click()
       expect(wrapper?.style.display).toBe('flex')
       expect(launcher?.getAttribute('aria-expanded')).toBe('true')
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('shows a configured proactive greeting above the launcher and opens chat on click', async () => {
+    vi.useFakeTimers()
+    try {
+      const { document, window } = setupDOM('GREETING_KEY', 'bottom-right', {
+        theme: { primaryColor: '#6366f1', position: 'bottom-right' },
+        proactiveGreeting: {
+          enabled: true,
+          delaySeconds: 0,
+          frequency: 'once_per_session',
+          messages: ['Welcome! How can we help?'],
+          backgroundColor: '#123456',
+          textColor: '#ffffff',
+          cornerRadius: 18,
+          fontFamily: 'inherit',
+        },
+      })
+      await flushPromises()
+      await vi.advanceTimersByTimeAsync(0)
+
+      const greeting = document.querySelector<HTMLElement>('[data-cbz-greeting]')
+      expect(greeting?.style.display).toBe('flex')
+      expect(greeting?.style.backgroundColor).toBe('rgb(18, 52, 86)')
+      expect(greeting?.textContent).toContain('Welcome! How can we help?')
+      expect(window.sessionStorage.getItem('cbz_greeting_GREETING_KEY')).toBe('1')
+
+      const openButton = greeting?.querySelector<HTMLButtonElement>('button:not([aria-label])')
+      openButton?.click()
+      expect(document.querySelector('[data-cbz-iframe]')).not.toBeNull()
+      expect(greeting?.style.opacity).toBe('0')
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('waits for the configured greeting delay', async () => {
+    vi.useFakeTimers()
+    try {
+      const { document } = setupDOM('DELAY_KEY', 'bottom-left', {
+        theme: { primaryColor: '#6366f1', position: 'bottom-left' },
+        proactiveGreeting: {
+          enabled: true,
+          delaySeconds: 5,
+          frequency: 'every_page',
+          messages: ['Need anything?'],
+        },
+      })
+      await flushPromises()
+      await vi.advanceTimersByTimeAsync(0)
+      const greeting = document.querySelector<HTMLElement>('[data-cbz-greeting]')
+      expect(greeting?.style.display).toBe('none')
+      await vi.advanceTimersByTimeAsync(4999)
+      expect(greeting?.style.display).toBe('none')
+      await vi.advanceTimersByTimeAsync(1)
+      expect(greeting?.style.display).toBe('flex')
+      expect(greeting?.style.left).toBe('20px')
     } finally {
       vi.useRealTimers()
     }

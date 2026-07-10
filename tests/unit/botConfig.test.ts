@@ -34,6 +34,9 @@ describe('botConfigSchema', () => {
     expect(parsed.theme.position).toBe('bottom-right')
     expect(parsed.theme.cornerRadius).toBe(16)
     expect(parsed.theme.bubbleRadius).toBe(16)
+    expect(parsed.proactiveGreeting.enabled).toBe(false)
+    expect(parsed.proactiveGreeting.delaySeconds).toBe(3)
+    expect(parsed.proactiveGreeting.frequency).toBe('once_per_session')
     expect(parsed.leadCapture.enabled).toBe(false)
     expect(parsed.allowedDomains).toEqual([])
   })
@@ -108,6 +111,44 @@ describe('botConfigSchema', () => {
     expect(() =>
       botConfigSchema.parse({ displayName: 'B', greeting: 'h', systemPrompt: 's', theme: { primaryColor: '#fff', position: 'top' } }),
     ).toThrow()
+  })
+
+  it('requires a proactive greeting variant for the primary language when enabled', () => {
+    const result = botConfigSchema.safeParse({
+      displayName: 'B',
+      greeting: 'h',
+      systemPrompt: 's',
+      proactiveGreeting: {
+        enabled: true,
+        delaySeconds: 0,
+        frequency: 'every_page',
+        messages: { en: [] },
+        backgroundColor: '#ffffff',
+        textColor: '#111827',
+        cornerRadius: 14,
+        fontFamily: 'inherit',
+      },
+    })
+    expect(result.success).toBe(false)
+  })
+
+  it('accepts up to five proactive greeting variants', () => {
+    const parsed = botConfigSchema.parse({
+      displayName: 'B',
+      greeting: 'h',
+      systemPrompt: 's',
+      proactiveGreeting: {
+        enabled: true,
+        delaySeconds: 5,
+        frequency: 'once_per_session',
+        messages: { en: ['One', 'Two', 'Three', 'Four', 'Five'].map((text) => ({ text })) },
+        backgroundColor: '#ffffff',
+        textColor: '#111827',
+        cornerRadius: 12,
+        fontFamily: 'inherit',
+      },
+    })
+    expect(parsed.proactiveGreeting.messages.en).toHaveLength(5)
   })
 
   it('accepts a fully-specified lead-capture block', () => {
