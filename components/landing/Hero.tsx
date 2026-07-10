@@ -35,7 +35,7 @@ export function Hero() {
               <span className="absolute inline-flex size-full animate-ping rounded-full bg-green-400 opacity-75" />
               <span className="relative size-1.5 rounded-full bg-green-400" />
             </span>
-            Always on · 24/7
+            AI voice + chat · always on
           </motion.div>
 
           {/* Headline — Plus Jakarta Sans with inline chat/voice icon chips and a
@@ -46,24 +46,16 @@ export function Hero() {
             transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
             className="text-balance font-[family-name:var(--font-jakarta)] text-[2.15rem] font-bold leading-[1.13] tracking-tight sm:text-[3rem] lg:text-[3.75rem] xl:text-[4.25rem]"
           >
-            Your AI chat{' '}
-            <span
-              className="inline-flex -rotate-3 items-center justify-center rounded-xl bg-white/10 px-1.5 align-middle text-[0.62em] ring-1 ring-white/15"
-              aria-hidden="true"
-            >
-              💬
+            Let your customers
+            <br />
+            <span className="bg-gradient-to-r from-primary via-[#f59a3c] to-primary bg-clip-text font-extrabold text-transparent">
+              talk to your store.
             </span>{' '}
-            &amp; voice{' '}
             <span
               className="inline-flex rotate-3 items-center justify-center rounded-xl bg-white/10 px-1.5 align-middle text-[0.62em] ring-1 ring-white/15"
               aria-hidden="true"
             >
               🎙️
-            </span>{' '}
-            agent,
-            <br />
-            <span className="bg-gradient-to-r from-primary via-[#f59a3c] to-primary bg-clip-text font-extrabold text-transparent">
-              day and night!
             </span>
           </motion.h1>
 
@@ -73,8 +65,9 @@ export function Hero() {
             transition={{ duration: 0.6, delay: 0.1 }}
             className="mt-5 max-w-xl text-base leading-relaxed text-white/80 sm:mt-6 sm:text-lg xl:max-w-2xl xl:text-xl"
           >
-            Your always-on AI agent for chat &amp; voice — answering questions, capturing leads, and
-            looking up orders 24/7, so customers never wait. Live in one line of code.
+            Loqara gives your store a real voice agent — shoppers ask out loud and hear answers
+            from your products, policies, and live order status. Prefer to type? The same AI handles
+            chat. Live in one line of code.
           </motion.p>
 
           <motion.div
@@ -88,7 +81,7 @@ export function Hero() {
               shimmer
               triggerClassName="relative inline-flex h-12 items-center justify-center overflow-hidden rounded-full bg-primary px-8 text-sm font-semibold text-white shadow-lg shadow-primary/25 transition-colors hover:bg-primary-hover sm:h-14 sm:px-10 sm:text-base"
             />
-            <p className="mt-3 text-sm text-white/60">Free to start · Live in one line of code</p>
+            <p className="mt-3 text-sm text-white/60">Free to start · add voice when you&apos;re ready</p>
           </motion.div>
         </div>
       </div>
