@@ -459,12 +459,45 @@ const ideas = [
   },
 ]
 
+// Recommended publishing order for the draft column (front of the list posts
+// first). Kept as an explicit id list so the drafts above can be authored in any
+// order — this list, not array position, defines the board sequence.
+const DRAFT_ORDER = [
+  'fa6dec03-f9f4-4b38-a454-a44d8f66e3d2', // The hardest answer is "I don't know" (grounded)
+  '10000000-0000-4000-8000-000000000020', // "One line of code" took much more than one line of work
+  '27f065e1-6e79-4649-9c8f-13426b3bb6d4', // A support bot should earn the right to keep talking (handoff)
+  '10000000-0000-4000-8000-000000000012', // The most expensive support question (WISMO)
+  '0c374f60-2f73-491b-90e5-9a22648a5446', // I stopped caring how many messages (ROI metrics)
+  '45138260-6e18-482a-9e5a-800532c6ae3f', // A small store does not need AI to answer everything
+  'f670a481-b17a-4510-b42c-b9c8c1ba9f4a', // The first time I spoke to our store widget (voice)
+  '74c54440-2c79-418e-a255-4ff107a580e7', // You can spot an FAQ widget (conversational vs chatbot)
+  '57764012-de66-49e0-8112-774e99556205', // Contact forms ask for trust (lead capture)
+  '4fd1af10-4cb3-4c90-a610-33eec5ff9c95', // Five questions before putting AI in front of customers
+  '968f7f5f-3e4a-4cb4-8bee-5decf401aff6', // Gorgias can be the right tool and still be too much tool
+  '10000000-0000-4000-8000-000000000019', // ChatGPT is a model. Customer support is a system.
+  '9095a072-057f-463d-a6a5-7c9d3121fa57', // A Shopify chat widget should know the storefront
+  '6bb4b086-3d5f-4ae5-a9ed-ec99033ff333', // A WooCommerce support setup (platform)
+  '10000000-0000-4000-8000-000000000014', // An AI agent becomes useless when conversations feel expensive
+  '10000000-0000-4000-8000-000000000013', // Lithuanian customer support exposes weak multilingual AI
+  '10000000-0000-4000-8000-000000000016', // Customer support AI needs a privacy model (GDPR)
+  '10000000-0000-4000-8000-000000000017', // Small stores need less software, more support capacity
+  '10000000-0000-4000-8000-000000000015', // Many abandoned carts are unanswered questions
+  '10000000-0000-4000-8000-000000000018', // The worst time to test automation is the campaign (Black Friday — seasonal, last)
+]
+
+// Guard: every draft must have an explicit rank, or the board order silently breaks.
+for (const post of drafts) {
+  if (!DRAFT_ORDER.includes(post.id)) {
+    throw new Error(`Draft ${post.id} ("${post.title}") is missing from DRAFT_ORDER`)
+  }
+}
+
 const now = new Date().toISOString()
 const rows = [
-  ...drafts.map((post, index) => ({
+  ...drafts.map((post) => ({
     ...post,
     status: 'draft',
-    sort_order: index,
+    sort_order: DRAFT_ORDER.indexOf(post.id),
     posted_at: null,
     updated_at: now,
   })),

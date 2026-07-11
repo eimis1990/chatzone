@@ -3,7 +3,7 @@ import { createRateLimiter } from '@/lib/ratelimit'
 
 describe('createRateLimiter (token bucket)', () => {
   it('allows up to capacity, then blocks', () => {
-    let t = 0
+    const t = 0
     const rl = createRateLimiter({ capacity: 2, refillPerSec: 1, now: () => t })
     expect(rl.check('a')).toBe(true)
     expect(rl.check('a')).toBe(true)
@@ -21,7 +21,7 @@ describe('createRateLimiter (token bucket)', () => {
   })
 
   it('tracks keys independently', () => {
-    let t = 0
+    const t = 0
     const rl = createRateLimiter({ capacity: 1, refillPerSec: 1, now: () => t })
     expect(rl.check('a')).toBe(true)
     expect(rl.check('b')).toBe(true)

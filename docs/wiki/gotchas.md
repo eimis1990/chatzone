@@ -2,6 +2,18 @@
 
 Sharp edges that have bitten us. Read before debugging something weird.
 
+## `npm run lint` has ~51 warnings by design
+
+The React Compiler lint rules (`eslint-plugin-react-hooks` v6, shipped by this
+Next version) are downgraded from error → **warn** in `eslint.config.mjs`:
+`purity`, `set-state-in-effect`, `static-components`, `preserve-manual-memoization`,
+`refs`. The codebase predates them and uses intentional patterns they flag (e.g.
+`setState` in an effect for SSR/first-render agreement in `ChatWindow`/`EmbedShell`).
+So **0 errors is the passing bar; warnings are expected**. `rules-of-hooks` and
+`exhaustive-deps` remain errors. Adopting the compiler properly (and re-erroring
+these) is a deferred, per-component migration that needs browser verification —
+don't bulk-"fix" them blind.
+
 ## Widget shows "This chatbot is currently unavailable"
 
 The embed iframe (served by our app) fetches `/api/widget-config` **same-origin**,

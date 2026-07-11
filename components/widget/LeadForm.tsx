@@ -43,7 +43,7 @@ export function LeadForm({ fields, primaryColor, onSubmit, onDismiss }: LeadForm
     return (
       <div className="mx-4 mb-4 rounded-xl border border-gray-200 bg-white p-4 text-center">
         <div className="text-2xl mb-2">✓</div>
-        <p className="text-sm font-medium text-gray-800">Thanks! We'll be in touch.</p>
+        <p className="text-sm font-medium text-gray-800">Thanks! We’ll be in touch.</p>
       </div>
     )
   }
