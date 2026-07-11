@@ -30,6 +30,8 @@ Add a line here. How the wiki works: [README.md](README.md).
   chatbot-aware positioning, and UI behavior.
 - [linkedin-content](linkedin-content.md) — draggable owner content board,
   ordering persistence, editorial drafts, and branded post visuals.
+- [owner-dashboard](owner-dashboard.md) — platform stat sources, the MRR/earnings
+  card (`computeMrr`), and the demo-data-in-totals gotcha.
 
 ## Related docs (not in the wiki — linked, not duplicated)
 

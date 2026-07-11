@@ -3,6 +3,8 @@ import { requireRole } from '@/lib/auth/guards'
 import { createServerClient } from '@/lib/supabase/server'
 import { StatCard } from '@/components/client/charts/StatCard'
 import { ClientCard } from '@/components/owner/ClientCard'
+import { MrrCard } from '@/components/owner/MrrCard'
+import { computeMrr, type BillingOrg } from '@/lib/billing/mrr'
 
 interface OwnerStats {
   total_orgs: number
@@ -28,21 +30,31 @@ export default async function OwnerDashboardPage() {
 
   const supabase = await createServerClient()
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
-  const [{ data: statsRow }, { data: recentOrgs }, { count: signupsCount }, { count: liveBots }] =
-    await Promise.all([
-      supabase.from('owner_stats').select('*').single<OwnerStats>(),
-      supabase
-        .from('org_stats')
-        .select('*')
-        .order('last_activity_at', { ascending: false, nullsFirst: false })
-        .limit(8),
-      supabase.from('signups').select('id', { count: 'exact', head: true }),
-      supabase
-        .from('bots')
-        .select('id', { count: 'exact', head: true })
-        .eq('status', 'active')
-        .gte('last_seen_at', sevenDaysAgo),
-    ])
+  const [
+    { data: statsRow },
+    { data: recentOrgs },
+    { count: signupsCount },
+    { count: liveBots },
+    { data: billingOrgs },
+  ] = await Promise.all([
+    supabase.from('owner_stats').select('*').single<OwnerStats>(),
+    supabase
+      .from('org_stats')
+      .select('*')
+      .order('last_activity_at', { ascending: false, nullsFirst: false })
+      .limit(8),
+    supabase.from('signups').select('id', { count: 'exact', head: true }),
+    supabase
+      .from('bots')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'active')
+      .gte('last_seen_at', sevenDaysAgo),
+    supabase
+      .from('organizations')
+      .select('is_platform, plan, subscription_status, billing_interval, voice_addon'),
+  ])
+
+  const revenue = computeMrr((billingOrgs ?? []) as BillingOrg[])
 
   const stats: OwnerStats = statsRow ?? {
     total_orgs: 0,
@@ -65,6 +77,9 @@ export default async function OwnerDashboardPage() {
         <h1 className="text-lg font-semibold">Dashboard</h1>
         <p className="text-sm text-muted-foreground">Platform-wide overview across all clients.</p>
       </div>
+
+      {/* Earnings headline */}
+      <MrrCard {...revenue} />
 
       {/* Stat cards */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
