@@ -785,3 +785,29 @@ html.lenis body {
 .cbz-composer-input::placeholder {
   color: var(--cbz-ph-color, #9ca3af);
 }
+
+/* Owner sales-lead details use Dialog semantics but a drawer transition. Keep
+   the shared centered-dialog zoom animation from competing with the slide. */
+.lead-detail-panel {
+  animation: none !important;
+  scale: 1 !important;
+  transition: transform 300ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.lead-detail-panel[data-starting-style],
+.lead-detail-panel[data-ending-style] {
+  transform: translateX(100%);
+}
+.lead-detail-backdrop {
+  animation: none !important;
+  transition: opacity 300ms ease-out;
+}
+.lead-detail-backdrop[data-starting-style],
+.lead-detail-backdrop[data-ending-style] {
+  opacity: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .lead-detail-panel,
+  .lead-detail-backdrop {
+    transition: none;
+  }
+}

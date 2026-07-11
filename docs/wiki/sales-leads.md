@@ -1,0 +1,50 @@
+# Sales leads
+
+Owner-only outbound pipeline: researched prospects, prioritization, prepared
+emails, and manual status progression.
+
+## Data and flow
+
+- `/owner/leads` reads every `sales_leads` row, ordered by score descending and
+  then name (`app/(owner)/owner/leads/page.tsx:15`). The table was introduced in
+  `supabase/migrations/0036_sales_leads.sql:8`; `has_chatbot` was added in
+  `0037_sales_leads_has_chatbot.sql:7`.
+- The client UI filters locally by text, vertical, status, and chatbot presence
+  (`components/owner/SalesLeadsTable.tsx:287`). Status changes are optimistic,
+  persist through `setLeadStatus`, and roll back on error (`:274`).
+- The route heading follows the same compact title/subtitle pattern as other
+  owner pages (`app/(owner)/owner/leads/page.tsx:23`). Desktop uses a flat,
+  score-first data grid with platform in its own column; below `md`, leads become
+  stacked cards rather than a horizontally overflowing table
+  (`components/owner/SalesLeadsTable.tsx:421`, `:485`). City is intentionally
+  detail-only (`:591`).
+- Score is represented by the same compact percentage tile in the table, mobile
+  list, and detail panel (`components/owner/SalesLeadsTable.tsx:86`). Status
+  colors are lifecycle semantics: neutral Ready, amber Email sent, red Rejected,
+  green Accepted, and accent-orange Our client (`:65`).
+- Lead selection and drawer visibility are separate state. Keeping the selected
+  lead mounted while `Dialog` closes lets Base UI finish the exit transition
+  (`components/owner/SalesLeadsTable.tsx:260`, `:526`). The drawer uses scoped
+  starting/ending-state CSS instead of the shared centered-dialog zoom
+  (`app/globals.css:789`).
+- The drawer's long-content region must keep `min-h-0`, `overflow-y-auto`, and
+  non-shrinking content cards; otherwise flex sizing collapses research and
+  email content instead of scrolling it (`components/owner/SalesLeadsTable.tsx:587`).
+  The website metadata value is a real external link (`:597`).
+
+## Prepared-email conventions
+
+- `email_subject` and `email_body` are operational snapshots stored on each
+  lead, not generated at send time. Existing-chatbot leads should acknowledge
+  the incumbent respectfully and give a concrete reason to compare.
+- Current positioning emphasizes a contextual Lithuanian conversation (not a
+  keyword/FAQ widget) and the paid-plan range of 1,500–12,000 conversations per
+  month. Keep those figures aligned with `lib/plans-catalog.ts:36` and `:68`.
+- **Copy means body only.** Both detail-panel copy actions pass exactly
+  `openLead.email_body` (`components/owner/SalesLeadsTable.tsx:559`, `:644`).
+  The separate mail-app action is allowed to include recipient, subject, and
+  body (`:560`). Do not reintroduce a `Tema:` prefix into clipboard copy.
+- Manual name/URL/email signature lines do not belong in stored bodies; the
+  sending provider supplies the signature.
+
+_Last verified: 2026-07-11 (5cb8523)._

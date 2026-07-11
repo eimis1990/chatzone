@@ -2,44 +2,77 @@
 
 import { useMemo, useState, useTransition } from 'react'
 import {
-  SearchIcon,
-  XIcon,
-  CopyIcon,
-  CheckIcon,
-  MailIcon,
-  ExternalLinkIcon,
+  ArrowUpRightIcon,
   BotIcon,
+  Building2Icon,
+  CheckIcon,
+  CopyIcon,
+  ExternalLinkIcon,
+  FilterXIcon,
+  Globe2Icon,
+  MailIcon,
+  MapPinIcon,
+  MessageSquareTextIcon,
+  SearchIcon,
+  SendIcon,
   SparklesIcon,
+  StoreIcon,
+  TargetIcon,
+  UserRoundIcon,
+  UsersIcon,
+  XIcon,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 import { setLeadStatus } from '@/app/(owner)/owner/leads/actions'
 import type { SalesLead, SalesLeadStatus } from '@/lib/types'
 
 const STATUS_META: Record<SalesLeadStatus, { label: string; classes: string }> = {
-  ready: { label: 'Ready', classes: 'bg-primary/10 text-primary border-primary/20' },
+  ready: { label: 'Ready', classes: 'border-border bg-muted text-foreground' },
   email_sent: {
     label: 'Email sent',
-    classes: 'bg-amber-500/15 text-amber-700 border-amber-500/20 dark:text-amber-400',
+    classes: 'border-amber-200 bg-amber-50 text-amber-700',
   },
-  rejected: { label: 'Rejected', classes: 'bg-muted text-muted-foreground border-border' },
-  accepted: {
-    label: 'Accepted',
-    classes: 'bg-emerald-500/15 text-emerald-700 border-emerald-500/20 dark:text-emerald-400',
-  },
-  client: {
-    label: 'Our client',
-    classes: 'bg-violet-500/15 text-violet-700 border-violet-500/20 dark:text-violet-400',
-  },
+  rejected: { label: 'Rejected', classes: 'border-red-200 bg-red-50 text-red-700' },
+  accepted: { label: 'Accepted', classes: 'border-emerald-200 bg-emerald-50 text-emerald-700' },
+  client: { label: 'Our client', classes: 'border-primary bg-primary text-primary-foreground' },
 }
+
 const STATUS_ORDER: SalesLeadStatus[] = ['ready', 'email_sent', 'rejected', 'accepted', 'client']
 
 function host(url: string): string {
@@ -50,86 +83,80 @@ function host(url: string): string {
   }
 }
 
-/** Chance score as a ~270° arc gauge showing just the percentage. */
-function ScoreGauge({ value }: { value: number }) {
+function ScoreTile({ value }: { value: number }) {
   const pct = Math.max(0, Math.min(100, value))
-  // 270° sweep with a gap at the bottom, starting bottom-left (135°).
-  const R = 15
-  const C = 2 * Math.PI * R
-  const sweep = 0.75 // 270° of the full circle
-  const dash = C * sweep
   return (
-    <span className="inline-flex flex-col items-center" title={`${pct} / 100`}>
-      <svg width="44" height="38" viewBox="0 0 40 40" aria-hidden="true">
-        <g transform="rotate(135 20 20)">
-          <circle
-            cx="20" cy="20" r={R} fill="none" strokeWidth="5" strokeLinecap="round"
-            className="stroke-muted" strokeDasharray={`${dash} ${C}`}
-          />
-          <circle
-            cx="20" cy="20" r={R} fill="none" strokeWidth="5" strokeLinecap="round"
-            className="stroke-primary" strokeDasharray={`${(dash * pct) / 100} ${C}`}
-          />
-        </g>
-        <text x="20" y="20" textAnchor="middle" dominantBaseline="central" className="fill-foreground text-[11px] font-semibold tabular-nums">
-          {pct}%
-        </text>
-      </svg>
-    </span>
-  )
-}
-
-const PLATFORM_STYLE: Record<string, string> = {
-  WooCommerce: 'bg-[#7f54b3]/12 text-[#7f54b3] dark:text-[#c9a6ec]',
-  Shopify: 'bg-[#5e8e3e]/15 text-[#4a7a2f] dark:text-[#95bf47]',
-  Magento: 'bg-[#ee672f]/15 text-[#d1571f] dark:text-[#f5915f]',
-}
-function PlatformBadge({ platform }: { platform: string | null }) {
-  if (!platform) return null
-  const cls = PLATFORM_STYLE[platform] ?? 'bg-muted text-muted-foreground'
-  return (
-    <span className={cn('rounded px-1.5 py-0.5 text-[10px] font-medium leading-none', cls)}>
-      {platform}
-    </span>
-  )
-}
-
-/** Existing-chatbot indicator. No bot = green (easy win); has bot = amber (switch). */
-function BotBadge({ has }: { has: boolean | null }) {
-  if (has === null) return <span className="text-muted-foreground/50">—</span>
-  return has ? (
-    <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2 py-0.5 text-xs font-medium text-amber-700 dark:text-amber-400">
-      <BotIcon className="size-3" /> Has bot
-    </span>
-  ) : (
-    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-2 py-0.5 text-xs font-medium text-emerald-700 dark:text-emerald-400">
-      <SparklesIcon className="size-3" /> Open
-    </span>
-  )
-}
-
-function CopyButton({ text, label }: { text: string; label?: string }) {
-  const [copied, setCopied] = useState(false)
-  return (
-    <button
-      type="button"
-      onClick={(e) => {
-        e.stopPropagation()
-        void navigator.clipboard.writeText(text).then(() => {
-          setCopied(true)
-          setTimeout(() => setCopied(false), 1200)
-        })
-      }}
-      className="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-      title="Copy"
+    <span
+      className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-primary/20 bg-primary/5 text-xs font-semibold tabular-nums text-primary"
+      aria-label={`Chance to close ${pct}%`}
     >
-      {copied ? <CheckIcon className="size-3 text-primary" /> : <CopyIcon className="size-3" />}
-      {label}
-    </button>
+      {pct}%
+    </span>
   )
 }
 
-/** Per-lead status picker — themed Select with the status color on the trigger. */
+function PlatformBadge({ platform }: { platform: string | null }) {
+  return (
+    <Badge variant="outline" className="font-normal text-muted-foreground">
+      {platform || 'Other'}
+    </Badge>
+  )
+}
+
+function BotBadge({ has }: { has: boolean | null }) {
+  if (has === null) return <span className="text-muted-foreground">Unknown</span>
+  return has ? (
+    <Badge variant="outline" className="border-primary/25 bg-primary/5 text-primary">
+      <BotIcon data-icon="inline-start" />
+      Has bot
+    </Badge>
+  ) : (
+    <Badge variant="secondary">
+      <SparklesIcon data-icon="inline-start" />
+      Open
+    </Badge>
+  )
+}
+
+function CopyButton({
+  text,
+  label,
+  compact = false,
+}: {
+  text: string
+  label: string
+  compact?: boolean
+}) {
+  const [copied, setCopied] = useState(false)
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1400)
+    } catch {
+      toast.error('Could not copy to clipboard')
+    }
+  }
+
+  return (
+    <Button
+      type="button"
+      variant={compact ? 'ghost' : 'outline'}
+      size={compact ? 'icon-xs' : 'sm'}
+      aria-label={label}
+      title={label}
+      onClick={(event) => {
+        event.stopPropagation()
+        void copy()
+      }}
+    >
+      {copied ? <CheckIcon data-icon={compact ? undefined : 'inline-start'} /> : <CopyIcon data-icon={compact ? undefined : 'inline-start'} />}
+      {!compact && (copied ? 'Copied' : label)}
+    </Button>
+  )
+}
+
 function StatusSelect({
   lead,
   onChange,
@@ -138,25 +165,89 @@ function StatusSelect({
   onChange: (id: string, status: SalesLeadStatus) => void
 }) {
   return (
-    // Rows open the drawer on click — the picker must not bubble.
-    <span onClick={(e) => e.stopPropagation()}>
-      <Select value={lead.status} onValueChange={(v) => onChange(lead.id, v as SalesLeadStatus)}>
+    <span onClick={(event) => event.stopPropagation()}>
+      <Select value={lead.status} onValueChange={(value) => onChange(lead.id, value as SalesLeadStatus)}>
         <SelectTrigger
           size="sm"
           aria-label={`Status for ${lead.name}`}
-          className={cn('h-8 w-[128px] rounded-md font-medium', STATUS_META[lead.status].classes)}
+          className={cn('h-8 min-w-32 rounded-lg font-medium', STATUS_META[lead.status].classes)}
         >
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          {STATUS_ORDER.map((s) => (
-            <SelectItem key={s} value={s}>
-              {STATUS_META[s].label}
-            </SelectItem>
-          ))}
+          <SelectGroup>
+            {STATUS_ORDER.map((status) => (
+              <SelectItem key={status} value={status}>
+                {STATUS_META[status].label}
+              </SelectItem>
+            ))}
+          </SelectGroup>
         </SelectContent>
       </Select>
     </span>
+  )
+}
+
+function MetricCard({
+  label,
+  value,
+  detail,
+  icon: Icon,
+}: {
+  label: string
+  value: number | string
+  detail: string
+  icon: typeof UsersIcon
+}) {
+  return (
+    <Card size="sm" className="shadow-sm ring-foreground/5">
+      <CardHeader>
+        <CardDescription>{label}</CardDescription>
+        <CardAction className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+          <Icon className="size-4" aria-hidden="true" />
+        </CardAction>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-1">
+        <CardTitle className="text-2xl font-semibold tabular-nums">{value}</CardTitle>
+        <p className="text-xs text-muted-foreground">{detail}</p>
+      </CardContent>
+    </Card>
+  )
+}
+
+function DetailItem({
+  label,
+  value,
+  icon: Icon,
+  href,
+}: {
+  label: string
+  value: string | null | undefined
+  icon: typeof Building2Icon
+  href?: string
+}) {
+  return (
+    <div className="flex min-w-0 gap-3 rounded-xl bg-muted/50 p-3">
+      <Icon className="mt-0.5 size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+      <div className="min-w-0">
+        <dt className="text-xs text-muted-foreground">{label}</dt>
+        <dd className="mt-0.5 break-words text-sm font-medium">
+          {href && value ? (
+            <a
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-primary underline-offset-4 hover:underline focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              {value}
+              <ExternalLinkIcon className="size-3.5" aria-hidden="true" />
+            </a>
+          ) : (
+            value || '—'
+          )}
+        </dd>
+      </div>
+    </div>
   )
 }
 
@@ -167,20 +258,28 @@ export function SalesLeadsTable({ leads: initialLeads }: { leads: SalesLead[] })
   const [statusFilter, setStatusFilter] = useState<SalesLeadStatus | 'all'>('all')
   const [botFilter, setBotFilter] = useState<'all' | 'no' | 'yes'>('all')
   const [openLead, setOpenLead] = useState<SalesLead | null>(null)
+  const [isDetailOpen, setIsDetailOpen] = useState(false)
   const [, startTransition] = useTransition()
 
-  const verticals = useMemo(() => [...new Set(leads.map((l) => l.vertical))], [leads])
+  const verticals = useMemo(() => [...new Set(leads.map((lead) => lead.vertical))], [leads])
+  const noBotCount = useMemo(() => leads.filter((lead) => !lead.has_chatbot).length, [leads])
+  const hasBotCount = leads.length - noBotCount
+  const readyCount = useMemo(() => leads.filter((lead) => lead.status === 'ready').length, [leads])
+  const averageScore = leads.length
+    ? Math.round(leads.reduce((sum, lead) => sum + lead.score, 0) / leads.length)
+    : 0
+
+  const hasActiveFilters = Boolean(query.trim() || vertical || statusFilter !== 'all' || botFilter !== 'all')
 
   const changeStatus = (id: string, status: SalesLeadStatus) => {
-    // Optimistic: flip locally, persist in the background, roll back on failure.
-    const prev = leads
-    setLeads(leads.map((l) => (l.id === id ? { ...l, status } : l)))
-    setOpenLead((o) => (o && o.id === id ? { ...o, status } : o))
+    const previous = leads
+    setLeads(leads.map((lead) => (lead.id === id ? { ...lead, status } : lead)))
+    setOpenLead((lead) => (lead?.id === id ? { ...lead, status } : lead))
     startTransition(async () => {
       try {
         await setLeadStatus(id, status)
       } catch {
-        setLeads(prev)
+        setLeads(previous)
         toast.error('Failed to update status')
       }
     })
@@ -188,277 +287,374 @@ export function SalesLeadsTable({ leads: initialLeads }: { leads: SalesLead[] })
 
   const filtered = useMemo(() => {
     let list = leads
-    if (vertical) list = list.filter((l) => l.vertical === vertical)
-    if (statusFilter !== 'all') list = list.filter((l) => l.status === statusFilter)
-    if (botFilter === 'no') list = list.filter((l) => !l.has_chatbot)
-    else if (botFilter === 'yes') list = list.filter((l) => l.has_chatbot)
+    if (vertical) list = list.filter((lead) => lead.vertical === vertical)
+    if (statusFilter !== 'all') list = list.filter((lead) => lead.status === statusFilter)
+    if (botFilter === 'no') list = list.filter((lead) => !lead.has_chatbot)
+    if (botFilter === 'yes') list = list.filter((lead) => lead.has_chatbot)
     if (query.trim()) {
-      const q = query.trim().toLowerCase()
-      list = list.filter((l) =>
-        [l.name, l.legal_name, l.city, l.ceo, l.email, l.vertical, l.platform]
+      const normalized = query.trim().toLowerCase()
+      list = list.filter((lead) =>
+        [lead.name, lead.legal_name, lead.city, lead.ceo, lead.email, lead.vertical, lead.platform]
           .filter(Boolean)
           .join(' ')
           .toLowerCase()
-          .includes(q),
+          .includes(normalized),
       )
     }
     return list
   }, [leads, vertical, statusFilter, botFilter, query])
 
-  const noBotCount = useMemo(() => leads.filter((l) => !l.has_chatbot).length, [leads])
+  const resetFilters = () => {
+    setQuery('')
+    setVertical(null)
+    setStatusFilter('all')
+    setBotFilter('all')
+  }
 
-  const chip = (active: boolean) =>
-    cn(
-      'rounded-full border px-3 py-1 text-xs font-medium transition-colors',
-      active
-        ? 'border-primary bg-primary text-primary-foreground'
-        : 'border-border bg-card text-muted-foreground hover:border-primary/50 hover:text-foreground',
-    )
+  const openDetails = (lead: SalesLead) => {
+    setOpenLead(lead)
+    setIsDetailOpen(true)
+  }
 
   return (
-    <div className="space-y-4">
-      {/* Toolbar: search + status filter side by side, category chips below */}
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="relative w-full max-w-xs">
-          <SearchIcon className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search company, city, CEO…"
-            className="bg-card pl-8"
-          />
-        </div>
-        <Select
-          value={statusFilter}
-          onValueChange={(v) => setStatusFilter(v as SalesLeadStatus | 'all')}
-        >
-          <SelectTrigger aria-label="Filter by status" className="w-44 bg-card">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All statuses</SelectItem>
-            {STATUS_ORDER.map((s) => (
-              <SelectItem key={s} value={s}>
-                {STATUS_META[s].label} ({leads.filter((l) => l.status === s).length})
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Select value={botFilter} onValueChange={(v) => setBotFilter(v as 'all' | 'no' | 'yes')}>
-          <SelectTrigger aria-label="Filter by existing chatbot" className="w-52 bg-card">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Any chatbot status</SelectItem>
-            <SelectItem value="no">No chatbot — easy win ({noBotCount})</SelectItem>
-            <SelectItem value="yes">Has chatbot — switch ({leads.length - noBotCount})</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-      <div className="flex flex-wrap gap-1.5">
-        <button type="button" className={chip(vertical === null)} onClick={() => setVertical(null)}>
-          All ({leads.length})
-        </button>
-        {verticals.map((v) => (
-          <button
-            key={v}
-            type="button"
-            className={chip(vertical === v)}
-            onClick={() => setVertical(vertical === v ? null : v)}
-          >
-            {v} ({leads.filter((l) => l.vertical === v).length})
-          </button>
-        ))}
-      </div>
+    <div className="flex flex-col gap-5">
+      <section className="grid grid-cols-2 gap-3 xl:grid-cols-4" aria-label="Pipeline summary">
+        <MetricCard label="Total prospects" value={leads.length} detail="Researched companies" icon={UsersIcon} />
+        <MetricCard label="Open opportunities" value={noBotCount} detail="No existing chatbot" icon={SparklesIcon} />
+        <MetricCard label="Switch opportunities" value={hasBotCount} detail="Already using chat" icon={BotIcon} />
+        <MetricCard label="Ready to contact" value={readyCount} detail={`Average priority ${averageScore}%`} icon={SendIcon} />
+      </section>
 
-      {/* Table */}
-      <div className="overflow-x-auto rounded-xl border bg-card">
-        <table className="w-full min-w-[900px] text-sm">
-          <thead>
-            <tr className="border-b text-left text-xs uppercase tracking-wide text-muted-foreground">
-              <th className="px-3 py-2.5 font-medium">#</th>
-              <th className="px-3 py-2.5 font-medium">Company</th>
-              <th className="px-3 py-2.5 font-medium">Chance</th>
-              <th className="px-3 py-2.5 font-medium">Category</th>
-              <th className="px-3 py-2.5 font-medium">City</th>
-              <th className="px-3 py-2.5 font-medium">Bot</th>
-              <th className="px-3 py-2.5 font-medium">Contact</th>
-              <th className="px-3 py-2.5 font-medium">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map((l, i) => (
-              <tr
-                key={l.id}
-                onClick={() => setOpenLead(l)}
-                className="cursor-pointer border-b transition-colors last:border-b-0 hover:bg-muted/40"
+      <Card className="shadow-none">
+        <CardHeader>
+          <CardTitle>Find the next lead</CardTitle>
+          <CardDescription>Search and narrow the pipeline before opening a prepared email.</CardDescription>
+          {hasActiveFilters && (
+            <CardAction>
+              <Button variant="ghost" size="sm" onClick={resetFilters}>
+                <FilterXIcon data-icon="inline-start" />
+                Clear filters
+              </Button>
+            </CardAction>
+          )}
+        </CardHeader>
+        <CardContent className="flex flex-col gap-4">
+          <div className="grid gap-3 lg:grid-cols-[minmax(260px,1fr)_190px_230px]">
+            <label className="relative block">
+              <span className="sr-only">Search sales leads</span>
+              <SearchIcon className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+              <Input
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Search company, city, CEO…"
+                className="h-10 bg-background pl-9"
+              />
+            </label>
+
+            <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as SalesLeadStatus | 'all')}>
+              <SelectTrigger aria-label="Filter by status" className="h-10 w-full bg-background">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem value="all">All statuses</SelectItem>
+                  {STATUS_ORDER.map((status) => (
+                    <SelectItem key={status} value={status}>
+                      {STATUS_META[status].label} ({leads.filter((lead) => lead.status === status).length})
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+
+            <Select value={botFilter} onValueChange={(value) => setBotFilter(value as 'all' | 'no' | 'yes')}>
+              <SelectTrigger aria-label="Filter by existing chatbot" className="h-10 w-full bg-background">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem value="all">Any chatbot status</SelectItem>
+                  <SelectItem value="no">Open opportunity ({noBotCount})</SelectItem>
+                  <SelectItem value="yes">Switch opportunity ({hasBotCount})</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex gap-2 overflow-x-auto pb-1" aria-label="Filter by category">
+            <Button
+              type="button"
+              variant={vertical === null ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setVertical(null)}
+            >
+              All {leads.length}
+            </Button>
+            {verticals.map((item) => (
+              <Button
+                key={item}
+                type="button"
+                variant={vertical === item ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setVertical(vertical === item ? null : item)}
               >
-                <td className="px-3 py-2.5 tabular-nums text-muted-foreground">{i + 1}</td>
-                <td className="px-3 py-2.5">
-                  <div className="font-medium">{l.name}</div>
-                  {(l.platform || l.legal_name) && (
-                    <div className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
-                      <PlatformBadge platform={l.platform} />
-                      {l.legal_name && <span>{l.legal_name}</span>}
-                    </div>
-                  )}
-                </td>
-                <td className="px-3 py-2.5">
-                  <ScoreGauge value={l.score} />
-                </td>
-                <td className="px-3 py-2.5">
-                  <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium">{l.vertical}</span>
-                </td>
-                <td className="px-3 py-2.5">{l.city ?? <span className="text-muted-foreground/50">—</span>}</td>
-                <td className="px-3 py-2.5">
-                  <BotBadge has={l.has_chatbot} />
-                </td>
-                <td className="px-3 py-2.5">
-                  <div className="text-xs">
-                    {l.email ? (
-                      <span className="inline-flex items-center">
-                        {l.email} <CopyButton text={l.email} />
-                      </span>
-                    ) : (
-                      <span className="text-muted-foreground/50">no email</span>
-                    )}
-                  </div>
-                  {l.phone && <div className="text-xs text-muted-foreground tabular-nums">{l.phone}</div>}
-                </td>
-                <td className="px-3 py-2.5">
-                  <StatusSelect lead={l} onChange={changeStatus} />
-                </td>
-              </tr>
+                {item} {leads.filter((lead) => lead.vertical === item).length}
+              </Button>
             ))}
-            {filtered.length === 0 && (
-              <tr>
-                <td colSpan={8} className="px-3 py-10 text-center text-muted-foreground">
-                  No leads match the current filters.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-      <p className="text-xs text-muted-foreground">
-        Showing {filtered.length} of {leads.length}. Chance (0–100) weighs commerce fit, revenue,
-        known decision-maker, reachable email, existing chat tooling, and after-hours pain.
-      </p>
+          </div>
+        </CardContent>
+      </Card>
 
-      {/* Detail drawer */}
-      {openLead && (
-        <>
-          <div
-            className="fixed inset-0 z-40 bg-black/30 duration-200 animate-in fade-in-0"
-            onClick={() => setOpenLead(null)}
-            aria-hidden="true"
-          />
-          <aside
-            role="dialog"
-            aria-modal="true"
-            aria-label={openLead.name}
-            className="fixed inset-y-0 right-0 z-50 flex w-full max-w-2xl flex-col border-l bg-background shadow-2xl duration-300 ease-out animate-in slide-in-from-right"
+      <Card className="overflow-hidden shadow-none">
+        <CardHeader>
+          <CardTitle>Pipeline</CardTitle>
+          <CardDescription>{filtered.length} of {leads.length} prospects match the current view.</CardDescription>
+          <CardAction>
+            <Badge variant="outline">
+              <TargetIcon data-icon="inline-start" />
+              Ranked by fit
+            </Badge>
+          </CardAction>
+        </CardHeader>
+
+        <CardContent className="px-0">
+          <div className="hidden md:block">
+            <Table className="min-w-[1040px]">
+              <TableHeader className="bg-muted/30">
+                <TableRow className="hover:bg-muted/30">
+                  <TableHead className="w-20 border-r pl-4 text-xs uppercase tracking-wide text-muted-foreground">Score</TableHead>
+                  <TableHead className="border-r text-xs uppercase tracking-wide text-muted-foreground">Company</TableHead>
+                  <TableHead className="border-r text-xs uppercase tracking-wide text-muted-foreground">Platform</TableHead>
+                  <TableHead className="border-r text-xs uppercase tracking-wide text-muted-foreground">Category</TableHead>
+                  <TableHead className="border-r text-xs uppercase tracking-wide text-muted-foreground">Chatbot</TableHead>
+                  <TableHead className="border-r text-xs uppercase tracking-wide text-muted-foreground">Contact</TableHead>
+                  <TableHead className="text-xs uppercase tracking-wide text-muted-foreground">Status</TableHead>
+                  <TableHead className="w-10"><span className="sr-only">Open</span></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filtered.map((lead) => (
+                  <TableRow
+                    key={lead.id}
+                    tabIndex={0}
+                    aria-label={`Open ${lead.name}`}
+                    onClick={() => openDetails(lead)}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault()
+                        openDetails(lead)
+                      }
+                    }}
+                    className="group cursor-pointer focus-visible:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    <TableCell className="border-r pl-4"><ScoreTile value={lead.score} /></TableCell>
+                    <TableCell className="border-r">
+                      <div className="min-w-52">
+                        <span className="block font-medium text-foreground">{lead.name}</span>
+                        {lead.legal_name && (
+                          <span className="mt-0.5 block max-w-56 truncate text-xs text-muted-foreground">{lead.legal_name}</span>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="border-r"><PlatformBadge platform={lead.platform} /></TableCell>
+                    <TableCell className="border-r"><Badge variant="secondary">{lead.vertical}</Badge></TableCell>
+                    <TableCell className="border-r"><BotBadge has={lead.has_chatbot} /></TableCell>
+                    <TableCell className="border-r">
+                      <div className="flex min-w-44 flex-col gap-0.5">
+                        {lead.email ? (
+                          <span className="flex items-center gap-1 text-xs">
+                            <span className="max-w-44 truncate">{lead.email}</span>
+                            <CopyButton text={lead.email} label="Copy email address" compact />
+                          </span>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">No email</span>
+                        )}
+                        {lead.phone && <span className="text-xs tabular-nums text-muted-foreground">{lead.phone}</span>}
+                      </div>
+                    </TableCell>
+                    <TableCell><StatusSelect lead={lead} onChange={changeStatus} /></TableCell>
+                    <TableCell>
+                      <ArrowUpRightIcon className="size-4 text-muted-foreground transition-colors group-hover:text-primary" aria-hidden="true" />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+
+          <div className="flex flex-col divide-y md:hidden">
+            {filtered.map((lead) => (
+              <div key={lead.id} className="flex flex-col gap-3 p-4">
+                <button type="button" className="flex w-full items-start gap-3 text-left" onClick={() => openDetails(lead)}>
+                  <ScoreTile value={lead.score} />
+                  <span className="min-w-0 flex-1">
+                    <span className="font-medium">{lead.name}</span>
+                    <span className="mt-1 flex flex-wrap items-center gap-2">
+                      <PlatformBadge platform={lead.platform} />
+                      <Badge variant="secondary">{lead.vertical}</Badge>
+                      <BotBadge has={lead.has_chatbot} />
+                    </span>
+                  </span>
+                </button>
+                <div className="flex items-center justify-between gap-3 pl-13">
+                  <span className="truncate text-xs text-muted-foreground">{lead.email || lead.phone || 'No contact details'}</span>
+                  <StatusSelect lead={lead} onChange={changeStatus} />
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {filtered.length === 0 && (
+            <div className="flex flex-col items-center gap-3 px-4 py-16 text-center">
+              <span className="flex size-11 items-center justify-center rounded-xl bg-muted">
+                <SearchIcon className="size-5 text-muted-foreground" aria-hidden="true" />
+              </span>
+              <div>
+                <p className="font-medium">No leads found</p>
+                <p className="mt-1 text-sm text-muted-foreground">Try clearing a filter or using a broader search.</p>
+              </div>
+              <Button variant="outline" size="sm" onClick={resetFilters}>Clear filters</Button>
+            </div>
+          )}
+        </CardContent>
+        <CardFooter className="justify-between text-xs text-muted-foreground">
+          <span>Showing {filtered.length} of {leads.length}</span>
+          <span className="hidden sm:inline">Priority weighs fit, reachability, revenue, and service pressure.</span>
+        </CardFooter>
+      </Card>
+
+      <Dialog open={isDetailOpen} onOpenChange={setIsDetailOpen}>
+        {openLead && (
+          <DialogContent
+            showCloseButton={false}
+            className="lead-detail-panel inset-y-0 right-0 left-auto top-0 flex h-dvh w-full max-w-2xl translate-x-0 translate-y-0 flex-col gap-0 overflow-hidden rounded-none border-l bg-background p-0 shadow-2xl sm:max-w-2xl"
+            overlayClassName="lead-detail-backdrop bg-black/35 supports-backdrop-filter:backdrop-blur-[2px]"
           >
-            <div className="flex items-start gap-3 border-b p-5">
-              <div className="min-w-0 flex-1">
-                <h2 className="text-lg font-semibold leading-tight">{openLead.name}</h2>
-                {openLead.legal_name && (
-                  <p className="text-sm text-muted-foreground">{openLead.legal_name}</p>
+            <DialogHeader className="shrink-0 border-b bg-card p-5 pr-16">
+              <div className="flex items-start gap-3">
+                <ScoreTile value={openLead.score} />
+                <div className="min-w-0 flex-1">
+                  <DialogTitle className="text-xl leading-tight">{openLead.name}</DialogTitle>
+                  <DialogDescription className="mt-1">{openLead.legal_name || host(openLead.website)}</DialogDescription>
+                  <div className="mt-3 flex flex-wrap items-center gap-2">
+                    <PlatformBadge platform={openLead.platform} />
+                    <BotBadge has={openLead.has_chatbot} />
+                    <Badge variant="secondary">{openLead.vertical}</Badge>
+                  </div>
+                </div>
+              </div>
+            </DialogHeader>
+
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute right-4 top-4"
+              aria-label="Close lead details"
+              onClick={() => setIsDetailOpen(false)}
+            >
+              <XIcon />
+            </Button>
+
+            <div className="flex shrink-0 flex-wrap items-center gap-2 border-b bg-muted/30 px-5 py-3">
+              {openLead.email_body && <CopyButton text={openLead.email_body} label="Copy email body" />}
+              {openLead.email && openLead.email_body && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  nativeButton={false}
+                  render={
+                    <a
+                      href={`mailto:${encodeURIComponent(openLead.email)}?subject=${encodeURIComponent(openLead.email_subject ?? '')}&body=${encodeURIComponent(openLead.email_body)}`}
+                    />
+                  }
+                >
+                  <MailIcon data-icon="inline-start" />
+                  Open mail app
+                </Button>
+              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                nativeButton={false}
+                render={<a href={openLead.website} target="_blank" rel="noopener noreferrer" />}
+              >
+                <ExternalLinkIcon data-icon="inline-start" />
+                Visit website
+              </Button>
+              <div className="ml-auto"><StatusSelect lead={openLead} onChange={changeStatus} /></div>
+            </div>
+
+            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-5 [scrollbar-gutter:stable]">
+              <div className="flex min-h-full flex-col gap-5">
+                <dl className="grid shrink-0 gap-3 sm:grid-cols-2">
+                  <DetailItem label="Company" value={openLead.legal_name} icon={Building2Icon} />
+                  <DetailItem label="City" value={openLead.city} icon={MapPinIcon} />
+                  <DetailItem label="Decision-maker" value={openLead.ceo} icon={UserRoundIcon} />
+                  <DetailItem label="Platform" value={openLead.platform} icon={StoreIcon} />
+                  <DetailItem label="Email" value={openLead.email} icon={MailIcon} />
+                  <DetailItem label="Phone" value={openLead.phone} icon={MessageSquareTextIcon} />
+                  <DetailItem label="Company size" value={openLead.size_info} icon={UsersIcon} />
+                  <DetailItem
+                    label="Website"
+                    value={host(openLead.website)}
+                    icon={Globe2Icon}
+                    href={openLead.website}
+                  />
+                </dl>
+
+                {openLead.fit_note && (
+                  <Card size="sm" className="shrink-0 overflow-visible bg-primary/5 ring-primary/15">
+                    <CardHeader>
+                      <CardTitle className="text-base">Why Loqara fits</CardTitle>
+                      <CardDescription>What makes this company a relevant prospect.</CardDescription>
+                      <CardAction className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                        <SparklesIcon className="size-4" aria-hidden="true" />
+                      </CardAction>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm leading-6 text-foreground/90">{openLead.fit_note}</p>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {openLead.score_why && (
+                  <Card size="sm" className="shrink-0 overflow-visible">
+                    <CardHeader>
+                      <CardTitle className="text-base">Priority reasoning</CardTitle>
+                      <CardDescription>Why this lead ranks at {openLead.score}%.</CardDescription>
+                      <CardAction className="flex size-8 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                        <TargetIcon className="size-4" aria-hidden="true" />
+                      </CardAction>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm leading-6 text-foreground/90">{openLead.score_why}</p>
+                    </CardContent>
+                    {openLead.source && <CardFooter className="text-xs text-muted-foreground">Sources: {openLead.source}</CardFooter>}
+                  </Card>
+                )}
+
+                {openLead.email_body && (
+                  <Card className="shrink-0 overflow-visible ring-primary/20">
+                    <CardHeader className="border-b bg-primary/5">
+                      <CardTitle className="flex items-center gap-2">
+                        <MailIcon className="size-4 text-primary" aria-hidden="true" />
+                        Prepared email
+                      </CardTitle>
+                      <CardDescription>{openLead.email_subject || 'No subject prepared'}</CardDescription>
+                      <CardAction><CopyButton text={openLead.email_body} label="Copy email body" /></CardAction>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="min-h-64 whitespace-pre-wrap rounded-lg bg-muted/30 p-5 text-[15px] leading-7 sm:p-6">
+                        {openLead.email_body}
+                      </div>
+                    </CardContent>
+                  </Card>
                 )}
               </div>
-              <StatusSelect lead={openLead} onChange={changeStatus} />
-              <button
-                type="button"
-                onClick={() => setOpenLead(null)}
-                aria-label="Close"
-                className="rounded-md border p-1.5 text-muted-foreground transition-colors hover:text-foreground"
-              >
-                <XIcon className="size-4" />
-              </button>
             </div>
-
-            <div className="flex-1 space-y-5 overflow-y-auto p-5">
-              <dl className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
-                {[
-                  ['Priority', `${openLead.score}/100`],
-                  ['Category', openLead.vertical],
-                  ['City', openLead.city],
-                  ['CEO', openLead.ceo],
-                  ['Email', openLead.email],
-                  ['Phone', openLead.phone],
-                  ['Size', openLead.size_info],
-                  ['Platform', openLead.platform],
-                  ['Existing chatbot', openLead.has_chatbot === null ? null : openLead.has_chatbot ? 'Yes — switch target' : 'No — easy win'],
-                ].map(([k, v]) => (
-                  <div key={k}>
-                    <dt className="text-xs uppercase tracking-wide text-muted-foreground">{k}</dt>
-                    <dd className="font-medium break-words">{v || '—'}</dd>
-                  </div>
-                ))}
-                <div className="col-span-2">
-                  <dt className="text-xs uppercase tracking-wide text-muted-foreground">Website</dt>
-                  <dd>
-                    <a
-                      href={openLead.website}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 font-medium text-primary hover:underline"
-                    >
-                      {host(openLead.website)} <ExternalLinkIcon className="size-3.5" />
-                    </a>
-                  </dd>
-                </div>
-              </dl>
-
-              {openLead.fit_note && (
-                <div className="rounded-lg bg-emerald-500/10 p-3 text-sm text-emerald-800 dark:text-emerald-300">
-                  {openLead.fit_note}
-                </div>
-              )}
-              {openLead.score_why && (
-                <p className="text-xs text-muted-foreground">
-                  <b>Why this priority:</b> {openLead.score_why}
-                </p>
-              )}
-              {openLead.source && (
-                <p className="text-xs text-muted-foreground">Sources: {openLead.source}</p>
-              )}
-
-              {openLead.email_body && (
-                <div className="overflow-hidden rounded-xl border">
-                  <div className="flex items-center gap-2 border-b bg-muted/40 px-4 py-2.5">
-                    <MailIcon className="size-4 text-primary" />
-                    <span className="text-sm font-semibold">Cold email</span>
-                    <div className="ml-auto flex items-center gap-1">
-                      {openLead.email && (
-                        <a
-                          href={`mailto:${encodeURIComponent(openLead.email)}?subject=${encodeURIComponent(openLead.email_subject ?? '')}&body=${encodeURIComponent(openLead.email_body)}`}
-                          className="rounded-md border bg-background px-2.5 py-1 text-xs font-medium transition-colors hover:border-primary hover:text-primary"
-                        >
-                          Open in mail app
-                        </a>
-                      )}
-                      <CopyButton
-                        text={`Tema: ${openLead.email_subject ?? ''}\n\n${openLead.email_body}`}
-                        label="Copy"
-                      />
-                    </div>
-                  </div>
-                  {openLead.email_subject && (
-                    <div className="border-b px-4 py-2 text-sm">
-                      <span className="text-muted-foreground">Subject: </span>
-                      {openLead.email_subject}
-                    </div>
-                  )}
-                  <pre className="max-w-full whitespace-pre-wrap p-4 font-sans text-sm leading-relaxed">
-                    {openLead.email_body}
-                  </pre>
-                </div>
-              )}
-            </div>
-          </aside>
-        </>
-      )}
+          </DialogContent>
+        )}
+      </Dialog>
     </div>
   )
 }

@@ -26,6 +26,8 @@ Add a line here. How the wiki works: [README.md](README.md).
 - [blog-and-seo](blog-and-seo.md) — markdown blog, FAQ schema, AEO conventions,
   image pipeline.
 - [voice](voice.md) — ElevenLabs voice add-on.
+- [sales-leads](sales-leads.md) — owner outreach pipeline, prepared-email copy,
+  chatbot-aware positioning, and UI behavior.
 
 ## Related docs (not in the wiki — linked, not duplicated)
 
