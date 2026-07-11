@@ -4,6 +4,7 @@
  */
 import { config } from 'dotenv'
 import { createClient } from '@supabase/supabase-js'
+import { HASHTAGS } from './linkedin-hashtags.mjs'
 
 config({ path: '.env.local' })
 
@@ -496,6 +497,7 @@ const now = new Date().toISOString()
 const rows = [
   ...drafts.map((post) => ({
     ...post,
+    body: HASHTAGS[post.id] ? `${post.body}\n\n${HASHTAGS[post.id]}` : post.body,
     status: 'draft',
     sort_order: DRAFT_ORDER.indexOf(post.id),
     posted_at: null,

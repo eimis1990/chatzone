@@ -31,7 +31,13 @@ Owner-only planning workspace for moving posts from an angle to publish-ready co
   here over generic generated imagery so the feed stays consistent and credible.
 - `scripts/seed-linkedin-content.mjs` is an idempotent content bootstrap, not a
   routine runtime command: rerunning it deliberately restores its 20 drafts and
-  10 ideas, including their ordering and statuses.
+  10 ideas, including their ordering and statuses. Draft board order comes from
+  the explicit `DRAFT_ORDER` id list (not array position), guarded so a new draft
+  without a rank throws.
+- Per-draft hashtags live in `scripts/linkedin-hashtags.mjs` (`HASHTAGS`, keyed by
+  id, 3–5 tags each). The seed appends them to each draft body at build time; the
+  same module backfills live rows, so DB and seed stay in sync. Bodies in the seed
+  stay tag-free, so a reseed never double-appends.
 - Copy follows a founder-led LinkedIn shape: a specific observation, short
   paragraphs, concrete evidence or a useful framework, and no engagement bait.
   Ideas stay brief; drafts contain complete publishable copy.
