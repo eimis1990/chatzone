@@ -102,7 +102,10 @@ export interface LinkedInPost {
   title: string
   body: string
   link: string | null
+  image_url: string | null
+  image_alt: string | null
   status: LinkedInPostStatus
+  sort_order: number
   posted_at: string | null
   created_at: string
   updated_at: string

@@ -12,7 +12,9 @@ export default async function LinkedInPage() {
   const { data } = await svc
     .from('linkedin_posts')
     .select('*')
-    .order('created_at', { ascending: false })
+    .order('status')
+    .order('sort_order')
+    .order('created_at')
 
   const posts = (data ?? []) as LinkedInPost[]
 

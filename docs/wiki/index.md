@@ -28,6 +28,8 @@ Add a line here. How the wiki works: [README.md](README.md).
 - [voice](voice.md) — ElevenLabs voice add-on.
 - [sales-leads](sales-leads.md) — owner outreach pipeline, prepared-email copy,
   chatbot-aware positioning, and UI behavior.
+- [linkedin-content](linkedin-content.md) — draggable owner content board,
+  ordering persistence, editorial drafts, and branded post visuals.
 
 ## Related docs (not in the wiki — linked, not duplicated)
 
