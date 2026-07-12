@@ -84,4 +84,34 @@ describe('buildMessages', () => {
     expect(msgs[0].content).not.toContain('no adjectives')
     expect(msgs[0].content).toContain('descriptive')
   })
+
+  describe('cards currently shown', () => {
+    const commerceConfig = {
+      ...config,
+      commerce: { ...config.commerce, enabled: true, provider: 'woocommerce' as const, storeUrl: 'https://x.lt' },
+    }
+    const shown = [
+      { id: 'p1', title: 'Kvapni žvakė', price: '12 €', inStock: true, shortDescription: 'Sojų vaško' },
+      { id: 'p2', title: 'Rankų kremas', price: '8 €', inStock: false },
+    ]
+
+    it('injects the shown cards in display order so "the first one" resolves', () => {
+      const msgs = buildMessages(commerceConfig, [], [], 'tell me about the first one', 'en', shown)
+      const sys = msgs[0].content
+      expect(sys).toContain('CARDS CURRENTLY SHOWN')
+      expect(sys).toContain('1. "Kvapni žvakė" — 12 € — in stock — Sojų vaško')
+      expect(sys).toContain('2. "Rankų kremas" — 8 € — out of stock')
+      expect(sys.indexOf('Kvapni žvakė')).toBeLessThan(sys.indexOf('Rankų kremas'))
+    })
+
+    it('omits the block when no cards were shown', () => {
+      const msgs = buildMessages(commerceConfig, [], [], 'q', 'en', [])
+      expect(msgs[0].content).not.toContain('CARDS CURRENTLY SHOWN')
+    })
+
+    it('omits the block for non-commerce bots even if products are passed', () => {
+      const msgs = buildMessages(config, [], [], 'q', 'en', shown)
+      expect(msgs[0].content).not.toContain('CARDS CURRENTLY SHOWN')
+    })
+  })
 })

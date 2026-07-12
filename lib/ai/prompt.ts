@@ -1,4 +1,5 @@
 import type { BotConfig, BotLanguage, LanguageContent } from '@/lib/types'
+import type { CommerceProduct } from '@/lib/commerce/types'
 import { storeConfigured, orderLookupEnabled } from '@/lib/commerce'
 
 export interface ChatMessage {
@@ -26,11 +27,15 @@ export function contentFor(config: BotConfig, lang: BotLanguage): LanguageConten
   return config.content[lang] ?? config.content.en ?? Object.values(config.content)[0] ?? EMPTY_CONTENT
 }
 
+/** Cards already shown this conversation, in display order (most recent turn). */
+export type ShownProducts = Pick<CommerceProduct, 'id' | 'title' | 'price' | 'inStock' | 'shortDescription'>[]
+
 /** Builds the grounding system prompt (persona + language + retrieved context). */
 export function buildSystemPrompt(
   config: BotConfig,
   context: ContextChunk[],
   lang: BotLanguage = defaultLanguage(config),
+  shownProducts?: ShownProducts,
 ): string {
   const contextBlock = context.length
     ? context.map((c) => `[source: ${c.source_id}]\n${c.content}`).join('\n\n')
@@ -161,6 +166,26 @@ export function buildSystemPrompt(
         `contain the answer, say you are not sure (e.g. "${fallback}") and offer to connect them with ` +
         'a person — never guess.',
     )
+    if (shownProducts?.length) {
+      const cardList = shownProducts
+        .slice(0, 20)
+        .map(
+          (p, i) =>
+            `${i + 1}. "${p.title}" — ${p.price} — ${p.inStock ? 'in stock' : 'out of stock'}` +
+            (p.shortDescription ? ` — ${p.shortDescription.slice(0, 120)}` : ''),
+        )
+        .join('\n')
+      lines.push(
+        'CARDS CURRENTLY SHOWN: earlier in this conversation you displayed these product cards to the ' +
+          'shopper, in this exact order (1 = the first/leftmost card):\n' +
+          cardList +
+          '\nWhen the shopper says "the first one", "the second one", "that candle", or otherwise refers ' +
+          'to what you showed, they mean these cards. As the ONE exception to the no-names rule above, ' +
+          'you MAY mention these already-shown products by name and price in your text when answering ' +
+          'questions about them or comparing them — do not re-list them all unprompted, and still never ' +
+          'write links. To show one of them again as a card, call `display_products` with its id.',
+      )
+    }
   } else {
     lines.push(
       'Answer using ONLY the context below. Do not mention, print, or reference the source ids ' +
@@ -189,8 +214,9 @@ export function buildMessages(
   history: ChatMessage[],
   userMessage: string,
   lang: BotLanguage = defaultLanguage(config),
+  shownProducts?: ShownProducts,
 ): ChatMessage[] {
-  const system = buildSystemPrompt(config, context, lang)
+  const system = buildSystemPrompt(config, context, lang, shownProducts)
   const trimmedHistory = history.slice(-HISTORY_WINDOW)
 
   return [

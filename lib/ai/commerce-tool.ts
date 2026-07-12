@@ -29,6 +29,10 @@ export function makeProductTools(
   /** Shared candidate store — lets the response layer auto-render a lone found
    *  product if the model forgets to call display_products. */
   candidates: Map<string, CommerceProduct> = new Map<string, CommerceProduct>(),
+  /** Cards already shown on a previous turn — display_products can re-show these
+   *  by id without a fresh search. Kept OUT of `candidates` so the response
+   *  layer's safety net never re-renders stale cards on non-product turns. */
+  shown?: Map<string, CommerceProduct>,
 ): ToolSet {
   const tools: ToolSet = {
     search_products: tool({
@@ -94,7 +98,7 @@ export function makeProductTools(
         const seen = new Set<string>()
         const chosen = productIds
           .filter((id) => !seen.has(id) && (seen.add(id), true))
-          .map((id) => candidates.get(id))
+          .map((id) => candidates.get(id) ?? shown?.get(id))
           .filter((p): p is CommerceProduct => Boolean(p))
           .slice(0, 20)
         sink.length = 0

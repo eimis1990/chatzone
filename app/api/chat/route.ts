@@ -139,13 +139,19 @@ export async function POST(req: Request) {
   // Load recent history (excluding the just-inserted message handled by buildMessages tail).
   const { data: historyRows } = await svc
     .from('messages')
-    .select('role, content')
+    .select('role, content, products')
     .eq('conversation_id', convId)
     .order('created_at', { ascending: true })
     .limit(40)
   const history: ChatMessage[] = (historyRows ?? [])
     .slice(0, -1) // drop the user message we just inserted; buildMessages adds it as the tail
     .map((m) => ({ role: m.role as ChatMessage['role'], content: m.content as string }))
+  // The cards the shopper is currently looking at: the last assistant turn that
+  // displayed products. Injected into the prompt so "the first one" resolves.
+  const shownProducts =
+    (historyRows ?? [])
+      .filter((m) => m.role === 'assistant' && (m.products as CommerceProduct[] | null)?.length)
+      .at(-1)?.products as CommerceProduct[] | undefined
 
   // Retrieve grounding context; on a miss, retry once with a condensed standalone
   // query (visitors write elliptical follow-ups like "o kiek kainuoja?" that
@@ -192,7 +198,14 @@ export async function POST(req: Request) {
     })
   }
 
-  const messages = buildMessages(bot.config, retrieval.chunks, history, message, lang) as ModelMessage[]
+  const messages = buildMessages(
+    bot.config,
+    retrieval.chunks,
+    history,
+    message,
+    lang,
+    shownProducts,
+  ) as ModelMessage[]
   const citations: Citation[] = retrieval.matched.map((m) => ({
     source_id: m.source_id,
     snippet: m.content.slice(0, 160),
@@ -202,6 +215,11 @@ export async function POST(req: Request) {
   // Shared with makeProductTools so the response layer can auto-render a lone
   // found product when the model forgets to call display_products.
   const candidates = new Map<string, CommerceProduct>()
+  // Already-shown cards, kept separate from candidates so the safety net never
+  // re-renders them on non-product turns. display_products can re-show one by id
+  // ("show me the first one again") without a fresh search; price/stock are from
+  // when the card was first shown — fine within a live session.
+  const shownMap = new Map((shownProducts ?? []).map((p) => [p.id, p]))
 
   return ndjsonChatResponse(openai(bot.config.model || DEFAULT_CHAT_MODEL), messages, {
     temperature: bot.config.temperature ?? DEFAULT_TEMPERATURE,
@@ -213,6 +231,7 @@ export async function POST(req: Request) {
           orderSink,
           (p) => searchCatalog(bot, p.query, svc, p.limit ?? 24, { audience: p.audience }),
           candidates,
+          shownMap,
         )
       : undefined,
     productSink,

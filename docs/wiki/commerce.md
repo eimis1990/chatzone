@@ -53,4 +53,23 @@ Store connectors + product search. Separate from [RAG chunks](rag-and-knowledge.
   above — they back the **voice** agent's client tools (ElevenLabs), each origin-checked and
   rate-limited independently. See [voice](voice.md).
 
-_Last verified: 2026-07-08 (66f6bb8)._
+## Card awareness across turns
+
+The model's tool results live only within one request, but the cards a turn showed
+are persisted on the assistant row (`messages.products`, migration 0013). On each
+turn the chat route reads back the **last assistant message with products** and:
+
+- injects a numbered "CARDS CURRENTLY SHOWN" block into the system prompt
+  (`buildSystemPrompt`'s `shownProducts` param, `lib/ai/prompt.ts`) so "the first
+  one" resolves and the agent may name/compare *shown* products in text — the one
+  exception to the no-names rule;
+- passes them to `makeProductTools` as a separate `shown` map so `display_products`
+  can re-show a card by id without a fresh search. ⚠️ Keep shown cards **out of
+  the `candidates` map** — the response layer's safety net auto-renders candidates
+  when the model doesn't call `display_products`, and seeding it re-renders stale
+  cards on every non-product turn (phantom-cards regression).
+
+Re-shown cards carry price/stock from when they were first displayed (fine within
+a live session; the widget resets on reload anyway — no cross-reload history).
+
+_Last verified: 2026-07-11 (working tree)._

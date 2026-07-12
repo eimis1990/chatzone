@@ -34,3 +34,33 @@ describe('search_products failure handling', () => {
     ])
   })
 })
+
+describe('display_products with previously shown cards', () => {
+  const shownCard: CommerceProduct = {
+    id: 'old1',
+    title: 'Rankų kremas',
+    price: '8 €',
+    url: 'https://x.lt/p/old1',
+    inStock: true,
+  }
+
+  it('re-shows a prior-turn card by id without a fresh search', async () => {
+    const sink: CommerceProduct[] = []
+    const shown = new Map([[shownCard.id, shownCard]])
+    const tools = makeProductTools(config, sink, undefined, async () => [], new Map(), shown)
+    const result = await (tools.display_products.execute as Exec)(
+      { productIds: ['old1'] },
+      {} as never,
+    )
+    expect(result).toEqual({ shown: 1 })
+    expect(sink).toEqual([shownCard])
+  })
+
+  it('keeps shown cards out of candidates so the safety net cannot re-render them', async () => {
+    const candidates = new Map<string, CommerceProduct>()
+    const shown = new Map([[shownCard.id, shownCard]])
+    makeProductTools(config, [], undefined, async () => [], candidates, shown)
+    // The safety net renders from `candidates` — pre-seeded shown cards must not leak there.
+    expect(candidates.size).toBe(0)
+  })
+})
