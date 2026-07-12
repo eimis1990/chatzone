@@ -1874,6 +1874,10 @@ function CommerceSection({ control, watch, botId }: CommerceSectionProps) {
     const supabase = createBrowserClient()
     let polling = true
     const poll = async () => {
+      // A previous run leaves a terminal row ('done'/'error') behind; breaking
+      // on it before THIS run's first write lands kills the progress display on
+      // every retry. Only treat terminal phases as ours after a live one.
+      let sawLive = false
       while (polling) {
         const { data } = await supabase
           .from('catalog_sync_status')
@@ -1881,8 +1885,14 @@ function CommerceSection({ control, watch, botId }: CommerceSectionProps) {
           .eq('bot_id', botId)
           .single<{ phase: string; processed: number; total: number }>()
         if (data) {
-          setSyncProgress({ phase: data.phase, processed: data.processed, total: data.total })
-          if (data.phase === 'done' || data.phase === 'error') break
+          const terminal = data.phase === 'done' || data.phase === 'error'
+          if (!terminal) {
+            sawLive = true
+            setSyncProgress({ phase: data.phase, processed: data.processed, total: data.total })
+          } else if (sawLive) {
+            setSyncProgress({ phase: data.phase, processed: data.processed, total: data.total })
+            break
+          }
         }
         await new Promise((r) => setTimeout(r, 1500))
       }

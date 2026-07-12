@@ -8,6 +8,7 @@ import {
   deriveTags,
   deriveAudience,
   buildDoc,
+  productRawHash,
   type RawProduct,
 } from './catalog'
 import { aiEnrich } from './enrich'
@@ -56,23 +57,40 @@ export async function syncProductCatalog(
     return { synced: 0 }
   }
 
-  report({ phase: 'enriching', processed: 0, total: products.length })
-  const ai = await aiEnrich(products, (processed, total) =>
+  // Incremental diff: skip AI enrichment + embedding for products whose raw
+  // inputs match the stored hash — a full re-enrich of a big catalog blows the
+  // serverless time budget (504). First sync (no hashes) processes everything.
+  const existing = new Map<string, string | null>()
+  for (let from = 0; ; from += 1000) {
+    const { data: page } = await db
+      .from('product_embeddings')
+      .select('external_id, raw_hash')
+      .eq('bot_id', bot.id)
+      .range(from, from + 999)
+    for (const r of page ?? []) existing.set(r.external_id as string, r.raw_hash as string | null)
+    if (!page || page.length < 1000) break
+  }
+  const hashes = new Map(products.map((p) => [p.id, productRawHash(p)]))
+  const changed = products.filter((p) => existing.get(p.id) !== hashes.get(p.id))
+  const unchangedIds = products.filter((p) => !changed.includes(p)).map((p) => p.id)
+
+  report({ phase: 'enriching', processed: 0, total: changed.length })
+  const ai = await aiEnrich(changed, (processed, total) =>
     report({ phase: 'enriching', processed, total }),
   )
   const tagsFor = (p: RawProduct) => [...new Set([...deriveTags(p), ...(ai.get(p.id)?.tags ?? [])])]
   // Explicit store categories win; AI fills the gaps; unknown → 'unisex' (shows
   // for every audience) so we never wrongly hide a genuinely neutral product.
   const audienceFor = (p: RawProduct) => deriveAudience(p.categories) ?? ai.get(p.id)?.audience ?? 'unisex'
-  const docs = products.map((p) => buildDoc(p, tagsFor(p), audienceFor(p)))
-  report({ phase: 'embedding', processed: 0, total: products.length })
+  const docs = changed.map((p) => buildDoc(p, tagsFor(p), audienceFor(p)))
+  report({ phase: 'embedding', processed: 0, total: changed.length })
   const embeddings = await embed(docs, (processed, total) =>
     report({ phase: 'embedding', processed, total }),
   )
 
   // Stamp every row with this run's time — the stamp doubles as the prune key.
   const startedAt = new Date().toISOString()
-  const rows = products.map((p, i) => ({
+  const rows = changed.map((p, i) => ({
     bot_id: bot.id,
     external_id: p.id,
     title: p.title,
@@ -82,22 +100,38 @@ export async function syncProductCatalog(
     audience: audienceFor(p),
     doc: docs[i],
     embedding: embeddings[i],
+    raw_hash: hashes.get(p.id),
     synced_at: startedAt,
   }))
 
   // Upsert-then-prune (NOT delete-then-insert): if the run is killed mid-way
   // (serverless timeout), the old index stays intact instead of being wiped —
   // a 504 once left a bot searching 400 of 2,582 products.
-  report({ phase: 'indexing', processed: 0, total: rows.length })
+  const totalWork = rows.length + unchangedIds.length
+  report({ phase: 'indexing', processed: 0, total: totalWork })
   for (let i = 0; i < rows.length; i += 100) {
     const { error } = await db
       .from('product_embeddings')
       .upsert(rows.slice(i, i + 100), { onConflict: 'bot_id,external_id' })
     if (error) throw new Error(`product_embeddings upsert failed: ${error.message}`)
-    report({ phase: 'indexing', processed: Math.min(i + 100, rows.length), total: rows.length })
+    report({ phase: 'indexing', processed: Math.min(i + 100, rows.length), total: totalWork })
+  }
+  // Unchanged rows just get their stamp bumped so the prune below keeps them.
+  for (let i = 0; i < unchangedIds.length; i += 200) {
+    const { error } = await db
+      .from('product_embeddings')
+      .update({ synced_at: startedAt })
+      .eq('bot_id', bot.id)
+      .in('external_id', unchangedIds.slice(i, i + 200))
+    if (error) throw new Error(`product_embeddings bump failed: ${error.message}`)
+    report({
+      phase: 'indexing',
+      processed: rows.length + Math.min(i + 200, unchangedIds.length),
+      total: totalWork,
+    })
   }
   // Remove products no longer in the catalog (rows this run didn't touch).
   await db.from('product_embeddings').delete().eq('bot_id', bot.id).lt('synced_at', startedAt)
-  report({ phase: 'done', synced: rows.length })
-  return { synced: rows.length }
+  report({ phase: 'done', synced: products.length })
+  return { synced: products.length }
 }

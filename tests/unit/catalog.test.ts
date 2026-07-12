@@ -143,3 +143,21 @@ describe('fetchWooCatalog progress', () => {
     expect(seen).toEqual([100, 200, 205])
   })
 })
+
+describe('productRawHash', () => {
+  const p = { ...base, rank: 50 }
+
+  it('is stable for identical inputs and ignores popularity jitter within the bucket', async () => {
+    const { productRawHash } = await import('@/lib/products/catalog')
+    expect(productRawHash(p)).toBe(productRawHash({ ...p }))
+    // rank 50 → 60: same non-top-seller bucket, must NOT re-enrich the catalog
+    expect(productRawHash({ ...p, rank: 60 })).toBe(productRawHash(p))
+  })
+
+  it('changes when content or the top-seller bucket changes', async () => {
+    const { productRawHash } = await import('@/lib/products/catalog')
+    expect(productRawHash({ ...p, title: 'Nauja žvakė' })).not.toBe(productRawHash(p))
+    expect(productRawHash({ ...p, onSale: true })).not.toBe(productRawHash(p))
+    expect(productRawHash({ ...p, rank: 5 })).not.toBe(productRawHash(p)) // crosses TOP_SELLER_RANK
+  })
+})

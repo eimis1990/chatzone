@@ -71,7 +71,15 @@ error". Two protections exist: `fetchWooCatalog` retries a failed page once,
 and the index refresh is **upsert-then-prune** (`lib/products/sync.ts`) so a
 killed run leaves the old index intact — it used to be delete-then-insert, and
 one 504 left a bot searching 400 of 2,582 products. A run that dies during
-ENRICHMENT writes nothing (no partial progress), so very large catalogs may
-never complete on Vercel — run the sync from localhost (same DB, no timeout)
-as the workaround. The proper fix is incremental enrichment (hash raw product
-data, only re-enrich changes) — not built yet.
+ENRICHMENT writes nothing (no partial progress), so a FIRST sync of a very
+large catalog may not complete on Vercel — run it from localhost (same DB) as
+the workaround. Note: Next 16 enforces `maxDuration` in dev too, and localhost
+runs can exceed a curl/undici client's 5-min header timeout while the handler
+keeps running — fire-and-forget + poll `catalog_sync_status` instead. RE-syncs
+are incremental since migration `20260712190000`: `productRawHash` (raw inputs,
+rank folded to the top-seller bucket) is stored per row and unchanged products
+skip enrichment + embedding entirely — a 1,480-product re-sync measured ~59 s
+vs ~5 min, so the button and the nightly cron fit the budget once a store is
+indexed. Also: the config UI's progress poll must ignore a stale terminal
+status row ('done'/'error' from a previous run) until it has seen a live phase,
+or retries show no progress (`ConfigForm.tsx` `sawLive`).

@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto'
 import { storeOrigin, decodeEntities } from '@/lib/commerce/woocommerce'
 import { shopifyDomain } from '@/lib/commerce/shopify'
 import { magentoBase } from '@/lib/commerce/magento'
@@ -269,6 +270,31 @@ export function deriveTags(p: RawProduct): string[] {
   if (p.onSale) tags.push('on sale', 'discounted')
   if (p.rank < TOP_SELLER_RANK) tags.push('top seller', 'popular', 'best-selling')
   return tags
+}
+
+/**
+ * Stable fingerprint of everything that feeds a product's doc/tags/audience —
+ * if it matches the stored row, the sync skips AI enrichment + embedding.
+ * Rank enters only as the top-seller BUCKET: daily popularity jitter must not
+ * re-enrich the whole catalog, but crossing the threshold changes the tags.
+ */
+export function productRawHash(p: RawProduct): string {
+  return createHash('sha256')
+    .update(
+      JSON.stringify([
+        p.title,
+        p.description,
+        p.categories,
+        p.attributes,
+        p.url,
+        p.imageUrl ?? null,
+        p.onSale,
+        p.featured,
+        p.rank < TOP_SELLER_RANK,
+      ]),
+    )
+    .digest('hex')
+    .slice(0, 32)
 }
 
 // Recipient signals in category names (Lithuanian + English). Order matters:
