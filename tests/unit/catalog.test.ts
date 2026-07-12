@@ -124,3 +124,22 @@ describe('fetchWooCatalog', () => {
     expect(ids.filter((i) => i === '100')).toHaveLength(1)
   })
 })
+
+describe('fetchWooCatalog progress', () => {
+  it('reports the running count after each page', async () => {
+    const { fetchWooCatalog } = await import('@/lib/products/catalog')
+    const page = (n: number, count: number) =>
+      Array.from({ length: count }, (_, i) => ({ id: n * 1000 + i, name: `P${n}-${i}` }))
+    let calls = 0
+    const fetchImpl = (async () => {
+      calls++
+      // two full pages then a short page ends pagination
+      const body = calls === 1 ? page(1, 100) : calls === 2 ? page(2, 100) : page(3, 5)
+      return new Response(JSON.stringify(body), { status: 200 })
+    }) as unknown as typeof fetch
+    const seen: number[] = []
+    const out = await fetchWooCatalog('https://shop.test', fetchImpl, (n) => seen.push(n))
+    expect(out).toHaveLength(205)
+    expect(seen).toEqual([100, 200, 205])
+  })
+})

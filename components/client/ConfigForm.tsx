@@ -14,6 +14,7 @@ import {
   type FieldPath,
 } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { formatDistanceToNow } from '@/lib/date-utils'
 import { toast } from 'sonner'
 import {
   PlusIcon,
@@ -1788,6 +1789,23 @@ function CommerceSection({ control, watch, botId }: CommerceSectionProps) {
     processed: number
     total: number
   } | null>(null)
+  // Current index status: how much of the store's catalog is indexed + when.
+  const [indexInfo, setIndexInfo] = useState<{
+    indexed: number
+    storeTotal: number
+    lastSyncedAt: string | null
+  } | null>(null)
+  const refreshIndexInfo = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/products/sync?botId=${botId}`)
+      if (res.ok) setIndexInfo(await res.json())
+    } catch {
+      /* status is decorative — never block the form on it */
+    }
+  }, [botId])
+  useEffect(() => {
+    if (commerceEnabled && provider !== 'feed') void refreshIndexInfo()
+  }, [commerceEnabled, provider, refreshIndexInfo])
 
   const handleSync = useCallback(async () => {
     setSyncState({ status: 'loading' })
@@ -1819,15 +1837,17 @@ function CommerceSection({ control, watch, botId }: CommerceSectionProps) {
         body: JSON.stringify({ botId }),
       })
       const data = (await res.json()) as { synced?: number; error?: string }
-      if (res.ok) setSyncState({ status: 'ok', synced: data.synced ?? 0 })
-      else setSyncState({ status: 'error', message: data.error ?? 'Sync failed.' })
+      if (res.ok) {
+        setSyncState({ status: 'ok', synced: data.synced ?? 0 })
+        void refreshIndexInfo()
+      } else setSyncState({ status: 'error', message: data.error ?? 'Sync failed.' })
     } catch {
       setSyncState({ status: 'error', message: 'Network error — please try again.' })
     } finally {
       polling = false
       setSyncProgress(null)
     }
-  }, [botId])
+  }, [botId, refreshIndexInfo])
 
   const handleTestOrders = useCallback(async () => {
     const isMagento = provider === 'magento'
@@ -2091,10 +2111,13 @@ function CommerceSection({ control, watch, botId }: CommerceSectionProps) {
                   <div>
                     <p className="text-sm font-medium">Smart product search</p>
                     <p className="text-xs text-muted-foreground">
-                      Indexes your store&rsquo;s <strong>product catalog</strong> so the bot understands
-                      intent (e.g. &ldquo;gift ideas for her&rdquo;), not just keywords. Prices &amp;
-                      stock stay live at answer time. Separate from the Knowledge screen, which indexes
-                      your website&rsquo;s pages and policies.
+                      {'Indexes your store\u2019s '}
+                      <strong>product catalog</strong>
+                      {' so the bot understands intent (e.g. \u201Cgift ideas for her\u201D), not just ' +
+                        'keywords. Prices & stock stay live at answer time \u2014 and once indexed, the ' +
+                        'catalog re-syncs automatically every night; the button is only for the first ' +
+                        'sync or to pick up store changes right away. Separate from the Knowledge ' +
+                        'screen, which indexes your website\u2019s pages and policies.'}
                     </p>
                   </div>
                   <Button
@@ -2116,6 +2139,35 @@ function CommerceSection({ control, watch, botId }: CommerceSectionProps) {
                 {syncState.status === 'error' && (
                   <TestBadge variant="error">{syncState.message}</TestBadge>
                 )}
+                {syncState.status !== 'loading' && indexInfo && indexInfo.indexed > 0 && (
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                      <span className="tabular-nums">
+                        {indexInfo.indexed.toLocaleString()}
+                        {indexInfo.storeTotal > indexInfo.indexed
+                          ? ` / ${indexInfo.storeTotal.toLocaleString()}`
+                          : ''}{' '}
+                        products indexed
+                      </span>
+                      {indexInfo.lastSyncedAt && (
+                        <span>
+                          Last synced {formatDistanceToNow(indexInfo.lastSyncedAt)} · auto-resyncs
+                          nightly
+                        </span>
+                      )}
+                    </div>
+                    {indexInfo.storeTotal > indexInfo.indexed && (
+                      <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                        <div
+                          className="h-full rounded-full bg-primary/70"
+                          style={{
+                            width: `${Math.min(100, Math.round((100 * indexInfo.indexed) / indexInfo.storeTotal))}%`,
+                          }}
+                        />
+                      </div>
+                    )}
+                  </div>
+                )}
                 {syncState.status === 'loading' &&
                   (() => {
                     const phase = syncProgress?.phase ?? 'fetching'
@@ -2132,7 +2184,10 @@ function CommerceSection({ control, watch, botId }: CommerceSectionProps) {
                     const hasBar =
                       !!syncProgress &&
                       syncProgress.total > 0 &&
-                      (phase === 'enriching' || phase === 'indexing')
+                      (phase === 'enriching' || phase === 'embedding' || phase === 'indexing')
+                    // Fetching has no known total (pages stream in) — show the count.
+                    const countOnly =
+                      !hasBar && !!syncProgress && phase === 'fetching' && syncProgress.processed > 0
                     const pct = hasBar
                       ? Math.min(100, Math.round((100 * syncProgress!.processed) / syncProgress!.total))
                       : 0
@@ -2144,6 +2199,11 @@ function CommerceSection({ control, watch, botId }: CommerceSectionProps) {
                             <span className="tabular-nums">
                               {syncProgress!.processed.toLocaleString()}/
                               {syncProgress!.total.toLocaleString()}
+                            </span>
+                          )}
+                          {countOnly && (
+                            <span className="tabular-nums">
+                              {syncProgress!.processed.toLocaleString()} products
                             </span>
                           )}
                         </div>

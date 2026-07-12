@@ -36,9 +36,19 @@ Store connectors + product search. Separate from [RAG chunks](rag-and-knowledge.
   WooCommerce); it fetches → AI-tags (`lib/products/enrich.ts`, batched via `gpt-4o-mini`) →
   embeds → full-refreshes `product_embeddings`.
 - Sync is triggered two ways: manually via the **"Sync catalog"** button
-  (`components/client/ConfigForm.tsx:1999` → `app/api/products/sync/route.ts`), and by a
+  (`components/client/ConfigForm.tsx` → `app/api/products/sync/route.ts`), and by a
   **nightly Vercel Cron** (`app/api/cron/catalog-sync/route.ts`) that only re-syncs bots that
   *already* have an index — the first sync is always a manual owner action.
+- **Index status UI**: `GET /api/products/sync?botId=` returns
+  `{indexed, storeTotal, lastSyncedAt}` (store total via `validateStore`; real for Woo,
+  best-effort 0/1 for Shopify). The configurator shows "X / Y products indexed · last synced …
+  · auto-resyncs nightly" with a fill bar. Live sync progress covers every phase: `fetching`
+  reports a running count (no total — pages stream), `enriching`/`embedding`/`indexing` report
+  processed/total (`lib/products/sync.ts` → `catalog_sync_status`, polled client-side).
+- ⚠️ **A transient page failure used to silently truncate the index** — one non-OK response
+  mid-pagination broke the fetch loop and the partial set (e.g. 1,600 of 2,582) was indexed
+  without any error. `fetchWooCatalog` now retries a failed page once (750 ms backoff); the
+  "X / Y indexed" display is the visible safeguard when it still happens.
 
 ## In chat
 

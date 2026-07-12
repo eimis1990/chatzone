@@ -51,6 +51,7 @@ interface WooCatalogItem {
 export async function fetchWooCatalog(
   storeUrl: string,
   fetchImpl: typeof fetch = fetch,
+  onProgress?: (fetched: number) => void,
 ): Promise<RawProduct[]> {
   const base = storeOrigin(storeUrl)
   const out: RawProduct[] = []
@@ -58,9 +59,14 @@ export async function fetchWooCatalog(
   // appear on two pages — dedupe or the index insert hits its unique constraint.
   const seen = new Set<string>()
   for (let page = 1; out.length < MAX_PRODUCTS; page++) {
-    const res = await fetchImpl(
-      `${base}/wp-json/wc/store/v1/products?per_page=${PER_PAGE}&page=${page}&orderby=popularity&order=desc`,
-    )
+    const url = `${base}/wp-json/wc/store/v1/products?per_page=${PER_PAGE}&page=${page}&orderby=popularity&order=desc`
+    let res = await fetchImpl(url)
+    if (!res.ok) {
+      // One transient 5xx/429 mid-pagination used to silently truncate the whole
+      // index (e.g. 1,600 of 2,582 products) — retry once before giving up.
+      await new Promise((r) => setTimeout(r, 750))
+      res = await fetchImpl(url)
+    }
     if (!res.ok) break
     const rows = (await res.json()) as WooCatalogItem[]
     if (!Array.isArray(rows) || rows.length === 0) break
@@ -89,6 +95,7 @@ export async function fetchWooCatalog(
       })
       if (out.length >= MAX_PRODUCTS) break
     }
+    onProgress?.(out.length)
     if (rows.length < PER_PAGE) break
   }
   return out

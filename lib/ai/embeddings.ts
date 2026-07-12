@@ -12,7 +12,10 @@ const BATCH_SIZE = 500
  * Embeds a batch of texts into 1536-dim vectors using OpenAI
  * text-embedding-3-small, chunking into API-sized requests.
  */
-export async function embed(texts: string[]): Promise<number[][]> {
+export async function embed(
+  texts: string[],
+  onProgress?: (processed: number, total: number) => void,
+): Promise<number[][]> {
   if (texts.length === 0) return []
   const out: number[][] = []
   for (let i = 0; i < texts.length; i += BATCH_SIZE) {
@@ -21,6 +24,7 @@ export async function embed(texts: string[]): Promise<number[][]> {
       values: texts.slice(i, i + BATCH_SIZE),
     })
     out.push(...embeddings)
+    onProgress?.(Math.min(i + BATCH_SIZE, texts.length), texts.length)
   }
   return out
 }

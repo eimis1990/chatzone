@@ -41,7 +41,9 @@ export async function syncProductCatalog(
   report({ phase: 'fetching' })
   let products: RawProduct[] = []
   if (c.provider === 'woocommerce' && c.storeUrl) {
-    products = await fetchWooCatalog(c.storeUrl)
+    products = await fetchWooCatalog(c.storeUrl, fetch, (fetched) =>
+      report({ phase: 'fetching', processed: fetched }),
+    )
   } else if (c.provider === 'shopify' && c.shopifyDomain && c.shopifyToken) {
     products = await fetchShopifyCatalog(c.shopifyDomain, c.shopifyToken)
   } else if (c.provider === 'magento' && c.storeUrl) {
@@ -62,8 +64,10 @@ export async function syncProductCatalog(
   // for every audience) so we never wrongly hide a genuinely neutral product.
   const audienceFor = (p: RawProduct) => deriveAudience(p.categories) ?? ai.get(p.id)?.audience ?? 'unisex'
   const docs = products.map((p) => buildDoc(p, tagsFor(p), audienceFor(p)))
-  report({ phase: 'embedding', total: products.length })
-  const embeddings = await embed(docs)
+  report({ phase: 'embedding', processed: 0, total: products.length })
+  const embeddings = await embed(docs, (processed, total) =>
+    report({ phase: 'embedding', processed, total }),
+  )
 
   const rows = products.map((p, i) => ({
     bot_id: bot.id,
