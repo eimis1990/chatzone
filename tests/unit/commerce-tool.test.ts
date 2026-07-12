@@ -62,6 +62,21 @@ describe('search_products failure handling', () => {
   })
 })
 
+describe('get_product_details registration', () => {
+  it('registers for woocommerce', () => {
+    const tools = makeProductTools(config, [], undefined, async () => [])
+    expect(tools.get_product_details).toBeDefined()
+  })
+
+  it('is not registered for a feed provider (no live details API)', () => {
+    const feedConfig = {
+      commerce: { enabled: true, provider: 'feed', feedUrl: 'https://x.lt/feed.xml' },
+    } as unknown as BotConfig
+    const tools = makeProductTools(feedConfig, [], undefined, async () => [])
+    expect(tools.get_product_details).toBeUndefined()
+  })
+})
+
 describe('display_products with previously shown cards', () => {
   const shownCard: CommerceProduct = {
     id: 'old1',

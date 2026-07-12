@@ -170,8 +170,10 @@ export function buildSystemPrompt(
       const cardList = shownProducts
         .slice(0, 20)
         .map(
+          // The id is what makes the card actionable on later turns — without it
+          // the model guesses ids for display_products / get_product_details.
           (p, i) =>
-            `${i + 1}. "${p.title}" — ${p.price} — ${p.inStock ? 'in stock' : 'out of stock'}` +
+            `${i + 1}. (id ${p.id}) "${p.title}" — ${p.price} — ${p.inStock ? 'in stock' : 'out of stock'}` +
             (p.shortDescription ? ` — ${p.shortDescription.slice(0, 120)}` : ''),
         )
         .join('\n')

@@ -28,6 +28,16 @@ export interface CommerceDeps {
   fetchImpl?: typeof fetch
 }
 
+/** Full live product details fetched on demand for the model (never rendered). */
+export interface ProductDetails {
+  id: string
+  title: string
+  /** Full description, HTML-stripped, capped at ~1500 chars. */
+  description?: string
+  /** Store attribute lines, e.g. "Spalva: mėlyna, žalia". */
+  attributes?: string[]
+}
+
 // ---------------------------------------------------------------------------
 // Transactional skills (Phase 3): order status + discount codes
 // ---------------------------------------------------------------------------

@@ -1,6 +1,7 @@
 import type {
   CommerceProduct,
   ProductSearchParams,
+  ProductDetails,
   CommerceDeps,
   OrderStatus,
   OrderLookupParams,
@@ -16,6 +17,7 @@ interface WooProduct {
   short_description?: string
   description?: string
   images?: Array<{ src?: string; thumbnail?: string }>
+  attributes?: Array<{ name?: string; terms?: Array<{ name?: string }> }>
   prices?: {
     price?: string
     currency_minor_unit?: number
@@ -124,6 +126,42 @@ export async function searchWooProducts(
   // and curates which results to show via the display step.
   const data = await run(params.query)
   return data.map(normalizeWooProduct)
+}
+
+/**
+ * Full live details for up to a few products by id (public Store API): the
+ * complete description (HTML-stripped, capped) plus attribute lines like
+ * "Spalva: mėlyna, žalia" — for the model to answer depth questions, never
+ * rendered as cards.
+ */
+export async function fetchWooProductDetails(
+  storeUrl: string,
+  ids: string[],
+  deps: CommerceDeps = {},
+): Promise<ProductDetails[]> {
+  if (ids.length === 0) return []
+  const fetchImpl = deps.fetchImpl ?? fetch
+  const base = storeOrigin(storeUrl)
+  const res = await fetchImpl(
+    `${base}/wp-json/wc/store/v1/products?include=${ids.join(',')}&per_page=${ids.length}`,
+  )
+  if (!res.ok) throw new Error(`WooCommerce details failed: HTTP ${res.status}`)
+  const rows = (await res.json()) as WooProduct[]
+  return rows.map((p) => {
+    const full = stripHtml(p.description) || stripHtml(p.short_description)
+    const attributes = (p.attributes ?? [])
+      .map((a) => {
+        const terms = (a.terms ?? []).map((t) => t.name).filter(Boolean).join(', ')
+        return a.name && terms ? `${decodeEntities(a.name)}: ${decodeEntities(terms)}` : ''
+      })
+      .filter(Boolean)
+    return {
+      id: String(p.id),
+      title: decodeEntities(p.name),
+      description: full ? truncateWords(full, 1500) : undefined,
+      ...(attributes.length ? { attributes } : {}),
+    }
+  })
 }
 
 // ---------------------------------------------------------------------------

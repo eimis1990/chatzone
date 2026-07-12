@@ -1,5 +1,11 @@
 import { describe, it, expect, vi } from 'vitest'
-import { searchWooProducts, normalizeWooProduct, formatWooPrice, storeOrigin } from '@/lib/commerce/woocommerce'
+import {
+  searchWooProducts,
+  fetchWooProductDetails,
+  normalizeWooProduct,
+  formatWooPrice,
+  storeOrigin,
+} from '@/lib/commerce/woocommerce'
 
 const sample = {
   id: 42,
@@ -63,5 +69,52 @@ describe('searchWooProducts', () => {
     await expect(
       searchWooProducts('https://shop.test', { query: 'x' }, { fetchImpl: fetchImpl as unknown as typeof fetch }),
     ).rejects.toThrow()
+  })
+})
+
+describe('fetchWooProductDetails', () => {
+  const detailed = {
+    ...sample,
+    description: '<p>Full <b>description</b> with sizing and care instructions.</p>',
+    attributes: [
+      { name: 'Spalva', terms: [{ name: 'mėlyna' }, { name: 'žalia' }] },
+      { name: 'Dydis', terms: [{ name: '250g' }] },
+      { name: 'Empty', terms: [] },
+    ],
+  }
+
+  it('fetches by include ids and maps full description + attribute lines', async () => {
+    const fetchImpl = vi.fn(async () => new Response(JSON.stringify([detailed]), { status: 200 }))
+    const out = await fetchWooProductDetails('https://shop.test', ['42'], {
+      fetchImpl: fetchImpl as unknown as typeof fetch,
+    })
+    expect(String((fetchImpl.mock.calls[0] as unknown as [string])[0])).toContain('include=42')
+    expect(out).toEqual([
+      {
+        id: '42',
+        title: 'Hydrating Eye Mask',
+        description: 'Full description with sizing and care instructions.',
+        attributes: ['Spalva: mėlyna, žalia', 'Dydis: 250g'],
+      },
+    ])
+  })
+
+  it('falls back to short_description and omits empty attributes', async () => {
+    const noDesc = { ...sample, attributes: [] }
+    const fetchImpl = vi.fn(async () => new Response(JSON.stringify([noDesc]), { status: 200 }))
+    const out = await fetchWooProductDetails('https://shop.test', ['42'], {
+      fetchImpl: fetchImpl as unknown as typeof fetch,
+    })
+    expect(out[0].description).toBe('Refreshing hyaluronic mask.')
+    expect(out[0].attributes).toBeUndefined()
+  })
+
+  it('returns [] for empty ids without fetching', async () => {
+    const fetchImpl = vi.fn()
+    const out = await fetchWooProductDetails('https://shop.test', [], {
+      fetchImpl: fetchImpl as unknown as typeof fetch,
+    })
+    expect(out).toEqual([])
+    expect(fetchImpl).not.toHaveBeenCalled()
   })
 })

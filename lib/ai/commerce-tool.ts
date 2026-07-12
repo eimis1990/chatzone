@@ -3,7 +3,14 @@ import { openai } from '@ai-sdk/openai'
 import { z } from 'zod'
 import type { BotConfig } from '@/lib/types'
 import type { CommerceProduct, OrderStatus } from '@/lib/commerce/types'
-import { searchStore, getOrderStatus, getDiscount, orderLookupEnabled, storeConfigured } from '@/lib/commerce'
+import {
+  searchStore,
+  getProductDetails,
+  getOrderStatus,
+  getDiscount,
+  orderLookupEnabled,
+  storeConfigured,
+} from '@/lib/commerce'
 
 /**
  * Builds the product tools for a commerce-enabled bot:
@@ -111,6 +118,36 @@ export function makeProductTools(
         return { shown: chosen.length }
       },
     }),
+  }
+
+  // Full live details — WooCommerce only for now (its public Store API carries
+  // the complete description + attribute terms). Not registered for other
+  // providers, so the model never sees a tool it can't use.
+  if (config.commerce?.provider === 'woocommerce') {
+    tools.get_product_details = tool({
+      description:
+        'Fetch the FULL live description and attribute list (materials, dimensions, scent, ' +
+        'ingredients, care…) for up to 3 products by id — ids come from search results or the ' +
+        'cards currently shown. Use when the shopper asks for depth that the search `details` ' +
+        'does not cover, or for a thorough comparison of specific items. Answer ONLY from what ' +
+        'it returns — never invent specs.',
+      inputSchema: z.object({
+        productIds: z.array(z.string()).max(3).describe('Up to 3 product ids to look up'),
+      }),
+      execute: async ({ productIds }) => {
+        try {
+          const details = await getProductDetails(config.commerce!, productIds.slice(0, 3))
+          return details.length ? details : { error: 'No details found for those product ids.' }
+        } catch (err) {
+          console.error('[agent] get_product_details failed:', err)
+          return {
+            error:
+              'Could not fetch product details right now (store API error). Answer from the ' +
+              'information you already have — do not invent specifics.',
+          }
+        }
+      },
+    })
   }
 
   // Order status — only when REST credentials are configured.

@@ -64,6 +64,18 @@ and the longer description. Cards don't render `details`; the keyword fallback
 (`searchStore`) has none. ⚠️ Details come from the synced index — a stale sync
 means stale attributes; price/stock stay live-hydrated as before.
 
+## On-demand full details (`get_product_details`)
+
+Registered only for `provider === 'woocommerce'` (`lib/ai/commerce-tool.ts`): up
+to 3 ids → `getProductDetails` (`lib/commerce/index.ts`, behind `guardStoreEgress`)
+→ `fetchWooProductDetails` (`lib/commerce/woocommerce.ts`) hits the public Store
+API `include=` endpoint and returns the FULL description (HTML-stripped, ≤1500
+chars, word-boundary truncation) plus attribute lines ("Spalva: mėlyna, žalia").
+For the model only — never rendered. Other providers return `[]` from the
+dispatch and simply don't get the tool. Unknown ids → Woo returns an empty list →
+the tool answers "No details found" (no log); infra errors log
+`[agent] get_product_details failed`.
+
 ## Card awareness across turns
 
 The model's tool results live only within one request, but the cards a turn showed
@@ -73,7 +85,9 @@ turn the chat route reads back the **last assistant message with products** and:
 - injects a numbered "CARDS CURRENTLY SHOWN" block into the system prompt
   (`buildSystemPrompt`'s `shownProducts` param, `lib/ai/prompt.ts`) so "the first
   one" resolves and the agent may name/compare *shown* products in text — the one
-  exception to the no-names rule;
+  exception to the no-names rule. ⚠️ The block MUST include each card's `(id …)` —
+  without ids the model guesses ids for `display_products` / `get_product_details`
+  on later turns and both silently fail ("No details found");
 - passes them to `makeProductTools` as a separate `shown` map so `display_products`
   can re-show a card by id without a fresh search. ⚠️ Keep shown cards **out of
   the `candidates` map** — the response layer's safety net auto-renders candidates

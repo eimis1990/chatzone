@@ -99,8 +99,8 @@ describe('buildMessages', () => {
       const msgs = buildMessages(commerceConfig, [], [], 'tell me about the first one', 'en', shown)
       const sys = msgs[0].content
       expect(sys).toContain('CARDS CURRENTLY SHOWN')
-      expect(sys).toContain('1. "Kvapni žvakė" — 12 € — in stock — Sojų vaško')
-      expect(sys).toContain('2. "Rankų kremas" — 8 € — out of stock')
+      expect(sys).toContain('1. (id p1) "Kvapni žvakė" — 12 € — in stock — Sojų vaško')
+      expect(sys).toContain('2. (id p2) "Rankų kremas" — 8 € — out of stock')
       expect(sys.indexOf('Kvapni žvakė')).toBeLessThan(sys.indexOf('Rankų kremas'))
     })
 

@@ -2,6 +2,7 @@ import type {
   CommerceProduct,
   CommerceProvider,
   ProductSearchParams,
+  ProductDetails,
   CommerceDeps,
   OrderStatus,
   OrderLookupParams,
@@ -9,6 +10,7 @@ import type {
 } from '@/lib/commerce/types'
 import {
   searchWooProducts,
+  fetchWooProductDetails,
   validateWooStore,
   getWooOrderStatus,
   validateWooOrderAccess,
@@ -96,6 +98,26 @@ export async function searchStore(
       return searchMagentoProducts(config.storeUrl, params, deps)
     case 'feed':
       return searchFeed(config.feedUrl ?? '', params, deps)
+    default:
+      return []
+  }
+}
+
+/**
+ * Full live details (complete description + attributes) for up to a few
+ * products by id. WooCommerce only for now — other providers return [] and the
+ * chat tool is simply not registered for them.
+ */
+export async function getProductDetails(
+  config: CommerceConfig,
+  ids: string[],
+  deps: CommerceDeps = {},
+): Promise<ProductDetails[]> {
+  if (!storeConfigured(config)) return []
+  await guardStoreEgress(config, deps)
+  switch (config.provider) {
+    case 'woocommerce':
+      return fetchWooProductDetails(config.storeUrl, ids, deps)
     default:
       return []
   }
