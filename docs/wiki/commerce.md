@@ -53,6 +53,17 @@ Store connectors + product search. Separate from [RAG chunks](rag-and-knowledge.
   above — they back the **voice** agent's client tools (ElevenLabs), each origin-checked and
   rate-limited independently. See [voice](voice.md).
 
+## Product details for the model
+
+`searchCatalog` carries the indexed `doc` along on semantic matches as
+`CommerceProduct.details` (`docToDetails` strips the title line, caps 400 chars —
+`lib/products/search.ts`). `search_products` returns it to the model for the top
+8 results per search (token budget; `lib/ai/commerce-tool.ts`), so the agent can
+judge fit, answer product questions, and compare using categories/tags/attributes
+and the longer description. Cards don't render `details`; the keyword fallback
+(`searchStore`) has none. ⚠️ Details come from the synced index — a stale sync
+means stale attributes; price/stock stay live-hydrated as before.
+
 ## Card awareness across turns
 
 The model's tool results live only within one request, but the cards a turn showed

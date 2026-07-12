@@ -13,6 +13,17 @@ export interface SearchOptions {
   audience?: Audience
 }
 
+/**
+ * The indexed doc, trimmed for the model: drop the first line (the title — the
+ * product already carries it) and cap the rest. What remains is the comparison
+ * material: audience, categories, tags, attributes, longer description.
+ */
+export function docToDetails(doc: string | null | undefined): string | undefined {
+  if (!doc) return undefined
+  const rest = doc.split('\n').slice(1).join('\n').trim()
+  return rest ? rest.slice(0, 400) : undefined
+}
+
 /** Whether this bot has a synced semantic product index. */
 async function hasIndex(botId: string, db: SupabaseClient): Promise<boolean> {
   const { count } = await db
@@ -86,7 +97,7 @@ export async function searchCatalog(
         p_k: limit,
         p_audience: opts.audience ?? null,
       })
-      const matches = (data ?? []) as { external_id: string }[]
+      const matches = (data ?? []) as { external_id: string; doc?: string | null }[]
       if (matches.length) {
         const live = await hydrateLive(
           c,
@@ -97,8 +108,13 @@ export async function searchCatalog(
         // keyword fallback hit the same dead store and read as "unavailable".
         if (live.size === 0) throw new Error('product hydration failed: store API unreachable')
         // Preserve semantic rank order; keep only in-stock, live-priced products.
+        // Carry the indexed doc along as `details` so the model can discuss and
+        // compare (attributes/categories/description beyond the live short one).
         const products = matches
-          .map((m) => live.get(m.external_id))
+          .map((m): CommerceProduct | undefined => {
+            const p = live.get(m.external_id)
+            return p ? { ...p, details: docToDetails(m.doc) } : undefined
+          })
           .filter((p): p is CommerceProduct => Boolean(p) && p!.inStock)
         if (products.length) return products
       }

@@ -44,7 +44,9 @@ export function makeProductTools(
         'anything. When the shopper names a recipient (a gift/product "for men", "for women", ' +
         '"for kids/a child"), ALSO set `audience` so results are limited to items that suit that ' +
         "person — this is how you avoid showing, say, a child's toy for a men's-gift request. " +
-        'You may search multiple times.',
+        'You may search multiple times. Top results include `details` (categories, attributes, ' +
+        'longer description) — use them to judge fit, answer product questions, and compare ' +
+        'options before choosing what to display.',
       inputSchema: z.object({
         query: z.string().describe('Product type/keywords in the catalog language'),
         minPrice: z.number().optional().describe('Minimum price in major units (e.g. euros)'),
@@ -60,12 +62,15 @@ export function makeProductTools(
             ? await searchImpl({ query, minPrice, maxPrice, limit: 24, audience })
             : await searchStore(config.commerce, { query, minPrice, maxPrice, limit: 24 })
           products.forEach((p) => candidates.set(p.id, p))
-          return products.map((p) => ({
+          return products.map((p, i) => ({
             id: p.id,
             title: p.title,
             price: p.price,
             inStock: p.inStock,
             description: p.shortDescription?.slice(0, 140),
+            // Comparison material (attributes/categories/longer description) for
+            // the strongest matches only — keeps multi-search turns within budget.
+            details: i < 8 ? p.details : undefined,
           }))
         } catch (err) {
           // An infrastructure failure is NOT "the catalog lacks this item" — tell

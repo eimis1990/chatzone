@@ -30,8 +30,35 @@ describe('search_products failure handling', () => {
     const tools = makeProductTools(config, [], undefined, async () => [product])
     const result = await (tools.search_products.execute as Exec)({ query: 'žvakė' }, {} as never)
     expect(result).toEqual([
-      { id: 'p1', title: 'Žvakė', price: '12 €', inStock: true, description: 'Kvapni žvakė' },
+      {
+        id: 'p1',
+        title: 'Žvakė',
+        price: '12 €',
+        inStock: true,
+        description: 'Kvapni žvakė',
+        details: undefined,
+      },
     ])
+  })
+
+  it('includes details for the top 8 results only (token budget)', async () => {
+    const many: CommerceProduct[] = Array.from({ length: 10 }, (_, i) => ({
+      id: `p${i}`,
+      title: `Product ${i}`,
+      price: '10 €',
+      url: `https://x.lt/p/${i}`,
+      inStock: true,
+      details: `Categories: X\nAttributes: attr ${i}`,
+    }))
+    const tools = makeProductTools(config, [], undefined, async () => many)
+    const result = (await (tools.search_products.execute as Exec)(
+      { query: 'q' },
+      {} as never,
+    )) as { details?: string }[]
+    expect(result[0].details).toContain('attr 0')
+    expect(result[7].details).toContain('attr 7')
+    expect(result[8].details).toBeUndefined()
+    expect(result[9].details).toBeUndefined()
   })
 })
 

@@ -11,6 +11,9 @@ export interface CommerceProduct {
   imageUrl?: string
   inStock: boolean
   shortDescription?: string
+  /** Richer catalog details for the MODEL (categories/tags/attributes/longer
+   *  description from the synced index doc) — cards don't render this. */
+  details?: string
 }
 
 export interface ProductSearchParams {
