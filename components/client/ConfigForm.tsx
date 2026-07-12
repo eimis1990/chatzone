@@ -1446,7 +1446,14 @@ export function ConfigForm({
                 render={({ field }) => (
                   <Switch
                     checked={field.value}
-                    onCheckedChange={field.onChange}
+                    onCheckedChange={(v) => {
+                      field.onChange(v)
+                      // An empty form can never appear — seed sensible defaults.
+                      if (v && leadFieldsArray.fields.length === 0) {
+                        leadFieldsArray.append({ key: 'name', label: 'Name', required: false })
+                        leadFieldsArray.append({ key: 'email', label: 'Email', required: true })
+                      }
+                    }}
                     id="leadCaptureEnabled"
                     disabled={!canUseLeadCapture}
                   />
@@ -1462,7 +1469,7 @@ export function ConfigForm({
             </SettingsGroup>
 
             {leadCaptureEnabled && (
-              <SettingsGroup title="Trigger and form" description="Choose when the form appears and which details it requests.">
+              <SettingsGroup title="Trigger and form" description="The widget shows a small built-in form in the chat with the fields below. Choose when it pops up and which details it asks for — without at least one field, nothing can appear.">
               <div className="space-y-4">
                 <div className="space-y-1.5">
                   <Label>Trigger</Label>

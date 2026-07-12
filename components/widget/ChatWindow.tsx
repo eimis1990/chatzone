@@ -503,6 +503,15 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
         if (leadCapture === '1' && !leadDismissed && config.leadCapture.enabled) {
           setShowLeadForm(true)
         }
+        // "After N messages" trigger is counted client-side: the visitor's Nth
+        // message opens the form (needs at least one configured field).
+        {
+          const lc = config.leadCapture
+          if (lc.enabled && lc.trigger === 'after_n_messages' && lc.fields.length > 0 && !leadDismissed) {
+            const userTurns = messagesRef.current.filter((m) => m.role === 'user').length
+            if (userTurns >= (lc.afterNMessages ?? 3)) setShowLeadForm(true)
+          }
+        }
 
         if (!res.ok || !res.body) {
           setMessages((prev) =>
@@ -598,7 +607,7 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
         setStreaming(false)
       }
     },
-    [streaming, conversationId, leadDismissed, config.leadCapture.enabled, activeLang, transport, syncMessageIds, updateHandoff, buildHistory]
+    [streaming, conversationId, leadDismissed, config.leadCapture, activeLang, transport, syncMessageIds, updateHandoff, buildHistory]
   )
 
   /** "Open URL" quick action: reply with a short note + a button to the link. */

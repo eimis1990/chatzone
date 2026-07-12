@@ -62,3 +62,16 @@ More than one agent session sometimes commits to this working copy. If history
 looks scrambled, check `git log`/reflog before assuming your work was lost.
 
 _Last verified: 2026-07-08 (66f6bb8)._
+
+## Catalog sync vs. the serverless time budget
+
+A full sync (fetch → AI-enrich → embed → index) of a ~2,600-product store can
+exceed the 300 s `maxDuration` on Vercel → the client sees a 504 "Network
+error". Two protections exist: `fetchWooCatalog` retries a failed page once,
+and the index refresh is **upsert-then-prune** (`lib/products/sync.ts`) so a
+killed run leaves the old index intact — it used to be delete-then-insert, and
+one 504 left a bot searching 400 of 2,582 products. A run that dies during
+ENRICHMENT writes nothing (no partial progress), so very large catalogs may
+never complete on Vercel — run the sync from localhost (same DB, no timeout)
+as the workaround. The proper fix is incremental enrichment (hash raw product
+data, only re-enrich changes) — not built yet.

@@ -75,8 +75,21 @@ describe('publicBotConfig', () => {
     expect(pub.leadCapture).toEqual({
       enabled: true,
       trigger: 'on_fallback',
+      afterNMessages: undefined,
       fields: fullConfig.leadCapture.fields,
     })
+  })
+
+  it('threads afterNMessages through for the after_n_messages trigger', () => {
+    const cfg = {
+      ...fullConfig,
+      leadCapture: { ...fullConfig.leadCapture, trigger: 'after_n_messages' as const, afterNMessages: 2 },
+    }
+    const pub = publicBotConfig(cfg)
+    // The widget counts visitor messages client-side — without this value the
+    // trigger silently never fires at the configured threshold.
+    expect(pub.leadCapture.afterNMessages).toBe(2)
+    expect(pub.leadCapture.trigger).toBe('after_n_messages')
   })
 
   it('MUST NOT expose systemPrompt', () => {

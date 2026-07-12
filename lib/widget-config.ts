@@ -106,6 +106,7 @@ export interface PublicBotConfig {
   leadCapture: {
     enabled: boolean
     trigger: LeadTrigger
+    afterNMessages?: number
     fields: LeadField[]
   }
   voice: {
@@ -214,6 +215,7 @@ export function publicBotConfig(
     leadCapture: {
       enabled: leadCaptureEnabled,
       trigger: config.leadCapture.trigger,
+      afterNMessages: config.leadCapture.afterNMessages,
       fields: config.leadCapture.fields,
     },
     hideBadge: entitlements?.removeBadge ?? false,

@@ -22,8 +22,9 @@ export interface SyncProgress {
 
 /**
  * Sync a bot's store catalog into the semantic product index: fetch → tag
- * (derived + AI) → embed → replace. A full refresh (delete + insert) keeps the
- * index in step with the store, incl. removed products. Prices/stock are NOT
+ * (derived + AI) → embed → upsert + prune. The upsert-then-prune order keeps
+ * the old index intact if the run dies mid-way (serverless timeout), while
+ * still removing products that left the store. Prices/stock are NOT
  * stored — they're hydrated live at query time (see lib/products/search).
  *
  * `onProgress` (optional) is called at each phase so the caller can surface a
@@ -69,6 +70,8 @@ export async function syncProductCatalog(
     report({ phase: 'embedding', processed, total }),
   )
 
+  // Stamp every row with this run's time — the stamp doubles as the prune key.
+  const startedAt = new Date().toISOString()
   const rows = products.map((p, i) => ({
     bot_id: bot.id,
     external_id: p.id,
@@ -79,16 +82,22 @@ export async function syncProductCatalog(
     audience: audienceFor(p),
     doc: docs[i],
     embedding: embeddings[i],
+    synced_at: startedAt,
   }))
 
-  // Full refresh so the index matches the current catalog.
+  // Upsert-then-prune (NOT delete-then-insert): if the run is killed mid-way
+  // (serverless timeout), the old index stays intact instead of being wiped —
+  // a 504 once left a bot searching 400 of 2,582 products.
   report({ phase: 'indexing', processed: 0, total: rows.length })
-  await db.from('product_embeddings').delete().eq('bot_id', bot.id)
   for (let i = 0; i < rows.length; i += 100) {
-    const { error } = await db.from('product_embeddings').insert(rows.slice(i, i + 100))
-    if (error) throw new Error(`product_embeddings insert failed: ${error.message}`)
+    const { error } = await db
+      .from('product_embeddings')
+      .upsert(rows.slice(i, i + 100), { onConflict: 'bot_id,external_id' })
+    if (error) throw new Error(`product_embeddings upsert failed: ${error.message}`)
     report({ phase: 'indexing', processed: Math.min(i + 100, rows.length), total: rows.length })
   }
+  // Remove products no longer in the catalog (rows this run didn't touch).
+  await db.from('product_embeddings').delete().eq('bot_id', bot.id).lt('synced_at', startedAt)
   report({ phase: 'done', synced: rows.length })
   return { synced: rows.length }
 }
