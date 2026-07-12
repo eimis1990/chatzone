@@ -66,15 +66,28 @@ means stale attributes; price/stock stay live-hydrated as before.
 
 ## On-demand full details (`get_product_details`)
 
-Registered only for `provider === 'woocommerce'` (`lib/ai/commerce-tool.ts`): up
-to 3 ids → `getProductDetails` (`lib/commerce/index.ts`, behind `guardStoreEgress`)
-→ `fetchWooProductDetails` (`lib/commerce/woocommerce.ts`) hits the public Store
-API `include=` endpoint and returns the FULL description (HTML-stripped, ≤1500
-chars, word-boundary truncation) plus attribute lines ("Spalva: mėlyna, žalia").
-For the model only — never rendered. Other providers return `[]` from the
-dispatch and simply don't get the tool. Unknown ids → Woo returns an empty list →
-the tool answers "No details found" (no log); infra errors log
-`[agent] get_product_details failed`.
+Gated by `productDetailsSupported` — WooCommerce + Shopify (`lib/ai/commerce-tool.ts`):
+up to 3 ids → `getProductDetails` (`lib/commerce/index.ts`, behind `guardStoreEgress`)
+→ `fetchWooProductDetails` (public Store API `include=`) or
+`fetchShopifyProductDetails` (Storefront `nodes(ids:)`, plain-text `description` +
+`options` as attribute lines, skipping the synthetic "Title: Default Title").
+Returns the FULL description (≤1500 chars, word-boundary truncation) plus
+attribute lines ("Spalva: mėlyna, žalia"). For the model only — never rendered.
+Other providers return `[]` from the dispatch and simply don't get the tool.
+Unknown ids → empty list → the tool answers "No details found" (no log); infra
+errors log `[agent] get_product_details failed`.
+
+**Voice version**: the voice LLM never sees product ids (the search summary is
+names-only), so its `get_product_details` client tool takes the spoken
+`productName`; `app/api/widget/details/route.ts` resolves it via `searchCatalog`
+top-1 and returns a spoken-summary string. Nearest-match resolution can pick the
+wrong product for a bad name — the summary tells the LLM to reject clear
+mismatches. Tool defined in `lib/ai/elevenlabs-agent.ts` with
+`expects_response: true` (mandatory — see [voice](voice.md)); registered only
+when `productDetailsSupported`; agent hash bumped to `v24-product-details` so
+existing agents re-sync on the next call. Widget chain:
+`VoiceCallButton` clientTool → `ChatWindow.handleVoiceProductDetails` →
+`transport.getProductDetailsByName` (the preview transport stubs it).
 
 ## Card awareness across turns
 

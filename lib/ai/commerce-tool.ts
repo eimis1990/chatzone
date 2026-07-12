@@ -6,6 +6,7 @@ import type { CommerceProduct, OrderStatus } from '@/lib/commerce/types'
 import {
   searchStore,
   getProductDetails,
+  productDetailsSupported,
   getOrderStatus,
   getDiscount,
   orderLookupEnabled,
@@ -120,10 +121,10 @@ export function makeProductTools(
     }),
   }
 
-  // Full live details — WooCommerce only for now (its public Store API carries
-  // the complete description + attribute terms). Not registered for other
-  // providers, so the model never sees a tool it can't use.
-  if (config.commerce?.provider === 'woocommerce') {
+  // Full live details — only where the provider has a live details API
+  // (WooCommerce Store API, Shopify Storefront). Not registered otherwise, so
+  // the model never sees a tool it can't use.
+  if (productDetailsSupported(config.commerce)) {
     tools.get_product_details = tool({
       description:
         'Fetch the FULL live description and attribute list (materials, dimensions, scent, ' +

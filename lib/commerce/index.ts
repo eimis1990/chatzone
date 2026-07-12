@@ -15,7 +15,7 @@ import {
   getWooOrderStatus,
   validateWooOrderAccess,
 } from '@/lib/commerce/woocommerce'
-import { searchShopifyProducts, validateShopifyStore } from '@/lib/commerce/shopify'
+import { searchShopifyProducts, fetchShopifyProductDetails, validateShopifyStore } from '@/lib/commerce/shopify'
 import {
   searchMagentoProducts,
   validateMagentoStore,
@@ -105,8 +105,8 @@ export async function searchStore(
 
 /**
  * Full live details (complete description + attributes) for up to a few
- * products by id. WooCommerce only for now — other providers return [] and the
- * chat tool is simply not registered for them.
+ * products by id. WooCommerce + Shopify — other providers return [] and the
+ * chat tool is simply not registered for them (see productDetailsSupported).
  */
 export async function getProductDetails(
   config: CommerceConfig,
@@ -118,9 +118,17 @@ export async function getProductDetails(
   switch (config.provider) {
     case 'woocommerce':
       return fetchWooProductDetails(config.storeUrl, ids, deps)
+    case 'shopify':
+      return fetchShopifyProductDetails(config.shopifyDomain!, config.shopifyToken!, ids, deps)
     default:
       return []
   }
+}
+
+/** Providers with a live full-details API — gates the get_product_details tool. */
+export function productDetailsSupported(config: CommerceConfig | undefined | null): boolean {
+  if (!config || !storeConfigured(config)) return false
+  return config.provider === 'woocommerce' || config.provider === 'shopify'
 }
 
 /** Validate a store connection and return the catalog size for the provider. */

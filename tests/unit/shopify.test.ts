@@ -1,12 +1,20 @@
 import { describe, it, expect } from 'vitest'
 import {
   searchShopifyProducts,
+  fetchShopifyProductDetails,
   validateShopifyStore,
   normalizeShopifyProduct,
   formatShopifyMoney,
   shopifyDomain,
 } from '@/lib/commerce/shopify'
-import { searchStore, validateStore, storeConfigured, type CommerceConfig } from '@/lib/commerce'
+import {
+  searchStore,
+  validateStore,
+  storeConfigured,
+  getProductDetails,
+  productDetailsSupported,
+  type CommerceConfig,
+} from '@/lib/commerce'
 
 function gqlFetch(body: unknown, ok = true) {
   return (async () => ({ ok, status: ok ? 200 : 500, json: async () => body })) as unknown as typeof fetch
@@ -105,5 +113,51 @@ describe('provider dispatch', () => {
   it('validateStore dispatches to Shopify', async () => {
     const r = await validateStore(shopifyConfig, { fetchImpl: gqlFetch(RESPONSE) })
     expect(r.ok).toBe(true)
+  })
+
+  it('getProductDetails dispatches to Shopify and productDetailsSupported gates providers', async () => {
+    const detailsResponse = {
+      data: {
+        nodes: [
+          {
+            id: 'gid://shopify/Product/1',
+            title: 'Bath Bomb',
+            description: 'A fizzy bath bomb with lavender oil.',
+            options: [
+              { name: 'Title', values: ['Default Title'] },
+              { name: 'Scent', values: ['Lavender', 'Rose'] },
+            ],
+          },
+        ],
+      },
+    }
+    const details = await getProductDetails(shopifyConfig, ['gid://shopify/Product/1'], {
+      fetchImpl: gqlFetch(detailsResponse),
+    })
+    expect(details).toEqual([
+      {
+        id: 'gid://shopify/Product/1',
+        title: 'Bath Bomb',
+        description: 'A fizzy bath bomb with lavender oil.',
+        attributes: ['Scent: Lavender, Rose'],
+      },
+    ])
+    expect(productDetailsSupported(shopifyConfig)).toBe(true)
+    expect(productDetailsSupported({ enabled: true, provider: 'feed', storeUrl: '', feedUrl: 'https://x/f.xml' })).toBe(false)
+  })
+})
+
+describe('fetchShopifyProductDetails', () => {
+  it('returns [] for empty ids without fetching', async () => {
+    let called = false
+    const fetchImpl = (async () => { called = true; return { ok: true, status: 200, json: async () => ({}) } }) as unknown as typeof fetch
+    expect(await fetchShopifyProductDetails('store.com', 'tok', [], { fetchImpl })).toEqual([])
+    expect(called).toBe(false)
+  })
+
+  it('skips null nodes and omits empty attributes', async () => {
+    const resp = { data: { nodes: [null, { id: 'gid://shopify/Product/2', title: 'Soap', description: 'Plain soap.' }] } }
+    const out = await fetchShopifyProductDetails('store.com', 'tok', ['a', 'b'], { fetchImpl: gqlFetch(resp) })
+    expect(out).toEqual([{ id: 'gid://shopify/Product/2', title: 'Soap', description: 'Plain soap.' }])
   })
 })

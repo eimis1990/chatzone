@@ -1,4 +1,9 @@
-import type { CommerceProduct, ProductSearchParams, CommerceDeps } from '@/lib/commerce/types'
+import type {
+  CommerceProduct,
+  ProductSearchParams,
+  ProductDetails,
+  CommerceDeps,
+} from '@/lib/commerce/types'
 
 /** Shopify Storefront API version (pinned). */
 const API_VERSION = '2024-07'
@@ -146,6 +151,58 @@ export async function fetchShopifyProductsByIds(
   return (json.data?.nodes ?? [])
     .filter((n): n is ShopifyProductNode => Boolean(n?.id))
     .map((n) => normalizeShopifyProduct(n, domain))
+}
+
+const DETAILS_QUERY = `query Details($ids: [ID!]!) {
+  nodes(ids: $ids) {
+    ... on Product {
+      id
+      title
+      description
+      options { name values }
+    }
+  }
+}`
+
+interface ShopifyDetailsNode {
+  id: string
+  title: string
+  description?: string
+  options?: Array<{ name?: string; values?: string[] }>
+}
+
+interface ShopifyDetailsResponse {
+  data?: { nodes?: Array<ShopifyDetailsNode | null> }
+  errors?: unknown
+}
+
+/**
+ * Full live details for up to a few products by Storefront GID: the complete
+ * plain-text description (capped) plus option lines like "Color: Red, Blue" —
+ * for the model to answer depth questions, never rendered as cards.
+ */
+export async function fetchShopifyProductDetails(
+  domain: string,
+  token: string,
+  ids: string[],
+  deps: CommerceDeps = {},
+): Promise<ProductDetails[]> {
+  if (ids.length === 0) return []
+  const json = (await storefront(domain, token, DETAILS_QUERY, { ids }, deps)) as ShopifyDetailsResponse
+  return (json.data?.nodes ?? [])
+    .filter((n): n is ShopifyDetailsNode => Boolean(n?.id))
+    .map((n) => {
+      const attributes = (n.options ?? [])
+        // Variant-less products carry a synthetic "Title: Default Title" option.
+        .filter((o) => o.name && o.name !== 'Title' && (o.values ?? []).length)
+        .map((o) => `${o.name}: ${(o.values ?? []).join(', ')}`)
+      return {
+        id: n.id,
+        title: n.title,
+        description: truncate(n.description, 1500),
+        ...(attributes.length ? { attributes } : {}),
+      }
+    })
 }
 
 /** Connectivity/credential check. `total` is a best-effort (0/1) — Storefront has no count. */

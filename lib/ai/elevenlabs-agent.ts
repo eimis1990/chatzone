@@ -3,7 +3,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Bot, BotLanguage } from '@/lib/types'
 import { MissingVoiceKeyError } from '@/lib/ai/tts'
 import { isValidVoiceLlm, DEFAULT_VOICE_LLM } from '@/lib/ai/voice-models'
-import { orderLookupEnabled, getDiscount } from '@/lib/commerce'
+import { orderLookupEnabled, getDiscount, productDetailsSupported } from '@/lib/commerce'
 
 const API = 'https://api.elevenlabs.io/v1'
 
@@ -83,6 +83,15 @@ function buildAgentPrompt(cfg: Bot['config'], toolIds: string[], languages: BotL
     } — never a whole sentence. Run only ONE product search per request: on this channel each search pops its own list of cards onto the screen, so searching several times in a row overwhelms the shopper with stacked lists. Choose the single best-fitting query for what they actually asked — if they named a type, use it (a gift "set"/"komplektas" → "dovanų rinkinys" or "rinkinys"; perfume → "kvepalai"; face cream → "veido kremas"). For a vague or open gift request, do NOT search the word "gift"/"dovana" itself and do NOT fan out into several category searches — pick the ONE most fitting category, show that single list, and ask ONE short question to narrow it (their budget, or what the person likes) rather than searching again. If the user says WHO it is for (for men/a man/husband/dad → men; for women/a woman/mum/her → women; for a child/kid/baby → kids), also set the tool's \`audience\` so results only include items that suit that person — and never suggest something meant for a different person. If a search returns nothing, retry with a synonym, the base form, and the same noun in the other language before saying it is unavailable. The matching products appear on screen as cards automatically, so DO NOT read out product names, prices, or details — the cards carry that. Instead say ONE or two short, genuinely warm sentences that acknowledge THIS specific request in your own words (that it's for dry skin, for their wife, a more premium option, and so on) and invite them to take a look. Regardless of any example phrasing elsewhere in these instructions, VARY your wording every time and do NOT open with "Žinoma" / "Of course" out of habit. Where it fits naturally, add a brief helpful touch or ONE short follow-up question (budget, scent, skin type, who it's for) to help them choose — but never interrogate. Aim for a tone like these, but NEVER reuse them verbatim — improvise fresh each turn: "For dry skin, these should feel lovely — take a look:" / "Lovely gift idea — here are a few she might love:" / "If you're after something more premium, these stand out:".`,
     'You CANNOT place orders, take payment, or complete a purchase, and you must NEVER ask for the person\'s name, address, phone number, or email in order to buy something — orders are not taken over the call. So never offer to take an order or collect delivery/contact details. When they want to buy or have chosen an item, the products are shown on screen as cards — tell them to tap the one they want to open it and complete the order on the website. You are glad to help them choose or answer questions, but the checkout itself happens on the site.',
   ]
+  if (productDetailsSupported(cfg.commerce)) {
+    parts.push(
+      'If the user asks to hear MORE about one specific product — its details, ingredients, ' +
+        'materials, size, scent, burn time, or how it works — call `get_product_details` with that ' +
+        "product's name and answer from what it returns in one or two natural spoken sentences. " +
+        'This is the exception to not reading product details aloud: when asked directly, you may ' +
+        'name the product and describe it — but summarise warmly, never recite the whole text.',
+    )
+  }
   if (orderLookupEnabled(cfg.commerce)) {
     parts.push(
       'If the user asks about an existing order (status, where it is, tracking), ask for BOTH the order ' +
@@ -172,7 +181,7 @@ export function buildAgentConfig(bot: Bot, toolIds: string[] = []): AgentConfig 
 export function agentConfigHash(bot: Bot, toolIds: string[] = []): string {
   const cfg = bot.config
   const material = JSON.stringify([
-    'v23-voice-single-search', // bump to force re-sync when the agent payload shape changes
+    'v24-product-details', // bump to force re-sync when the agent payload shape changes
     cfg.displayName, // agent name follows the bot's display name
     cfg.languages,
     cfg.defaultLanguage ?? null,
@@ -185,6 +194,7 @@ export function agentConfigHash(bot: Bot, toolIds: string[] = []): string {
     // Transactional skills affect the tool set + prompt.
     orderLookupEnabled(cfg.commerce),
     getDiscount(cfg.commerce).enabled,
+    productDetailsSupported(cfg.commerce),
     cfg.commerce?.storeUrl ?? '',
   ])
   return createHash('sha256').update(material).digest('hex').slice(0, 32)
@@ -296,6 +306,33 @@ function buildDiscountToolConfig() {
   }
 }
 
+/** Client tool config for `get_product_details` (param: spoken product name). */
+function buildProductDetailsToolConfig() {
+  return {
+    type: 'client' as const,
+    name: 'get_product_details',
+    description:
+      'Fetch the full details of ONE specific product — its complete description and ' +
+      'specifications (materials, size, scent, ingredients, burn time…). Call this when the user ' +
+      'asks to hear MORE about a specific product, or asks a question the search results cannot ' +
+      'answer. Pass the product name as the user said it or as it appears on screen. Answer ' +
+      'briefly from what it returns.',
+    // Feed the fetched details back to the LLM (same pattern as search_knowledge)
+    // — without this the agent only gets "Tool called successfully".
+    expects_response: true,
+    parameters: {
+      type: 'object' as const,
+      properties: {
+        productName: {
+          type: 'string' as const,
+          description: 'The name of the product to look up, as the user referred to it.',
+        },
+      },
+      required: ['productName'],
+    },
+  }
+}
+
 /**
  * Ensures a client tool (stored under `key`) exists in the ElevenLabs workspace
  * (creating it once, then PATCHing). Returns its tool id.
@@ -327,6 +364,9 @@ async function ensureTools(db: SupabaseClient, bot: Bot): Promise<string[]> {
     await ensureTool(db, `cbz_tool_kb_${bot.id}`, buildKnowledgeToolConfig()),
     await ensureTool(db, `cbz_tool_${bot.id}`, buildSearchToolConfig()),
   ]
+  if (productDetailsSupported(bot.config.commerce)) {
+    ids.push(await ensureTool(db, `cbz_tool_details_${bot.id}`, buildProductDetailsToolConfig()))
+  }
   if (orderLookupEnabled(bot.config.commerce)) {
     ids.push(await ensureTool(db, `cbz_tool_order_${bot.id}`, buildOrderToolConfig()))
   }

@@ -48,6 +48,7 @@ interface VoiceCallButtonProps {
   onDiscount?: () => Promise<string>
   /** Implements `search_knowledge` — retrieve KB context, return a spoken answer. */
   onKnowledge?: (query: string) => Promise<string>
+  onProductDetails?: (productName: string) => Promise<string>
   /** Corner radius (px) for the call button. */
   radius?: number
   /** Use the shorter idle label ("Call Agent") — for the tight mobile header. */
@@ -70,6 +71,7 @@ interface InnerProps {
   onOrderStatus?: (orderId: string, email: string) => Promise<string>
   onDiscount?: () => Promise<string>
   onKnowledge?: (query: string) => Promise<string>
+  onProductDetails?: (productName: string) => Promise<string>
   radius?: number
   shortLabel?: boolean
 }
@@ -87,6 +89,7 @@ function VoiceCallInner({
   onOrderStatus,
   onDiscount,
   onKnowledge,
+  onProductDetails,
   radius,
   shortLabel,
 }: InnerProps) {
@@ -136,6 +139,16 @@ function VoiceCallInner({
           return await onDiscount()
         } catch {
           return 'The discount is temporarily unavailable.'
+        }
+      },
+      // Full details for one product by spoken name — text the agent answers from.
+      get_product_details: async (params: { productName?: string }) => {
+        const name = params?.productName?.trim()
+        if (!name || !onProductDetails) return 'Product details are unavailable right now.'
+        try {
+          return await onProductDetails(name)
+        } catch {
+          return 'Product details are temporarily unavailable.'
         }
       },
       // Look up the knowledge base and return text the agent answers from.
@@ -405,6 +418,7 @@ export function VoiceCallButton({
   onOrderStatus,
   onDiscount,
   onKnowledge,
+  onProductDetails,
   radius,
   shortLabel,
   className,
@@ -425,6 +439,7 @@ export function VoiceCallButton({
           onOrderStatus={onOrderStatus}
           onDiscount={onDiscount}
           onKnowledge={onKnowledge}
+          onProductDetails={onProductDetails}
           radius={radius}
           shortLabel={shortLabel}
         />

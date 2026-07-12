@@ -320,6 +320,20 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
     [transport],
   )
 
+  // Voice `get_product_details` tool: full live details for one product by its
+  // spoken name — the agent answers from the returned text (no cards pushed).
+  const handleVoiceProductDetails = useCallback(
+    async (productName: string): Promise<string> => {
+      try {
+        const { summary } = await transport.getProductDetailsByName(productName)
+        return summary || 'Could not fetch the product details right now.'
+      } catch {
+        return 'Could not fetch the product details right now.'
+      }
+    },
+    [transport],
+  )
+
   const primaryColor = config.theme.primaryColor
   const cornerRadius = config.theme.cornerRadius ?? 16
   const bubbleRadius = config.theme.bubbleRadius ?? 16
@@ -810,6 +824,7 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
             onOrderStatus={handleVoiceOrder}
             onDiscount={handleVoiceDiscount}
             onKnowledge={handleVoiceKnowledge}
+            onProductDetails={handleVoiceProductDetails}
             className="flex-shrink-0"
           />
         )}
