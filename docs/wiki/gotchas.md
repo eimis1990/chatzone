@@ -83,3 +83,16 @@ vs ~5 min, so the button and the nightly cron fit the budget once a store is
 indexed. Also: the config UI's progress poll must ignore a stale terminal
 status row ('done'/'error' from a previous run) until it has seen a live phase,
 or retries show no progress (`ConfigForm.tsx` `sawLive`).
+
+## Same-name bots across orgs are DIFFERENT bots
+
+The owner deliberately keeps identical copies of client bots (same display
+name, e.g. "Natali AI"/"HomeByNB") for pre-sale testing — a bot is identified
+by `(id, org_id)`, never by name. Before ANY destructive, bulk, or analytical
+operation on bots, resolve and show each bot's org
+(`organizations.name` + `is_platform`). On 2026-07-12 a same-name bot in the
+HOME BY NB client org was nearly written off as a "duplicate" of one in the
+3IMIS org. Existing protections: `lib/actions/deleteBot.ts` is scoped to the
+caller's own org (the owner cannot delete client bots), `DeleteBotButton`
+renders only in the client app, and the owner bot editor banner names the
+client org. Client bots must NEVER be deleted by tooling.
