@@ -95,7 +95,9 @@ export async function searchCatalog(
         p_embedding: embedding,
         p_query_text: query,
         p_k: limit,
-        p_audience: opts.audience ?? null,
+        // 'unisex' means "no specific recipient" — filtering BY it would exclude
+        // women/men/kids-tagged items (the model sends it unprompted).
+        p_audience: !opts.audience || opts.audience === 'unisex' ? null : opts.audience,
       })
       const matches = (data ?? []) as { external_id: string; doc?: string | null }[]
       if (matches.length) {

@@ -53,6 +53,28 @@ Store connectors + product search. Separate from [RAG chunks](rag-and-knowledge.
   above — they back the **voice** agent's client tools (ElevenLabs), each origin-checked and
   rate-limited independently. See [voice](voice.md).
 
+## Search ranking: brand names and the audience filter
+
+Three sharp edges found via the "slim lady" incident (2026-07-12), all live-debugged:
+
+- **Title-token boost** (migration `20260712060000_product_title_boost.sql`):
+  products whose TITLE contains every query token — case + Lithuanian-diacritic
+  folded via `fold_lt()` (`translate()`, no unaccent extension) — always rank
+  first in `match_products`. Before this, "slim lady skaidulu kompleksas" FTS'd
+  to nothing ("skaidulu" ≠ "skaidulų" under 'simple' config) and vector noise
+  (soap dispensers) outranked exact name matches.
+- **Brand names are searched verbatim**: the chat + voice prompts and both
+  search-tool descriptions now tell the model that a named BRAND/PRODUCT (e.g.
+  "Slim Lady") is passed as-is, never translated into a category search.
+- ⚠️ **`audience=unisex` means "no filter"**, enforced in `searchCatalog`
+  (`lib/products/search.ts`): the model volunteers `audience: 'unisex'` even when
+  told not to, and the RPC filter would then EXCLUDE women/men/kids-tagged items —
+  that's how "Slim Lady" (tagged women) vanished from its own search.
+
+The chat route logs every model search (`[agent] search_products query=...`,
+`app/api/chat/route.ts`) — check it first when ranking looks wrong; the model's
+query is often not what the shopper typed.
+
 ## Product details for the model
 
 `searchCatalog` carries the indexed `doc` along on semantic matches as

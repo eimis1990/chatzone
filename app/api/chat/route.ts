@@ -229,7 +229,11 @@ export async function POST(req: Request) {
           bot.config,
           productSink,
           orderSink,
-          (p) => searchCatalog(bot, p.query, svc, p.limit ?? 24, { audience: p.audience }),
+          (p) => {
+            // Log the model's actual query — invaluable when ranking looks wrong.
+            console.log(`[agent] search_products query="${p.query}" audience=${p.audience ?? '-'}`)
+            return searchCatalog(bot, p.query, svc, p.limit ?? 24, { audience: p.audience })
+          },
           candidates,
           shownMap,
         )

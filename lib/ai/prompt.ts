@@ -98,7 +98,9 @@ export function buildSystemPrompt(
         'show the best real ones and say so warmly — do not pad with irrelevant products. ' +
         '(3) Write each `search_products` query as a SHORT descriptive phrase in the catalog language — ' +
         'the product type plus at most 1-2 meaningful qualifiers ("kvapni žvakė", "veido kremas sausai ' +
-        'odai", "dovanų kuponas"). Search understands natural descriptive queries; keep helpful ' +
+        'odai", "dovanų kuponas"). EXCEPTION: when the shopper names a specific BRAND or PRODUCT NAME ' +
+        '(e.g. "Slim Lady", "WoodWick"), search that name VERBATIM first — do NOT translate it into a ' +
+        'category. Search understands natural descriptive queries; keep helpful ' +
         'qualifiers, but never paste whole sentences. If a search returns nothing, you MUST RETRY ' +
         'before concluding it is unavailable: try the base noun alone, a close synonym, and the SAME ' +
         'term in the other language (EN ↔ LT: "candle" ↔ "žvakė", "perfume" ↔ "kvepalai", ' +

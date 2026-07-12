@@ -48,8 +48,9 @@ export function makeProductTools(
         'Search the store catalog and get CANDIDATE products to review (not shown to the user yet). ' +
         'Use a short descriptive phrase in the catalog language (this store is often Lithuanian) — ' +
         'the product type plus at most 1-2 qualifiers, e.g. "kvapni žvakė" or "veido kremas sausai ' +
-        'odai". If it returns an { error }, retry the same search once before telling the shopper ' +
-        'anything. When the shopper names a recipient (a gift/product "for men", "for women", ' +
+        'odai". When the shopper names a specific BRAND or PRODUCT NAME, pass that name VERBATIM ' +
+        'as the query instead of a category. If it returns an { error }, retry the same search once ' +
+        'before telling the shopper anything. When the shopper names a recipient (a gift/product "for men", "for women", ' +
         '"for kids/a child"), ALSO set `audience` so results are limited to items that suit that ' +
         "person — this is how you avoid showing, say, a child's toy for a men's-gift request. " +
         'You may search multiple times. Top results include `details` (categories, attributes, ' +
