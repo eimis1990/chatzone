@@ -1448,10 +1448,20 @@ export function ConfigForm({
                     checked={field.value}
                     onCheckedChange={(v) => {
                       field.onChange(v)
-                      // An empty form can never appear — seed sensible defaults.
+                      // An empty form can never appear — seed sensible defaults
+                      // in the bot's primary language.
                       if (v && leadFieldsArray.fields.length === 0) {
-                        leadFieldsArray.append({ key: 'name', label: 'Name', required: false })
-                        leadFieldsArray.append({ key: 'email', label: 'Email', required: true })
+                        const lt = (watch('defaultLanguage') ?? watch('languages')?.[0]) === 'lt'
+                        leadFieldsArray.append({
+                          key: 'name',
+                          label: lt ? 'Vardas' : 'Name',
+                          required: false,
+                        })
+                        leadFieldsArray.append({
+                          key: 'email',
+                          label: lt ? 'El. paštas' : 'Email',
+                          required: true,
+                        })
                       }
                     }}
                     id="leadCaptureEnabled"
@@ -1476,19 +1486,61 @@ export function ConfigForm({
                   <Controller
                     name="leadCapture.trigger"
                     control={control}
-                    render={({ field }) => (
-                      <Select value={field.value} onValueChange={field.onChange}>
-                        <SelectTrigger className="w-full">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="on_fallback">On fallback</SelectItem>
-                          <SelectItem value="after_n_messages">After N messages</SelectItem>
-                          <SelectItem value="manual">Manual</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    )}
+                    render={({ field }) => {
+                      const TRIGGERS = [
+                        {
+                          value: 'on_fallback',
+                          label: "When the bot can't answer",
+                          hint: 'The form appears when the bot has no answer, so a human can follow up.',
+                        },
+                        {
+                          value: 'after_n_messages',
+                          label: 'After N visitor messages',
+                          hint: "Appears once the visitor has sent their Nth message — set N below.",
+                        },
+                        {
+                          value: 'manual',
+                          label: 'Manual (quick action)',
+                          hint: 'Appears only when the visitor taps a welcome-screen quick action set to "Open contact form" (Content → Suggested questions).',
+                        },
+                      ] as const
+                      const current = TRIGGERS.find((o) => o.value === field.value) ?? TRIGGERS[0]
+                      return (
+                        <>
+                          <Select value={field.value} onValueChange={field.onChange}>
+                            <SelectTrigger className="w-full">
+                              <span>{current.label}</span>
+                            </SelectTrigger>
+                            <SelectContent>
+                              {TRIGGERS.map((o) => (
+                                <SelectItem key={o.value} value={o.value}>
+                                  <div className="py-0.5">
+                                    <div className="text-sm">{o.label}</div>
+                                    <div className="text-xs text-muted-foreground max-w-[340px] whitespace-normal">
+                                      {o.hint}
+                                    </div>
+                                  </div>
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <p className="text-xs text-muted-foreground">{current.hint}</p>
+                        </>
+                      )
+                    }}
                   />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="leadFormTitle">Form title</Label>
+                  <Input
+                    id="leadFormTitle"
+                    {...register('leadCapture.title')}
+                    placeholder="Leave your details / Palikite savo kontaktus"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Leave empty to use the built-in title in the visitor&rsquo;s language.
+                  </p>
                 </div>
 
                 {watch('leadCapture.trigger') === 'after_n_messages' && (

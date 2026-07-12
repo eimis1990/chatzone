@@ -249,6 +249,7 @@ export interface BotConfig {
     enabled: boolean
     trigger: LeadTrigger
     afterNMessages?: number
+    title?: string
     fields: LeadField[]
   }
   allowedDomains: string[]

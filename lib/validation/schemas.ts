@@ -212,6 +212,8 @@ export const botConfigFormSchema = z.object({
       enabled: z.boolean().default(false),
       trigger: z.enum(['on_fallback', 'after_n_messages', 'manual']).default('on_fallback'),
       afterNMessages: z.number().int().positive().optional(),
+      // Custom form heading; empty → a built-in default in the widget language.
+      title: z.string().max(80).optional(),
       fields: z.array(leadFieldSchema).default([]),
     })
     .default({ enabled: false, trigger: 'on_fallback', fields: [] }),

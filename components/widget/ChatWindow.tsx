@@ -993,6 +993,8 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
           <LeadForm
             fields={config.leadCapture.fields}
             primaryColor={primaryColor}
+            lang={activeLang}
+            title={config.leadCapture.title}
             onSubmit={handleLeadSubmit}
             onDismiss={() => {
               setShowLeadForm(false)

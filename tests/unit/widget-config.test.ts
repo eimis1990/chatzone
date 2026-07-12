@@ -83,13 +83,19 @@ describe('publicBotConfig', () => {
   it('threads afterNMessages through for the after_n_messages trigger', () => {
     const cfg = {
       ...fullConfig,
-      leadCapture: { ...fullConfig.leadCapture, trigger: 'after_n_messages' as const, afterNMessages: 2 },
+      leadCapture: {
+        ...fullConfig.leadCapture,
+        trigger: 'after_n_messages' as const,
+        afterNMessages: 2,
+        title: 'Gaukite nuolaidą',
+      },
     }
     const pub = publicBotConfig(cfg)
     // The widget counts visitor messages client-side — without this value the
     // trigger silently never fires at the configured threshold.
     expect(pub.leadCapture.afterNMessages).toBe(2)
     expect(pub.leadCapture.trigger).toBe('after_n_messages')
+    expect(pub.leadCapture.title).toBe('Gaukite nuolaidą')
   })
 
   it('MUST NOT expose systemPrompt', () => {
