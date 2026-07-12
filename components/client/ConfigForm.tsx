@@ -2091,8 +2091,10 @@ function CommerceSection({ control, watch, botId }: CommerceSectionProps) {
                   <div>
                     <p className="text-sm font-medium">Smart product search</p>
                     <p className="text-xs text-muted-foreground">
-                      Build a semantic index so the bot understands intent (e.g. &ldquo;gift ideas for
-                      her&rdquo;), not just keywords. Prices &amp; stock stay live at answer time.
+                      Indexes your store&rsquo;s <strong>product catalog</strong> so the bot understands
+                      intent (e.g. &ldquo;gift ideas for her&rdquo;), not just keywords. Prices &amp;
+                      stock stay live at answer time. Separate from the Knowledge screen, which indexes
+                      your website&rsquo;s pages and policies.
                     </p>
                   </div>
                   <Button

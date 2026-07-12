@@ -180,12 +180,25 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
     messagesRef.current = messages
   }, [messages])
 
-  // Prior turns sent to the (stateless) chat transport.
+  // Prior turns sent to the (stateless) chat transport. Card-only messages
+  // (empty content + products) must survive, and assistant products ride along,
+  // so the preview endpoint can rebuild card awareness like /api/chat does.
   const buildHistory = useCallback(
     () =>
       messagesRef.current
-        .filter((m) => (m.role === 'user' || m.role === 'assistant') && !!m.content && !m.streaming)
-        .map((m) => ({ role: m.role, content: m.content })),
+        .filter(
+          (m) =>
+            (m.role === 'user' || m.role === 'assistant') &&
+            (!!m.content || !!m.products?.length) &&
+            !m.streaming,
+        )
+        .map((m) => ({
+          role: m.role,
+          content: m.content,
+          ...(m.role === 'assistant' && m.products?.length
+            ? { products: m.products.slice(0, 24) }
+            : {}),
+        })),
     [],
   )
 

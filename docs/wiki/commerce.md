@@ -132,4 +132,13 @@ turn the chat route reads back the **last assistant message with products** and:
 Re-shown cards carry price/stock from when they were first displayed (fine within
 a live session; the widget resets on reload anyway — no cross-reload history).
 
+⚠️ **The configurator preview is a separate route** (`/api/preview/chat`,
+stateless) — features added to `/api/chat` do NOT automatically exist there, and
+"works in preview" ≠ "works live" (or vice versa). Card awareness reaches the
+preview via the client: `ChatWindow.buildHistory` keeps card-only messages and
+attaches `products` to assistant turns (`previewChatSchema` allows them); the
+preview route derives `shownProducts` from that history exactly like the chat
+route does from `messages.products`. Note the preview also searches via keyword
+`searchStore` (no `searchImpl`), not the semantic index.
+
 _Last verified: 2026-07-11 (working tree)._

@@ -365,7 +365,29 @@ export const previewChatSchema = z.object({
   botId: z.string().uuid(),
   config: botConfigSchema,
   history: z
-    .array(z.object({ role: z.enum(['user', 'assistant']), content: z.string() }))
+    .array(
+      z.object({
+        role: z.enum(['user', 'assistant']),
+        content: z.string(),
+        // Cards the assistant showed on that turn — the preview is stateless, so
+        // the client carries them back for card-awareness parity with /api/chat.
+        products: z
+          .array(
+            z.object({
+              id: z.string(),
+              title: z.string(),
+              price: z.string(),
+              url: z.string(),
+              imageUrl: z.string().optional(),
+              inStock: z.boolean(),
+              shortDescription: z.string().optional(),
+              details: z.string().optional(),
+            }),
+          )
+          .max(24)
+          .optional(),
+      }),
+    )
     .default([]),
   message: z.string().min(1).max(4000),
   language: z.enum(['en', 'lt']).optional(),

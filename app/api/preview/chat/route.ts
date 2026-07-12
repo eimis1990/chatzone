@@ -50,22 +50,30 @@ export async function POST(req: Request) {
     return ndjsonText(contentFor(config, lang).fallbackMessage, { 'x-weak': '1' })
   }
 
+  // Card awareness, stateless flavour: the client sends back the products each
+  // assistant turn displayed; the last such turn is "the cards on screen".
+  const shownProducts = (history as { role: string; products?: CommerceProduct[] }[])
+    .filter((m) => m.role === 'assistant' && m.products?.length)
+    .at(-1)?.products as CommerceProduct[] | undefined
+
   const messages = buildMessages(
     config,
     retrieval.chunks,
     history as ChatMessage[],
     message,
     lang,
+    shownProducts,
   ) as ModelMessage[]
   const productSink: CommerceProduct[] = []
   const orderSink: OrderStatus[] = []
   const candidates = new Map<string, CommerceProduct>()
+  const shownMap = new Map((shownProducts ?? []).map((p) => [p.id, p]))
 
   return ndjsonChatResponse(openai(config.model || DEFAULT_CHAT_MODEL), messages, {
     temperature: config.temperature ?? DEFAULT_TEMPERATURE,
     headers: {},
     tools: commerce
-      ? makeProductTools(config, productSink, orderSink, undefined, candidates)
+      ? makeProductTools(config, productSink, orderSink, undefined, candidates, shownMap)
       : undefined,
     productSink,
     orderSink,
