@@ -10,7 +10,7 @@ import {
 import Image from 'next/image'
 import Link from 'next/link'
 import { Reveal, RevealSlide } from './Reveal'
-import { FeatureText } from './ScrollRevealText'
+import { FeatureSpine, FeatureText } from './ScrollRevealText'
 import { GetStartedDialog } from './GetStartedDialog'
 import { FlickeringGrid } from '@/components/magicui/flickering-grid'
 
@@ -87,33 +87,33 @@ const FEATURES: Feature[] = [
   },
 ]
 
-function FeatureVisual({ imageSrc, imageAlt }: { imageSrc: string; imageAlt: string }) {
-  return (
-    <div
-      className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl shadow-lg"
-      style={{ backgroundImage: 'linear-gradient(135deg, #fdeee2, #f7d3b5)' }}
-    >
-      <Image
-        src={imageSrc}
-        alt={imageAlt}
-        fill
-        sizes="(min-width: 1024px) 50vw, 100vw"
-        className="object-cover"
-      />
-    </div>
-  )
-}
-
 function FeatureRow({ feature, index }: { feature: Feature; index: number }) {
   const reversed = index % 2 === 1
   const num = String(index + 1).padStart(2, '0')
   return (
-    <section className="overflow-x-clip bg-white text-gray-900">
-      <div className="mx-auto grid max-w-7xl items-center gap-10 px-5 py-14 lg:grid-cols-2 lg:gap-16 lg:py-20">
-        <RevealSlide from={reversed ? 'right' : 'left'} className={reversed ? 'lg:order-2' : ''}>
-          <FeatureVisual imageSrc={feature.imageSrc} imageAlt={feature.imageAlt} />
+    <section className="grid border-t border-gray-200 bg-white text-gray-900 lg:grid-cols-2">
+      {/* Visual half: spans hairline to hairline; the 4:3 shot letterboxes inside
+          (object-contain) so nothing is cropped, and drifts in from its outer edge */}
+      <div
+        className={`relative aspect-[4/3] overflow-hidden lg:aspect-auto ${reversed ? 'lg:order-2' : ''}`}
+        style={{ backgroundImage: 'linear-gradient(135deg, #fdeee2, #f7d3b5)' }}
+      >
+        <RevealSlide from={reversed ? 'right' : 'left'} className="absolute inset-0">
+          <Image
+            src={feature.imageSrc}
+            alt={feature.imageAlt}
+            fill
+            sizes="(min-width: 1024px) 50vw, 100vw"
+            className="object-contain"
+          />
         </RevealSlide>
-        <div className={reversed ? 'lg:order-1' : ''}>
+      </div>
+      <div
+        className={`flex items-center justify-center px-5 py-14 sm:px-10 lg:px-16 lg:py-28 ${
+          reversed ? 'lg:order-1' : ''
+        }`}
+      >
+        <div className="w-full max-w-xl">
           <FeatureText number={num} title={feature.title} body={feature.body} accent={ACCENT} />
         </div>
       </div>
@@ -125,7 +125,7 @@ export function Features() {
   return (
     <div id="features">
       <section className="bg-white">
-        <div className="mx-auto max-w-3xl px-5 pt-24 pb-4 text-center">
+        <div className="mx-auto max-w-3xl px-5 pt-24 pb-20 text-center">
           <Reveal>
             <h2 className="text-5xl font-light tracking-tight text-gray-900 sm:text-6xl">
               One agent. Every part of support.
@@ -137,9 +137,13 @@ export function Features() {
           </Reveal>
         </div>
       </section>
-      {FEATURES.map((f, i) => (
-        <FeatureRow key={f.title} feature={f} index={i} />
-      ))}
+      <FeatureSpine>
+        <div className="border-b border-gray-200">
+          {FEATURES.map((f, i) => (
+            <FeatureRow key={f.title} feature={f} index={i} />
+          ))}
+        </div>
+      </FeatureSpine>
     </div>
   )
 }

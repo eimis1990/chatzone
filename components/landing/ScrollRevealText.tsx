@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef } from 'react'
+import { useRef, type ReactNode } from 'react'
 import { motion, useScroll, useTransform, type MotionValue } from 'framer-motion'
 
 function Word({
@@ -21,9 +21,43 @@ function Word({
 }
 
 /**
- * A "Solution"-style feature text block: an accent vertical line that fills as
- * the row scrolls, a number, a title, and a paragraph whose words fill from
- * light grey to solid — all driven by one shared scroll progress.
+ * One continuous vertical line down the center of the whole features stack:
+ * a grey track plus an accent fill that grows as the section scrolls by.
+ * Hidden on mobile where the rows stack.
+ */
+export function FeatureSpine({ children }: { children: ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null)
+  const { scrollYProgress } = useScroll({ target: ref, offset: ['start 0.8', 'end 0.8'] })
+  const fillHeight = useTransform(scrollYProgress, [0, 1], ['0%', '100%'])
+  return (
+    <div ref={ref} className="relative">
+      <span
+        className="absolute left-1/2 top-0 hidden h-full w-0.5 -translate-x-1/2 bg-gray-200 lg:block"
+        aria-hidden="true"
+      />
+      <motion.span
+        className="absolute left-1/2 top-0 z-10 hidden w-0.5 -translate-x-1/2 lg:block"
+        style={{ height: fillHeight, backgroundColor: 'var(--primary)' }}
+        aria-hidden="true"
+      >
+        {/* Glowing tip so the line's progress stays visible on dark imagery */}
+        <span
+          className="absolute -bottom-1 left-1/2 size-2 -translate-x-1/2 rounded-full"
+          style={{
+            backgroundColor: 'var(--primary)',
+            boxShadow: '0 0 10px 3px color-mix(in srgb, var(--primary) 80%, transparent)',
+          }}
+        />
+      </motion.span>
+      {children}
+    </div>
+  )
+}
+
+/**
+ * Feature text block: a number, a title, and a paragraph whose words fill from
+ * light grey to solid as the row scrolls. (The accent line lives in
+ * FeatureSpine — one continuous line for the whole section.)
  */
 export function FeatureText({
   number,
@@ -38,18 +72,10 @@ export function FeatureText({
 }) {
   const ref = useRef<HTMLDivElement>(null)
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start 0.9', 'start 0.4'] })
-  const fillHeight = useTransform(scrollYProgress, [0, 0.85], ['0%', '100%'])
   const words = body.split(' ')
 
   return (
-    <div ref={ref} className="relative pl-6 sm:pl-8">
-      {/* Line: grey track + accent fill that grows with scroll */}
-      <span className="absolute left-0 top-0 h-full w-0.5 rounded-full bg-gray-200" aria-hidden="true" />
-      <motion.span
-        className="absolute left-0 top-0 w-0.5 rounded-full"
-        style={{ height: fillHeight, backgroundColor: accent }}
-        aria-hidden="true"
-      />
+    <div ref={ref}>
       <p className="text-sm font-semibold tracking-[0.2em]" style={{ color: accent }}>
         — {number}
       </p>
