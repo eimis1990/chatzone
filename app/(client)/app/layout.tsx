@@ -48,18 +48,23 @@ export default async function ClientLayout({
   // floating on top, with the mesh showing through the gutter around it.
   // Below md: the sidebar becomes a bottom tab bar + top bar (mobile portal).
   return (
-    <div className="relative isolate flex h-svh flex-col overflow-hidden bg-sidebar-mesh md:flex-row">
-      {/* Decorative grid fading up from the bottom of the dark shell */}
-      <div className="shell-grid pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-[42vh]" aria-hidden="true" />
-      <div className="hidden md:flex">
-        <AppSidebar bots={bots} userEmail={user.email ?? ''} />
+    <>
+      <div className="relative isolate flex h-svh flex-col overflow-hidden bg-sidebar-mesh md:flex-row">
+        {/* Decorative grid fading up from the bottom of the dark shell */}
+        <div className="shell-grid pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-[42vh]" aria-hidden="true" />
+        <div className="hidden md:flex">
+          <AppSidebar bots={bots} userEmail={user.email ?? ''} />
+        </div>
+        <MobileTopBar />
+        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto bg-background pb-20 md:m-3 md:rounded-2xl md:pb-0 md:shadow-sm">
+          {children}
+        </main>
+        <MobileTabBar inboxCount={inboxTotal} />
       </div>
-      <MobileTopBar />
-      <main className="min-h-0 min-w-0 flex-1 overflow-y-auto bg-background pb-20 md:m-3 md:rounded-2xl md:pb-0 md:shadow-sm">
-        {children}
-      </main>
-      <MobileTabBar inboxCount={inboxTotal} />
+      {/* OUTSIDE the isolate stacking context: the widget preview portals to
+          document.body (z-45), which out-stacks anything inside the layout —
+          toasts must live at the same body level to render above it. */}
       <Toaster />
-    </div>
+    </>
   )
 }

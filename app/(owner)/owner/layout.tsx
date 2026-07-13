@@ -19,13 +19,18 @@ export default async function OwnerLayout({
 
   // Same shell as the client app: dark mesh with a white rounded content card.
   return (
-    <div className="relative isolate flex h-svh overflow-hidden bg-sidebar-mesh">
-      <div className="shell-grid pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-[42vh]" aria-hidden="true" />
-      <OwnerSidebar userEmail={user.email ?? ''} openBugs={openBugs ?? 0} />
-      <main className="flex-1 min-h-0 min-w-0 m-3 overflow-y-auto rounded-2xl bg-background shadow-sm">
-        {children}
-      </main>
+    <>
+      <div className="relative isolate flex h-svh overflow-hidden bg-sidebar-mesh">
+        <div className="shell-grid pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-[42vh]" aria-hidden="true" />
+        <OwnerSidebar userEmail={user.email ?? ''} openBugs={openBugs ?? 0} />
+        <main className="flex-1 min-h-0 min-w-0 m-3 overflow-y-auto rounded-2xl bg-background shadow-sm">
+          {children}
+        </main>
+      </div>
+      {/* OUTSIDE the isolate stacking context: the widget preview portals to
+          document.body (z-45), which out-stacks anything inside the layout —
+          toasts must live at the same body level to render above it. */}
       <Toaster />
-    </div>
+    </>
   )
 }

@@ -75,3 +75,15 @@ See also [plans-and-entitlements](plans-and-entitlements.md) for how
 `voice_addon` fits into the broader entitlements model.
 
 _Last verified: 2026-07-08 (66f6bb8)._
+
+## ASR language drift (LT → LV)
+
+Scribe realtime's per-utterance language detection sometimes transcribes short
+or filler-heavy Lithuanian as Latvian. There is NO hard pin: `asr.language` is
+silently dropped by the agents API (probed 2026-07-13), `agent.language` +
+the per-session override already say `lt`, and the `language_detection` system
+tool is opt-in (we don't enable it — output language can't switch on its own).
+The one working lever is `asr.keywords`: `buildAgentConfig` seeds ~20 Lithuanian
+conversation/commerce anchors + the bot's display name for every lt-enabled bot
+(hash `v28-lt-asr-keywords`). Biasing, not a guarantee — expect improvement,
+not elimination.

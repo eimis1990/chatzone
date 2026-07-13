@@ -49,6 +49,7 @@ export interface AgentConfig {
       supported_voices: SupportedVoice[]
     }
     language_presets: Record<string, { overrides: { agent: { first_message: string } } }>
+    asr?: { keywords: string[] }
   }
   // Allow the client SDK to set the conversation language AND the TTS voice at
   // session start, so a visitor who picked Lithuanian starts the call in
@@ -149,6 +150,25 @@ export function buildAgentConfig(bot: Bot, toolIds: string[] = []): AgentConfig 
     })
   }
 
+  // ASR keyword biasing: Scribe's per-utterance language detection sometimes
+  // drifts Lithuanian to Latvian on short/filler-heavy speech (there is no
+  // hard asr-language pin — the API silently drops asr.language). Seeding
+  // common Lithuanian conversation + commerce vocabulary and the bot's own
+  // name biases transcription toward the expected language.
+  const asrKeywords = languages.includes('lt')
+    ? [
+        ...new Set(
+          [
+            'laba diena', 'labas', 'ačiū', 'prašau', 'taip', 'ne',
+            'kaina', 'kainuoja', 'prekė', 'prekės', 'užsakymas', 'pristatymas',
+            'grąžinimas', 'dovana', 'nuolaida', 'krepšelis', 'dydis', 'turite',
+            'ieškau', 'papasakok',
+            ...(cfg.displayName?.trim() ? [cfg.displayName.trim()] : []),
+          ],
+        ),
+      ]
+    : undefined
+
   return {
     // Human-readable name so agents are findable in the ElevenLabs dashboard,
     // with the bot id appended for an exact match.
@@ -172,6 +192,7 @@ export function buildAgentConfig(bot: Bot, toolIds: string[] = []): AgentConfig 
         supported_voices: supportedVoices,
       },
       language_presets: languagePresets,
+      ...(asrKeywords ? { asr: { keywords: asrKeywords } } : {}),
     },
     platform_settings: {
       overrides: { conversation_config_override: { agent: { language: true }, tts: { voice_id: true } } },
@@ -183,7 +204,7 @@ export function buildAgentConfig(bot: Bot, toolIds: string[] = []): AgentConfig 
 export function agentConfigHash(bot: Bot, toolIds: string[] = []): string {
   const cfg = bot.config
   const material = JSON.stringify([
-    'v27-details-mandatory', // bump to force re-sync when the agent payload shape changes
+    'v28-lt-asr-keywords', // bump to force re-sync when the agent payload shape changes
     cfg.displayName, // agent name follows the bot's display name
     cfg.languages,
     cfg.defaultLanguage ?? null,
