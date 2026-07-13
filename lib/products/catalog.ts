@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto'
-import { storeOrigin, decodeEntities } from '@/lib/commerce/woocommerce'
+import { storeOrigin, decodeEntities, STOREFRONT_HEADERS } from '@/lib/commerce/woocommerce'
 import { shopifyDomain } from '@/lib/commerce/shopify'
 import { magentoBase } from '@/lib/commerce/magento'
 
@@ -61,12 +61,12 @@ export async function fetchWooCatalog(
   const seen = new Set<string>()
   for (let page = 1; out.length < MAX_PRODUCTS; page++) {
     const url = `${base}/wp-json/wc/store/v1/products?per_page=${PER_PAGE}&page=${page}&orderby=popularity&order=desc`
-    let res = await fetchImpl(url)
+    let res = await fetchImpl(url, { headers: STOREFRONT_HEADERS })
     if (!res.ok) {
       // One transient 5xx/429 mid-pagination used to silently truncate the whole
       // index (e.g. 1,600 of 2,582 products) — retry once before giving up.
       await new Promise((r) => setTimeout(r, 750))
-      res = await fetchImpl(url)
+      res = await fetchImpl(url, { headers: STOREFRONT_HEADERS })
     }
     if (!res.ok) break
     const rows = (await res.json()) as WooCatalogItem[]

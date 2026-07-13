@@ -4,7 +4,7 @@ import type { CommerceProduct } from '@/lib/commerce/types'
 import type { Audience } from './catalog'
 import { embedOne } from '@/lib/ai/embeddings'
 import { searchStore } from '@/lib/commerce'
-import { storeOrigin, normalizeWooProduct } from '@/lib/commerce/woocommerce'
+import { storeOrigin, normalizeWooProduct, STOREFRONT_HEADERS } from '@/lib/commerce/woocommerce'
 import { fetchShopifyProductsByIds } from '@/lib/commerce/shopify'
 import { fetchMagentoProductsBySkus } from '@/lib/commerce/magento'
 
@@ -40,6 +40,7 @@ async function hydrateWoo(storeUrl: string, ids: string[]): Promise<Map<string, 
   const base = storeOrigin(storeUrl)
   const res = await fetch(
     `${base}/wp-json/wc/store/v1/products?include=${ids.join(',')}&per_page=${ids.length}`,
+    { headers: STOREFRONT_HEADERS },
   )
   if (!res.ok) return map
   const rows = (await res.json()) as Parameters<typeof normalizeWooProduct>[0][]

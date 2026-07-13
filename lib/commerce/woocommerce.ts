@@ -85,6 +85,20 @@ export function normalizeWooProduct(p: WooProduct): CommerceProduct {
   }
 }
 
+/**
+ * Browser-like headers for public storefront requests. Some stores sit behind
+ * Cloudflare bot rules that score headerless serverless fetches as bots (e.g.
+ * dropslietuva.com blocked Vercel egress while curl from a residential IP
+ * passed). Not a guarantee against IP-reputation blocks, but it removes the
+ * cheap-to-fix signal.
+ */
+export const STOREFRONT_HEADERS: Record<string, string> = {
+  'User-Agent':
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
+  Accept: 'application/json',
+  'Accept-Language': 'lt,en;q=0.8',
+}
+
 /** Normalize a store base URL (strip trailing slash + any path). */
 export function storeOrigin(storeUrl: string): string {
   try {
@@ -116,7 +130,9 @@ export async function searchWooProducts(
     const p = new URLSearchParams(qs)
     if (search) p.set('search', search)
     else p.delete('search')
-    const res = await fetchImpl(`${base}/wp-json/wc/store/v1/products?${p.toString()}`)
+    const res = await fetchImpl(`${base}/wp-json/wc/store/v1/products?${p.toString()}`, {
+      headers: STOREFRONT_HEADERS,
+    })
     if (!res.ok) throw new Error(`WooCommerce search failed: HTTP ${res.status}`)
     return (await res.json()) as WooProduct[]
   }
@@ -144,6 +160,7 @@ export async function fetchWooProductDetails(
   const base = storeOrigin(storeUrl)
   const res = await fetchImpl(
     `${base}/wp-json/wc/store/v1/products?include=${ids.join(',')}&per_page=${ids.length}`,
+    { headers: STOREFRONT_HEADERS },
   )
   if (!res.ok) throw new Error(`WooCommerce details failed: HTTP ${res.status}`)
   const rows = (await res.json()) as WooProduct[]
@@ -289,7 +306,9 @@ export async function validateWooStore(
 ): Promise<{ ok: boolean; total: number }> {
   const fetchImpl = deps.fetchImpl ?? fetch
   try {
-    const res = await fetchImpl(`${storeOrigin(storeUrl)}/wp-json/wc/store/v1/products?per_page=1`)
+    const res = await fetchImpl(`${storeOrigin(storeUrl)}/wp-json/wc/store/v1/products?per_page=1`, {
+      headers: STOREFRONT_HEADERS,
+    })
     if (!res.ok) return { ok: false, total: 0 }
     const data = await res.json()
     if (!Array.isArray(data)) return { ok: false, total: 0 }
