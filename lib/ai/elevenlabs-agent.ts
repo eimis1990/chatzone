@@ -181,7 +181,7 @@ export function buildAgentConfig(bot: Bot, toolIds: string[] = []): AgentConfig 
 export function agentConfigHash(bot: Bot, toolIds: string[] = []): string {
   const cfg = bot.config
   const material = JSON.stringify([
-    'v25-brand-verbatim-search', // bump to force re-sync when the agent payload shape changes
+    'v26-tools-expect-response', // bump to force re-sync when the agent payload shape changes
     cfg.displayName, // agent name follows the bot's display name
     cfg.languages,
     cfg.defaultLanguage ?? null,
@@ -259,6 +259,9 @@ function buildSearchToolConfig() {
       'names who it is for (a gift/product "for men", "for women", "for a child"), ALSO set `audience` ' +
       'so the results only include items that suit that person. When the user names a specific ' +
       'BRAND or PRODUCT NAME, pass that name verbatim instead of a category.',
+    // Without this the LLM only hears "Tool called successfully" and never the
+    // result summary — it could show cards but not KNOW what products it found.
+    expects_response: true,
     parameters: {
       type: 'object' as const,
       properties: {
@@ -286,6 +289,7 @@ function buildOrderToolConfig() {
       'Look up the status of an existing order and show it on screen. Call this ONLY after you have ' +
       'BOTH the order number AND the email used on the order — ask the user for whatever is missing ' +
       'first, and never guess.',
+    expects_response: true,
     parameters: {
       type: 'object' as const,
       properties: {
@@ -303,6 +307,7 @@ function buildDiscountToolConfig() {
     type: 'client' as const,
     name: 'discount_code',
     description: 'Provide the store discount/promo code when the user asks for a discount, coupon, or deal.',
+    expects_response: true,
     parameters: { type: 'object' as const, properties: {}, required: [] as string[] },
   }
 }

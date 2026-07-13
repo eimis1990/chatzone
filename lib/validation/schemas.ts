@@ -139,7 +139,7 @@ export const botConfigFormSchema = z.object({
       launcherColor: z.string().optional().or(z.literal('')),
       // Closed-state launcher icon + the icon shown while chat is open.
       launcherIcon: z
-        .enum(['chat', 'message-circle', 'message-dots', 'help', 'sparkles', 'headset', 'send', 'zap', 'smile', 'shopping-bag'])
+        .enum(['chat', 'message-circle', 'message-dots', 'smile-bubble', 'sparkles', 'headset', 'bot', 'zap', 'smile', 'shopping-bag'])
         .default('chat'),
       // Color for the launcher + close icons; empty = auto contrast vs the launcher bg.
       launcherIconColor: z.string().optional().or(z.literal('')),
