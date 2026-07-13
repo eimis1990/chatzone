@@ -19,6 +19,15 @@ Store connectors + product search. Separate from [RAG chunks](rag-and-knowledge.
   `assertPublicUrl` before the real network call (`lib/commerce/index.ts:32-44`).
 - **Testing notes:** crocs.lt & open24.lt block public Magento APIs — test Magento against
   `venia.magento.com` ([gotchas](gotchas.md)).
+- ⚠️ **Some stores block datacenter egress entirely**: dropslietuva.com (Woo behind
+  Cloudflare) accepts the same request from a residential IP but rejects it from
+  Vercel — an IP/ASN-level bot rule, so headers don't help (we send browser-like
+  `STOREFRONT_HEADERS` on all storefront fetches anyway, since that fixes the
+  cheaper header-scoring case). Diagnose by comparing `/api/commerce/validate` on
+  localhost vs production. For such stores the client must add a WAF exception for
+  `/wp-json/wc/store/*` (or disable Bot Fight Mode) — read-only public data. Until
+  then, validate/sync/hydration ALL fail from prod, so a demo bot cannot run
+  against their store from Vercel.
 
 ## Product search (`lib/products/`)
 
