@@ -2899,9 +2899,14 @@ function ThemePresetPicker({
       if (extras?.avatarUrl) {
         setValue('avatarUrl', extras.avatarUrl, { shouldDirty: true, shouldValidate: true })
       }
+      // One sticky toast per theme change: a fixed id makes each new selection
+      // REPLACE the previous toast (no stack of ten while comparing presets),
+      // and Infinity keeps it up until Keep/Revert/× — theme comparison takes
+      // longer than any auto-dismiss.
       toast.success(`${label} applied`, {
+        id: 'theme-preview',
         description: 'Save to make it live — or revert.',
-        duration: 8000,
+        duration: Infinity,
         action: { label: 'Keep', onClick: () => {} },
         cancel: {
           label: 'Revert',
@@ -2910,7 +2915,7 @@ function ThemePresetPicker({
             if (beforeAvatar !== undefined) {
               setValue('avatarUrl', beforeAvatar, { shouldDirty: true, shouldValidate: true })
             }
-            toast.message('Theme reverted')
+            toast.message('Theme reverted', { id: 'theme-preview', duration: 3000 })
           },
         },
       })
