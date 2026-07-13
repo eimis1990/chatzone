@@ -14,6 +14,10 @@ export type LauncherIconKey =
   | 'help'
   | 'sparkles'
   | 'headset'
+  | 'send'
+  | 'zap'
+  | 'smile'
+  | 'shopping-bag'
 
 export type LauncherCloseIconKey = 'x' | 'chevron-down'
 
@@ -43,6 +47,18 @@ export const LAUNCHER_ICONS: Record<LauncherIconKey, string> = {
   headset: stroked(
     '<path d="M3 11h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-5Zm0 0a9 9 0 1 1 18 0m0 0v5a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3Z"/><path d="M21 16v2a4 4 0 0 1-4 4h-5"/>',
   ),
+  send: stroked(
+    '<path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"/><path d="m21.854 2.147-10.94 10.939"/>',
+  ),
+  zap: stroked(
+    '<path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/>',
+  ),
+  smile: stroked(
+    '<circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01"/><path d="M15 9h.01"/>',
+  ),
+  'shopping-bag': stroked(
+    '<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/>',
+  ),
 }
 
 export const LAUNCHER_CLOSE_ICONS: Record<LauncherCloseIconKey, string> = {
@@ -63,4 +79,8 @@ export const LAUNCHER_ICON_LABELS: Record<LauncherIconKey, string> = {
   help: 'Question',
   sparkles: 'Sparkles (AI)',
   headset: 'Support headset',
+  send: 'Paper plane',
+  zap: 'Lightning',
+  smile: 'Smiley',
+  'shopping-bag': 'Shopping bag',
 }

@@ -188,7 +188,7 @@ export interface BotConfig {
     launcherShowLogo?: boolean
     /** Animated pulse rings radiating from the circle launcher (circle style only). */
     launcherPulse?: boolean
-    launcherIcon?: 'chat' | 'message-circle' | 'message-dots' | 'help' | 'sparkles' | 'headset'
+    launcherIcon?: 'chat' | 'message-circle' | 'message-dots' | 'help' | 'sparkles' | 'headset' | 'send' | 'zap' | 'smile' | 'shopping-bag'
     launcherCloseIcon?: 'x' | 'chevron-down'
     launcherBottomSpacing?: number
     launcherSideSpacing?: number

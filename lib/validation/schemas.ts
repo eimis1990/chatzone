@@ -139,12 +139,12 @@ export const botConfigFormSchema = z.object({
       launcherColor: z.string().optional().or(z.literal('')),
       // Closed-state launcher icon + the icon shown while chat is open.
       launcherIcon: z
-        .enum(['chat', 'message-circle', 'message-dots', 'help', 'sparkles', 'headset'])
+        .enum(['chat', 'message-circle', 'message-dots', 'help', 'sparkles', 'headset', 'send', 'zap', 'smile', 'shopping-bag'])
         .default('chat'),
       launcherCloseIcon: z.enum(['x', 'chevron-down']).default('x'),
       // Distance from the viewport edges, in px (side follows `position`).
-      launcherBottomSpacing: z.number().int().min(8).max(120).default(20),
-      launcherSideSpacing: z.number().int().min(8).max(120).default(20),
+      launcherBottomSpacing: z.number().int().min(10).max(50).default(20),
+      launcherSideSpacing: z.number().int().min(10).max(50).default(20),
       showCallButton: z.boolean().default(true),
       // Show the "talk to a person" human-handoff button.
       showHandoffButton: z.boolean().default(true),

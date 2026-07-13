@@ -1291,10 +1291,10 @@ export function ConfigForm({
                 {/* Spacing from the viewport edges; the side follows Position. */}
                 <div className="grid gap-3 sm:grid-cols-2">
                   <SliderField label="Bottom spacing"><Controller control={control} name="theme.launcherBottomSpacing" render={({ field }) => (
-                    <Scrubber size="sm" showLabel={false} label="Bottom spacing" min={8} max={120} step={1} decimals={0} suffix="px" value={field.value ?? 20} onValueChange={field.onChange} />
+                    <Scrubber size="sm" showLabel={false} label="Bottom spacing" min={10} max={50} step={1} decimals={0} suffix="px" value={field.value ?? 20} onValueChange={field.onChange} />
                   )} /></SliderField>
                   <SliderField label={watch('theme.position') === 'bottom-left' ? 'Left spacing' : 'Right spacing'}><Controller control={control} name="theme.launcherSideSpacing" render={({ field }) => (
-                    <Scrubber size="sm" showLabel={false} label="Side spacing" min={8} max={120} step={1} decimals={0} suffix="px" value={field.value ?? 20} onValueChange={field.onChange} />
+                    <Scrubber size="sm" showLabel={false} label="Side spacing" min={10} max={50} step={1} decimals={0} suffix="px" value={field.value ?? 20} onValueChange={field.onChange} />
                   )} /></SliderField>
                 </div>
               </div>
