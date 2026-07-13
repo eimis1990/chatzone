@@ -20,6 +20,18 @@ export default async function ClientsPage() {
   const internalIds = new Set(((platformOrg ?? []) as { id: string }[]).map((o) => o.id))
   const rows = ((orgs ?? []) as ClientCardOrg[]).filter((o) => !internalIds.has(o.org_id))
 
+  // Each card glows in the client's own brand color (their first bot's theme).
+  const { data: brandBots } = await supabase
+    .from('bots')
+    .select('org_id, config')
+    .order('created_at', { ascending: true })
+  const accents = new Map<string, string>()
+  for (const b of brandBots ?? []) {
+    const theme = (b.config as { theme?: { launcherColor?: string; primaryColor?: string } })?.theme
+    const color = theme?.launcherColor || theme?.primaryColor
+    if (color && !accents.has(b.org_id as string)) accents.set(b.org_id as string, color)
+  }
+
   return (
     <div className="space-y-6 p-6">
       <div>
@@ -44,7 +56,7 @@ export default async function ClientsPage() {
         />
 
         {rows.map((org) => (
-          <ClientCard key={org.org_id} org={org} />
+          <ClientCard key={org.org_id} org={org} accent={accents.get(org.org_id)} />
         ))}
       </div>
     </div>

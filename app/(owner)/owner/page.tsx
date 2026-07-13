@@ -71,6 +71,18 @@ export default async function OwnerDashboardPage() {
   const internalIds = new Set((internalOrgs ?? []).map((o: { id: string }) => o.id))
   const orgs = ((recentOrgs ?? []) as OrgStatRow[]).filter((o) => !internalIds.has(o.org_id))
 
+  // Brand accent per client (first bot's theme) for the activity cards.
+  const { data: brandBots } = await supabase
+    .from('bots')
+    .select('org_id, config')
+    .order('created_at', { ascending: true })
+  const accents = new Map<string, string>()
+  for (const b of brandBots ?? []) {
+    const theme = (b.config as { theme?: { launcherColor?: string; primaryColor?: string } })?.theme
+    const color = theme?.launcherColor || theme?.primaryColor
+    if (color && !accents.has(b.org_id as string)) accents.set(b.org_id as string, color)
+  }
+
   return (
     <div className="space-y-8 p-6">
       <div>
@@ -106,7 +118,7 @@ export default async function OwnerDashboardPage() {
         ) : (
           <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
             {orgs.map((org) => (
-              <ClientCard key={org.org_id} org={org} />
+              <ClientCard key={org.org_id} org={org} accent={accents.get(org.org_id)} />
             ))}
           </div>
         )}
