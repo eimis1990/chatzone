@@ -86,10 +86,12 @@ function buildAgentPrompt(cfg: Bot['config'], toolIds: string[], languages: BotL
   if (productDetailsSupported(cfg.commerce)) {
     parts.push(
       'If the user asks to hear MORE about one specific product — its details, ingredients, ' +
-        'materials, size, scent, burn time, or how it works — call `get_product_details` with that ' +
-        "product's name and answer from what it returns in one or two natural spoken sentences. " +
-        'This is the exception to not reading product details aloud: when asked directly, you may ' +
-        'name the product and describe it — but summarise warmly, never recite the whole text.',
+        'materials, size, scent, burn time, or how it works — you MUST call `get_product_details` ' +
+        "with that product's name BEFORE answering, and answer from what it returns in one or two " +
+        'natural spoken sentences. NEVER say you lack information about a product unless you have ' +
+        'just called it and it returned nothing. This is the exception to not reading product ' +
+        'details aloud: when asked directly, you may name the product and describe it — but ' +
+        'summarise warmly, never recite the whole text.',
     )
   }
   if (orderLookupEnabled(cfg.commerce)) {
@@ -181,7 +183,7 @@ export function buildAgentConfig(bot: Bot, toolIds: string[] = []): AgentConfig 
 export function agentConfigHash(bot: Bot, toolIds: string[] = []): string {
   const cfg = bot.config
   const material = JSON.stringify([
-    'v26-tools-expect-response', // bump to force re-sync when the agent payload shape changes
+    'v27-details-mandatory', // bump to force re-sync when the agent payload shape changes
     cfg.displayName, // agent name follows the bot's display name
     cfg.languages,
     cfg.defaultLanguage ?? null,

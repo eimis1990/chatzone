@@ -1,6 +1,6 @@
 import type { BotConfig, BotLanguage, LanguageContent } from '@/lib/types'
 import type { CommerceProduct } from '@/lib/commerce/types'
-import { storeConfigured, orderLookupEnabled } from '@/lib/commerce'
+import { storeConfigured, orderLookupEnabled, productDetailsSupported } from '@/lib/commerce'
 
 export interface ChatMessage {
   role: 'system' | 'user' | 'assistant'
@@ -123,6 +123,16 @@ export function buildSystemPrompt(
         'bullets in your text — the cards already show all of that. For non-product questions, use the ' +
         'context below.',
     )
+
+    if (productDetailsSupported(config.commerce)) {
+      lines.push(
+        'PRODUCT DETAILS: when the shopper asks to hear MORE about one specific product — "tell me ' +
+          'more", "papasakok daugiau", its ingredients, composition, materials, size, or usage — you ' +
+          'MUST call `get_product_details` with that product\'s id BEFORE answering. NEVER say you ' +
+          'lack further information about a product unless you have just called it and it returned ' +
+          'nothing. Summarise the returned description naturally in the conversation language.',
+      )
+    }
 
     lines.push(
       'BUYING & CHECKOUT: you CANNOT place orders, take payment, reserve items, or complete a purchase, ' +

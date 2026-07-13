@@ -130,9 +130,11 @@ export function makeProductTools(
       description:
         'Fetch the FULL live description and attribute list (materials, dimensions, scent, ' +
         'ingredients, care…) for up to 3 products by id — ids come from search results or the ' +
-        'cards currently shown. Use when the shopper asks for depth that the search `details` ' +
-        'does not cover, or for a thorough comparison of specific items. Answer ONLY from what ' +
-        'it returns — never invent specs.',
+        'cards currently shown. Call this WHENEVER the shopper asks to hear more about a specific ' +
+        'product ("tell me more", "papasakok daugiau", ingredients, composition, how to use) or ' +
+        'wants a thorough comparison. NEVER tell the shopper you lack further information about a ' +
+        'product without having called this first. Answer ONLY from what it returns — never ' +
+        'invent specs.',
       inputSchema: z.object({
         productIds: z.array(z.string()).max(3).describe('Up to 3 product ids to look up'),
       }),
