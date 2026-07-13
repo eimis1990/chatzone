@@ -96,3 +96,16 @@ HOME BY NB client org was nearly written off as a "duplicate" of one in the
 caller's own org (the owner cannot delete client bots), `DeleteBotButton`
 renders only in the client app, and the owner bot editor banner names the
 client org. Client bots must NEVER be deleted by tooling.
+
+## Anti-bot interstitials index as "knowledge"
+
+Cloudflare challenge pages return HTTP 200 with clean-looking text, so Jina
+Reader (datacenter IPs — gets challenged even when the owner's machine passes)
+hands the pipeline "Performing security verification… Ray ID: …" and it lands
+in `document_chunks` as a Ready source (all 18 dropslietuva.com pages, 2026-07-13).
+`looksLikeBotChallenge` (lib/ingestion/parse.ts) now rejects challenge output —
+two-signal heuristic (Cloudflare stamp AND challenge phrase) so real pages that
+merely mention Cloudflare don't trip it. Jina-challenged → fall back to direct
+fetch; direct also challenged → the source errors with a clear message instead
+of indexing garbage. When auditing old bots, grep chunks for "Performing
+security verification".

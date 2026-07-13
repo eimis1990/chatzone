@@ -32,6 +32,8 @@ const Toaster = ({ ...props }: ToasterProps) => {
       }}
       style={
         {
+          // Above the widget preview/launcher (which pin themselves to max z).
+          zIndex: 2147483647,
           "--normal-bg": "var(--popover)",
           "--normal-text": "var(--popover-foreground)",
           "--normal-border": "var(--border)",

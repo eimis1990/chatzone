@@ -67,6 +67,20 @@ export async function parseFile(buffer: Buffer, mime: string): Promise<string> {
   throw new Error(`Unsupported file type: ${mime}`)
 }
 
+/**
+ * Anti-bot interstitials (Cloudflare & co) come back as HTTP 200 with perfectly
+ * parseable text — without this check they get INDEXED as knowledge ("Performing
+ * security verification… Ray ID: …" chunks, seen with dropslietuva.com). Two
+ * signals required so a real page that merely mentions Cloudflare never trips it.
+ */
+export function looksLikeBotChallenge(text: string): boolean {
+  const t = text.slice(0, 4000)
+  const stamp = /Ray ID:|Performance and Security by Cloudflare|cf-ray/i.test(t)
+  const phrase =
+    /security verification|verify you are (not a bot|human)|Just a moment|Enable JavaScript and cookies|Checking your browser/i.test(t)
+  return stamp && phrase
+}
+
 /** Fetches a URL and extracts its readable text. `fetchImpl` is injectable for tests. */
 export async function parseUrl(url: string, fetchImpl: typeof fetch = fetch): Promise<string> {
   // Real-network path only (tests inject a mock fetch and get the direct path).
@@ -74,13 +88,23 @@ export async function parseUrl(url: string, fetchImpl: typeof fetch = fetch): Pr
     const { assertPublicUrl } = await import('@/lib/net/ssrf')
     await assertPublicUrl(url)
     // Prefer Jina Reader: it renders JS and returns clean Markdown, so JS-heavy
-    // sites yield real content. Falls through to a direct fetch if unavailable.
+    // sites yield real content. Falls through to a direct fetch if unavailable —
+    // or if the site's bot protection served Jina an interstitial instead of
+    // the page (Jina crawls from datacenter IPs; a direct fetch from this
+    // server may still pass).
     const { readerMarkdown } = await import('@/lib/ingestion/jina-reader')
     const md = await readerMarkdown(url)
-    if (md) return md
+    if (md && !looksLikeBotChallenge(md)) return md
   }
   const res = await fetchImpl(url)
   if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`)
   const html = await res.text()
-  return await extractReadableText(html, url)
+  const text = await extractReadableText(html, url)
+  if (looksLikeBotChallenge(text)) {
+    throw new Error(
+      "The site's bot protection (Cloudflare) blocked indexing. Ask the site owner to allow " +
+        'automated access — see the Cloudflare note on the Demos screen.',
+    )
+  }
+  return text
 }
