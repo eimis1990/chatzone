@@ -37,6 +37,10 @@ export const PRESET_PRESERVED_THEME_KEYS = [
 
 // Shared functional defaults — presets only vary the visual fields.
 const base = {
+  launcherIcon: 'chat' as const,
+  launcherCloseIcon: 'x' as const,
+  launcherBottomSpacing: 20,
+  launcherSideSpacing: 20,
   position: 'bottom-right',
   launcherStyle: 'circle',
   launcherShowLogo: false,

@@ -15,6 +15,13 @@ import {
 } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { formatDistanceToNow } from '@/lib/date-utils'
+import {
+  LAUNCHER_ICONS,
+  LAUNCHER_CLOSE_ICONS,
+  LAUNCHER_ICON_LABELS,
+  type LauncherIconKey,
+  type LauncherCloseIconKey,
+} from '@/lib/launcher-icons'
 import { toast } from 'sonner'
 import {
   PlusIcon,
@@ -1214,6 +1221,81 @@ export function ConfigForm({
                       <Switch aria-label="Pulse effect" checked={field.value ?? false} onCheckedChange={field.onChange} disabled={watch('theme.launcherStyle') === 'pill'} />
                     )} />
                   </CompactToggle>
+                </div>
+
+                {/* Closed-state icon — rendered exactly as the live launcher will. */}
+                <div className="flex flex-col gap-1.5">
+                  <Label>Icon</Label>
+                  <Controller name="theme.launcherIcon" control={control} render={({ field }) => {
+                    const launcherBg = watch('theme.launcherColor') || watch('theme.primaryColor') || '#4f46e5'
+                    return (
+                      <div className="flex flex-wrap items-center gap-2">
+                        {(Object.keys(LAUNCHER_ICONS) as LauncherIconKey[]).map((key) => {
+                          const selected = (field.value ?? 'chat') === key
+                          return (
+                            <button
+                              key={key}
+                              type="button"
+                              title={LAUNCHER_ICON_LABELS[key]}
+                              aria-label={LAUNCHER_ICON_LABELS[key]}
+                              aria-pressed={selected}
+                              onClick={() => field.onChange(key)}
+                              className={`flex size-11 items-center justify-center rounded-full text-white transition-all [&_svg]:size-[22px] ${
+                                selected
+                                  ? 'ring-2 ring-primary ring-offset-2 scale-105'
+                                  : 'opacity-60 hover:opacity-100'
+                              }`}
+                              style={{ backgroundColor: launcherBg }}
+                              dangerouslySetInnerHTML={{ __html: LAUNCHER_ICONS[key] }}
+                            />
+                          )
+                        })}
+                      </div>
+                    )
+                  }} />
+                </div>
+
+                {/* Icon shown on the launcher while the chat window is open. */}
+                <div className="flex flex-col gap-1.5">
+                  <Label>Close icon</Label>
+                  <Controller name="theme.launcherCloseIcon" control={control} render={({ field }) => {
+                    const launcherBg = watch('theme.launcherColor') || watch('theme.primaryColor') || '#4f46e5'
+                    const labels: Record<LauncherCloseIconKey, string> = { x: 'X', 'chevron-down': 'Arrow down' }
+                    return (
+                      <div className="flex items-center gap-2">
+                        {(Object.keys(LAUNCHER_CLOSE_ICONS) as LauncherCloseIconKey[]).map((key) => {
+                          const selected = (field.value ?? 'x') === key
+                          return (
+                            <button
+                              key={key}
+                              type="button"
+                              title={labels[key]}
+                              aria-label={`Close icon: ${labels[key]}`}
+                              aria-pressed={selected}
+                              onClick={() => field.onChange(key)}
+                              className={`flex size-11 items-center justify-center rounded-full text-white transition-all [&_svg]:size-[22px] ${
+                                selected
+                                  ? 'ring-2 ring-primary ring-offset-2 scale-105'
+                                  : 'opacity-60 hover:opacity-100'
+                              }`}
+                              style={{ backgroundColor: launcherBg }}
+                              dangerouslySetInnerHTML={{ __html: LAUNCHER_CLOSE_ICONS[key] }}
+                            />
+                          )
+                        })}
+                      </div>
+                    )
+                  }} />
+                </div>
+
+                {/* Spacing from the viewport edges; the side follows Position. */}
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <SliderField label="Bottom spacing"><Controller control={control} name="theme.launcherBottomSpacing" render={({ field }) => (
+                    <Scrubber size="sm" showLabel={false} label="Bottom spacing" min={8} max={120} step={1} decimals={0} suffix="px" value={field.value ?? 20} onValueChange={field.onChange} />
+                  )} /></SliderField>
+                  <SliderField label={watch('theme.position') === 'bottom-left' ? 'Left spacing' : 'Right spacing'}><Controller control={control} name="theme.launcherSideSpacing" render={({ field }) => (
+                    <Scrubber size="sm" showLabel={false} label="Side spacing" min={8} max={120} step={1} decimals={0} suffix="px" value={field.value ?? 20} onValueChange={field.onChange} />
+                  )} /></SliderField>
                 </div>
               </div>
             </SettingsGroup>

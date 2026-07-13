@@ -188,6 +188,10 @@ export interface BotConfig {
     launcherShowLogo?: boolean
     /** Animated pulse rings radiating from the circle launcher (circle style only). */
     launcherPulse?: boolean
+    launcherIcon?: 'chat' | 'message-circle' | 'message-dots' | 'help' | 'sparkles' | 'headset'
+    launcherCloseIcon?: 'x' | 'chevron-down'
+    launcherBottomSpacing?: number
+    launcherSideSpacing?: number
     /** Launcher background color; falls back to primaryColor when unset. */
     launcherColor?: string
     /** Show the "talk with agent" voice call button in the header (when voice on). */

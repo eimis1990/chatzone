@@ -137,6 +137,14 @@ export const botConfigFormSchema = z.object({
       // Animated pulse rings radiating from the circle launcher (circle style only).
       launcherPulse: z.boolean().default(false),
       launcherColor: z.string().optional().or(z.literal('')),
+      // Closed-state launcher icon + the icon shown while chat is open.
+      launcherIcon: z
+        .enum(['chat', 'message-circle', 'message-dots', 'help', 'sparkles', 'headset'])
+        .default('chat'),
+      launcherCloseIcon: z.enum(['x', 'chevron-down']).default('x'),
+      // Distance from the viewport edges, in px (side follows `position`).
+      launcherBottomSpacing: z.number().int().min(8).max(120).default(20),
+      launcherSideSpacing: z.number().int().min(8).max(120).default(20),
       showCallButton: z.boolean().default(true),
       // Show the "talk to a person" human-handoff button.
       showHandoffButton: z.boolean().default(true),
@@ -173,6 +181,10 @@ export const botConfigFormSchema = z.object({
       launcherStyle: 'circle',
       launcherShowLogo: false,
       launcherPulse: false,
+      launcherIcon: 'chat',
+      launcherCloseIcon: 'x',
+      launcherBottomSpacing: 20,
+      launcherSideSpacing: 20,
       showCallButton: true,
       showHandoffButton: true,
       navButtonRadius: 12,

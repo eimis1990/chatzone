@@ -12,7 +12,8 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
-import { MessageCircleIcon, XIcon } from 'lucide-react'
+import { XIcon } from 'lucide-react'
+import { LAUNCHER_ICONS, LAUNCHER_CLOSE_ICONS } from '@/lib/launcher-icons'
 import { ChatWindow } from '@/components/widget/ChatWindow'
 import { DEFAULT_CHAT_MODEL, DEFAULT_TEMPERATURE } from '@/lib/ai/chat-models'
 import { detectHandoffIntent, HANDOFF_ACK } from '@/lib/handoff'
@@ -114,6 +115,17 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
   const launcherAvatar = config.avatarUrl || config.botAvatarUrl
   const launcherColor = config.theme?.launcherColor || primaryColor
   const launcherStyleCfg = config.theme?.launcherStyle ?? 'circle'
+  const launcherIconSvg =
+    LAUNCHER_ICONS[(config.theme?.launcherIcon as keyof typeof LAUNCHER_ICONS) ?? 'chat'] ?? LAUNCHER_ICONS.chat
+  const closeIconSvg =
+    LAUNCHER_CLOSE_ICONS[(config.theme?.launcherCloseIcon as keyof typeof LAUNCHER_CLOSE_ICONS) ?? 'x'] ??
+    LAUNCHER_CLOSE_ICONS.x
+  // Visualize the configured spacing as a shift away from the pane corner
+  // (the live widget offsets from the viewport edges the same way).
+  const spacingShift = {
+    x: -(((config.theme?.launcherSideSpacing ?? 20) as number) - 20),
+    y: -(((config.theme?.launcherBottomSpacing ?? 20) as number) - 20),
+  }
   const launcherLabel = config.theme?.launcherLabel ?? ''
   const showLauncherLogo = (config.theme?.launcherShowLogo ?? false) && !!launcherAvatar
   const asPill = launcherStyleCfg === 'pill' && !!launcherLabel && !isOpen
@@ -152,7 +164,10 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
   )
 
   return (
-    <div className="relative pointer-events-none select-none">
+    <div
+      className="relative pointer-events-none select-none transition-transform"
+      style={{ transform: `translate(${spacingShift.x}px, ${spacingShift.y}px)` }}
+    >
       {/* Card + chrome, as a column anchored just above the launcher */}
       <AnimatePresence>
         {isOpen && (
@@ -275,7 +290,10 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
           style={{ backgroundColor: launcherColor, color: readableTextColor(launcherColor) }}
         >
           {isOpen ? (
-            <XIcon className="size-6" aria-hidden="true" />
+            <span
+              className="flex items-center justify-center [&_svg]:size-6"
+              dangerouslySetInnerHTML={{ __html: closeIconSvg }}
+            />
           ) : (
             <>
               {showLauncherLogo ? (
@@ -285,7 +303,10 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
                   className={asPill ? 'size-8 rounded-full object-cover' : 'size-full rounded-full object-cover'}
                 />
               ) : (
-                <MessageCircleIcon className="size-7" aria-hidden="true" />
+                <span
+                  className="flex items-center justify-center [&_svg]:size-7"
+                  dangerouslySetInnerHTML={{ __html: launcherIconSvg }}
+                />
               )}
               {asPill && (
                 <span className="whitespace-nowrap text-[15px] font-semibold">{launcherLabel}</span>
