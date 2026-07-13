@@ -220,14 +220,22 @@ function DetailItem({
   value,
   icon: Icon,
   href,
+  copyable,
 }: {
   label: string
   value: string | null | undefined
   icon: typeof Building2Icon
   href?: string
+  /** Show a copy button next to the value. */
+  copyable?: boolean
 }) {
   return (
-    <div className="flex min-w-0 gap-3 rounded-xl bg-muted/50 p-3">
+    <div className="group/detail relative flex min-w-0 gap-3 rounded-xl bg-muted/50 p-3">
+      {copyable && value && (
+        <span className="absolute right-2 top-2">
+          <CopyButton text={value} label={`Copy ${label.toLowerCase()}`} compact />
+        </span>
+      )}
       <Icon className="mt-0.5 size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
       <div className="min-w-0">
         <dt className="text-xs text-muted-foreground">{label}</dt>
@@ -591,8 +599,8 @@ export function SalesLeadsTable({ leads: initialLeads }: { leads: SalesLead[] })
                   <DetailItem label="City" value={openLead.city} icon={MapPinIcon} />
                   <DetailItem label="Decision-maker" value={openLead.ceo} icon={UserRoundIcon} />
                   <DetailItem label="Platform" value={openLead.platform} icon={StoreIcon} />
-                  <DetailItem label="Email" value={openLead.email} icon={MailIcon} />
-                  <DetailItem label="Phone" value={openLead.phone} icon={MessageSquareTextIcon} />
+                  <DetailItem label="Email" value={openLead.email} icon={MailIcon} copyable />
+                  <DetailItem label="Phone" value={openLead.phone} icon={MessageSquareTextIcon} copyable />
                   <DetailItem label="Company size" value={openLead.size_info} icon={UsersIcon} />
                   <DetailItem
                     label="Website"
@@ -640,7 +648,12 @@ export function SalesLeadsTable({ leads: initialLeads }: { leads: SalesLead[] })
                         <MailIcon className="size-4 text-primary" aria-hidden="true" />
                         Prepared email
                       </CardTitle>
-                      <CardDescription>{openLead.email_subject || 'No subject prepared'}</CardDescription>
+                      <CardDescription className="flex items-center gap-1.5">
+                        <span className="min-w-0 truncate">{openLead.email_subject || 'No subject prepared'}</span>
+                        {openLead.email_subject && (
+                          <CopyButton text={openLead.email_subject} label="Copy subject" compact />
+                        )}
+                      </CardDescription>
                       <CardAction><CopyButton text={openLead.email_body} label="Copy email body" /></CardAction>
                     </CardHeader>
                     <CardContent>
