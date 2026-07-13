@@ -18,6 +18,7 @@ import {
   BarChart3Icon,
   TargetIcon,
   type LucideIcon,
+  PresentationIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { SignOutButton } from '@/components/client/SignOutButton'
@@ -35,6 +36,7 @@ interface NavItem {
 const NAV: NavItem[] = [
   { label: 'Dashboard', href: '/owner', icon: LayoutDashboardIcon, exact: true },
   { label: 'Clients', href: '/owner/clients', icon: UsersIcon },
+  { label: 'Demos', href: '/owner/demos', icon: PresentationIcon },
   {
     label: 'Our chatbot',
     href: '/owner/chatbot',

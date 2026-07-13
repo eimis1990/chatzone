@@ -63,13 +63,13 @@ export default async function OwnerDashboardPage() {
     total_messages: 0,
     total_leads: 0,
   }
-  const { data: platformOrg } = await supabase
+  const { data: internalOrgs } = await supabase
     .from('organizations')
     .select('id')
-    .eq('is_platform', true)
-    .maybeSingle<{ id: string }>()
-  // Loqara's own (platform) org isn't a client — exclude it from recent activity.
-  const orgs = ((recentOrgs ?? []) as OrgStatRow[]).filter((o) => o.org_id !== platformOrg?.id)
+    .or('is_platform.eq.true,is_demo.eq.true')
+  // Loqara's own platform org and demo orgs aren't clients — keep them out.
+  const internalIds = new Set((internalOrgs ?? []).map((o: { id: string }) => o.id))
+  const orgs = ((recentOrgs ?? []) as OrgStatRow[]).filter((o) => !internalIds.has(o.org_id))
 
   return (
     <div className="space-y-8 p-6">

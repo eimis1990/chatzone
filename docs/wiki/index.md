@@ -31,7 +31,9 @@ Add a line here. How the wiki works: [README.md](README.md).
 - [linkedin-content](linkedin-content.md) — draggable owner content board,
   ordering persistence, editorial drafts, and branded post visuals.
 - [owner-dashboard](owner-dashboard.md) — platform stat sources, the MRR/earnings
-  card (`computeMrr`), and the demo-data-in-totals gotcha.
+  card (`computeMrr`), and the demo-data-in-totals gotcha. Demo bots live in the
+  `is_demo` "Loqara Demos" org (`/owner/demos`, presented at `/present/[botId]`)
+  and are excluded from `owner_stats` since migration `20260713120000`.
 
 ## Related docs (not in the wiki — linked, not duplicated)
 

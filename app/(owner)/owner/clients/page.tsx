@@ -13,11 +13,12 @@ export default async function ClientsPage() {
       .from('org_stats')
       .select('*')
       .order('last_activity_at', { ascending: false, nullsFirst: false }),
-    supabase.from('organizations').select('id').eq('is_platform', true).maybeSingle<{ id: string }>(),
+    supabase.from('organizations').select('id').or('is_platform.eq.true,is_demo.eq.true'),
   ])
 
-  // Loqara's own (platform) org isn't a client — keep it out of the list.
-  const rows = ((orgs ?? []) as ClientCardOrg[]).filter((o) => o.org_id !== platformOrg?.id)
+  // Loqara's own platform org and demo orgs aren't clients — keep them out.
+  const internalIds = new Set(((platformOrg ?? []) as { id: string }[]).map((o) => o.id))
+  const rows = ((orgs ?? []) as ClientCardOrg[]).filter((o) => !internalIds.has(o.org_id))
 
   return (
     <div className="space-y-6 p-6">
