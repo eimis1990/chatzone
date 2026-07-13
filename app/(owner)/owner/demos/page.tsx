@@ -65,7 +65,7 @@ export default async function OwnerDemosPage() {
                 </CardHeader>
                 <CardContent className="flex gap-2">
                   <Link
-                    href={`/owner/clients/${org.id}/bots/${bot.id}/configure`}
+                    href={`/owner/demos/${bot.id}/configure`}
                     className={buttonVariants({ variant: 'outline', size: 'sm' })}
                   >
                     <SlidersHorizontalIcon data-icon="inline-start" />

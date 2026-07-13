@@ -12,7 +12,8 @@ import { SuspendToggle } from '@/components/owner/SuspendToggle'
 import { ResendInviteButton } from '@/components/owner/ResendInviteButton'
 import { CreateBotDialog } from '@/components/client/CreateBotDialog'
 import { Button } from '@/components/ui/button'
-import { createBotForOrg } from './actions'
+import { redirect } from 'next/navigation'
+import { createBotForOrg, createBotFromDemo } from './actions'
 import { SETUP_PACKAGES } from '@/lib/setup-packages'
 import type { Bot, Invite } from '@/lib/types'
 
@@ -56,6 +57,16 @@ export default async function ClientDetailPage({
     return createBotForOrg(orgId, name)
   }
 
+  // "Create from demo": duplicate a prepared showcase bot (config + knowledge +
+  // product index) into this client's org, then jump straight to its editor.
+  async function createFromDemo(formData: FormData) {
+    'use server'
+    const demoBotId = String(formData.get('demoBotId') ?? '')
+    if (!demoBotId) return
+    const res = await createBotFromDemo(orgId, demoBotId)
+    if (res.id) redirect(`/owner/clients/${orgId}/bots/${res.id}/configure`)
+  }
+
   const supabase = await createServerClient()
 
   // Owner sees all rows via RLS — parallel fetches
@@ -82,6 +93,20 @@ export default async function ClientDetailPage({
         .eq('org_id', orgId)
         .order('created_at', { ascending: false }),
     ])
+
+  // Demo bots available to duplicate into this client (empty → picker hidden).
+  const { data: demoOrg } = await supabase
+    .from('organizations')
+    .select('id')
+    .eq('is_demo', true)
+    .maybeSingle<{ id: string }>()
+  const { data: demoBots } = demoOrg
+    ? await supabase
+        .from('bots')
+        .select('id, name')
+        .eq('org_id', demoOrg.id)
+        .order('name')
+    : { data: [] as { id: string; name: string }[] }
 
   if (!orgStat) notFound()
 
@@ -132,16 +157,41 @@ export default async function ClientDetailPage({
       <div className="space-y-4">
         <div className="flex items-center justify-between gap-4">
           <h2 className="text-lg font-semibold">Bots</h2>
-          <CreateBotDialog
-            orgId={orgId}
-            action={createBot}
-            configureBase={`/owner/clients/${orgId}/bots`}
-            trigger={
-              <Button size="sm" className="bg-primary text-white hover:bg-primary-hover">
-                New bot
-              </Button>
-            }
-          />
+          <div className="flex items-center gap-2">
+            {(demoBots ?? []).length > 0 && (
+              <form action={createFromDemo} className="flex items-center gap-2">
+                <select
+                  name="demoBotId"
+                  required
+                  defaultValue=""
+                  className="h-7 rounded-lg border border-input bg-background px-2 text-[0.8rem]"
+                  aria-label="Demo bot to duplicate"
+                >
+                  <option value="" disabled>
+                    Pick a demo…
+                  </option>
+                  {(demoBots ?? []).map((d) => (
+                    <option key={d.id} value={d.id}>
+                      {d.name}
+                    </option>
+                  ))}
+                </select>
+                <Button type="submit" size="sm" variant="outline">
+                  Create from demo
+                </Button>
+              </form>
+            )}
+            <CreateBotDialog
+              orgId={orgId}
+              action={createBot}
+              configureBase={`/owner/clients/${orgId}/bots`}
+              trigger={
+                <Button size="sm" className="bg-primary text-white hover:bg-primary-hover">
+                  New bot
+                </Button>
+              }
+            />
+          </div>
         </div>
         {botRows.length === 0 ? (
           <div className="rounded-2xl border border-dashed bg-card p-8 text-center">

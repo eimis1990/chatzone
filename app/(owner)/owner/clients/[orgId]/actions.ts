@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { requireRole } from '@/lib/auth/guards'
 import { createServiceClient } from '@/lib/supabase/service'
 import { createBotInOrg } from '@/lib/bots/create'
+import { duplicateDemoBot } from '@/lib/bots/duplicate'
 import { sendEmail, emailEnabled } from '@/lib/email'
 import { clientInviteEmail } from '@/lib/notify'
 import { getEnv } from '@/lib/env'
@@ -101,4 +102,20 @@ export async function resendClientInvite(
 
   revalidatePath(`/owner/clients/${invite.org_id}`)
   return { ok: true, emailed }
+}
+
+/**
+ * Duplicate a fully-configured demo bot into a client's org — config, knowledge
+ * (sources + chunks with embeddings), and the synced product index all come
+ * along, so a pitched demo becomes the client's working bot in one click.
+ * Owner-only; the heavy lifting lives in lib/bots/duplicate.ts.
+ */
+export async function createBotFromDemo(
+  orgId: string,
+  demoBotId: string,
+): Promise<{ id?: string; error?: string }> {
+  await requireRole('owner')
+  const res = await duplicateDemoBot(orgId, demoBotId)
+  if (res.id) revalidatePath(`/owner/clients/${orgId}`)
+  return res
 }

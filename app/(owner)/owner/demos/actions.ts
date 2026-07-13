@@ -22,5 +22,5 @@ export async function createDemoBot(formData: FormData) {
     .single<{ id: string }>()
   if (error || !bot) throw new Error(`Failed to create demo bot: ${error?.message}`)
 
-  redirect(`/owner/clients/${org.id}/bots/${bot.id}/configure`)
+  redirect(`/owner/demos/${bot.id}/configure`)
 }

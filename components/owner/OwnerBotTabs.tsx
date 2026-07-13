@@ -6,9 +6,18 @@ import { SlidersHorizontalIcon, DatabaseIcon, Code2Icon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 /** Configure / Knowledge / Embed tabs for the owner editing a client's bot. */
-export function OwnerBotTabs({ orgId, botId }: { orgId: string; botId: string }) {
+export function OwnerBotTabs({
+  orgId,
+  botId,
+  base: baseProp,
+}: {
+  orgId: string
+  botId: string
+  /** Route base override — the demos editor lives under /owner/demos. */
+  base?: string
+}) {
   const pathname = usePathname()
-  const base = `/owner/clients/${orgId}/bots/${botId}`
+  const base = baseProp ?? `/owner/clients/${orgId}/bots/${botId}`
   const tabs = [
     { label: 'Configure', href: `${base}/configure`, icon: SlidersHorizontalIcon },
     { label: 'Knowledge', href: `${base}/knowledge`, icon: DatabaseIcon },
