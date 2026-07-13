@@ -119,7 +119,10 @@ mismatches. Tool defined in `lib/ai/elevenlabs-agent.ts` with
 when `productDetailsSupported`; agent hash bumped to `v24-product-details` so
 existing agents re-sync on the next call. Widget chain:
 `VoiceCallButton` clientTool → `ChatWindow.handleVoiceProductDetails` →
-`transport.getProductDetailsByName` (the preview transport stubs it).
+`transport.getProductDetailsByName`; the configurator preview has its own authed
+mirror (`/api/preview/details`) — it was initially stubbed, which made preview
+voice calls claim "no details" while the live widget worked (same
+preview-is-a-separate-route trap as card awareness).
 
 ## Card awareness across turns
 

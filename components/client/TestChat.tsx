@@ -371,10 +371,14 @@ function createPreviewTransport(botId: string, getConfig: () => BotConfig): Chat
       return (await res.json()) as { answer: string }
     },
 
-    // Preview has no live-store details endpoint; voice depth questions are a
-    // live-widget concern.
-    async getProductDetailsByName() {
-      return { summary: 'Product details are not available in the preview.' }
+    async getProductDetailsByName(productName) {
+      const res = await fetch('/api/preview/details', {
+        method: 'POST',
+        headers: JSON_HEADERS,
+        body: JSON.stringify({ botId, productName }),
+      })
+      if (!res.ok) return { summary: 'Could not fetch the product details right now.' }
+      return (await res.json()) as { summary: string }
     },
 
     async getVoiceToken(language) {
