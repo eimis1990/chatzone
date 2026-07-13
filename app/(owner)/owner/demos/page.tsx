@@ -7,13 +7,14 @@ import {
   PackageIcon,
   ShieldAlertIcon,
   ChevronDownIcon,
+  ArrowUpRightIcon,
 } from 'lucide-react'
 import { requireRole } from '@/lib/auth/guards'
 import { createServiceClient } from '@/lib/supabase/service'
 import { getOrCreateDemoOrg } from '@/lib/demo-org'
 import { readableTextColor } from '@/lib/utils'
-import { Button, buttonVariants } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { buttonVariants } from '@/components/ui/button'
+import { CreateBotDialog } from '@/components/client/CreateBotDialog'
 import { createDemoBot } from './actions'
 import type { BotConfig } from '@/lib/types'
 
@@ -63,47 +64,26 @@ export default async function OwnerDemosPage() {
         </p>
       </div>
 
-      {/* New demo */}
-      <div className="relative overflow-hidden rounded-2xl border bg-card p-5">
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute -right-12 -top-12 size-36 rounded-full bg-primary opacity-15 blur-3xl"
+      {/* New-demo card first, then the demos — same layout as Clients. */}
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <CreateBotDialog
+          orgId={org.id}
+          action={createDemoBot}
+          configureBase="/owner/demos"
+          trigger={
+            <button
+              type="button"
+              className="group flex h-full min-h-[172px] w-full flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border bg-card/40 text-muted-foreground transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <span className="flex size-11 items-center justify-center rounded-lg border border-dashed border-current">
+                <PlusIcon className="size-5" aria-hidden="true" />
+              </span>
+              <span className="text-sm font-medium">New demo</span>
+              <span className="text-xs">Usually the prospect&rsquo;s store name</span>
+            </button>
+          }
         />
-        <div className="relative flex flex-wrap items-center gap-x-8 gap-y-4">
-          <div className="min-w-56">
-            <p className="text-sm font-semibold">New demo</p>
-            <p className="text-xs text-muted-foreground">Usually the prospect&rsquo;s store name.</p>
-          </div>
-          <form action={createDemoBot} className="flex min-w-0 flex-1 gap-2">
-            <Input
-              name="name"
-              placeholder="e.g. The House of DROPS"
-              required
-              maxLength={60}
-              className="max-w-sm bg-background"
-            />
-            <Button type="submit">
-              <PlusIcon data-icon="inline-start" />
-              Create
-            </Button>
-          </form>
-        </div>
-      </div>
-
-      {/* Demo cards */}
-      {(bots ?? []).length === 0 ? (
-        <div className="rounded-2xl border border-dashed bg-card p-10 text-center">
-          <span className="mx-auto mb-3 flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
-            <PresentationIcon className="size-5" />
-          </span>
-          <p className="text-sm font-medium">No demo bots yet</p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Create one above and style it to the prospect&rsquo;s brand.
-          </p>
-        </div>
-      ) : (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {(bots ?? []).map((bot) => {
+        {(bots ?? []).map((bot) => {
             const cfg = bot.config as BotConfig
             const brand = cfg?.theme?.launcherColor || cfg?.theme?.primaryColor || '#4f46e5'
             const avatar = cfg?.avatarUrl
@@ -118,13 +98,23 @@ export default async function OwnerDemosPage() {
                 key={bot.id}
                 className="group relative overflow-hidden rounded-2xl border bg-card p-5 transition-shadow hover:shadow-md"
               >
+                {/* Whole card opens the editor; buttons sit above the overlay. */}
+                <Link
+                  href={`/owner/demos/${bot.id}/configure`}
+                  aria-label={`Open ${bot.name}`}
+                  className="absolute inset-0 z-0"
+                />
                 {/* Brand-colored glow so each card carries the prospect's look. */}
                 <div
                   aria-hidden="true"
                   className="pointer-events-none absolute -right-10 -top-10 size-28 rounded-full opacity-20 blur-2xl transition-opacity group-hover:opacity-35"
                   style={{ backgroundColor: brand }}
                 />
-                <div className="relative flex items-start gap-3">
+                <ArrowUpRightIcon
+                  aria-hidden="true"
+                  className="pointer-events-none absolute right-4 top-4 z-10 size-4 -translate-x-1 translate-y-1 text-gray-700 opacity-0 transition-all duration-200 group-hover:translate-x-0 group-hover:translate-y-0 group-hover:opacity-100"
+                />
+                <div className="pointer-events-none relative z-10 flex items-start gap-3">
                   {avatar ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
@@ -149,7 +139,7 @@ export default async function OwnerDemosPage() {
                   </div>
                 </div>
 
-                <div className="relative mt-4 flex items-center gap-2 text-xs text-muted-foreground">
+                <div className="pointer-events-none relative z-10 mt-4 text-xs text-muted-foreground">
                   <span
                     className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-medium ${
                       indexed > 0 ? 'bg-green-100 text-green-700' : 'bg-muted'
@@ -158,13 +148,12 @@ export default async function OwnerDemosPage() {
                     <PackageIcon className="size-3" aria-hidden="true" />
                     {indexed > 0 ? `${indexed.toLocaleString()} products indexed` : 'Catalog not synced'}
                   </span>
-                  <span className="ml-auto">Created {created}</span>
                 </div>
 
-                <div className="relative mt-4 flex gap-2">
+                <div className="relative z-10 mt-4 flex items-end gap-2">
                   <Link
                     href={`/owner/demos/${bot.id}/configure`}
-                    className={buttonVariants({ variant: 'outline', size: 'sm' })}
+                    className={buttonVariants({ variant: 'outline', size: 'lg' })}
                   >
                     <SlidersHorizontalIcon data-icon="inline-start" />
                     Configure
@@ -172,17 +161,19 @@ export default async function OwnerDemosPage() {
                   <Link
                     href={`/present/${bot.id}`}
                     target="_blank"
-                    className={buttonVariants({ size: 'sm' })}
+                    className={buttonVariants({ size: 'lg' })}
                   >
                     <PresentationIcon data-icon="inline-start" />
                     Present
                   </Link>
+                  <span className="ml-auto pb-0.5 text-xs text-muted-foreground">
+                    Created {created}
+                  </span>
                 </div>
               </div>
             )
           })}
-        </div>
-      )}
+      </div>
 
       {/* Field reference: stores that block our servers (keep — pitch-call material). */}
       <details className="group rounded-2xl border bg-card">
