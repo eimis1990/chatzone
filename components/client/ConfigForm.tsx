@@ -94,7 +94,7 @@ import {
   WIDGET_THEME_PRESETS,
   PRESET_PRESERVED_THEME_KEYS,
 } from '@/lib/widget-theme-presets'
-import { cn } from '@/lib/utils'
+import { cn, readableTextColor } from '@/lib/utils'
 import { normalizeLanguageSelection } from '@/lib/validation/normalize-languages'
 import { SUPPORTED_LANGUAGES, languageMeta } from '@/lib/i18n/languages'
 
@@ -1228,6 +1228,8 @@ export function ConfigForm({
                   <Label>Icon</Label>
                   <Controller name="theme.launcherIcon" control={control} render={({ field }) => {
                     const launcherBg = watch('theme.launcherColor') || watch('theme.primaryColor') || '#4f46e5'
+                    // White icons vanish on a white launcher — contrast like the live widget.
+                    const iconColor = watch('theme.launcherIconColor') || readableTextColor(launcherBg)
                     return (
                       <div className="flex flex-wrap items-center gap-2">
                         {(Object.keys(LAUNCHER_ICONS) as LauncherIconKey[]).map((key) => {
@@ -1240,12 +1242,12 @@ export function ConfigForm({
                               aria-label={LAUNCHER_ICON_LABELS[key]}
                               aria-pressed={selected}
                               onClick={() => field.onChange(key)}
-                              className={`flex size-11 items-center justify-center rounded-full text-white transition-all [&_svg]:size-[22px] ${
+                              className={`flex size-11 items-center justify-center rounded-full border transition-all [&_svg]:size-[22px] ${
                                 selected
                                   ? 'ring-2 ring-primary ring-offset-2 scale-105'
                                   : 'opacity-60 hover:opacity-100'
                               }`}
-                              style={{ backgroundColor: launcherBg }}
+                              style={{ backgroundColor: launcherBg, color: iconColor }}
                               dangerouslySetInnerHTML={{ __html: LAUNCHER_ICONS[key] }}
                             />
                           )
@@ -1260,6 +1262,7 @@ export function ConfigForm({
                   <Label>Close icon</Label>
                   <Controller name="theme.launcherCloseIcon" control={control} render={({ field }) => {
                     const launcherBg = watch('theme.launcherColor') || watch('theme.primaryColor') || '#4f46e5'
+                    const iconColor = watch('theme.launcherIconColor') || readableTextColor(launcherBg)
                     const labels: Record<LauncherCloseIconKey, string> = { x: 'X', 'chevron-down': 'Arrow down' }
                     return (
                       <div className="flex items-center gap-2">
@@ -1273,12 +1276,12 @@ export function ConfigForm({
                               aria-label={`Close icon: ${labels[key]}`}
                               aria-pressed={selected}
                               onClick={() => field.onChange(key)}
-                              className={`flex size-11 items-center justify-center rounded-full text-white transition-all [&_svg]:size-[22px] ${
+                              className={`flex size-11 items-center justify-center rounded-full border transition-all [&_svg]:size-[22px] ${
                                 selected
                                   ? 'ring-2 ring-primary ring-offset-2 scale-105'
                                   : 'opacity-60 hover:opacity-100'
                               }`}
-                              style={{ backgroundColor: launcherBg }}
+                              style={{ backgroundColor: launcherBg, color: iconColor }}
                               dangerouslySetInnerHTML={{ __html: LAUNCHER_CLOSE_ICONS[key] }}
                             />
                           )
@@ -1287,6 +1290,8 @@ export function ConfigForm({
                     )
                   }} />
                 </div>
+
+                <ColorField control={control} name="theme.launcherIconColor" label="Icon color" swatchDefault="#ffffff" defaultLabel="Auto contrast" description="Applies to both icons" />
 
                 {/* Spacing from the viewport edges; the side follows Position. */}
                 <div className="grid gap-3 sm:grid-cols-2">

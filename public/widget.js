@@ -582,7 +582,7 @@
     var theme = (config && config.theme) || {}
     var pc = theme.launcherColor || theme.primaryColor || '#6366f1'
     launcher.style.backgroundColor = pc
-    launcher.style.color = readable(pc)
+    launcher.style.color = theme.launcherIconColor || readable(pc)
 
     // Configured spacing (applies to the launcher, its pulse rings, and the
     // greeting bubble; sizeWidget() positions the panel itself).

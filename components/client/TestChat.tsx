@@ -287,7 +287,10 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
           className={`relative flex h-14 items-center justify-center gap-2 shadow-lg transition-transform hover:scale-105 active:scale-95 ${
             asPill ? 'rounded-full px-5' : 'w-14 overflow-hidden rounded-full'
           } ${pulseDemo ? 'motion-safe:animate-[cbzBreatheOnce_0.9s_ease-in-out_1_both]' : ''}`}
-          style={{ backgroundColor: launcherColor, color: readableTextColor(launcherColor) }}
+          style={{
+            backgroundColor: launcherColor,
+            color: config.theme?.launcherIconColor || readableTextColor(launcherColor),
+          }}
         >
           {isOpen ? (
             <span

@@ -141,6 +141,8 @@ export const botConfigFormSchema = z.object({
       launcherIcon: z
         .enum(['chat', 'message-circle', 'message-dots', 'help', 'sparkles', 'headset', 'send', 'zap', 'smile', 'shopping-bag'])
         .default('chat'),
+      // Color for the launcher + close icons; empty = auto contrast vs the launcher bg.
+      launcherIconColor: z.string().optional().or(z.literal('')),
       launcherCloseIcon: z.enum(['x', 'chevron-down']).default('x'),
       // Distance from the viewport edges, in px (side follows `position`).
       launcherBottomSpacing: z.number().int().min(10).max(50).default(20),

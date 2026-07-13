@@ -74,6 +74,7 @@ export interface PublicBotConfig {
     launcherColor?: string
     launcherIcon?: string
     launcherCloseIcon?: string
+    launcherIconColor?: string
     launcherBottomSpacing?: number
     launcherSideSpacing?: number
     showCallButton?: boolean
@@ -179,6 +180,7 @@ export function publicBotConfig(
       launcherPulse: config.theme.launcherPulse ?? false,
       launcherIcon: config.theme.launcherIcon ?? 'chat',
       launcherCloseIcon: config.theme.launcherCloseIcon ?? 'x',
+      launcherIconColor: config.theme.launcherIconColor || undefined,
       launcherBottomSpacing: config.theme.launcherBottomSpacing ?? 20,
       launcherSideSpacing: config.theme.launcherSideSpacing ?? 20,
       // No separate user toggle anymore: the call button shows exactly when

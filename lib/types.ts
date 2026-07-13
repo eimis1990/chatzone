@@ -190,6 +190,7 @@ export interface BotConfig {
     launcherPulse?: boolean
     launcherIcon?: 'chat' | 'message-circle' | 'message-dots' | 'help' | 'sparkles' | 'headset' | 'send' | 'zap' | 'smile' | 'shopping-bag'
     launcherCloseIcon?: 'x' | 'chevron-down'
+    launcherIconColor?: string
     launcherBottomSpacing?: number
     launcherSideSpacing?: number
     /** Launcher background color; falls back to primaryColor when unset. */
