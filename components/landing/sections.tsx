@@ -92,10 +92,11 @@ function FeatureRow({ feature, index }: { feature: Feature; index: number }) {
   const num = String(index + 1).padStart(2, '0')
   return (
     <section className="grid border-t border-gray-200 bg-white text-gray-900 lg:grid-cols-2">
-      {/* Visual half: spans hairline to hairline; the 4:3 shot letterboxes inside
-          (object-contain) so nothing is cropped, and drifts in from its outer edge */}
+      {/* Visual half: locked to the screenshots' own 10:7 ratio (1200×840), so the
+          image fills its half exactly — no letterbox bands — and the row height
+          scales proportionally with the viewport. Drifts in from its outer edge. */}
       <div
-        className={`relative aspect-[4/3] overflow-hidden bg-[#f9f9f9] lg:aspect-auto ${reversed ? 'lg:order-2' : ''}`}
+        className={`relative aspect-[10/7] overflow-hidden bg-[#f9f9f9] ${reversed ? 'lg:order-2' : ''}`}
       >
         <RevealSlide from={reversed ? 'right' : 'left'} className="absolute inset-0">
           <Image
@@ -103,12 +104,12 @@ function FeatureRow({ feature, index }: { feature: Feature; index: number }) {
             alt={feature.imageAlt}
             fill
             sizes="(min-width: 1024px) 50vw, 100vw"
-            className="object-contain"
+            className="object-cover"
           />
         </RevealSlide>
       </div>
       <div
-        className={`flex items-center justify-center px-5 py-14 sm:px-10 lg:px-16 lg:py-28 ${
+        className={`flex items-center justify-center px-5 py-14 sm:px-10 lg:px-16 lg:py-16 ${
           reversed ? 'lg:order-1' : ''
         }`}
       >
