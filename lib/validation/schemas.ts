@@ -54,6 +54,7 @@ const proactiveGreetingSchema = z
     // 0 = show as soon as the launcher config has loaded.
     delaySeconds: z.number().int().min(0).max(30).default(3),
     frequency: z.enum(['once_per_session', 'every_page']).default('once_per_session'),
+    sound: z.enum(['none', 'chime', 'pop']).default('none'),
     messages: z
       .object({
         en: z.array(proactiveGreetingMessageSchema).max(5).optional(),
@@ -70,6 +71,7 @@ const proactiveGreetingSchema = z
     enabled: false,
     delaySeconds: 3,
     frequency: 'once_per_session',
+    sound: 'none',
     messages: { en: [{ text: 'Hi! How can we help?' }] },
     backgroundColor: '#ffffff',
     textColor: '#111827',

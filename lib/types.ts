@@ -151,6 +151,8 @@ export interface ProactiveGreetingConfig {
   /** Seconds after launcher load; 0 shows immediately. */
   delaySeconds: number
   frequency: 'once_per_session' | 'every_page'
+  /** Quiet notification sound when the greeting appears (WebAudio, no assets). */
+  sound?: 'none' | 'chime' | 'pop'
   /** Editable objects keep React Hook Form field arrays stable. */
   messages: Partial<Record<BotLanguage, Array<{ text: string }>>>
   backgroundColor: string

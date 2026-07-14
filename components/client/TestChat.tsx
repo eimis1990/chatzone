@@ -19,6 +19,7 @@ import { DEFAULT_CHAT_MODEL, DEFAULT_TEMPERATURE } from '@/lib/ai/chat-models'
 import { detectHandoffIntent, HANDOFF_ACK } from '@/lib/handoff'
 import type { ChatTransport } from '@/lib/widget-transport'
 import type { PublicBotConfig } from '@/lib/widget-config'
+import { playGreetingSound } from '@/lib/greeting-sound'
 import type { BotConfig, BotLanguage, SuggestedQuestion } from '@/lib/types'
 import { POWERED_BY_URL, readableTextColor } from '@/lib/utils'
 import { fontStack } from '@/lib/fonts'
@@ -63,6 +64,7 @@ type LiveConfig = {
     enabled?: boolean
     delaySeconds?: number
     frequency?: 'once_per_session' | 'every_page'
+    sound?: 'none' | 'chime' | 'pop'
     messages?: Partial<Record<BotLanguage, Array<{ text?: string }>>>
     backgroundColor?: string
     textColor?: string
@@ -96,14 +98,17 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
   const [previewGreetingDismissed, setPreviewGreetingDismissed] = useState(false)
   const previousProactiveEnabled = useRef(proactiveEnabled)
 
+  const proactiveSound = config.proactiveGreeting?.sound ?? 'none'
   useEffect(() => {
     const turnedOn = proactiveEnabled && !previousProactiveEnabled.current
     previousProactiveEnabled.current = proactiveEnabled
     if (turnedOn) {
       setIsOpen(false)
       setPreviewGreetingDismissed(false)
+      // Same sound the live widget plays when the greeting appears.
+      playGreetingSound(proactiveSound)
     }
-  }, [proactiveEnabled])
+  }, [proactiveEnabled, proactiveSound])
 
   // Always read the latest config inside the (stable) transport.
   const configRef = useRef(config)
@@ -484,6 +489,7 @@ function buildPreviewPublicConfig(config: LiveConfig): PublicBotConfig {
       enabled: config.proactiveGreeting?.enabled ?? false,
       delaySeconds: config.proactiveGreeting?.delaySeconds ?? 3,
       frequency: config.proactiveGreeting?.frequency ?? 'once_per_session',
+      sound: config.proactiveGreeting?.sound ?? 'none',
       messages: (config.proactiveGreeting?.messages?.[config.defaultLanguage ?? languages[0]] ?? [])
         .map((variant) => variant.text?.trim() ?? '')
         .filter(Boolean),

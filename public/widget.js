@@ -311,6 +311,51 @@
     return stacks[key] || 'system-ui, -apple-system, sans-serif'
   }
 
+  // Quiet notification sound when the greeting appears, synthesized with
+  // WebAudio (no asset to load). Skips silently when the browser's autoplay
+  // policy blocks audio (no user gesture on the page yet).
+  // ⚠️ Synced COPY of lib/greeting-sound.ts — update both together.
+  function playGreetingSound(kind) {
+    if (kind !== 'chime' && kind !== 'pop') return
+    try {
+      var Ctx = window.AudioContext || window.webkitAudioContext
+      if (!Ctx) return
+      var ctx = new Ctx()
+      if (ctx.state === 'suspended') {
+        ctx.close()
+        return
+      }
+      function note(freq, at, dur, peak) {
+        var osc = ctx.createOscillator()
+        var gain = ctx.createGain()
+        osc.type = 'sine'
+        osc.frequency.setValueAtTime(freq, ctx.currentTime + at)
+        gain.gain.setValueAtTime(0, ctx.currentTime + at)
+        gain.gain.linearRampToValueAtTime(peak, ctx.currentTime + at + 0.012)
+        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + at + dur)
+        osc.connect(gain)
+        gain.connect(ctx.destination)
+        osc.start(ctx.currentTime + at)
+        osc.stop(ctx.currentTime + at + dur + 0.05)
+        return osc
+      }
+      if (kind === 'chime') {
+        // Two-tone bell: C6 then G6, soft and short.
+        note(1046.5, 0, 0.5, 0.1)
+        note(1568, 0.13, 0.6, 0.08)
+      } else {
+        // Gentle "bloop": a quick upward pitch glide.
+        var osc = note(440, 0, 0.25, 0.13)
+        osc.frequency.exponentialRampToValueAtTime(660, ctx.currentTime + 0.07)
+      }
+      setTimeout(function () {
+        try {
+          ctx.close()
+        } catch (_) {}
+      }, 1200)
+    } catch (_) {}
+  }
+
   function dismissProactiveGreeting() {
     if (proactiveTimer) {
       clearTimeout(proactiveTimer)
@@ -342,6 +387,7 @@
     proactiveTail.style.backgroundColor = settings.backgroundColor || '#ffffff'
     proactiveGreeting.style.display = 'flex'
     proactiveVisible = true
+    playGreetingSound(settings.sound)
 
     try {
       if (settings.frequency === 'once_per_session') {

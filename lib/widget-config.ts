@@ -102,6 +102,7 @@ export interface PublicBotConfig {
     enabled: boolean
     delaySeconds: number
     frequency: 'once_per_session' | 'every_page'
+    sound: 'none' | 'chime' | 'pop'
     messages: string[]
     backgroundColor: string
     textColor: string
@@ -215,6 +216,7 @@ export function publicBotConfig(
       enabled: config.proactiveGreeting?.enabled ?? false,
       delaySeconds: config.proactiveGreeting?.delaySeconds ?? 3,
       frequency: config.proactiveGreeting?.frequency ?? 'once_per_session',
+      sound: config.proactiveGreeting?.sound ?? 'none',
       messages: (config.proactiveGreeting?.messages?.[primary] ?? [])
         .map((message) => message.text.trim())
         .filter(Boolean),

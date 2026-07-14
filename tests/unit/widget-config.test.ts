@@ -195,6 +195,7 @@ describe('publicBotConfig', () => {
       enabled: true,
       delaySeconds: 4,
       frequency: 'once_per_session',
+      sound: 'none',
       messages: ['Labas!', 'Kuo galime padėti?'],
       backgroundColor: '#123456',
       textColor: '#ffffff',

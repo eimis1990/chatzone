@@ -41,6 +41,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { botConfigFormSchema } from '@/lib/validation/schemas'
+import { GREETING_SOUNDS, playGreetingSound, type GreetingSound } from '@/lib/greeting-sound'
 import {
   QUICK_ACTION_SUGGESTIONS,
   buildQuickAction,
@@ -279,6 +280,7 @@ export function ConfigForm({
         enabled: false,
         delaySeconds: 3,
         frequency: 'once_per_session',
+        sound: 'none',
         messages: { en: [{ text: 'Hi! How can we help?' }] },
         backgroundColor: '#ffffff',
         textColor: '#111827',
@@ -1357,6 +1359,24 @@ export function ConfigForm({
                     <SliderField label="Delay time"><Controller control={control} name="proactiveGreeting.delaySeconds" render={({ field }) => (
                       <Scrubber size="sm" showLabel={false} label="Delay time" min={0} max={30} step={1} decimals={0} suffix="s" value={field.value ?? 3} onValueChange={field.onChange} />
                     )} /></SliderField>
+                    <div className="flex flex-col gap-1.5">
+                      <Label>Sound</Label>
+                      <Controller name="proactiveGreeting.sound" control={control} render={({ field }) => (
+                        <Select
+                          value={field.value ?? 'none'}
+                          onValueChange={(value) => {
+                            field.onChange(value)
+                            // Instant preview — selecting is a user gesture, so audio is allowed.
+                            playGreetingSound(value as GreetingSound)
+                          }}
+                        >
+                          <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                          <SelectContent><SelectGroup>
+                            {GREETING_SOUNDS.map((s) => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
+                          </SelectGroup></SelectContent>
+                        </Select>
+                      )} />
+                    </div>
                     <ColorField control={control} name="proactiveGreeting.backgroundColor" label="Greeting background" swatchDefault="#ffffff" clearable={false} description="Prompt surface" />
                     <ColorField control={control} name="proactiveGreeting.textColor" label="Greeting text" swatchDefault="#111827" clearable={false} description="Prompt copy" />
                     <div className="flex flex-col gap-1.5">
