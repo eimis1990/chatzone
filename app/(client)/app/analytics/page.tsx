@@ -1,10 +1,12 @@
 import Link from 'next/link'
-import { BarChart3Icon } from 'lucide-react'
+import { ArrowUpRightIcon } from 'lucide-react'
 import { requireRole, getUserOrgIds } from '@/lib/auth/guards'
 import { createServerClient } from '@/lib/supabase/server'
 import { ALLOWED_RANGES } from '@/components/bot-views/AnalyticsSection'
 import { AnalyticsRangeSelector } from '@/components/client/charts/AnalyticsRangeSelector'
 import { parsePriceToCents, formatCentsEur, isAfterHours } from '@/lib/analytics/value-metrics'
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import type { Bot } from '@/lib/types'
 
 /**
@@ -86,17 +88,14 @@ export default async function OrgAnalyticsPage({
     { month: 'short', day: 'numeric', year: 'numeric' },
   )}`
 
-  const th = 'px-3 py-2 text-right text-xs font-medium uppercase tracking-wide text-muted-foreground'
-  const td = 'px-3 py-2.5 text-right text-sm tabular-nums'
+  const th = 'text-right text-xs uppercase tracking-wide text-muted-foreground'
+  const td = 'text-right text-sm tabular-nums'
 
   return (
-    <div className="max-w-6xl space-y-6 p-6">
+    <div className="space-y-6 p-4 lg:p-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="flex items-center gap-2 text-lg font-semibold">
-            <BarChart3Icon className="size-5 text-primary" aria-hidden="true" />
-            Analytics
-          </h1>
+          <h1 className="text-lg font-semibold">Analytics</h1>
           <p className="text-sm text-muted-foreground">All bots side by side, {rangeDays}-day window.</p>
         </div>
         <AnalyticsRangeSelector range={rangeDays} rangeLabel={rangeLabel} />
@@ -107,54 +106,78 @@ export default async function OrgAnalyticsPage({
           No bots yet — create one from Home to start collecting data.
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-xl border bg-card">
-          <table className="w-full min-w-[760px]">
-            <thead>
-              <tr className="border-b">
-                <th className={`${th} text-left`}>Bot</th>
-                <th className={th}>Conversations</th>
-                <th className={th}>Leads</th>
-                <th className={th}>Opens</th>
-                {anyCommerce && <th className={th}>Product clicks</th>}
-                {anyCommerce && <th className={th}>Assisted value</th>}
-                <th className={th}>Link clicks</th>
-                <th className={th}>After hours</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((r) => (
-                <tr key={r.bot.id} className="border-b last:border-b-0 transition-colors hover:bg-muted/40">
-                  <td className="px-3 py-2.5">
-                    <Link
-                      href={`/app/bots/${r.bot.id}/analytics?range=${rangeDays}`}
-                      className="text-sm font-medium hover:text-primary hover:underline"
-                    >
-                      {r.bot.name}
-                    </Link>
-                  </td>
-                  <td className={td}>{r.conversations}</td>
-                  <td className={td}>{r.leads}</td>
-                  <td className={td}>{r.widgetOpens}</td>
-                  {anyCommerce && <td className={td}>{r.commerce ? r.productClicks : '—'}</td>}
-                  {anyCommerce && (
-                    <td className={`${td} font-medium`}>
-                      {r.commerce && r.assistedCents > 0 ? formatCentsEur(r.assistedCents) : '—'}
-                    </td>
-                  )}
-                  <td className={td}>{r.linkClicks}</td>
-                  <td className={td}>{r.afterHoursPct}%</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <Card className="overflow-hidden shadow-none">
+          <CardHeader>
+            <CardTitle>Performance</CardTitle>
+            <CardDescription>
+              {rows.length} {rows.length === 1 ? 'bot' : 'bots'}, {rangeLabel}. Click a bot for the full
+              breakdown.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="px-0">
+            <div className="overflow-x-auto">
+              <Table className="min-w-[760px]">
+                <TableHeader className="bg-muted/30">
+                  <TableRow className="hover:bg-muted/30">
+                    <TableHead className={`${th} border-r pl-4 text-left`}>Bot</TableHead>
+                    <TableHead className={`${th} border-r`}>Conversations</TableHead>
+                    <TableHead className={`${th} border-r`}>Leads</TableHead>
+                    <TableHead className={`${th} border-r`}>Opens</TableHead>
+                    {anyCommerce && <TableHead className={`${th} border-r`}>Product clicks</TableHead>}
+                    {anyCommerce && <TableHead className={`${th} border-r`}>Assisted value</TableHead>}
+                    <TableHead className={`${th} border-r`}>Link clicks</TableHead>
+                    <TableHead className={th}>After hours</TableHead>
+                    <TableHead className="w-10">
+                      <span className="sr-only">Open</span>
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {rows.map((r) => (
+                    <TableRow key={r.bot.id} className="group relative cursor-pointer">
+                      <TableCell className="border-r pl-4">
+                        {/* Stretched link: covers the whole row, so anywhere is clickable */}
+                        <Link
+                          href={`/app/bots/${r.bot.id}/analytics?range=${rangeDays}`}
+                          className="font-medium text-foreground after:absolute after:inset-0 group-hover:text-primary"
+                        >
+                          {r.bot.name}
+                        </Link>
+                      </TableCell>
+                      <TableCell className={`${td} border-r`}>{r.conversations}</TableCell>
+                      <TableCell className={`${td} border-r`}>{r.leads}</TableCell>
+                      <TableCell className={`${td} border-r`}>{r.widgetOpens}</TableCell>
+                      {anyCommerce && (
+                        <TableCell className={`${td} border-r`}>
+                          {r.commerce ? r.productClicks : '—'}
+                        </TableCell>
+                      )}
+                      {anyCommerce && (
+                        <TableCell className={`${td} border-r font-medium`}>
+                          {r.commerce && r.assistedCents > 0 ? formatCentsEur(r.assistedCents) : '—'}
+                        </TableCell>
+                      )}
+                      <TableCell className={`${td} border-r`}>{r.linkClicks}</TableCell>
+                      <TableCell className={td}>{r.afterHoursPct}%</TableCell>
+                      <TableCell>
+                        <ArrowUpRightIcon
+                          className="size-4 text-muted-foreground transition-colors group-hover:text-primary"
+                          aria-hidden="true"
+                        />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+          <CardFooter className="text-xs text-muted-foreground">
+            Assisted value is an estimate: the sum of prices of products visitors clicked in the chat.
+            After hours = outside each bot&apos;s configured working hours (Mon–Fri, default 08:00–17:00,
+            Europe/Vilnius).
+          </CardFooter>
+        </Card>
       )}
-
-      <p className="text-xs text-muted-foreground">
-        Assisted value is an estimate: the sum of prices of products visitors clicked in the chat. After
-        hours = outside each bot&apos;s configured working hours (Mon–Fri, default 08:00–17:00,
-        Europe/Vilnius). Click a bot for the full breakdown.
-      </p>
     </div>
   )
 }

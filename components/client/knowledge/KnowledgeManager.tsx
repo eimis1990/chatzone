@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react'
 import { toast } from 'sonner'
-import { FileTextIcon, MessageSquareTextIcon, GlobeIcon, UploadIcon, XIcon, SparklesIcon, SearchCheckIcon } from 'lucide-react'
+import { FileTextIcon, MessageSquareTextIcon, GlobeIcon, UploadIcon, XIcon, WandSparklesIcon, SearchCheckIcon } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
@@ -179,7 +179,7 @@ export function KnowledgeManager({ botId, initialSources }: KnowledgeManagerProp
               <Button
                 type="button"
                 variant="outline"
-                size="sm"
+                className="h-10 rounded-md px-4"
                 onClick={handleCheckIssues}
                 disabled={linting || sources.length === 0}
                 title="Scan your content for contradictions, outdated info, and missing topics"
@@ -190,13 +190,13 @@ export function KnowledgeManager({ botId, initialSources }: KnowledgeManagerProp
               <Button
                 type="button"
                 variant="outline"
-                size="sm"
+                className="h-10 rounded-md px-4"
                 onClick={handleRebuildSummaries}
                 disabled={summarizing || sources.length === 0}
                 title="Synthesize clean answer pages (returns, shipping, contact…) from your content"
               >
-                <SparklesIcon className={cn('size-4', summarizing && 'animate-pulse')} />
-                {summarizing ? 'Building…' : 'Rebuild answer summaries'}
+                <WandSparklesIcon className={cn('size-4', summarizing && 'animate-pulse')} />
+                {summarizing ? 'Building…' : 'Rebuild summaries'}
               </Button>
             </div>
           </div>

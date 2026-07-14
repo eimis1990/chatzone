@@ -41,13 +41,15 @@ export const TYPE_META: Record<SourceType, { label: string; icon: LucideIcon }> 
   file: { label: 'File', icon: PaperclipIcon },
 }
 
-// Subtle per-type icon tile (colour-codes the source kind at a glance).
-const TYPE_TILE: Record<SourceType, string> = {
-  text: 'bg-blue-50 text-blue-600',
-  qa: 'bg-violet-50 text-violet-600',
-  url: 'bg-cyan-50 text-cyan-600',
-  file: 'bg-slate-100 text-slate-600',
+// Per-type accent — tints the icon tile and the card's corner glow, the same
+// treatment as the owner Clients cards (which use the client's brand color).
+const TYPE_ACCENT: Record<SourceType, string> = {
+  text: '#3b82f6', // blue
+  qa: '#8b5cf6', // violet
+  url: '#0891b2', // cyan
+  file: '#64748b', // slate
 }
+const CANONICAL_ACCENT = '#d97706' // amber
 
 const STATUS_STYLE: Record<
   SourceStatus,
@@ -340,14 +342,14 @@ export function SourceList({ sources, onDeleted, onUpdated, onAddSource }: Sourc
 
   return (
     <>
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-3 p-4">
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-4 p-4">
         {/* Add-source card — always first. */}
         <button
           type="button"
           onClick={onAddSource}
-          className="group flex min-h-[150px] flex-col items-center justify-center gap-2 rounded-xl border border-dashed bg-card p-4 text-muted-foreground transition-colors hover:border-primary/50 hover:bg-primary/5 hover:text-primary"
+          className="group flex min-h-[150px] flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border bg-card/40 p-4 text-muted-foreground transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
-          <span className="flex size-10 items-center justify-center rounded-lg bg-muted text-foreground/60 transition-colors group-hover:bg-primary/10 group-hover:text-primary">
+          <span className="flex size-11 items-center justify-center rounded-lg border border-dashed border-current">
             <PlusIcon className="size-5" aria-hidden="true" />
           </span>
           <span className="text-sm font-medium">Add source</span>
@@ -358,7 +360,7 @@ export function SourceList({ sources, onDeleted, onUpdated, onAddSource }: Sourc
           // Canonical "answer summary" pages are text sources with a special kind.
           const canonical = (source.metadata as Record<string, unknown>)?.kind === 'canonical'
           const Icon = canonical ? SparklesIcon : TypeIcon
-          const tile = canonical ? 'bg-amber-50 text-amber-600' : TYPE_TILE[source.type]
+          const accent = canonical ? CANONICAL_ACCENT : TYPE_ACCENT[source.type]
           const tileLabel = canonical ? 'Answer summary' : label
           const subtitle = sourceSubtitle(source)
           const chunks = counts[source.id]
@@ -374,14 +376,35 @@ export function SourceList({ sources, onDeleted, onUpdated, onAddSource }: Sourc
                   setViewingId(source.id)
                 }
               }}
-              className="group flex cursor-pointer flex-col gap-3 rounded-xl border bg-card p-4 text-left transition-all hover:border-foreground/15 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+              className="group relative flex cursor-pointer flex-col gap-3 rounded-2xl border bg-card p-4 text-left transition-all hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
             >
-              <div className="flex items-start justify-between">
+              {/* Type-colored glow bleeding from the top-right corner (clipped to the
+                  card here rather than overflow-hidden, so the kebab menu can escape). */}
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 overflow-hidden rounded-2xl"
+              >
                 <span
-                  className={cn('flex size-10 items-center justify-center rounded-lg', tile)}
+                  className="absolute -right-10 -top-10 size-28 rounded-full opacity-15 blur-2xl transition-opacity group-hover:opacity-30"
+                  style={{ backgroundColor: accent }}
+                />
+              </span>
+
+              <div className="relative flex items-start justify-between">
+                <span
+                  className="flex size-11 items-center justify-center rounded-xl"
+                  style={{
+                    backgroundColor: `color-mix(in srgb, ${accent} 12%, transparent)`,
+                    color: accent,
+                  }}
                   title={tileLabel}
                 >
-                  <Icon className="size-5" aria-hidden="true" />
+                  <Icon
+                    className="size-5"
+                    // Filled sparkles for answer summaries; other type icons stay stroked.
+                    fill={canonical ? 'currentColor' : 'none'}
+                    aria-hidden="true"
+                  />
                 </span>
                 <CardMenu
                   canRetry={source.status === 'error'}
@@ -391,9 +414,9 @@ export function SourceList({ sources, onDeleted, onUpdated, onAddSource }: Sourc
                 />
               </div>
 
-              <div className="min-w-0">
+              <div className="relative min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <p className="truncate font-medium text-foreground" title={source.name}>
+                  <p className="truncate font-semibold text-foreground" title={source.name}>
                     {source.name}
                   </p>
                   {canonical && (
@@ -405,7 +428,7 @@ export function SourceList({ sources, onDeleted, onUpdated, onAddSource }: Sourc
                 <p className="mt-0.5 line-clamp-2 text-sm text-muted-foreground">{subtitle}</p>
               </div>
 
-              <div className="mt-auto flex items-center justify-between gap-2 pt-1">
+              <div className="relative mt-auto flex items-center justify-between gap-2 pt-1">
                 <span className="text-xs text-muted-foreground">
                   {formatDistanceToNow(source.created_at)}
                 </span>

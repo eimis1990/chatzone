@@ -38,7 +38,7 @@ const FEATURES: Feature[] = [
     bullets: ['Retrieval over your own content', 'Cites the sources it used', 'Graceful fallback + lead capture when unsure'],
     icon: BrainIcon,
     imageSrc: '/landing/feature-chat.webp',
-    imageAlt: 'Loqara chat widget answering a return-policy question with an answer grounded in the store’s own knowledge base',
+    imageAlt: 'Loqara Knowledge Base screen with indexed sources — site pages, FAQs, and AI answer summaries the agent draws on',
   },
   {
     eyebrow: 'VOICE AGENT',
@@ -47,7 +47,7 @@ const FEATURES: Feature[] = [
     bullets: ['Live voice calls in the widget', 'Per-language voices', 'Speaks product results aloud'],
     icon: PhoneCallIcon,
     imageSrc: '/landing/feature-voice.webp',
-    imageAlt: 'Live voice call in the Loqara widget showing the Listening state while a customer talks to the store',
+    imageAlt: 'Loqara widget during a live voice call — the assistant listens and answers the customer’s spoken question in chat',
   },
   {
     eyebrow: 'LIVE HANDOFF',
@@ -65,7 +65,7 @@ const FEATURES: Feature[] = [
     bullets: ['Per-conversation summaries + topics', 'AI success rating (1–5) with reasons', 'CSAT, fallback rate, trending topics'],
     icon: BarChart3Icon,
     imageSrc: '/landing/feature-analytics.webp',
-    imageAlt: 'Loqara analytics dashboard with conversation trends, CSAT, AI success score, top questions and top products',
+    imageAlt: 'Loqara analytics dashboard with conversation and message-volume trends, CSAT, AI success score and handoff stats',
   },
   {
     eyebrow: 'COMMERCE SKILLS',
