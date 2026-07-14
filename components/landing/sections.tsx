@@ -95,8 +95,7 @@ function FeatureRow({ feature, index }: { feature: Feature; index: number }) {
       {/* Visual half: spans hairline to hairline; the 4:3 shot letterboxes inside
           (object-contain) so nothing is cropped, and drifts in from its outer edge */}
       <div
-        className={`relative aspect-[4/3] overflow-hidden lg:aspect-auto ${reversed ? 'lg:order-2' : ''}`}
-        style={{ backgroundImage: 'linear-gradient(135deg, #fdeee2, #f7d3b5)' }}
+        className={`relative aspect-[4/3] overflow-hidden bg-[#f9f9f9] lg:aspect-auto ${reversed ? 'lg:order-2' : ''}`}
       >
         <RevealSlide from={reversed ? 'right' : 'left'} className="absolute inset-0">
           <Image
