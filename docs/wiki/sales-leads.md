@@ -37,9 +37,25 @@ emails, and manual status progression.
 - `email_subject` and `email_body` are operational snapshots stored on each
   lead, not generated at send time. Existing-chatbot leads should acknowledge
   the incumbent respectfully and give a concrete reason to compare.
-- Current positioning emphasizes a contextual Lithuanian conversation (not a
-  keyword/FAQ widget) and the paid-plan range of 1,500–12,000 conversations per
-  month. Keep those figures aligned with `lib/plans-catalog.ts:36` and `:68`.
+- Prepared-email openings use two sentences: a verifiable observation grounded
+  in `hook`/the previous opening, then one concrete task Loqara could help with.
+  Do not turn inferred buyer behavior into fact (for example, "customers often
+  ask"); use possibility/task language instead. Long brand dumps, registry
+  revenue/staff facts, hype, and unsupported comparisons are excluded
+  (`scripts/rewrite-sales-lead-emails.mjs:79`).
+- The shared pitch has separate variants: e-commerce leads mention the live
+  product catalog; other verticals describe a content-grounded website
+  consultant and never force catalog/stock/shopper wording. Healthcare openings
+  stay with factual service, specialist, location, preparation, and registration
+  information—not diagnosis or treatment advice
+  (`scripts/rewrite-sales-lead-emails.mjs:40`, `:96`).
+- First-touch copy emphasizes contextual Lithuanian conversation rather than a
+  FAQ widget. Plan allowances (1,500–12,000 conversations) are intentionally
+  omitted until a prospect is evaluating the product.
+- Bulk rewrites go through the dry-run/repair/apply workflow in
+  `scripts/rewrite-sales-lead-emails.mjs:235`; validation checks full row
+  coverage, duplicate ids, unsupported behavior claims, incumbent-chatbot
+  acknowledgement, vertical vocabulary, and stale-row timestamps before writes.
 - **Copy means body only.** Both detail-panel copy actions pass exactly
   `openLead.email_body` (`components/owner/SalesLeadsTable.tsx:559`, `:644`).
   The separate mail-app action is allowed to include recipient, subject, and
@@ -47,4 +63,4 @@ emails, and manual status progression.
 - Manual name/URL/email signature lines do not belong in stored bodies; the
   sending provider supplies the signature.
 
-_Last verified: 2026-07-11 (5cb8523)._
+_Last verified: 2026-07-15 (3f83d4d)._

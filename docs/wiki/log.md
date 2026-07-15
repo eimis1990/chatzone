@@ -66,3 +66,4 @@ Format: `YYYY-MM-DD TAG — note`. Tags: `INGEST` (new/updated knowledge),
   seven FAQ entries for schema, primary-source citations, internal cluster
   links, and an OpenAI-generated 1200×800 WebP hero. Added all three to the
   manually curated `public/llms.txt` guide list.
+- 2026-07-15 DECISION — Rewrote all 231 sales-lead emails around a two-sentence relevance hook (verified observation → concrete website task), removed first-touch plan-limit copy, and split the shared pitch into e-commerce/catalog and service/organization variants. Unsupported buyer-behavior claims are rejected; 19 incumbent-chatbot leads acknowledge the existing assistant respectfully. Added a validated dry-run/repair/apply script. See sales-leads.
