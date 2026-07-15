@@ -197,8 +197,15 @@ export interface BotConfig {
     launcherSideSpacing?: number
     /** Launcher background color; falls back to primaryColor when unset. */
     launcherColor?: string
+    /** Header layout: classic full-width bar, floating inset pill, or a curved
+     *  body card overlapping the bar. */
+    headerStyle?: 'classic' | 'floating' | 'curved'
+    /** Hide the company logo/avatar in the widget header. */
+    hideHeaderLogo?: boolean
     /** Show the "talk with agent" voice call button in the header (when voice on). */
     showCallButton?: boolean
+    /** Icon-only square call button instead of the labeled pill. */
+    compactCallButton?: boolean
     /** Show the "talk to a person" human-handoff button (once a chat is underway). */
     showHandoffButton?: boolean
     /** Background color for the voice call button (text auto-contrasts). */

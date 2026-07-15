@@ -1132,6 +1132,13 @@ export function ConfigForm({
             />}>
           <CardContent className="flex flex-col gap-3 bg-muted/70 py-3">
             <SettingsGroup
+              title="Choose a style"
+              description="How the header sits in the chat window."
+            >
+              <HeaderStylePicker watch={watch} setValue={setValue} />
+            </SettingsGroup>
+
+            <SettingsGroup
               title="Choose a starting point"
               description="Apply a complete look, then fine-tune only what you need."
             >
@@ -1431,6 +1438,18 @@ export function ConfigForm({
                       <Switch aria-label="Human handoff" checked={field.value ?? true} onCheckedChange={field.onChange} />
                     )} />
                   </CompactToggle>
+                  <CompactToggle label="Header logo" description="Show your logo next to the name">
+                    <Controller name="theme.hideHeaderLogo" control={control} render={({ field }) => (
+                      <Switch aria-label="Header logo" checked={!(field.value ?? false)} onCheckedChange={(checked) => field.onChange(!checked)} />
+                    )} />
+                  </CompactToggle>
+                  {(watch('voice.enabled') ?? false) && (
+                    <CompactToggle label="Compact call button" description="Phone icon only, no label">
+                      <Controller name="theme.compactCallButton" control={control} render={({ field }) => (
+                        <Switch aria-label="Compact call button" checked={field.value ?? false} onCheckedChange={field.onChange} />
+                      )} />
+                    </CompactToggle>
+                  )}
                 </div>
                 <LogoUpload botId={botId} control={control} setValue={setValue} name="theme.backgroundImageUrl" label="Chat background image (optional)" filePrefix="bg" description="Shown behind the conversation." />
                 {watch('theme.backgroundImageUrl') ? (
@@ -2872,6 +2891,60 @@ function AdvancedColorFields({
           {voiceEnabled ? <ColorField control={control} name="theme.callButtonColor" label="Call button" swatchDefault="#22c55e" description="Voice action" /> : null}
         </div>
       ) : null}
+    </div>
+  )
+}
+
+// -------------------------------------------------------------------------
+// HeaderStylePicker — three mini window mockups for the header layout.
+// -------------------------------------------------------------------------
+const HEADER_STYLES = [
+  { id: 'classic', name: 'Classic' },
+  { id: 'floating', name: 'Floating' },
+  { id: 'curved', name: 'Curved' },
+] as const
+
+function HeaderStylePicker({
+  watch,
+  setValue,
+}: {
+  watch: UseFormWatch<FormValues>
+  setValue: UseFormSetValue<FormValues>
+}) {
+  const current = watch('theme.headerStyle') ?? 'classic'
+  const brand = watch('theme.primaryColor') || '#4f46e5'
+  return (
+    <div className="grid grid-cols-3 gap-2">
+      {HEADER_STYLES.map((style) => {
+        const selected = current === style.id
+        return (
+          <button
+            key={style.id}
+            type="button"
+            aria-pressed={selected}
+            onClick={() => setValue('theme.headerStyle', style.id, { shouldDirty: true })}
+            className={`flex flex-col items-center gap-1.5 rounded-xl border-2 p-2 transition ${
+              selected ? 'border-primary bg-primary/5' : 'border-transparent bg-muted/60 hover:bg-muted'
+            }`}
+          >
+            <span className="relative h-16 w-full overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-black/10">
+              {style.id === 'classic' && (
+                <span className="absolute inset-x-0 top-0 h-5" style={{ backgroundColor: brand }} />
+              )}
+              {style.id === 'floating' && (
+                <span className="absolute left-1.5 right-1.5 top-1.5 h-5 rounded-md" style={{ backgroundColor: brand }} />
+              )}
+              {style.id === 'curved' && (
+                <>
+                  <span className="absolute inset-x-0 top-0 h-9" style={{ backgroundColor: brand }} />
+                  <span className="absolute inset-x-0 bottom-0 top-5 rounded-t-lg bg-white" />
+                </>
+              )}
+            </span>
+            <span className="text-xs font-medium">{style.name}</span>
+          </button>
+        )
+      })}
     </div>
   )
 }

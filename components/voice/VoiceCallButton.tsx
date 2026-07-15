@@ -53,6 +53,8 @@ interface VoiceCallButtonProps {
   radius?: number
   /** Use the shorter idle label ("Call Agent") — for the tight mobile header. */
   shortLabel?: boolean
+  /** Icon-only square button (compact appearance only) — no text label. */
+  iconOnly?: boolean
   className?: string
 }
 
@@ -74,6 +76,7 @@ interface InnerProps {
   onProductDetails?: (productName: string) => Promise<string>
   radius?: number
   shortLabel?: boolean
+  iconOnly?: boolean
 }
 
 function VoiceCallInner({
@@ -92,6 +95,7 @@ function VoiceCallInner({
   onProductDetails,
   radius,
   shortLabel,
+  iconOnly,
 }: InnerProps) {
   const [callError, setCallError] = useState<string | null>(null)
   const [micDenied, setMicDenied] = useState(false)
@@ -255,8 +259,10 @@ function VoiceCallInner({
   // ── Compact (icon-only) appearance — square, matches the restart button ──────
   if (appearance === 'compact') {
     const lt = language === 'lt'
-    const pill =
-      'inline-flex items-center gap-1.5 h-8 rounded-lg px-2.5 flex-shrink-0 text-xs font-medium transition-opacity hover:opacity-85'
+    // iconOnly: square, matches the language/restart header buttons.
+    const pill = iconOnly
+      ? 'inline-flex items-center justify-center size-8 rounded-lg flex-shrink-0 transition-opacity hover:opacity-85'
+      : 'inline-flex items-center gap-1.5 h-8 rounded-lg px-2.5 flex-shrink-0 text-xs font-medium transition-opacity hover:opacity-85'
     const radiusStyle = radius != null ? { borderRadius: `${radius}px` } : {}
     // Idle/connecting use the configured call color; text auto-contrasts.
     const callStyle = { backgroundColor: callColor, color: readableTextColor(callColor), ...radiusStyle }
@@ -271,7 +277,7 @@ function VoiceCallInner({
           style={callStyle}
         >
           <LoaderCircleIcon className="size-4 animate-spin" aria-hidden="true" />
-          {lt ? 'Jungiamasi…' : 'Connecting…'}
+          {!iconOnly && (lt ? 'Jungiamasi…' : 'Connecting…')}
         </button>
       )
     }
@@ -287,7 +293,7 @@ function VoiceCallInner({
           style={{ backgroundColor: '#ef4444', color: '#ffffff', ...radiusStyle }}
         >
           <FilledPhoneIcon />
-          {lt ? 'Baigti' : 'End call'}
+          {!iconOnly && (lt ? 'Baigti' : 'End call')}
         </button>
       )
     }
@@ -302,13 +308,14 @@ function VoiceCallInner({
         style={callStyle}
       >
         <FilledPhoneIcon />
-        {shortLabel
-          ? lt
-            ? 'Skambinti'
-            : 'Call Agent'
-          : lt
-            ? 'Kalbėti su Agentu'
-            : 'Talk with Agent'}
+        {!iconOnly &&
+          (shortLabel
+            ? lt
+              ? 'Skambinti'
+              : 'Call Agent'
+            : lt
+              ? 'Kalbėti su Agentu'
+              : 'Talk with Agent')}
       </button>
     )
   }
@@ -421,6 +428,7 @@ export function VoiceCallButton({
   onProductDetails,
   radius,
   shortLabel,
+  iconOnly,
   className,
 }: VoiceCallButtonProps) {
   return (
@@ -442,6 +450,7 @@ export function VoiceCallButton({
           onProductDetails={onProductDetails}
           radius={radius}
           shortLabel={shortLabel}
+          iconOnly={iconOnly}
         />
       </ConversationProvider>
     </div>

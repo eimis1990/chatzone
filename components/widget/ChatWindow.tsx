@@ -740,6 +740,12 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
   const navButtonRadius = config.theme.navButtonRadius ?? 12
   // Full-screen mobile sheet has square top corners (it meets the screen edge).
   const headerBorderRadius = isMobile ? '0' : `${cornerRadius}px ${cornerRadius}px 0 0`
+  // Header layout: classic bar / floating inset pill / curved body overlap.
+  const headerStyle = config.theme.headerStyle ?? 'classic'
+  const hideHeaderLogo = config.theme.hideHeaderLogo ?? false
+  // Radius used by the floating pill and the curved body card — keeps the
+  // style visible even when the window corners are set to 0.
+  const styleRadius = Math.max(cornerRadius, 12)
   // Auto-contrast: keep header text/icons legible on any chosen color.
   const headerFg = readableTextColor(primaryColor)
   // Header shows the company logo (brand); message bubbles show the bot avatar.
@@ -761,8 +767,13 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
 
   return (
     <div
-      className="flex flex-col h-full bg-white overflow-hidden"
-      style={{ borderRadius: isMobile ? 0 : `${cornerRadius}px`, fontFamily: fontStack(config.theme.fontFamily) }}
+      className="flex flex-col h-full overflow-hidden"
+      style={{
+        borderRadius: isMobile ? 0 : `${cornerRadius}px`,
+        fontFamily: fontStack(config.theme.fontFamily),
+        // Shows through the floating header's gap; body covers it otherwise.
+        backgroundColor: bgColor,
+      }}
     >
       {/* Header */}
       <div
@@ -770,8 +781,14 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
         style={{
           backgroundColor: primaryColor,
           color: headerFg,
-          borderRadius: headerBorderRadius,
-          borderBottom: `1px solid color-mix(in srgb, ${headerFg} 14%, transparent)`,
+          ...(headerStyle === 'floating'
+            ? { margin: '10px', borderRadius: `${styleRadius}px` }
+            : headerStyle === 'curved'
+              ? { borderRadius: headerBorderRadius, paddingBottom: `${16 + styleRadius}px` }
+              : {
+                  borderRadius: headerBorderRadius,
+                  borderBottom: `1px solid color-mix(in srgb, ${headerFg} 14%, transparent)`,
+                }),
         }}
       >
         {showClose ? (
@@ -789,7 +806,7 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
           >
             <XIcon className="size-4" aria-hidden="true" />
           </button>
-        ) : headerAvatar ? (
+        ) : hideHeaderLogo ? null : headerAvatar ? (
           <img
             src={headerAvatar}
             alt={config.displayName}
@@ -833,6 +850,7 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
         {voiceEnabled && showCallButton && (
           <VoiceCallButton
             appearance="compact"
+            iconOnly={config.theme.compactCallButton ?? false}
             getToken={getVoiceToken}
             primaryColor="#ffffff"
             callColor={callButtonColor}
@@ -922,8 +940,14 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
       {/* Body — messages + composer. Relative so the product list can overlay it;
           isolate so the background image layer (−z-10) stays behind the content. */}
       <div
-        className="relative isolate flex-1 flex flex-col min-h-0"
-        style={{ backgroundColor: bgColor }}
+        className="relative isolate flex-1 flex flex-col min-h-0 overflow-hidden"
+        style={{
+          backgroundColor: bgColor,
+          // Curved: the body card slides up over the header's padded bottom.
+          ...(headerStyle === 'curved'
+            ? { marginTop: `-${styleRadius}px`, borderRadius: `${styleRadius}px ${styleRadius}px 0 0` }
+            : {}),
+        }}
       >
         {/* Optional background image, overlaid on the base color at chosen opacity. */}
         {bgImage ? (

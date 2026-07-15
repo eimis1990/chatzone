@@ -30,7 +30,10 @@ export const PRESET_PRESERVED_THEME_KEYS = [
   'launcherLabel',
   'launcherShowLogo',
   'launcherPulse',
+  'headerStyle',
+  'hideHeaderLogo',
   'showCallButton',
+  'compactCallButton',
   'showHandoffButton',
   'sendIconUrl',
 ] as const
@@ -45,7 +48,12 @@ const base = {
   launcherStyle: 'circle',
   launcherShowLogo: false,
   launcherPulse: false,
+  // Layout/feature keys — present for the type only; all in
+  // PRESET_PRESERVED_THEME_KEYS, so applying a preset never writes them.
+  headerStyle: 'classic',
+  hideHeaderLogo: false,
   showCallButton: true,
+  compactCallButton: false,
   showHandoffButton: true,
   backgroundImageUrl: '',
   backgroundImageOpacity: 100,

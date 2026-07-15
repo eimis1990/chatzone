@@ -77,7 +77,10 @@ export interface PublicBotConfig {
     launcherIconColor?: string
     launcherBottomSpacing?: number
     launcherSideSpacing?: number
+    headerStyle?: 'classic' | 'floating' | 'curved'
+    hideHeaderLogo?: boolean
     showCallButton?: boolean
+    compactCallButton?: boolean
     showHandoffButton?: boolean
     callButtonColor?: string
     navButtonRadius?: number
@@ -187,6 +190,9 @@ export function publicBotConfig(
       // No separate user toggle anymore: the call button shows exactly when
       // voice is enabled AND the org's Voice add-on allows live calls.
       showCallButton: callAllowed && (config.voice?.enabled ?? false),
+      headerStyle: config.theme.headerStyle ?? 'classic',
+      hideHeaderLogo: config.theme.hideHeaderLogo ?? false,
+      compactCallButton: config.theme.compactCallButton ?? false,
       showHandoffButton: config.theme.showHandoffButton ?? true,
       navButtonRadius: config.theme.navButtonRadius ?? 12,
       backgroundColor: config.theme.backgroundColor ?? '#ffffff',

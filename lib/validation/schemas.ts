@@ -149,7 +149,13 @@ export const botConfigFormSchema = z.object({
       // Distance from the viewport edges, in px (side follows `position`).
       launcherBottomSpacing: z.number().int().min(10).max(50).default(20),
       launcherSideSpacing: z.number().int().min(10).max(50).default(20),
+      // Header layout: classic bar, floating inset pill, or curved body overlap.
+      headerStyle: z.enum(['classic', 'floating', 'curved']).default('classic'),
+      // Hide the company logo/avatar in the widget header.
+      hideHeaderLogo: z.boolean().default(false),
       showCallButton: z.boolean().default(true),
+      // Icon-only square call button instead of the labeled pill.
+      compactCallButton: z.boolean().default(false),
       // Show the "talk to a person" human-handoff button.
       showHandoffButton: z.boolean().default(true),
       // Background color for the voice call button (text auto-contrasts).
@@ -189,7 +195,10 @@ export const botConfigFormSchema = z.object({
       launcherCloseIcon: 'x',
       launcherBottomSpacing: 20,
       launcherSideSpacing: 20,
+      headerStyle: 'classic',
+      hideHeaderLogo: false,
       showCallButton: true,
+      compactCallButton: false,
       showHandoffButton: true,
       navButtonRadius: 12,
       backgroundColor: '#ffffff',
