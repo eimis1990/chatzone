@@ -34,6 +34,11 @@
 - Blog (guides): https://www.loqara.com/blog
 
 ## Popular guides
+- Google AI Mode shopping for e-commerce: https://www.loqara.com/blog/google-ai-mode-shopping-ecommerce
+- Semantic search for e-commerce: https://www.loqara.com/blog/semantic-search-ecommerce
+- Conversational commerce practical guide: https://www.loqara.com/blog/conversational-commerce-guide
+- How to add an AI chatbot to Magento: https://www.loqara.com/blog/ai-chatbot-for-magento
+- Automating e-commerce returns with AI: https://www.loqara.com/blog/automate-returns-with-ai-chatbot
 - Agentic commerce explained for online stores: https://www.loqara.com/blog/agentic-commerce-ecommerce
 - How to get products recommended by ChatGPT shopping: https://www.loqara.com/blog/how-to-get-products-recommended-by-chatgpt
 - AI product recommendation chatbots: https://www.loqara.com/blog/ai-product-recommendation-chatbot

@@ -20,6 +20,13 @@ auto-wrapped tables, `figure`/`figcaption`, and `quick-answer`. **Markdown does
 not render inside these raw-HTML blocks** — use `<strong>`/`<em>`
 ([gotchas](gotchas.md)). Flagship template: `best-ai-chatbot-for-shopify.md`.
 
+Markdown tables are enhanced centrally in `lib/blog.ts`: every cell receives
+its column heading as `data-label`, and tables with four or more columns get a
+wide-table marker. Container queries in `app/globals.css` turn wide tables into
+labelled comparison cards inside the narrow article + TOC layout; three-column
+tables stack on phones, while two-column tables stay tabular. Do not add manual
+scroll wrappers or per-post table HTML.
+
 ## AEO conventions (see `docs/seo-content-loop.md`)
 
 Every post: a `<blockquote class="quick-answer">` (40–60 word direct answer) under
@@ -44,5 +51,13 @@ The July 2026 commerce-discovery cluster covers three distinct intents:
 `ai-product-recommendation-chatbot` (commercial onsite product discovery).
 They cross-link rather than competing for the same primary query.
 
-_Last verified: 2026-07-15 (added the agentic-commerce / ChatGPT shopping /
-product-recommendation cluster)._
+The follow-on five-post cluster extends that coverage without reusing those
+primary queries: `google-ai-mode-shopping-ecommerce` (Google-specific external
+discovery), `semantic-search-ecommerce` (onsite retrieval),
+`conversational-commerce-guide` (category strategy), `ai-chatbot-for-magento`
+(platform implementation), and `automate-returns-with-ai-chatbot` (post-purchase
+workflow). Returns content must preserve the product boundary: Loqara answers,
+collects, verifies supported order status, and hands off; it does not currently
+issue refunds or return labels.
+
+_Last verified: 2026-07-15 (responsive table rendering + both commerce-discovery clusters)._

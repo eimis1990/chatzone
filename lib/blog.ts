@@ -60,9 +60,42 @@ function readingTime(markdown: string): number {
   return Math.max(1, Math.round(words / 200))
 }
 
+function tableLabel(inner: string, index: number): string {
+  const text = inner.replace(/<[^>]+>/g, '').trim() || (index === 0 ? 'Item' : `Column ${index + 1}`)
+  return text.replace(/"/g, '&quot;')
+}
+
+/** Add responsive metadata while preserving the table's semantic HTML. */
+function enhanceTables(html: string): string {
+  return html.replace(/<table>([\s\S]*?)<\/table>/g, (_table, inner: string) => {
+    const headerRow = inner.match(/<thead>[\s\S]*?<tr>([\s\S]*?)<\/tr>[\s\S]*?<\/thead>/)
+    const headers = headerRow
+      ? [...headerRow[1].matchAll(/<th>([\s\S]*?)<\/th>/g)].map((match, index) => tableLabel(match[1], index))
+      : []
+    const columnCount = headers.length
+    const layout = columnCount >= 4 ? 'wide' : 'compact'
+
+    const labelled = headers.length
+      ? inner.replace(/<tbody>([\s\S]*?)<\/tbody>/, (_body, rows: string) => {
+          const labelledRows = rows.replace(/<tr>([\s\S]*?)<\/tr>/g, (_row, cells: string) => {
+            let column = 0
+            return `<tr>${cells.replace(/<td>/g, () => {
+              const label = headers[column] ?? `Column ${column + 1}`
+              column += 1
+              return `<td data-label="${label}">`
+            })}</tr>`
+          })
+          return `<tbody>${labelledRows}</tbody>`
+        })
+      : inner
+
+    return `<div class="table-wrap table-wrap--${layout}" data-columns="${columnCount}"><table>${labelled}</table></div>`
+  })
+}
+
 /**
  * Render Markdown to HTML: inject anchor ids on H2/H3 (collecting H2s for the
- * table of contents) and wrap tables so wide ones scroll on mobile.
+ * table of contents) and annotate tables for responsive presentation.
  */
 function renderBody(body: string): { html: string; headings: Heading[] } {
   let html = marked.parse(body, { async: false }) as string
@@ -78,9 +111,7 @@ function renderBody(body: string): { html: string; headings: Heading[] } {
     if (depth === '2') headings.push({ id, text: label, level: 2 })
     return `<h${depth} id="${id}">${inner}</h${depth}>`
   })
-  html = html
-    .replace(/<table>/g, '<div class="table-wrap"><table>')
-    .replace(/<\/table>/g, '</table></div>')
+  html = enhanceTables(html)
   return { html, headings }
 }
 
