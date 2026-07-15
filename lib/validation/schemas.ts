@@ -133,6 +133,9 @@ export const botConfigFormSchema = z.object({
       cornerRadius: z.number().min(0).max(32).default(16),
       bubbleRadius: z.number().min(0).max(24).default(16),
       fontFamily: z.string().default('geist'),
+      fontWeight: z
+        .union([z.literal(400), z.literal(500), z.literal(600), z.literal(700)])
+        .default(400),
       launcherStyle: z.enum(['circle', 'pill']).default('circle'),
       launcherLabel: z.string().max(40).optional().or(z.literal('')),
       launcherShowLogo: z.boolean().default(false),
@@ -188,6 +191,7 @@ export const botConfigFormSchema = z.object({
       cornerRadius: 16,
       bubbleRadius: 16,
       fontFamily: 'geist',
+      fontWeight: 400,
       launcherStyle: 'circle',
       launcherShowLogo: false,
       launcherPulse: false,

@@ -771,6 +771,7 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
       style={{
         borderRadius: isMobile ? 0 : `${cornerRadius}px`,
         fontFamily: fontStack(config.theme.fontFamily),
+        fontWeight: config.theme.fontWeight ?? 400,
         // Shows through the floating header's gap; body covers it otherwise.
         backgroundColor: bgColor,
       }}

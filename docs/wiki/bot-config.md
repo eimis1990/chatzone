@@ -49,6 +49,21 @@
   restores the value captured when the editor opened
   (`components/ui/dialog.tsx:42`, `components/client/ConfigForm.tsx:1630`,
   `components/client/ConfigForm.tsx:2469`).
+- Chat typography uses the 24-family grouped open-source catalog in
+  `lib/fonts.ts` (business, playful, serif, and monospace). Each family is
+  self-hosted through `next/font` with optional families set to
+  `preload: false`; the configurator exposes a 400–700 weight scrubber. Font
+  selection uses a compact transactional dialog: choices preview immediately
+  in the live widget without closing the list, **Keep** accepts the preview,
+  while **Cancel**, Escape, backdrop-close, or the close button restore the
+  opening value. Its backdrop deliberately stays at z-index 40, below the
+  portalled preview at 45 and the dialog at 50
+  (`components/client/FontPickerDialog.tsx:30`,
+  `components/client/ConfigForm.tsx:1450`). `theme.fontWeight` must travel
+  through the validation schema, public browser-safe config, both TestChat
+  config builders, and the ChatWindow root style. Theme presets preserve the
+  user's chosen weight (`app/layout.tsx:31`, `lib/widget-config.ts:176`,
+  `components/widget/ChatWindow.tsx:768`).
 - The entire configurator now uses the same visual hierarchy: the collapsible
   section names the feature area, then compact `SettingsGroup` cards organize
   related decisions. Display separates identity/imagery/privacy; Language &
@@ -91,4 +106,4 @@ Owner-only `system_prompts` table + `/owner/prompts`. A bot references one via
 `config.systemPromptId`, which snapshots the content into `config.systemPrompt`
 (runtime reads the snapshot). Editing a prompt re-pushes to referencing bots.
 
-_Last verified: 2026-07-10._
+_Last verified: 2026-07-15._

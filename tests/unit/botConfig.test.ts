@@ -34,6 +34,7 @@ describe('botConfigSchema', () => {
     expect(parsed.theme.position).toBe('bottom-right')
     expect(parsed.theme.cornerRadius).toBe(16)
     expect(parsed.theme.bubbleRadius).toBe(16)
+    expect(parsed.theme.fontWeight).toBe(400)
     expect(parsed.proactiveGreeting.enabled).toBe(false)
     expect(parsed.proactiveGreeting.delaySeconds).toBe(3)
     expect(parsed.proactiveGreeting.frequency).toBe('once_per_session')
@@ -111,6 +112,13 @@ describe('botConfigSchema', () => {
     expect(() =>
       botConfigSchema.parse({ displayName: 'B', greeting: 'h', systemPrompt: 's', theme: { primaryColor: '#fff', position: 'top' } }),
     ).toThrow()
+  })
+
+  it('accepts supported chat font weights and rejects arbitrary values', () => {
+    const base = { displayName: 'B', greeting: 'h', systemPrompt: 's' }
+    expect(botConfigSchema.parse({ ...base, theme: { fontWeight: 600 } }).theme.fontWeight).toBe(600)
+    expect(() => botConfigSchema.parse({ ...base, theme: { fontWeight: 550 } })).toThrow()
+    expect(() => botConfigSchema.parse({ ...base, theme: { fontWeight: 800 } })).toThrow()
   })
 
   it('requires a proactive greeting variant for the primary language when enabled', () => {

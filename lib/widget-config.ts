@@ -67,6 +67,7 @@ export interface PublicBotConfig {
     cornerRadius: number
     bubbleRadius: number
     fontFamily?: string
+    fontWeight?: 400 | 500 | 600 | 700
     launcherStyle?: 'circle' | 'pill'
     launcherLabel?: string
     launcherShowLogo?: boolean
@@ -179,6 +180,7 @@ export function publicBotConfig(
       cornerRadius: config.theme.cornerRadius ?? 16,
       bubbleRadius: config.theme.bubbleRadius ?? 16,
       fontFamily: config.theme.fontFamily ?? 'geist',
+      fontWeight: config.theme.fontWeight ?? 400,
       launcherStyle: config.theme.launcherStyle ?? 'circle',
       launcherShowLogo: config.theme.launcherShowLogo ?? false,
       launcherPulse: config.theme.launcherPulse ?? false,

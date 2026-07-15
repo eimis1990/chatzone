@@ -182,6 +182,8 @@ export interface BotConfig {
     bubbleRadius: number
     /** Chat font key — see lib/fonts.ts FONT_OPTIONS. */
     fontFamily?: string
+    /** Chat text weight; limited to weights bundled for every selectable font. */
+    fontWeight?: 400 | 500 | 600 | 700
     /** Floating launcher shape: a plain circle, or a pill with a text label. */
     launcherStyle?: 'circle' | 'pill'
     /** Text shown next to the icon when launcherStyle is 'pill'. */

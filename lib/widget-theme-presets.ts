@@ -36,6 +36,7 @@ export const PRESET_PRESERVED_THEME_KEYS = [
   'compactCallButton',
   'showHandoffButton',
   'sendIconUrl',
+  'fontWeight',
 ] as const
 
 // Shared functional defaults — presets only vary the visual fields.
@@ -58,6 +59,9 @@ const base = {
   backgroundImageUrl: '',
   backgroundImageOpacity: 100,
   callButtonColor: '',
+  // Present for schema completeness, but preserved so switching a visual preset
+  // never resets a user's typography choice.
+  fontWeight: 400,
 } as const satisfies Partial<WidgetTheme>
 
 export const WIDGET_THEME_PRESETS: WidgetThemePreset[] = [

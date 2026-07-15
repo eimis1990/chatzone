@@ -13,6 +13,7 @@ const fullConfig: BotConfig = {
     cornerRadius: 16,
     bubbleRadius: 16,
     fontFamily: 'geist',
+    fontWeight: 600,
     launcherStyle: 'pill',
     launcherLabel: 'Chat with us',
     launcherShowLogo: true,
@@ -72,6 +73,7 @@ describe('publicBotConfig', () => {
     expect(pub.displayName).toBe('Test Bot')
     expect(pub.avatarUrl).toBe('https://example.com/avatar.png')
     expect(pub.theme).toEqual(fullConfig.theme)
+    expect(pub.theme.fontWeight).toBe(600)
     expect(pub.languages).toEqual(['en'])
     expect(pub.content.en?.greeting).toBe('Hello! How can I help?')
     expect(pub.content.en?.suggestedQuestions).toEqual(['How do I get started?', 'What are your pricing plans?'])

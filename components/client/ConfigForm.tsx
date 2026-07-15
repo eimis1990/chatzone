@@ -90,8 +90,8 @@ import { TestChat } from '@/components/client/TestChat'
 import { ResizablePanel } from '@/components/ui/resizable-panel'
 import { VoiceSection } from '@/components/client/VoiceSection'
 import { LogoUpload } from '@/components/client/LogoUpload'
+import { FontPickerDialog } from '@/components/client/FontPickerDialog'
 import type { BotConfig } from '@/lib/types'
-import { FONT_OPTIONS, fontStack } from '@/lib/fonts'
 import {
   WIDGET_THEME_PRESETS,
   PRESET_PRESERVED_THEME_KEYS,
@@ -1390,13 +1390,13 @@ export function ConfigForm({
                     <div className="flex flex-col gap-1.5">
                       <Label>Font</Label>
                       <Controller name="proactiveGreeting.fontFamily" control={control} render={({ field }) => (
-                        <Select value={field.value ?? 'inherit'} onValueChange={field.onChange}>
-                          <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
-                          <SelectContent><SelectGroup>
-                            <SelectItem value="inherit">Same as chat</SelectItem>
-                            {FONT_OPTIONS.map((font) => <SelectItem key={font.value} value={font.value} style={{ fontFamily: font.stack }}>{font.label}</SelectItem>)}
-                          </SelectGroup></SelectContent>
-                        </Select>
+                        <FontPickerDialog
+                          label="Greeting font"
+                          value={field.value ?? 'inherit'}
+                          onValueChange={field.onChange}
+                          onBlur={field.onBlur}
+                          includeInherit
+                        />
                       )} />
                     </div>
                     <SliderField label="Corner radius"><Controller control={control} name="proactiveGreeting.cornerRadius" render={({ field }) => (
@@ -1418,15 +1418,29 @@ export function ConfigForm({
                   <div className="flex flex-col gap-1.5">
                     <Label>Chat font</Label>
                     <Controller name="theme.fontFamily" control={control} render={({ field }) => (
-                      <Select value={field.value ?? 'geist'} onValueChange={field.onChange}>
-                        <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
-                        <SelectContent><SelectGroup>
-                          {FONT_OPTIONS.map((font) => <SelectItem key={font.value} value={font.value} style={{ fontFamily: font.stack }}>{font.label}</SelectItem>)}
-                        </SelectGroup></SelectContent>
-                      </Select>
+                      <FontPickerDialog
+                        label="Chat font"
+                        value={field.value ?? 'geist'}
+                        onValueChange={field.onChange}
+                        onBlur={field.onBlur}
+                      />
                     )} />
                   </div>
-                  <p className="flex items-end pb-1 text-sm text-muted-foreground" style={{ fontFamily: fontStack(watch('theme.fontFamily')) }}>The quick brown fox jumps over the lazy dog.</p>
+                  <SliderField label="Font weight">
+                    <Controller name="theme.fontWeight" control={control} render={({ field }) => (
+                      <Scrubber
+                        size="sm"
+                        showLabel={false}
+                        label="Chat font weight"
+                        min={400}
+                        max={700}
+                        step={100}
+                        decimals={0}
+                        value={field.value ?? 400}
+                        onValueChange={field.onChange}
+                      />
+                    )} />
+                  </SliderField>
                 </div>
                 <div className="grid gap-2 sm:grid-cols-2">
                   <CompactToggle label="Glass bubbles" description="Frosted message surfaces">
