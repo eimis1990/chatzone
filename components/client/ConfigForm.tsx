@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect, useMemo, useRef, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
+import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import {
   useForm,
@@ -2612,6 +2613,14 @@ function TestBadge({ variant, children }: { variant: 'ok' | 'error'; children: R
   )
 }
 
+// Descend-into-place variant for the white setting cards. No initial/animate:
+// the state is inherited from CollapsibleSection's body via MotionContext, so
+// the cards stagger in when a section expands.
+const settingsGroupVariants = {
+  collapsed: { opacity: 0, y: -14 },
+  open: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.4, 0, 0.2, 1] as const } },
+}
+
 function SettingsGroup({
   title,
   description,
@@ -2624,14 +2633,16 @@ function SettingsGroup({
   children: ReactNode
 }) {
   return (
-    <Card size="sm" className="gap-0 py-0 shadow-none">
-      <CardHeader className="py-3">
-        <CardTitle>{title}</CardTitle>
-        <CardDescription className="text-xs">{description}</CardDescription>
-        {action ? <CardAction>{action}</CardAction> : null}
-      </CardHeader>
-      <CardContent className="border-t py-3">{children}</CardContent>
-    </Card>
+    <motion.div variants={settingsGroupVariants}>
+      <Card size="sm" className="gap-0 py-0 shadow-none">
+        <CardHeader className="py-3">
+          <CardTitle>{title}</CardTitle>
+          <CardDescription className="text-xs">{description}</CardDescription>
+          {action ? <CardAction>{action}</CardAction> : null}
+        </CardHeader>
+        <CardContent className="border-t py-3">{children}</CardContent>
+      </Card>
+    </motion.div>
   )
 }
 

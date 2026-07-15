@@ -176,8 +176,10 @@
     mask-image: linear-gradient(to left, #000 0%, transparent 100%);
   }
 
-  /* Config section headers: a soft Analytics-style accent wash along the left
-     edge. Unlike metric cards, it stays a vertical field rather than a corner glow. */
+  /* Config section headers: a soft Analytics-style accent wash mirrored on the
+     left and right edges. Each stays a vertical field rather than a corner glow.
+     (Kept as two standalone rules — Lightning CSS drops the shared block from a
+     grouped ::before,::after selector.) */
   .section-header-gradient::before {
     content: '';
     position: absolute;
@@ -197,13 +199,38 @@
       transform 280ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
+  .section-header-gradient::after {
+    content: '';
+    position: absolute;
+    inset: 0 0 0 auto;
+    width: 10rem;
+    pointer-events: none;
+    background: linear-gradient(
+      to left,
+      color-mix(in srgb, var(--primary) 17%, transparent),
+      color-mix(in srgb, var(--primary) 6%, transparent) 58%,
+      transparent
+    );
+    opacity: 0;
+    transform: translateX(18%);
+    transition:
+      opacity 220ms ease-out,
+      transform 280ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
   .section-header-gradient[data-expanded='true']::before {
     opacity: 1;
     transform: translateX(0);
   }
 
+  .section-header-gradient[data-expanded='true']::after {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
   @media (prefers-reduced-motion: reduce) {
-    .section-header-gradient::before {
+    .section-header-gradient::before,
+    .section-header-gradient::after {
       transition: none;
     }
   }

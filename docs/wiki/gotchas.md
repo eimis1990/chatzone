@@ -109,3 +109,12 @@ merely mention Cloudflare don't trip it. Jina-challenged → fall back to direct
 fetch; direct also challenged → the source errors with a clear message instead
 of indexing garbage. When auditing old bots, grep chunks for "Performing
 security verification".
+
+## Grouped `::before, ::after` selectors drop the shared block (Lightning CSS)
+
+A single rule `.x::before, .x::after { ... }` in `app/globals.css` applies the
+declaration block to `::before` ONLY — `::after` silently ends up with
+`content: none` (Tailwind v4's Lightning CSS drops it). Symptom: one pseudo-glow
+renders, the mirror doesn't. Fix: write two standalone rules, one per pseudo.
+Verified via `getComputedStyle(el, '::after').content` returning `"none"`. See
+the `.section-header-gradient` two-sided header glow in globals.css.
