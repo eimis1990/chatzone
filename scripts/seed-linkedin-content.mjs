@@ -1,6 +1,7 @@
 /**
  * One-time, idempotent LinkedIn content refresh for the owner board.
- * Run from the repository root with: node scripts/seed-linkedin-content.mjs
+ * Full restore: node scripts/seed-linkedin-content.mjs
+ * Append only the July editorial set: node scripts/seed-linkedin-content.mjs --new-only
  */
 import { config } from 'dotenv'
 import { createClient } from '@supabase/supabase-js'
@@ -405,6 +406,207 @@ The customer should not have to understand the architecture to receive its benef
     image_url: '/linkedin/20-one-line-install.png',
     image_alt: 'A single lightweight website script opening into a carefully organised architecture of knowledge, commerce, privacy, languages, and handoff.',
   },
+  {
+    id: '30000000-0000-4000-8000-000000000021',
+    title: 'The quiet cost of making customers repeat themselves',
+    body: `A support answer can be technically correct and still create a bad experience.
+
+The customer asks about a delivery. The next reply asks for the order number again. Then another channel asks them to explain the problem from the beginning.
+
+Nothing dramatic happened. No system crashed. But the customer learned that every handoff resets the relationship.
+
+This is why context matters beyond AI. A useful support system should preserve three things: what the customer already said, what has already been checked, and what the next person needs to do.
+
+Fast replies feel slow when they make someone repeat work.
+
+The best handoff is not the one that moves a ticket fastest. It is the one where the customer never notices the boundary between tools or people.`,
+    link: 'https://www.loqara.com/blog/conversational-ai-vs-chatbot',
+    image_url: '/linkedin/21-repeat-yourself.webp',
+    image_alt: 'A lone customer silhouette surrounded by looping speech ribbons that gradually become tangled, representing the frustration of repeating the same story.',
+  },
+  {
+    id: '30000000-0000-4000-8000-000000000022',
+    title: 'The real return on automation is attention',
+    body: `Automation is usually sold with a time-saved calculation.
+
+Five minutes saved here. Two hours saved there. Add the numbers and call it ROI.
+
+But an interrupted hour is not the same as an uninterrupted hour.
+
+When a founder stops packing orders to answer a routine delivery question, the reply may take ninety seconds. Recovering the original train of thought takes longer. Repeat that across a day and the real loss is not time. It is attention fragmented into pieces too small for meaningful work.
+
+Good automation returns blocks of focus. It protects the hour needed to improve a product page, speak to a difficult customer, or make a decision that cannot be delegated.
+
+Measure the minutes if you want. I would also measure how often the day gets broken.`,
+    link: 'https://www.loqara.com/blog/ai-customer-service-small-stores',
+    image_url: '/linkedin/22-returned-attention.webp',
+    image_alt: 'A warm beam of focused light reconnecting scattered fragments of a workday into one calm uninterrupted block.',
+  },
+  {
+    id: '30000000-0000-4000-8000-000000000023',
+    title: 'AI cannot make an unfair policy feel fair',
+    body: `A faster answer does not fix a frustrating answer.
+
+If the returns policy is confusing, the delivery promise is unrealistic, or the exception process has no owner, automation only delivers the disappointment sooner.
+
+This is an uncomfortable but useful test for any customer-service project: separate the communication problem from the policy problem.
+
+AI can explain a clear rule consistently. It can find the right paragraph, ask for the missing detail, and route an exception.
+
+It cannot turn a rule customers dislike into a good experience through better wording alone.
+
+Sometimes the most valuable outcome of automation is not fewer tickets. It is discovering which policy creates the same avoidable argument every week.
+
+Fix the policy first. Then automate the explanation.`,
+    link: 'https://www.loqara.com/blog/reduce-support-tickets-with-ai',
+    image_url: '/linkedin/23-policy-friction.webp',
+    image_alt: 'A polished orange message bubble striking an immovable rough stone barrier, showing that faster communication cannot repair a bad policy.',
+  },
+  {
+    id: '30000000-0000-4000-8000-000000000024',
+    title: 'The best support question is the one customers stop needing to ask',
+    body: `A support team can become excellent at answering the same question.
+
+That does not mean the question should continue to exist.
+
+If customers repeatedly ask whether a product includes a charger, improve the product page. If delivery questions spike after checkout, improve the confirmation email. If everyone misunderstands the return window, rewrite the policy summary.
+
+Support conversations are not only work to be processed. They are evidence about where the customer journey is unclear.
+
+The useful loop is simple:
+
+1. Answer the question well.
+2. Count where it repeats.
+3. Fix the source of confusion.
+4. Watch whether the question disappears.
+
+Resolution rate tells you how support performed. Question elimination tells you whether the business learned.`,
+    link: 'https://www.loqara.com/blog/chatbot-roi-metrics-that-matter',
+    image_url: '/linkedin/24-question-elimination.webp',
+    image_alt: 'A field of repeated question marks fading away after one bright source document is clarified.',
+  },
+  {
+    id: '30000000-0000-4000-8000-000000000025',
+    title: 'Your help centre is product infrastructure',
+    body: `Most help centres are treated like archives.
+
+Write an article when a problem appears. Add it to a category. Hope somebody searches for the right phrase.
+
+But the same content now feeds much more than a help-centre page. It supports human agents, onboarding, search, automated answers, sales conversations, and the increasingly common AI systems that need a reliable source.
+
+That changes the standard.
+
+A useful article needs one clear owner, an update date, concrete examples, unambiguous limits, and language that still makes sense when a paragraph is retrieved on its own.
+
+Knowledge quality is becoming product quality.
+
+The interface may change—from search box to chat to voice—but every channel still inherits the clarity or confusion of the source underneath it.`,
+    link: 'https://www.loqara.com/blog/ai-chatbot-for-online-store',
+    image_url: '/linkedin/25-help-centre-infrastructure.webp',
+    image_alt: 'A glowing knowledge library forming the foundation beneath several customer channels including search, chat, voice, and human support.',
+  },
+  {
+    id: '30000000-0000-4000-8000-000000000026',
+    title: 'Every checkout contains invisible uncertainty',
+    body: `A customer can want the product, accept the price, and still leave.
+
+The missing piece is often confidence.
+
+Will it fit the space? Is this the correct version? Can it arrive before the event? What happens if the colour looks different in person?
+
+Analytics sees a session, a product view, and an abandoned cart. It rarely sees the unanswered question between them.
+
+This is why conversion work should not begin with another pop-up.
+
+First make specifications easier to compare. Put delivery promises where decisions happen. Show return boundaries clearly. Give customers a way to ask the awkward, specific question that no FAQ title matches.
+
+Not every hesitation needs a discount. Many need one credible answer at the right moment.`,
+    link: 'https://www.loqara.com/blog/recover-abandoned-carts-ai-chatbot',
+    image_url: '/linkedin/26-invisible-uncertainty.webp',
+    image_alt: 'A shopping cart approaching checkout while translucent question-shaped shadows reveal hidden doubts around fit, delivery, compatibility, and returns.',
+  },
+  {
+    id: '30000000-0000-4000-8000-000000000027',
+    title: 'Automate the predictable, not the personal',
+    body: `Small teams are often told to automate everything they can.
+
+I think the better rule is to automate what is predictable.
+
+Order status is predictable. Opening hours are predictable. A documented delivery rule is predictable. Routing a request to the right person is predictable.
+
+A frightened customer describing a damaged gift is not. A first sales conversation with an unusual business is not. A sensitive exception is not.
+
+The goal is not to remove people from the customer experience. It is to stop spending human attention on work where empathy and judgment add nothing.
+
+Automate the repetitive layer aggressively. Keep the moments that build trust deliberately human.
+
+That boundary will move as systems improve, but it should always be designed—not discovered after a customer gets trapped.`,
+    link: 'https://www.loqara.com/blog/ai-chatbot-human-handoff',
+    image_url: '/linkedin/27-predictable-personal.webp',
+    image_alt: 'A clean path splitting predictable boxes toward automation while one nuanced human conversation remains warmly lit and personal.',
+  },
+  {
+    id: '30000000-0000-4000-8000-000000000028',
+    title: 'Trust falls faster than response time improves',
+    body: `An instant wrong answer is not better service.
+
+It is simply a faster way to lose trust.
+
+Customer-service technology is often benchmarked on response time because speed is easy to measure. Accuracy, appropriate uncertainty, and recovery are harder.
+
+I would rather evaluate a system with three uncomfortable questions:
+
+• Does it show where the answer came from?
+• Does it admit when the available information is weak?
+• Can the customer reach a person without starting over?
+
+Speed matters after those conditions are met.
+
+A customer may forgive waiting thirty seconds. They are less likely to forgive acting on a confident delivery promise that was invented.
+
+Optimise latency. But earn the right to optimise it by making the answer dependable first.`,
+    link: 'https://www.loqara.com/blog/how-to-choose-ai-support-agent',
+    image_url: '/linkedin/28-trust-before-speed.webp',
+    image_alt: 'A bright speed trail racing toward a fragile glass trust bridge, with a slower grounded path crossing safely.',
+  },
+  {
+    id: '30000000-0000-4000-8000-000000000029',
+    title: 'A product catalogue is a conversation dataset',
+    body: `A catalogue is usually organised for pages and filters.
+
+Customers do not always think in those fields.
+
+They ask for “a quiet coffee grinder for an apartment,” “a jacket that works in warm rain,” or “something like this, but easier to clean.”
+
+Those questions combine product attributes, context, trade-offs, and language that may never appear in a category name.
+
+The stronger the catalogue, the easier it is for any search or conversational system to help. Clear materials. Real dimensions. Compatibility. Use cases. Meaningful attributes. Honest limitations.
+
+AI does not remove the need for structured product information. It exposes whether the structure was useful in the first place.
+
+Write catalogue data for the question a person will ask, not only the filter a database expects.`,
+    link: 'https://www.loqara.com/blog/semantic-search-ecommerce',
+    image_url: '/linkedin/29-catalogue-conversation.webp',
+    image_alt: 'Rows of ordinary product data unfolding into vivid customer questions about context, trade-offs, and real-world use.',
+  },
+  {
+    id: '30000000-0000-4000-8000-000000000030',
+    title: 'The accessibility case for voice starts with occupied hands',
+    body: `Voice interfaces are often presented as futuristic.
+
+Their most useful moments are usually ordinary.
+
+Someone is holding a broken part while trying to find a replacement. A shopper has limited vision. A parent has one free hand. A person finds typing slow or painful. A customer simply explains a complicated need more naturally by speaking.
+
+Accessibility is not a separate edge case added after the main experience. It is a reminder that the “normal” way of using a website is only normal for some people, some of the time.
+
+Voice will not replace reading, forms, or chat. Nor should it.
+
+Good interfaces offer another door into the same information—and make sure every door leads to an equally reliable answer.`,
+    link: 'https://www.loqara.com/blog/add-voice-ai-to-online-store',
+    image_url: '/linkedin/30-voice-accessibility.webp',
+    image_alt: 'Different everyday hands using one calm voice waveform to access the same information while cooking, repairing, carrying, and navigating.',
+  },
 ]
 
 const ideas = [
@@ -464,6 +666,16 @@ const ideas = [
 // first). Kept as an explicit id list so the drafts above can be authored in any
 // order — this list, not array position, defines the board sequence.
 const DRAFT_ORDER = [
+  '30000000-0000-4000-8000-000000000021', // Repetition / context — broad CX opener
+  '30000000-0000-4000-8000-000000000022', // Automation returns attention
+  '30000000-0000-4000-8000-000000000026', // Invisible checkout uncertainty
+  '30000000-0000-4000-8000-000000000024', // Eliminate repeated questions
+  '30000000-0000-4000-8000-000000000027', // Predictable vs personal automation
+  '30000000-0000-4000-8000-000000000029', // Catalogue as conversation data
+  '30000000-0000-4000-8000-000000000023', // AI cannot fix unfair policy
+  '30000000-0000-4000-8000-000000000025', // Help centre as infrastructure
+  '30000000-0000-4000-8000-000000000028', // Trust before speed
+  '30000000-0000-4000-8000-000000000030', // Voice accessibility
   'fa6dec03-f9f4-4b38-a454-a44d8f66e3d2', // The hardest answer is "I don't know" (grounded)
   '10000000-0000-4000-8000-000000000020', // "One line of code" took much more than one line of work
   '27f065e1-6e79-4649-9c8f-13426b3bb6d4', // A support bot should earn the right to keep talking (handoff)
@@ -515,7 +727,37 @@ const rows = [
   })),
 ]
 
-const { error } = await supabase.from('linkedin_posts').upsert(rows, { onConflict: 'id' })
+let rowsToUpsert = rows
+if (process.argv.includes('--new-only')) {
+  const newDrafts = rows
+    .filter((post) => post.id.startsWith('30000000-'))
+    .sort((a, b) => DRAFT_ORDER.indexOf(a.id) - DRAFT_ORDER.indexOf(b.id))
+  const newDraftIds = new Set(newDrafts.map((post) => post.id))
+  const { data: currentDrafts, error: orderError } = await supabase
+    .from('linkedin_posts')
+    .select('id, sort_order')
+    .eq('status', 'draft')
+    .order('sort_order', { ascending: true })
+  if (orderError) throw orderError
+
+  // Keep the new editorial run at the front while preserving the relative order
+  // of every existing draft. Re-running this mode is therefore idempotent.
+  const existingDrafts = currentDrafts.filter((post) => !newDraftIds.has(post.id))
+  const existingUpdates = await Promise.all(
+    existingDrafts.map((post, index) =>
+      supabase
+        .from('linkedin_posts')
+        .update({ sort_order: newDrafts.length + index, updated_at: now })
+        .eq('id', post.id),
+    ),
+  )
+  const existingOrderError = existingUpdates.find((result) => result.error)?.error
+  if (existingOrderError) throw existingOrderError
+
+  rowsToUpsert = newDrafts.map((post, index) => ({ ...post, sort_order: index }))
+}
+
+const { error } = await supabase.from('linkedin_posts').upsert(rowsToUpsert, { onConflict: 'id' })
 if (error) throw error
 
 const { data: counts, error: countError } = await supabase

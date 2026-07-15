@@ -45,4 +45,15 @@ export const HASHTAGS = {
   '10000000-0000-4000-8000-000000000015': '#Ecommerce #AbandonedCart #ConversionRate #CustomerExperience',
   // The worst time to test automation is the campaign (Black Friday)
   '10000000-0000-4000-8000-000000000018': '#BlackFriday #BFCM #Ecommerce #CustomerSupport',
+  // Broader editorial series: customer experience, operations, knowledge, and accessibility
+  '30000000-0000-4000-8000-000000000021': '#CustomerExperience #CustomerSupport #CX #ServiceDesign',
+  '30000000-0000-4000-8000-000000000022': '#Productivity #Automation #SmallBusiness #FounderLife',
+  '30000000-0000-4000-8000-000000000023': '#CustomerExperience #CustomerSupport #ServiceDesign #AI',
+  '30000000-0000-4000-8000-000000000024': '#CustomerSupport #CustomerExperience #KnowledgeManagement #CX',
+  '30000000-0000-4000-8000-000000000025': '#KnowledgeManagement #CustomerExperience #ContentStrategy #AI',
+  '30000000-0000-4000-8000-000000000026': '#Ecommerce #ConversionRate #CustomerExperience #UX',
+  '30000000-0000-4000-8000-000000000027': '#Automation #CustomerSupport #SmallBusiness #CustomerExperience',
+  '30000000-0000-4000-8000-000000000028': '#Trust #ResponsibleAI #CustomerSupport #CustomerExperience',
+  '30000000-0000-4000-8000-000000000029': '#Ecommerce #ProductData #SemanticSearch #CustomerExperience',
+  '30000000-0000-4000-8000-000000000030': '#Accessibility #VoiceAI #InclusiveDesign #CustomerExperience',
 }

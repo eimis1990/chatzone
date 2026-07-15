@@ -22,12 +22,10 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import {
   CopyIcon,
-  ExternalLinkIcon,
   GripVerticalIcon,
   ImageIcon,
   LightbulbIcon,
   Loader2Icon,
-  MegaphoneIcon,
   PencilIcon,
   PlusIcon,
   SendIcon,
@@ -260,20 +258,6 @@ export function LinkedInBoard({ initialPosts }: { initialPosts: LinkedInPost[] }
     })
   }
 
-  function moveTo(post: LinkedInPost, status: LinkedInPostStatus) {
-    if (status === post.status) return
-    const rollback = boardRef.current
-    const next: BoardState = {
-      idea: rollback.idea.filter((item) => item.id !== post.id),
-      draft: rollback.draft.filter((item) => item.id !== post.id),
-      posted: rollback.posted.filter((item) => item.id !== post.id),
-    }
-    next[status].push({ ...post, status })
-    const normalized = normalizeBoard(next)
-    commitBoard(normalized)
-    persistBoard(normalized, rollback)
-  }
-
   function remove(post: LinkedInPost) {
     if (!window.confirm('Delete this post? This cannot be undone.')) return
     startTransition(async () => {
@@ -284,6 +268,7 @@ export function LinkedInBoard({ initialPosts }: { initialPosts: LinkedInPost[] }
           draft: boardRef.current.draft.filter((item) => item.id !== post.id),
           posted: boardRef.current.posted.filter((item) => item.id !== post.id),
         })
+        setOpen(false)
         toast.success('Post deleted')
       } catch (error) {
         toast.error((error as Error).message)
@@ -291,11 +276,10 @@ export function LinkedInBoard({ initialPosts }: { initialPosts: LinkedInPost[] }
     })
   }
 
-  async function copy(post: LinkedInPost) {
-    const text = post.link ? `${post.body}\n\n${post.link}` : post.body
+  async function copyText(text: string, success: string) {
     try {
       await navigator.clipboard.writeText(text)
-      toast.success('Copied — paste into LinkedIn')
+      toast.success(success)
     } catch {
       toast.error('Could not copy to clipboard')
     }
@@ -308,6 +292,9 @@ export function LinkedInBoard({ initialPosts }: { initialPosts: LinkedInPost[] }
 
   const activePost = activePostId
     ? COLUMNS.flatMap(({ key }) => board[key]).find((post) => post.id === activePostId) ?? null
+    : null
+  const selectedPost = form.id
+    ? COLUMNS.flatMap(({ key }) => board[key]).find((post) => post.id === form.id) ?? null
     : null
 
   return (
@@ -406,10 +393,7 @@ export function LinkedInBoard({ initialPosts }: { initialPosts: LinkedInPost[] }
                 pending={pending}
                 activePostId={activePostId}
                 onAdd={() => openNew(column.key)}
-                onEdit={openEdit}
-                onDelete={remove}
-                onCopy={copy}
-                onMove={moveTo}
+                onOpen={openEdit}
               />
             ))}
           </div>
@@ -427,111 +411,158 @@ export function LinkedInBoard({ initialPosts }: { initialPosts: LinkedInPost[] }
       </div>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-h-[92dvh] overflow-y-auto sm:max-w-3xl">
-          <DialogHeader>
-            <DialogTitle>{form.id ? 'Edit LinkedIn post' : 'Create LinkedIn post'}</DialogTitle>
+        <DialogContent
+          aria-label={form.id ? 'Edit LinkedIn post' : 'Create LinkedIn post'}
+          className="top-0 right-0 bottom-0 left-auto grid h-dvh max-h-dvh w-full max-w-2xl translate-x-0 translate-y-0 grid-rows-[auto_minmax(0,1fr)_auto] gap-0 rounded-none border-l bg-background p-0 shadow-2xl duration-200 sm:max-w-2xl data-open:slide-in-from-right-full data-open:zoom-in-100 data-closed:slide-out-to-right-full data-closed:zoom-out-100 motion-reduce:duration-0"
+          overlayClassName="bg-black/25 duration-200 supports-backdrop-filter:backdrop-blur-[2px] motion-reduce:duration-0"
+        >
+          <DialogHeader className="border-b px-5 py-4 pr-14">
+            <div className="flex flex-wrap items-center gap-2">
+              <DialogTitle>{form.id ? 'Edit LinkedIn post' : 'Create LinkedIn post'}</DialogTitle>
+              {form.id && (
+                <Badge variant="secondary" className="font-normal">
+                  {STATUS_LABEL[form.status]}
+                  {form.sort_order !== undefined ? ` · Suggested #${form.sort_order + 1}` : ''}
+                </Badge>
+              )}
+            </div>
             <DialogDescription>
-              Lead with a specific observation, earn the reader&rsquo;s attention, and keep the link as supporting context.
+              Everything needed to prepare, copy, and move this post—without crowding the board.
             </DialogDescription>
           </DialogHeader>
 
-          <FieldGroup>
-            <Field>
-              <FieldLabel htmlFor="li-title">Working title / hook</FieldLabel>
-              <Input
-                id="li-title"
-                value={form.title}
-                onChange={(event) => setForm((current) => ({ ...current, title: event.target.value }))}
-                placeholder="A specific observation the reader will recognize"
-              />
-            </Field>
+          <div className="min-h-0 overflow-y-auto px-5 py-5">
+            <FieldGroup>
+              {form.image_url && (
+                <div className="overflow-hidden rounded-xl border bg-muted/30">
+                  <Image
+                    src={form.image_url}
+                    alt={form.image_alt || 'LinkedIn post visual preview'}
+                    width={1200}
+                    height={628}
+                    unoptimized
+                    className="aspect-[1.91/1] w-full object-cover"
+                  />
+                </div>
+              )}
 
-            <Field>
-              <FieldLabel htmlFor="li-body">Post copy</FieldLabel>
-              <Textarea
-                id="li-body"
-                value={form.body}
-                onChange={(event) => setForm((current) => ({ ...current, body: event.target.value }))}
-                placeholder={form.status === 'idea' ? 'A short angle or evidence to explore…' : 'The complete LinkedIn post…'}
-                maxLength={3000}
-                className="min-h-64 whitespace-pre-wrap"
-              />
-              <FieldDescription className="flex justify-between gap-3">
-                <span>{form.status === 'idea' ? 'Ideas can stay brief.' : 'Use short paragraphs and one clear takeaway.'}</span>
-                <span className="shrink-0 tabular-nums">{form.body.length} / 3000</span>
-              </FieldDescription>
-            </Field>
+              {form.id && (
+                <div className="grid gap-2 sm:grid-cols-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => void copyText(form.link ? `${form.body}\n\n${form.link}` : form.body, 'Post and link copied — paste into LinkedIn')}
+                    aria-label="Copy post and link"
+                  >
+                    <CopyIcon data-icon="inline-start" />
+                    Copy post + link
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => void copyText(form.image_alt, 'Image alt text copied')}
+                    disabled={!form.image_alt}
+                    aria-label="Copy image alt text"
+                  >
+                    <ImageIcon data-icon="inline-start" />
+                    Copy image alt text
+                  </Button>
+                </div>
+              )}
 
-            <div className="grid gap-4 sm:grid-cols-2">
               <Field>
-                <FieldLabel htmlFor="li-link">Supporting link</FieldLabel>
+                <FieldLabel htmlFor="li-title">Working title / hook</FieldLabel>
                 <Input
-                  id="li-link"
-                  value={form.link}
-                  onChange={(event) => setForm((current) => ({ ...current, link: event.target.value }))}
-                  placeholder="https://www.loqara.com/blog/…"
+                  id="li-title"
+                  value={form.title}
+                  onChange={(event) => setForm((current) => ({ ...current, title: event.target.value }))}
+                  placeholder="A specific observation the reader will recognize"
                 />
-                <FieldDescription>Optional; LinkedIn can use it in the post or first comment.</FieldDescription>
               </Field>
 
               <Field>
-                <FieldLabel htmlFor="li-status">Pipeline stage</FieldLabel>
-                <Select
-                  value={form.status}
-                  onValueChange={(value) => setForm((current) => ({ ...current, status: value as LinkedInPostStatus }))}
-                >
-                  <SelectTrigger id="li-status" className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectItem value="idea">Idea</SelectItem>
-                      <SelectItem value="draft">Draft</SelectItem>
-                      <SelectItem value="posted">Posted</SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
+                <FieldLabel htmlFor="li-body">Post copy</FieldLabel>
+                <Textarea
+                  id="li-body"
+                  value={form.body}
+                  onChange={(event) => setForm((current) => ({ ...current, body: event.target.value }))}
+                  placeholder={form.status === 'idea' ? 'A short angle or evidence to explore…' : 'The complete LinkedIn post…'}
+                  maxLength={3000}
+                  className="min-h-80 whitespace-pre-wrap leading-6"
+                />
+                <FieldDescription className="flex justify-between gap-3">
+                  <span>{form.status === 'idea' ? 'Ideas can stay brief.' : 'Use short paragraphs and one clear takeaway.'}</span>
+                  <span className="shrink-0 tabular-nums">{form.body.length} / 3000</span>
+                </FieldDescription>
               </Field>
-            </div>
 
-            <div className="grid gap-4 rounded-xl border bg-muted/30 p-4 sm:grid-cols-2">
-              <Field>
-                <FieldLabel htmlFor="li-image">Post image URL</FieldLabel>
-                <Input
-                  id="li-image"
-                  value={form.image_url}
-                  onChange={(event) => setForm((current) => ({ ...current, image_url: event.target.value }))}
-                  placeholder="/linkedin/post-visual.webp"
-                />
-                <FieldDescription>Landscape 1.91:1 works well in the feed.</FieldDescription>
-              </Field>
-              <Field>
-                <FieldLabel htmlFor="li-image-alt">Image alt text</FieldLabel>
-                <Input
-                  id="li-image-alt"
-                  value={form.image_alt}
-                  onChange={(event) => setForm((current) => ({ ...current, image_alt: event.target.value }))}
-                  placeholder="Describe what the image communicates"
-                />
-                <FieldDescription>Copy this into LinkedIn&rsquo;s image alt-text field.</FieldDescription>
-              </Field>
-            </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field>
+                  <FieldLabel htmlFor="li-link">Supporting link</FieldLabel>
+                  <Input
+                    id="li-link"
+                    value={form.link}
+                    onChange={(event) => setForm((current) => ({ ...current, link: event.target.value }))}
+                    placeholder="https://www.loqara.com/blog/…"
+                  />
+                  <FieldDescription>Optional; use it in the post or first comment.</FieldDescription>
+                </Field>
 
-            {form.image_url && (
-              <div className="overflow-hidden rounded-xl border bg-muted/30">
-                <Image
-                  src={form.image_url}
-                  alt={form.image_alt || 'LinkedIn post visual preview'}
-                  width={1200}
-                  height={628}
-                  unoptimized
-                  className="aspect-[1.91/1] w-full object-cover"
-                />
+                <Field>
+                  <FieldLabel htmlFor="li-status">Pipeline stage</FieldLabel>
+                  <Select
+                    value={form.status}
+                    onValueChange={(value) => setForm((current) => ({ ...current, status: value as LinkedInPostStatus }))}
+                  >
+                    <SelectTrigger id="li-status" className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectItem value="idea">Idea</SelectItem>
+                        <SelectItem value="draft">Draft</SelectItem>
+                        <SelectItem value="posted">Posted</SelectItem>
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </Field>
               </div>
-            )}
-          </FieldGroup>
 
-          <DialogFooter>
+              <div className="grid gap-4 rounded-xl border bg-muted/30 p-4 sm:grid-cols-2">
+                <Field>
+                  <FieldLabel htmlFor="li-image">Post image URL</FieldLabel>
+                  <Input
+                    id="li-image"
+                    value={form.image_url}
+                    onChange={(event) => setForm((current) => ({ ...current, image_url: event.target.value }))}
+                    placeholder="/linkedin/post-visual.webp"
+                  />
+                  <FieldDescription>Landscape 1.91:1 works well in the feed.</FieldDescription>
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor="li-image-alt">Image alt text</FieldLabel>
+                  <Input
+                    id="li-image-alt"
+                    value={form.image_alt}
+                    onChange={(event) => setForm((current) => ({ ...current, image_alt: event.target.value }))}
+                    placeholder="Describe what the image communicates"
+                  />
+                  <FieldDescription>Add this in LinkedIn&rsquo;s image alt-text field.</FieldDescription>
+                </Field>
+              </div>
+            </FieldGroup>
+          </div>
+
+          <DialogFooter className="mx-0 mb-0 rounded-none px-5 py-4">
+            {selectedPost && (
+              <Button
+                variant="outline"
+                onClick={() => remove(selectedPost)}
+                disabled={pending}
+                className="mr-auto text-destructive hover:text-destructive"
+              >
+                <Trash2Icon data-icon="inline-start" />
+                Delete
+              </Button>
+            )}
             <Button variant="outline" onClick={() => setOpen(false)} disabled={pending}>
               Cancel
             </Button>
@@ -552,20 +583,14 @@ function PostColumn({
   pending,
   activePostId,
   onAdd,
-  onEdit,
-  onDelete,
-  onCopy,
-  onMove,
+  onOpen,
 }: {
   column: (typeof COLUMNS)[number]
   posts: LinkedInPost[]
   pending: boolean
   activePostId: string | null
   onAdd: () => void
-  onEdit: (post: LinkedInPost) => void
-  onDelete: (post: LinkedInPost) => void
-  onCopy: (post: LinkedInPost) => void
-  onMove: (post: LinkedInPost, status: LinkedInPostStatus) => void
+  onOpen: (post: LinkedInPost) => void
 }) {
   const { setNodeRef, isOver } = useDroppable({
     id: column.key,
@@ -605,31 +630,28 @@ function PostColumn({
 
       <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-3">
         <SortableContext items={posts.map((post) => post.id)} strategy={verticalListSortingStrategy}>
-        {posts.length === 0 ? (
-          <button
-            type="button"
-            onClick={onAdd}
-            className="flex min-h-32 flex-col items-center justify-center gap-2 rounded-xl border border-dashed bg-card/50 p-5 text-center text-muted-foreground transition-colors hover:border-primary/40 hover:bg-primary/5 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            <PlusIcon className="size-5" aria-hidden="true" />
-            <span className="text-sm font-medium">Add the first {STATUS_LABEL[column.key].toLowerCase()}</span>
-            <span className="text-xs">You can also drop a card here.</span>
-          </button>
-        ) : (
-          posts.map((post, index) => (
-            <PostCard
-              key={post.id}
-              post={post}
-              index={index}
-              pending={pending}
-              active={activePostId === post.id}
-              onEdit={() => onEdit(post)}
-              onDelete={() => onDelete(post)}
-              onCopy={() => void onCopy(post)}
-              onMove={(status) => onMove(post, status)}
-            />
-          ))
-        )}
+          {posts.length === 0 ? (
+            <button
+              type="button"
+              onClick={onAdd}
+              className="flex min-h-32 flex-col items-center justify-center gap-2 rounded-xl border border-dashed bg-card/50 p-5 text-center text-muted-foreground transition-colors hover:border-primary/40 hover:bg-primary/5 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <PlusIcon className="size-5" aria-hidden="true" />
+              <span className="text-sm font-medium">Add the first {STATUS_LABEL[column.key].toLowerCase()}</span>
+              <span className="text-xs">You can also drop a card here.</span>
+            </button>
+          ) : (
+            posts.map((post, index) => (
+              <PostCard
+                key={post.id}
+                post={post}
+                index={index}
+                pending={pending}
+                active={activePostId === post.id}
+                onOpen={() => onOpen(post)}
+              />
+            ))
+          )}
         </SortableContext>
       </div>
     </section>
@@ -641,19 +663,13 @@ function PostCard({
   index,
   pending,
   active,
-  onEdit,
-  onDelete,
-  onCopy,
-  onMove,
+  onOpen,
 }: {
   post: LinkedInPost
   index: number
   pending: boolean
   active: boolean
-  onEdit: () => void
-  onDelete: () => void
-  onCopy: () => void
-  onMove: (status: LinkedInPostStatus) => void
+  onOpen: () => void
 }) {
   const {
     attributes,
@@ -675,113 +691,57 @@ function PostCard({
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition }}
       className={cn(
-        'group shrink-0 overflow-hidden rounded-xl border bg-card shadow-sm transition-[box-shadow,opacity,border-color] duration-200',
+        'group relative shrink-0 overflow-hidden rounded-xl border bg-card shadow-sm transition-[box-shadow,opacity,border-color,transform] duration-200 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md motion-reduce:hover:translate-y-0',
         isOver && 'border-primary/40 ring-2 ring-primary/10',
         (isDragging || active) && 'opacity-40 shadow-none',
       )}
     >
-      {post.image_url ? (
-        <div className="relative overflow-hidden border-b bg-muted">
-          <Image
-            src={post.image_url}
-            alt={post.image_alt || ''}
-            width={1200}
-            height={628}
-            unoptimized
-            className="h-28 w-full object-cover transition-transform duration-300 motion-reduce:transition-none group-hover:scale-[1.01]"
-          />
-        </div>
-      ) : (
-        <div className="flex h-12 items-center gap-2 border-b bg-muted/40 px-3 text-xs text-muted-foreground">
-          <ImageIcon className="size-4" aria-hidden="true" />
-          Visual not attached yet
-        </div>
-      )}
-
-      <div className="flex flex-col gap-3 p-3">
-        <div className="flex items-start gap-2">
-          <button
-            ref={setActivatorNodeRef}
-            type="button"
-            disabled={pending}
-            {...attributes}
-            {...listeners}
-            aria-label={`Drag ${post.title}`}
-            title="Drag to reorder or move column"
-            className="flex size-8 shrink-0 cursor-grab items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:cursor-grabbing disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            <GripVerticalIcon className="size-4" />
-          </button>
-          <div className="min-w-0 flex-1">
-            <div className="mb-1 flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-              <MegaphoneIcon className="size-3" aria-hidden="true" />
-              {STATUS_LABEL[post.status]}
-              <span aria-hidden="true">·</span>
-              <span className="tabular-nums">#{index + 1}</span>
-            </div>
-            <h3 className="text-sm font-semibold leading-snug">{post.title}</h3>
+      <button
+        type="button"
+        onClick={onOpen}
+        aria-label={`Open ${post.title}`}
+        className="block w-full cursor-pointer text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+      >
+        {post.image_url ? (
+          <div className="relative overflow-hidden border-b bg-muted">
+            <Image
+              src={post.image_url}
+              alt={post.image_alt || ''}
+              width={1200}
+              height={628}
+              unoptimized
+              className="h-24 w-full object-cover transition-transform duration-300 motion-reduce:transition-none group-hover:scale-[1.015]"
+            />
           </div>
-          <div className="flex shrink-0 items-center gap-0.5">
-            <Button variant="ghost" size="icon-xs" onClick={onCopy} aria-label={`Copy ${post.title}`}>
-              <CopyIcon />
-            </Button>
-            <Button variant="ghost" size="icon-xs" onClick={onEdit} aria-label={`Edit ${post.title}`}>
-              <PencilIcon />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon-xs"
-              onClick={onDelete}
-              disabled={pending}
-              aria-label={`Delete ${post.title}`}
-              className="hover:bg-destructive/10 hover:text-destructive"
-            >
-              <Trash2Icon />
-            </Button>
+        ) : (
+          <div className="flex h-20 items-center justify-center border-b bg-muted/40 text-muted-foreground">
+            <ImageIcon className="size-5" aria-hidden="true" />
+            <span className="sr-only">Visual not attached yet</span>
           </div>
-        </div>
-
-        {post.body && (
-          <p className="line-clamp-3 whitespace-pre-wrap text-xs leading-5 text-muted-foreground">
-            {post.body}
-          </p>
         )}
+        <h3 className="min-h-16 px-3 py-3 pr-14 text-sm font-semibold leading-snug">
+          {post.title}
+        </h3>
+      </button>
 
-        <div className="flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
-          <span className="tabular-nums">{post.body.length.toLocaleString()} chars</span>
-          {post.image_url && (
-            <span className="inline-flex items-center gap-1">
-              <ImageIcon className="size-3" aria-hidden="true" /> Visual ready
-            </span>
-          )}
-        </div>
-
-        {post.link && (
-          <a
-            href={post.link}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex max-w-full items-center gap-1.5 self-start rounded-lg bg-muted px-2 py-1.5 text-[11px] font-medium text-foreground/80 transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            <ExternalLinkIcon className="size-3 shrink-0" />
-            <span className="truncate">{post.link.replace(/^https?:\/\//, '')}</span>
-          </a>
-        )}
-
-        <Select value={post.status} onValueChange={(value) => onMove(value as LinkedInPostStatus)}>
-          <SelectTrigger size="sm" className="w-full">
-            <span className="text-muted-foreground">Move to</span>
-            <SelectValue>{STATUS_LABEL[post.status]}</SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectItem value="idea">Idea</SelectItem>
-              <SelectItem value="draft">Draft</SelectItem>
-              <SelectItem value="posted">Posted</SelectItem>
-            </SelectGroup>
-          </SelectContent>
-        </Select>
-      </div>
+      <Badge
+        variant="secondary"
+        className="pointer-events-none absolute top-2 left-2 border border-white/60 bg-background/95 font-medium shadow-sm backdrop-blur-sm"
+      >
+        Suggested #{index + 1}
+      </Badge>
+      <button
+        ref={setActivatorNodeRef}
+        type="button"
+        disabled={pending}
+        {...attributes}
+        {...listeners}
+        aria-label={`Drag ${post.title}`}
+        title="Drag to reorder or move column"
+        className="absolute right-2 bottom-2 flex size-11 shrink-0 cursor-grab items-center justify-center rounded-lg border bg-background/95 text-muted-foreground shadow-sm transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:cursor-grabbing disabled:cursor-not-allowed disabled:opacity-40"
+      >
+        <GripVerticalIcon className="size-4" />
+      </button>
     </article>
   )
 }
