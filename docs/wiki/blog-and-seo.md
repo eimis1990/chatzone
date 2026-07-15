@@ -10,7 +10,8 @@ File-based markdown blog that drives organic + AI-engine traffic.
   **FAQPage JSON-LD**. Pages: `app/blog/` + `app/blog/[slug]/`.
 - Author defaults to the site owner (headshot + LinkedIn auto-applied).
 - `app/sitemap.ts` auto-includes every post; `app/robots.ts` + `public/llms.txt`
-  round out discoverability.
+  round out discoverability. The sitemap is automatic, but `public/llms.txt` is
+  a manually curated list: add strategically important new guides there.
 
 ## Visual system (`.article` CSS in `app/globals.css`)
 
@@ -37,5 +38,11 @@ illustrative/abstract — no text in the image (data lives in CSS blocks).
 Competitor is **Parnidia** (see `docs/loqara-vs-parnidia.md`). Mix of how-to +
 comparison/"alternatives" SEO posts; lead with intent keywords; honest voice.
 
-_Last verified: 2026-07-08 (66f6bb8; this session added the AEO Quick-Answer pass
-+ 4 posts)._
+The July 2026 commerce-discovery cluster covers three distinct intents:
+`agentic-commerce-ecommerce` (emerging category),
+`how-to-get-products-recommended-by-chatgpt` (merchant GEO/how-to), and
+`ai-product-recommendation-chatbot` (commercial onsite product discovery).
+They cross-link rather than competing for the same primary query.
+
+_Last verified: 2026-07-15 (added the agentic-commerce / ChatGPT shopping /
+product-recommendation cluster)._

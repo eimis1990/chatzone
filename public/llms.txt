@@ -34,6 +34,9 @@
 - Blog (guides): https://www.loqara.com/blog
 
 ## Popular guides
+- Agentic commerce explained for online stores: https://www.loqara.com/blog/agentic-commerce-ecommerce
+- How to get products recommended by ChatGPT shopping: https://www.loqara.com/blog/how-to-get-products-recommended-by-chatgpt
+- AI product recommendation chatbots: https://www.loqara.com/blog/ai-product-recommendation-chatbot
 - Best AI chatbot for Shopify: https://www.loqara.com/blog/best-ai-chatbot-for-shopify
 - Best AI chatbot for WooCommerce: https://www.loqara.com/blog/best-ai-chatbot-for-woocommerce
 - Best AI chatbot for e-commerce: https://www.loqara.com/blog/best-ai-chatbot-for-ecommerce
