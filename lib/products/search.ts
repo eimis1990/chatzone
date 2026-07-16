@@ -3,7 +3,7 @@ import type { Bot } from '@/lib/types'
 import type { CommerceProduct } from '@/lib/commerce/types'
 import type { Audience } from './catalog'
 import { embedOne } from '@/lib/ai/embeddings'
-import { searchStore } from '@/lib/commerce'
+import { searchStore, listStoreProductsByUrl } from '@/lib/commerce'
 import { storeOrigin, normalizeWooProduct, STOREFRONT_HEADERS } from '@/lib/commerce/woocommerce'
 import { fetchShopifyProductsByIds } from '@/lib/commerce/shopify'
 import { fetchMagentoProductsBySkus } from '@/lib/commerce/magento'
@@ -73,20 +73,46 @@ async function hydrateLive(c: Commerce, ids: string[]): Promise<Map<string, Comm
   return map
 }
 
+/** "…/produkto-zyma/natalijos-hitas/" → "natalijos hitas" (search fallback for URLs). */
+function urlSlugWords(url: string): string {
+  try {
+    const segs = new URL(url).pathname.split('/').filter(Boolean)
+    return decodeURIComponent(segs[segs.length - 1] ?? '').replace(/[-_+]+/g, ' ').trim()
+  } catch {
+    return ''
+  }
+}
+
 /**
  * Product search for a bot: semantic (concept-level) match against the synced
  * index, hydrated with LIVE prices/stock — falls back to live keyword search
  * when there's no index or the semantic path finds nothing.
+ *
+ * A store page URL as the query (category/tag/collection) lists that page's
+ * products directly via the provider; when the provider can't resolve it, the
+ * URL's slug words become the search query instead.
  */
 export async function searchCatalog(
   bot: Bot,
-  query: string,
+  rawQuery: string,
   db: SupabaseClient,
   limit = 8,
   opts: SearchOptions = {},
 ): Promise<CommerceProduct[]> {
   const c = bot.config.commerce
   if (!c?.enabled) return []
+
+  let query = rawQuery.trim()
+  if (/^https?:\/\//i.test(query)) {
+    try {
+      const listed = await listStoreProductsByUrl(c, query, Math.max(limit, 12))
+      const inStock = listed.filter((p) => p.inStock)
+      if (inStock.length) return inStock
+    } catch (err) {
+      console.error('[agent] listing products by URL failed, falling back to search:', err)
+    }
+    query = urlSlugWords(query) || query
+  }
 
   try {
     if (semanticIndexSupported(c) && (await hasIndex(bot.id, db))) {

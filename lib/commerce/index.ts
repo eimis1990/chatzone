@@ -14,8 +14,14 @@ import {
   validateWooStore,
   getWooOrderStatus,
   validateWooOrderAccess,
+  listWooProductsByUrl,
 } from '@/lib/commerce/woocommerce'
-import { searchShopifyProducts, fetchShopifyProductDetails, validateShopifyStore } from '@/lib/commerce/shopify'
+import {
+  searchShopifyProducts,
+  fetchShopifyProductDetails,
+  validateShopifyStore,
+  listShopifyCollectionProducts,
+} from '@/lib/commerce/shopify'
 import {
   searchMagentoProducts,
   validateMagentoStore,
@@ -98,6 +104,29 @@ export async function searchStore(
       return searchMagentoProducts(config.storeUrl, params, deps)
     case 'feed':
       return searchFeed(config.feedUrl ?? '', params, deps)
+    default:
+      return []
+  }
+}
+
+/**
+ * List products from a store category/tag/collection page URL.
+ * WooCommerce (category + tag archives) and Shopify (collections) resolve the
+ * URL natively; other providers return [] and callers fall back to search.
+ */
+export async function listStoreProductsByUrl(
+  config: CommerceConfig,
+  pageUrl: string,
+  limit = 20,
+  deps: CommerceDeps = {},
+): Promise<CommerceProduct[]> {
+  if (!storeConfigured(config)) return []
+  await guardStoreEgress(config, deps)
+  switch (config.provider) {
+    case 'woocommerce':
+      return listWooProductsByUrl(config.storeUrl, pageUrl, limit, deps)
+    case 'shopify':
+      return listShopifyCollectionProducts(config.shopifyDomain!, config.shopifyToken!, pageUrl, limit, deps)
     default:
       return []
   }

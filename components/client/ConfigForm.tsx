@@ -141,20 +141,28 @@ type CommerceTestState =
 const MAX_SUGGESTED_QUESTIONS = 6
 
 // Quick-action type picker (dialog). 'text' and 'url' map to the prompt/url
-// fields; 'handoff' and 'lead' become the typed `action` on the saved item.
-type QaMode = 'text' | 'url' | 'handoff' | 'lead'
+// fields; 'handoff', 'lead' and 'products' become the typed `action` on the
+// saved item ('products' also carries the query field).
+type QaMode = 'text' | 'url' | 'products' | 'handoff' | 'lead'
 
 const QA_MODE_OPTIONS: { value: QaMode; title: string; description: string }[] = [
   { value: 'text', title: 'Send a message', description: 'Sends text to the bot' },
   { value: 'url', title: 'Open a link', description: 'Replies with a link button' },
+  { value: 'products', title: 'Show products', description: 'Displays product cards' },
   { value: 'handoff', title: 'Talk to a human', description: 'Requests a team member' },
   { value: 'lead', title: 'Get contact details', description: 'Opens the contact form' },
 ]
 
 /** One-line description of what a saved quick action does (list rows). */
-function qaSummary(f: { prompt?: string; url?: string; action?: SuggestedQuestionAction }): string {
+function qaSummary(f: {
+  prompt?: string
+  url?: string
+  query?: string
+  action?: SuggestedQuestionAction
+}): string {
   if (f.action === 'handoff') return 'Requests a human'
   if (f.action === 'lead') return 'Opens the contact form'
+  if (f.action === 'products') return `Shows products: ${f.query || 'the title'}`
   if (f.url) return `Opens ${f.url}`
   if (f.prompt) return `Sends: ${f.prompt}`
   return 'Sends the title'
@@ -229,7 +237,7 @@ export function ConfigForm({
   const [qaOpen, setQaOpen] = useState(false)
   const [qaIndex, setQaIndex] = useState<number | null>(null)
   const [qaMode, setQaMode] = useState<QaMode>('text')
-  const [qaDraft, setQaDraft] = useState({ label: '', prompt: '', url: '' })
+  const [qaDraft, setQaDraft] = useState({ label: '', prompt: '', url: '', query: '' })
   // Active language tab — drives which content.<lang> fields are shown + live preview.
   // Persisted to localStorage keyed by botId so it survives refresh.
   const lsKey = `cbz_cfg_lang_${botId}`
@@ -409,16 +417,17 @@ export function ConfigForm({
   // Open the quick-action dialog to add (index null) or edit an existing one.
   const openQuickAction = (index: number | null) => {
     if (index === null) {
-      setQaDraft({ label: '', prompt: '', url: '' })
+      setQaDraft({ label: '', prompt: '', url: '', query: '' })
       setQaMode('text')
     } else {
       const f = activeSuggestedField.fields[index] as {
         label?: string
         prompt?: string
         url?: string
+        query?: string
         action?: SuggestedQuestionAction
       }
-      setQaDraft({ label: f.label ?? '', prompt: f.prompt ?? '', url: f.url ?? '' })
+      setQaDraft({ label: f.label ?? '', prompt: f.prompt ?? '', url: f.url ?? '', query: f.query ?? '' })
       setQaMode(f.action ?? (f.url ? 'url' : 'text'))
     }
     setQaIndex(index)
@@ -433,7 +442,8 @@ export function ConfigForm({
       label,
       prompt: qaMode === 'text' ? qaDraft.prompt.trim() : '',
       url: qaMode === 'url' ? qaDraft.url.trim() : '',
-      action: qaMode === 'handoff' || qaMode === 'lead' ? qaMode : undefined,
+      query: qaMode === 'products' ? qaDraft.query.trim() : '',
+      action: qaMode === 'handoff' || qaMode === 'lead' || qaMode === 'products' ? qaMode : undefined,
     }
     if (qaIndex === null) activeSuggestedField.append(value)
     else activeSuggestedField.update(qaIndex, value)
@@ -1002,20 +1012,23 @@ export function ConfigForm({
                       <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Action type">
                         {QA_MODE_OPTIONS.map((opt) => {
                           const leadOff = opt.value === 'lead' && !leadCaptureEnabled
+                          const productsOff =
+                            opt.value === 'products' && !(watch('commerce.enabled') ?? false)
+                          const off = leadOff || productsOff
                           return (
                             <button
                               key={opt.value}
                               type="button"
                               role="radio"
                               aria-checked={qaMode === opt.value}
-                              disabled={leadOff}
+                              disabled={off}
                               onClick={() => setQaMode(opt.value)}
                               className={cn(
                                 'rounded-lg border p-2.5 text-left transition-colors',
                                 qaMode === opt.value
                                   ? 'border-primary bg-primary/5'
                                   : 'hover:border-muted-foreground/40',
-                                leadOff && 'pointer-events-none opacity-40',
+                                off && 'pointer-events-none opacity-40',
                               )}
                             >
                               <p className="text-sm font-medium leading-tight">{opt.title}</p>
@@ -1028,6 +1041,11 @@ export function ConfigForm({
                         <p className="text-xs text-muted-foreground">
                           “Get contact details” needs lead capture enabled (see the Lead capture
                           section).
+                        </p>
+                      )}
+                      {!(watch('commerce.enabled') ?? false) && (
+                        <p className="text-xs text-muted-foreground">
+                          “Show products” needs a connected store.
                         </p>
                       )}
                     </div>
@@ -1057,6 +1075,22 @@ export function ConfigForm({
                         />
                         <p className="text-xs text-muted-foreground">
                           The visitor gets a link button to follow.
+                        </p>
+                      </div>
+                    )}
+                    {qaMode === 'products' && (
+                      <div className="space-y-1.5">
+                        <Label htmlFor="qa-query">What to show</Label>
+                        <Input
+                          id="qa-query"
+                          value={qaDraft.query}
+                          onChange={(e) => setQaDraft((d) => ({ ...d, query: e.target.value }))}
+                          placeholder="Search phrase — or a category/tag page URL"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          A search phrase (e.g. “dovanų idėjos”) or a store category/tag/collection
+                          page URL — its products appear instantly as cards. Empty = the title is
+                          used as the search.
                         </p>
                       </div>
                     )}

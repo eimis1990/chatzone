@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import {
   searchWooProducts,
+  listWooProductsByUrl,
   fetchWooProductDetails,
   normalizeWooProduct,
   formatWooPrice,
@@ -116,5 +117,64 @@ describe('fetchWooProductDetails', () => {
     })
     expect(out).toEqual([])
     expect(fetchImpl).not.toHaveBeenCalled()
+  })
+})
+
+describe('listWooProductsByUrl', () => {
+  // Route-aware fake fetch: category listing, tag term lookup, product listing.
+  function storeFetch(opts: { catSlug?: string; tagSlug?: string }) {
+    return vi.fn(async (url: string) => {
+      const u = String(url)
+      let body: unknown = []
+      if (u.includes('/products/categories')) {
+        body = opts.catSlug ? [{ id: 7, slug: opts.catSlug }] : []
+      } else if (u.includes('/wp/v2/product_tag')) {
+        body = opts.tagSlug && u.includes(`slug=${opts.tagSlug}`) ? [{ id: 3103 }] : []
+      } else if (u.includes('category=7') || u.includes('tag=3103')) {
+        body = [sample]
+      }
+      return { ok: true, status: 200, json: async () => body, headers: new Headers() }
+    }) as unknown as typeof fetch
+  }
+
+  it('resolves a category archive URL to its products', async () => {
+    const fetchImpl = storeFetch({ catSlug: 'kvepalai' })
+    const products = await listWooProductsByUrl(
+      'https://shop.test',
+      'https://shop.test/produkto-kategorija/kvepalai/',
+      12,
+      { fetchImpl },
+    )
+    expect(products).toHaveLength(1)
+    expect(products[0].title).toBe('Hydrating Eye Mask')
+  })
+
+  it('falls back to a tag term when no category slug matches', async () => {
+    const fetchImpl = storeFetch({ tagSlug: 'natalijos-hitas' })
+    const products = await listWooProductsByUrl(
+      'https://shop.test',
+      'https://homebynb.lt/produkto-zyma/natalijos-hitas/',
+      12,
+      { fetchImpl },
+    )
+    expect(products).toHaveLength(1)
+  })
+
+  it('returns [] when neither category nor tag resolves', async () => {
+    const fetchImpl = storeFetch({})
+    const products = await listWooProductsByUrl(
+      'https://shop.test',
+      'https://shop.test/about-us/',
+      12,
+      { fetchImpl },
+    )
+    expect(products).toEqual([])
+  })
+
+  it('returns [] for an unparseable page URL', async () => {
+    const products = await listWooProductsByUrl('https://shop.test', 'not a url', 12, {
+      fetchImpl: storeFetch({}),
+    })
+    expect(products).toEqual([])
   })
 })

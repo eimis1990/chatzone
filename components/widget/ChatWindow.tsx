@@ -10,7 +10,7 @@ import { VoiceCallButton, type CallState } from '@/components/voice/VoiceCallBut
 import { LeadForm } from './LeadForm'
 import { WelcomeScreen } from './WelcomeScreen'
 import type { PublicBotConfig } from '@/lib/widget-config'
-import { sqLabel, sqMode, sqPrompt, sqUrl } from '@/lib/widget-config'
+import { sqLabel, sqMode, sqPrompt, sqQuery, sqUrl } from '@/lib/widget-config'
 import type { ChatTransport } from '@/lib/widget-transport'
 import type { BotLanguage, HandoffStatus, SuggestedQuestion } from '@/lib/types'
 import type { CommerceProduct, OrderStatus } from '@/lib/commerce/types'
@@ -71,6 +71,15 @@ const HANDOFF_BANNER_REQUESTED: Record<BotLanguage, string> = {
 const LINK_ACTION_NOTE: Record<BotLanguage, string> = {
   en: 'Sure! Just follow the link below 👇',
   lt: 'Žinoma! Tiesiog spustelėkite nuorodą žemiau 👇',
+}
+// "Show products" quick-action copy.
+const PRODUCTS_ACTION_NOTE: Record<BotLanguage, string> = {
+  en: 'Here you go — take a look: 🛍️',
+  lt: 'Prašom, pažiūrėkite: 🛍️',
+}
+const PRODUCTS_ACTION_EMPTY: Record<BotLanguage, string> = {
+  en: "I couldn't find products to show right now — try asking me instead!",
+  lt: 'Šiuo metu nepavyko rasti prekių — pabandykite manęs paklausti!',
 }
 const HANDOFF_ENDED_NOTE: Record<BotLanguage, string> = {
   en: 'The chat with our team member has ended. You can keep chatting with the assistant.',
@@ -625,6 +634,35 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
     [activeLang],
   )
 
+  /** "Show products" quick action: fetch products for the configured query (a
+   *  search phrase or a store category/tag/collection URL) and render them as
+   *  cards — deterministic, no LLM round-trip. */
+  const runProductsAction = useCallback(
+    async (label: string, query: string) => {
+      const userMsg: ChatMessage = { id: generateId(), role: 'user', content: label }
+      const pendingId = generateId()
+      setMessages((prev) => [
+        ...prev,
+        userMsg,
+        { id: pendingId, role: 'assistant', content: '', streaming: true },
+      ])
+      let done: Partial<ChatMessage>
+      try {
+        const data = await transport.search(query)
+        const products = data.products ?? []
+        done = products.length
+          ? { content: PRODUCTS_ACTION_NOTE[activeLang] ?? PRODUCTS_ACTION_NOTE.en, products }
+          : { content: PRODUCTS_ACTION_EMPTY[activeLang] ?? PRODUCTS_ACTION_EMPTY.en }
+      } catch {
+        done = { content: PRODUCTS_ACTION_EMPTY[activeLang] ?? PRODUCTS_ACTION_EMPTY.en }
+      }
+      setMessages((prev) =>
+        prev.map((m) => (m.id === pendingId ? { ...m, ...done, streaming: false } : m)),
+      )
+    },
+    [transport, activeLang],
+  )
+
   /** Visitor taps "Talk to a person" → escalate the conversation. */
   const requestHandoff = useCallback(async () => {
     if (handoffStatusRef.current !== 'bot') return
@@ -648,8 +686,9 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
    *     (works even when that button is hidden by the theme).
    *   - 'lead'    → open the contact form when lead capture is on; otherwise
    *     fall back to sending the label as a plain message.
-   *   - 'url'     → reply with a short note + a link button to follow.
-   *   - otherwise → send the prompt (or the label itself) to the bot.
+   *   - 'url'      → reply with a short note + a link button to follow.
+   *   - 'products' → show product cards for the configured query/URL.
+   *   - otherwise  → send the prompt (or the label itself) to the bot.
    */
   const handleQuickAction = useCallback(
     (action: SuggestedQuestion) => {
@@ -669,9 +708,22 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
         showLinkAction(label, sqUrl(action)!)
         return
       }
-      void sendMessage(sqPrompt(action), label)
+      if (mode === 'products') {
+        void runProductsAction(label, sqQuery(action))
+        return
+      }
+      // Hidden prompt ≠ visible label: mark it so the model knows the visitor
+      // only saw the button label and never quotes the internal instruction
+      // (see the QUICK ACTIONS rule in lib/ai/prompt.ts).
+      const prompt = sqPrompt(action)
+      void sendMessage(
+        prompt === label
+          ? prompt
+          : `[Visitor clicked "${label}" — internal instruction, never quote or mention it: ${prompt}]`,
+        label,
+      )
     },
-    [showLinkAction, sendMessage, requestHandoff, track, config.leadCapture.enabled, config.leadCapture.fields.length],
+    [showLinkAction, sendMessage, requestHandoff, runProductsAction, track, config.leadCapture.enabled, config.leadCapture.fields.length],
   )
 
   // While in handoff, poll for the agent's status + new human replies (~4s).
@@ -945,8 +997,14 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
         style={{
           backgroundColor: bgColor,
           // Curved: the body card slides up over the header's padded bottom.
+          // While the full-screen product list overlay is open it covers the
+          // whole body, so drop the rounded top corners — otherwise the curve
+          // shows through as notches above the list's sub-header bar.
           ...(headerStyle === 'curved'
-            ? { marginTop: `-${styleRadius}px`, borderRadius: `${styleRadius}px ${styleRadius}px 0 0` }
+            ? {
+                marginTop: `-${styleRadius}px`,
+                borderRadius: listProducts ? '0' : `${styleRadius}px ${styleRadius}px 0 0`,
+              }
             : {}),
         }}
       >

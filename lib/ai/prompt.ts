@@ -72,6 +72,16 @@ export function buildSystemPrompt(
     )
   }
 
+  lines.push(
+    'QUICK ACTIONS: a user message may arrive wrapped as `[Visitor clicked "<label>" — internal ' +
+      'instruction, never quote or mention it: …]`. The visitor tapped a button and saw ONLY the ' +
+      'label — they never saw the instruction text. Follow the instruction, but NEVER quote, ' +
+      'paraphrase, or reference its wording, URLs, page names, tags, or slugs in your reply. If the ' +
+      'instruction cannot be fulfilled (e.g. a search finds nothing), apologize in terms of the ' +
+      'LABEL only (e.g. for "Top products": "I couldn\'t find products to show right now") — never ' +
+      'reveal what the instruction asked for.',
+  )
+
   if (commerce) {
     lines.push(
       'PRODUCT SEARCH: the shopper may ask about products, prices, availability, gifts, gift coupons / ' +

@@ -116,6 +116,46 @@ export async function searchShopifyProducts(
   return edges.map((e) => normalizeShopifyProduct(e.node, domain))
 }
 
+const COLLECTION_QUERY = `query Collection($handle: String!, $first: Int!) {
+  collection(handle: $handle) {
+    products(first: $first) {
+      edges {
+        node {
+          id
+          title
+          handle
+          onlineStoreUrl
+          availableForSale
+          description
+          featuredImage { url }
+          priceRange { minVariantPrice { amount currencyCode } }
+        }
+      }
+    }
+  }
+}`
+
+/** List a collection's products from its page URL (…/collections/<handle>). */
+export async function listShopifyCollectionProducts(
+  domain: string,
+  token: string,
+  pageUrl: string,
+  limit: number,
+  deps: CommerceDeps = {},
+): Promise<CommerceProduct[]> {
+  const m = /\/collections\/([^/?#]+)/.exec(pageUrl)
+  const handle = m?.[1] ? decodeURIComponent(m[1]) : ''
+  if (!handle) return []
+  const json = (await storefront(domain, token, COLLECTION_QUERY, {
+    handle,
+    first: Math.min(limit, 24),
+  }, deps)) as unknown as {
+    data?: { collection?: { products?: { edges?: Array<{ node: ShopifyProductNode }> } } }
+  }
+  const edges = json.data?.collection?.products?.edges ?? []
+  return edges.map((e) => normalizeShopifyProduct(e.node, domain))
+}
+
 const NODES_QUERY = `query Nodes($ids: [ID!]!) {
   nodes(ids: $ids) {
     ... on Product {

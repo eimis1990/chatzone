@@ -26,14 +26,24 @@ export function sqUrl(q: SuggestedQuestion): string | undefined {
   return u || undefined
 }
 
-/** The typed behavior of a quick action ('handoff' | 'lead'), if any. */
+/** The typed behavior of a quick action ('handoff' | 'lead' | 'products'), if any. */
 export function sqAction(q: SuggestedQuestion): SuggestedQuestionAction | undefined {
   if (typeof q === 'string') return undefined
-  return q.action === 'handoff' || q.action === 'lead' ? q.action : undefined
+  return q.action === 'handoff' || q.action === 'lead' || q.action === 'products'
+    ? q.action
+    : undefined
+}
+
+/** The search phrase (or store page URL) a 'products' quick action shows. */
+export function sqQuery(q: SuggestedQuestion): string {
+  if (typeof q === 'string') return q
+  return q.query?.trim() || q.label
 }
 
 /** Behavior of a quick action. Precedence: action > url > prompt > message. */
-export function sqMode(q: SuggestedQuestion): 'handoff' | 'lead' | 'url' | 'prompt' | 'message' {
+export function sqMode(
+  q: SuggestedQuestion,
+): 'handoff' | 'lead' | 'products' | 'url' | 'prompt' | 'message' {
   if (typeof q === 'string') return 'message'
   const action = sqAction(q)
   if (action) return action

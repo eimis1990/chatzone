@@ -189,12 +189,12 @@ function ProductCard({
   outOfStockLabel,
   onProductClick,
 }: ProductCardProps) {
-  // Card takes ~80% of the chat width so the next card peeks (signals scroll).
+  // Card takes ~72% of the chat width so the next card peeks (signals scroll).
   const cardRadius = bubbleRadius
   const imageRadius = `${cardRadius}px ${cardRadius}px 0 0`
   const cardStyle = {
     borderRadius: `${cardRadius}px`,
-    width: '80%',
+    width: '72%',
     flexShrink: 0,
   }
 

@@ -144,6 +144,81 @@ export async function searchWooProducts(
   return data.map(normalizeWooProduct)
 }
 
+/** Last non-empty path segment of a URL, decoded — the term slug of an archive page. */
+export function lastPathSegment(pageUrl: string): string {
+  try {
+    const segs = new URL(pageUrl).pathname.split('/').filter(Boolean)
+    return decodeURIComponent(segs[segs.length - 1] ?? '')
+  } catch {
+    return ''
+  }
+}
+
+/**
+ * List products from a category/tag archive page URL (e.g. /produkto-zyma/x/,
+ * /product-category/y/). Permalink bases vary per store/language, so we take
+ * the LAST path segment as the term slug and try category first, then tag.
+ * Returns [] when neither resolves — the caller falls back to search.
+ */
+export async function listWooProductsByUrl(
+  storeUrl: string,
+  pageUrl: string,
+  limit: number,
+  deps: CommerceDeps = {},
+): Promise<CommerceProduct[]> {
+  const fetchImpl = deps.fetchImpl ?? fetch
+  const base = storeOrigin(storeUrl)
+  const slug = lastPathSegment(pageUrl)
+  if (!slug) return []
+
+  const list = async (param: 'category' | 'tag', termId: number): Promise<CommerceProduct[]> => {
+    const res = await fetchImpl(
+      `${base}/wp-json/wc/store/v1/products?${param}=${termId}&per_page=${Math.min(limit, 24)}`,
+      { headers: STOREFRONT_HEADERS },
+    )
+    if (!res.ok) return []
+    const rows = (await res.json()) as WooProduct[]
+    return Array.isArray(rows) ? rows.map(normalizeWooProduct) : []
+  }
+
+  // Category: the public Store API lists categories (id + slug).
+  try {
+    const res = await fetchImpl(`${base}/wp-json/wc/store/v1/products/categories?per_page=100`, {
+      headers: STOREFRONT_HEADERS,
+    })
+    if (res.ok) {
+      const cats = (await res.json()) as Array<{ id: number; slug?: string }>
+      const hit = Array.isArray(cats) ? cats.find((c) => c.slug === slug) : undefined
+      if (hit) {
+        const products = await list('category', hit.id)
+        if (products.length) return products
+      }
+    }
+  } catch {
+    // fall through to tag
+  }
+
+  // Tag: the Store API has no tags listing — resolve the term id via the core
+  // WP REST taxonomy route (public on stock WooCommerce installs).
+  try {
+    const res = await fetchImpl(
+      `${base}/wp-json/wp/v2/product_tag?slug=${encodeURIComponent(slug)}`,
+      { headers: STOREFRONT_HEADERS },
+    )
+    if (res.ok) {
+      const tags = (await res.json()) as Array<{ id: number }>
+      if (Array.isArray(tags) && tags[0]?.id) {
+        const products = await list('tag', tags[0].id)
+        if (products.length) return products
+      }
+    }
+  } catch {
+    // no tag match either
+  }
+
+  return []
+}
+
 /**
  * Full live details for up to a few products by id (public Store API): the
  * complete description (HTML-stripped, capped) plus attribute lines like
