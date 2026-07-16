@@ -96,6 +96,7 @@ import {
   WIDGET_THEME_PRESETS,
   PRESET_PRESERVED_THEME_KEYS,
 } from '@/lib/widget-theme-presets'
+import { WIDGET_GRADIENT_PRESETS } from '@/lib/widget-gradients'
 import { cn, readableTextColor } from '@/lib/utils'
 import { normalizeLanguageSelection } from '@/lib/validation/normalize-languages'
 import { SUPPORTED_LANGUAGES, languageMeta } from '@/lib/i18n/languages'
@@ -1499,6 +1500,49 @@ export function ConfigForm({
                       )} />
                     </CompactToggle>
                   )}
+                </div>
+                {/* Mesh-gradient presets — stored in theme.backgroundImageUrl as
+                    tiny data: SVGs, so the image pipeline below applies as-is. */}
+                <div className="flex flex-col gap-1.5">
+                  <Label>Background gradient</Label>
+                  {/* p-1.5 keeps the selection ring+offset (4px) inside the
+                      scroll clip; -mx-1.5 restores the visual left alignment. */}
+                  <div className="-mx-1.5 flex gap-2 overflow-x-auto p-1.5 pb-2" style={{ scrollbarWidth: 'thin' }}>
+                    {WIDGET_GRADIENT_PRESETS.map((g) => {
+                      const selected = watch('theme.backgroundImageUrl') === g.url
+                      return (
+                        <button
+                          key={g.id}
+                          type="button"
+                          title={g.name}
+                          aria-label={`${g.name} gradient`}
+                          aria-pressed={selected}
+                          onClick={() => {
+                            setValue('theme.backgroundImageUrl', selected ? '' : g.url, {
+                              shouldDirty: true,
+                              shouldValidate: true,
+                            })
+                            if (!selected) {
+                              // Base color paints before the SVG loads and drives
+                              // the widget's dark-body text contrast.
+                              setValue('theme.backgroundColor', g.baseColor, { shouldDirty: true })
+                              setValue('theme.backgroundImageOpacity', 100, { shouldDirty: true })
+                            }
+                          }}
+                          className={cn(
+                            'h-16 w-12 shrink-0 rounded-lg bg-cover bg-center transition-shadow',
+                            selected
+                              ? 'ring-2 ring-primary ring-offset-2 ring-offset-background'
+                              : 'ring-1 ring-black/10 hover:ring-primary/50',
+                          )}
+                          style={{ backgroundImage: `url("${g.url}")` }}
+                        />
+                      )
+                    })}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Tap to apply — or upload your own image below. Tap again to remove.
+                  </p>
                 </div>
                 <LogoUpload botId={botId} control={control} setValue={setValue} name="theme.backgroundImageUrl" label="Chat background image (optional)" filePrefix="bg" description="Shown behind the conversation." />
                 {watch('theme.backgroundImageUrl') ? (

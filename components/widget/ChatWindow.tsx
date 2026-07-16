@@ -1013,7 +1013,7 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
           <div
             aria-hidden="true"
             className="pointer-events-none absolute inset-0 -z-10 bg-cover bg-center"
-            style={{ backgroundImage: `url(${bgImage})`, opacity: bgImageOpacity }}
+            style={{ backgroundImage: `url("${bgImage}")`, opacity: bgImageOpacity }}
           />
         ) : null}
         {/* Handoff banner */}
