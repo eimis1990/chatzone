@@ -1,10 +1,14 @@
 import type { BotConfig, BotLanguage, LanguageContent } from '@/lib/types'
 import type { CommerceProduct } from '@/lib/commerce/types'
-import { storeConfigured, orderLookupEnabled, productDetailsSupported } from '@/lib/commerce'
+import {
+  storeConfigured,
+  orderLookupEnabled,
+  productDetailsSupported,
+} from '@/lib/commerce/capabilities'
 import {
   providerDisplayGuidance,
   providerSearchQueryGuidance,
-} from '@/lib/products/provider-profiles'
+} from '@/lib/products/provider-profiles/guidance'
 
 export interface ChatMessage {
   role: 'system' | 'user' | 'assistant'

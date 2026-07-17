@@ -131,6 +131,21 @@ pages may omit JSON-LD `offers.price`; use the visible main price fallback, not 
 price (`lib/commerce/verskis.ts:207-217`). Also, the widget intentionally previews four carousel
 cards: inspect the “See all (N)” count before diagnosing an N-result search as only four results.
 
+## Edge prompt imports must not cross into server provider registries
+
+`/api/llm/[publicKey]` is intentionally Edge-hosted for low-latency voice SSE.
+It imports `lib/ai/prompt.ts`, so even a pure-looking helper imported from an
+aggregate server module can pull every transitive dependency into the Edge
+bundle. The first provider-profile implementation made this chain:
+`Edge route → prompt → provider-profiles/index → Verskis → catalog → node:crypto`,
+which compiled but failed while Vercel collected page data. Import prompt-only
+metadata from `lib/products/provider-profiles/guidance.ts` and pure capability
+checks from `lib/commerce/capabilities.ts`; never import the aggregate profile
+or commerce dispatcher from Edge prompt code. Run `npm run build`, not only
+TypeScript/unit tests—the production bundler is what evaluates runtime
+compatibility. Next's Edge runtime supports Web Crypto, not native `node:*`
+modules.
+
 ## Anti-bot interstitials index as "knowledge"
 
 Cloudflare challenge pages return HTTP 200 with clean-looking text, so Jina

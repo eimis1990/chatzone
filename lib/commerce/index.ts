@@ -36,6 +36,15 @@ import {
   validateVerskisStore,
 } from '@/lib/commerce/verskis'
 import { assertPublicUrl } from '@/lib/net/ssrf'
+import { storeConfigured } from '@/lib/commerce/capabilities'
+import type { CommerceConfig } from '@/lib/commerce/capabilities'
+
+export {
+  orderLookupEnabled,
+  productDetailsSupported,
+  storeConfigured,
+} from '@/lib/commerce/capabilities'
+export type { CommerceConfig } from '@/lib/commerce/capabilities'
 
 /**
  * SSRF guard for connected-store egress. Runs only on the real-network path
@@ -55,44 +64,6 @@ async function guardStoreEgress(
     targets.push(cfg.shopifyDomain.startsWith('http') ? cfg.shopifyDomain : `https://${cfg.shopifyDomain}`)
   }
   for (const t of targets) await assertPublicUrl(t)
-}
-
-export interface CommerceConfig {
-  enabled: boolean
-  provider: CommerceProvider
-  /** WooCommerce store URL (and base for the REST API). */
-  storeUrl: string
-  /** WooCommerce REST consumer key/secret — server-only, for order lookups. */
-  restKey?: string
-  restSecret?: string
-  /** Shopify Storefront domain + token (server-only token). */
-  shopifyDomain?: string
-  shopifyToken?: string
-  /** Magento integration access token — server-only, for order lookups. */
-  magentoToken?: string
-  /** Product feed URL (JSON/XML/CSV) for the 'feed' provider. */
-  feedUrl?: string
-  /** A static discount the agent can offer on discount intent. */
-  discount?: { enabled: boolean; code?: string; description?: string }
-}
-
-/** Whether the active provider has the fields it needs to run a search. */
-export function storeConfigured(config: CommerceConfig): boolean {
-  if (!config?.enabled) return false
-  switch (config.provider) {
-    case 'woocommerce':
-      return Boolean(config.storeUrl)
-    case 'shopify':
-      return Boolean(config.shopifyDomain && config.shopifyToken)
-    case 'magento':
-      return Boolean(config.storeUrl)
-    case 'verskis':
-      return Boolean(config.storeUrl)
-    case 'feed':
-      return Boolean(config.feedUrl)
-    default:
-      return false
-  }
 }
 
 /** Search a store's catalog using the configured provider. */
@@ -166,16 +137,6 @@ export async function getProductDetails(
     default:
       return []
   }
-}
-
-/** Providers with a live full-details API — gates the get_product_details tool. */
-export function productDetailsSupported(config: CommerceConfig | undefined | null): boolean {
-  if (!config || !storeConfigured(config)) return false
-  return (
-    config.provider === 'woocommerce' ||
-    config.provider === 'shopify' ||
-    config.provider === 'verskis'
-  )
 }
 
 /** Validate a store connection and return the catalog size for the provider. */
@@ -257,14 +218,6 @@ export function getDiscount(config: CommerceConfig): DiscountInfo {
   const d = config?.discount
   if (!d?.enabled || !d.code) return { enabled: false }
   return { enabled: true, code: d.code, description: d.description }
-}
-
-/** Whether order lookups are usable (enabled + store + the provider's creds). */
-export function orderLookupEnabled(config: CommerceConfig): boolean {
-  if (!config?.enabled || !config.storeUrl) return false
-  if (config.provider === 'magento') return Boolean(config.magentoToken)
-  if (config.provider === 'woocommerce') return Boolean(config.restKey && config.restSecret)
-  return false
 }
 
 /** A short, agent-speakable summary of an order lookup (the agent translates it). */

@@ -54,13 +54,25 @@ that parameter through the provider profile. Do not branch on the domain.
 
 - General commerce rules stay in `lib/ai/prompt.ts` and
   `lib/ai/commerce-tool.ts`.
-- Provider-specific tool guidance comes from the selected provider profile.
+- Provider-specific prompt text lives in the Edge-safe
+  `lib/products/provider-profiles/guidance.ts`; the server profile imports that
+  text, never the other way around.
 - Industry/store conversation behavior belongs in an assigned reusable system
   prompt (for example `docs/prompt-templates/furniture-store.md`), not in every
   commerce bot's shared prompt.
 
 This distinction matters: Lithuanian canonical-form furniture guidance is
 useful for a furniture bot, but must not bias an English Shopify cosmetics bot.
+
+`app/api/llm/[publicKey]` runs on the Edge runtime and imports
+`lib/ai/prompt.ts`. That import graph must remain free of Node-only catalog,
+hydration, SSRF/DNS, and hashing code. Prompt guidance therefore imports the
+lightweight module above directly; pure store/order/detail capability checks
+live separately in `lib/commerce/capabilities.ts`. The aggregate
+`provider-profiles/index.ts` and `lib/commerce/index.ts` are server entrypoints
+and must not be imported by Edge prompt code. A production `npm run build` is
+the regression check because ordinary unit tests run in Node and cannot expose
+this bundle-evaluation failure.
 
 ## Shared automatically vs. provider opt-in
 

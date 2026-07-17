@@ -4,6 +4,7 @@ import { fetchVerskisCatalog } from '@/lib/products/catalog'
 import type { CommerceProduct } from '@/lib/commerce/types'
 import type { CompleteDisplaySelectionInput } from './types'
 import type { CommerceProviderProfile } from './types'
+import { verskisPromptGuidance } from './guidance'
 
 function fold(value: string): string {
   return value
@@ -159,15 +160,7 @@ export const verskisProductSearchProfile: CommerceProviderProfile = {
     skipAiEnrichment: true,
   },
   productDetailsReference: (product) => product.url,
-  queryGuidance:
-    'For this Verskis catalog, express hard attribute values in the catalog\'s ' +
-    'canonical form rather than copying an inflected conversational phrase. Keep the product ' +
-    'type and actual attribute value; omit filler words such as "color" when possible.',
-  displayGuidance:
-    'For a category browse, including a category plus one simple attribute such as color or ' +
-    'function, display exactly min(20, the number of verified matching candidates). If at least 20 ' +
-    'verified matches are available, pass exactly 20 ids; do not stop at 4-15. The first 4 are only ' +
-    'preview cards and the rest remain available behind the full-results list.',
+  ...verskisPromptGuidance,
   completeDisplaySelection: completeVerskisBrowseSelection,
   semantic: {
     matcherRpc: 'match_products_verskis',

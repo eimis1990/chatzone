@@ -10,6 +10,10 @@ import type {
 } from './types'
 import { verskisProductSearchProfile } from './verskis'
 import { woocommerceProductSearchProfile } from './woocommerce'
+export {
+  providerDisplayGuidance,
+  providerSearchQueryGuidance,
+} from './guidance'
 
 /** Single extension point for provider-specific commerce behavior and policy.
  * A provider improvement belongs in its profile/connector/RPC, never in a
@@ -24,14 +28,6 @@ export const commerceProviderProfiles = Object.freeze({
 
 export function commerceProviderProfile(config: CommerceConfig): CommerceProviderProfile {
   return commerceProviderProfiles[config.provider]
-}
-
-export function providerSearchQueryGuidance(config?: CommerceConfig): string {
-  return config ? commerceProviderProfile(config).queryGuidance ?? '' : ''
-}
-
-export function providerDisplayGuidance(config?: CommerceConfig): string {
-  return config ? commerceProviderProfile(config).displayGuidance ?? '' : ''
 }
 
 export function providerCandidateDetailsLimit(config?: CommerceConfig): number {
