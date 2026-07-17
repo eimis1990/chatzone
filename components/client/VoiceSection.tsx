@@ -412,7 +412,9 @@ function LanguageVoicePicker({
           control={control}
           render={({ field }) => (
             <Select
-              value={(field.value as string) || undefined}
+              // Base UI uses `undefined` to mean uncontrolled. Keep the picker
+              // controlled while the async voice list chooses its initial value.
+              value={(field.value as string | undefined) || null}
               onValueChange={field.onChange}
             >
               <SelectTrigger id={`voice-${lang}`} className="flex-1" aria-label={`Select ${label} voice`}>

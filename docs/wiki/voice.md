@@ -23,6 +23,11 @@ on **ElevenLabs Conversational AI**.
   (`{ en, lt? }`, `lib/validation/schemas.ts:210-212`). LLM is a built-in
   ElevenLabs model id chosen from `VOICE_LLM_OPTIONS`
   (`lib/ai/voice-models.ts:14-21`), default `gpt-4o`.
+- The configurator fetches curated voices asynchronously, then auto-selects the
+  first valid voice for any enabled language without a saved selection. The Base
+  UI Select must receive controlled `null` during that gap—`undefined` makes it
+  uncontrolled and causes a warning when the voice id arrives
+  (`components/client/VoiceSection.tsx:410-419`).
 - **Prompt** = `buildAgentPrompt` (`lib/ai/elevenlabs-agent.ts:71`): the bot's
   `cfg.systemPrompt` + hardcoded voice blocks (spoken-delivery style + per-tool
   guidance for search/knowledge/order/discount). Product results render as cards,
@@ -74,7 +79,7 @@ Stripe price/product is configured to be.
 See also [plans-and-entitlements](plans-and-entitlements.md) for how
 `voice_addon` fits into the broader entitlements model.
 
-_Last verified: 2026-07-08 (66f6bb8)._
+_Last verified: 2026-07-17._
 
 ## ASR language drift (LT → LV)
 
