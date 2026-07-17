@@ -331,13 +331,14 @@ export function buildDisplayToolConfig(config: Bot['config']) {
     parameters: {
       type: 'object' as const,
       properties: {
-        productIds: {
-          type: 'array' as const,
-          items: { type: 'string' as const },
-          description: 'Verified candidate product ids, best first.',
+        productIdsJson: {
+          type: 'string' as const,
+          description:
+            'A JSON array string containing verified candidate product ids, best first, for example ' +
+            '["id1","id2"]. Copy ids exactly from search_products.',
         },
       },
-      required: ['productIds'],
+      required: ['productIdsJson'],
     },
   }
 }
@@ -413,12 +414,18 @@ async function ensureTool(db: SupabaseClient, key: string, toolConfig: object): 
   if (existing) {
     const res = await fetch(`${API}/convai/tools/${existing}`, { method: 'PATCH', headers, body })
     if (res.ok) return existing
-    if (res.status !== 404) throw new Error(`Failed to update tool: HTTP ${res.status}`)
+    if (res.status !== 404) {
+      const detail = (await res.text()).replace(/\s+/g, ' ').trim().slice(0, 800)
+      throw new Error(`Failed to update tool: HTTP ${res.status}${detail ? ` — ${detail}` : ''}`)
+    }
     // 404 → the tool was deleted; fall through and recreate.
   }
 
   const res = await fetch(`${API}/convai/tools`, { method: 'POST', headers, body })
-  if (!res.ok) throw new Error(`Failed to create tool: HTTP ${res.status}`)
+  if (!res.ok) {
+    const detail = (await res.text()).replace(/\s+/g, ' ').trim().slice(0, 800)
+    throw new Error(`Failed to create tool: HTTP ${res.status}${detail ? ` — ${detail}` : ''}`)
+  }
   const data = (await res.json()) as { id: string }
   await setSetting(db, key, data.id)
   return data.id

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  parseVoiceProductIds,
   selectVoiceProductCandidates,
   voiceProductCandidateSummary,
 } from '@/lib/ai/voice-product-search'
@@ -54,5 +55,16 @@ describe('voiceProductCandidateSummary', () => {
     expect(
       selectVoiceProductCandidates(candidates, ['missing', 'second', 'second', 'first']),
     ).toEqual([second, first])
+  })
+})
+
+describe('parseVoiceProductIds', () => {
+  it('parses the scalar JSON protocol used by the ElevenLabs client tool', () => {
+    expect(parseVoiceProductIds('["first","second"]')).toEqual(['first', 'second'])
+  })
+
+  it('keeps stale array agents and plain-list model output compatible', () => {
+    expect(parseVoiceProductIds([' first ', 'second', 3])).toEqual(['first', 'second'])
+    expect(parseVoiceProductIds('first,\nsecond')).toEqual(['first', 'second'])
   })
 })

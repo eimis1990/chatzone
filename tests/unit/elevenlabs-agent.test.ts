@@ -100,6 +100,8 @@ describe('buildAgentConfig', () => {
     const display = buildDisplayToolConfig(verskis)
     expect(search.description).toContain("catalog's canonical form")
     expect(display.description).toContain('exactly min(20')
+    expect(display.parameters.properties.productIdsJson.type).toBe('string')
+    expect(display.parameters.required).toEqual(['productIdsJson'])
 
     const neutralSearch = buildSearchToolConfig(base)
     const neutralDisplay = buildDisplayToolConfig(base)

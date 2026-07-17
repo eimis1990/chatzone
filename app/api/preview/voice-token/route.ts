@@ -43,6 +43,7 @@ export async function POST(req: Request) {
     if (err instanceof MissingVoiceKeyError) {
       return NextResponse.json({ error: 'Voice calling unavailable' }, { status: 503 })
     }
+    console.error('[preview/voice-token] Failed to ensure agent or mint conversation token', err)
     return NextResponse.json({ error: 'Failed to start voice call' }, { status: 502 })
   }
 }

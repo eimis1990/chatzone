@@ -146,6 +146,18 @@ TypeScript/unit tests—the production bundler is what evaluates runtime
 compatibility. Next's Edge runtime supports Web Crypto, not native `node:*`
 modules.
 
+## ElevenLabs client-tool inputs must stay scalar
+
+The ElevenLabs tool-create endpoint rejected `display_products` when
+`productIds` used an array/items schema. A failed tool sync happens inside the
+voice-token request, so the browser only sees the route's generic 502. Encode
+multi-value inputs as a JSON string (`productIdsJson`) and parse them in the
+browser; validate every decoded id against the latest search candidates before
+rendering (`lib/ai/elevenlabs-agent.ts:318-343`,
+`lib/ai/voice-product-search.ts:30-80`). Preserve the upstream response body in
+server logs (`lib/ai/elevenlabs-agent.ts:408-431`) so future schema rejections
+are diagnosable without exposing them to visitors.
+
 ## Anti-bot interstitials index as "knowledge"
 
 Cloudflare challenge pages return HTTP 200 with clean-looking text, so Jina

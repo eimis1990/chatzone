@@ -19,7 +19,7 @@ import { ConversationProvider, useConversation } from '@elevenlabs/react'
 import { PhoneIcon, PhoneOffIcon, LoaderCircleIcon } from 'lucide-react'
 import { readableTextColor } from '@/lib/utils'
 import { normalizeVoiceSearchQuery } from '@/lib/voice/transcript'
-import { selectVoiceProductCandidates } from '@/lib/ai/voice-product-search'
+import { parseVoiceProductIds, selectVoiceProductCandidates } from '@/lib/ai/voice-product-search'
 import type { CommerceProduct } from '@/lib/commerce/types'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -152,10 +152,14 @@ function VoiceCallInner({
           return 'The product search is temporarily unavailable.'
         }
       },
-      display_products: async (params: { productIds?: string[] }) => {
+      display_products: async (params: {
+        productIdsJson?: string
+        productIds?: string[] | string
+      }) => {
+        const productIds = parseVoiceProductIds(params?.productIdsJson ?? params?.productIds)
         const products = selectVoiceProductCandidates(
           productCandidatesRef.current,
-          params?.productIds ?? [],
+          productIds,
         )
         if (!products.length || !onDisplayProducts) {
           return 'No verified candidate products were displayed.'

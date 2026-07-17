@@ -54,6 +54,12 @@ on **ElevenLabs Conversational AI**.
   even if only one dimension matched. Provider query/display guidance and candidate
   detail budgets come from the same provider profiles as text chat. Voice still
   runs one search per request unless it must retry a miss, avoiding stacked lists.
+  ElevenLabs rejected the first `display_products` schema because its client-tool
+  parameter was an array. Keep client-tool inputs scalar: selected ids now travel
+  as the `productIdsJson` string and are parsed/validated strictly against the
+  browser's latest candidate map (`lib/ai/elevenlabs-agent.ts:318-343`,
+  `lib/ai/voice-product-search.ts:30-80`). The parser also accepts the old array
+  shape during rolling deployments.
 - **Spoken dimensions:** both visible transcripts and voice tool queries normalize
   common English/Lithuanian measurement words. For example, `du metrai ant metro
   aštuoniasdešimt` displays as `2 m × 1,8 m`, while the catalog query becomes
@@ -74,6 +80,12 @@ on **ElevenLabs Conversational AI**.
   the org's `voice_addon`, the monthly conversation limit, and domain
   allowlist before calling `ensureAgent` + `getConversationToken`
   (`app/api/widget/voice-token/route.ts:38-63`).
+- Agent/tool synchronization errors remain generic to the browser, but both
+  voice-token routes log the server-side exception and ElevenLabs' bounded API
+  response body. Do not reduce these failures to status-only errors again;
+  otherwise a rejected tool schema is indistinguishable from a transient 502
+  (`lib/ai/elevenlabs-agent.ts:408-431`,
+  `app/api/widget/voice-token/route.ts:62-68`).
 
 ## Billing
 

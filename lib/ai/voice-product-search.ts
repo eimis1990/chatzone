@@ -27,6 +27,39 @@ export function voiceProductCandidateSummary(
   ].join('\n')
 }
 
+/**
+ * ElevenLabs client-tool parameters are scalar, so `display_products` sends
+ * the selected ids as a JSON-encoded string. Accept the former array shape and
+ * a simple comma/newline fallback too, so an in-flight/stale agent cannot break
+ * card rendering during a deployment.
+ */
+export function parseVoiceProductIds(value: unknown): string[] {
+  if (Array.isArray(value)) {
+    return value
+      .filter((id): id is string => typeof id === 'string')
+      .map((id) => id.trim())
+      .filter(Boolean)
+  }
+  if (typeof value !== 'string' || !value.trim()) return []
+
+  try {
+    const parsed: unknown = JSON.parse(value)
+    if (Array.isArray(parsed)) {
+      return parsed
+        .filter((id): id is string => typeof id === 'string')
+        .map((id) => id.trim())
+        .filter(Boolean)
+    }
+  } catch {
+    // Be tolerant of a model returning a plain comma/newline-delimited list.
+  }
+
+  return value
+    .split(/[,\n]+/)
+    .map((id) => id.trim().replace(/^\[?["']?|["']?\]?$/g, ''))
+    .filter(Boolean)
+}
+
 /** Resolve a voice model's display ids strictly against its latest search. */
 export function selectVoiceProductCandidates(
   candidates: ReadonlyMap<string, CommerceProduct>,
