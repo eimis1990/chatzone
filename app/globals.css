@@ -242,6 +242,42 @@
     background-position: -9px -9px;
   }
 
+  /* Voice-call waveform in the composer (active live call). Bars pulse gently
+     while listening; the parent sets data-speaking to boost the amplitude. */
+  .cbz-wave-bar {
+    width: 2.5px;
+    height: 5px;
+    flex-shrink: 0;
+    border-radius: 2px;
+    background-color: color-mix(in srgb, currentColor 55%, transparent);
+    animation: cbz-wave 0.9s ease-in-out infinite alternate;
+  }
+  [data-speaking='true'] .cbz-wave-bar {
+    animation-name: cbz-wave-loud;
+  }
+  @keyframes cbz-wave {
+    from {
+      transform: scaleY(0.6);
+    }
+    to {
+      transform: scaleY(1.8);
+    }
+  }
+  @keyframes cbz-wave-loud {
+    from {
+      transform: scaleY(1);
+    }
+    to {
+      transform: scaleY(3.4);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .cbz-wave-bar {
+      animation: none;
+      transform: scaleY(1.4);
+    }
+  }
+
   /* "Agent is thinking" — bouncing dots (adapted from Uiverse / mobinkakei). */
   .cz-think {
     position: relative;

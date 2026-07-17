@@ -112,6 +112,8 @@ interface ConfigFormProps {
   canUseLeadCapture?: boolean
   /** Voice add-on gating — disable voice unless the add-on is active. */
   canUseVoice?: boolean
+  /** Plan-gated Whisper dictation in the composer (paid tiers). */
+  canUseDictation?: boolean
   /** Free plan: enabling voice opens an upgrade dialog instead of toggling. */
   voiceLocked?: boolean
   /** Save handler — defaults to the client saveConfig; the owner editor injects its own. */
@@ -220,6 +222,7 @@ export function ConfigForm({
   maxLanguages = Infinity,
   canUseLeadCapture = true,
   canUseVoice = true,
+  canUseDictation = false,
   voiceLocked = false,
   onSave = saveConfig,
   headerAction,
@@ -1494,6 +1497,18 @@ export function ConfigForm({
                     )} />
                   </CompactToggle>
                   {(watch('voice.enabled') ?? false) && (
+                    <CompactToggle label="Call from message field" description="Call button inside the composer">
+                      <Controller name="theme.callButtonPlacement" control={control} render={({ field }) => (
+                        <Switch
+                          aria-label="Call from message field"
+                          checked={(field.value ?? 'header') === 'composer'}
+                          onCheckedChange={(checked) => field.onChange(checked ? 'composer' : 'header')}
+                        />
+                      )} />
+                    </CompactToggle>
+                  )}
+                  {/* Compact only affects the header button — moot in composer placement. */}
+                  {(watch('voice.enabled') ?? false) && watch('theme.callButtonPlacement') !== 'composer' && (
                     <CompactToggle label="Compact call button" description="Phone icon only, no label">
                       <Controller name="theme.compactCallButton" control={control} render={({ field }) => (
                         <Switch aria-label="Compact call button" checked={field.value ?? false} onCheckedChange={field.onChange} />
@@ -1921,7 +1936,7 @@ export function ConfigForm({
             aria-label="Live preview"
             role="complementary"
           >
-          <TestChat botId={botId} config={liveConfig} activeLang={activeLang} />
+          <TestChat botId={botId} config={liveConfig} activeLang={activeLang} dictationEnabled={canUseDictation} />
           </div>,
           document.body,
         )

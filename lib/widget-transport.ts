@@ -63,6 +63,8 @@ export interface ChatTransport {
   lookupOrder(orderId: string, email: string): Promise<{ found: boolean; order?: OrderStatus; summary: string }>
   /** Voice `discount_code` tool: fetch the configured discount. */
   getDiscountInfo(): Promise<{ available: boolean; code?: string; description?: string; summary: string }>
+  /** Whisper dictation: audio blob → transcribed text (plan-gated server-side). */
+  transcribe?(audio: Blob, language: BotLanguage): Promise<{ text: string }>
   /**
    * Record a widget interaction event (analytics). Fire-and-forget: must never
    * block or break the UI. Optional — the configurator preview omits it so
@@ -194,6 +196,16 @@ export function createWidgetTransport(publicKey: string): ChatTransport {
       })
       if (!res.ok) return { available: false, summary: 'No discount is available right now.' }
       return (await res.json()) as { available: boolean; code?: string; description?: string; summary: string }
+    },
+
+    async transcribe(audio, language) {
+      const form = new FormData()
+      form.append('publicKey', publicKey)
+      form.append('language', language)
+      form.append('audio', new File([audio], 'dictation.webm', { type: audio.type || 'audio/webm' }))
+      const res = await fetch('/api/widget/transcribe', { method: 'POST', body: form })
+      if (!res.ok) throw new Error(`transcribe failed: ${res.status}`)
+      return (await res.json()) as { text: string }
     },
 
     trackEvent(event) {

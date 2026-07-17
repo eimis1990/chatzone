@@ -37,6 +37,7 @@ export default async function ConfigurePage({
       initialConfig={data.config}
       maxLanguages={ent.maxLanguages}
       canUseLeadCapture={ent.leadCapture}
+      canUseDictation={ent.dictation}
       canUseVoice={Boolean(org?.voice_addon)}
       voiceLocked={(org?.plan ?? 'free') === 'free'}
       audience="client"

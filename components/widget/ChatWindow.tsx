@@ -11,6 +11,7 @@ import { LeadForm } from './LeadForm'
 import { WelcomeScreen } from './WelcomeScreen'
 import type { PublicBotConfig } from '@/lib/widget-config'
 import { sqLabel, sqMode, sqPrompt, sqQuery, sqUrl } from '@/lib/widget-config'
+import { SiriOrb } from './SiriOrb'
 import type { ChatTransport } from '@/lib/widget-transport'
 import type { BotLanguage, HandoffStatus, SuggestedQuestion } from '@/lib/types'
 import type { CommerceProduct, OrderStatus } from '@/lib/commerce/types'
@@ -81,6 +82,23 @@ const PRODUCTS_ACTION_EMPTY: Record<BotLanguage, string> = {
   en: "I couldn't find products to show right now — try asking me instead!",
   lt: 'Šiuo metu nepavyko rasti prekių — pabandykite manęs paklausti!',
 }
+// Call problems surfaced above the composer (composer-placed call button —
+// the header placement shows these inline next to its own button).
+const VOICE_ISSUE_COPY: Record<'mic-denied' | 'unavailable' | 'error', Record<BotLanguage, string>> = {
+  'mic-denied': {
+    en: 'Microphone access denied — allow it in your browser settings to talk.',
+    lt: 'Mikrofonas užblokuotas — leiskite jį naršyklės nustatymuose.',
+  },
+  unavailable: {
+    en: "Voice calling isn't available right now.",
+    lt: 'Skambučiai balsu šiuo metu negalimi.',
+  },
+  error: {
+    en: 'Could not start the call — please try again.',
+    lt: 'Nepavyko pradėti pokalbio — bandykite dar kartą.',
+  },
+}
+
 const HANDOFF_ENDED_NOTE: Record<BotLanguage, string> = {
   en: 'The chat with our team member has ended. You can keep chatting with the assistant.',
   lt: 'Pokalbis su komandos nariu baigtas. Galite toliau bendrauti su asistentu.',
@@ -182,6 +200,8 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
   const [callState, setCallState] = useState<CallState>('idle')
   const callStateRef = useRef<CallState>('idle')
   const endVoiceRef = useRef<(() => void) | null>(null)
+  const startVoiceRef = useRef<(() => void) | null>(null)
+  const [voiceIssue, setVoiceIssue] = useState<'mic-denied' | 'unavailable' | 'error' | null>(null)
   const visitorIdRef = useRef<string>('')
   // Latest messages, for building request history without re-creating callbacks.
   const messagesRef = useRef<ChatMessage[]>([])
@@ -253,8 +273,9 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
     })
   }, [])
 
-  const handleVoiceReady = useCallback((c: { end: () => void }) => {
+  const handleVoiceReady = useCallback((c: { end: () => void; start: () => void }) => {
     endVoiceRef.current = c.end
+    startVoiceRef.current = c.start
   }, [])
 
   // The agent's `search_products` client tool: fetch products, show them as cards
@@ -788,6 +809,12 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
 
   const voiceEnabled = Boolean(config.voice?.enabled)
   const showCallButton = config.theme.showCallButton !== false
+  // Composer placement: the call button lives inside the message field (and
+  // morphs into send while typing); the header shows no call button. The
+  // VoiceCallButton still mounts headlessly to own the call session.
+  const callInComposer =
+    voiceEnabled && showCallButton && (config.theme.callButtonPlacement ?? 'header') === 'composer'
+  const callActive = callState !== 'idle'
   const callButtonColor = config.theme.callButtonColor || '#22c55e'
   const navButtonRadius = config.theme.navButtonRadius ?? 12
   // Full-screen mobile sheet has square top corners (it meets the screen edge).
@@ -899,10 +926,12 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
           </span>
         </div>
 
-        {/* Voice call button — when voice is on and the client hasn't hidden it */}
+        {/* Voice call button — when voice is on and the client hasn't hidden it.
+            Composer placement mounts it headlessly (owns the session; the
+            composer's button drives it via startVoiceRef/endVoiceRef). */}
         {voiceEnabled && showCallButton && (
           <VoiceCallButton
-            appearance="compact"
+            appearance={callInComposer ? 'none' : 'compact'}
             iconOnly={config.theme.compactCallButton ?? false}
             getToken={getVoiceToken}
             primaryColor="#ffffff"
@@ -913,6 +942,7 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
             onStateChange={handleCallState}
             onTranscript={handleVoiceTranscript}
             onReady={handleVoiceReady}
+            onIssue={callInComposer ? setVoiceIssue : undefined}
             onSearch={handleVoiceSearch}
             onOrderStatus={handleVoiceOrder}
             onDiscount={handleVoiceDiscount}
@@ -1035,7 +1065,22 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
           </div>
         )}
 
-        {messages.length === 0 ? (
+        {/* Live-call orb — pinned above the transcript for the whole call so
+            bubbles scroll up to it, never over or under it. Particle sphere in
+            brand shades; `activity` makes it settle while the visitor talks
+            (listening) and come alive while the agent speaks. */}
+        {callActive && (
+          <div className="flex flex-shrink-0 items-center justify-center py-3">
+            <SiriOrb
+              size={88}
+              color={primaryColor}
+              dark={darkBody}
+              activity={callState === 'speaking' ? 1 : callState === 'connecting' ? 0.55 : 0.22}
+            />
+          </div>
+        )}
+
+        {messages.length === 0 && !callActive ? (
           <WelcomeScreen
             displayName={config.displayName}
             tagline={config.tagline}
@@ -1138,6 +1183,22 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
           fieldColor={config.theme.composerFieldColor}
           fieldBorderColor={config.theme.composerBorderColor}
           sendColor={config.theme.sendButtonColor}
+          voiceCall={
+            callInComposer
+              ? {
+                  state: callState,
+                  start: () => startVoiceRef.current?.(),
+                  end: () => endVoiceRef.current?.(),
+                  callColor: callButtonColor,
+                }
+              : undefined
+          }
+          notice={voiceIssue ? (VOICE_ISSUE_COPY[voiceIssue][activeLang] ?? VOICE_ISSUE_COPY[voiceIssue].en) : null}
+          onTranscribe={
+            config.dictation && transport.transcribe
+              ? (audio) => transport.transcribe!(audio, activeLang).then((r) => r.text)
+              : undefined
+          }
         />
 
         {/* Full-height product list overlay (covers messages + composer) */}

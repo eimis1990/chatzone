@@ -18,6 +18,8 @@ export interface Entitlements {
   customRetention: boolean
   /** Invite teammates with roles. */
   teams: boolean
+  /** Voice dictation in the widget composer (Whisper speech-to-text). */
+  dictation: boolean
   /** Included conversations / month (soft today; for metering later). */
   conversations: number
 }
@@ -30,6 +32,7 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
     removeBadge: false,
     customRetention: false,
     teams: false,
+    dictation: false,
     conversations: 100,
   },
   starter: {
@@ -39,6 +42,7 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
     removeBadge: true,
     customRetention: false,
     teams: false,
+    dictation: true,
     conversations: 1500,
   },
   growth: {
@@ -48,6 +52,7 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
     removeBadge: true,
     customRetention: false,
     teams: false,
+    dictation: true,
     conversations: 4000,
   },
   scale: {
@@ -57,6 +62,7 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
     removeBadge: true,
     customRetention: true,
     teams: true,
+    dictation: true,
     conversations: 12000,
   },
   enterprise: {
@@ -66,6 +72,7 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
     removeBadge: true,
     customRetention: true,
     teams: true,
+    dictation: true,
     conversations: Infinity,
   },
 }

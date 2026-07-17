@@ -19,6 +19,7 @@ export default async function OwnerChatbotConfigurePage() {
         initialConfig={bot.config}
         maxLanguages={Infinity}
         canUseLeadCapture
+        canUseDictation
         canUseVoice
         onSave={saveClientBotConfig}
         headerAction={<LandingToggle botId={bot.id} initial={bot.show_on_landing} />}

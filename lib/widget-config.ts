@@ -92,6 +92,7 @@ export interface PublicBotConfig {
     hideHeaderLogo?: boolean
     showCallButton?: boolean
     compactCallButton?: boolean
+    callButtonPlacement?: 'header' | 'composer'
     showHandoffButton?: boolean
     callButtonColor?: string
     navButtonRadius?: number
@@ -137,6 +138,8 @@ export interface PublicBotConfig {
   }
   /** Hide the "Powered by Loqara" badge (true on plans that allow it). */
   hideBadge?: boolean
+  /** Whisper dictation in the composer (paid plans). */
+  dictation?: boolean
 }
 
 /**
@@ -205,6 +208,7 @@ export function publicBotConfig(
       headerStyle: config.theme.headerStyle ?? 'classic',
       hideHeaderLogo: config.theme.hideHeaderLogo ?? false,
       compactCallButton: config.theme.compactCallButton ?? false,
+      callButtonPlacement: config.theme.callButtonPlacement ?? 'header',
       showHandoffButton: config.theme.showHandoffButton ?? true,
       navButtonRadius: config.theme.navButtonRadius ?? 12,
       backgroundColor: config.theme.backgroundColor ?? '#ffffff',
@@ -251,6 +255,9 @@ export function publicBotConfig(
       fields: config.leadCapture.fields,
     },
     hideBadge: entitlements?.removeBadge ?? false,
+    // Dictation is plan-gated (paid tiers). Without entitlements info (e.g.
+    // configurator preview builds its own config), leave it off here.
+    dictation: entitlements?.dictation ?? false,
     // Only flags — never the raw voiceId (TTS runs server-side).
     voice: {
       enabled: config.voice?.enabled ?? false,

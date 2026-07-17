@@ -89,9 +89,11 @@ interface TestChatProps {
   botId: string
   config: LiveConfig
   activeLang: BotLanguage
+  /** Plan-gated Whisper dictation — mirrors the live widget's entitlement. */
+  dictationEnabled?: boolean
 }
 
-export function TestChat({ botId, config, activeLang }: TestChatProps) {
+export function TestChat({ botId, config, activeLang, dictationEnabled = false }: TestChatProps) {
   const proactiveEnabled = config.proactiveGreeting?.enabled ?? false
   const prefersReducedMotion = useReducedMotion()
   const [isOpen, setIsOpen] = useState(() => !proactiveEnabled)
@@ -114,7 +116,7 @@ export function TestChat({ botId, config, activeLang }: TestChatProps) {
   const configRef = useRef(config)
   configRef.current = config
 
-  const publicConfig = buildPreviewPublicConfig(config)
+  const publicConfig = { ...buildPreviewPublicConfig(config), dictation: dictationEnabled }
   const cornerRadius = config.theme?.cornerRadius ?? 16
   const primaryColor = config.theme?.primaryColor ?? '#4f46e5'
   const launcherAvatar = config.avatarUrl || config.botAvatarUrl
@@ -436,6 +438,16 @@ function createPreviewTransport(botId: string, getConfig: () => BotConfig): Chat
       if (!res.ok) return { available: false, summary: 'No discount is available right now.' }
       return res.json()
     },
+
+    async transcribe(audio, language) {
+      const form = new FormData()
+      form.append('botId', botId)
+      form.append('language', language)
+      form.append('audio', new File([audio], 'dictation.webm', { type: audio.type || 'audio/webm' }))
+      const res = await fetch('/api/preview/transcribe', { method: 'POST', body: form })
+      if (!res.ok) throw new Error(`transcribe failed: ${res.status}`)
+      return (await res.json()) as { text: string }
+    },
   }
 }
 
@@ -470,6 +482,7 @@ function buildPreviewPublicConfig(config: LiveConfig): PublicBotConfig {
       hideHeaderLogo: config.theme?.hideHeaderLogo ?? false,
       showCallButton: config.theme?.showCallButton ?? true,
       compactCallButton: config.theme?.compactCallButton ?? false,
+      callButtonPlacement: config.theme?.callButtonPlacement ?? 'header',
       showHandoffButton: config.theme?.showHandoffButton ?? true,
       navButtonRadius: config.theme?.navButtonRadius ?? 12,
       backgroundColor: config.theme?.backgroundColor ?? '#ffffff',

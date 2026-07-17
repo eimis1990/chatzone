@@ -36,6 +36,7 @@ export default async function DemoConfigurePage({
       initialConfig={bot.config}
       maxLanguages={ent.maxLanguages}
       canUseLeadCapture={ent.leadCapture}
+      canUseDictation={ent.dictation}
       canUseVoice
       onSave={saveClientBotConfig}
       topSlot={<OwnerBotTabs key="demo-bot-tabs" orgId={org.id} botId={botId} base={`/owner/demos/${botId}`} />}

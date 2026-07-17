@@ -44,6 +44,7 @@ export default async function OwnerConfigurePage({
       initialConfig={bot.config}
       maxLanguages={ent.maxLanguages}
       canUseLeadCapture={ent.leadCapture}
+      canUseDictation={ent.dictation}
       canUseVoice={Boolean(org?.voice_addon)}
       onSave={saveClientBotConfig}
       topSlot={<OwnerBotTabs key="owner-bot-tabs" orgId={orgId} botId={botId} />}

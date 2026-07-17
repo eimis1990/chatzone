@@ -30,15 +30,21 @@ interface VoiceCallButtonProps {
   primaryColor?: string
   /** Background color for the idle "start call" button; text auto-contrasts. */
   callColor?: string
-  appearance?: 'full' | 'compact'
+  /** 'none' renders nothing — the host drives the call via onReady's controls
+   *  (composer-placed call button) while this component owns the session. */
+  appearance?: 'full' | 'compact' | 'none'
   /** Conversation language — starts the agent in this language (en/lt). */
   language?: 'en' | 'lt'
   /** Reports call state changes so the host can show listening/speaking. */
   onStateChange?: (state: CallState) => void
   /** Each finalized utterance (visitor + agent) so the host can show it in chat. */
   onTranscript?: (role: 'user' | 'assistant', text: string) => void
-  /** Hands the host an `end()` so it can hang up (e.g. when the visitor types). */
-  onReady?: (controls: { end: () => void }) => void
+  /** Hands the host call controls: `end()` to hang up (e.g. when the visitor
+   *  types) and `start()` to begin a call (composer-placed call button). */
+  onReady?: (controls: { end: () => void; start: () => void }) => void
+  /** Call problems, surfaced as codes so headless hosts can show a localized
+   *  notice (appearance='none' has no UI of its own). null = cleared. */
+  onIssue?: (issue: 'mic-denied' | 'unavailable' | 'error' | null) => void
   /** Implements the agent's `search_products` client tool — return a short
    *  spoken summary; the host renders the product cards in the chat. */
   onSearch?: (query: string, audience?: 'women' | 'men' | 'kids' | 'unisex') => Promise<string>
@@ -64,11 +70,12 @@ interface InnerProps {
   getToken: () => Promise<{ token: string; voiceId?: string }>
   primaryColor: string
   callColor: string
-  appearance: 'full' | 'compact'
+  appearance: 'full' | 'compact' | 'none'
   language?: 'en' | 'lt'
   onStateChange?: (state: CallState) => void
   onTranscript?: (role: 'user' | 'assistant', text: string) => void
-  onReady?: (controls: { end: () => void }) => void
+  onReady?: (controls: { end: () => void; start: () => void }) => void
+  onIssue?: (issue: 'mic-denied' | 'unavailable' | 'error' | null) => void
   onSearch?: (query: string, audience?: 'women' | 'men' | 'kids' | 'unisex') => Promise<string>
   onOrderStatus?: (orderId: string, email: string) => Promise<string>
   onDiscount?: () => Promise<string>
@@ -88,6 +95,7 @@ function VoiceCallInner({
   onStateChange,
   onTranscript,
   onReady,
+  onIssue,
   onSearch,
   onOrderStatus,
   onDiscount,
@@ -186,11 +194,6 @@ function VoiceCallInner({
     onStateChange?.(callState)
   }, [callState, onStateChange])
 
-  // Expose an end() control so the host can hang up the call programmatically.
-  useEffect(() => {
-    onReady?.({ end: () => void endSession() })
-  }, [onReady, endSession])
-
   const handleStart = useCallback(async () => {
     setCallError(null)
     setMicDenied(false)
@@ -252,6 +255,20 @@ function VoiceCallInner({
     await endSession()
     setCallError(null)
   }, [endSession])
+
+  // Expose start/end controls so the host can drive the call programmatically
+  // (hang up when the visitor types; start from a composer-placed button).
+  useEffect(() => {
+    onReady?.({ end: () => void endSession(), start: () => void handleStart() })
+  }, [onReady, endSession, handleStart])
+
+  // Surface problems to headless hosts as codes (they localize the copy).
+  useEffect(() => {
+    onIssue?.(micDenied ? 'mic-denied' : unavailable ? 'unavailable' : callError ? 'error' : null)
+  }, [onIssue, micDenied, unavailable, callError])
+
+  // Headless: the host renders its own call UI (composer button + wave bar).
+  if (appearance === 'none') return null
 
   // When voice calling is unavailable, hide the button entirely in compact mode.
   if (unavailable && appearance === 'compact') return null
@@ -421,6 +438,7 @@ export function VoiceCallButton({
   onStateChange,
   onTranscript,
   onReady,
+  onIssue,
   onSearch,
   onOrderStatus,
   onDiscount,
@@ -432,7 +450,9 @@ export function VoiceCallButton({
   className,
 }: VoiceCallButtonProps) {
   return (
-    <div className={className}>
+    // Headless mode renders nothing — display:contents removes the wrapper's
+    // box so it doesn't add a phantom gap in the header's flex row.
+    <div className={className} style={appearance === 'none' ? { display: 'contents' } : undefined}>
       <ConversationProvider>
         <VoiceCallInner
           getToken={getToken}
@@ -443,6 +463,7 @@ export function VoiceCallButton({
           onStateChange={onStateChange}
           onTranscript={onTranscript}
           onReady={onReady}
+          onIssue={onIssue}
           onSearch={onSearch}
           onOrderStatus={onOrderStatus}
           onDiscount={onDiscount}

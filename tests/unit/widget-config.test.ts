@@ -26,6 +26,7 @@ const fullConfig: BotConfig = {
     hideHeaderLogo: false,
     showCallButton: true,
     compactCallButton: false,
+    callButtonPlacement: 'header',
     showHandoffButton: true,
     navButtonRadius: 12,
     backgroundColor: '#ffffff',

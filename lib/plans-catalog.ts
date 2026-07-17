@@ -45,6 +45,7 @@ export const PLANS: Record<Plan, PlanMeta> = {
       'Lead capture',
       'All languages',
       'Product search & order lookup',
+      'Voice dictation in chat',
       'Full analytics + CSAT',
       'Remove Loqara badge',
     ],
