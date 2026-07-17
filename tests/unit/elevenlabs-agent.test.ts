@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest'
-import { buildAgentConfig, agentConfigHash } from '@/lib/ai/elevenlabs-agent'
+import {
+  agentConfigHash,
+  buildAgentConfig,
+  buildDisplayToolConfig,
+  buildSearchToolConfig,
+} from '@/lib/ai/elevenlabs-agent'
 import { DEFAULT_VOICE_LLM, isValidVoiceLlm } from '@/lib/ai/voice-models'
 import { defaultBotConfig } from '@/lib/validation/schemas'
 import type { Bot, BotConfig } from '@/lib/types'
@@ -68,6 +73,39 @@ describe('buildAgentConfig', () => {
     const lt = cfg.conversation_config.tts.supported_voices.find((v) => v.language === 'lt')
     expect(lt?.voice_id).toBe('voice-lt')
   })
+
+  it('requires candidate review before voice product cards are displayed', () => {
+    const cfg = buildAgentConfig(makeBot(), ['search-tool', 'display-tool'])
+    const prompt = cfg.conversation_config.agent.prompt.prompt
+
+    expect(prompt).toContain('search returns CANDIDATES but shows nothing yet')
+    expect(prompt).toContain('call `display_products` exactly once')
+    expect(prompt).toContain('2 m by 1.8 m → 200 cm 180 cm')
+    expect(prompt).toContain('write every number as digits')
+  })
+
+  it('adds only the selected provider guidance to the voice product tools', () => {
+    const base = defaultBotConfig('Bot')
+    const verskis = {
+      ...base,
+      commerce: {
+        enabled: true,
+        provider: 'verskis' as const,
+        storeUrl: 'https://furniture.example',
+        discount: { enabled: false },
+      },
+    }
+
+    const search = buildSearchToolConfig(verskis)
+    const display = buildDisplayToolConfig(verskis)
+    expect(search.description).toContain("catalog's canonical form")
+    expect(display.description).toContain('exactly min(20')
+
+    const neutralSearch = buildSearchToolConfig(base)
+    const neutralDisplay = buildDisplayToolConfig(base)
+    expect(neutralSearch.description).not.toContain("catalog's canonical form")
+    expect(neutralDisplay.description).not.toContain('exactly min(20')
+  })
 })
 
 describe('agentConfigHash', () => {
@@ -86,6 +124,19 @@ describe('agentConfigHash', () => {
     const base = defaultBotConfig('Bot')
     const a = makeBot({ ...base, voice: { ...base.voice, llmModel: 'gpt-4o-mini' } })
     const b = makeBot({ ...base, voice: { ...base.voice, llmModel: 'gemini-2.5-flash' } })
+    expect(agentConfigHash(a)).not.toBe(agentConfigHash(b))
+  })
+
+  it('changes when the commerce provider changes because voice guidance is provider-specific', () => {
+    const base = defaultBotConfig('Bot')
+    const a = makeBot({
+      ...base,
+      commerce: { ...base.commerce, enabled: true, provider: 'woocommerce', storeUrl: 'https://store.example' },
+    })
+    const b = makeBot({
+      ...base,
+      commerce: { ...base.commerce, enabled: true, provider: 'verskis', storeUrl: 'https://store.example' },
+    })
     expect(agentConfigHash(a)).not.toBe(agentConfigHash(b))
   })
 })

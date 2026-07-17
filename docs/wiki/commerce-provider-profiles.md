@@ -87,6 +87,7 @@ schema-dependent capabilities.
 | Product cards stream as soon as `display_products` finishes | All providers | Universal latency/UI behavior in `lib/ai/commerce-tool.ts:328-360` |
 | Preview and live text chat both use `searchCatalog` | All configured providers | Universal parity rule; provider profiles still select the actual matcher/hydrator |
 | Missing hard product data is unverified, not a match | All providers | Universal prompt safety rule; industry prompts may make it stricter |
+| Voice candidate-review/display separation | All providers | Universal parity rule; voice reuses each profile's query guidance, display guidance, and candidate-detail budget before rendering cards |
 | Semantic query normalization | Verskis only | Add `semantic.normalizeQuery` only when a provider's catalog has a repeatable vocabulary/schema mismatch |
 | Candidate overfetch before live hydration | Verskis only | Add `semantic.candidatePoolSize` only when measured live hydration losses prevent filling the requested result count |
 | More than 8 model-visible candidate details | Verskis uses 20 | Raise `candidateDetailsLimit` only when structured details materially improve exhaustive filtering and the token cost is justified |

@@ -19,6 +19,7 @@ import { fontStack } from '@/lib/fonts'
 import { readableTextColor, isLightColor } from '@/lib/utils'
 import { tintToward } from '@/lib/theme-extract'
 import { languageMeta } from '@/lib/i18n/languages'
+import { normalizeVoiceTranscript } from '@/lib/voice/transcript'
 
 interface ChatWindowProps {
   config: PublicBotConfig
@@ -264,49 +265,43 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
   // wraps replies in language tags (<Lithuanian>…</Lithuanian>) for TTS — strip
   // them for display.
   const handleVoiceTranscript = useCallback((role: 'user' | 'assistant', text: string) => {
-    const clean = text.replace(/<\/?[A-Za-z][\w-]*>/g, '').trim()
+    const clean = normalizeVoiceTranscript(
+      text.replace(/<\/?[A-Za-z][\w-]*>/g, '').trim(),
+      activeLang,
+    )
     if (!clean) return
     setMessages((prev) => {
       const last = prev[prev.length - 1]
       if (last && last.role === role && last.content === clean) return prev
       return [...prev, { id: generateId(), role, content: clean }]
     })
-  }, [])
+  }, [activeLang])
 
   const handleVoiceReady = useCallback((c: { end: () => void; start: () => void }) => {
     endVoiceRef.current = c.end
     startVoiceRef.current = c.start
   }, [])
 
-  // The agent's `search_products` client tool: fetch products, show them as cards
-  // in the chat, and return a short summary for the agent to speak.
+  // Voice search returns semantic candidates without displaying them. The
+  // ElevenLabs agent reviews their structured facts and then calls
+  // `display_products` with only verified ids.
   const handleVoiceSearch = useCallback(
-    async (query: string, audience?: 'women' | 'men' | 'kids' | 'unisex'): Promise<string> => {
+    async (query: string, audience?: 'women' | 'men' | 'kids' | 'unisex') => {
       try {
-        const data = await transport.search(query, audience)
-        if (data.products?.length) {
-          const found = data.products
-          setMessages((prev) => {
-            // Collapse a burst of searches for the SAME request into one card
-            // list instead of stacking a new list per search. Only merge when the
-            // previous message is already a products-only bubble (no spoken reply
-            // or new question since), so separate requests still get their own list.
-            const last = prev[prev.length - 1]
-            if (last && last.role === 'assistant' && !last.content && last.products?.length) {
-              const seen = new Set(last.products.map((p) => p.id))
-              const merged = [...last.products, ...found.filter((p) => !seen.has(p.id))]
-              return [...prev.slice(0, -1), { ...last, products: merged }]
-            }
-            return [...prev, { id: generateId(), role: 'assistant', content: '', products: found }]
-          })
-        }
-        return data.summary ?? 'Here are a few options.'
+        return await transport.search(query, audience)
       } catch {
-        return 'The product search is temporarily unavailable.'
+        return { products: [], summary: 'The product search is temporarily unavailable.' }
       }
     },
     [transport],
   )
+
+  const handleVoiceDisplayProducts = useCallback((products: CommerceProduct[]) => {
+    setMessages((prev) => [
+      ...prev,
+      { id: generateId(), role: 'assistant', content: '', products },
+    ])
+  }, [])
 
   // Voice `order_status` tool: look up an order, show a card, speak a summary.
   const handleVoiceOrder = useCallback(
@@ -961,6 +956,7 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
             onReady={handleVoiceReady}
             onIssue={callInComposer ? setVoiceIssue : undefined}
             onSearch={handleVoiceSearch}
+            onDisplayProducts={handleVoiceDisplayProducts}
             onOrderStatus={handleVoiceOrder}
             onDiscount={handleVoiceDiscount}
             onKnowledge={handleVoiceKnowledge}

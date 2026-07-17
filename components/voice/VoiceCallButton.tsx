@@ -14,10 +14,13 @@
  *  - className: optional extra class on the root element.
  */
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { ConversationProvider, useConversation } from '@elevenlabs/react'
 import { PhoneIcon, PhoneOffIcon, LoaderCircleIcon } from 'lucide-react'
 import { readableTextColor } from '@/lib/utils'
+import { normalizeVoiceSearchQuery } from '@/lib/voice/transcript'
+import { selectVoiceProductCandidates } from '@/lib/ai/voice-product-search'
+import type { CommerceProduct } from '@/lib/commerce/types'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -45,9 +48,14 @@ interface VoiceCallButtonProps {
   /** Call problems, surfaced as codes so headless hosts can show a localized
    *  notice (appearance='none' has no UI of its own). null = cleared. */
   onIssue?: (issue: 'mic-denied' | 'unavailable' | 'error' | null) => void
-  /** Implements the agent's `search_products` client tool — return a short
-   *  spoken summary; the host renders the product cards in the chat. */
-  onSearch?: (query: string, audience?: 'women' | 'men' | 'kids' | 'unisex') => Promise<string>
+  /** Fetch candidates for `search_products`; nothing is displayed until the
+   *  agent follows with `display_products`. */
+  onSearch?: (
+    query: string,
+    audience?: 'women' | 'men' | 'kids' | 'unisex',
+  ) => Promise<{ products?: CommerceProduct[]; summary?: string }>
+  /** Render the verified candidates chosen by the voice agent. */
+  onDisplayProducts?: (products: CommerceProduct[]) => void
   /** Implements `order_status` — look up an order, return a spoken summary. */
   onOrderStatus?: (orderId: string, email: string) => Promise<string>
   /** Implements `discount_code` — return the discount as a spoken summary. */
@@ -76,7 +84,11 @@ interface InnerProps {
   onTranscript?: (role: 'user' | 'assistant', text: string) => void
   onReady?: (controls: { end: () => void; start: () => void }) => void
   onIssue?: (issue: 'mic-denied' | 'unavailable' | 'error' | null) => void
-  onSearch?: (query: string, audience?: 'women' | 'men' | 'kids' | 'unisex') => Promise<string>
+  onSearch?: (
+    query: string,
+    audience?: 'women' | 'men' | 'kids' | 'unisex',
+  ) => Promise<{ products?: CommerceProduct[]; summary?: string }>
+  onDisplayProducts?: (products: CommerceProduct[]) => void
   onOrderStatus?: (orderId: string, email: string) => Promise<string>
   onDiscount?: () => Promise<string>
   onKnowledge?: (query: string) => Promise<string>
@@ -97,6 +109,7 @@ function VoiceCallInner({
   onReady,
   onIssue,
   onSearch,
+  onDisplayProducts,
   onOrderStatus,
   onDiscount,
   onKnowledge,
@@ -108,6 +121,7 @@ function VoiceCallInner({
   const [callError, setCallError] = useState<string | null>(null)
   const [micDenied, setMicDenied] = useState(false)
   const [unavailable, setUnavailable] = useState(false)
+  const productCandidatesRef = useRef<Map<string, CommerceProduct>>(new Map())
 
   const conv = useConversation({
     onError: (msg: string) => {
@@ -126,11 +140,28 @@ function VoiceCallInner({
         const q = params?.query?.trim()
         if (!q || !onSearch) return 'No results found.'
         const audience = (['women', 'men', 'kids', 'unisex'] as const).find((a) => a === params?.audience)
+        productCandidatesRef.current.clear()
         try {
-          return await onSearch(q, audience)
+          const normalizedQuery = normalizeVoiceSearchQuery(q, language ?? 'en')
+          const result = await onSearch(normalizedQuery, audience)
+          for (const product of result.products ?? []) {
+            productCandidatesRef.current.set(product.id, product)
+          }
+          return result.summary ?? 'No matching products were found for that query.'
         } catch {
           return 'The product search is temporarily unavailable.'
         }
+      },
+      display_products: async (params: { productIds?: string[] }) => {
+        const products = selectVoiceProductCandidates(
+          productCandidatesRef.current,
+          params?.productIds ?? [],
+        )
+        if (!products.length || !onDisplayProducts) {
+          return 'No verified candidate products were displayed.'
+        }
+        onDisplayProducts(products)
+        return `Displayed ${products.length} verified matching products as cards.`
       },
       // Look up an order — REQUIRES order number + matching email (verified server-side).
       order_status: async (params: { orderId?: string; email?: string }) => {
@@ -440,6 +471,7 @@ export function VoiceCallButton({
   onReady,
   onIssue,
   onSearch,
+  onDisplayProducts,
   onOrderStatus,
   onDiscount,
   onKnowledge,
@@ -465,6 +497,7 @@ export function VoiceCallButton({
           onReady={onReady}
           onIssue={onIssue}
           onSearch={onSearch}
+          onDisplayProducts={onDisplayProducts}
           onOrderStatus={onOrderStatus}
           onDiscount={onDiscount}
           onKnowledge={onKnowledge}

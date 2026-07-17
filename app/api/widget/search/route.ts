@@ -3,7 +3,9 @@ import { createServiceClient } from '@/lib/supabase/service'
 import { isOriginAllowed, corsHeaders } from '@/lib/widget-auth'
 import { createRateLimiter } from '@/lib/ratelimit'
 import { commerceEnabled } from '@/lib/ai/commerce-tool'
+import { voiceProductCandidateSummary } from '@/lib/ai/voice-product-search'
 import { searchCatalog } from '@/lib/products/search'
+import { providerCandidateDetailsLimit } from '@/lib/products/provider-profiles'
 import { retrieveContext, serviceRetrievalDeps } from '@/lib/ai/retrieval'
 import type { Bot } from '@/lib/types'
 import type { CommerceProduct } from '@/lib/commerce/types'
@@ -11,7 +13,8 @@ import type { CommerceProduct } from '@/lib/commerce/types'
 export const maxDuration = 20
 
 // Public search for the live-voice `search_products` client tool: returns
-// products (rendered as cards in the widget) + a short summary the agent speaks.
+// semantic candidates + compact facts for the agent to review. A separate
+// `display_products` client-tool call renders only the verified selection.
 const limiter = createRateLimiter({ capacity: 20, refillPerSec: 1 })
 const bodySchema = z.object({
   publicKey: z.string().min(1),
@@ -66,8 +69,10 @@ export async function POST(req: Request) {
 
   let summary: string
   if (products.length) {
-    const names = products.slice(0, 4).map((p) => `${p.title} (${p.price})`).join('; ')
-    summary = `Showing ${products.length} matching products to the user as cards: ${names}. Tell them you've shown some options.`
+    summary = voiceProductCandidateSummary(
+      products,
+      providerCandidateDetailsLimit(bot.config.commerce),
+    )
   } else if (info) {
     summary = info
   } else {

@@ -38,7 +38,7 @@ export interface WidgetEventInput {
 export interface ChatTransport {
   /** Send a turn; returns the streaming NDJSON Response (with x-* headers). */
   sendChat(params: SendChatParams): Promise<Response>
-  /** Product search for the voice `search_products` client tool. */
+  /** Candidate search for voice; cards render only after `display_products`. */
   search(
     query: string,
     audience?: 'women' | 'men' | 'kids' | 'unisex',

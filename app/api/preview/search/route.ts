@@ -3,14 +3,17 @@ import { z } from 'zod'
 import { createServerClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { commerceEnabled } from '@/lib/ai/commerce-tool'
+import { voiceProductCandidateSummary } from '@/lib/ai/voice-product-search'
 import { searchCatalog } from '@/lib/products/search'
+import { providerCandidateDetailsLimit } from '@/lib/products/provider-profiles'
 import { retrieveContext, serviceRetrievalDeps } from '@/lib/ai/retrieval'
 import type { Bot } from '@/lib/types'
 import type { CommerceProduct } from '@/lib/commerce/types'
 
 export const maxDuration = 20
 
-// Authenticated voice-search for the playground's `search_products` client tool.
+// Authenticated candidate search for the playground's voice product tools.
+// It intentionally mirrors the live widget's search-then-display separation.
 const bodySchema = z.object({
   botId: z.string().uuid(),
   query: z.string().min(1),
@@ -57,8 +60,10 @@ export async function POST(req: Request) {
 
   let summary: string
   if (products.length) {
-    const names = products.slice(0, 4).map((p) => `${p.title} (${p.price})`).join('; ')
-    summary = `Showing ${products.length} matching products to the user as cards: ${names}. Tell them you've shown some options.`
+    summary = voiceProductCandidateSummary(
+      products,
+      providerCandidateDetailsLimit(bot.config.commerce),
+    )
   } else if (info) {
     summary = info
   } else {

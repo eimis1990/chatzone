@@ -36,7 +36,7 @@ on **ElevenLabs Conversational AI**.
   "Žinoma"/"Of course" — that repetition was a real complaint, fixed 2026-07-08).
   ⚠️ **gotcha:** `agentConfigHash` hashes `cfg.systemPrompt` but NOT the hardcoded
   voice-block text, so when you change `buildAgentPrompt` you must bump its version
-  marker (`agentConfigHash`, currently `v22-voice-language-lock`) or live agents
+  marker (`agentConfigHash`, currently `v29-voice-candidate-review`) or live agents
   won't re-sync.
 - **Language lock:** `buildAgentPrompt` injects the bot's available language names
   (from `languages[]`) and forbids replying in anything outside that set — added
@@ -44,11 +44,22 @@ on **ElevenLabs Conversational AI**.
   the agent not to switch languages unless the customer does. (ElevenLabs' own V3
   auto-detection is a separate layer we don't currently constrain in config — if
   drift persists, that's the next lever.)
-- **One list per request:** on voice, every `search_products` call renders its
-  own card list (`ChatWindow` `handleVoiceSearch`), so the prompt tells the agent
-  to run ONE search per request (not fan out across gift categories) and to ask a
-  clarifying question instead; the widget also merges a burst of searches into a
-  single list. Prevents stacking several carousels for one question (fixed 2026-07-08).
+- **Search → review → display parity:** voice `search_products` uses the same
+  `searchCatalog` semantic/provider-profile path as text chat, but returns candidate
+  ids plus compact structured facts without rendering cards. The ElevenLabs model
+  verifies the full active constraint set, then calls the separate client-side
+  `display_products`; only those latest-search ids render
+  (`lib/ai/voice-product-search.ts`, `components/voice/VoiceCallButton.tsx:137-166`).
+  This closes the old gap where all 20 semantic candidates appeared immediately,
+  even if only one dimension matched. Provider query/display guidance and candidate
+  detail budgets come from the same provider profiles as text chat. Voice still
+  runs one search per request unless it must retry a miss, avoiding stacked lists.
+- **Spoken dimensions:** both visible transcripts and voice tool queries normalize
+  common English/Lithuanian measurement words. For example, `du metrai ant metro
+  aštuoniasdešimt` displays as `2 m × 1,8 m`, while the catalog query becomes
+  `200 cm × 180 cm` to match indexed furniture attributes
+  (`lib/voice/transcript.ts`). The voice prompt separately requires generated
+  response text to use digits/compact units while TTS pronounces them naturally.
 - The agent answers knowledge questions via a `search_knowledge` **client
   tool** (`buildKnowledgeToolConfig`, `lib/ai/elevenlabs-agent.ts:211-236`),
   implemented browser-side in `components/voice/VoiceCallButton.tsx:142`
@@ -56,8 +67,9 @@ on **ElevenLabs Conversational AI**.
   `expects_response: true` (`lib/ai/elevenlabs-agent.ts:224`) — without that,
   ElevenLabs only tells the LLM "tool called successfully" and it can't use
   the retrieved context. Other client tools follow the same shape:
-  `search_products`, and conditionally `order_status` / `discount_code` when
-  those features are enabled (`lib/ai/elevenlabs-agent.ts:238-295,321-334`).
+  `search_products` + `display_products`, and conditionally `order_status` /
+  `discount_code` when those features are enabled
+  (`lib/ai/elevenlabs-agent.ts:277-342,430-444`).
 - Token minting: `POST /api/widget/voice-token` checks `config.voice.enabled`,
   the org's `voice_addon`, the monthly conversation limit, and domain
   allowlist before calling `ensureAgent` + `getConversationToken`

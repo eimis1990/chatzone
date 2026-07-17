@@ -4,6 +4,10 @@ import type { Bot, BotLanguage } from '@/lib/types'
 import { MissingVoiceKeyError } from '@/lib/ai/tts'
 import { isValidVoiceLlm, DEFAULT_VOICE_LLM } from '@/lib/ai/voice-models'
 import { orderLookupEnabled, getDiscount, productDetailsSupported } from '@/lib/commerce'
+import {
+  providerDisplayGuidance,
+  providerSearchQueryGuidance,
+} from '@/lib/products/provider-profiles/guidance'
 
 const API = 'https://api.elevenlabs.io/v1'
 
@@ -73,15 +77,17 @@ function buildAgentPrompt(cfg: Bot['config'], toolIds: string[], languages: BotL
   if (!toolIds.length) return cfg.systemPrompt
   const lt = languages.includes('lt')
   const langNames = languages.map((l) => LANG_NAME[l] ?? l).join(', ')
+  const queryGuidance = providerSearchQueryGuidance(cfg.commerce)
+  const displayGuidance = providerDisplayGuidance(cfg.commerce)
   const parts = [
     cfg.systemPrompt,
     `Language rule (critical): reply ONLY in the language the customer is writing or speaking, which will be one of: ${langNames}. NEVER reply in Russian, or in any language outside that list — not even a single word, product name, or phrase. Keep every reply entirely in ONE language and never mix languages within a sentence (e.g. do not drop a Russian word into a Lithuanian sentence). Do NOT switch languages on your own — only switch if the customer clearly writes to you in the other supported language first.`,
     // Voice delivery style — applies to everything the agent says aloud.
-    'You are speaking out loud. Be warm, friendly and personable — sound genuinely happy to help, acknowledge what the person actually asked for in your own words, and never come across as cold, curt, or robotic. Talk like a real, attentive shop assistant having a natural conversation, not a script. VARY how you speak: never open consecutive replies with the same word or a stock phrase — in particular do NOT habitually start with "Žinoma" / "Of course". Keep answers short and conversational — usually one or two sentences — and never read long passages verbatim; summarise. Do NOT use emojis, asterisks, or other symbols, since everything you say is read aloud. When you say an email address or website, say it the natural way a person would: read "hello@example.com" as "hello at example dot com" and "https://www.example.com" as "example dot com". Never spell an address out letter by letter and never say "h t t p s".',
+    'You are speaking out loud. Be warm, friendly and personable — sound genuinely happy to help, acknowledge what the person actually asked for in your own words, and never come across as cold, curt, or robotic. Talk like a real, attentive shop assistant having a natural conversation, not a script. VARY how you speak: never open consecutive replies with the same word or a stock phrase — in particular do NOT habitually start with "Žinoma" / "Of course". Keep answers short and conversational — usually one or two sentences — and never read long passages verbatim; summarise. In the response text, write every number as digits with a compact unit or symbol where relevant (for example 2 m, 180 cm, €500), even though the voice will pronounce it naturally. Do NOT use emojis, asterisks, or decorative symbols, since everything you say is read aloud. When you say an email address or website, say it the natural way a person would: read "hello@example.com" as "hello at example dot com" and "https://www.example.com" as "example dot com". Never spell an address out letter by letter and never say "h t t p s".',
     'When the user asks anything informational about this business — its services, policies, hours, pricing, shipping, returns, contact details (email, phone, address), or any other fact — ALWAYS call the `search_knowledge` tool with their question first and answer ONLY from what it returns, in one or two natural sentences. The business\'s own email, phone, website and address are PUBLIC contact details — share them plainly when asked; never treat them as personal or private information, and never refuse or say you lack access before calling the tool. If it returns nothing relevant, say you do not have that detail and offer to connect them with a person — never invent an answer.',
-    `When the user asks about products, prices, availability, gifts, gift coupons/vouchers, or wants recommendations, you MUST call the \`search_products\` tool to check the live catalog BEFORE answering — never say something is unavailable or that "we don't have it" from memory. A gift coupon/voucher ("dovanų kuponas") is a PRODUCT to search for, not a discount code. Each search takes a SHORT descriptive phrase — the product type plus at most 1-2 qualifiers${
+    `When the user asks about products, prices, availability, gifts, gift coupons/vouchers, or wants recommendations, you MUST call the \`search_products\` tool to check the live catalog BEFORE answering — never say something is unavailable or that "we don't have it" from memory. A gift coupon/voucher ("dovanų kuponas") is a PRODUCT to search for, not a discount code. Each search takes a compact descriptive phrase — the product type plus EVERY stated hard constraint; never drop a dimension, color, material, orientation, function, or budget just to shorten the query. Convert spoken number words and measurements to digits and canonical units before calling the tool (for example 2 m by 1.8 m → 200 cm 180 cm).${
       lt ? ' in Lithuanian (e.g. "kvapni žvakė", "kvepalai", "veido kremas sausai odai")' : ''
-    } — never a whole sentence. EXCEPTION: when the user names a specific brand or product name (like "Slim Lady"), search that name verbatim — do not turn it into a category. Run only ONE product search per request: on this channel each search pops its own list of cards onto the screen, so searching several times in a row overwhelms the shopper with stacked lists. Choose the single best-fitting query for what they actually asked — if they named a type, use it (a gift "set"/"komplektas" → "dovanų rinkinys" or "rinkinys"; perfume → "kvepalai"; face cream → "veido kremas"). For a vague or open gift request, do NOT search the word "gift"/"dovana" itself and do NOT fan out into several category searches — pick the ONE most fitting category, show that single list, and ask ONE short question to narrow it (their budget, or what the person likes) rather than searching again. If the user says WHO it is for (for men/a man/husband/dad → men; for women/a woman/mum/her → women; for a child/kid/baby → kids), also set the tool's \`audience\` so results only include items that suit that person — and never suggest something meant for a different person. If a search returns nothing, retry with a synonym, the base form, and the same noun in the other language before saying it is unavailable. The matching products appear on screen as cards automatically, so DO NOT read out product names, prices, or details — the cards carry that. Instead say ONE or two short, genuinely warm sentences that acknowledge THIS specific request in your own words (that it's for dry skin, for their wife, a more premium option, and so on) and invite them to take a look. Regardless of any example phrasing elsewhere in these instructions, VARY your wording every time and do NOT open with "Žinoma" / "Of course" out of habit. Where it fits naturally, add a brief helpful touch or ONE short follow-up question (budget, scent, skin type, who it's for) to help them choose — but never interrogate. Aim for a tone like these, but NEVER reuse them verbatim — improvise fresh each turn: "For dry skin, these should feel lovely — take a look:" / "Lovely gift idea — here are a few she might love:" / "If you're after something more premium, these stand out:".`,
+    } ${queryGuidance ? `${queryGuidance} ` : ''}Never pass a whole conversational sentence. EXCEPTION: when the user names a specific brand or product name (like "Slim Lady"), search that name verbatim — do not turn it into a category. Run only ONE product search per request unless the result explicitly says to retry: search returns CANDIDATES but shows nothing yet. Review their structured facts against the full active constraint ledger, then call \`display_products\` exactly once with only verified matches. Missing data is unverified, never a match. Never display a product that violates even one hard constraint, and never pad a tight search with weak alternatives. ${displayGuidance ? `${displayGuidance} ` : ''}Choose the single best-fitting query for what they actually asked — if they named a type, use it (a gift "set"/"komplektas" → "dovanų rinkinys" or "rinkinys"; perfume → "kvepalai"; face cream → "veido kremas"). For a vague or open gift request, do NOT search the word "gift"/"dovana" itself and do NOT fan out into several category searches — pick the ONE most fitting category and ask ONE short question to narrow it. If the user says WHO it is for (for men/a man/husband/dad → men; for women/a woman/mum/her → women; for a child/kid/baby → kids), also set the tool's \`audience\`. If a search returns nothing, retry with a synonym or base form before saying it is unavailable. After \`display_products\` succeeds, DO NOT read product names, prices, or details aloud — the cards carry that. Instead say ONE or two short, warm sentences that acknowledge this specific request and invite them to look.`,
     'You CANNOT place orders, take payment, or complete a purchase, and you must NEVER ask for the person\'s name, address, phone number, or email in order to buy something — orders are not taken over the call. So never offer to take an order or collect delivery/contact details. When they want to buy or have chosen an item, the products are shown on screen as cards — tell them to tap the one they want to open it and complete the order on the website. You are glad to help them choose or answer questions, but the checkout itself happens on the site.',
   ]
   if (productDetailsSupported(cfg.commerce)) {
@@ -204,7 +210,7 @@ export function buildAgentConfig(bot: Bot, toolIds: string[] = []): AgentConfig 
 export function agentConfigHash(bot: Bot, toolIds: string[] = []): string {
   const cfg = bot.config
   const material = JSON.stringify([
-    'v28-lt-asr-keywords', // bump to force re-sync when the agent payload shape changes
+    'v29-voice-candidate-review', // bump to force re-sync when the agent payload shape changes
     cfg.displayName, // agent name follows the bot's display name
     cfg.languages,
     cfg.defaultLanguage ?? null,
@@ -218,6 +224,7 @@ export function agentConfigHash(bot: Bot, toolIds: string[] = []): string {
     orderLookupEnabled(cfg.commerce),
     getDiscount(cfg.commerce).enabled,
     productDetailsSupported(cfg.commerce),
+    cfg.commerce?.provider ?? null,
     cfg.commerce?.storeUrl ?? '',
   ])
   return createHash('sha256').update(material).digest('hex').slice(0, 32)
@@ -270,27 +277,32 @@ function buildKnowledgeToolConfig() {
   }
 }
 
-function buildSearchToolConfig() {
+export function buildSearchToolConfig(config: Bot['config']) {
+  const queryGuidance = providerSearchQueryGuidance(config.commerce)
   return {
     type: 'client' as const,
     name: 'search_products',
     description:
-      "Search the store's products and SHOW them to the user as cards on screen. Call this " +
-      'whenever the user asks about products, prices, availability, or recommendations. Pass a ' +
-      'SHORT query — just the product noun in the catalog language (e.g. "veido kremas", "serumas") ' +
-      '— never include adjectives like dry/sensitive/hydrating, which return nothing. When the user ' +
+      "Search the store's products and return CANDIDATES to review; this tool does NOT show cards. " +
+      'Call it whenever the user asks about products, prices, availability, or recommendations. Pass ' +
+      'one compact query containing the product noun plus EVERY stated hard constraint. Never drop ' +
+      'dimensions, color, material, orientation, function, or budget. Convert spoken measurements ' +
+      'to digits and canonical units (2 m by 1.8 m → 200 cm 180 cm). ' +
+      (queryGuidance ? `${queryGuidance} ` : '') +
+      'When the user ' +
       'names who it is for (a gift/product "for men", "for women", "for a child"), ALSO set `audience` ' +
       'so the results only include items that suit that person. When the user names a specific ' +
-      'BRAND or PRODUCT NAME, pass that name verbatim instead of a category.',
-    // Without this the LLM only hears "Tool called successfully" and never the
-    // result summary — it could show cards but not KNOW what products it found.
+      'BRAND or PRODUCT NAME, pass that name verbatim instead of a category. Review the returned ' +
+      'structured facts, then call display_products with only ids that satisfy every hard constraint.',
+    // Without this the LLM only hears "Tool called successfully" and cannot
+    // review the candidate facts before choosing ids for display_products.
     expects_response: true,
     parameters: {
       type: 'object' as const,
       properties: {
         query: {
           type: 'string' as const,
-          description: 'Product noun to search for, e.g. "veido kremas".',
+          description: 'Compact product type plus every hard constraint, with measurements in digits.',
         },
         audience: {
           type: 'string' as const,
@@ -299,6 +311,33 @@ function buildSearchToolConfig() {
         },
       },
       required: ['query'],
+    },
+  }
+}
+
+export function buildDisplayToolConfig(config: Bot['config']) {
+  const displayGuidance = providerDisplayGuidance(config.commerce)
+  return {
+    type: 'client' as const,
+    name: 'display_products',
+    description:
+      'Show selected candidate products as cards. Call this exactly once after search_products. Pass ' +
+      'ONLY candidate ids that satisfy the requested product type and EVERY active hard constraint; ' +
+      'missing facts are unverified and must not be displayed. Order best matches first and pass no ' +
+      'more than 20 ids. For a tight multi-constraint request, a small verified set is better than ' +
+      'padding with weak matches. ' +
+      (displayGuidance || ''),
+    expects_response: true,
+    parameters: {
+      type: 'object' as const,
+      properties: {
+        productIds: {
+          type: 'array' as const,
+          items: { type: 'string' as const },
+          description: 'Verified candidate product ids, best first.',
+        },
+      },
+      required: ['productIds'],
     },
   }
 }
@@ -391,7 +430,8 @@ async function ensureTools(db: SupabaseClient, bot: Bot): Promise<string[]> {
   // (its endpoint falls back to knowledge when the store has no match).
   const ids = [
     await ensureTool(db, `cbz_tool_kb_${bot.id}`, buildKnowledgeToolConfig()),
-    await ensureTool(db, `cbz_tool_${bot.id}`, buildSearchToolConfig()),
+    await ensureTool(db, `cbz_tool_${bot.id}`, buildSearchToolConfig(bot.config)),
+    await ensureTool(db, `cbz_tool_display_${bot.id}`, buildDisplayToolConfig(bot.config)),
   ]
   if (productDetailsSupported(bot.config.commerce)) {
     ids.push(await ensureTool(db, `cbz_tool_details_${bot.id}`, buildProductDetailsToolConfig()))
