@@ -584,6 +584,16 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
                 )
               } else if (event.t === 'products' && Array.isArray(event.v)) {
                 accumulatedProducts = event.v as CommerceProduct[]
+                // Product tools can finish before the model's final sentence.
+                // Render their cards immediately instead of holding them until
+                // the entire streamed response completes.
+                setMessages((prev) =>
+                  prev.map((m) =>
+                    m.id === assistantMsg.id
+                      ? { ...m, products: accumulatedProducts, streaming: true }
+                      : m
+                  )
+                )
               } else if (event.t === 'order' && event.v) {
                 accumulatedOrder = event.v as OrderStatus
               }
@@ -600,6 +610,13 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
               accumulatedText += event.v
             } else if (event.t === 'products' && Array.isArray(event.v)) {
               accumulatedProducts = event.v as CommerceProduct[]
+              setMessages((prev) =>
+                prev.map((m) =>
+                  m.id === assistantMsg.id
+                    ? { ...m, products: accumulatedProducts, streaming: true }
+                    : m
+                )
+              )
             } else if (event.t === 'order' && event.v) {
               accumulatedOrder = event.v as OrderStatus
             }

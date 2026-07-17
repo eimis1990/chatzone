@@ -114,7 +114,7 @@ export async function startOnboardingBot(
 // ---------------------------------------------------------------------------
 
 export interface OnboardingCommerceInput {
-  provider: 'woocommerce' | 'shopify' | 'magento' | 'feed'
+  provider: 'woocommerce' | 'shopify' | 'magento' | 'verskis' | 'feed'
   storeUrl?: string
   shopifyDomain?: string
   shopifyToken?: string

@@ -84,6 +84,12 @@ indexed. Also: the config UI's progress poll must ignore a stale terminal
 status row ('done'/'error' from a previous run) until it has seen a live phase,
 or retries show no progress (`ConfigForm.tsx` `sawLive`).
 
+**Verskis exception:** its first sync crawls product sitemap URLs with 16 concurrent
+workers and directly embeds rich breadcrumb/attribute data, skipping the generic AI
+recipient-tagging pass. Mobel's 1,951-page fetch live-tested at ~69s, leaving the rest
+of the 300s budget for four embedding batches + DB writes. Do not make the page crawl
+sequential or re-enable full-catalog AI enrichment without re-measuring the budget.
+
 ## Same-name bots across orgs are DIFFERENT bots
 
 The owner deliberately keeps identical copies of client bots (same display
@@ -96,6 +102,34 @@ HOME BY NB client org was nearly written off as a "duplicate" of one in the
 caller's own org (the owner cannot delete client bots), `DeleteBotButton`
 renders only in the client app, and the owner bot editor banner names the
 client org. Client bots must NEVER be deleted by tooling.
+
+## Provider fixes must not leak into shared commerce
+
+Never put a store/provider-specific ranking rule, localized prompt hint,
+hydrator, or index guard directly in shared `searchCatalog` / `match_products`.
+Register it under `lib/products/provider-profiles/`; use a provider-named RPC
+when database ranking differs. Never branch on a client's hostname. See
+[commerce-provider-profiles](commerce-provider-profiles.md).
+
+## Verskis product attributes are fields, not one bag of words
+
+For furniture search, `Spalva: Balta` (main product/upholstery color) is not the
+same constraint as `Kojų spalva: Balta` (white legs). Likewise Lithuanian
+inflections (`baltos`, `kėdžių`) do not stem under Postgres's `simple` FTS
+dictionary. `match_products_verskis` therefore ranks type prefixes in the title and the
+main `Spalva`/`Color` value separately before general attribute/document matches
+(`20260717115738_product_color_field_ranking.sql`). Do not collapse structured
+attribute labels back into one text score; that recreates false colors.
+
+## Indexed candidates are not the same as live product cards
+
+A semantic RPC may return 20 rows while live hydration returns fewer: pages can be stale,
+temporarily fail, be unparseable, or omit a machine-readable price. Verskis must overfetch before
+hydration, preserve rank with bounded workers, retry once, and trim only after live stock/price
+validation (`lib/products/search.ts:86-122`, `lib/commerce/verskis.ts:291-340`). Configurable Verskis
+pages may omit JSON-LD `offers.price`; use the visible main price fallback, not a related-product
+price (`lib/commerce/verskis.ts:207-217`). Also, the widget intentionally previews four carousel
+cards: inspect the “See all (N)” count before diagnosing an N-result search as only four results.
 
 ## Anti-bot interstitials index as "knowledge"
 

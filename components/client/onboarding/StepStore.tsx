@@ -73,7 +73,13 @@ export function StepStore({ botId, businessType, websiteUrl, onDone }: StepStore
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       })
-      const data = (await res.json()) as { ok: boolean; error?: string; total?: number }
+      const data = (await res.json()) as {
+        ok: boolean
+        error?: string
+        total?: number
+        detectedProvider?: 'verskis'
+      }
+      if (data.ok && data.detectedProvider) setProvider(data.detectedProvider)
       setTest(
         data.ok
           ? { status: 'ok', count: data.total ?? 0 }
@@ -151,12 +157,13 @@ export function StepStore({ botId, businessType, websiteUrl, onDone }: StepStore
                 <SelectItem value="woocommerce">WooCommerce</SelectItem>
                 <SelectItem value="shopify">Shopify</SelectItem>
                 <SelectItem value="magento">Magento</SelectItem>
+                <SelectItem value="verskis">Verskis</SelectItem>
                 <SelectItem value="feed">Product feed (XML / CSV / JSON)</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
-          {(provider === 'woocommerce' || provider === 'magento') && (
+          {(provider === 'woocommerce' || provider === 'magento' || provider === 'verskis') && (
             <div className="space-y-1.5">
               <Label htmlFor="ob-store-url">Store URL</Label>
               <Input

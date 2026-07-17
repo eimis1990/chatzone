@@ -21,6 +21,8 @@ Add a line here. How the wiki works: [README.md](README.md).
   free-tier single language, content de-anchored from English.
 - [rag-and-knowledge](rag-and-knowledge.md) — ingestion pipeline + hybrid retrieval.
 - [commerce](commerce.md) — store connectors + live product search.
+- [commerce-provider-profiles](commerce-provider-profiles.md) — provider isolation
+  invariant, per-provider search/RPC ownership, extension checklist.
 - [access-model](access-model.md) — owner/client roles, invites, owner
   done-for-you, RLS/security invariants.
 - [blog-and-seo](blog-and-seo.md) — markdown blog, FAQ schema, AEO conventions,

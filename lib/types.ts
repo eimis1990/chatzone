@@ -277,7 +277,7 @@ export interface BotConfig {
   /** Live product search (e-commerce). */
   commerce: {
     enabled: boolean
-    provider: 'woocommerce' | 'shopify' | 'magento' | 'feed'
+    provider: 'woocommerce' | 'shopify' | 'magento' | 'verskis' | 'feed'
     storeUrl: string
     /** WooCommerce REST consumer key/secret — server-only, for order lookups. */
     restKey?: string

@@ -2,16 +2,14 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Bot } from '@/lib/types'
 import { embed } from '@/lib/ai/embeddings'
 import {
-  fetchWooCatalog,
-  fetchShopifyCatalog,
-  fetchMagentoCatalog,
   deriveTags,
   deriveAudience,
   buildDoc,
   productRawHash,
   type RawProduct,
 } from './catalog'
-import { aiEnrich } from './enrich'
+import { aiEnrich, type Enrichment } from './enrich'
+import { commerceProviderProfile } from './provider-profiles'
 
 /** A stage of the sync, reported for the live progress UI. */
 export interface SyncProgress {
@@ -41,16 +39,12 @@ export async function syncProductCatalog(
   if (!c?.enabled) return { synced: 0 }
 
   report({ phase: 'fetching' })
-  let products: RawProduct[] = []
-  if (c.provider === 'woocommerce' && c.storeUrl) {
-    products = await fetchWooCatalog(c.storeUrl, fetch, (fetched) =>
-      report({ phase: 'fetching', processed: fetched }),
-    )
-  } else if (c.provider === 'shopify' && c.shopifyDomain && c.shopifyToken) {
-    products = await fetchShopifyCatalog(c.shopifyDomain, c.shopifyToken)
-  } else if (c.provider === 'magento' && c.storeUrl) {
-    products = await fetchMagentoCatalog(c.storeUrl)
-  }
+  const profile = commerceProviderProfile(c)
+  const products: RawProduct[] = profile.catalogSync?.configured(c)
+    ? await profile.catalogSync.fetch(c, (fetched) =>
+        report({ phase: 'fetching', processed: fetched }),
+      )
+    : []
   // 'feed' has no live price/stock API to hydrate from — keyword search only.
   if (products.length === 0) {
     report({ phase: 'done', synced: 0 })
@@ -74,10 +68,19 @@ export async function syncProductCatalog(
   const changed = products.filter((p) => existing.get(p.id) !== hashes.get(p.id))
   const unchangedIds = products.filter((p) => !changed.includes(p)).map((p) => p.id)
 
-  report({ phase: 'enriching', processed: 0, total: changed.length })
-  const ai = await aiEnrich(changed, (processed, total) =>
-    report({ phase: 'enriching', processed, total }),
-  )
+  // Providers with rich structured source metadata may opt out of the generic
+  // recipient/occasion classifier in their profile. Incremental hashing still
+  // makes later syncs cheap.
+  const ai = new Map<string, Enrichment>()
+  if (profile.catalogSync?.skipAiEnrichment) {
+    report({ phase: 'enriching', processed: 0, total: 0 })
+  } else {
+    report({ phase: 'enriching', processed: 0, total: changed.length })
+    const enriched = await aiEnrich(changed, (processed, total) =>
+      report({ phase: 'enriching', processed, total }),
+    )
+    for (const [id, value] of enriched) ai.set(id, value)
+  }
   const tagsFor = (p: RawProduct) => [...new Set([...deriveTags(p), ...(ai.get(p.id)?.tags ?? [])])]
   // Explicit store categories win; AI fills the gaps; unknown → 'unisex' (shows
   // for every audience) so we never wrongly hide a genuinely neutral product.

@@ -1865,7 +1865,7 @@ export function ConfigForm({
         </CollapsibleSection>
 
         {/* ── Store / Products ── */}
-        <CommerceSection control={control} watch={watch} botId={botId} />
+        <CommerceSection control={control} watch={watch} setValue={setValue} botId={botId} />
 
         {/* ── Allowed Domains (Advanced) ── */}
         <CollapsibleSection header={<SectionHeader
@@ -2053,10 +2053,11 @@ function SystemPromptSelect({
 interface CommerceSectionProps {
   control: Control<FormValues>
   watch: UseFormWatch<FormValues>
+  setValue: UseFormSetValue<FormValues>
   botId: string
 }
 
-function CommerceSection({ control, watch, botId }: CommerceSectionProps) {
+function CommerceSection({ control, watch, setValue, botId }: CommerceSectionProps) {
   const commerceEnabled = watch('commerce.enabled')
   const provider = watch('commerce.provider') ?? 'woocommerce'
   const storeUrl = watch('commerce.storeUrl') ?? ''
@@ -2096,9 +2097,14 @@ function CommerceSection({ control, watch, botId }: CommerceSectionProps) {
       /* status is decorative — never block the form on it */
     }
   }, [botId])
+  const smartSearchSupported =
+    provider === 'woocommerce' ||
+    provider === 'shopify' ||
+    provider === 'magento' ||
+    provider === 'verskis'
   useEffect(() => {
-    if (commerceEnabled && provider !== 'feed') void refreshIndexInfo()
-  }, [commerceEnabled, provider, refreshIndexInfo])
+    if (commerceEnabled && smartSearchSupported) void refreshIndexInfo()
+  }, [commerceEnabled, smartSearchSupported, refreshIndexInfo])
 
   const handleSync = useCallback(async () => {
     setSyncState({ status: 'loading' })
@@ -2192,6 +2198,8 @@ function CommerceSection({ control, watch, botId }: CommerceSectionProps) {
         ? Boolean(feedUrl.trim())
         : Boolean(storeUrl.trim())
 
+  const skipNextTestResetRef = useRef(false)
+
   const handleTest = useCallback(async () => {
     if (!testReady) {
       setTestState({
@@ -2213,8 +2221,20 @@ function CommerceSection({ control, watch, botId }: CommerceSectionProps) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       })
-      const data = (await res.json()) as { ok: boolean; error?: string; total?: number }
+      const data = (await res.json()) as {
+        ok: boolean
+        error?: string
+        total?: number
+        detectedProvider?: 'verskis'
+      }
       if (data.ok) {
+        if (data.detectedProvider && data.detectedProvider !== provider) {
+          skipNextTestResetRef.current = true
+          setValue('commerce.provider', data.detectedProvider, {
+            shouldDirty: true,
+            shouldValidate: true,
+          })
+        }
         setTestState({ status: 'ok', count: data.total ?? 0 })
       } else {
         setTestState({ status: 'error', message: data.error ?? 'Connection failed.' })
@@ -2222,14 +2242,15 @@ function CommerceSection({ control, watch, botId }: CommerceSectionProps) {
     } catch {
       setTestState({ status: 'error', message: 'Network error — please try again.' })
     }
-  }, [provider, storeUrl, shopifyDomain, shopifyToken, feedUrl, testReady])
+  }, [provider, storeUrl, shopifyDomain, shopifyToken, feedUrl, testReady, setValue])
 
   // Reset test state when the connection inputs change.
   const connKey = `${provider}:${storeUrl}:${shopifyDomain}:${shopifyToken}:${feedUrl}`
   const prevConnRef = useRef(connKey)
   if (prevConnRef.current !== connKey) {
     prevConnRef.current = connKey
-    if (testState.status !== 'idle') setTestState({ status: 'idle' })
+    if (skipNextTestResetRef.current) skipNextTestResetRef.current = false
+    else if (testState.status !== 'idle') setTestState({ status: 'idle' })
   }
 
   return (
@@ -2274,6 +2295,7 @@ function CommerceSection({ control, watch, botId }: CommerceSectionProps) {
                       <SelectItem value="woocommerce">WooCommerce</SelectItem>
                       <SelectItem value="shopify">Shopify</SelectItem>
                       <SelectItem value="magento">Magento</SelectItem>
+                      <SelectItem value="verskis">Verskis</SelectItem>
                       <SelectItem value="feed">Product feed (XML / CSV / JSON)</SelectItem>
                     </SelectContent>
                   </Select>
@@ -2281,8 +2303,8 @@ function CommerceSection({ control, watch, botId }: CommerceSectionProps) {
               />
             </div>
 
-            {/* WooCommerce / Magento: store URL */}
-            {(provider === 'woocommerce' || provider === 'magento') && (
+            {/* URL-based storefronts. */}
+            {(provider === 'woocommerce' || provider === 'magento' || provider === 'verskis') && (
               <div className="space-y-1.5">
                 <Label htmlFor="commerceStoreUrl">Store URL</Label>
                 <Controller
@@ -2407,8 +2429,8 @@ function CommerceSection({ control, watch, botId }: CommerceSectionProps) {
               Your bot will search this store&apos;s catalog live and show product cards in chat.
             </p>
 
-            {/* Semantic catalog index — WooCommerce/Shopify/Magento (feed has no live price/stock API) */}
-            {provider !== 'feed' && (
+            {/* Semantic catalog index — only providers with id-based live hydration. */}
+            {smartSearchSupported && (
               <div className="space-y-2 rounded-lg border p-4">
                 <div className="flex items-center justify-between gap-3 flex-wrap">
                   <div>

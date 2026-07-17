@@ -4,6 +4,13 @@ import { z } from 'zod'
 import type { BotConfig } from '@/lib/types'
 import type { CommerceProduct, OrderStatus } from '@/lib/commerce/types'
 import {
+  providerCandidateDetailsLimit,
+  providerCompleteDisplaySelection,
+  providerDisplayGuidance,
+  providerProductDetailsReference,
+  providerSearchQueryGuidance,
+} from '@/lib/products/provider-profiles'
+import {
   searchStore,
   getProductDetails,
   productDetailsSupported,
@@ -42,13 +49,21 @@ export function makeProductTools(
    *  layer's safety net never re-renders stale cards on non-product turns. */
   shown?: Map<string, CommerceProduct>,
 ): ToolSet {
+  const queryGuidance = providerSearchQueryGuidance(config.commerce)
+  const displayGuidance = providerDisplayGuidance(config.commerce)
+  const candidateDetailsLimit = providerCandidateDetailsLimit(config.commerce)
+  let latestSearchQuery = ''
+  let latestSearchProducts: CommerceProduct[] = []
   const tools: ToolSet = {
     search_products: tool({
       description:
         'Search the store catalog and get CANDIDATE products to review (not shown to the user yet). ' +
-        'Use a short descriptive phrase in the catalog language (this store is often Lithuanian) — ' +
+        'Use a short descriptive phrase in the catalog language — ' +
         'the product type plus at most 1-2 qualifiers, e.g. "kvapni žvakė" or "veido kremas sausai ' +
-        'odai". When the shopper names a specific BRAND or PRODUCT NAME, pass that name VERBATIM ' +
+        'odai". ' +
+        (queryGuidance ? `${queryGuidance} ` : '') +
+        'When the shopper names a ' +
+        'specific BRAND or PRODUCT NAME, pass that name VERBATIM ' +
         'as the query instead of a category. If it returns an { error }, retry the same search once ' +
         'before telling the shopper anything. When the shopper names a recipient (a gift/product "for men", "for women", ' +
         '"for kids/a child"), ALSO set `audience` so results are limited to items that suit that ' +
@@ -70,16 +85,28 @@ export function makeProductTools(
           const products = searchImpl
             ? await searchImpl({ query, minPrice, maxPrice, limit: 24, audience })
             : await searchStore(config.commerce, { query, minPrice, maxPrice, limit: 24 })
+          latestSearchQuery = query
+          latestSearchProducts = products
           products.forEach((p) => candidates.set(p.id, p))
+          if (!products.length) {
+            return {
+              noMatches: true,
+              nextAction:
+                'Do not answer that the store lacks this product yet. Immediately retry with the ' +
+                'base product noun/category, then a synonym. Store search often does not index ' +
+                'attributes such as color, dimensions, or material.',
+            }
+          }
           return products.map((p, i) => ({
             id: p.id,
             title: p.title,
             price: p.price,
             inStock: p.inStock,
             description: p.shortDescription?.slice(0, 140),
-            // Comparison material (attributes/categories/longer description) for
-            // the strongest matches only — keeps multi-search turns within budget.
-            details: i < 8 ? p.details : undefined,
+            // Provider profiles control this token/recall trade-off. Structured
+            // catalogs can expose more verified candidates without imposing the
+            // same model-input cost on every provider.
+            details: i < candidateDetailsLimit ? p.details : undefined,
           }))
         } catch (err) {
           // An infrastructure failure is NOT "the catalog lacks this item" — tell
@@ -103,18 +130,32 @@ export function makeProductTools(
         '(avoid showing near-identical items — vary the brand, type, or price). For an OPEN or GIFT ' +
         'request ("gift ideas for her", "something for the home") be GENEROUS — show a rich, varied ' +
         'selection (aim for ~12-20 relevant products) so the shopper has plenty to browse. For a ' +
-        'SPECIFIC product ask, a focused handful is enough. Pass up to 20 ids.',
+        'NAMED product or tightly constrained comparison, a focused handful is enough. Pass up to ' +
+        '20 ids. ' +
+        (displayGuidance ? displayGuidance : ''),
       inputSchema: z.object({
         productIds: z.array(z.string()).describe('Candidate product ids to show, best first'),
       }),
       execute: async ({ productIds }) => {
         // De-duplicate: the model sometimes repeats an id.
         const seen = new Set<string>()
-        const chosen = productIds
+        // Once this turn has performed a fresh search, its display set must come
+        // from that fresh result pool. Prior-turn cards remain addressable only
+        // on follow-ups that do not run a new search ("show the first one again").
+        const allowPreviouslyShown = candidates.size === 0
+        let chosen = productIds
           .filter((id) => !seen.has(id) && (seen.add(id), true))
-          .map((id) => candidates.get(id) ?? shown?.get(id))
+          .map((id) => candidates.get(id) ?? (allowPreviouslyShown ? shown?.get(id) : undefined))
           .filter((p): p is CommerceProduct => Boolean(p))
           .slice(0, 20)
+        if (!allowPreviouslyShown && latestSearchProducts.length) {
+          chosen = providerCompleteDisplaySelection(config.commerce, {
+            query: latestSearchQuery,
+            selected: chosen,
+            rankedCandidates: latestSearchProducts,
+            limit: 20,
+          })
+        }
         sink.length = 0
         sink.push(...chosen)
         return { shown: chosen.length }
@@ -122,8 +163,8 @@ export function makeProductTools(
     }),
   }
 
-  // Full live details — only where the provider has a live details API
-  // (WooCommerce Store API, Shopify Storefront). Not registered otherwise, so
+  // Full live details — only where the provider has a live details path
+  // (WooCommerce Store API, Shopify Storefront, Verskis product HTML). Not registered otherwise, so
   // the model never sees a tool it can't use.
   if (productDetailsSupported(config.commerce)) {
     tools.get_product_details = tool({
@@ -132,7 +173,12 @@ export function makeProductTools(
         'ingredients, care…) for up to 3 products by id — ids come from search results or the ' +
         'cards currently shown. Call this WHENEVER the shopper asks to hear more about a specific ' +
         'product ("tell me more", "papasakok daugiau", ingredients, composition, how to use) or ' +
-        'wants a thorough comparison. NEVER tell the shopper you lack further information about a ' +
+        'wants a thorough comparison. For furniture and other specification-heavy products, also ' +
+        'call this BEFORE ' +
+        'recommending candidates against a hard constraint (dimensions, color, material, orientation, ' +
+        'weight limit, included features) whenever search results do not already show that fact. ' +
+        'A missing attribute is unverified, not a match. NEVER tell the shopper you lack further ' +
+        'information about a ' +
         'product without having called this first. Answer ONLY from what it returns — never ' +
         'invent specs.',
       inputSchema: z.object({
@@ -140,8 +186,30 @@ export function makeProductTools(
       }),
       execute: async ({ productIds }) => {
         try {
-          const details = await getProductDetails(config.commerce!, productIds.slice(0, 3))
-          return details.length ? details : { error: 'No details found for those product ids.' }
+          const resolvedIds = productIds.slice(0, 3).map((id) => ({
+            modelId: id,
+            // Provider reference quirks stay in the selected provider profile.
+            // The model still sees its original id, not an internal URL/ref.
+            providerId: config.commerce
+              ? providerProductDetailsReference(
+                  config.commerce,
+                  id,
+                  candidates.get(id) ?? shown?.get(id),
+                )
+              : id,
+          }))
+          const details = await getProductDetails(
+            config.commerce!,
+            resolvedIds.map((item) => item.providerId),
+          )
+          const modelIds = new Map(
+            resolvedIds.map((item) => [item.providerId, item.modelId]),
+          )
+          const safeDetails = details.map((detail) => ({
+            ...detail,
+            id: modelIds.get(detail.id) ?? detail.id,
+          }))
+          return safeDetails.length ? safeDetails : { error: 'No details found for those product ids.' }
         } catch (err) {
           console.error('[agent] get_product_details failed:', err)
           return {
@@ -258,6 +326,15 @@ export function ndjsonChatResponse(
     async start(controller) {
       const line = (obj: unknown) => controller.enqueue(encoder.encode(JSON.stringify(obj) + '\n'))
       let fullText = ''
+      let emittedProductKey = ''
+      const emitProductsIfChanged = () => {
+        const products = opts.productSink ?? []
+        if (!products.length) return
+        const key = products.map((product) => product.id).join('\u0000')
+        if (key === emittedProductKey) return
+        emittedProductKey = key
+        line({ t: 'products', v: products })
+      }
       try {
         for await (const part of result.fullStream) {
           if (part.type === 'text-delta') {
@@ -268,6 +345,9 @@ export function ndjsonChatResponse(
               line({ t: 'text', v: delta })
             }
           }
+          // display_products mutates productSink while the tool result streams.
+          // Send cards immediately instead of waiting for the final prose.
+          emitProductsIfChanged()
         }
         const products = opts.productSink ?? []
         // Safety net: the model frequently lists found products in text (even
@@ -277,7 +357,7 @@ export function ndjsonChatResponse(
         if (products.length === 0 && opts.candidates && opts.candidates.size >= 1) {
           products.push(...Array.from(opts.candidates.values()).slice(0, 12))
         }
-        if (products.length) line({ t: 'products', v: products })
+        emitProductsIfChanged()
         const order = opts.orderSink ?? []
         if (order.length) line({ t: 'order', v: order[0] })
       } catch (err) {

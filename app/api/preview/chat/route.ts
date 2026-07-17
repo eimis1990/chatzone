@@ -10,6 +10,7 @@ import type { BotConfig } from '@/lib/types'
 import type { CommerceProduct, OrderStatus } from '@/lib/commerce/types'
 import { createRateLimiter } from '@/lib/ratelimit'
 import { DEFAULT_CHAT_MODEL, DEFAULT_TEMPERATURE } from '@/lib/ai/chat-models'
+import { searchCatalog } from '@/lib/products/search'
 
 export const maxDuration = 60
 
@@ -73,7 +74,21 @@ export async function POST(req: Request) {
     temperature: config.temperature ?? DEFAULT_TEMPERATURE,
     headers: {},
     tools: commerce
-      ? makeProductTools(config, productSink, orderSink, undefined, candidates, shownMap)
+      ? makeProductTools(
+          config,
+          productSink,
+          orderSink,
+          (params) =>
+            searchCatalog(
+              { id: botId, config },
+              params.query,
+              svc,
+              params.limit ?? 24,
+              { audience: params.audience },
+            ),
+          candidates,
+          shownMap,
+        )
       : undefined,
     productSink,
     orderSink,

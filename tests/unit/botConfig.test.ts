@@ -61,6 +61,16 @@ describe('botConfigSchema', () => {
     expect(parsed.voice.voices.en).toBeTruthy()
   })
 
+  it('accepts a Verskis store connection', () => {
+    const parsed = botConfigSchema.parse({
+      displayName: 'Bot',
+      greeting: 'Hi',
+      systemPrompt: 's',
+      commerce: { enabled: true, provider: 'verskis', storeUrl: 'https://www.mobel.lt/' },
+    })
+    expect(parsed.commerce.provider).toBe('verskis')
+  })
+
   it('normalizes a legacy (flat) config into per-language content', () => {
     const parsed = botConfigSchema.parse({
       displayName: 'Bot',

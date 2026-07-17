@@ -256,7 +256,7 @@ export const botConfigFormSchema = z.object({
   commerce: z
     .object({
       enabled: z.boolean().default(false),
-      provider: z.enum(['woocommerce', 'shopify', 'magento', 'feed']).default('woocommerce'),
+      provider: z.enum(['woocommerce', 'shopify', 'magento', 'verskis', 'feed']).default('woocommerce'),
       storeUrl: z.string().default(''),
       restKey: z.string().optional().or(z.literal('')),
       restSecret: z.string().optional().or(z.literal('')),

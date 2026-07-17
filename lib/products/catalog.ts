@@ -2,6 +2,10 @@ import { createHash } from 'node:crypto'
 import { storeOrigin, decodeEntities, STOREFRONT_HEADERS } from '@/lib/commerce/woocommerce'
 import { shopifyDomain } from '@/lib/commerce/shopify'
 import { magentoBase } from '@/lib/commerce/magento'
+import {
+  fetchVerskisProductUrls,
+  parseVerskisPageProduct,
+} from '@/lib/commerce/verskis'
 
 // Index the bulk of the catalog so the semantic search can find ANY relevant
 // product (e.g. a candle for a gift), not just the top sellers. Most-popular
@@ -261,6 +265,63 @@ export async function fetchMagentoCatalog(
     if (items.length < PER_PAGE) break
   }
   return out
+}
+
+// ---------------------------------------------------------------------------
+// Verskis catalog (product sitemap + concurrent structured product pages).
+// There is no bulk catalog API. Product JSON-LD supplies stable ids, images and
+// descriptions; the main Savybės table supplies dimensions/color/material.
+// ---------------------------------------------------------------------------
+
+const VERSKIS_FETCH_CONCURRENCY = 16
+
+export async function fetchVerskisCatalog(
+  storeUrl: string,
+  fetchImpl: typeof fetch = fetch,
+  onProgress?: (fetched: number) => void,
+): Promise<RawProduct[]> {
+  const urls = (await fetchVerskisProductUrls(storeUrl, { fetchImpl })).slice(0, MAX_PRODUCTS)
+  if (!urls.length) return []
+
+  const rows: Array<RawProduct | undefined> = new Array(urls.length)
+  let next = 0
+  let processed = 0
+  const worker = async (): Promise<void> => {
+    while (next < urls.length) {
+      const index = next++
+      const url = urls[index]
+      let res = await fetchImpl(url, { headers: STOREFRONT_HEADERS })
+      if (!res.ok) {
+        // The sync's final prune assumes a complete snapshot. Retry one
+        // transient page rather than silently deleting it from the index.
+        await new Promise((resolve) => setTimeout(resolve, 300))
+        res = await fetchImpl(url, { headers: STOREFRONT_HEADERS })
+      }
+      if (!res.ok) throw new Error(`Verskis product fetch failed: HTTP ${res.status} (${url})`)
+      const product = parseVerskisPageProduct(await res.text(), url)
+      if (!product) throw new Error(`Verskis product data missing: ${url}`)
+      rows[index] = {
+        id: product.id,
+        title: product.title,
+        url: product.url,
+        imageUrl: product.imageUrl,
+        description: product.description,
+        categories: product.categories,
+        attributes: product.attributes,
+        onSale: false,
+        featured: false,
+        // Sitemap order is not popularity. Keep every Verskis product outside
+        // the synthetic "top seller" rank bucket rather than inventing status.
+        rank: TOP_SELLER_RANK + index,
+      }
+      processed++
+      onProgress?.(processed)
+    }
+  }
+  await Promise.all(
+    Array.from({ length: Math.min(VERSKIS_FETCH_CONCURRENCY, urls.length) }, worker),
+  )
+  return rows.filter((row): row is RawProduct => Boolean(row))
 }
 
 /** Tags derived purely from store data — free, always accurate. */

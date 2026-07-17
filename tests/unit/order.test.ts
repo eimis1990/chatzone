@@ -119,5 +119,6 @@ describe('getDiscount + orderLookupEnabled', () => {
     expect(orderLookupEnabled({ enabled: true, provider: 'woocommerce', storeUrl: 'https://s.com', restKey: 'ck', restSecret: 'cs' })).toBe(true)
     expect(orderLookupEnabled({ enabled: true, provider: 'woocommerce', storeUrl: 'https://s.com' })).toBe(false)
     expect(orderLookupEnabled({ enabled: false, provider: 'woocommerce', storeUrl: 'https://s.com', restKey: 'ck', restSecret: 'cs' })).toBe(false)
+    expect(orderLookupEnabled({ enabled: true, provider: 'verskis', storeUrl: 'https://s.com', restKey: 'stale', restSecret: 'stale' })).toBe(false)
   })
 })

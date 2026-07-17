@@ -1,6 +1,10 @@
 import type { BotConfig, BotLanguage, LanguageContent } from '@/lib/types'
 import type { CommerceProduct } from '@/lib/commerce/types'
 import { storeConfigured, orderLookupEnabled, productDetailsSupported } from '@/lib/commerce'
+import {
+  providerDisplayGuidance,
+  providerSearchQueryGuidance,
+} from '@/lib/products/provider-profiles'
 
 export interface ChatMessage {
   role: 'system' | 'user' | 'assistant'
@@ -83,6 +87,8 @@ export function buildSystemPrompt(
   )
 
   if (commerce) {
+    const queryGuidance = providerSearchQueryGuidance(config.commerce)
+    const displayGuidance = providerDisplayGuidance(config.commerce)
     lines.push(
       'PRODUCT SEARCH: the shopper may ask about products, prices, availability, gifts, gift coupons / ' +
         'gift cards / vouchers, or want recommendations. You MUST call `search_products` to check the ' +
@@ -108,7 +114,10 @@ export function buildSystemPrompt(
         'show the best real ones and say so warmly — do not pad with irrelevant products. ' +
         '(3) Write each `search_products` query as a SHORT descriptive phrase in the catalog language — ' +
         'the product type plus at most 1-2 meaningful qualifiers ("kvapni žvakė", "veido kremas sausai ' +
-        'odai", "dovanų kuponas"). EXCEPTION: when the shopper names a specific BRAND or PRODUCT NAME ' +
+        'odai", "dovanų kuponas"). ' +
+        (queryGuidance ? `${queryGuidance} ` : '') +
+        'EXCEPTION: when the shopper names a ' +
+        'specific BRAND or PRODUCT NAME ' +
         '(e.g. "Slim Lady", "WoodWick"), search that name VERBATIM first — do NOT translate it into a ' +
         'category. Search understands natural descriptive queries; keep helpful ' +
         'qualifiers, but never paste whole sentences. If a search returns nothing, you MUST RETRY ' +
@@ -122,8 +131,10 @@ export function buildSystemPrompt(
         'ids show as cards and the rest sit behind "See all": for an OPEN need make the first 4 span ' +
         'DIFFERENT categories; for a SPECIFIC ask put the best of that type first. Favour VARIETY over ' +
         'near-duplicates. For an OPEN or GIFT request, be GENEROUS — pass a rich, varied set (aim for ' +
-        '~12-20 relevant products) so the shopper has plenty to browse; for a SPECIFIC ask a focused ' +
-        'handful is enough. Search several times / broaden the query if needed to gather that many. ' +
+        '~12-20 relevant products) so the shopper has plenty to browse; for a NAMED product or tightly ' +
+        'constrained comparison a focused handful is enough. ' +
+        (displayGuidance ? `${displayGuidance} ` : '') +
+        'Search several times / broaden the query if needed to gather the intended set. ' +
         'ALWAYS call `display_products` for EVERY product you suggest — INCLUDING when there is only ' +
         'ONE match. Never write a product name or price in your text, and never say "tap the card", ' +
         'unless you have called `display_products` for it in this same reply (otherwise no card shows). ' +
@@ -140,7 +151,11 @@ export function buildSystemPrompt(
           'more", "papasakok daugiau", its ingredients, composition, materials, size, or usage — you ' +
           'MUST call `get_product_details` with that product\'s id BEFORE answering. NEVER say you ' +
           'lack further information about a product unless you have just called it and it returned ' +
-          'nothing. Summarise the returned description naturally in the conversation language.',
+          'nothing. For furniture and other specification-heavy products, you MUST also fetch details ' +
+          'before recommending a candidate against a hard requirement such as dimensions, color, ' +
+          'material, orientation, weight limit, or included features whenever that fact is absent from ' +
+          'the search result. Missing means unverified, not matching. Summarise the returned description ' +
+          'naturally in the conversation language.',
       )
     }
 

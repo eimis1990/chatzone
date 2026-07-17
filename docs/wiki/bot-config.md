@@ -106,4 +106,11 @@ Owner-only `system_prompts` table + `/owner/prompts`. A bot references one via
 `config.systemPromptId`, which snapshots the content into `config.systemPrompt`
 (runtime reads the snapshot). Editing a prompt re-pushes to referencing bots.
 
-_Last verified: 2026-07-15._
+Prompt sources are kept in `docs/prompt-templates/`. The specialized **Furniture
+Store** prompt (`docs/prompt-templates/furniture-store.md`) treats dimensions,
+color/material, orientation, and function as verified constraints; preserves all
+other constraints when one is relaxed; and requires base-category search + live
+details before claiming no match. It is published in `system_prompts` and assigned
+to the Mobel bot (and the separate 3IMIS/Chafox Verskis test bot).
+
+_Last verified: 2026-07-17._

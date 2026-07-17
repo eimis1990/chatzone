@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { buildDoc, deriveTags, type RawProduct } from '@/lib/products/catalog'
 
 const base: RawProduct = {
@@ -141,6 +141,53 @@ describe('fetchWooCatalog progress', () => {
     const out = await fetchWooCatalog('https://shop.test', fetchImpl, (n) => seen.push(n))
     expect(out).toHaveLength(205)
     expect(seen).toEqual([100, 200, 205])
+  })
+})
+
+describe('fetchVerskisCatalog', () => {
+  it('crawls product sitemaps concurrently and indexes full structured attributes', async () => {
+    const { fetchVerskisCatalog } = await import('@/lib/products/catalog')
+    const home =
+      '<meta name="generator" content="Verskis"><form class="product-suggestion-search" action="https://shop.test/paieska"></form>'
+    const productPage = (id: string, title: string, color: string) => `
+      <script type="application/ld+json">{"@type":"BreadcrumbList","itemListElement":[{"item":{"name":"Pradžia"}},{"item":{"name":"Svetainės baldai"}},{"item":{"name":"Sofos"}},{"item":{"name":"${title}"}}]}</script>
+      <script type="application/ld+json">{"@type":"Product","productID":"${id}","name":"${title}","description":"Patogi sofa","image":"https://shop.test/${id}.jpg","offers":{"price":1000,"priceCurrency":"EUR","availability":"https://schema.org/InStock","url":"https://shop.test/p-${id}"}}</script>
+      <div class="attributes mt10">
+        <div data-attribute-name="Spalva" data-attribute-values='["${color}"]'></div>
+        <div data-attribute-name="Ilgis" data-attribute-values='["250 cm"]'></div>
+      </div><div id="alternative_goods"></div>`
+    const fetchImpl = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input)
+      if (url === 'https://shop.test') return new Response(home)
+      if (url.endsWith('/sitemap.xml')) {
+        return new Response(
+          '<sitemapindex><sitemap><loc>https://shop.test/products.xml</loc></sitemap></sitemapindex>',
+        )
+      }
+      if (url.endsWith('/products.xml')) {
+        return new Response(
+          '<urlset><url><loc>https://shop.test/p-1</loc></url><url><loc>https://shop.test/p-2</loc></url></urlset>',
+        )
+      }
+      if (url.endsWith('/p-1')) return new Response(productPage('1', 'Sofa A', 'Kapučino'))
+      if (url.endsWith('/p-2')) return new Response(productPage('2', 'Sofa B', 'Ruda'))
+      return new Response('', { status: 404 })
+    }) as unknown as typeof fetch
+    const progress: number[] = []
+
+    const products = await fetchVerskisCatalog('https://shop.test', fetchImpl, (n) =>
+      progress.push(n),
+    )
+    expect(products).toHaveLength(2)
+    expect(products[0]).toMatchObject({
+      id: '1',
+      title: 'Sofa A',
+      url: 'https://shop.test/p-1',
+      categories: ['Svetainės baldai', 'Sofos'],
+      attributes: ['Spalva: Kapučino', 'Ilgis: 250 cm'],
+    })
+    expect(products[0].rank).toBeGreaterThanOrEqual(20)
+    expect(progress.sort((a, b) => a - b)).toEqual([1, 2])
   })
 })
 

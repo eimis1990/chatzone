@@ -1,4 +1,4 @@
-export type CommerceProvider = 'woocommerce' | 'shopify' | 'magento' | 'feed'
+export type CommerceProvider = 'woocommerce' | 'shopify' | 'magento' | 'verskis' | 'feed'
 
 /** Normalized product shape used by the chat tool + product cards. */
 export interface CommerceProduct {

@@ -73,7 +73,7 @@ type LiveConfig = {
   }
   commerce?: {
     enabled?: boolean
-    provider?: 'woocommerce' | 'shopify' | 'magento' | 'feed'
+    provider?: 'woocommerce' | 'shopify' | 'magento' | 'verskis' | 'feed'
     storeUrl?: string
     restKey?: string
     restSecret?: string

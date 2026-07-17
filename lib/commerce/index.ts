@@ -29,6 +29,12 @@ import {
   validateMagentoOrderAccess,
 } from '@/lib/commerce/magento'
 import { searchFeed, validateFeed } from '@/lib/commerce/feed'
+import {
+  fetchVerskisProductDetails,
+  listVerskisProductsByUrl,
+  searchVerskisProducts,
+  validateVerskisStore,
+} from '@/lib/commerce/verskis'
 import { assertPublicUrl } from '@/lib/net/ssrf'
 
 /**
@@ -80,6 +86,8 @@ export function storeConfigured(config: CommerceConfig): boolean {
       return Boolean(config.shopifyDomain && config.shopifyToken)
     case 'magento':
       return Boolean(config.storeUrl)
+    case 'verskis':
+      return Boolean(config.storeUrl)
     case 'feed':
       return Boolean(config.feedUrl)
     default:
@@ -102,6 +110,8 @@ export async function searchStore(
       return searchShopifyProducts(config.shopifyDomain!, config.shopifyToken!, params, deps)
     case 'magento':
       return searchMagentoProducts(config.storeUrl, params, deps)
+    case 'verskis':
+      return searchVerskisProducts(config.storeUrl, params, deps)
     case 'feed':
       return searchFeed(config.feedUrl ?? '', params, deps)
     default:
@@ -127,6 +137,8 @@ export async function listStoreProductsByUrl(
       return listWooProductsByUrl(config.storeUrl, pageUrl, limit, deps)
     case 'shopify':
       return listShopifyCollectionProducts(config.shopifyDomain!, config.shopifyToken!, pageUrl, limit, deps)
+    case 'verskis':
+      return listVerskisProductsByUrl(config.storeUrl, pageUrl, limit, deps)
     default:
       return []
   }
@@ -134,7 +146,7 @@ export async function listStoreProductsByUrl(
 
 /**
  * Full live details (complete description + attributes) for up to a few
- * products by id. WooCommerce + Shopify — other providers return [] and the
+ * products by id. WooCommerce, Shopify, and Verskis — other providers return [] and the
  * chat tool is simply not registered for them (see productDetailsSupported).
  */
 export async function getProductDetails(
@@ -149,6 +161,8 @@ export async function getProductDetails(
       return fetchWooProductDetails(config.storeUrl, ids, deps)
     case 'shopify':
       return fetchShopifyProductDetails(config.shopifyDomain!, config.shopifyToken!, ids, deps)
+    case 'verskis':
+      return fetchVerskisProductDetails(config.storeUrl, ids, deps)
     default:
       return []
   }
@@ -157,7 +171,11 @@ export async function getProductDetails(
 /** Providers with a live full-details API — gates the get_product_details tool. */
 export function productDetailsSupported(config: CommerceConfig | undefined | null): boolean {
   if (!config || !storeConfigured(config)) return false
-  return config.provider === 'woocommerce' || config.provider === 'shopify'
+  return (
+    config.provider === 'woocommerce' ||
+    config.provider === 'shopify' ||
+    config.provider === 'verskis'
+  )
 }
 
 /** Validate a store connection and return the catalog size for the provider. */
@@ -181,6 +199,8 @@ export async function validateStore(
         : { ok: false, total: 0 }
     case 'magento':
       return config.storeUrl ? validateMagentoStore(config.storeUrl, deps) : { ok: false, total: 0 }
+    case 'verskis':
+      return config.storeUrl ? validateVerskisStore(config.storeUrl, deps) : { ok: false, total: 0 }
     case 'feed':
       return config.feedUrl ? validateFeed(config.feedUrl, deps) : { ok: false, total: 0 }
     default:
@@ -243,7 +263,8 @@ export function getDiscount(config: CommerceConfig): DiscountInfo {
 export function orderLookupEnabled(config: CommerceConfig): boolean {
   if (!config?.enabled || !config.storeUrl) return false
   if (config.provider === 'magento') return Boolean(config.magentoToken)
-  return Boolean(config.restKey && config.restSecret)
+  if (config.provider === 'woocommerce') return Boolean(config.restKey && config.restSecret)
+  return false
 }
 
 /** A short, agent-speakable summary of an order lookup (the agent translates it). */

@@ -83,6 +83,24 @@ describe('buildMessages', () => {
     expect(msgs[0].content).toContain('PRODUCT SEARCH')
     expect(msgs[0].content).not.toContain('no adjectives')
     expect(msgs[0].content).toContain('descriptive')
+    expect(msgs[0].content).not.toContain('canonical/nominative')
+    expect(msgs[0].content).toContain('Missing means unverified, not matching')
+  })
+
+  it('adds provider-specific query guidance only for Verskis', () => {
+    const verskisConfig = {
+      ...config,
+      commerce: {
+        ...config.commerce,
+        enabled: true,
+        provider: 'verskis' as const,
+        storeUrl: 'https://shop.test',
+      },
+    }
+    const msgs = buildMessages(verskisConfig, [], [], 'q')
+    expect(msgs[0].content).toContain('canonical form')
+    expect(msgs[0].content).toContain('inflected conversational phrase')
+    expect(msgs[0].content).toContain('pass exactly 20 ids')
   })
 
   describe('cards currently shown', () => {
