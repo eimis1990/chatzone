@@ -60,4 +60,15 @@ workflow). Returns content must preserve the product boundary: Loqara answers,
 collects, verifies supported order status, and hands off; it does not currently
 issue refunds or return labels.
 
-_Last verified: 2026-07-15 (responsive table rendering + both commerce-discovery clusters)._
+The July 17 cluster was planned from an explicit overlap audit rather than raw
+content volume. Its discovery branch separates the umbrella query
+`generative-engine-optimization-ecommerce`, the protocol-specific
+`indexnow-ecommerce-guide`, and the analytics intent
+`measure-ai-search-visibility-ecommerce`. Its trustworthy-support branch moves
+from source preparation (`ecommerce-ai-chatbot-knowledge-base`) to risk control
+(`prevent-ai-chatbot-hallucinations`) to release validation
+(`test-ai-chatbot-before-launch`). Each page owns a different question and
+cross-links to its two supporting pages; do not merge or retarget them toward
+the same head term.
+
+_Last verified: 2026-07-17 (GEO measurement + trustworthy-support clusters)._

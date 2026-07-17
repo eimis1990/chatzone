@@ -34,6 +34,12 @@
 - Blog (guides): https://www.loqara.com/blog
 
 ## Popular guides
+- Generative engine optimization for e-commerce: https://www.loqara.com/blog/generative-engine-optimization-ecommerce
+- IndexNow for e-commerce: https://www.loqara.com/blog/indexnow-ecommerce-guide
+- How to measure AI search visibility: https://www.loqara.com/blog/measure-ai-search-visibility-ecommerce
+- Building an AI-ready e-commerce knowledge base: https://www.loqara.com/blog/ecommerce-ai-chatbot-knowledge-base
+- Preventing AI chatbot hallucinations in customer service: https://www.loqara.com/blog/prevent-ai-chatbot-hallucinations
+- How to test an e-commerce AI chatbot before launch: https://www.loqara.com/blog/test-ai-chatbot-before-launch
 - Google AI Mode shopping for e-commerce: https://www.loqara.com/blog/google-ai-mode-shopping-ecommerce
 - Semantic search for e-commerce: https://www.loqara.com/blog/semantic-search-ecommerce
 - Conversational commerce practical guide: https://www.loqara.com/blog/conversational-commerce-guide
