@@ -34,6 +34,12 @@
 - Blog (guides): https://www.loqara.com/blog
 
 ## Popular guides
+- AI for e-commerce — 12 practical store uses: https://www.loqara.com/blog/ai-for-ecommerce
+- Shopify AI assistant guide — Sidekick, Magic, and storefront helpers: https://www.loqara.com/blog/shopify-ai-assistant-guide
+- AI product descriptions for e-commerce: https://www.loqara.com/blog/ai-product-descriptions-ecommerce
+- AI personalization in e-commerce: https://www.loqara.com/blog/ai-personalization-ecommerce
+- AI inventory forecasting for e-commerce: https://www.loqara.com/blog/ai-inventory-forecasting-ecommerce
+- AI fraud detection for e-commerce: https://www.loqara.com/blog/ai-fraud-detection-ecommerce
 - Generative engine optimization for e-commerce: https://www.loqara.com/blog/generative-engine-optimization-ecommerce
 - IndexNow for e-commerce: https://www.loqara.com/blog/indexnow-ecommerce-guide
 - How to measure AI search visibility: https://www.loqara.com/blog/measure-ai-search-visibility-ecommerce

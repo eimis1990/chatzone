@@ -40,6 +40,13 @@ gets cited by ChatGPT/Claude/Perplexity/Gemini. The weekly GSC gap-analysis loop
 (OpenAI gpt-image-1, converted to light WebP via `cwebp`). Prompts must be
 illustrative/abstract — no text in the image (data lives in CSS blocks).
 
+When a post needs a second explanatory visual, use a distinct text-free process
+diagram or concept map rather than repeating the hero. Reference it in a semantic
+`<figure>` with descriptive alt text, explicit 1200×800 dimensions, lazy loading,
+and a caption that explains the relationship the image encodes. The July 18 AI
+operations cluster is the reference set: each post pairs a 3D editorial cover with
+a process infographic in `public/blog/`.
+
 ## Strategy
 
 Competitor is **Parnidia** (see `docs/loqara-vs-parnidia.md`). Mix of how-to +
@@ -71,4 +78,15 @@ from source preparation (`ecommerce-ai-chatbot-knowledge-base`) to risk control
 cross-links to its two supporting pages; do not merge or retarget them toward
 the same head term.
 
-_Last verified: 2026-07-17 (GEO measurement + trustworthy-support clusters)._
+The July 18 cluster establishes `ai-for-ecommerce` as an umbrella page for broad
+AI-use-case intent, with five operational spokes that must retain separate query
+ownership: Shopify merchant assistants (`shopify-ai-assistant-guide`), catalog
+content operations (`ai-product-descriptions-ecommerce`), shopper experience
+ranking (`ai-personalization-ecommerce`), inventory prediction
+(`ai-inventory-forecasting-ecommerce`), and transaction/account risk
+(`ai-fraud-detection-ecommerce`). The Shopify article distinguishes internal
+Sidekick/Magic assistance from public storefront chat, so it complements rather
+than replaces `best-ai-chatbot-for-shopify`. Personalization remains broader than
+the conversational recommendation intent owned by `ai-product-recommendation-chatbot`.
+
+_Last verified: 2026-07-18 (AI operations pillar + dual-image article pattern)._
