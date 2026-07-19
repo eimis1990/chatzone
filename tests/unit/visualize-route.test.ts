@@ -73,10 +73,14 @@ beforeEach(() => {
   })
   updateEq2.mockResolvedValue({ error: null })
   renderRoomScene.mockResolvedValue({ data: PX, mimeType: 'image/png' })
-  // Product image download.
-  vi.stubGlobal('fetch', vi.fn().mockResolvedValue(
-    new Response(Buffer.from(PX, 'base64'), { headers: { 'Content-Type': 'image/jpeg' } }),
-  ))
+  // Product image download. A fresh Response per call — bodies are one-shot,
+  // and the rate-limit test below calls POST repeatedly.
+  vi.stubGlobal(
+    'fetch',
+    vi.fn().mockImplementation(
+      async () => new Response(Buffer.from(PX, 'base64'), { headers: { 'Content-Type': 'image/jpeg' } }),
+    ),
+  )
 })
 
 describe('POST /api/widget/visualize', () => {
@@ -85,9 +89,37 @@ describe('POST /api/widget/visualize', () => {
     expect((await POST(req({}))).status).toBe(403)
   })
 
-  it('429 when the conversation hit the render cap', async () => {
+  it('429 when the conversation hit the render cap, with remaining: 0', async () => {
     convSingle.mockResolvedValue({ data: { id: CONV, visualizer_renders: 5 } })
-    expect((await POST(req({}))).status).toBe(429)
+    const res = await POST(req({}))
+    expect(res.status).toBe(429)
+    const body = (await res.json()) as { error: string; remaining?: number }
+    expect(body.remaining).toBe(0)
+  })
+
+  it('429 from the per-IP rate limit has no remaining field', async () => {
+    // The limiter buckets by `${bot.id}:${ip}` (capacity 5) and is a
+    // module-level singleton shared across tests in this file, so use a
+    // dedicated IP here to avoid interference from other tests' calls.
+    const ipReq = () =>
+      new Request('http://localhost/api/widget/visualize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-forwarded-for': '203.0.113.9' },
+        body: JSON.stringify({
+          publicKey: 'pk',
+          conversationId: CONV,
+          roomImage: `data:image/png;base64,${PX}`,
+          productIds: ['p1'],
+        }),
+      })
+    let last: Response | null = null
+    for (let i = 0; i < 6; i++) {
+      last = await POST(ipReq())
+    }
+    expect(last!.status).toBe(429)
+    const body = (await last!.json()) as { error: string; remaining?: number }
+    expect(body.error).toBe('Too many requests.')
+    expect('remaining' in body).toBe(false)
   })
 
   it('400 on a non-image room upload', async () => {

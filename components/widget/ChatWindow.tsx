@@ -199,7 +199,6 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
   // Room visualizer: products picked from cards, and the studio overlay.
   const [roomSelection, setRoomSelection] = useState<CommerceProduct[]>([])
   const [studioOpen, setStudioOpen] = useState(false)
-  const roomEnabled = config.roomVisualizer && Boolean(transport.visualize) && Boolean(conversationId)
   // Confirmation bottom sheet before clearing the conversation.
   const [confirmRestart, setConfirmRestart] = useState(false)
   // Live-call state, surfaced in the header.
@@ -258,6 +257,7 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
     setAgentName(null)
     setConfirmRestart(false)
     setRoomSelection([])
+    setStudioOpen(false)
     lastPollTsRef.current = undefined
     updateHandoff('bot')
   }, [updateHandoff])

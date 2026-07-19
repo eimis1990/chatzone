@@ -231,7 +231,10 @@ export function createWidgetTransport(publicKey: string): ChatTransport {
         error?: string
       }
       if (!res.ok)
-        return { error: data.error ?? 'The visualization failed.', ...(res.status === 429 ? { remaining: 0 } : {}) }
+        return {
+          error: data.error ?? 'The visualization failed.',
+          ...(typeof data.remaining === 'number' ? { remaining: data.remaining } : {}),
+        }
       return data
     },
 

@@ -59,7 +59,8 @@ export async function POST(req: Request) {
     .eq('bot_id', bot.id)
     .single<{ id: string; visualizer_renders: number }>()
   if (!conv) return json({ error: 'Conversation not found.' }, 404)
-  if (conv.visualizer_renders >= RENDER_CAP) return json({ error: 'Render limit reached.' }, 429)
+  if (conv.visualizer_renders >= RENDER_CAP)
+    return json({ error: 'Render limit reached.', remaining: 0 }, 429)
 
   const room = parseImageDataUrl(roomImage)
   if (!room) return json({ error: 'Room photo must be a JPEG, PNG or WebP under 8 MB.' }, 400)
@@ -110,11 +111,12 @@ export async function POST(req: Request) {
   // Consume a slot only after success. ponytail: read-then-write race can
   // overshoot the cap by a concurrent request or two — acceptable; switch to a
   // SQL increment RPC if abuse shows up.
-  await svc
+  const { error: incrementError } = await svc
     .from('conversations')
     .update({ visualizer_renders: conv.visualizer_renders + 1 })
     .eq('id', conv.id)
     .eq('bot_id', bot.id)
+  if (incrementError) console.error('[visualizer] cap increment failed:', incrementError)
 
   return json({
     image: `data:${rendered.mimeType};base64,${rendered.data}`,
