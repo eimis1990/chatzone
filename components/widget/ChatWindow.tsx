@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { HeadsetIcon, RotateCcwIcon, XIcon } from 'lucide-react'
 import { MessageList, type ChatMessage } from './MessageList'
 import { ProductListView } from './ProductCards'
-import { RoomTray, roomLabels, MAX_ROOM_PRODUCTS, type RoomSelect } from './RoomVisualizer'
+import { RoomTray, RoomStudio, roomLabels, MAX_ROOM_PRODUCTS, type RoomSelect } from './RoomVisualizer'
 import { Composer } from './Composer'
 import { VoiceCallButton, type CallState } from '@/components/voice/VoiceCallButton'
 import { LeadForm } from './LeadForm'
@@ -1269,6 +1269,26 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
               onClose={() => setListProducts(null)}
               onProductClick={trackProductClick}
               roomSelect={roomSelect}
+            />
+          )}
+        </AnimatePresence>
+
+        {/* Fullscreen room-studio overlay (upload photo, generate, regenerate) */}
+        <AnimatePresence>
+          {studioOpen && transport.visualize && (
+            <RoomStudio
+              products={roomSelection}
+              conversationId={conversationId}
+              visualize={transport.visualize}
+              primaryColor={primaryColor}
+              language={activeLang}
+              onClose={() => setStudioOpen(false)}
+              onResult={(image) =>
+                setMessages((prev) => [
+                  ...prev,
+                  { id: generateId(), role: 'assistant', content: roomLabels(activeLang).resultNote, image },
+                ])
+              }
             />
           )}
         </AnimatePresence>

@@ -25,6 +25,8 @@ export interface ChatMessage {
   link?: { url: string; label: string }
   /** Assistant message authored by a human agent (handoff) vs. the bot. */
   fromHuman?: boolean
+  /** A generated image (room visualizer render), shown inside the bubble. */
+  image?: string
 }
 
 interface MessageListProps {
@@ -194,6 +196,15 @@ export function MessageList({
                     </>
                   )}
                 </div>
+              )}
+
+              {msg.image && (
+                <img
+                  src={msg.image}
+                  alt=""
+                  className="mt-2 w-full rounded-xl border"
+                  style={{ maxHeight: 280, objectFit: 'cover' }}
+                />
               )}
 
               {/* 👍/👎 feedback on completed bot replies (real DB id only) */}
