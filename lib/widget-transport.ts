@@ -66,6 +66,17 @@ export interface ChatTransport {
   /** Whisper dictation: audio blob → transcribed text (plan-gated server-side). */
   transcribe?(audio: Blob, language: BotLanguage): Promise<{ text: string }>
   /**
+   * Room visualizer: render selected products into the visitor's room photo.
+   * Optional — the configurator preview omits it (renders cost real money),
+   * so the feature is live-embed only.
+   */
+  visualize?(params: {
+    conversationId: string
+    roomImage: string
+    productIds: string[]
+    instruction?: string
+  }): Promise<{ image?: string; remaining?: number; error?: string }>
+  /**
    * Record a widget interaction event (analytics). Fire-and-forget: must never
    * block or break the UI. Optional — the configurator preview omits it so
    * preview clicks never pollute a bot's real metrics.
@@ -206,6 +217,22 @@ export function createWidgetTransport(publicKey: string): ChatTransport {
       const res = await fetch('/api/widget/transcribe', { method: 'POST', body: form })
       if (!res.ok) throw new Error(`transcribe failed: ${res.status}`)
       return (await res.json()) as { text: string }
+    },
+
+    async visualize(params) {
+      const res = await fetch('/api/widget/visualize', {
+        method: 'POST',
+        headers: JSON_HEADERS,
+        body: JSON.stringify({ publicKey, ...params }),
+      })
+      const data = (await res.json().catch(() => ({}))) as {
+        image?: string
+        remaining?: number
+        error?: string
+      }
+      if (!res.ok)
+        return { error: data.error ?? 'The visualization failed.', ...(res.status === 429 ? { remaining: 0 } : {}) }
+      return data
     },
 
     trackEvent(event) {

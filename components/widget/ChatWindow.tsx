@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { HeadsetIcon, RotateCcwIcon, XIcon } from 'lucide-react'
 import { MessageList, type ChatMessage } from './MessageList'
 import { ProductListView } from './ProductCards'
+import { RoomTray, roomLabels, MAX_ROOM_PRODUCTS, type RoomSelect } from './RoomVisualizer'
 import { Composer } from './Composer'
 import { VoiceCallButton, type CallState } from '@/components/voice/VoiceCallButton'
 import { LeadForm } from './LeadForm'
@@ -195,6 +196,10 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
   const [leadDismissed, setLeadDismissed] = useState(false)
   // When set, the full-height product list overlay covers the chat body.
   const [listProducts, setListProducts] = useState<CommerceProduct[] | null>(null)
+  // Room visualizer: products picked from cards, and the studio overlay.
+  const [roomSelection, setRoomSelection] = useState<CommerceProduct[]>([])
+  const [studioOpen, setStudioOpen] = useState(false)
+  const roomEnabled = config.roomVisualizer && Boolean(transport.visualize) && Boolean(conversationId)
   // Confirmation bottom sheet before clearing the conversation.
   const [confirmRestart, setConfirmRestart] = useState(false)
   // Live-call state, surfaced in the header.
@@ -252,9 +257,20 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
     setListProducts(null)
     setAgentName(null)
     setConfirmRestart(false)
+    setRoomSelection([])
     lastPollTsRef.current = undefined
     updateHandoff('bot')
   }, [updateHandoff])
+
+  const toggleRoomProduct = useCallback((p: CommerceProduct) => {
+    setRoomSelection((prev) =>
+      prev.some((x) => x.id === p.id)
+        ? prev.filter((x) => x.id !== p.id)
+        : prev.length >= MAX_ROOM_PRODUCTS
+          ? prev
+          : [...prev, p],
+    )
+  }, [])
 
   const handleCallState = useCallback((s: CallState) => {
     callStateRef.current = s
@@ -373,6 +389,20 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
   )
 
   const primaryColor = config.theme.primaryColor
+
+  // Room visualizer selection UI — shown whenever the feature + transport are
+  // available (doesn't require conversationId, cards can appear before one exists).
+  const roomSelect: RoomSelect | undefined =
+    config.roomVisualizer && transport.visualize
+      ? {
+          selectedIds: roomSelection.map((p) => p.id),
+          full: roomSelection.length >= MAX_ROOM_PRODUCTS,
+          onToggle: toggleRoomProduct,
+          addLabel: roomLabels(activeLang).addToRoom,
+          addedLabel: roomLabels(activeLang).added,
+        }
+      : undefined
+
   const cornerRadius = config.theme.cornerRadius ?? 16
   const bubbleRadius = config.theme.bubbleRadius ?? 16
   const glassBubbles = config.theme.glassBubbles ?? false
@@ -1126,6 +1156,7 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
             onFeedback={handleFeedback}
             onProductClick={trackProductClick}
             onLinkClick={trackLinkClick}
+            roomSelect={roomSelect}
           />
         )}
 
@@ -1184,6 +1215,17 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
           </p>
         )}
 
+        {/* Room visualizer tray — hidden behind the full-list overlay */}
+        {roomSelect && !listProducts && (
+          <RoomTray
+            products={roomSelection}
+            primaryColor={primaryColor}
+            language={activeLang}
+            onRemove={(id) => setRoomSelection((prev) => prev.filter((p) => p.id !== id))}
+            onOpen={() => setStudioOpen(true)}
+          />
+        )}
+
         {/* Composer */}
         <Composer
           onSend={sendMessage}
@@ -1224,6 +1266,7 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
               language={activeLang}
               onClose={() => setListProducts(null)}
               onProductClick={trackProductClick}
+              roomSelect={roomSelect}
             />
           )}
         </AnimatePresence>
