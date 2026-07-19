@@ -136,6 +136,8 @@ export interface PublicBotConfig {
     ttsEnabled: boolean
     sttEnabled: boolean
   }
+  /** Widget offers the "see it in your room" product visualizer. */
+  roomVisualizer: boolean
   /** Hide the "Powered by Loqara" badge (true on plans that allow it). */
   hideBadge?: boolean
   /** Whisper dictation in the composer (paid plans). */
@@ -266,6 +268,7 @@ export function publicBotConfig(
       ttsEnabled: false,
       sttEnabled: false,
     },
+    roomVisualizer: config.roomVisualizer ?? false,
   }
 
   if (config.tagline) {
