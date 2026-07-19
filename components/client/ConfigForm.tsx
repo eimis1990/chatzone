@@ -1865,7 +1865,7 @@ export function ConfigForm({
         </CollapsibleSection>
 
         {/* ── Store / Products ── */}
-        <CommerceSection control={control} watch={watch} setValue={setValue} botId={botId} />
+        <CommerceSection control={control} watch={watch} setValue={setValue} botId={botId} showAdvanced={showAdvanced} />
 
         {/* ── Allowed Domains (Advanced) ── */}
         <CollapsibleSection header={<SectionHeader
@@ -2055,9 +2055,11 @@ interface CommerceSectionProps {
   watch: UseFormWatch<FormValues>
   setValue: UseFormSetValue<FormValues>
   botId: string
+  /** Owner-only rows (room visualizer); the section itself is visible to clients. */
+  showAdvanced: boolean
 }
 
-function CommerceSection({ control, watch, setValue, botId }: CommerceSectionProps) {
+function CommerceSection({ control, watch, setValue, botId, showAdvanced }: CommerceSectionProps) {
   const commerceEnabled = watch('commerce.enabled')
   const provider = watch('commerce.provider') ?? 'woocommerce'
   const storeUrl = watch('commerce.storeUrl') ?? ''
@@ -2719,7 +2721,8 @@ function CommerceSection({ control, watch, setValue, botId }: CommerceSectionPro
               )}
             </div>
 
-            {/* Room visualizer — AI "see it in your room" for furniture stores. */}
+            {/* Room visualizer — AI "see it in your room" for furniture stores. Owner-only. */}
+            {showAdvanced && (
             <div className="space-y-3 border-t pt-4">
               <div className="flex items-center justify-between gap-3 rounded-lg border p-3">
                 <div>
@@ -2736,12 +2739,13 @@ function CommerceSection({ control, watch, setValue, botId }: CommerceSectionPro
                     <Switch
                       checked={field.value ?? false}
                       onCheckedChange={field.onChange}
-                      id="roomVisualizerEnabled"
+                      aria-label="Room visualizer"
                     />
                   )}
                 />
               </div>
             </div>
+            )}
           </div>
           </SettingsGroup>
         )}
