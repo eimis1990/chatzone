@@ -31,6 +31,7 @@ export interface RoomLabels {
   instructionPlaceholder: string
   download: string
   back: string
+  removeProduct: (title: string) => string
   remaining: (n: number) => string
   limitReached: string
   genericError: string
@@ -52,6 +53,7 @@ export function roomLabels(language: 'en' | 'lt'): RoomLabels {
         instructionPlaceholder: 'Pvz.: „pastatykite prie lango“ (nebūtina)',
         download: 'Atsisiųsti',
         back: 'Atgal',
+        removeProduct: (title) => `Pašalinti ${title}`,
         remaining: (n) => `Liko bandymų: ${n}`,
         limitReached: 'Pasiektas vizualizacijų limitas šiam pokalbiui.',
         genericError: 'Nepavyko sugeneruoti — bandykite dar kartą.',
@@ -70,6 +72,7 @@ export function roomLabels(language: 'en' | 'lt'): RoomLabels {
         instructionPlaceholder: 'e.g. "place it by the window" (optional)',
         download: 'Download',
         back: 'Back',
+        removeProduct: (title) => `Remove ${title}`,
         remaining: (n) => `${n} renders left`,
         limitReached: 'Visualization limit reached for this conversation.',
         genericError: 'Generation failed — please try again.',
@@ -97,7 +100,7 @@ export function RoomTray({ products, primaryColor, language, onRemove, onOpen }:
             key={p.id}
             type="button"
             onClick={() => onRemove(p.id)}
-            aria-label={language === 'lt' ? `Pašalinti ${p.title}` : `Remove ${p.title}`}
+            aria-label={labels.removeProduct(p.title)}
             title={`${p.title} ✕`}
             className="relative size-9 shrink-0 overflow-hidden rounded-lg border-2 border-white bg-muted outline-none focus-visible:ring-2"
           >
@@ -244,7 +247,14 @@ export function RoomStudio({
               className="sr-only"
               onChange={async (e) => {
                 const f = e.target.files?.[0]
-                if (f) setRoomImage(await downscaleImage(f))
+                if (!f) return
+                try {
+                  setRoomImage(await downscaleImage(f))
+                  setError(null)
+                } catch {
+                  // Corrupt/undecodable file — createImageBitmap rejects.
+                  setError(labels.genericError)
+                }
               }}
             />
           </label>
