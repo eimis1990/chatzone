@@ -1215,16 +1215,18 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
           </p>
         )}
 
-        {/* Room visualizer tray — hidden behind the full-list overlay */}
-        {roomSelect && !listProducts && (
-          <RoomTray
-            products={roomSelection}
-            primaryColor={primaryColor}
-            language={activeLang}
-            onRemove={(id) => setRoomSelection((prev) => prev.filter((p) => p.id !== id))}
-            onOpen={() => setStudioOpen(true)}
-          />
-        )}
+        {/* Room visualizer tray — hidden behind the full-list overlay or the lead form */}
+        {roomSelect &&
+          !listProducts &&
+          !(showLeadForm && !leadDismissed && config.leadCapture.fields.length > 0) && (
+            <RoomTray
+              products={roomSelection}
+              primaryColor={primaryColor}
+              language={activeLang}
+              onRemove={(id) => setRoomSelection((prev) => prev.filter((p) => p.id !== id))}
+              onOpen={() => setStudioOpen(true)}
+            />
+          )}
 
         {/* Composer */}
         <Composer
