@@ -2718,6 +2718,30 @@ function CommerceSection({ control, watch, setValue, botId }: CommerceSectionPro
                 </div>
               )}
             </div>
+
+            {/* Room visualizer — AI "see it in your room" for furniture stores. */}
+            <div className="space-y-3 border-t pt-4">
+              <div className="flex items-center justify-between gap-3 rounded-lg border p-3">
+                <div>
+                  <p className="text-sm font-medium">Room visualizer</p>
+                  <p className="text-xs text-muted-foreground">
+                    Let visitors upload a room photo and see selected products placed in it (AI
+                    render, max 5 per conversation).
+                  </p>
+                </div>
+                <Controller
+                  name="roomVisualizer"
+                  control={control}
+                  render={({ field }) => (
+                    <Switch
+                      checked={field.value ?? false}
+                      onCheckedChange={field.onChange}
+                      id="roomVisualizerEnabled"
+                    />
+                  )}
+                />
+              </div>
+            </div>
           </div>
           </SettingsGroup>
         )}
