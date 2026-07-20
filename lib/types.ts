@@ -264,6 +264,8 @@ export interface BotConfig {
    *  format replies as Markdown (bold, lists, links). Rendered safely in the
    *  bubble. Defaults to on (treat undefined as true). */
   richResponses?: boolean
+  /** "See it in your room" AI product visualizer (furniture stores). */
+  roomVisualizer?: boolean
   model: string
   temperature: number
   leadCapture: {

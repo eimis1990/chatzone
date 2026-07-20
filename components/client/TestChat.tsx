@@ -529,6 +529,7 @@ function buildPreviewPublicConfig(config: LiveConfig): PublicBotConfig {
       ttsEnabled: config.voice?.ttsEnabled ?? true,
       sttEnabled: config.voice?.sttEnabled ?? true,
     },
+    roomVisualizer: false,
   }
 
   if (config.avatarUrl) result.avatarUrl = config.avatarUrl

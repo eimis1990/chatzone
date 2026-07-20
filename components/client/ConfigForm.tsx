@@ -123,6 +123,9 @@ interface ConfigFormProps {
   /** 'client' hides the technical sections (AI behaviour, Voice, Store, Allowed
    *  domains) — those are configured for them by the owner. 'owner' shows all. */
   audience?: 'owner' | 'client'
+  /** Demo bots only (owner portal): exposes the room visualizer toggle. The
+   *  public endpoints enforce the same demo-org gate server-side. */
+  showRoomVisualizer?: boolean
   /** Optional bar at the very top of the config panel (e.g. the owner's
    *  Configure / Knowledge tabs) — spans the config-panel width. */
   topSlot?: ReactNode
@@ -227,6 +230,7 @@ export function ConfigForm({
   onSave = saveConfig,
   headerAction,
   audience = 'owner',
+  showRoomVisualizer = false,
   topSlot,
 }: ConfigFormProps) {
   const router = useRouter()
@@ -1865,7 +1869,7 @@ export function ConfigForm({
         </CollapsibleSection>
 
         {/* ── Store / Products ── */}
-        <CommerceSection control={control} watch={watch} setValue={setValue} botId={botId} />
+        <CommerceSection control={control} watch={watch} setValue={setValue} botId={botId} showRoomVisualizer={showRoomVisualizer} />
 
         {/* ── Allowed Domains (Advanced) ── */}
         <CollapsibleSection header={<SectionHeader
@@ -2055,9 +2059,11 @@ interface CommerceSectionProps {
   watch: UseFormWatch<FormValues>
   setValue: UseFormSetValue<FormValues>
   botId: string
+  /** Demo-bots-only rows (room visualizer); the section itself is visible to clients. */
+  showRoomVisualizer: boolean
 }
 
-function CommerceSection({ control, watch, setValue, botId }: CommerceSectionProps) {
+function CommerceSection({ control, watch, setValue, botId, showRoomVisualizer }: CommerceSectionProps) {
   const commerceEnabled = watch('commerce.enabled')
   const provider = watch('commerce.provider') ?? 'woocommerce'
   const storeUrl = watch('commerce.storeUrl') ?? ''
@@ -2718,6 +2724,32 @@ function CommerceSection({ control, watch, setValue, botId }: CommerceSectionPro
                 </div>
               )}
             </div>
+
+            {/* Room visualizer — AI "see it in your room" for furniture stores. Demo bots only. */}
+            {showRoomVisualizer && (
+            <div className="space-y-3 border-t pt-4">
+              <div className="flex items-center justify-between gap-3 rounded-lg border p-3">
+                <div>
+                  <p className="text-sm font-medium">Room visualizer</p>
+                  <p className="text-xs text-muted-foreground">
+                    Let visitors upload a room photo and see selected products placed in it (AI
+                    render, max 5 per conversation).
+                  </p>
+                </div>
+                <Controller
+                  name="roomVisualizer"
+                  control={control}
+                  render={({ field }) => (
+                    <Switch
+                      checked={field.value ?? false}
+                      onCheckedChange={field.onChange}
+                      aria-label="Room visualizer"
+                    />
+                  )}
+                />
+              </div>
+            </div>
+            )}
           </div>
           </SettingsGroup>
         )}

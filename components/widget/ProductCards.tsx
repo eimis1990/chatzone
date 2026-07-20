@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import type { CommerceProduct } from '@/lib/commerce/types'
 import { readableTextColor, isLightColor } from '@/lib/utils'
+import type { RoomSelect } from './RoomVisualizer'
 
 interface ProductCardsProps {
   products: CommerceProduct[]
@@ -14,6 +15,8 @@ interface ProductCardsProps {
   onSeeAll?: (products: CommerceProduct[]) => void
   /** Analytics: the visitor followed a product link out of the chat. */
   onProductClick?: (product: CommerceProduct) => void
+  /** Room visualizer selection plumbing — omitted when the feature is off. */
+  roomSelect?: RoomSelect
 }
 
 /** How many products are shown as cards before the rest move behind "See all". */
@@ -58,6 +61,7 @@ export function ProductCards({
   language = 'en',
   onSeeAll,
   onProductClick,
+  roomSelect,
 }: ProductCardsProps) {
   if (!products || products.length === 0) return null
   const labels = labelsFor(language)
@@ -80,6 +84,7 @@ export function ProductCards({
             viewMoreLabel={labels.viewMore}
             outOfStockLabel={labels.outOfStock}
             onProductClick={onProductClick}
+            roomSelect={roomSelect}
           />
         ))}
       </div>
@@ -107,6 +112,8 @@ interface ProductListViewProps {
   onClose: () => void
   /** Analytics: the visitor followed a product link out of the chat. */
   onProductClick?: (product: CommerceProduct) => void
+  /** Room visualizer selection plumbing — omitted when the feature is off. */
+  roomSelect?: RoomSelect
 }
 
 /**
@@ -121,6 +128,7 @@ export function ProductListView({
   language = 'en',
   onClose,
   onProductClick,
+  roomSelect,
 }: ProductListViewProps) {
   const labels = labelsFor(language)
 
@@ -130,7 +138,10 @@ export function ProductListView({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 14 }}
       transition={{ duration: 0.22, ease: [0.25, 0.46, 0.45, 0.94] }}
-      className="absolute inset-0 z-20 flex flex-col bg-white"
+      // Root carries the sub-header color: at fractional pixel positions a
+      // white root bleeds a hairline above the dark bar (AA seam).
+      className="absolute inset-0 z-20 flex flex-col"
+      style={{ backgroundColor: primaryColor }}
       role="region"
       aria-label={labels.products}
     >
@@ -154,7 +165,7 @@ export function ProductListView({
       </div>
 
       {/* Scrollable list */}
-      <div className="flex-1 overflow-y-auto px-3 py-3 space-y-1.5" style={{ scrollbarWidth: 'thin' }}>
+      <div className="flex-1 overflow-y-auto bg-white px-3 py-3 space-y-1.5" style={{ scrollbarWidth: 'thin' }}>
         <div className="flex flex-col gap-1.5" role="list">
           {products.map((product) => (
             <ProductRow
@@ -164,6 +175,7 @@ export function ProductListView({
               primaryColor={primaryColor}
               labels={labels}
               onProductClick={onProductClick}
+              roomSelect={roomSelect}
             />
           ))}
         </div>
@@ -179,6 +191,7 @@ interface ProductCardProps {
   viewMoreLabel: string
   outOfStockLabel: string
   onProductClick?: (product: CommerceProduct) => void
+  roomSelect?: RoomSelect
 }
 
 function ProductCard({
@@ -188,6 +201,7 @@ function ProductCard({
   viewMoreLabel,
   outOfStockLabel,
   onProductClick,
+  roomSelect,
 }: ProductCardProps) {
   // Card takes ~72% of the chat width so the next card peeks (signals scroll).
   const cardRadius = bubbleRadius
@@ -272,6 +286,24 @@ function ProductCard({
         >
           {viewMoreLabel}
         </a>
+
+        {roomSelect &&
+          (() => {
+            const selected = roomSelect.selectedIds.includes(product.id)
+            const disabled = !selected && roomSelect.full
+            return (
+              <button
+                type="button"
+                disabled={disabled}
+                onClick={() => roomSelect.onToggle(product)}
+                className="flex items-center justify-center border text-xs font-medium py-1.5 px-2 transition-colors hover:bg-gray-50 disabled:opacity-40 outline-none focus-visible:ring-2"
+                style={{ borderRadius: `${Math.min(cardRadius, 12)}px` }}
+                aria-pressed={selected}
+              >
+                {selected ? roomSelect.addedLabel : roomSelect.addLabel}
+              </button>
+            )
+          })()}
       </div>
     </div>
   )
@@ -283,9 +315,10 @@ interface ProductRowProps {
   primaryColor: string
   labels: Labels
   onProductClick?: (product: CommerceProduct) => void
+  roomSelect?: RoomSelect
 }
 
-function ProductRow({ product, bubbleRadius, primaryColor, labels, onProductClick }: ProductRowProps) {
+function ProductRow({ product, bubbleRadius, primaryColor, labels, onProductClick, roomSelect }: ProductRowProps) {
   const [expanded, setExpanded] = useState(false)
   const rowRadius = Math.min(bubbleRadius, 14)
   const hasDescription = Boolean(product.shortDescription)
@@ -353,18 +386,39 @@ function ProductRow({ product, bubbleRadius, primaryColor, labels, onProductClic
           </a>
         </div>
 
-        {/* Full-width dashed "Description" toggle */}
-        {hasDescription && (
-          <button
-            type="button"
-            onClick={() => setExpanded((v) => !v)}
-            aria-expanded={expanded}
-            className="flex w-full items-center justify-center gap-1 border border-dashed bg-white text-[11px] font-medium py-1.5 text-muted-foreground transition-colors hover:bg-gray-50 hover:text-foreground outline-none focus-visible:ring-2"
-            style={{ borderRadius: `${Math.min(rowRadius, 8)}px` }}
-          >
-            {labels.details}
-            <Chevron open={expanded} />
-          </button>
+        {/* Description toggle + room-visualizer toggle, side by side */}
+        {(hasDescription || roomSelect) && (
+          <div className="flex items-center gap-1.5">
+            {hasDescription && (
+              <button
+                type="button"
+                onClick={() => setExpanded((v) => !v)}
+                aria-expanded={expanded}
+                className="flex flex-1 items-center justify-center gap-1 border border-dashed bg-white text-[11px] font-medium py-1.5 text-muted-foreground transition-colors hover:bg-gray-50 hover:text-foreground outline-none focus-visible:ring-2"
+                style={{ borderRadius: `${Math.min(rowRadius, 8)}px` }}
+              >
+                {labels.details}
+                <Chevron open={expanded} />
+              </button>
+            )}
+            {roomSelect &&
+              (() => {
+                const selected = roomSelect.selectedIds.includes(product.id)
+                const disabled = !selected && roomSelect.full
+                return (
+                  <button
+                    type="button"
+                    disabled={disabled}
+                    onClick={() => roomSelect.onToggle(product)}
+                    className="flex flex-1 items-center justify-center border text-[11px] font-medium py-1.5 transition-colors hover:bg-gray-50 disabled:opacity-40 outline-none focus-visible:ring-2"
+                    style={{ borderRadius: `${Math.min(rowRadius, 8)}px` }}
+                    aria-pressed={selected}
+                  >
+                    {selected ? roomSelect.addedLabel : roomSelect.addLabel}
+                  </button>
+                )
+              })()}
+          </div>
         )}
       </div>
 

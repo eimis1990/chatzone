@@ -240,6 +240,8 @@ export const botConfigFormSchema = z.object({
   // Append a hidden instruction asking the model to format replies as rich
   // Markdown (bold, lists, links). On by default.
   richResponses: z.boolean().default(true),
+  /** "See it in your room" AI visualizer (furniture stores). */
+  roomVisualizer: z.boolean().default(false),
   model: z.string().default(DEFAULT_CHAT_MODEL),
   temperature: z.number().min(0).max(2).default(DEFAULT_TEMPERATURE),
   leadCapture: z

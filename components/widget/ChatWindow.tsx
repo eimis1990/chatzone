@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { HeadsetIcon, RotateCcwIcon, XIcon } from 'lucide-react'
 import { MessageList, type ChatMessage } from './MessageList'
 import { ProductListView } from './ProductCards'
+import { RoomTray, RoomStudio, roomLabels, MAX_ROOM_PRODUCTS, type RoomSelect, type RoomPhoto } from './RoomVisualizer'
 import { Composer } from './Composer'
 import { VoiceCallButton, type CallState } from '@/components/voice/VoiceCallButton'
 import { LeadForm } from './LeadForm'
@@ -195,6 +196,13 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
   const [leadDismissed, setLeadDismissed] = useState(false)
   // When set, the full-height product list overlay covers the chat body.
   const [listProducts, setListProducts] = useState<CommerceProduct[] | null>(null)
+  // Room visualizer: products picked from cards, and the studio overlay.
+  const [roomSelection, setRoomSelection] = useState<CommerceProduct[]>([])
+  const [studioOpen, setStudioOpen] = useState(false)
+  // Past renders this page session (in-memory only — gone on reload).
+  const [roomRenders, setRoomRenders] = useState<string[]>([])
+  // Uploaded room photo — survives closing the studio, gone on reload/restart.
+  const [roomPhoto, setRoomPhoto] = useState<RoomPhoto | null>(null)
   // Confirmation bottom sheet before clearing the conversation.
   const [confirmRestart, setConfirmRestart] = useState(false)
   // Live-call state, surfaced in the header.
@@ -252,9 +260,23 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
     setListProducts(null)
     setAgentName(null)
     setConfirmRestart(false)
+    setRoomSelection([])
+    setStudioOpen(false)
+    setRoomRenders([])
+    setRoomPhoto(null)
     lastPollTsRef.current = undefined
     updateHandoff('bot')
   }, [updateHandoff])
+
+  const toggleRoomProduct = useCallback((p: CommerceProduct) => {
+    setRoomSelection((prev) =>
+      prev.some((x) => x.id === p.id)
+        ? prev.filter((x) => x.id !== p.id)
+        : prev.length >= MAX_ROOM_PRODUCTS
+          ? prev
+          : [...prev, p],
+    )
+  }, [])
 
   const handleCallState = useCallback((s: CallState) => {
     callStateRef.current = s
@@ -373,6 +395,20 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
   )
 
   const primaryColor = config.theme.primaryColor
+
+  // Room visualizer selection UI — shown whenever the feature + transport are
+  // available (doesn't require conversationId, cards can appear before one exists).
+  const roomSelect: RoomSelect | undefined =
+    config.roomVisualizer && transport.visualize
+      ? {
+          selectedIds: roomSelection.map((p) => p.id),
+          full: roomSelection.length >= MAX_ROOM_PRODUCTS,
+          onToggle: toggleRoomProduct,
+          addLabel: roomLabels(activeLang).addToRoom,
+          addedLabel: roomLabels(activeLang).added,
+        }
+      : undefined
+
   const cornerRadius = config.theme.cornerRadius ?? 16
   const bubbleRadius = config.theme.bubbleRadius ?? 16
   const glassBubbles = config.theme.glassBubbles ?? false
@@ -1040,13 +1076,14 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
         style={{
           backgroundColor: bgColor,
           // Curved: the body card slides up over the header's padded bottom.
-          // While the full-screen product list overlay is open it covers the
-          // whole body, so drop the rounded top corners — otherwise the curve
-          // shows through as notches above the list's sub-header bar.
+          // While a full-screen overlay (product list / room studio) covers the
+          // whole body, drop the rounded top corners — otherwise the curve
+          // shows through as notches above the overlay's sub-header bar.
           ...(headerStyle === 'curved'
             ? {
                 marginTop: `-${styleRadius}px`,
-                borderRadius: listProducts ? '0' : `${styleRadius}px ${styleRadius}px 0 0`,
+                borderRadius:
+                  listProducts || studioOpen ? '0' : `${styleRadius}px ${styleRadius}px 0 0`,
               }
             : {}),
         }}
@@ -1126,6 +1163,7 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
             onFeedback={handleFeedback}
             onProductClick={trackProductClick}
             onLinkClick={trackLinkClick}
+            roomSelect={roomSelect}
           />
         )}
 
@@ -1184,6 +1222,19 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
           </p>
         )}
 
+        {/* Room visualizer tray — hidden behind the full-list overlay or the lead form */}
+        {roomSelect &&
+          !listProducts &&
+          !(showLeadForm && !leadDismissed && config.leadCapture.fields.length > 0) && (
+            <RoomTray
+              products={roomSelection}
+              primaryColor={primaryColor}
+              language={activeLang}
+              onRemove={(id) => setRoomSelection((prev) => prev.filter((p) => p.id !== id))}
+              onOpen={() => setStudioOpen(true)}
+            />
+          )}
+
         {/* Composer */}
         <Composer
           onSend={sendMessage}
@@ -1224,6 +1275,32 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
               language={activeLang}
               onClose={() => setListProducts(null)}
               onProductClick={trackProductClick}
+              roomSelect={roomSelect}
+            />
+          )}
+        </AnimatePresence>
+
+        {/* Fullscreen room-studio overlay (upload photo, generate, regenerate) */}
+        <AnimatePresence>
+          {studioOpen && transport.visualize && (
+            <RoomStudio
+              products={roomSelection}
+              conversationId={conversationId}
+              visualize={transport.visualize}
+              primaryColor={primaryColor}
+              language={activeLang}
+              onClose={() => setStudioOpen(false)}
+              history={roomRenders}
+              onRemoveProduct={(id) => setRoomSelection((prev) => prev.filter((p) => p.id !== id))}
+              roomPhoto={roomPhoto}
+              onRoomPhotoChange={setRoomPhoto}
+              onResult={(image) => {
+                setRoomRenders((prev) => [...prev, image])
+                setMessages((prev) => [
+                  ...prev,
+                  { id: generateId(), role: 'assistant', content: roomLabels(activeLang).resultNote, image },
+                ])
+              }}
             />
           )}
         </AnimatePresence>

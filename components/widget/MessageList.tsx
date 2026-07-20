@@ -8,6 +8,7 @@ import { ThinkingDots } from './ThinkingDots'
 import { readableTextColor } from '@/lib/utils'
 import { formatMessage, stripCitations } from '@/lib/format-message'
 import type { CommerceProduct, OrderStatus } from '@/lib/commerce/types'
+import type { RoomSelect } from './RoomVisualizer'
 
 export interface ChatMessage {
   id: string
@@ -24,6 +25,8 @@ export interface ChatMessage {
   link?: { url: string; label: string }
   /** Assistant message authored by a human agent (handoff) vs. the bot. */
   fromHuman?: boolean
+  /** A generated image (room visualizer render), shown inside the bubble. */
+  image?: string
 }
 
 interface MessageListProps {
@@ -48,6 +51,8 @@ interface MessageListProps {
   onProductClick?: (product: CommerceProduct, messageId?: string) => void
   /** Analytics: a link inside a bot answer (or a quick-action link button) was followed. */
   onLinkClick?: (url: string, kind: 'answer' | 'action', messageId?: string) => void
+  /** Room visualizer selection plumbing — omitted when the feature is off. */
+  roomSelect?: RoomSelect
 }
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -68,6 +73,7 @@ export function MessageList({
   onFeedback,
   onProductClick,
   onLinkClick,
+  roomSelect,
 }: MessageListProps) {
   // Custom bot bubble color applies only outside glass mode (glass is its own style).
   const botBubbleStyle =
@@ -192,6 +198,21 @@ export function MessageList({
                 </div>
               )}
 
+              {msg.image && (
+                <img
+                  src={msg.image}
+                  alt=""
+                  className="mt-2 w-full h-auto cursor-zoom-in rounded-xl border"
+                  onClick={() => {
+                    // Data URLs can't open as a tab directly — use a blob URL.
+                    void fetch(msg.image!)
+                      .then((r) => r.blob())
+                      .then((b) => window.open(URL.createObjectURL(b), '_blank', 'noopener'))
+                      .catch(() => {})
+                  }}
+                />
+              )}
+
               {/* 👍/👎 feedback on completed bot replies (real DB id only) */}
               {msg.role === 'assistant' &&
                 !msg.streaming &&
@@ -238,6 +259,7 @@ export function MessageList({
                 language={activeLang}
                 onSeeAll={onSeeAllProducts}
                 onProductClick={(p) => onProductClick?.(p, UUID_RE.test(msg.id) ? msg.id : undefined)}
+                roomSelect={roomSelect}
               />
             )}
 
