@@ -63,4 +63,23 @@ emails, and manual status progression.
 - Manual name/URL/email signature lines do not belong in stored bodies; the
   sending provider supplies the signature.
 
-_Last verified: 2026-07-15 (3f83d4d)._
+## Prospect seeds
+
+- Researched batches belong in timestamped, idempotent migrations with
+  `on conflict (website) do nothing`, so records inserted into the live pipeline
+  during research are not duplicated when deployment later applies the migration
+  (`supabase/migrations/20260720120000_add_furniture_sales_leads.sql:1`).
+- Resolve suggested domains to their canonical storefront before inserting. A
+  supplied alias or typo can otherwise bypass the unique website constraint; the
+  July 2026 furniture batch resolved `sofaformabaldai.lt` to `sofaforma.lt` and
+  detected that Guru Baldai was already present rather than inserting it twice.
+- Platform compatibility is part of qualification, not a reason to invent an
+  integration. WooCommerce, Shopify, Magento, and Verskis can use Smart product
+  search directly; PrestaShop/CS-Cart/custom sites should explicitly say that a
+  feed or new integration needs verification. See [commerce](commerce.md).
+- An existing owner demo is strong qualification evidence, but it does not move
+  the prospect's lifecycle by itself. Store the demo/catalog proof in the lead
+  research and keep status `ready` until outreach or a buyer response occurs
+  (`supabase/migrations/20260720130000_add_mobel_sales_lead.sql:1`).
+
+_Last verified: 2026-07-20 (working tree)._
