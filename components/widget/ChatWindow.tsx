@@ -1076,13 +1076,14 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
         style={{
           backgroundColor: bgColor,
           // Curved: the body card slides up over the header's padded bottom.
-          // While the full-screen product list overlay is open it covers the
-          // whole body, so drop the rounded top corners — otherwise the curve
-          // shows through as notches above the list's sub-header bar.
+          // While a full-screen overlay (product list / room studio) covers the
+          // whole body, drop the rounded top corners — otherwise the curve
+          // shows through as notches above the overlay's sub-header bar.
           ...(headerStyle === 'curved'
             ? {
                 marginTop: `-${styleRadius}px`,
-                borderRadius: listProducts ? '0' : `${styleRadius}px ${styleRadius}px 0 0`,
+                borderRadius:
+                  listProducts || studioOpen ? '0' : `${styleRadius}px ${styleRadius}px 0 0`,
               }
             : {}),
         }}

@@ -138,7 +138,10 @@ export function ProductListView({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 14 }}
       transition={{ duration: 0.22, ease: [0.25, 0.46, 0.45, 0.94] }}
-      className="absolute inset-0 z-20 flex flex-col bg-white"
+      // Root carries the sub-header color: at fractional pixel positions a
+      // white root bleeds a hairline above the dark bar (AA seam).
+      className="absolute inset-0 z-20 flex flex-col"
+      style={{ backgroundColor: primaryColor }}
       role="region"
       aria-label={labels.products}
     >
@@ -162,7 +165,7 @@ export function ProductListView({
       </div>
 
       {/* Scrollable list */}
-      <div className="flex-1 overflow-y-auto px-3 py-3 space-y-1.5" style={{ scrollbarWidth: 'thin' }}>
+      <div className="flex-1 overflow-y-auto bg-white px-3 py-3 space-y-1.5" style={{ scrollbarWidth: 'thin' }}>
         <div className="flex flex-col gap-1.5" role="list">
           {products.map((product) => (
             <ProductRow

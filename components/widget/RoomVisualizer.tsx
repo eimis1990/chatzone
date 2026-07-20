@@ -289,7 +289,9 @@ export function RoomStudio({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 14 }}
       transition={{ duration: 0.22, ease: [0.25, 0.46, 0.45, 0.94] }}
-      className="absolute inset-0 z-30 flex flex-col bg-white"
+      // Root carries the sub-header color so no white hairline shows above the bar.
+      className="absolute inset-0 z-30 flex flex-col"
+      style={{ backgroundColor: primaryColor }}
       role="dialog"
       aria-label={labels.trayTitle}
     >
@@ -311,7 +313,7 @@ export function RoomStudio({
         </span>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-3 space-y-3">
+      <div className="flex-1 overflow-y-auto bg-white p-3 space-y-3">
         {/* Product picker — exactly one product goes into each render. */}
         {products.length > 1 && (
           <p className="text-xs text-muted-foreground">{labels.pickProductHint}</p>
@@ -452,7 +454,7 @@ export function RoomStudio({
       </div>
 
       {/* Footer actions */}
-      <div className="flex gap-2 border-t p-3">
+      <div className="flex gap-2 border-t bg-white p-3">
         {result && (
           <a
             href={result}
