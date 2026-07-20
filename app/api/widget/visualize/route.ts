@@ -2,6 +2,7 @@ import { z } from 'zod'
 import { createServiceClient } from '@/lib/supabase/service'
 import { isOriginAllowed, corsHeaders } from '@/lib/widget-auth'
 import { createRateLimiter } from '@/lib/ratelimit'
+import sharp from 'sharp'
 import { assertPublicUrl } from '@/lib/net/ssrf'
 import {
   parseImageDataUrl,
@@ -16,7 +17,9 @@ export const maxDuration = 60 // image generation is slow
 
 const RENDER_CAP = 5
 const MAX_PRODUCTS = 4
-const MAX_PRODUCT_IMAGE_BYTES = 4 * 1024 * 1024
+// Download guard only — images are downscaled to ≤1024px JPEG after fetching,
+// so this just caps how much we're willing to pull from a store.
+const MAX_PRODUCT_IMAGE_BYTES = 15 * 1024 * 1024
 
 const limiter = createRateLimiter({ capacity: 5, refillPerSec: 0.1 })
 
@@ -91,7 +94,14 @@ export async function POST(req: Request) {
         if (!res.ok || !mime.startsWith('image/')) throw new Error(`bad product image: ${url}`)
         const buf = await res.arrayBuffer()
         if (buf.byteLength > MAX_PRODUCT_IMAGE_BYTES) throw new Error('product image too large')
-        return { data: Buffer.from(buf).toString('base64'), mimeType: mime }
+        // Stores serve full-resolution originals (often several MB) — normalize
+        // to ≤1024px JPEG so the Gemini payload stays small. sharp also rejects
+        // non-image bytes, regardless of the claimed content-type.
+        const jpeg = await sharp(Buffer.from(buf))
+          .resize(1024, 1024, { fit: 'inside', withoutEnlargement: true })
+          .jpeg({ quality: 80 })
+          .toBuffer()
+        return { data: jpeg.toString('base64'), mimeType: 'image/jpeg' }
       }),
     )
   } catch (err) {
