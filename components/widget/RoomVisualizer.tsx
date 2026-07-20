@@ -1,10 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
 import type { CommerceProduct } from '@/lib/commerce/types'
 import type { ChatTransport } from '@/lib/widget-transport'
-import { readableTextColor } from '@/lib/utils'
+import { readableTextColor, isLightColor } from '@/lib/utils'
 
 /** Selection plumbing passed down to product cards. */
 export interface RoomSelect {
@@ -22,6 +22,7 @@ export interface RoomLabels {
   addToRoom: string
   added: string
   trayCta: string
+  trayTryCta: string
   trayTitle: string
   uploadTitle: string
   uploadHint: string
@@ -44,6 +45,7 @@ export function roomLabels(language: 'en' | 'lt'): RoomLabels {
         addToRoom: '+ Į kambarį',
         added: '✓ Pridėta',
         trayCta: 'Vizualizuoti mano kambaryje',
+        trayTryCta: 'Išbandyti',
         trayTitle: 'Jūsų kambarys',
         uploadTitle: 'Įkelkite savo kambario nuotrauką',
         uploadHint: 'JPG, PNG arba WebP — geriausiai tinka šviesi, aiški nuotrauka.',
@@ -63,6 +65,7 @@ export function roomLabels(language: 'en' | 'lt'): RoomLabels {
         addToRoom: '+ Add to room',
         added: '✓ Added',
         trayCta: 'Visualize in your room',
+        trayTryCta: 'Try it',
         trayTitle: 'Your room',
         uploadTitle: 'Upload a photo of your room',
         uploadHint: 'JPG, PNG or WebP — a bright, straight-on photo works best.',
@@ -88,39 +91,57 @@ interface RoomTrayProps {
   onOpen: () => void
 }
 
-/** Compact selected-products strip pinned above the composer. */
+/**
+ * Compact selected-products strip pinned above the composer. Brand-accent
+ * card that slides up from under the composer when the first product is added.
+ */
 export function RoomTray({ products, primaryColor, language, onRemove, onOpen }: RoomTrayProps) {
-  if (products.length === 0) return null
   const labels = roomLabels(language)
+  const textColor = readableTextColor(primaryColor)
   return (
-    <div className="mx-3 mb-2 flex items-center gap-2 rounded-xl border bg-white p-2 shadow-sm">
-      <div className="flex -space-x-2">
-        {products.map((p) => (
+    <AnimatePresence initial={false}>
+      {products.length > 0 && (
+        <motion.div
+          key="room-tray"
+          initial={{ y: 56, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: 56, opacity: 0 }}
+          transition={{ duration: 0.28, ease: [0.25, 0.46, 0.45, 0.94] }}
+          className="mx-3 mb-2 flex items-center gap-2.5 rounded-xl p-2 pl-2.5 shadow-md"
+          style={{ backgroundColor: primaryColor, color: textColor }}
+        >
+          <div className="flex -space-x-2">
+            {products.map((p) => (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => onRemove(p.id)}
+                aria-label={labels.removeProduct(p.title)}
+                title={`${p.title} ✕`}
+                className="relative size-9 shrink-0 overflow-hidden rounded-lg border-2 border-white bg-white outline-none focus-visible:ring-2"
+              >
+                {p.imageUrl ? (
+                  <img src={p.imageUrl} alt={p.title} className="h-full w-full object-cover" />
+                ) : (
+                  <span className="text-[10px]">🛋️</span>
+                )}
+              </button>
+            ))}
+          </div>
+          <span className="min-w-0 flex-1 truncate text-xs font-medium opacity-90">
+            {labels.trayCta} ({products.length})
+          </span>
           <button
-            key={p.id}
             type="button"
-            onClick={() => onRemove(p.id)}
-            aria-label={labels.removeProduct(p.title)}
-            title={`${p.title} ✕`}
-            className="relative size-9 shrink-0 overflow-hidden rounded-lg border-2 border-white bg-muted outline-none focus-visible:ring-2"
+            onClick={onOpen}
+            className="shrink-0 rounded-lg bg-white px-3.5 py-2 text-xs font-bold shadow-sm transition-transform hover:scale-[1.03] active:scale-[0.98] outline-none focus-visible:ring-2"
+            style={{ color: isLightColor(primaryColor) ? '#111' : primaryColor }}
           >
-            {p.imageUrl ? (
-              <img src={p.imageUrl} alt={p.title} className="h-full w-full object-cover" />
-            ) : (
-              <span className="text-[10px]">🛋️</span>
-            )}
+            {labels.trayTryCta} ✨
           </button>
-        ))}
-      </div>
-      <button
-        type="button"
-        onClick={onOpen}
-        className="ml-auto rounded-lg px-3 py-2 text-xs font-semibold transition-opacity hover:opacity-85 outline-none focus-visible:ring-2"
-        style={{ backgroundColor: primaryColor, color: readableTextColor(primaryColor) }}
-      >
-        {labels.trayCta} ({products.length})
-      </button>
-    </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   )
 }
 
