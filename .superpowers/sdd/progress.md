@@ -1,24 +1,25 @@
-# Language Selection Feature — Progress Ledger
+# Room Visualizer — Progress Ledger
 
-Base commit: 02b337dccc1cbc2e8f3f03cf59d80d5ece70aa0d
-Branch: feat/language-selection
-Plan: docs/superpowers/plans/2026-07-07-language-selection.md
+Base commit: 218710a99e006c555a4df5218d0b008ff84a8c63
+Branch: worktree-room-visualizer (worktree)
+Plan: docs/superpowers/plans/2026-07-19-room-visualizer.md
 
 ## Tasks
 (none complete yet)
-Task 1: complete (commit 7c9fd40, review clean)
-  Minor (for final review): ChatWindow languageMeta() falls back to English for out-of-union codes vs old '🌐' fallback — cosmetic, only en/lt exist.
-Task 2: complete (commit ad27ad9, review clean)
-Task 3: complete (commit d373b7b, review clean)
-  Deviation from plan (reviewer-approved): clamp reorders primary-first ONLY when limit<configured.length, else config order passes through — keeps paid-plan order + pre-existing tests green. Plan's literal snippet would have reordered always.
-Task 4: complete (commits 77a299c + b05aa2a, review clean after comment fix)
-  Beyond brief (reviewer-approved): fixed lib/ai/prompt.ts contentFor fallback (real latent bug exposed by optional content.en). Important finding fixed: stale lib/types.ts comments.
-Task 5: complete (commit af1e0a9, review clean)
-Task 6: complete (commits 03d4870 + dd2125e, review clean after free-tier-lock fix)
-  Important fixed: free-tier controls now gate on entitlement + initial languages clamped to maxLanguages (downgrade-safe).
-ALL TASKS COMPLETE — pending final whole-branch review.
-Minor roll-up for final review:
-  - ChatWindow languageMeta() English fallback for out-of-union codes (cosmetic, only en/lt exist)
-  - tests/unit/botConfig.test.ts:132 stale comment references removed withEnabledLanguagesOnly
-  - Defense-in-depth: saveConfig does NOT clamp stored languages to maxLanguages (free bot could persist 2 langs on re-save; live widget still clamps via publicBotConfig, so visitor-safe)
-FINAL WHOLE-BRANCH REVIEW: Ready to merge — Yes (no Critical/Important). Minor #3 (stale comment) fixed in follow-up commit. Minor #1 (saveConfig server clamp) + informational (free re-save prunes non-primary content, vs spec §4 reversibility) left for user decision.
+Task 1: complete (commits 2c89f08 + d8c7908, review clean after TS2741 fix)
+  Minor (for final review / Task 6): configurator preview hardcodes roomVisualizer:false in TestChat.tsx buildPreviewPublicConfig — intentional (preview transport omits visualize), but Task 6 toggle will not reflect in preview; note in wiki.
+Task 2: complete (commit a2ace2e, review clean)
+  Minor (for final review): parseImageDataUrl does not validate base64 padding; buildVisualizePrompt assumes titles.length === productImages.length (route must keep aligned).
+Task 3: complete (commit f98f060, review clean)
+  Minor (for final review): cap-increment update result not checked/logged; route tests skip origin-403/ratelimit-429/conv-404 branches (thin pass-throughs).
+Task 4: complete (commits 8ced4d0 + b8a2e16, review clean)
+  Minor (for final review): toggle-button markup duplicated in ProductCard/ProductRow (plan-mandated); tray-vs-LeadForm visibility boolean duplicated in ChatWindow; RoomTray remove button uses title not aria-label.
+Task 5: complete (commits df4e87f + a078c09, review clean after i18n/upload-error fixes)
+  Minor (for final review): no in-studio room-photo replace (close/reopen resets); instruction input editable while busy (harmless).
+Task 6: complete (commits 7a0609a + 705dd04, review clean after owner-only gate fix)
+  ESCALATED separately (task chip task_4d6784ce): pre-existing gap — CommerceSection (Store, incl. provider credentials) visible to client audience; only the new toggle row is gated.
+Task 7: partial (wiki committed 170db05; smoke E2E passed: landing+widget+chat clean on branch dev server, no console errors; BLOCKED on user for GEMINI_API_KEY + DB migration approval before generate-path E2E)
+ALL IMPLEMENTATION TASKS COMPLETE — running final whole-branch review.
+FINAL WHOLE-BRANCH REVIEW: With fixes → fixes applied (603e6b2: 429 cap-vs-ratelimit distinction + 3 nits) → re-verified: Ready to merge = Yes.
+REMAINING (user-gated): GEMINI_API_KEY in .env.local + Vercel; apply migration 20260719120000 (BEFORE enabling on any bot); generate-path manual E2E; then finishing-a-development-branch.
+Task 7: COMPLETE — full generate-path E2E passed on Mobel demo bot (localhost worktree server): + Į kambarį → tray → studio → upload → Gemini render 200 OK, sofa fidelity preserved, cap 5→4 (Liko bandymų: 4), Download/Regenerate present. GEMINI_API_KEY present locally (still needed on Vercel). Migration applied by user.
