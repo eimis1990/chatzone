@@ -18,8 +18,8 @@ their room. Spec: `docs/superpowers/specs/2026-07-19-room-visualizer-design.md`.
 ## Widget UI
 
 - Selection: `RoomSelect` prop threads from `ChatWindow` → `MessageList` →
-  `ProductCards` (card + row toggle buttons). Max 4 products
-  (`MAX_ROOM_PRODUCTS`, `components/widget/RoomVisualizer.tsx`).
+  `ProductCards` (card + row toggle buttons). Tray holds up to 6 products
+  (`MAX_ROOM_PRODUCTS`), but each render uses exactly ONE (studio single-select).
 - `RoomTray` (above the composer, hidden while the product list overlay or lead
   form is open) opens `RoomStudio` — a z-30 `absolute inset-0` overlay like
   `ProductListView`. Upload downscales client-side (max 1536px JPEG 0.85,
@@ -53,7 +53,9 @@ success**. Read-then-increment race is accepted (`ponytail:` comment in route).
 paths. Model constant `gemini-3-pro-image-preview` ("Nano Banana Pro"; cost fallback noted inline).
 Needs `GEMINI_API_KEY` (Google AI Studio) in env — also on Vercel. Prompt
 numbers product images starting at 2 (image 1 = the room);
-`titles.length === productImages.length` is the route's responsibility.
+`titles.length === productImages.length` is the route's responsibility. Render
+ aspect matches the room photo via `closestAspectRatio` + `imageConfig.aspectRatio`
+ (client sends roomWidth/roomHeight).
 
 ## No storage
 

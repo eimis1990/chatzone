@@ -202,8 +202,14 @@ export function MessageList({
                 <img
                   src={msg.image}
                   alt=""
-                  className="mt-2 w-full rounded-xl border"
-                  style={{ maxHeight: 280, objectFit: 'cover' }}
+                  className="mt-2 w-full h-auto cursor-zoom-in rounded-xl border"
+                  onClick={() => {
+                    // Data URLs can't open as a tab directly — use a blob URL.
+                    void fetch(msg.image!)
+                      .then((r) => r.blob())
+                      .then((b) => window.open(URL.createObjectURL(b), '_blank', 'noopener'))
+                      .catch(() => {})
+                  }}
                 />
               )}
 

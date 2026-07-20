@@ -35,6 +35,26 @@ export function parseImageDataUrl(dataUrl: string): InlineImage | null {
   return { mimeType, data }
 }
 
+/** Aspect ratios the Gemini image models accept. */
+const SUPPORTED_ASPECTS = ['1:1', '2:3', '3:2', '3:4', '4:3', '4:5', '5:4', '9:16', '16:9', '21:9'] as const
+
+/** Closest supported aspect ratio for a room photo, so renders aren't letterboxed. */
+export function closestAspectRatio(width: number, height: number): string {
+  if (!(width > 0) || !(height > 0)) return '4:3'
+  const target = width / height
+  let best: string = '4:3'
+  let bestDiff = Infinity
+  for (const a of SUPPORTED_ASPECTS) {
+    const [w, h] = a.split(':').map(Number)
+    const diff = Math.abs(w / h - target)
+    if (diff < bestDiff) {
+      bestDiff = diff
+      best = a
+    }
+  }
+  return best
+}
+
 export function buildVisualizePrompt(titles: string[], instruction: string): string {
   const list = titles.map((t, i) => `${i + 2}. ${t}`).join('\n')
   return [
@@ -50,7 +70,8 @@ export function buildVisualizePrompt(titles: string[], instruction: string): str
     'perspective, lighting and shadows. Keep everything else in the room',
     'unchanged — walls, floor, windows, decor and all other furniture.',
     instruction ? `Placement request from the customer: ${instruction}` : '',
-    'Return only the edited room image.',
+    'Keep the exact framing and aspect ratio of the room photo — no borders,',
+    'white bars or padding. Return only the edited room image.',
   ]
     .filter(Boolean)
     .join('\n')
@@ -61,6 +82,8 @@ export async function renderRoomScene(args: {
   productImages: InlineImage[]
   titles: string[]
   instruction: string
+  /** Supported Gemini aspect string (see closestAspectRatio); omit for model default. */
+  aspectRatio?: string
 }): Promise<InlineImage> {
   const apiKey = process.env.GEMINI_API_KEY
   if (!apiKey) throw new Error('GEMINI_API_KEY is not configured')
@@ -77,7 +100,10 @@ export async function renderRoomScene(args: {
   const response = await ai.models.generateContent({
     model: MODEL,
     contents: [{ role: 'user', parts }],
-    config: { responseModalities: ['TEXT', 'IMAGE'] },
+    config: {
+      responseModalities: ['TEXT', 'IMAGE'],
+      ...(args.aspectRatio ? { imageConfig: { aspectRatio: args.aspectRatio } } : {}),
+    },
   })
 
   const out = response.candidates?.[0]?.content?.parts?.find((p) => p.inlineData?.data)

@@ -7,6 +7,7 @@ import {
   parseImageDataUrl,
   sanitizeInstruction,
   renderRoomScene,
+  closestAspectRatio,
   type InlineImage,
 } from '@/lib/room-visualizer'
 import type { Bot } from '@/lib/types'
@@ -25,6 +26,9 @@ const bodySchema = z.object({
   roomImage: z.string().min(1).max(12 * 1024 * 1024),
   productIds: z.array(z.string().min(1)).min(1).max(MAX_PRODUCTS),
   instruction: z.string().max(500).optional(),
+  /* Room photo pixel size — picks the render's aspect ratio (no letterboxing). */
+  roomWidth: z.number().int().positive().max(10000).optional(),
+  roomHeight: z.number().int().positive().max(10000).optional(),
 })
 
 export async function OPTIONS(req: Request) {
@@ -39,7 +43,7 @@ export async function POST(req: Request) {
 
   const parsed = bodySchema.safeParse(await req.json().catch(() => null))
   if (!parsed.success) return json({ error: 'Invalid request.' }, 400)
-  const { publicKey, conversationId, roomImage, productIds, instruction } = parsed.data
+  const { publicKey, conversationId, roomImage, productIds, instruction, roomWidth, roomHeight } = parsed.data
 
   const svc = createServiceClient()
   const { data: bot } = await svc.from('bots').select('*').eq('public_key', publicKey).single<Bot>()
@@ -102,6 +106,7 @@ export async function POST(req: Request) {
       productImages,
       titles: products.map((p) => p!.title),
       instruction: sanitizeInstruction(instruction),
+      ...(roomWidth && roomHeight ? { aspectRatio: closestAspectRatio(roomWidth, roomHeight) } : {}),
     })
   } catch (err) {
     console.error('[visualizer] render failed:', err)

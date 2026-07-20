@@ -39,3 +39,15 @@ describe('buildVisualizePrompt', () => {
     expect(p).toContain('by the window')
   })
 })
+
+describe('closestAspectRatio', () => {
+  it('maps common photo shapes to supported ratios', async () => {
+    const { closestAspectRatio } = await import('@/lib/room-visualizer')
+    expect(closestAspectRatio(1536, 1152)).toBe('4:3')
+    expect(closestAspectRatio(1152, 1536)).toBe('3:4')
+    expect(closestAspectRatio(1920, 1080)).toBe('16:9')
+    expect(closestAspectRatio(1080, 1920)).toBe('9:16')
+    expect(closestAspectRatio(1000, 1000)).toBe('1:1')
+    expect(closestAspectRatio(0, 100)).toBe('4:3') // degenerate input → safe default
+  })
+})

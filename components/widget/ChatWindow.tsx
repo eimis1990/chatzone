@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { HeadsetIcon, RotateCcwIcon, XIcon } from 'lucide-react'
 import { MessageList, type ChatMessage } from './MessageList'
 import { ProductListView } from './ProductCards'
-import { RoomTray, RoomStudio, roomLabels, MAX_ROOM_PRODUCTS, type RoomSelect } from './RoomVisualizer'
+import { RoomTray, RoomStudio, roomLabels, MAX_ROOM_PRODUCTS, type RoomSelect, type RoomPhoto } from './RoomVisualizer'
 import { Composer } from './Composer'
 import { VoiceCallButton, type CallState } from '@/components/voice/VoiceCallButton'
 import { LeadForm } from './LeadForm'
@@ -201,6 +201,8 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
   const [studioOpen, setStudioOpen] = useState(false)
   // Past renders this page session (in-memory only — gone on reload).
   const [roomRenders, setRoomRenders] = useState<string[]>([])
+  // Uploaded room photo — survives closing the studio, gone on reload/restart.
+  const [roomPhoto, setRoomPhoto] = useState<RoomPhoto | null>(null)
   // Confirmation bottom sheet before clearing the conversation.
   const [confirmRestart, setConfirmRestart] = useState(false)
   // Live-call state, surfaced in the header.
@@ -261,6 +263,7 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
     setRoomSelection([])
     setStudioOpen(false)
     setRoomRenders([])
+    setRoomPhoto(null)
     lastPollTsRef.current = undefined
     updateHandoff('bot')
   }, [updateHandoff])
@@ -1287,6 +1290,9 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
               language={activeLang}
               onClose={() => setStudioOpen(false)}
               history={roomRenders}
+              onRemoveProduct={(id) => setRoomSelection((prev) => prev.filter((p) => p.id !== id))}
+              roomPhoto={roomPhoto}
+              onRoomPhotoChange={setRoomPhoto}
               onResult={(image) => {
                 setRoomRenders((prev) => [...prev, image])
                 setMessages((prev) => [

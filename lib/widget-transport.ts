@@ -75,6 +75,9 @@ export interface ChatTransport {
     roomImage: string
     productIds: string[]
     instruction?: string
+    /** Room photo pixel size — server matches the render's aspect ratio to it. */
+    roomWidth?: number
+    roomHeight?: number
   }): Promise<{ image?: string; remaining?: number; error?: string }>
   /**
    * Record a widget interaction event (analytics). Fire-and-forget: must never
