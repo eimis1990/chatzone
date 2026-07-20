@@ -262,8 +262,8 @@ export function RoomStudio({
 
         {error && <p className="text-xs text-red-600">{error}</p>}
 
-        {/* Regenerate instruction (after a first render) */}
-        {result && !capped && (
+        {/* Optional placement instruction — available from the first render on. */}
+        {roomImage && !capped && (
           <input
             type="text"
             value={instruction}

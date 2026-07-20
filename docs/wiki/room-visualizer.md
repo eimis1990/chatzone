@@ -50,7 +50,7 @@ success**. Read-then-increment race is accepted (`ponytail:` comment in route).
 ## Gemini module
 
 `lib/room-visualizer.ts` — server-only (Node); never import from edge/prompt
-paths. Model constant `gemini-2.5-flash-image` (upgrade path noted inline).
+paths. Model constant `gemini-3-pro-image-preview` ("Nano Banana Pro"; cost fallback noted inline).
 Needs `GEMINI_API_KEY` (Google AI Studio) in env — also on Vercel. Prompt
 numbers product images starting at 2 (image 1 = the room);
 `titles.length === productImages.length` is the route's responsibility.

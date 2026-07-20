@@ -15,9 +15,10 @@ const ALLOWED_MIMES = new Set(['image/jpeg', 'image/png', 'image/webp'])
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024
 const MAX_INSTRUCTION_CHARS = 200
 
-// ponytail: GA "nano banana" tier — cheap and best-in-class at multi-image
-// compositing. Bump to a newer image model here if quality disappoints.
-const MODEL = 'gemini-2.5-flash-image'
+// "Nano Banana Pro" tier — markedly better at keeping the customer's room
+// intact while swapping/adding products. ~3x the cost of gemini-2.5-flash-image;
+// drop back to that constant if spend becomes an issue.
+const MODEL = 'gemini-3-pro-image-preview'
 
 export function sanitizeInstruction(raw: string | undefined): string {
   if (!raw) return ''
@@ -41,9 +42,13 @@ export function buildVisualizePrompt(titles: string[], instruction: string): str
     'or home product, in this order:',
     list,
     'Edit the room photo so these exact products are placed naturally in the',
-    'room. Preserve each product\'s shape, materials, colors and proportions',
-    'exactly as shown in its image. Match the room\'s perspective, lighting and',
-    'shadows. Do not change the room itself beyond adding the products.',
+    'room. If the room already contains furniture of the same type as a product',
+    '(for example it already has a sofa and a product is a sofa), REPLACE that',
+    'existing furniture with the product in the same spot; otherwise add the',
+    'product where it fits naturally. Preserve each product\'s shape, materials,',
+    'colors and proportions exactly as shown in its image. Match the room\'s',
+    'perspective, lighting and shadows. Keep everything else in the room',
+    'unchanged — walls, floor, windows, decor and all other furniture.',
     instruction ? `Placement request from the customer: ${instruction}` : '',
     'Return only the edited room image.',
   ]
