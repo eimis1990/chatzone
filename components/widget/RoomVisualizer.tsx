@@ -33,6 +33,7 @@ export interface RoomLabels {
   download: string
   back: string
   removeProduct: (title: string) => string
+  historyItem: (n: number) => string
   remaining: (n: number) => string
   limitReached: string
   genericError: string
@@ -56,6 +57,7 @@ export function roomLabels(language: 'en' | 'lt'): RoomLabels {
         download: 'Atsisiųsti',
         back: 'Atgal',
         removeProduct: (title) => `Pašalinti ${title}`,
+        historyItem: (n) => `Vaizdas ${n}`,
         remaining: (n) => `Liko bandymų: ${n}`,
         limitReached: 'Pasiektas vizualizacijų limitas šiam pokalbiui.',
         genericError: 'Nepavyko sugeneruoti — bandykite dar kartą.',
@@ -76,6 +78,7 @@ export function roomLabels(language: 'en' | 'lt'): RoomLabels {
         download: 'Download',
         back: 'Back',
         removeProduct: (title) => `Remove ${title}`,
+        historyItem: (n) => `Render ${n}`,
         remaining: (n) => `${n} renders left`,
         limitReached: 'Visualization limit reached for this conversation.',
         genericError: 'Generation failed — please try again.',
@@ -166,6 +169,11 @@ interface RoomStudioProps {
   onClose: () => void
   /** Push the finished render into the chat transcript. */
   onResult: (image: string) => void
+  /**
+   * Past renders from this page session (oldest first). Kept in ChatWindow
+   * state so they survive closing the studio; gone on page reload.
+   */
+  history: string[]
 }
 
 export function RoomStudio({
@@ -176,10 +184,12 @@ export function RoomStudio({
   language,
   onClose,
   onResult,
+  history,
 }: RoomStudioProps) {
   const labels = roomLabels(language)
   const [roomImage, setRoomImage] = useState<string | null>(null)
-  const [result, setResult] = useState<string | null>(null)
+  // Reopening the studio shows the latest render from this page session.
+  const [result, setResult] = useState<string | null>(history[history.length - 1] ?? null)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [remaining, setRemaining] = useState<number | null>(null)
@@ -279,6 +289,25 @@ export function RoomStudio({
               }}
             />
           </label>
+        )}
+
+        {/* Past generations from this page session — tap to view. */}
+        {history.length > 1 && (
+          <div className="flex gap-2 overflow-x-auto">
+            {history.map((h, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => setResult(h)}
+                aria-label={labels.historyItem(i + 1)}
+                aria-pressed={result === h}
+                className="size-14 shrink-0 overflow-hidden rounded-lg border-2 outline-none focus-visible:ring-2"
+                style={{ borderColor: result === h ? primaryColor : 'transparent' }}
+              >
+                <img src={h} alt={labels.historyItem(i + 1)} className="h-full w-full object-cover" />
+              </button>
+            ))}
+          </div>
         )}
 
         {error && <p className="text-xs text-red-600">{error}</p>}
