@@ -11,9 +11,22 @@ their room. Spec: `docs/superpowers/specs/2026-07-19-room-visualizer-design.md`.
   (`lib/types.ts:260`) → exposed as `PublicBotConfig.roomVisualizer`
   (`lib/widget-config.ts:270`).
 - Configurator toggle lives in the Store section (`components/client/ConfigForm.tsx`,
-  `CommerceSection`), rendered only for `audience === 'owner'` via a
-  `showAdvanced` prop. ⚠️ The *rest* of CommerceSection is visible to clients —
-  pre-existing gap, tracked separately.
+  `CommerceSection`), rendered only when the page passes `showRoomVisualizer` —
+  currently only the demo-bot editor (`app/(owner)/owner/demos/[botId]/configure/page.tsx`).
+  ⚠️ The *rest* of CommerceSection is visible to clients — pre-existing gap,
+  tracked separately.
+
+## Demo-bots-only gate (pre-GA)
+
+The feature is hidden from clients until GA. Server-enforced in two places,
+both keyed on `organizations.is_demo` (the Loqara Demos org, `lib/demo-org.ts`):
+
+- `app/api/widget-config/route.ts` forces `roomVisualizer: false` in the public
+  config when the bot's org isn't the demo org.
+- `app/api/widget/visualize/route.ts` returns 403 for non-demo orgs even if the
+  bot's flag is set.
+
+To GA the feature: delete both gates + the `showRoomVisualizer` prop plumbing.
 
 ## Widget UI
 
@@ -38,7 +51,8 @@ the live embed. If a client asks "why can't I see it in Test chat", this is why.
 ## API — `POST /api/widget/visualize`
 
 `app/api/widget/visualize/route.ts`. Check order: zod body → bot by public key
-(active) → `config.roomVisualizer` (403) → `isOriginAllowed` (403) → per-IP
+(active) → `config.roomVisualizer` (403) → org `is_demo` (403, pre-GA gate
+above) → `isOriginAllowed` (403) → per-IP
 rate limit (429) → conversation belongs to bot (404) → cap
 `conversations.visualizer_renders >= 5` (429, migration
 `20260719120000_room_visualizer.sql`) → room image jpeg/png/webp ≤ 8MB (400) →
@@ -62,4 +76,4 @@ numbers product images starting at 2 (image 1 = the room);
 Room photos and renders travel as data URLs and are never persisted — the only
 DB write is the `visualizer_renders` counter.
 
-_Last verified: 2026-07-19._
+_Last verified: 2026-07-20._

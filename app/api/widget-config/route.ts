@@ -46,10 +46,14 @@ export async function GET(req: Request) {
   // add-on for the org.
   const { data: org } = await svc
     .from('organizations')
-    .select('plan, voice_addon')
+    .select('plan, voice_addon, is_demo')
     .eq('id', bot.org_id)
-    .single<{ plan: Plan | null; voice_addon: boolean | null }>()
+    .single<{ plan: Plan | null; voice_addon: boolean | null; is_demo: boolean | null }>()
   const entitlements = entitlementsFor(org?.plan ?? 'free')
+
+  // Room visualizer is demo-bots-only for now — never expose it on client bots,
+  // whatever their config says. Remove this once the feature goes GA.
+  if (!org?.is_demo) bot.config.roomVisualizer = false
 
   // Stamp "last seen" so the owner can tell this bot is embedded & live. The
   // row is already loaded, so we only write when it's stale (≤ every 10 min).

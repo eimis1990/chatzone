@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 // --- mocks (declared before importing the route) ---------------------------
 const single = vi.fn()
+const orgSingle = vi.fn()
 const convSingle = vi.fn()
 const inFn = vi.fn()
 const updateEq2 = vi.fn()
@@ -11,6 +12,8 @@ vi.mock('@/lib/supabase/service', () => ({
     from: (table: string) => {
       if (table === 'bots')
         return { select: () => ({ eq: () => ({ single }) }) }
+      if (table === 'organizations')
+        return { select: () => ({ eq: () => ({ single: orgSingle }) }) }
       if (table === 'conversations')
         return {
           select: () => ({ eq: () => ({ eq: () => ({ single: convSingle }) }) }),
@@ -67,6 +70,7 @@ function req(body: Record<string, unknown>) {
 beforeEach(() => {
   vi.clearAllMocks()
   single.mockResolvedValue({ data: bot() })
+  orgSingle.mockResolvedValue({ data: { is_demo: true } })
   convSingle.mockResolvedValue({ data: { id: CONV, visualizer_renders: 0 } })
   inFn.mockResolvedValue({
     data: [{ external_id: 'p1', title: 'Oak Sofa', image_url: 'https://store.example/sofa.jpg' }],
@@ -86,6 +90,11 @@ beforeEach(() => {
 describe('POST /api/widget/visualize', () => {
   it('403 when the bot has the feature off', async () => {
     single.mockResolvedValue({ data: bot({ roomVisualizer: false }) })
+    expect((await POST(req({}))).status).toBe(403)
+  })
+
+  it("403 when the bot's org isn't the demo org, even with the flag on", async () => {
+    orgSingle.mockResolvedValue({ data: { is_demo: false } })
     expect((await POST(req({}))).status).toBe(403)
   })
 

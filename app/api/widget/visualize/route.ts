@@ -52,6 +52,14 @@ export async function POST(req: Request) {
   const { data: bot } = await svc.from('bots').select('*').eq('public_key', publicKey).single<Bot>()
   if (!bot || bot.status !== 'active') return json({ error: 'Bot not available.' }, 404)
   if (!bot.config.roomVisualizer) return json({ error: 'Not enabled.' }, 403)
+  // Demo-bots-only for now (mirrors the widget-config gate) — client bots can't
+  // spend Gemini renders even with the flag set. Remove when the feature goes GA.
+  const { data: org } = await svc
+    .from('organizations')
+    .select('is_demo')
+    .eq('id', bot.org_id)
+    .single<{ is_demo: boolean | null }>()
+  if (!org?.is_demo) return json({ error: 'Not enabled.' }, 403)
   if (!isOriginAllowed(origin, bot.config.allowedDomains ?? [])) {
     return json({ error: 'Origin not allowed.' }, 403)
   }

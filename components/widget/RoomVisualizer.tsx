@@ -272,7 +272,7 @@ export function RoomStudio({
   }
 
   /** Use a previous render as the room to edit next. */
-  async function usePreviousAsRoom(image: string) {
+  async function adoptRenderAsRoom(image: string) {
     try {
       const dims = await measureDataUrl(image)
       onRoomPhotoChange({ dataUrl: image, ...dims })
@@ -390,7 +390,7 @@ export function RoomStudio({
                     <button
                       key={i}
                       type="button"
-                      onClick={() => void usePreviousAsRoom(h)}
+                      onClick={() => void adoptRenderAsRoom(h)}
                       aria-label={labels.historyItem(i + 1)}
                       className="size-14 shrink-0 overflow-hidden rounded-lg border-2 border-transparent hover:border-gray-300 outline-none focus-visible:ring-2"
                     >
