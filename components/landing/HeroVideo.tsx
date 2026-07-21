@@ -1,7 +1,9 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useRef, useState, useSyncExternalStore } from 'react'
 import { useReducedMotion } from 'framer-motion'
+
+const subscribeToHydration = () => () => {}
 
 /**
  * Hero background: the lobby starts empty, the fox leans in from the right, waves,
@@ -11,10 +13,14 @@ import { useReducedMotion } from 'framer-motion'
  */
 export function HeroVideo() {
   const reduce = useReducedMotion()
+  // Keep the server and the first client render identical. Motion preferences
+  // are browser-only, so the poster is the safe hydration snapshot; video is a
+  // progressive enhancement after React has attached.
+  const hydrated = useSyncExternalStore(subscribeToHydration, () => true, () => false)
   const [introDone, setIntroDone] = useState(false)
   const loopRef = useRef<HTMLVideoElement>(null)
 
-  if (reduce) {
+  if (!hydrated || reduce) {
     return (
       // eslint-disable-next-line @next/next/no-img-element
       <img

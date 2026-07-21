@@ -6,7 +6,6 @@ import { SetupPricing } from '@/components/landing/SetupPricing'
 import { Showcase } from '@/components/landing/Showcase'
 import { Faq } from '@/components/landing/Faq'
 import { FAQ } from '@/components/landing/faq-data'
-import { SmoothScroll } from '@/components/landing/SmoothScroll'
 import { WidgetEmbed } from '@/components/landing/WidgetEmbed'
 import { getLandingBotKey } from '@/lib/platform-bot'
 import { PLANS, DISPLAY_PLANS } from '@/lib/plans-catalog'
@@ -101,7 +100,6 @@ export default async function Home() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <SmoothScroll />
       <LandingNav />
       <main>
         <Hero />

@@ -1,8 +1,8 @@
 # SEO/GEO, performance, and indexing remediation — design specification
 
-**Date:** 2026-07-20  
-**Status:** proposed for implementation  
-**Source audit:** `/Users/eimantaskudarauskas/Desktop/www.loqara.com-20260720T225809.html`  
+**Date:** 2026-07-20
+**Status:** implementation in progress
+**Source audit:** `/Users/eimantaskudarauskas/Desktop/www.loqara.com-20260720T225809.html`
 **Execution plan:** `docs/superpowers/plans/2026-07-20-seo-geo-remediation.md`
 
 ## 1. Outcome

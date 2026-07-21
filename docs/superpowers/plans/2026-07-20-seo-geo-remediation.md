@@ -117,14 +117,14 @@ after Phase 4 implements real dates.
 - Modify as needed: `app/globals.css`
 - Test: add a server-render assertion or Playwright smoke test
 
-- [ ] Replace `motion.h1`, `motion.p`, and the animated CTA wrapper with semantic
+- [x] Replace `motion.h1`, `motion.p`, and the animated CTA wrapper with semantic
       elements whose initial rendered opacity is 1.
-- [ ] Remove hydration-dependent opacity from the eyebrow, heading, paragraph,
+- [x] Remove hydration-dependent opacity from the eyebrow, heading, paragraph,
       and CTA.
-- [ ] If entrance motion is retained, use a CSS/progressive-enhancement approach
+- [x] If entrance motion is retained, use a CSS/progressive-enhancement approach
       that never hides content in server HTML and does not delay LCP.
-- [ ] Preserve heading hierarchy, current copy, responsive layout, and CTA behavior.
-- [ ] Verify the page with JavaScript disabled: heading, paragraph, CTA, pricing
+- [x] Preserve heading hierarchy, current copy, responsive layout, and CTA behavior.
+- [x] Verify the page with JavaScript disabled: heading, paragraph, CTA, pricing
       links, and navigation remain visible and usable.
 
 **Acceptance:** Lighthouse's LCP element has no material client-side element-render
@@ -137,12 +137,12 @@ delay attributable to hydration; critical text is visible in no-JS screenshots.
 - Modify: `components/landing/Reveal.tsx`
 - Review callers: `components/landing/sections.tsx`, pricing, FAQ, and showcase
 
-- [ ] Change `Reveal` and `RevealSlide` so server-rendered children are visible.
-- [ ] Remove the reduced-motion branch that explicitly starts at opacity 0.
-- [ ] Retain transform enhancement only when it cannot leave content invisible if
+- [x] Change `Reveal` and `RevealSlide` so server-rendered children are visible.
+- [x] Remove the reduced-motion branch that explicitly starts at opacity 0.
+- [x] Retain transform enhancement only when it cannot leave content invisible if
       hydration, IntersectionObserver, or animation execution fails.
-- [ ] Test direct navigation to `/#pricing`, `/#faq`, and `/#how`.
-- [ ] Capture a full-page no-JS screenshot and confirm no blank sections.
+- [x] Test direct navigation to `/#pricing`, `/#faq`, and `/#how`.
+- [x] Capture a full-page no-JS screenshot and confirm no blank sections.
 
 **Acceptance:** all marketing content is readable without scrolling-triggered
 JavaScript; the visual order and section spacing are unchanged.
@@ -156,23 +156,23 @@ JavaScript; the visual order and section spacing are unchanged.
 - Modify as needed: `app/globals.css`
 - Modify: `package.json` only if `lenis` becomes unused everywhere
 
-- [ ] Replace Lenis behavior with native anchor navigation and CSS
+- [x] Replace Lenis behavior with native anchor navigation and CSS
       `scroll-behavior: smooth` under `prefers-reduced-motion: no-preference`.
-- [ ] Add `scroll-margin-top` to anchored sections so the fixed navigation does
+- [x] Add `scroll-margin-top` to anchored sections so the fixed navigation does
       not cover headings.
-- [ ] Confirm the signup hash still opens `GetStartedDialog` and is not captured
+- [x] Confirm the signup hash still opens `GetStartedDialog` and is not captured
       as a normal scroll target.
-- [ ] Use `rg` to prove `lenis` has no remaining consumers before removing it.
+- [x] Use `rg` to prove `lenis` has no remaining consumers before removing it.
 
 **Acceptance:** all header anchors work, back/forward navigation remains native,
 and no page-long Lenis RAF loop runs on the homepage.
 
 ### Phase 1 gate
 
-- [ ] Standard verification commands pass.
-- [ ] No-JS homepage contains and visibly renders all primary content.
-- [ ] Median clean mobile LCP improves from the 11.3 s baseline.
-- [ ] There is no regression in CTA/dialog behavior or CLS.
+- [x] Standard verification commands pass.
+- [x] No-JS homepage contains and visibly renders all primary content.
+- [x] Median clean mobile LCP improves from the 11.3 s baseline.
+- [x] There is no regression in CTA/dialog behavior or CLS.
 
 ---
 

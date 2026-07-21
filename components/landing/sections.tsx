@@ -98,7 +98,7 @@ function FeatureRow({ feature, index }: { feature: Feature; index: number }) {
       <div
         className={`relative aspect-[10/7] overflow-hidden bg-[#f9f9f9] ${reversed ? 'lg:order-2' : ''}`}
       >
-        <RevealSlide from={reversed ? 'right' : 'left'} className="absolute inset-0">
+        <RevealSlide className="absolute inset-0">
           <Image
             src={feature.imageSrc}
             alt={feature.imageAlt}
@@ -123,7 +123,7 @@ function FeatureRow({ feature, index }: { feature: Feature; index: number }) {
 
 export function Features() {
   return (
-    <div id="features">
+    <div id="features" className="scroll-mt-20">
       <section className="bg-white">
         <div className="mx-auto max-w-3xl px-5 pt-24 pb-20 text-center">
           <Reveal>
@@ -170,7 +170,6 @@ export function Stats() {
         {stats.map((s, i) => (
           <Reveal
             key={s.label}
-            delay={i * 0.08}
             className={`border-white/10 px-6 py-12 text-center ${
               i === 0 ? '' : i % 2 === 0 ? 'md:border-l' : 'border-l'
             }`}
@@ -192,7 +191,7 @@ export function HowItWorks() {
     { image: '/landing/how-step-3.webp', title: 'Embed and go live', body: 'Paste one script tag. Your agent is answering — and your inbox is ready for handoffs.' },
   ]
   return (
-    <section id="how" className="bg-[#f6f8f6]">
+    <section id="how" className="scroll-mt-20 bg-[#f6f8f6]">
       <div className="mx-auto max-w-7xl px-5 py-24">
         <Reveal className="mx-auto max-w-2xl text-center">
           <h2 className="text-5xl font-light tracking-tight text-gray-900 sm:text-6xl">Live in an afternoon</h2>
@@ -200,7 +199,7 @@ export function HowItWorks() {
         </Reveal>
         <div className="mt-14 grid gap-6 md:grid-cols-3">
           {steps.map((s, i) => (
-            <Reveal key={s.title} delay={i * 0.1}>
+            <Reveal key={s.title}>
               <div className="group h-full overflow-hidden rounded-2xl border bg-white shadow-sm transition-shadow hover:shadow-md">
                 <div className="bg-[#faf8f5]">
                   {/* eslint-disable-next-line @next/next/no-img-element */}

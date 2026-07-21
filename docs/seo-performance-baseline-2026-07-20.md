@@ -69,3 +69,24 @@ node scripts/summarize-lighthouse.mjs /tmp/loqara-home.json /tmp/loqara-blog.jso
 
 Record the URL, deployment SHA, capture time, Lighthouse version, median scores,
 metrics, bytes, and request count with every phase gate.
+
+## Phase 1 checkpoint — 2026-07-21
+
+Measured against a local optimized production build (`next build` + `next start`)
+with the same Lighthouse mobile simulation. This is directional rather than a
+production-to-production comparison because localhost removes production network
+latency. Three runs produced these medians:
+
+| Performance | Accessibility | Best Practices | SEO | FCP | LCP | Speed Index | TBT | CLS | Transfer |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 79 | 89 | 96* | 100 | 1.21 s | 5.83 s | 2.28 s | 10 ms | 0 | 10.34 MB |
+
+`*` Local Best Practices lost four points only because Vercel Analytics' production
+`/_vercel/insights/script.js` endpoint returns 404 under `next start`. The clean
+production baseline for Best Practices remains 100.
+
+Phase 1 removed hydration-dependent opacity from the hero and all rendered landing
+reveal wrappers, removed Lenis, and made the reduced-motion hero hydration-safe.
+The LCP breakdown now reports approximately 127 ms of element render delay instead
+of the multi-second hydration delay. The remaining lab LCP/transfer constraint is
+the unchanged 7.96 MB hero-video payload, owned by Phase 2.

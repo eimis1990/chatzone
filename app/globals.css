@@ -381,6 +381,14 @@
     transform: translateX(-50%);
   }
 }
+.landing-brand-marquee {
+  animation: brand-marquee 120s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .landing-brand-marquee {
+    animation: none;
+  }
+}
 /* Widget launcher "breathe + pulse" — one synced 6s cycle:
    1) the button shrinks slowly from 1.0 → 0.9 over ~5s (a long inhale),
    2) at 5s it springs back past 1.0 and settles, and AT THE SAME MOMENT the two
@@ -520,17 +528,11 @@
     transform: none;
   }
 }
-/* Lenis smooth-scroll (landing). Note: intentionally NO `iframe { pointer-events:
-   none }` rule — that would break the embedded chat widget. */
-html.lenis,
-html.lenis body {
-  height: auto;
-}
-.lenis.lenis-smooth {
-  scroll-behavior: auto !important;
-}
-.lenis.lenis-stopped {
-  overflow: hidden;
+/* Native smooth anchor navigation without a page-long JavaScript RAF loop. */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
 }
 
 /* Blog article prose (rendered from Markdown via marked). */
