@@ -2,6 +2,7 @@
 title: "AI chatbot data privacy & GDPR: what e-commerce owners must know"
 description: A plain-English guide to the data an AI chatbot handles, your GDPR obligations, and the exact questions to ask any vendor before you put one on your store.
 date: 2026-07-02
+updated: 2026-07-21
 topic: ai-customer-support
 author: Eimantas Kudarauskas
 image: /blog/ai-chatbot-gdpr-data-privacy.webp
@@ -19,7 +20,7 @@ This guide walks through what data a support chatbot actually touches, the oblig
 <div class="takeaways">
 <p class="takeaways-title">Quick take</p>
 <ul>
-<li><strong>You're the data controller.</strong> The chatbot vendor is usually a processor acting on your instructions — but the accountability stays with you.</li>
+<li><strong>You're the data controller.</strong> The chatbot vendor is usually a processor acting on your instructions (<a href="https://gdpr-info.eu/art-4-gdpr/">Art. 4(7)–(8) GDPR</a>) — but the accountability stays with you (<a href="https://gdpr-info.eu/art-5-gdpr/">Art. 5(2)</a>).</li>
 <li><strong>Minimize by default.</strong> A support bot rarely needs more than the question itself; don't collect what you can't justify.</li>
 <li><strong>The big three to verify:</strong> where data is stored, whether it's used to train anyone's models, and how long it's kept.</li>
 <li><strong>Get it in writing:</strong> a Data Processing Agreement (DPA), a list of sub-processors, and clear retention controls.</li>
@@ -40,13 +41,13 @@ Before you can protect data, you need to know what's flowing. A typical e-commer
 | The message content | Every conversation | Usually low, but can contain anything a shopper types |
 | Name / email / phone | If you capture leads or look up orders | Personal data — the core of GDPR scope |
 | Order number & status | Order-lookup conversations | Personal data when tied to a customer |
-| IP address / device info | Often logged by default | Personal data under GDPR |
+| IP address / device info | Often logged by default | Personal data under GDPR ([Recital 30](https://gdpr-info.eu/recitals/no-30/)) |
 | Payment details | Should **never** enter a chat | High — keep it out entirely |
 
 Two rules make the rest simpler. First, **a support chatbot should never handle payment card details** — checkout stays in your payment processor, full stop. Second, **collect only what the conversation needs**: to look up an order you need an order number and the email on it, not a phone number, home address, and date of birth. Data you don't collect is data you can't leak, don't have to secure, and never have to delete.
 
 <div class="stat-grid">
-<div class="stat"><div class="stat-num">€20M</div><div class="stat-label">Or 4% of global turnover — the GDPR fine ceiling</div></div>
+<div class="stat"><div class="stat-num">€20M</div><div class="stat-label">Or 4% of global turnover, whichever is higher — the top GDPR fine tier (<a href="https://gdpr-info.eu/art-83-gdpr/">Art. 83(5)</a>)</div></div>
 <div class="stat"><div class="stat-num">Controller</div><div class="stat-label">Your role; the vendor is your processor</div></div>
 <div class="stat"><div class="stat-num">DPA</div><div class="stat-label">The contract you must have with any processor</div></div>
 <div class="stat"><div class="stat-num">Minimize</div><div class="stat-label">The single most effective privacy practice</div></div>
@@ -56,15 +57,15 @@ Two rules make the rest simpler. First, **a support chatbot should never handle 
 
 You don't need to memorize the regulation. For a support chatbot, the duties that actually matter come down to a short list.
 
-**Have a lawful basis.** For support, this is usually "legitimate interest" (answering a customer who contacted you) or performance of a contract (handling an order). If you use conversations for marketing follow-up, that's a separate purpose that typically needs consent.
+**Have a lawful basis** ([Art. 6 GDPR](https://gdpr-info.eu/art-6-gdpr/)). For support, this is usually legitimate interest (Art. 6(1)(f) — answering a customer who contacted you) or performance of a contract (Art. 6(1)(b) — handling an order). If you use conversations for marketing follow-up, that's a separate purpose that typically needs consent (Art. 6(1)(a)).
 
-**Be transparent.** Your privacy policy should mention the chatbot: that an AI assists support, what it collects, and who processes it. A one-line notice near the chat ("By chatting you agree to our privacy policy") plus the detail in the policy itself is the norm.
+**Be transparent** ([Arts. 12–13 GDPR](https://gdpr-info.eu/art-13-gdpr/)). Your privacy policy should mention the chatbot: that an AI assists support, what it collects, and who processes it. A one-line notice near the chat ("This chat is AI-assisted — see our privacy policy") plus the detail in the policy itself is the norm.
 
-**Minimize and limit purpose.** Collect only what's needed for support, and don't quietly repurpose it. An email captured to answer a delivery question isn't automatically a marketing subscriber.
+**Minimize and limit purpose** ([Art. 5(1)(b)–(c) GDPR](https://gdpr-info.eu/art-5-gdpr/)). Collect only what's needed for support, and don't quietly repurpose it. An email captured to answer a delivery question isn't automatically a marketing subscriber.
 
-**Respect data-subject rights.** Customers can ask what you hold, correct it, or have it deleted. You need to be able to honor that — which means knowing where chat data lives and being able to remove it.
+**Respect data-subject rights** ([Arts. 15–17 GDPR](https://gdpr-info.eu/art-15-gdpr/)). Customers can ask what you hold (Art. 15), correct it (Art. 16), or have it deleted (Art. 17). You need to be able to honor that — which means knowing where chat data lives and being able to remove it.
 
-**Keep it secure and keep it briefly.** Reasonable security (encryption, access control) and a retention period that isn't "forever." If you don't need a two-year-old support chat, don't keep it.
+**Keep it secure and keep it briefly.** Reasonable security (encryption, access control — [Art. 32 GDPR](https://gdpr-info.eu/art-32-gdpr/)) and a retention period that isn't "forever" ([Art. 5(1)(e)](https://gdpr-info.eu/art-5-gdpr/)). If you don't need a two-year-old support chat, don't keep it.
 
 <div class="callout">
 <p class="callout-title">Legitimate interest still needs a light touch</p>
@@ -75,9 +76,9 @@ You don't need to memorize the regulation. For a support chatbot, the duties tha
 
 Most of your compliance depends on the tool you pick, so interrogate it before you install it. A trustworthy vendor answers all of these without squirming:
 
-- **Do you offer a Data Processing Agreement (DPA)?** If they can't provide one, walk away — you legally need it.
+- **Do you offer a Data Processing Agreement (DPA)?** If they can't provide one, walk away — you legally need one ([Art. 28(3) GDPR](https://gdpr-info.eu/art-28-gdpr/)).
 - **Where is the data stored and processed?** For EU shoppers, EU/EEA storage (or a valid transfer mechanism) keeps things simple.
-- **Who are your sub-processors?** The model provider, hosting, analytics — you're entitled to the list, and you inherit their practices.
+- **Who are your sub-processors?** The model provider, hosting, analytics — the vendor needs your authorization to use them and must tell you about changes ([Art. 28(2) GDPR](https://gdpr-info.eu/art-28-gdpr/)), and you inherit their practices.
 - **Is my data used to train AI models?** The answer you want is "no." Your customers' questions should not become someone's training set.
 - **What's the data retention, and can I control it?** You want configurable retention and automatic deletion, not indefinite storage.
 - **How do you handle deletion and export requests?** You need a practical way to fulfill data-subject rights.
@@ -118,7 +119,7 @@ We'll also tell you plainly what we are and aren't: we're a practical, privacy-r
 
 ### Does using an AI chatbot make me GDPR non-compliant?
 
-No — a chatbot is fine under GDPR when handled correctly. You need a lawful basis (usually answering the customer), transparency in your privacy policy, a DPA with the vendor, data minimization, and a sensible retention period. Thousands of EU stores run chatbots compliantly; the work is in choosing a solid vendor and being honest in your policy.
+No — a chatbot is fine under GDPR when handled correctly. You need a lawful basis (usually answering the customer), transparency in your privacy policy, a DPA with the vendor, data minimization, and a sensible retention period. EU stores run chatbots compliantly every day; the work is in choosing a solid vendor and being honest in your policy.
 
 ### Am I responsible, or is the chatbot company?
 

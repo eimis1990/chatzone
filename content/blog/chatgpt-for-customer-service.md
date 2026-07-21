@@ -4,7 +4,7 @@ description: An honest look at using ChatGPT for customer service — what it do
 date: 2026-07-07
 topic: ai-customer-support
 related: conversational-ai-vs-chatbot, prevent-ai-chatbot-hallucinations, how-to-choose-ai-support-agent
-updated: 2026-07-07
+updated: 2026-07-21
 author: Eimantas Kudarauskas
 image: /blog/chatgpt-for-customer-service.webp
 ---
@@ -34,7 +34,7 @@ We build an AI agent on top of models like the one behind ChatGPT, so we're not 
 
 Yes — nothing stops you. The language model behind ChatGPT is one of the best conversational engines available, and OpenAI gives you three real ways to put it in front of customers (the app, custom GPTs, and the API). For drafting replies, summarising a long thread, or brainstorming a tone of voice, it's already an excellent internal assistant.
 
-The catch is what "customer service for a store" actually means. It isn't just fluent chat — it's answering *your* return policy correctly, telling a customer where *their* order is, and recommending a product *you actually stock*. Raw ChatGPT knows none of that. It knows the internet up to its training cut-off and whatever you paste into the current chat. Point it at your storefront untouched and it will answer questions about your business using general knowledge and guesswork — which is exactly the failure mode you can't afford in support.
+The catch is what "customer service for a store" actually means. It isn't just fluent chat — it's answering *your* return policy correctly, telling a customer where *their* order is, and recommending a product *you actually stock*. Raw ChatGPT knows none of that. It knows its training data, whatever you paste into the current chat, and — with browsing on — whatever is on the public web. What it doesn't know is your unpublished policies, your live stock, or your customers' orders. Point it at your storefront untouched and it will answer questions about your business using general knowledge and guesswork — which is exactly the failure mode you can't afford in support.
 
 ## What are the ways to use ChatGPT for support?
 
@@ -42,7 +42,7 @@ There are three practical routes, from least to most work:
 
 **1. The ChatGPT app.** Your team opens chatgpt.com to draft and refine replies by hand. Genuinely useful as an internal copilot. But it's a person-in-the-loop tool — it doesn't sit on your site, doesn't see your live data, and every reply still passes through a human.
 
-**2. A custom GPT.** In the ChatGPT app you can build a "GPT" with custom instructions and a few uploaded files (your FAQ, your policies). This narrows its knowledge and is a real step up. But it lives inside ChatGPT — customers would need their own ChatGPT accounts to use it — the uploaded knowledge is a static snapshot, and it still can't call your live systems for an order or a price.
+**2. A custom GPT.** In the ChatGPT app you can build a "GPT" with custom instructions and a few uploaded files (your FAQ, your policies). This narrows its knowledge and is a real step up. But it lives inside ChatGPT — customers would need their own ChatGPT accounts to use it — the uploaded knowledge is a static snapshot, and while GPT "Actions" can technically call external APIs, building and securing those integrations is on you — it doesn't ship connected to your orders or prices.
 
 **3. The API.** This is the serious route. You call OpenAI's API from your own app and build the support experience around it: a widget on your site, your content wired in, connections to your order and catalog systems, logging, and handoff. The model does the talking; *you* build everything that makes it safe and useful. That "everything" is precisely the grounded agent we describe below — and it's a real engineering project, which is why most stores use a tool that has already done it.
 
@@ -95,9 +95,9 @@ Loqara is one example of this pattern: grounded chat *and* voice in a single wid
 
 ## Is it safe to put customer data into ChatGPT?
 
-Be careful here, and don't overstate it in either direction. The consumer ChatGPT app is not the right place to paste customer order numbers, addresses, or emails — it's a personal-productivity product, not a system designed around handling other people's personal data on your behalf. Doing so can create real privacy and GDPR headaches, especially for EU customers.
+Be careful here, and don't overstate it in either direction. The consumer ChatGPT app is not the right place to paste customer order numbers, addresses, or emails — it's a personal-productivity product, not a system designed around handling other people's personal data on your behalf. By default, OpenAI can use consumer ChatGPT conversations to improve its models unless you opt out ([OpenAI's data-usage policy](https://openai.com/policies/how-your-data-is-used-to-improve-model-performance/)). Doing so can create real privacy and GDPR headaches, especially for EU customers.
 
-That said, the picture differs by tier. OpenAI's business, enterprise, and API offerings have different data-handling terms than the free consumer app — for example, business tiers generally state that they don't train on your data by default. So "is ChatGPT safe for customer data?" doesn't have a single yes/no answer; it depends entirely on *which* ChatGPT and *how* you've set it up. If you're serious about support, you want a tool built for processing customer conversations, with a clear data-processing agreement — not a consumer chat window. We go deeper in [AI chatbots, GDPR, and data privacy](/blog/ai-chatbot-gdpr-data-privacy).
+That said, the picture differs by tier. OpenAI's business, enterprise, and API offerings have different data-handling terms than the free consumer app — OpenAI states it does not train on ChatGPT Team/Enterprise or API data by default ([OpenAI enterprise privacy](https://openai.com/enterprise-privacy/)). So "is ChatGPT safe for customer data?" doesn't have a single yes/no answer; it depends entirely on *which* ChatGPT and *how* you've set it up. If you're serious about support, you want a tool built for processing customer conversations, with a clear data-processing agreement — not a consumer chat window. We go deeper in [AI chatbots, GDPR, and data privacy](/blog/ai-chatbot-gdpr-data-privacy).
 
 ## So should I use ChatGPT or a dedicated agent?
 
@@ -127,7 +127,7 @@ It depends on which ChatGPT. The free consumer app is not designed for handling 
 They can use the same underlying model. The difference is the layer around it. A grounded agent retrieves your real content before answering (so it doesn't invent policies), can search your live catalog and look up orders, and hands off to a human when it's unsure. Raw ChatGPT does none of that by default — it answers from general knowledge with no connection to your store.
 
 ### Do customers need a ChatGPT account to use a custom GPT?
-Generally yes — custom GPTs live inside the ChatGPT product, so people typically need their own ChatGPT access to use one. That makes custom GPTs better suited to internal use or low-stakes Q&A than to a public storefront. A support widget embedded directly on your site needs no account from the customer — they just open the chat.
+Yes — custom GPTs live inside the ChatGPT product, and OpenAI's help docs say users must be signed in to ChatGPT to chat with a GPT (a free account is enough; no paid plan needed) ([OpenAI Help: GPTs in ChatGPT](https://help.openai.com/en/articles/8554407-gpts-in-chatgpt)). That makes custom GPTs better suited to internal use or low-stakes Q&A than to a public storefront. A support widget embedded directly on your site needs no account from the customer — they just open the chat.
 
 ### Can a grounded agent do voice too, not just chat?
 Some can. Loqara, for instance, offers grounded chat and a real-time voice agent in the same widget, so customers can either type or speak their question and get answers from your content. Voice is an optional paid add-on on top of the base plan. Not every ChatGPT-based setup includes voice, so check what a given tool actually ships.

@@ -2,6 +2,7 @@
 title: Multilingual customer support with AI (without hiring a bigger team)
 description: How an AI chatbot lets an online store answer shoppers in their own language 24/7 — what it does well, where to keep a human, and how to set it up in an afternoon.
 date: 2026-07-02
+updated: 2026-07-21
 topic: ai-customer-support
 author: Eimantas Kudarauskas
 image: /blog/multilingual-ai-customer-support.webp
@@ -31,11 +32,11 @@ Hiring native speakers for every market doesn't scale, and bolting a "Translate"
 
 ## Why language quietly kills conversions
 
-People buy in the language they think in. Research on cross-border commerce consistently finds that a large share of shoppers won't complete a purchase on a site that doesn't speak their language — and many won't even start. The effect is strongest exactly where it hurts: at the questions that gate a sale ("does this ship to my country?", "how do returns work from here?", "is this in stock?").
+People buy in the language they think in. CSA Research's long-running ["Can't Read, Won't Buy"](https://csa-research.com/l/media/Consumers-Prefer-their-Own-Language) series — the 2020 edition surveyed 8,709 consumers in 29 countries — found that most shoppers prefer to buy with product information in their own language, and a large share won't buy at all from sites in other languages. The effect is strongest exactly where it hurts: at the questions that gate a sale ("does this ship to my country?", "how do returns work from here?", "is this in stock?").
 
 <div class="stat-grid">
-<div class="stat"><div class="stat-num">~75%</div><div class="stat-label">Of shoppers prefer to buy in their native language</div></div>
-<div class="stat"><div class="stat-num">40%+</div><div class="stat-label">Say they won't buy from sites in other languages</div></div>
+<div class="stat"><div class="stat-num">76%</div><div class="stat-label">Of online shoppers prefer to buy with information in their native language (CSA Research, 2020)</div></div>
+<div class="stat"><div class="stat-num">40%</div><div class="stat-label">Will never buy from websites in other languages (CSA Research, 2020)</div></div>
 <div class="stat"><div class="stat-num">24/7</div><div class="stat-label">Coverage across time zones, no night shift to staff</div></div>
 <div class="stat"><div class="stat-num">1</div><div class="stat-label">Agent to maintain — not one team per market</div></div>
 </div>
@@ -96,7 +97,7 @@ The point is consistency: whether a shopper types in Lithuanian or speaks in Eng
 You don't need a localization project. A practical path:
 
 1. **Connect your content.** Point the agent at your policy, FAQ, and about pages, plus your live product data. This is the source every language answers from.
-2. **Pick the languages you serve.** Start with the two or three that cover most of your traffic. You can add more later without re-doing anything.
+2. **Pick the languages you serve.** Start with the ones that cover most of your traffic. You can add more later without re-doing anything. (With Loqara today that means English and Lithuanian — how many you can enable depends on your plan.)
 3. **Set the greeting and tone per language.** A warm first message in each language signals "yes, we speak your language" before the shopper even asks.
 4. **Test the top questions in each language.** Ask about shipping, returns, and a product or two. Read the answers as a native speaker would — you're checking they're grounded and natural, not just grammatical.
 5. **Embed and go live.** One line of code on your storefront. No per-market rebuild.

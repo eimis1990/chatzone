@@ -926,32 +926,32 @@ audit before execution because content may change.
 - [ ] `add-ai-agent-to-woocommerce`
 - [ ] `add-voice-ai-to-online-store`
 - [ ] `ai-chatbot-for-online-store`
-- [ ] `ai-chatbot-gdpr-data-privacy`
+- [x] `ai-chatbot-gdpr-data-privacy`
 - [ ] `ai-chatbot-human-handoff`
 - [ ] `ai-customer-service-small-stores`
 - [ ] `ai-product-recommendation-chatbot`
-- [ ] `best-ai-chatbot-for-ecommerce`
-- [ ] `best-ai-chatbot-for-shopify`
-- [ ] `best-ai-chatbot-for-woocommerce`
-- [ ] `best-chatbot-platforms`
+- [x] `best-ai-chatbot-for-ecommerce`
+- [x] `best-ai-chatbot-for-shopify`
+- [x] `best-ai-chatbot-for-woocommerce`
+- [x] `best-chatbot-platforms`
 - [ ] `black-friday-ai-agent`
 - [ ] `capture-leads-with-conversational-chat`
 - [ ] `chatbot-roi-metrics-that-matter`
-- [ ] `chatgpt-for-customer-service`
-- [ ] `conversational-ai-vs-chatbot`
-- [ ] `gorgias-alternatives-for-ecommerce`
-- [ ] `how-much-does-ai-chatbot-cost`
+- [x] `chatgpt-for-customer-service`
+- [x] `conversational-ai-vs-chatbot` — _editorial exception (2026-07-21): concept explainer with no statistics or vendor numbers; deliberately citation-free, audit warning expected_
+- [x] `gorgias-alternatives-for-ecommerce`
+- [x] `how-much-does-ai-chatbot-cost`
 - [ ] `how-to-choose-ai-support-agent`
-- [ ] `intercom-alternatives-for-ecommerce`
-- [ ] `multilingual-ai-customer-support`
-- [ ] `new-ai-chatbots-2026`
+- [x] `intercom-alternatives-for-ecommerce`
+- [x] `multilingual-ai-customer-support`
+- [x] `new-ai-chatbots-2026`
 - [ ] `recover-abandoned-carts-ai-chatbot`
 - [ ] `reduce-support-tickets-with-ai`
-- [ ] `tidio-alternatives-for-ecommerce`
-- [ ] `tidio-vs-zendesk`
+- [x] `tidio-alternatives-for-ecommerce`
+- [x] `tidio-vs-zendesk`
 - [ ] `voice-ai-for-ecommerce-support`
 - [ ] `where-is-my-order-ai`
-- [ ] `zendesk-alternatives-for-ecommerce`
+- [x] `zendesk-alternatives-for-ecommerce`
 
 ### 28 posts without explicit `related` frontmatter
 
