@@ -19,7 +19,7 @@
 
 import { buildManifest, diffManifests } from './indexnow-manifest.mjs'
 
-const KEY = 'e45327d6d3e3404362460bdf9087fb8d'
+const KEY = 'a58f1e5d94c32c16e9297f00c46c15ef'
 const SITE_URL = (process.env.NEXT_PUBLIC_APP_URL ?? 'https://www.loqara.com').replace(/\/+$/, '')
 const FORCE = process.argv.includes('--force')
 const ENDPOINT = 'https://api.indexnow.org/indexnow'

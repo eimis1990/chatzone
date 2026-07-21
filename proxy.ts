@@ -35,8 +35,10 @@ export const config = {
     /*
      * Run on all routes except Next internals and static files. The widget
      * loader (/widget.js) and embed/api routes are handled as public by
-     * routeDecision, so they pass through.
+     * routeDecision, so they pass through. Text/manifest files (llms.txt,
+     * the IndexNow key + manifest, videos) skip the session refresh entirely —
+     * crawler fetches of static files must never depend on Supabase.
      */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|js)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|js|txt|json|xml|mp4|webm|ico)$).*)',
   ],
 }
