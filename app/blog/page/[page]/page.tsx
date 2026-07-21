@@ -36,6 +36,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description,
       url: `/blog/page/${page}`,
       type: 'website',
+      images: [{ url: '/landing/og.jpg?v=4', width: 1200, height: 630, alt: 'Loqara Blog' }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `Loqara Blog — Page ${page}`,
+      description,
+      images: ['/landing/og.jpg?v=4'],
     },
   }
 }

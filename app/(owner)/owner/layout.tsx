@@ -1,7 +1,11 @@
+import type { Metadata } from 'next'
 import { requireRole } from '@/lib/auth/guards'
 import { createServerClient } from '@/lib/supabase/server'
 import { OwnerSidebar } from '@/components/owner/OwnerSidebar'
 import { Toaster } from '@/components/ui/sonner'
+
+// Owner console is private — auth protects it; this keeps crawlers from indexing it.
+export const metadata: Metadata = { robots: { index: false, follow: false } }
 
 export default async function OwnerLayout({
   children,

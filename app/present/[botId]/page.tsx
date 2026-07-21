@@ -1,5 +1,10 @@
+import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { requireRole } from '@/lib/auth/guards'
+
+// Owner-only pitch stage — auth redirects anonymous requests, and this keeps
+// the route out of indexes if it is ever reachable.
+export const metadata: Metadata = { robots: { index: false, follow: false } }
 import { createServiceClient } from '@/lib/supabase/service'
 import { WidgetEmbed } from '@/components/landing/WidgetEmbed'
 

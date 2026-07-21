@@ -96,11 +96,11 @@ compare a future run without manually exploring the Lighthouse HTML.
 - Create: `tests/unit/public-seo.test.ts`
 - Modify later in Phase 4 as route behavior is implemented
 
-- [ ] Add initial tests for sitemap URL uniqueness, canonical URL construction,
+- [x] Add initial tests for sitemap URL uniqueness, canonical URL construction,
       and post `dateModified = updated ?? date` behavior.
-- [ ] Add fixtures for an article with and without `updated`.
-- [ ] Add a helper test ensuring all explicit `related` slugs resolve.
-- [ ] Keep route-render/header smoke tests separate if they require a running app.
+- [x] Add fixtures for an article with and without `updated`.
+- [x] Add a helper test ensuring all explicit `related` slugs resolve.
+- [x] Keep route-render/header smoke tests separate if they require a running app.
 
 **Acceptance:** tests fail for the known synthetic sitemap freshness and pass only
 after Phase 4 implements real dates.
@@ -404,13 +404,13 @@ within budget on low-end mobile simulation.
 - Modify: `app/present/[botId]/page.tsx` or create a route layout
 - Test: extend `tests/unit/public-seo.test.ts`; add running-app smoke checks
 
-- [ ] Export `robots: { index: false, follow: false }` from auth, client, owner,
+- [x] Export `robots: { index: false, follow: false }` from auth, client, owner,
       embed, and presentation route boundaries.
-- [ ] Confirm metadata exports remain in Server Components.
-- [ ] Verify with Googlebot-like curl/browser requests that each publicly reachable
+- [x] Confirm metadata exports remain in Server Components.
+- [x] Verify with Googlebot-like curl/browser requests that each publicly reachable
       route returns a readable noindex tag or X-Robots header.
-- [ ] Verify public `/`, `/blog`, articles, Privacy, and Terms remain indexable.
-- [ ] Confirm authentication still protects private content independently of SEO.
+- [x] Verify public `/`, `/blog`, articles, Privacy, and Terms remain indexable.
+- [x] Confirm authentication still protects private content independently of SEO.
 
 **Acceptance:** every route family has an intentional, tested indexing state and
 no private route relies only on robots disallow.
@@ -422,12 +422,12 @@ no private route relies only on robots disallow.
 - Modify: `app/robots.ts`
 - Test: extend `tests/unit/public-seo.test.ts`
 
-- [ ] Keep APIs and other genuine crawl-waste endpoints disallowed.
-- [ ] Remove disallows that prevent crawlers from seeing required noindex metadata,
+- [x] Keep APIs and other genuine crawl-waste endpoints disallowed.
+- [x] Remove disallows that prevent crawlers from seeing required noindex metadata,
       unless authentication alone makes fetching impossible and the reason is
       documented.
-- [ ] Include `/present` in the reviewed policy rather than leaving it accidental.
-- [ ] Verify generated `/robots.txt` syntax, sitemap URL, and production host.
+- [x] Include `/present` in the reviewed policy rather than leaving it accidental.
+- [x] Verify generated `/robots.txt` syntax, sitemap URL, and production host.
 
 **Acceptance:** robots rules and route metadata do not contradict each other; the
 generated file contains only deliberate entries.
@@ -440,11 +440,11 @@ generated file contains only deliberate entries.
 - Modify: `lib/blog.ts` only if date helpers belong there
 - Test: `tests/unit/public-seo.test.ts`
 
-- [ ] Use `updated ?? date` for every article sitemap entry.
-- [ ] Define real, stable modification dates for homepage/blog/static legal pages,
+- [x] Use `updated ?? date` for every article sitemap entry.
+- [x] Define real, stable modification dates for homepage/blog/static legal pages,
       or omit `lastModified` where no reliable source exists.
-- [ ] Do not instantiate `new Date()` merely because the sitemap was requested.
-- [ ] Validate unique URLs, valid ISO dates, and `updated >= date`.
+- [x] Do not instantiate `new Date()` merely because the sitemap was requested.
+- [x] Validate unique URLs, valid ISO dates, and `updated >= date`.
 - [ ] Include new About/author/policy/methodology and topic-hub routes when they
       become public in Phase 5.
 
@@ -461,11 +461,11 @@ dates and articles use their real latest meaningful edit.
 - Modify: `app/terms/page.tsx`
 - Review: `app/page.tsx`, `app/layout.tsx`, `app/blog/[slug]/page.tsx`
 
-- [ ] Add explicit Open Graph title, description, canonical URL, type, and image to
+- [x] Add explicit Open Graph title, description, canonical URL, type, and image to
       every public non-article route.
-- [ ] Add matching Twitter metadata.
-- [ ] Add `modifiedTime` to article Open Graph data when `updated` exists.
-- [ ] Verify the root homepage image/URL no longer leaks onto Blog, Privacy, Terms,
+- [x] Add matching Twitter metadata.
+- [x] Add `modifiedTime` to article Open Graph data when `updated` exists.
+- [x] Verify the root homepage image/URL no longer leaks onto Blog, Privacy, Terms,
       or paginated pages.
 - [ ] Validate with raw HTML/head inspection and at least one social-card debugger.
 
@@ -480,9 +480,12 @@ description, and image.
 - Modify: `app/terms/page.tsx`
 
 - [ ] Obtain actual substantive review dates from the owner/legal reviewer.
-- [ ] Replace `new Date().getFullYear()` with fixed reviewed dates.
-- [ ] Use the same dates in sitemap metadata and any structured/social metadata.
-- [ ] Do not imply legal review that did not occur; mark this task blocked pending
+      _Interim: pages show 2026-07-02 — the last substantive content edit from
+      git history (`LEGAL_UPDATED` in lib/site.ts). Owner must confirm or
+      replace with a real legal-review date._
+- [x] Replace `new Date().getFullYear()` with fixed reviewed dates.
+- [x] Use the same dates in sitemap metadata and any structured/social metadata.
+- [x] Do not imply legal review that did not occur; mark this task blocked pending
       owner input if dates cannot be verified.
 
 **Acceptance:** visible and machine-readable dates remain stable until the documents
@@ -496,11 +499,11 @@ are meaningfully reviewed again.
 - Modify: `app/blog/[slug]/page.tsx`
 - Add tests: `tests/unit/structured-data.test.ts`
 
-- [ ] Preserve Organization, WebSite, SoftwareApplication, BlogPosting, and
+- [x] Preserve Organization, WebSite, SoftwareApplication, BlogPosting, and
       Breadcrumb structures only where their data is visible/accurate.
-- [ ] Keep supported-language and feature claims aligned with product configuration.
-- [ ] Ensure FAQ schema exactly mirrors visible FAQ questions/answers.
-- [ ] Remove comments or documentation that present FAQ schema as guaranteed rich
+- [x] Keep supported-language and feature claims aligned with product configuration.
+- [x] Ensure FAQ schema exactly mirrors visible FAQ questions/answers.
+- [x] Remove comments or documentation that present FAQ schema as guaranteed rich
       results or a special AI-citation mechanism.
 - [ ] Validate representative pages with Schema.org and Google's Rich Results Test;
       document expected ineligibility for Loqara FAQ rich results.
@@ -510,7 +513,7 @@ current visible/product truth.
 
 ### Phase 4 gate
 
-- [ ] Standard verification commands pass.
+- [x] Standard verification commands pass.
 - [ ] SEO score remains 100 on public routes.
 - [ ] Sitemap, robots, canonical, noindex, OG, Twitter, and JSON-LD smoke matrix passes.
 - [ ] Search Console sitemap is resubmitted after production deployment.

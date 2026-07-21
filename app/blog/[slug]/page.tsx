@@ -32,6 +32,7 @@ export async function generateMetadata({
       type: 'article',
       url: `/blog/${slug}`,
       publishedTime: post.date,
+      ...(post.updated ? { modifiedTime: post.updated } : {}),
       authors: [post.author],
       // og:image comes from the colocated opengraph-image.tsx (per-post card).
     },
@@ -74,8 +75,10 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
           { '@type': 'ListItem', position: 3, name: post.title, item: `${SITE_URL}/blog/${slug}` },
         ],
       },
-      // Only when the post has a "Frequently asked questions" section — eligible
-      // for FAQ rich results, and answers AI assistants can quote directly.
+      // Only when the post has a "Frequently asked questions" section, so the
+      // schema mirrors visible content. Note: Google restricts FAQ rich results
+      // to well-known government/health sites, so no rich result is expected —
+      // the markup is kept for accurate machine-readable structure only.
       ...(post.faq.length
         ? [
             {

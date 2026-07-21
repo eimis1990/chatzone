@@ -10,3 +10,23 @@ export const SITE_URL = (process.env.NEXT_PUBLIC_APP_URL ?? 'https://www.loqara.
 
 /** Human-facing brand name, reused across metadata + structured data. */
 export const SITE_NAME = 'Loqara'
+
+/**
+ * Last substantive edit of each legal page (from git history — content edits,
+ * not styling). Shown on the page and used as sitemap `lastModified`. Bump
+ * manually when the copy meaningfully changes; never derive from build time.
+ */
+export const LEGAL_UPDATED = {
+  privacy: '2026-07-02',
+  terms: '2026-07-02',
+} as const
+
+/** Render a YYYY-MM-DD date as e.g. "July 2, 2026" for visible "last updated" labels. */
+export function formatUpdated(iso: string): string {
+  return new Date(`${iso}T00:00:00Z`).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    timeZone: 'UTC',
+  })
+}
