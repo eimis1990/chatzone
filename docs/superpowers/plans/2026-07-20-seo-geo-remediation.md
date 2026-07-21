@@ -252,14 +252,14 @@ the carousel still reaches every design.
 - Modify: `components/landing/sections.tsx`
 - Review: all `components/landing/**/*.tsx`
 
-- [ ] Replace the three `HowItWorks` plain images with `next/image` and accurate
+- [x] Replace the three `HowItWorks` plain images with `next/image` and accurate
       responsive `sizes`.
-- [ ] Audit every landing `<img>` and classify it as eager LCP, normal lazy
+- [x] Audit every landing `<img>` and classify it as eager LCP, normal lazy
       content, or decorative.
-- [ ] Ensure only a proven LCP image uses `preload`; do not preload below-fold
+- [x] Ensure only a proven LCP image uses `preload`; do not preload below-fold
       images.
-- [ ] Verify intrinsic dimensions/aspect-ratio containers prevent CLS.
-- [ ] Compare image bytes and responsive candidates in the browser network panel.
+- [x] Verify intrinsic dimensions/aspect-ratio containers prevent CLS.
+- [x] Compare image bytes and responsive candidates in the browser network panel.
 
 **Acceptance:** Lighthouse image-delivery savings are no longer dominated by
 landing screenshots/posters and no below-fold landing image appears in head
@@ -273,14 +273,14 @@ preloads.
 - Potentially create: a route-scoped font module/layout
 - Verify consumers: `lib/fonts.ts`, widget/configurator components
 
-- [ ] Keep global preload only for the true base UI font(s).
-- [ ] Set all chat-catalog families to `preload: false` unless a route-specific
+- [x] Keep global preload only for the true base UI font(s).
+- [x] Set all chat-catalog families to `preload: false` unless a route-specific
       measurement proves one is critical.
-- [ ] Decide whether Plus Jakarta remains a marketing preload or the hero uses the
+- [x] Decide whether Plus Jakarta remains a marketing preload or the hero uses the
       base face; keep total public preloads at three or fewer.
-- [ ] Verify every selectable chat font still applies in configurator preview and
+- [x] Verify every selectable chat font still applies in configurator preview and
       embedded widget.
-- [ ] Compare homepage, blog, app, and embed font requests after the change.
+- [x] Compare homepage, blog, app, and embed font requests after the change.
 
 **Acceptance:** homepage and blog each preload no more than three font files with
 no broken font selection or visible layout shift.
@@ -293,24 +293,30 @@ no broken font selection or visible layout shift.
 - Modify: `app/page.tsx`
 - Verify: `app/present/[botId]/page.tsx`
 
-- [ ] Add an explicit loading policy prop such as `immediate | idle | interaction`.
-- [ ] Use deferred loading on `/` and retain immediate loading on `/present`.
-- [ ] Ensure first user interaction with the launcher affordance loads and opens
+- [x] Add an explicit loading policy prop such as `immediate | idle | interaction`.
+- [x] Use deferred loading on `/` and retain immediate loading on `/present`.
+- [x] Ensure first user interaction with the launcher affordance loads and opens
       the widget reliably rather than requiring a second click.
-- [ ] Cancel idle callbacks/listeners on unmount and retain full widget cleanup.
-- [ ] Verify analytics events and the owner landing-bot toggle.
+- [x] Cancel idle callbacks/listeners on unmount and retain full widget cleanup.
+- [x] Verify analytics events and the owner landing-bot toggle.
 
 **Acceptance:** no widget iframe/config request is on the initial homepage critical
 path; presentation demos remain immediate.
 
 ### Phase 2 gate
 
-- [ ] Standard verification commands pass.
-- [ ] At most one hero video request occurs concurrently.
-- [ ] Homepage initial transfer before deferred media is <= 2.0 MB.
-- [ ] Homepage median mobile Performance is >= 85 and lab LCP <= 3.5 s, or any
+- [x] Standard verification commands pass.
+- [x] At most one hero video request occurs concurrently.
+- [x] Homepage initial transfer before deferred media is <= 2.0 MB.
+- [x] Homepage median mobile Performance is >= 85 and lab LCP <= 3.5 s, or any
       shortfall is documented with the remaining dominant audit and a corrective task.
-- [ ] Desktop and mobile visual QA confirms no meaningful quality regression.
+- [x] Desktop and mobile visual QA confirms no meaningful quality regression.
+
+Phase 2 closed at median Performance 85, 0.94 MB, and 4.30-second simulated
+LCP. The LCP element is server-visible text with only ~122 ms observed render
+delay; the remaining simulated shortfall is led by two route CSS files (35 KB,
+Lighthouse-estimated 410 ms savings). Corrective work is tracked in Task 6.5 so
+indexing and crawl fixes can proceed without reopening the completed media budget.
 
 ---
 
@@ -769,6 +775,25 @@ URL and any genuinely changed hub/index URL.
 
 **Acceptance:** the agentic audit recognizes links and internal documentation does
 not elevate the file above crawlable HTML.
+
+### Task 6.5: Reduce remaining public-route render-blocking CSS
+
+**Files:**
+
+- Review: `app/globals.css`, public route layouts, and generated route CSS chunks
+- Modify only after measuring: route-scoped styles/layout boundaries
+
+- [ ] Attribute the two homepage CSS chunks (currently ~35 KB combined) to their
+      source layers and separate app/widget-only rules from public critical CSS.
+- [ ] Keep hero typography/layout styles available in the first render; do not
+      trade the current server-visible LCP text for a flash or hydration branch.
+- [ ] Remove dead public selectors and route-scope non-public style bundles where
+      Next's layout boundaries allow it.
+- [ ] Re-run three mobile audits; target Lighthouse's current estimated 410 ms
+      render-blocking saving without adding inline-style duplication.
+
+**Acceptance:** public CSS transfer/render blocking is measurably lower, observed
+LCP remains stable and visible, and no app/widget route loses required styles.
 
 ### Phase 6 gate
 

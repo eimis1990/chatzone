@@ -96,6 +96,33 @@ test('save-data keeps the hero poster-only', async ({ browser }) => {
   await context.close()
 })
 
+test('landing widget defers network and opens on the first proxy click', async ({ page }) => {
+  const widgetRequests: string[] = []
+  page.on('request', (request) => {
+    const url = request.url()
+    if (
+      url.endsWith('/widget.js') ||
+      url.includes('/api/widget-config') ||
+      url.includes('/embed/')
+    ) {
+      widgetRequests.push(url)
+    }
+  })
+
+  await page.goto('/')
+  const proxyLauncher = page.getByTestId('deferred-widget-launcher')
+  await expect(proxyLauncher).toBeVisible()
+  await page.waitForTimeout(1500)
+  expect(widgetRequests).toEqual([])
+
+  await proxyLauncher.click()
+  await expect(page.locator('[data-cbz-launcher]')).toHaveCount(1)
+  await expect(page.locator('[data-cbz-iframe]')).toHaveCount(1)
+  expect(widgetRequests.some((url) => url.endsWith('/widget.js'))).toBe(true)
+  expect(widgetRequests.some((url) => url.includes('/api/widget-config'))).toBe(true)
+  expect(widgetRequests.some((url) => url.includes('/embed/'))).toBe(true)
+})
+
 test('mobile hero downloads the intro before assigning the loop', async ({ browser }) => {
   const context = await browser.newContext({ viewport: { width: 390, height: 844 } })
   const page = await context.newPage()

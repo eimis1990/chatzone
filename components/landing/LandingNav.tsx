@@ -38,20 +38,13 @@ export function LandingNav({ solid = false }: { solid?: boolean }) {
       <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5">
         <Link href="/" className={`flex items-center gap-2.5 text-2xl font-bold ${solidNav ? 'text-gray-900' : 'text-white'}`}>
           {/* Colorful fox over the dark hero; black fox once the bar turns white. */}
-          <span className="relative inline-block size-12 shrink-0">
-            <img
-              src="/loqara-logo-colorful.webp"
-              alt=""
-              aria-hidden="true"
-              className={`absolute inset-0 size-12 transition-opacity duration-300 ${solidNav ? 'opacity-0' : 'opacity-100'}`}
-            />
-            <img
-              src="/loqara-fox-black.webp"
-              alt=""
-              aria-hidden="true"
-              className={`absolute inset-0 size-12 transition-opacity duration-300 ${solidNav ? 'opacity-100' : 'opacity-0'}`}
-            />
-          </span>
+          <span
+            aria-hidden="true"
+            className="inline-block size-12 shrink-0 bg-contain bg-center bg-no-repeat"
+            style={{
+              backgroundImage: `url(${solidNav ? '/loqara-fox-black.webp' : '/loqara-logo-colorful.webp'})`,
+            }}
+          />
           <span>
             Loqara<span className="text-primary">.</span>
           </span>

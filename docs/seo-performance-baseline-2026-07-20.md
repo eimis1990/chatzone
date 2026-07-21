@@ -128,3 +128,26 @@ transfer is now 88.1% below the 10.78 MB production baseline and 87.6% below the
 10.34 MB Phase 1 local checkpoint. The interaction regression proves at most
 three showcase images are mounted/requested initially and covers side-card click,
 Previous wrap, and swipe navigation across the complete 11-design set.
+
+### Phase 2 completion checkpoint
+
+After responsive How it works images, two global font preloads, single-state nav
+logo delivery, and deferred live-widget loading, the final three-run median is:
+
+| Performance | Accessibility | Best Practices | SEO | FCP | LCP | Speed Index | TBT | CLS | Transfer | Requests |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 85 | 89 | 96* | 100 | 1.21 s | 4.30 s | 1.49 s | 9 ms | 0 | 0.94 MB | 38 |
+
+Resource medians are 0.32 MB media, 0.30 MB script, 0.18 MB image, 0.06 MB font,
+0.04 MB CSS, and 0.03 MB document. `/`, `/blog`, and `/login` each expose two
+font preloads; the invalid embed smoke URL returns no font preload. Homepage HTML
+has zero image preloads because its LCP candidate is the server-rendered hero
+paragraph, not an image. The widget loader/config/embed requests are absent from
+the initial trace and a browser regression proves the proxy's first click both
+loads and opens the real widget.
+
+The simulated LCP remains above the 3.5-second stretch target even though the
+observed local LCP is 128 ms and the text element's observed render delay is
+~122 ms. The dominant actionable insight is two render-blocking CSS files totaling
+~35 KB, with Lighthouse estimating 410 ms savings. This is tracked as Task 6.5;
+Phase 2's media/image/font/widget budgets are complete.

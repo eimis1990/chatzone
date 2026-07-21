@@ -113,7 +113,7 @@ export default async function Home() {
         <CTASection />
       </main>
       <Footer />
-      {landingBotKey && <WidgetEmbed botKey={landingBotKey} />}
+      {landingBotKey && <WidgetEmbed botKey={landingBotKey} loadingPolicy="idle" />}
     </>
   )
 }

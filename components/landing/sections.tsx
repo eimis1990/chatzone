@@ -202,11 +202,13 @@ export function HowItWorks() {
             <Reveal key={s.title}>
               <div className="group h-full overflow-hidden rounded-2xl border bg-white shadow-sm transition-shadow hover:shadow-md">
                 <div className="bg-[#faf8f5]">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
+                  <Image
                     src={s.image}
                     alt=""
                     aria-hidden="true"
+                    width={900}
+                    height={672}
+                    sizes="(min-width: 1280px) 405px, (min-width: 768px) 31vw, 100vw"
                     className="aspect-[4/3] w-full object-cover"
                   />
                 </div>

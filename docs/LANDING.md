@@ -82,6 +82,24 @@ Use the same settings for the loop file. Posters use matching 1280×720 and
 Keep the full-resolution sources until the optimized derivatives have passed
 production network and visual smoke tests.
 
+## Landing image and font budgets
+
+- The hero picture is intentional eager background chrome; it uses responsive
+  540×960 and 1280×720 poster sources and is the only image available before
+  hydration.
+- Feature screenshots use `next/image`, fixed aspect-ratio containers, and
+  `(min-width: 1024px) 50vw, 100vw` sizing. They remain lazy because they are
+  below the hero.
+- The three How it works illustrations are decorative, dimensioned 900×672
+  WebPs delivered through `next/image`; they remain lazy and reserve a 4:3 box.
+- The showcase mounts at most three responsive images. Outer wings are CSS and
+  the likely forward neighbor waits for browser idle.
+- The header selects one decorative fox mark as a CSS background instead of
+  rendering and preloading both light/dark variants. Dialog logo images are
+  created only after a dialog opens; they are not content/LCP candidates.
+- Global font preloads are limited to Geist Sans (base UI) and Plus Jakarta Sans
+  (hero heading). Geist Mono and every selectable chat font use `preload: false`.
+
 ## Image prompts (run these; drop results in `public/landing/`)
 See the chat message accompanying this build for the full prompt list (hero,
 feature shots, og image). Slots reference `/landing/*.png` with graceful
