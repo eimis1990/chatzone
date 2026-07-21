@@ -179,3 +179,16 @@ declaration block to `::before` ONLY — `::after` silently ends up with
 renders, the mirror doesn't. Fix: write two standalone rules, one per pseudo.
 Verified via `getComputedStyle(el, '::after').content` returning `"none"`. See
 the `.section-header-gradient` two-sided header glow in globals.css.
+
+## Browser-only preferences must not change the first hydrated tree
+
+`useReducedMotion()` cannot know the browser preference during server rendering.
+Branching directly on it made `HeroVideo` render two `<video>` elements on the
+server and an `<img>` poster on the first reduced-motion client render, causing a
+full hydration mismatch. Keep the server and first client snapshot identical;
+`HeroVideo` uses `useSyncExternalStore` to render the poster until hydration, then
+progressively enables video only when motion is allowed
+(`components/landing/HeroVideo.tsx:10-26`). Apply the same rule to color scheme,
+viewport, storage, and other browser-only state that changes element structure.
+
+_Last verified: 2026-07-21 (9acaebe)._

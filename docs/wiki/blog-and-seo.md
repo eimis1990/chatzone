@@ -107,4 +107,10 @@ schema as Google ranking shortcuts; prioritize visible server content, media/ima
 budgets, index controls, curated topic relationships, primary evidence, and clear
 publisher/author methodology.
 
-_Last verified: 2026-07-20 (ba6f82d)._
+Phase 1 shipped on the remediation branch in `9acaebe`: hero/showcase/reveal content
+is server-visible, Lenis is removed in favor of native anchor scrolling, and the
+reduced-motion hero has a hydration-safe poster snapshot. The local production-build
+checkpoint improved median Performance 61 → 79 and lab LCP 11.26 s → 5.83 s;
+Phase 2 still owns the ~7.96 MB hero-video payload.
+
+_Last verified: 2026-07-21 (9acaebe)._
