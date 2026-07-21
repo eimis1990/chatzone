@@ -4,16 +4,16 @@ description: An honest store owner's guide to what AI chatbots really cost in 20
 date: 2026-07-07
 topic: vendor-comparisons
 related: chatbot-roi-metrics-that-matter, how-to-choose-ai-support-agent, best-ai-chatbot-for-ecommerce
-updated: 2026-07-07
+updated: 2026-07-21
 author: Eimantas Kudarauskas
 image: /blog/how-much-does-ai-chatbot-cost.webp
 ---
 
-Ask five vendors what an AI chatbot costs and you'll get five wildly different answers — some quote a few dollars a month, others a few thousand. Both can be telling the truth. The sticker price barely matters; what matters is the *pricing model* underneath it, because the same store traffic can cost 3–4× more under one model than another.
+Ask five vendors what an AI chatbot costs and you'll get five wildly different answers — some quote a few dollars a month, others a few thousand. Both can be telling the truth. The sticker price barely matters; what matters is the *pricing model* underneath it, because in our experience the same store traffic can cost several times more under one model than another.
 
 This guide breaks down what AI chatbots actually cost in 2026, the three pricing models you'll run into, the hidden fees nobody advertises, and — most usefully — how to estimate what *your* store will pay before you commit to anyone.
 
-<blockquote class="quick-answer">AI chatbots in 2026 range from free tiers to thousands per month, but the price depends far more on the pricing <em>model</em> than the headline number. The three models are per-seat plus an AI add-on, per-resolution, and per-conversation. Model your real monthly volume against each unit before you commit — the same traffic can cost 3–4× more under one than another.</blockquote>
+<blockquote class="quick-answer">AI chatbots in 2026 range from free tiers to thousands per month, but the price depends far more on the pricing <em>model</em> than the headline number. The three models are per-seat plus an AI add-on, per-resolution, and per-conversation. Model your real monthly volume against each unit before you commit — the same traffic can cost several times more under one than another.</blockquote>
 
 <div class="takeaways">
 <p class="takeaways-title">Quick take</p>
@@ -68,8 +68,8 @@ Almost every AI chatbot bills you one of three ways. Knowing which is the fastes
 
 | Pricing model | What you pay for | Best fit | Cost predictability |
 | --- | --- | --- | --- |
-| **Per seat + AI add-on** (Zendesk / Intercom style) | A monthly fee per human agent, plus an AI module on top | Established support teams with several agents | Medium — seats are fixed, but the AI add-on can scale |
-| **Per resolution** (Gorgias / Fin style) | A fee each time the AI "resolves" an issue, on top of base tiers | Higher-volume teams that live in the inbox | Lower — a "resolution" is vendor-defined and can trigger often |
+| **Per seat + AI add-on** ([Zendesk](https://www.zendesk.com/pricing/) / [Intercom](https://www.intercom.com/pricing) style) | A monthly fee per human agent, plus AI billed on top ([Zendesk pricing](https://www.zendesk.com/pricing/), [Intercom pricing](https://www.intercom.com/pricing)) | Established support teams with several agents | Medium — seats are fixed, but the AI add-on can scale |
+| **Per resolution** ([Gorgias](https://www.gorgias.com/pricing) / [Fin](https://www.intercom.com/pricing) style) | A fee each time the AI "resolves" an issue, on top of base tiers ([Gorgias pricing](https://www.gorgias.com/pricing)) | Higher-volume teams that live in the inbox | Lower — a "resolution" is vendor-defined and can trigger often |
 | **Per conversation** (Loqara style) | A fee per customer thread, whether the AI answers one message or ten | Small–mid stores wanting a bill that tracks real traffic | Higher — one thread is one unit, easy to forecast |
 
 <p style="font-size:0.8125rem;color:#6b7280;margin-top:-0.5rem"><em>Model names reference how each vendor typically bills as of mid-2026. Specifics change — always check each vendor's current pricing page.</em></p>
@@ -82,11 +82,11 @@ This is the distinction that quietly decides your bill.
 
 A **conversation** is one customer thread — one person, one back-and-forth, however many messages it takes. It's easy to count and easy to forecast, because it maps to something you already track: how many customers reached out.
 
-A **resolution** is whatever the vendor says it is. Often it means "the AI handled an issue without a human," but the trigger conditions are set by the vendor, not you. Depending on the definition, a single customer thread can count as more than one resolution, or a resolution can fire on interactions you wouldn't have called a resolved ticket at all. The unit isn't wrong — it's just harder to predict, and it tends to move in the vendor's favour.
+A **resolution** is whatever the vendor says it is. Often it means "the AI handled an issue without a human," but the trigger conditions are set by the vendor, not you. Intercom's Fin, for example, counts a billable "outcome" not only when the customer confirms they're helped but also when they simply don't ask for more help after Fin responds — though it charges at most once per conversation, at $0.99 per outcome ([Intercom pricing](https://www.intercom.com/pricing)). Zendesk bills AI usage on "automated resolutions" — requests the AI resolved without escalating to a human ([Zendesk pricing](https://www.zendesk.com/pricing/)). So a resolution can fire on interactions you wouldn't have called a resolved ticket at all. The unit isn't wrong — it's just harder to predict, and the definition is the vendor's, not yours.
 
 <div class="callout">
 <p class="callout-title">The per-resolution vs per-conversation trap</p>
-<p>"$X per resolution" and "$X per conversation" look comparable on a pricing page — they are not. A conversation is one customer thread you can count in advance. A "resolution" is defined by the vendor and can be triggered generously, so the same traffic can bill 3–4× higher under a per-resolution model than a per-conversation one. Before you sign, ask the vendor to define a resolution in writing, then run your real monthly volume through both units. Our <a href="/blog/how-to-choose-ai-support-agent">buyer's checklist</a> covers the exact questions to ask.</p>
+<p>"$X per resolution" and "$X per conversation" look comparable on a pricing page — they are not. A conversation is one customer thread you can count in advance. A "resolution" is defined by the vendor and can be triggered generously, so the same traffic can bill meaningfully higher under a per-resolution model than a per-conversation one. Before you sign, ask the vendor to define a resolution in writing, then run your real monthly volume through both units. Our <a href="/blog/how-to-choose-ai-support-agent">buyer's checklist</a> covers the exact questions to ask.</p>
 </div>
 
 ## What would 1,000 conversations actually cost? (an illustrative example)
@@ -96,7 +96,7 @@ To make the models concrete, here's a deliberately simplified, *illustrative* ex
 | Model | How it's counted | Directional monthly bill |
 | --- | --- | --- |
 | **Per seat + AI add-on** | 3 agent seats + a flat AI module, whether you get 1,000 threads or 100 | Fixed base, roughly flat |
-| **Per resolution** | Billed on ~700 AI "resolutions" — and more if a thread counts as several | Scales with resolutions; can exceed the others |
+| **Per resolution** | Billed on ~700 AI "resolutions" — more if the vendor's definition triggers generously | Scales with resolutions; can exceed the others |
 | **Per conversation** | Billed on 1,000 threads, one unit each | Scales cleanly and predictably with traffic |
 
 <p style="font-size:0.8125rem;color:#6b7280;margin-top:-0.5rem"><em>This is an illustrative example to show how the same traffic maps to different units — not real vendor pricing. Always model against current published rates.</em></p>
@@ -134,7 +134,7 @@ It ranges from free to several thousand dollars a month, depending on the pricin
 Yes — a real free tier is often enough for a starting store. Loqara includes 100 conversations a month free, which covers the repetitive questions most small stores get and lets you prove the value on real traffic before paying. "Free" plans that lock the actual AI behind an add-on are less useful; check that the free tier includes the thing you're there for.
 
 ### What's the difference between per-resolution and per-conversation pricing?
-A conversation is one customer thread — easy to count and forecast. A resolution is a vendor-defined event that fires when the AI "handles" an issue, and its trigger conditions are set by the vendor. Because a single thread can count as more than one resolution, per-resolution pricing is less predictable and can bill 3–4× higher than per-conversation on identical traffic.
+A conversation is one customer thread — easy to count and forecast. A resolution is a vendor-defined event that fires when the AI "handles" an issue, and its trigger conditions are set by the vendor — Intercom's Fin, for instance, counts an outcome even when the customer simply stops asking for help ([Intercom pricing](https://www.intercom.com/pricing)). Because the trigger is out of your hands, per-resolution pricing is less predictable than per-conversation on identical traffic.
 
 ### Why are some AI chatbots so much more expensive than others?
 Because they charge for different things. Helpdesk suites bill per human seat plus an AI module and often add setup fees, so a multi-agent team pays a large fixed base. A per-conversation tool with a one-line install and no seat minimums bills only on real traffic. Same "AI chatbot" label, very different cost structures underneath.

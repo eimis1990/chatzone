@@ -4,7 +4,7 @@ description: An honest, up-to-date comparison of the best AI chatbots for Shopif
 date: 2026-06-27
 topic: vendor-comparisons
 related: shopify-ai-assistant-guide, best-ai-chatbot-for-ecommerce, how-much-does-ai-chatbot-cost
-updated: 2026-06-30
+updated: 2026-07-21
 author: Eimantas Kudarauskas
 image: /blog/best-ai-chatbot-for-shopify.webp
 ---
@@ -42,7 +42,7 @@ Feature checklists are mostly noise. For a Shopify store specifically, three thi
 
 <div class="stat-grid">
 <div class="stat"><div class="stat-num">24/7</div><div class="stat-label">Coverage with no extra headcount</div></div>
-<div class="stat"><div class="stat-num">~70%</div><div class="stat-label">Of store questions are repetitive (order status, sizing, returns)</div></div>
+<div class="stat"><div class="stat-num">~70%</div><div class="stat-label">Of the store questions we see are repetitive (order status, sizing, returns)</div></div>
 <div class="stat"><div class="stat-num">&lt;2s</div><div class="stat-label">Typical first reply from a good agent</div></div>
 <div class="stat"><div class="stat-num">1 line</div><div class="stat-label">To install on a Shopify theme</div></div>
 </div>
@@ -56,11 +56,11 @@ A side-by-side before the detail. "Shopify actions" means native product search 
 | Tool | Built-in AI | Shopify actions | Voice | Pricing model | Best fit |
 | --- | --- | --- | --- | --- | --- |
 | **Loqara** | Grounded, included | Product search + order lookup | Yes (add-on) | Per conversation, free tier | Small–mid stores wanting AI + optional voice |
-| **Gorgias** | Per-resolution add-on | Order edits + returns | No | Tiered + per AI resolution | Established multichannel support teams |
-| **Tidio** | Lyro (paid add-on) | Order lookup | No | Per seat + AI add-on | Beginners who like building flows |
-| **Intercom (Fin)** | Fin, premium | Via apps | No | Per seat + per resolution | Larger SaaS/support orgs |
-| **Re:amaze** | Basic, add-on | Native order actions | No | Per seat | Mid-size multichannel stores |
-| **Zendesk** | Premium add-on | Via apps | No | Per agent + AI add-on | Enterprises already on Zendesk |
+| **Gorgias** | Billed per resolution | Order edits + returns | Phone add-on (human agents) | Ticket-volume tiers + per AI resolution | Established multichannel support teams |
+| **Tidio** | Lyro (paid add-on) | Order lookup | No | Per conversation + Lyro add-on | Beginners who like building flows |
+| **Intercom (Fin)** | Fin, premium | Via apps | Fin Voice (phone) | Seats + $0.99 per resolution | Larger SaaS/support orgs |
+| **Re:amaze** | Included, capped per plan | Native order actions | No | Per seat | Mid-size multichannel stores |
+| **Zendesk** | Included + paid add-ons | Via apps | No | Per agent + AI usage | Enterprises already on Zendesk |
 
 <p style="font-size:0.8125rem;color:#6b7280;margin-top:-0.5rem"><em>Details are approximate and as of mid-2026. Always check each vendor's current pricing and Shopify App Store listing.</em></p>
 
@@ -70,7 +70,7 @@ A side-by-side before the detail. "Shopify actions" means native product search 
 
 <p class="pills"><span class="pill pill-best">Best for: small &amp; growing stores</span><span class="pill">Free tier: 100 chats/mo</span><span class="pill">Chat + voice</span></p>
 
-Loqara answers from your own content with sources, searches your Shopify catalog, and looks up orders after a quick identity check — all inside one widget you install with a single line. It's the only option here with a built-in real-time **[voice agent](/blog/voice-ai-for-ecommerce-support)**, so customers can literally talk to your store. Pricing is per conversation rather than per "resolution," which keeps costs predictable as you grow, and there's a genuine free tier (100 conversations/month) to test on your real traffic.
+Loqara answers from your own content with sources, searches your Shopify catalog, and looks up orders after a quick identity check — all inside one widget you install with a single line. It's the only option here with a real-time **[voice agent](/blog/voice-ai-for-ecommerce-support)** built into the chat widget itself, so customers can literally talk to your store (Intercom's Fin Voice handles phone calls, at enterprise pricing). Pricing is per conversation rather than per "resolution," which keeps costs predictable as you grow, and there's a genuine free tier (100 conversations/month) to test on your real traffic.
 
 <div class="proscons">
 <div class="pros"><p class="pc-title">Strengths</p><ul><li>Grounded answers with citations — no invented policies</li><li>Live product search + order lookup built in</li><li>Chat <em>and</em> voice in the same widget</li><li>One-line install, live in an afternoon</li><li>Predictable per-conversation pricing, real free tier</li></ul></div>
@@ -81,31 +81,31 @@ Loqara answers from your own content with sources, searches your Shopify catalog
 
 <p class="pills"><span class="pill pill-best">Best for: busy support teams</span><span class="pill">AI billed per resolution</span><span class="pill">Multichannel</span></p>
 
-Gorgias pulls email, chat, social, and SMS into one inbox and can automate returns and order edits deeply. Its AI Agent is strong but billed per resolution, so it shines once you're handling real volume and have a team living in the inbox all day. For a lean store, you may pay for helpdesk machinery you don't yet need.
+Gorgias pulls email, chat, and social into one inbox (SMS and a human-agent phone channel are add-ons), and its AI Agent can genuinely edit Shopify orders — cancel, change addresses, swap items ([AI Agent actions docs](https://docs.gorgias.com/en-US/ai-agent-actions-make-changes-to-shopify-orders-757792)). Plans are tiered by ticket volume rather than per seat, with the AI Agent billed per resolved conversation on top ([Gorgias pricing](https://www.gorgias.com/pricing)), so it shines once you're handling real volume and have a team living in the inbox all day. For a lean store, you may pay for helpdesk machinery you don't yet need.
 
 ### Tidio — friendly, flow-builder first
 
 <p class="pills"><span class="pill pill-best">Best for: DIY beginners</span><span class="pill">Lyro AI = paid add-on</span></p>
 
-Tidio is approachable, with a visual flow builder that's great if you enjoy mapping conversations by hand. Its Lyro AI handles natural questions but is a separate paid add-on, so the "AI chatbot" you're picturing isn't the base product. If you've outgrown manual flows, see our [Tidio alternatives](/blog/tidio-alternatives-for-ecommerce).
+Tidio is approachable, with a visual flow builder that's great if you enjoy mapping conversations by hand. Its Lyro AI handles natural questions but is a separate paid add-on — 50 Lyro conversations free, then from about $32.50/month on top of your plan ([Tidio pricing](https://www.tidio.com/pricing/)) — so the "AI chatbot" you're picturing isn't the base product. If you've outgrown manual flows, see our [Tidio alternatives](/blog/tidio-alternatives-for-ecommerce).
 
 ### Intercom (Fin) — premium and polished
 
 <p class="pills"><span class="pill pill-best">Best for: larger SaaS/support orgs</span><span class="pill">Per resolution</span></p>
 
-Fin is one of the strongest AI agents on the market and Intercom's tooling is excellent — but it's priced and positioned for bigger support organisations, not a five-person store. Costs (seats plus per-resolution AI) add up quickly at scale. More in our [Intercom alternatives](/blog/intercom-alternatives-for-ecommerce).
+Fin is one of the strongest AI agents on the market and Intercom's tooling is excellent — but it's priced and positioned for bigger support organisations, not a five-person store. Costs (seats plus $0.99 per Fin resolution, [Intercom pricing](https://www.intercom.com/pricing)) add up quickly at scale. Fin Voice, its AI phone agent, is sales-quoted separately. More in our [Intercom alternatives](/blog/intercom-alternatives-for-ecommerce).
 
 ### Re:amaze — solid multichannel middle ground
 
 <p class="pills"><span class="pill">Best for: mid-size stores</span><span class="pill">Native Shopify order actions</span></p>
 
-Re:amaze is a capable multichannel helpdesk with native Shopify order actions right in the chat. A reasonable middle option if you want a traditional inbox with lighter AI than Fin or Gorgias.
+Re:amaze is a capable multichannel helpdesk with native Shopify order actions — view, refund, and cancel orders right from a conversation ([Re:amaze Shopify integration](https://www.reamaze.com/integrations/shopify)). Per-seat plans run $29–$69/user/month, with AI resolutions capped per plan and $0.85 each beyond that ([Re:amaze pricing](https://www.reamaze.com/pricing)). A reasonable middle option if you want a traditional inbox with lighter AI than Fin or Gorgias.
 
 ### Zendesk — enterprise suite
 
-<p class="pills"><span class="pill">Best for: enterprises already on Zendesk</span><span class="pill">AI = premium add-on</span></p>
+<p class="pills"><span class="pill">Best for: enterprises already on Zendesk</span><span class="pill">AI usage billed per resolution</span></p>
 
-Powerful and endlessly configurable, but heavy and expensive for most Shopify stores. Worth it mainly if you're already standardised on Zendesk company-wide. See [Zendesk alternatives](/blog/zendesk-alternatives-for-ecommerce) if it feels like overkill.
+Powerful and endlessly configurable, but heavy and expensive for most Shopify stores. Suite plans run $55–$115 per agent/month, AI agent usage is billed per automated resolution, and Copilot is a $50/agent add-on ([Zendesk pricing](https://www.zendesk.com/pricing/)). Worth it mainly if you're already standardised on Zendesk company-wide. See [Zendesk alternatives](/blog/zendesk-alternatives-for-ecommerce) if it feels like overkill.
 
 ## How do I choose the right Shopify chatbot?
 
@@ -142,10 +142,10 @@ Yes. Tools like Loqara connect through Shopify's APIs to search your live catalo
 A grounded chatbot won't. Loqara only answers from the content you give it and cites its sources; when it isn't sure, it captures the lead or hands off to a human instead of guessing. Ungrounded, model-only bots are the ones that invent policies — which is exactly what you want to avoid.
 
 ### How much does an AI chatbot for Shopify cost?
-It depends on the pricing unit. Loqara is priced per conversation with a free tier of 100 conversations a month; helpdesk suites like Gorgias and Intercom bill per "resolution" on top of seat fees. Model your real monthly volume against each unit before committing, because the same traffic can cost very differently.
+It depends on the pricing unit. Loqara is priced per conversation with a free tier of 100 conversations a month; helpdesk suites like Gorgias and Intercom bill per "resolution" on top of their plan fees. Model your real monthly volume against each unit before committing, because the same traffic can cost very differently.
 
 ### Can customers talk to the chatbot by voice?
-With Loqara, yes — it includes an optional real-time [voice agent](/blog/voice-ai-for-ecommerce-support) so customers can speak their question and hear answers, in their own language. Most other tools on this list are text-only today.
+With Loqara, yes — it includes an optional real-time [voice agent](/blog/voice-ai-for-ecommerce-support) so customers can speak their question and hear answers, in English or Lithuanian. Among the others, Intercom offers Fin Voice for phone calls (sales-quoted) and Gorgias sells a phone channel for human agents; the rest are text-only today.
 
 ### How long does it take to set up?
 A grounded agent with a one-line embed can be live the same day: add your content, connect Shopify, customise the widget, and paste one snippet into your theme. Heavier helpdesk suites take longer to configure because there's more machinery to set up.

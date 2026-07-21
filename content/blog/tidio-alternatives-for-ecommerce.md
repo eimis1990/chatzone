@@ -4,14 +4,14 @@ description: Tidio is a great starter chat tool, but its Lyro AI is a paid add-o
 date: 2026-06-27
 topic: vendor-comparisons
 related: tidio-vs-zendesk, gorgias-alternatives-for-ecommerce, how-much-does-ai-chatbot-cost
-updated: 2026-06-30
+updated: 2026-07-21
 author: Eimantas Kudarauskas
 image: /blog/tidio-alternatives-for-ecommerce.webp
 ---
 
 Tidio is one of the most popular live-chat tools for small businesses, and for good reason: its visual flow builder is genuinely pleasant to use, the widget looks clean, and you can be answering customers within an hour. If you want friendly live chat with some drag-and-drop automation, Tidio does the job well and we won't pretend otherwise.
 
-The friction shows up later. The moment you actually want **AI** answering customers — not scripted flows you maintain by hand, but an agent that reads a question and replies from your real policies and catalog — Tidio's economics shift. Its Lyro AI is a separate paid add-on rather than the heart of the product, and the tiers jump steeply as you grow. So stores outgrow Tidio not because it's bad, but because they came for chat and now need *grounded AI included*, not bolted on. Here's an honest look at the alternatives — including where staying on Tidio is the right call.
+The friction shows up later. The moment you actually want **AI** answering customers — not scripted flows you maintain by hand, but an agent that reads a question and replies from your real policies and catalog — Tidio's economics shift. Its Lyro AI is a separate paid add-on rather than the heart of the product — starting at around $32.50/month for 50 AI conversations ([Tidio pricing](https://www.tidio.com/pricing/)) — and the tiers jump steeply as you grow. So stores outgrow Tidio not because it's bad, but because they came for chat and now need *grounded AI included*, not bolted on. Here's an honest look at the alternatives — including where staying on Tidio is the right call.
 
 <blockquote class="quick-answer">For most stores that came to Tidio for chat but now need real AI, the best alternative is <strong>Loqara</strong>: grounded AI chat <em>and</em> voice included from the start, live product search and order lookup, and predictable per-conversation pricing with a real monthly free tier. Stay on Tidio if you mainly want live chat with hand-built flows and don't yet need AI doing the heavy lifting.</blockquote>
 
@@ -42,7 +42,7 @@ Tidio is a legitimately good product for a specific stage. Be honest about where
 - You want AI handling *real* volume, and the Lyro add-on cost climbs as traffic grows.
 - You're maintaining flows by hand and customers keep asking things your flows don't cover.
 - You need the bot to **look up an order** or **search the live catalog**, not just match keywords.
-- The tiers feel like a cliff — a comfortable plan, then a sudden 10x jump with little in between.
+- The tiers feel like a cliff — Tidio's Growth plan starts around $49/month, then the next tier, Plus, starts at $300/month plus usage fees ([Tidio pricing](https://www.tidio.com/pricing/)).
 
 If two or more ring true, you're shopping for an AI-first tool. The honest framing: with Tidio you can end up [paying twice](/blog/how-to-choose-ai-support-agent) — once for the chat platform, again for the AI add-on — to get the feature you came for.
 
@@ -53,12 +53,12 @@ A side-by-side before the detail. "Store actions" means native product search an
 | Tool | Built-in AI | Store actions | Voice | Pricing model | Best fit |
 | --- | --- | --- | --- | --- | --- |
 | **Loqara** | Grounded, included | Product search + order lookup | Yes (add-on) | Per conversation, real free tier | Stores wanting AI (and maybe voice) included |
-| **Tidio** | Lyro (paid add-on) | Order lookup | No | Per seat + AI add-on | Beginners who love flow-building |
-| **Gorgias** | Per-resolution add-on | Order edits + returns | No | Tiered + per AI resolution | Established multichannel teams |
-| **Re:amaze** | Basic, add-on | Native order actions | No | Per seat | Mid-size multichannel stores |
-| **Intercom (Fin)** | Fin, premium | Via apps | No | Per seat + per resolution | Larger SaaS/support orgs |
-| **Crisp** | Add-on | Light, via integrations | No | Flat per-workspace tiers | Tiny teams wanting a cheap inbox |
-| **Zendesk** | Premium add-on | Via apps | No | Per agent + AI add-on | Enterprises already on Zendesk |
+| **Tidio** | Lyro (paid add-on) | Order lookup | No | Per conversation + Lyro add-on | Beginners who love flow-building |
+| **Gorgias** | Billed per resolution | Order edits + returns | Add-on (phone) | Ticket tiers + per AI resolution | Established multichannel teams |
+| **Re:amaze** | Basic, included | Native order actions | No | Per seat | Mid-size multichannel stores |
+| **Intercom (Fin)** | Fin, premium | Via apps | Phone, usage-based | Per seat + per resolution | Larger SaaS/support orgs |
+| **Crisp** | Credit-based | Light, via integrations | No | Flat per-workspace tiers | Tiny teams wanting a cheap inbox |
+| **Zendesk** | Billed per resolution | Via apps | Add-on | Per agent + AI usage | Enterprises already on Zendesk |
 
 <p style="font-size:0.8125rem;color:#6b7280;margin-top:-0.5rem"><em>Details are approximate and as of mid-2026. Always check each vendor's current pricing and app listing.</em></p>
 
@@ -68,7 +68,7 @@ A side-by-side before the detail. "Store actions" means native product search an
 
 <p class="pills"><span class="pill pill-best">Best for: stores that want AI included</span><span class="pill">Free tier: 100 chats/mo</span><span class="pill">Chat + voice</span></p>
 
-Where Tidio treats AI as an add-on, Loqara is AI-first. It answers from your own content with citations — so it never invents a returns window or a shipping date — searches your live catalog, and looks up a customer's order after a quick identity check, all inside one widget you install with a single line. It connects to [WooCommerce](/blog/add-ai-agent-to-woocommerce), [Shopify](/blog/best-ai-chatbot-for-shopify), and Magento (plus a product feed for anything else), and it's the only option here with a built-in real-time [voice agent](/blog/voice-ai-for-ecommerce-support) — in English or Lithuanian. Pricing is per conversation rather than per "resolution," and the free tier of 100 conversations runs *every month*, not as a one-time bucket — so you prove the value on real traffic before paying.
+Where Tidio treats AI as an add-on, Loqara is AI-first. It answers from your own content with citations — so it never invents a returns window or a shipping date — searches your live catalog, and looks up a customer's order after a quick identity check, all inside one widget you install with a single line. It connects to [WooCommerce](/blog/add-ai-agent-to-woocommerce), [Shopify](/blog/best-ai-chatbot-for-shopify), and Magento (plus a product feed for anything else), and it's the only option here with a real-time [voice agent](/blog/voice-ai-for-ecommerce-support) built into the same chat widget — in English or Lithuanian. Pricing is per conversation rather than per "resolution," and the free tier of 100 conversations runs *every month*, not as a one-time bucket — so you prove the value on real traffic before paying.
 
 <div class="proscons">
 <div class="pros"><p class="pc-title">Strengths</p><ul><li>Grounded answers with citations — no invented policies</li><li>Live product search + order lookup built in</li><li>Chat <em>and</em> voice in the same widget</li><li>Connectors for WooCommerce, Shopify, Magento, plus product feed</li><li>One-line embed, live the same day</li><li>Shared-inbox <a href="/blog/ai-chatbot-human-handoff">live human handoff</a>, analytics, and CSAT included</li><li>Predictable per-conversation pricing, real 100/mo free tier</li></ul></div>
@@ -79,31 +79,31 @@ Where Tidio treats AI as an add-on, Loqara is AI-first. It answers from your own
 
 <p class="pills"><span class="pill pill-best">Best for: busy support teams</span><span class="pill">AI billed per resolution</span><span class="pill">Multichannel</span></p>
 
-Gorgias pulls email, chat, social, and SMS into one inbox and automates returns and order edits deeply. Its AI Agent is strong, but it's billed per resolution on top of seat fees, so it shines once you're handling real volume with a team in the inbox all day. For a lean store coming off Tidio, that can be more helpdesk machinery — and cost — than you need yet. If it feels heavy, our [Gorgias alternatives guide](/blog/gorgias-alternatives-for-ecommerce) covers lighter options.
+Gorgias pulls email, chat, social, and SMS into one inbox and automates returns and order edits deeply. Its AI Agent is strong, but it's billed per resolution on top of the plan fee — Gorgias plans scale by ticket volume rather than seats ([Gorgias pricing](https://www.gorgias.com/pricing)) — so it shines once you're handling real volume with a team in the inbox all day. For a lean store coming off Tidio, that can be more helpdesk machinery — and cost — than you need yet. If it feels heavy, our [Gorgias alternatives guide](/blog/gorgias-alternatives-for-ecommerce) covers lighter options.
 
 ### Re:amaze — the classic multichannel middle ground
 
 <p class="pills"><span class="pill pill-best">Best for: mid-size multichannel stores</span><span class="pill">Native order actions</span></p>
 
-Re:amaze is a capable multichannel helpdesk with native order actions right in the chat, typically priced per seat. It's the most natural "shared inbox" upgrade from Tidio if you want a traditional ticketing feel with lighter AI than Fin or Gorgias. The trade-off is the one you're leaving Tidio over: AI is an add-on rather than the core.
+Re:amaze is a capable multichannel helpdesk with native order actions right in the chat, priced per seat at $29–$69/month per team member ([Re:amaze pricing](https://www.reamaze.com/pricing)). It's the most natural "shared inbox" upgrade from Tidio if you want a traditional ticketing feel with lighter AI than Fin or Gorgias. The trade-off: its AI is a lighter layer on a classic helpdesk rather than the core of the product.
 
 ### Intercom (Fin) — premium and polished
 
 <p class="pills"><span class="pill pill-best">Best for: larger SaaS/support orgs</span><span class="pill">Per resolution</span></p>
 
-Fin is one of the strongest AI agents on the market and Intercom's tooling is excellent — but it's priced for bigger support organisations, not a small store stepping up from Tidio. Seats plus per-resolution AI add up quickly at scale. If you like the Intercom feel but not the bill, see our [Intercom alternatives](/blog/intercom-alternatives-for-ecommerce).
+Fin is one of the strongest AI agents on the market and Intercom's tooling is excellent — but it's priced for bigger support organisations, not a small store stepping up from Tidio. Seats plus Fin at $0.99 per resolution ([Intercom pricing](https://www.intercom.com/pricing)) add up quickly at scale. If you like the Intercom feel but not the bill, see our [Intercom alternatives](/blog/intercom-alternatives-for-ecommerce).
 
 ### Crisp — the cheap, simple inbox
 
 <p class="pills"><span class="pill">Best for: tiny teams on a budget</span><span class="pill">Flat per-workspace pricing</span></p>
 
-Crisp is a friendly, low-cost shared inbox with flat per-workspace tiers rather than per-seat fees, which appeals to very small teams. Like Tidio, its strength is the inbox and basic automation; serious AI is an add-on layered on integrations rather than a grounded agent that natively searches your store. A fine lateral move from Tidio if cost is the main driver — less so if AI quality is.
+Crisp is a friendly, low-cost shared inbox with flat per-workspace tiers from $45 to $295/month ([Crisp pricing](https://crisp.chat/en/pricing/)), which appeals to very small teams. Like Tidio, its strength is the inbox and basic automation; AI runs on usage credits bundled into each tier rather than a grounded agent that natively searches your store. A fine lateral move from Tidio if cost is the main driver — less so if AI quality is.
 
 ### Zendesk — the enterprise suite
 
-<p class="pills"><span class="pill">Best for: enterprises already on Zendesk</span><span class="pill">AI = premium add-on</span></p>
+<p class="pills"><span class="pill">Best for: enterprises already on Zendesk</span><span class="pill">AI billed per resolution</span></p>
 
-Powerful and endlessly configurable, but heavy and expensive for most stores leaving a tool like Tidio. Worth it mainly if you're already standardised on Zendesk company-wide. We've compared the two head-to-head in [Tidio vs Zendesk](/blog/tidio-vs-zendesk), and if it feels like overkill, our [Zendesk alternatives](/blog/zendesk-alternatives-for-ecommerce) walks through leaner picks.
+Powerful and endlessly configurable — plans run $19–$115+ per agent/month with AI usage billed per automated resolution ([Zendesk pricing](https://www.zendesk.com/pricing/)) — but heavy and expensive for most stores leaving a tool like Tidio. Worth it mainly if you're already standardised on Zendesk company-wide. We've compared the two head-to-head in [Tidio vs Zendesk](/blog/tidio-vs-zendesk), and if it feels like overkill, our [Zendesk alternatives](/blog/zendesk-alternatives-for-ecommerce) walks through leaner picks.
 
 <div class="callout">
 <p class="callout-title">AI as a paid add-on vs AI included</p>
@@ -127,7 +127,7 @@ Two practical checks before you switch. First, run the numbers on your *actual* 
 
 ### Is Tidio's Lyro AI included for free?
 
-Not in the way most people expect. Tidio's free plan includes only a small, one-time batch of AI conversations rather than a recurring monthly allowance, and after that Lyro is a separate paid add-on layered on top of your plan. If your goal is AI that handles ongoing volume, budget for the add-on or pick a tool where AI is included in the base plan.
+Not in the way most people expect. Tidio's free plan includes only a small, one-time batch of AI conversations — 50 Lyro conversations, non-renewable — rather than a recurring monthly allowance, and after that Lyro is a separate paid add-on starting around $32.50/month ([Tidio pricing](https://www.tidio.com/pricing/)). If your goal is AI that handles ongoing volume, budget for the add-on or pick a tool where AI is included in the base plan.
 
 ### What is the best Tidio alternative for AI support?
 
@@ -143,7 +143,7 @@ It varies by tool, so check each one's app listing. Loqara connects to WooCommer
 
 ### Can a Tidio alternative answer by voice?
 
-With Loqara, yes — it includes an optional real-time voice agent so customers can speak their question and hear an answer, in English or Lithuanian. Tidio and most other tools on this list are text-only today, so if spoken support matters to your store, it's a genuine point of difference.
+With Loqara, yes — it includes an optional real-time voice agent so customers can speak their question and hear an answer, in English or Lithuanian. Tidio's chat is text-only today, and the tools here that do offer voice treat it as a separate, usage-billed phone channel rather than part of the chat widget — so if spoken support matters to your store, it's a genuine point of difference.
 
 ### Should I just stay on Tidio?
 

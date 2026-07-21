@@ -4,7 +4,7 @@ description: The best AI chat (and voice) agents for WooCommerce stores — nati
 date: 2026-06-27
 topic: vendor-comparisons
 related: add-ai-agent-to-woocommerce, best-ai-chatbot-for-ecommerce, how-much-does-ai-chatbot-cost
-updated: 2026-06-30
+updated: 2026-07-21
 author: Eimantas Kudarauskas
 image: /blog/best-ai-chatbot-for-woocommerce.webp
 ---
@@ -20,7 +20,7 @@ Yes, Loqara is on the list — we built it. But we'll say plainly when something
 <ul>
 <li><strong>Best all-rounder for growing Woo stores:</strong> Loqara — grounded AI chat <em>and</em> voice, a live WooCommerce connector for product search + order lookup, a one-line embed, and predictable per-conversation pricing with a real free tier.</li>
 <li><strong>Best for established support teams:</strong> Gorgias — a mature multichannel helpdesk that connects to Woo over the REST API.</li>
-<li><strong>Best for DIY flow-builders:</strong> Tidio — friendly visual builder, though its Lyro AI is a paid add-on.</li>
+<li><strong>Best for DIY flow-builders:</strong> Tidio — friendly visual builder, though Lyro AI conversations are metered by plan.</li>
 <li><strong>Best for big support orgs already standardised on a suite:</strong> Zendesk — powerful, configurable, heavy, and priced for it.</li>
 </ul>
 </div>
@@ -34,7 +34,7 @@ Yes, Loqara is on the list — we built it. But we'll say plainly when something
 
 WooCommerce chatbots split into two camps, and they solve different problems:
 
-- **Native WordPress plugins** (e.g. WoowBot, WPBot) install straight from the plugin directory and read your WooCommerce products and orders directly — no API keys, no external account. They're cheap and simple, but the AI is usually lighter and it runs on your own WordPress hosting, so it shares your server's resources.
+- **Native WordPress plugins** (e.g. [WoowBot](https://wordpress.org/plugins/woowbot-woocommerce-chatbot/), [WPBot](https://wordpress.org/plugins/chatbot/)) install straight from the plugin directory and read your WooCommerce catalog directly — no external account for the basics, though their AI modes require your own OpenAI/Dialogflow keys and order tracking sits in the paid tiers. They're cheap and simple, but they run on your own WordPress hosting, so they share your server's resources.
 - **SaaS tools** (Tidio, Gorgias, Re:amaze, Crisp, Zendesk, and Loqara) connect to your store over the WooCommerce REST API and run off your server. They typically bring stronger grounded AI, a proper [shared inbox for human handoff](/blog/ai-chatbot-human-handoff), and richer analytics — at a monthly subscription.
 
 If you want a basic FAQ widget on a budget, a native plugin can be enough. If you want an agent that actually **resolves** support and nudges sales — reading live products and order status, not just matching keywords — a SaaS tool with grounded AI is usually the better buy. The good news: because WooCommerce is open, both camps can plug into the same store, so you can start light and upgrade without re-platforming.
@@ -53,7 +53,7 @@ Feature checklists are mostly noise. For a self-hosted Woo store specifically, f
 
 <div class="stat-grid">
 <div class="stat"><div class="stat-num">24/7</div><div class="stat-label">Coverage with no extra headcount</div></div>
-<div class="stat"><div class="stat-num">~70%</div><div class="stat-label">Of store questions are repetitive (order status, sizing, returns)</div></div>
+<div class="stat"><div class="stat-num">Most</div><div class="stat-label">Store questions are repetitive (order status, sizing, returns)</div></div>
 <div class="stat"><div class="stat-num">&lt;2s</div><div class="stat-label">Typical first reply from a good agent</div></div>
 <div class="stat"><div class="stat-num">1 line</div><div class="stat-label">To embed on a WordPress theme</div></div>
 </div>
@@ -67,11 +67,11 @@ A side-by-side before the detail. "WooCommerce actions" means native product sea
 | Tool | Built-in AI | WooCommerce actions | Voice | Pricing model | Best fit |
 | --- | --- | --- | --- | --- | --- |
 | **Loqara** | Grounded, included | Product search + order lookup | Yes (add-on) | Per conversation, free tier | Small–mid stores wanting AI + optional voice |
-| **Tidio** | Lyro (paid add-on) | Order lookup | No | Per seat + AI add-on | Beginners who like building flows |
-| **Gorgias** | Per-resolution add-on | Order edits + returns via API | No | Tiered + per AI resolution | Established multichannel support teams |
-| **Re:amaze** | Basic, add-on | Order actions via API | No | Per seat | Mid-size multichannel stores |
-| **Crisp** | Add-on (MagicReply/bots) | Light, via integrations | No | Per seat + AI add-on | Small teams wanting a tidy inbox |
-| **Zendesk** | Premium add-on | Via apps/API | No | Per agent + AI add-on | Enterprises already on Zendesk |
+| **Tidio** | Lyro (metered per plan) | Order status via Lyro actions | No | Per conversation, usage tiers | Beginners who like building flows |
+| **Gorgias** | Per-resolution billing | Order edits via helpdesk | No | Tiered by ticket volume + per AI resolution | Established multichannel support teams |
+| **Re:amaze** | Included, usage caps | Refunds + order status via API | No | Per seat | Mid-size multichannel stores |
+| **Crisp** | AI credits per plan | Light, via integrations | No | Per workspace | Small teams wanting a tidy inbox |
+| **Zendesk** | Included + paid Copilot add-on | Via apps/API | No | Per agent + AI usage | Enterprises already on Zendesk |
 
 <p style="font-size:0.8125rem;color:#6b7280;margin-top:-0.5rem"><em>Details are approximate and as of mid-2026. Always check each vendor's current pricing and WooCommerce/plugin listing.</em></p>
 
@@ -90,37 +90,37 @@ Loqara answers from your own content with citations, searches your live WooComme
 
 ### Tidio — friendly, flow-builder first
 
-<p class="pills"><span class="pill pill-best">Best for: DIY beginners</span><span class="pill">Lyro AI = paid add-on</span></p>
+<p class="pills"><span class="pill pill-best">Best for: DIY beginners</span><span class="pill">Lyro AI metered per plan</span></p>
 
-Tidio is approachable and ships a WordPress plugin, with a visual flow builder that's great if you enjoy mapping conversations by hand. Its Lyro AI handles natural questions but is a separate paid add-on, so the "AI chatbot" you're picturing isn't the base product. A solid starting point for small Woo stores — but if you've outgrown manual flows, see our [Tidio alternatives](/blog/tidio-alternatives-for-ecommerce).
+Tidio is approachable and ships a [WordPress plugin](https://www.tidio.com/integrations/woocommerce/), with a visual flow builder that's great if you enjoy mapping conversations by hand. Its Lyro AI handles natural questions, but Lyro conversations are metered — the free plan includes a one-off 50 and paid tiers start around [$24/month with usage-based limits](https://www.tidio.com/pricing/), so budget for the AI quota, not just the base plan. Order-status answers are possible but need Lyro's [Smart Actions](https://www.tidio.com/ai-agent/lyro-actions/) wired up to your store's API rather than working out of the box. A solid starting point for small Woo stores — but if you've outgrown manual flows, see our [Tidio alternatives](/blog/tidio-alternatives-for-ecommerce).
 
 ### Gorgias — the e-commerce helpdesk veteran
 
 <p class="pills"><span class="pill pill-best">Best for: busy support teams</span><span class="pill">AI billed per resolution</span><span class="pill">Multichannel</span></p>
 
-Gorgias pulls email, chat, social, and SMS into one inbox and connects to WooCommerce over the REST API to automate returns and order edits deeply. Its AI Agent is strong but billed per resolution, so it shines once you're handling real volume with a team living in the inbox all day. For a lean store, you may pay for helpdesk machinery you don't yet need — our [Gorgias alternatives](/blog/gorgias-alternatives-for-ecommerce) covers lighter options.
+Gorgias pulls email, chat, social, and SMS into one inbox and its [WooCommerce integration](https://www.gorgias.com/integrations/woocommerce) shows customer orders next to tickets and lets agents edit them in a click. Its AI Agent is available on every plan but [billed per resolved conversation](https://www.gorgias.com/pricing), with helpdesk tiers scaling by ticket volume rather than per agent — so it shines once you're handling real volume with a team living in the inbox all day. For a lean store, you may pay for helpdesk machinery you don't yet need — our [Gorgias alternatives](/blog/gorgias-alternatives-for-ecommerce) covers lighter options.
 
 ### Re:amaze — solid multichannel middle ground
 
 <p class="pills"><span class="pill">Best for: mid-size stores</span><span class="pill">Order actions via API</span></p>
 
-Re:amaze is a capable multichannel helpdesk that integrates with WooCommerce to surface order data inside the chat. A reasonable middle option if you want a traditional inbox with lighter AI than Gorgias — though its AI features sit behind add-ons too.
+Re:amaze is a capable multichannel helpdesk whose [WooCommerce integration](https://www.reamaze.com/integrations/woocommerce) surfaces order details, purchase history, and payment status inside conversations, and can process refunds and update order status. Pricing is [per team member from $29/month](https://www.reamaze.com/pricing), and its AI Agent is included in paid plans but with small monthly resolution caps (extra resolutions billed each) — a reasonable middle option if you want a traditional inbox with lighter AI than Gorgias.
 
 ### Crisp — a tidy inbox for small teams
 
-<p class="pills"><span class="pill">Best for: small teams</span><span class="pill">AI = add-on</span></p>
+<p class="pills"><span class="pill">Best for: small teams</span><span class="pill">AI credits per plan</span></p>
 
-Crisp is a clean, affordable team inbox with a WordPress plugin and a pleasant chat widget. Its AI (bots and reply assistance) is an add-on rather than a deeply grounded e-commerce agent, and its WooCommerce order actions are lighter than the helpdesks above — fine if you mainly want organised live chat with some automation on top.
+Crisp is a clean team inbox with a [WordPress plugin](https://wordpress.org/plugins/crisp/) and a pleasant chat widget, [priced per workspace rather than per seat](https://crisp.chat/en/pricing/) (free plan, then from $45/month). Its AI runs on plan-included credit allowances rather than being a deeply grounded e-commerce agent, and its WooCommerce order actions are lighter than the helpdesks above — fine if you mainly want organised live chat with some automation on top.
 
 ### Zendesk — the enterprise heavyweight
 
-<p class="pills"><span class="pill">Best for: enterprises already on Zendesk</span><span class="pill">AI = premium add-on</span></p>
+<p class="pills"><span class="pill">Best for: enterprises already on Zendesk</span><span class="pill">AI usage billed separately</span></p>
 
-Powerful and endlessly configurable, Zendesk can absolutely serve a WooCommerce store via its API and apps — but it's heavy and expensive for most. Worth it mainly if you're already standardised on Zendesk company-wide. See [Zendesk alternatives](/blog/zendesk-alternatives-for-ecommerce) if it feels like overkill for a single store.
+Powerful and endlessly configurable, Zendesk can absolutely serve a WooCommerce store via its API and apps — but it's heavy and expensive for most: [Suite plans run $55–115 per agent per month](https://www.zendesk.com/pricing/), AI agents bill separately per automated resolution, and the Copilot assistant is a $50/agent/month add-on. Worth it mainly if you're already standardised on Zendesk company-wide. See [Zendesk alternatives](/blog/zendesk-alternatives-for-ecommerce) if it feels like overkill for a single store.
 
 <div class="callout">
 <p class="callout-title">The pricing trap to watch</p>
-<p>"$X per resolution" and "$X per conversation" are not the same thing, and the gap can be 3–4× on identical traffic. A "resolution" is defined by the vendor and can be triggered generously; a "conversation" is one customer thread. Before you commit, model your real monthly volume against each pricing unit — and remember a native plugin's "free" cost still consumes your WordPress hosting. Our <a href="/blog/how-to-choose-ai-support-agent">buyer's checklist</a> walks through the questions that actually decide it.</p>
+<p>"$X per resolution" and "$X per conversation" are not the same thing, and in our experience the gap on identical traffic can be severalfold. A "resolution" is defined by the vendor and can be triggered generously; a "conversation" is one customer thread. Before you commit, model your real monthly volume against each pricing unit — and remember a native plugin's "free" cost still consumes your WordPress hosting. Our <a href="/blog/how-to-choose-ai-support-agent">buyer's checklist</a> walks through the questions that actually decide it.</p>
 </div>
 
 ## How do I add an AI chatbot to my WooCommerce store?
@@ -146,7 +146,7 @@ A grounded chatbot won't. Loqara only answers from the content you give it and c
 
 ### How much does an AI chatbot for WooCommerce cost?
 
-It depends on the pricing unit. Loqara is priced per conversation with a free tier of 100 conversations a month; helpdesk suites like Gorgias and Zendesk bill per AI "resolution" on top of seat fees; native plugins are cheap upfront but run on your own hosting. Model your real monthly volume against each unit before committing, because the same traffic can cost very differently.
+It depends on the pricing unit. Loqara is priced per conversation with a free tier of 100 conversations a month; helpdesk suites like Gorgias and Zendesk bill per AI "resolution" on top of their base subscriptions (ticket-volume tiers for Gorgias, per-agent seats for Zendesk); native plugins are cheap upfront but run on your own hosting. Model your real monthly volume against each unit before committing, because the same traffic can cost very differently.
 
 ### Should I use a WordPress plugin or a SaaS chatbot?
 

@@ -4,7 +4,7 @@ description: An honest, platform-agnostic comparison of the best AI chatbots for
 date: 2026-06-30
 topic: vendor-comparisons
 related: best-ai-chatbot-for-shopify, best-ai-chatbot-for-woocommerce, how-to-choose-ai-support-agent
-updated: 2026-06-30
+updated: 2026-07-21
 author: Eimantas Kudarauskas
 image: /blog/best-ai-chatbot-for-ecommerce.webp
 ---
@@ -43,7 +43,7 @@ A general-purpose chatbot and an *e-commerce* chatbot are not the same thing. Th
 
 <div class="stat-grid">
 <div class="stat"><div class="stat-num">24/7</div><div class="stat-label">Coverage with no extra headcount</div></div>
-<div class="stat"><div class="stat-num">~70%</div><div class="stat-label">Of store questions are repetitive (orders, sizing, returns)</div></div>
+<div class="stat"><div class="stat-num">Most</div><div class="stat-label">Store questions we see are repetitive (orders, sizing, returns)</div></div>
 <div class="stat"><div class="stat-num">&lt;2s</div><div class="stat-label">Typical first reply from a good agent</div></div>
 <div class="stat"><div class="stat-num">1 line</div><div class="stat-label">To install on most platforms</div></div>
 </div>
@@ -58,10 +58,10 @@ A side-by-side before the detail. "Store actions" means native product search an
 | --- | --- | --- | --- | --- | --- |
 | **Loqara** | Grounded, included | Product search + order lookup | Yes (add-on) | Per conversation, free tier | Small–mid stores wanting AI + optional voice |
 | **Gorgias** | Per-resolution add-on | Order edits + returns | No | Tiered + per AI resolution | Established multichannel teams |
-| **Tidio** | Lyro (paid add-on) | Order lookup | No | Per seat + AI add-on | Beginners who like flows |
+| **Tidio** | Lyro (paid add-on) | Order lookup | No | Per conversation quota + Lyro add-on | Beginners who like flows |
 | **Intercom (Fin)** | Fin, premium | Via apps | No | Per seat + per resolution | Larger SaaS/support orgs |
 | **Re:amaze** | Basic, add-on | Native order actions | No | Per seat | Mid-size multichannel stores |
-| **Zendesk** | Premium add-on | Via apps | No | Per agent + AI add-on | Enterprises already on Zendesk |
+| **Zendesk** | Included, usage-billed | Via apps | No | Per agent + per AI resolution | Enterprises already on Zendesk |
 | **E-comm specialists** | Grounded, included | Catalog + orders | Varies | Per resolution / custom | Stores wanting a done-for-you AI |
 
 <p style="font-size:0.8125rem;color:#6b7280;margin-top:-0.5rem"><em>Details are approximate and as of mid-2026. Always check each vendor's current pricing and listings.</em></p>
@@ -83,31 +83,31 @@ Loqara answers from your own content with sources, searches your catalog, and lo
 
 <p class="pills"><span class="pill pill-best">Best for: busy support teams</span><span class="pill">AI per resolution</span><span class="pill">Multichannel</span></p>
 
-Gorgias pulls email, chat, social, and SMS into one inbox and automates returns and order edits deeply. Its AI Agent is strong but billed per resolution, so it shines at higher volume with a team in the inbox all day. For a lean store, it can be more helpdesk than you need — see [Gorgias alternatives](/blog/gorgias-alternatives-for-ecommerce).
+Gorgias pulls email, chat, social, and SMS into one inbox and automates returns and order edits deeply. Its AI Agent is strong but billed per resolution — "pay only when it resolves a conversation" ([Gorgias pricing](https://www.gorgias.com/pricing)) — so it shines at higher volume with a team in the inbox all day. For a lean store, it can be more helpdesk than you need — see [Gorgias alternatives](/blog/gorgias-alternatives-for-ecommerce).
 
 ### Tidio — friendly, flow-builder first
 
 <p class="pills"><span class="pill pill-best">Best for: DIY beginners</span><span class="pill">Lyro AI = paid add-on</span></p>
 
-Tidio is approachable, with a visual flow builder that's great if you like mapping conversations by hand. Its Lyro AI handles natural questions but is a separate paid add-on, so the "AI chatbot" you picture isn't the base product. Outgrown manual flows? See [Tidio alternatives](/blog/tidio-alternatives-for-ecommerce).
+Tidio is approachable, with a visual flow builder that's great if you like mapping conversations by hand. Its Lyro AI handles natural questions but is a separate paid add-on — ongoing Lyro access starts at $32.50/mo on top of your plan ([Tidio pricing](https://www.tidio.com/pricing/)) — so the "AI chatbot" you picture isn't the base product. Outgrown manual flows? See [Tidio alternatives](/blog/tidio-alternatives-for-ecommerce).
 
 ### Intercom (Fin) — premium and polished
 
 <p class="pills"><span class="pill pill-best">Best for: larger orgs</span><span class="pill">Per resolution</span></p>
 
-Fin is one of the strongest AI agents going, and Intercom's tooling is excellent — but it's priced and positioned for bigger support organisations, not a small store. Seats plus per-resolution AI add up fast at scale. More in [Intercom alternatives](/blog/intercom-alternatives-for-ecommerce).
+Fin is one of the strongest AI agents going, and Intercom's tooling is excellent — but it's priced and positioned for bigger support organisations, not a small store. Seats plus Fin's $0.99-per-resolution AI ([Intercom pricing](https://www.intercom.com/pricing)) add up fast at scale. More in [Intercom alternatives](/blog/intercom-alternatives-for-ecommerce).
 
 ### Re:amaze — solid multichannel middle ground
 
 <p class="pills"><span class="pill">Best for: mid-size stores</span><span class="pill">Native order actions</span></p>
 
-A capable multichannel helpdesk with native order actions in the chat. A reasonable middle option if you want a traditional inbox with lighter AI than Fin or Gorgias.
+A capable multichannel helpdesk with native order actions in the chat, priced per team member from $29/mo with per-resolution AI beyond small included allowances ([Re:amaze pricing](https://www.reamaze.com/pricing)). A reasonable middle option if you want a traditional inbox with lighter AI than Fin or Gorgias.
 
 ### Zendesk — enterprise suite
 
-<p class="pills"><span class="pill">Best for: enterprises on Zendesk</span><span class="pill">AI = premium add-on</span></p>
+<p class="pills"><span class="pill">Best for: enterprises on Zendesk</span><span class="pill">AI billed per resolution</span></p>
 
-Powerful and endlessly configurable, but heavy and costly for most stores, with AI as a premium add-on. Worth it mainly if you're already standardised on Zendesk. See [Zendesk alternatives](/blog/zendesk-alternatives-for-ecommerce) if it feels like overkill.
+Powerful and endlessly configurable, but heavy and costly for most stores: seats start at $19–$115/agent/mo depending on tier, AI agent resolutions beyond your plan's allowance are usage-billed, and the Copilot add-on is another $50/agent/mo ([Zendesk pricing](https://www.zendesk.com/pricing/)). Worth it mainly if you're already standardised on Zendesk. See [Zendesk alternatives](/blog/zendesk-alternatives-for-ecommerce) if it feels like overkill.
 
 ### E-commerce specialists (Octocom, Certainly, and similar)
 
@@ -127,7 +127,7 @@ Match the tool to your stage, not the longest feature list:
 
 <div class="callout">
 <p class="callout-title">The pricing trap to watch</p>
-<p>"$X per resolution" and "$X per conversation" are not the same thing, and the gap can be 3–4× on identical traffic. A "resolution" is defined by the vendor and can be triggered generously; a "conversation" is one customer thread. Model your real monthly volume against each pricing unit before you commit — our <a href="/blog/how-to-choose-ai-support-agent">buyer's checklist</a> walks through the questions that actually decide it.</p>
+<p>"$X per resolution" and "$X per conversation" are not the same thing — in our modeling the gap can be several times over on identical traffic. A "resolution" is defined by the vendor and can be triggered generously; a "conversation" is one customer thread. Model your real monthly volume against each pricing unit before you commit — our <a href="/blog/how-to-choose-ai-support-agent">buyer's checklist</a> walks through the questions that actually decide it.</p>
 </div>
 
 ## What about your specific platform?
@@ -148,13 +148,13 @@ There's no single winner for every store. For most small-to-mid stores wanting g
 An e-commerce chatbot can take real store actions — searching your live catalog and looking up a customer's order — not just answering FAQ-style questions. That's what deflects "where's my order?" tickets and helps shoppers buy, which a generic chatbot can't do.
 
 ### How much does an AI chatbot for e-commerce cost?
-It depends on the pricing unit. Per-conversation tools like Loqara start free (100 conversations/month) and stay predictable; helpdesk suites bill per "resolution" on top of seat fees, which can cost 3–4× more on the same traffic. Always model your real monthly volume against each pricing model.
+It depends on the pricing unit. Per-conversation tools like Loqara start free (100 conversations/month) and stay predictable; helpdesk suites bill per "resolution" on top of seat fees — Intercom's Fin is $0.99 per resolution ([Intercom pricing](https://www.intercom.com/pricing)) — which in our modeling can cost several times more on the same traffic. Always model your real monthly volume against each pricing model.
 
 ### Will an AI chatbot make up answers about my products or policies?
 A grounded chatbot won't — it only answers from the content you give it and cites its sources, then captures the lead or hands off when unsure. Ungrounded, model-only bots are the ones that invent policies, which is exactly what to avoid in retail.
 
 ### Can customers talk to an e-commerce chatbot by voice?
-With Loqara, yes — it includes an optional real-time voice agent so customers can speak their question and hear answers in their own language. Most other tools on this list are text-only today.
+With Loqara, yes — it includes an optional real-time voice agent so customers can speak their question and hear the answer out loud, in the languages Loqara supports. Most other tools on this list are text-only today.
 
 ### Is a free AI chatbot good enough for a small store?
 For a starting store, a real free tier (like Loqara's 100 conversations/month) is often enough to handle your repetitive questions and prove the value before you pay. You upgrade when volume — not features — forces it.
