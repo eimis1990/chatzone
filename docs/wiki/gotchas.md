@@ -210,3 +210,12 @@ and remove body-level widget nodes because they live outside React
 (`components/landing/WidgetEmbed.tsx:79-98`).
 
 _Last verified: 2026-07-21 (6b3b5e6)._
+
+## `pkill -f "next start"` doesn't kill the server
+
+`next start` re-titles its process to `next-server (vX.Y.Z)`, so pkill by the
+start command leaves an orphaned server running — it keeps serving the OLD
+build from memory, and after a rebuild the stale HTML references chunk hashes
+that 500. Symptoms: edits "not appearing", phantom stale pages, corrupted-
+looking chunk maps. Kill with `pkill -f next-server`, then rebuild/restart.
+(Discovered 2026-07-21 while verifying landing changes.)
