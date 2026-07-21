@@ -4,7 +4,7 @@ description: Voice AI can answer customers out loud in real time — but it isn'
 date: 2026-06-24
 topic: voice-ai
 related: ai-voice-agents-explained, add-voice-ai-to-online-store, multilingual-ai-customer-support
-updated: 2026-06-30
+updated: 2026-07-21
 author: Eimantas Kudarauskas
 image: /blog/voice-ai-for-ecommerce-support.webp
 ---
@@ -28,7 +28,7 @@ But "you can add voice" and "you should add voice" are different questions, and 
 
 <figure>
 <img src="/blog/voice-ai-for-ecommerce-support-ill.webp" alt="Illustration of an AI chat bubble emitting sound waves beside a microphone — voice AI for e-commerce support" width="1200" height="800" loading="lazy" />
-<figcaption>Voice lets customers just talk to your store — hands-free, in their own language.</figcaption>
+<figcaption>Voice lets customers just talk to your store — hands-free, in English or Lithuanian.</figcaption>
 </figure>
 
 ## What is voice AI for e-commerce, actually?
@@ -128,7 +128,7 @@ Yes, if it's wired into your store data rather than just reading a help center. 
 
 ### What languages does Loqara's voice support?
 
-Loqara offers per-language voices, with English and Lithuanian supported today. Each language gets its own natural-sounding voice that you preview before enabling, so customers hear answers in the language they're shopping in. The grounding and store actions work the same across languages.
+Loqara offers per-language voices, with English and Lithuanian supported today. Each language gets its own natural-sounding voice that you preview before enabling, so English- and Lithuanian-speaking customers hear answers in their own language. The grounding and store actions work the same across languages.
 
 ### Is voice harder or slower to set up than chat?
 

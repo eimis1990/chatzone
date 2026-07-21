@@ -1,6 +1,6 @@
 ---
 title: Multilingual customer support with AI (without hiring a bigger team)
-description: How an AI chatbot lets an online store answer shoppers in their own language 24/7 — what it does well, where to keep a human, and how to set it up in an afternoon.
+description: How an AI chatbot lets an online store answer shoppers in every language it serves, 24/7 — what it does well, where to keep a human, and how to set it up in an afternoon.
 date: 2026-07-02
 updated: 2026-07-21
 topic: ai-customer-support
@@ -13,12 +13,12 @@ Your product page ships worldwide. Your support does not. The moment a shopper i
 
 Hiring native speakers for every market doesn't scale, and bolting a "Translate" widget onto a help center just turns your English FAQ into slightly-wrong Lithuanian. An AI support agent takes a different route: it understands the question in whatever language it arrives, answers from your real content, and replies in the shopper's language — the same way a good bilingual assistant would.
 
-<blockquote class="quick-answer">An AI support agent answers every shopper in their own language, day and night, <em>without adding headcount per market</em>. It reads intent across languages and replies <strong>from your grounded content</strong> — not a word-for-word translation of a stale FAQ. Keep a human for legal wording, nuanced complaints, and high-value B2B, with a clean handoff. Setup is one embed: pick the languages you serve, done the same day.</blockquote>
+<blockquote class="quick-answer">An AI support agent answers shoppers in every language you serve, day and night, <em>without adding headcount per market</em>. It reads intent across languages and replies <strong>from your grounded content</strong> — not a word-for-word translation of a stale FAQ. Keep a human for legal wording, nuanced complaints, and high-value B2B, with a clean handoff. Setup is one embed: pick the languages you serve, done the same day.</blockquote>
 
 <div class="takeaways">
 <p class="takeaways-title">Quick take</p>
 <ul>
-<li><strong>The win:</strong> answer every shopper in their language, day and night, without adding headcount per market.</li>
+<li><strong>The win:</strong> answer shoppers in each language you serve, day and night, without adding headcount per market.</li>
 <li><strong>How it works:</strong> the AI reads intent across languages and answers <em>from your grounded content</em> — not a word-for-word machine translation of a stale FAQ.</li>
 <li><strong>Where to keep a human:</strong> legal wording, nuanced complaints, and high-value B2B conversations still deserve a person — with a clean handoff.</li>
 <li><strong>Setup:</strong> one embed, pick the languages you serve, done the same day.</li>
@@ -131,4 +131,4 @@ For most stores, yes — but a smaller, calmer team. AI absorbs the repetitive, 
 
 ---
 
-Language shouldn't decide who gets to buy from you. If shoppers are landing on your store from more than one country, answering them in their own language — accurately, instantly, around the clock — is one of the highest-leverage upgrades you can make. [See how Loqara does it on your store.](/#get-started)
+Language shouldn't decide who gets to buy from you. If shoppers are landing on your store from more than one country, answering them in the languages you serve — accurately, instantly, around the clock — is one of the highest-leverage upgrades you can make. [See how Loqara does it on your store.](/#get-started)

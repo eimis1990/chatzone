@@ -4,12 +4,12 @@ description: Where support volume actually comes from in e-commerce — and how 
 date: 2026-06-26
 topic: ai-customer-support
 related: where-is-my-order-ai, automate-returns-with-ai-chatbot, ai-chatbot-human-handoff
-updated: 2026-06-30
+updated: 2026-07-21
 author: Eimantas Kudarauskas
 image: /blog/reduce-support-tickets-with-ai.webp
 ---
 
-Support volume in e-commerce is surprisingly predictable. Look at a month of tickets and you'll find the same handful of questions over and over: where's my order, can I return this, do you ship here, will this fit, is it back in stock. The exact mix varies by store, but the pattern doesn't — a small set of repetitive question types tends to make up the large majority of everything your inbox sees.
+Support volume in e-commerce is surprisingly predictable. Look at a month of tickets and you'll find the same handful of questions over and over: where's my order, can I return this, do you ship here, will this fit, is it back in stock. The exact mix varies by store, but the pattern doesn't — in the stores we see, a small set of repetitive question types makes up the large majority of everything the inbox sees.
 
 That predictability is the opportunity. When questions repeat and the answers don't change, you don't need a human typing the same reply forty times a day. You need a grounded AI agent that answers from your real content and *takes real actions* on your store — and a clean way to hand the rest to a person. This guide breaks down which ticket types AI can deflect, how it actually closes them (grounding plus store actions, not guesswork), and a practical playbook to cut volume without quietly wrecking your customer experience.
 
@@ -51,7 +51,7 @@ The top rows are where the volume is — and where automation is genuinely safe.
 
 ### "Where's my order?" — the single biggest source of volume
 
-Order-status checks ("WISMO") are the most common repetitive ticket in retail, full stop — and the easiest to deflect cleanly *if* the agent can do a real order lookup. An agent connected to your store can verify the customer (email plus order number, or an account check), pull the live status and tracking, and answer in seconds — at 2am, on a Sunday, without a human ever seeing it. This one capability alone removes a large slice of your inbox, which is why it's [the feature that pays for the tool](/blog/best-ai-chatbot-for-shopify).
+Order-status checks ("WISMO") are the most common repetitive ticket in the stores we see — and the easiest to deflect cleanly *if* the agent can do a real order lookup. An agent connected to your store can verify the customer (email plus order number, or an account check), pull the live status and tracking, and answer in seconds — at 2am, on a Sunday, without a human ever seeing it. This one capability alone removes a large slice of your inbox, which is why it's [the feature that pays for the tool](/blog/best-ai-chatbot-for-shopify).
 
 ### Returns, shipping & policy questions
 
@@ -67,7 +67,7 @@ Order-status checks ("WISMO") are the most common repetitive ticket in retail, f
 
 ## How AI closes them (grounding + store actions)
 
-Most chatbots fail at deflection for the same reason: they match keywords to a help article and hope. That works for the easiest 20% and falls apart on everything that needs a *specific* answer about *this* customer's order or *your* exact policy. Real deflection rests on two capabilities working together.
+Most chatbots fail at deflection for the same reason: they match keywords to a help article and hope. That works for the easiest questions and falls apart on everything that needs a *specific* answer about *this* customer's order or *your* exact policy. Real deflection rests on two capabilities working together.
 
 **1. Grounding.** The agent answers *only* from the content you give it — your policies, FAQs, product data — and cites where each answer came from. When it isn't confident, it says "let me get a human" instead of fabricating. This is what makes automation safe: a bot that invents a returns window or a delivery date doesn't deflect a ticket, it spawns an angry follow-up plus a refund request. Grounding with citations is the difference between deflection and damage control.
 
@@ -75,7 +75,7 @@ Most chatbots fail at deflection for the same reason: they match keywords to a h
 
 <div class="stat-grid">
 <div class="stat"><div class="stat-num">24/7</div><div class="stat-label">Coverage with no extra headcount</div></div>
-<div class="stat"><div class="stat-num">WISMO</div><div class="stat-label">Typically the #1 repetitive ticket in retail</div></div>
+<div class="stat"><div class="stat-num">WISMO</div><div class="stat-label">The #1 repetitive ticket in the stores we see</div></div>
 <div class="stat"><div class="stat-num">1 line</div><div class="stat-label">Of code to embed the agent on your store</div></div>
 <div class="stat"><div class="stat-num">100/mo</div><div class="stat-label">Free conversations on Loqara to test on real traffic</div></div>
 </div>

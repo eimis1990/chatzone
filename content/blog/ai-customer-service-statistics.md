@@ -2,6 +2,7 @@
 title: 20 AI customer service statistics for 2026 (with sources)
 description: Twenty AI customer service statistics for 2026 — adoption, cost savings, deflection, and what customers actually think — each with a named source and honest context.
 date: 2026-07-07
+updated: 2026-07-21
 topic: ai-customer-support
 related: reduce-support-tickets-with-ai, chatbot-roi-metrics-that-matter, ai-customer-service-small-stores
 author: Eimantas Kudarauskas
@@ -42,7 +43,7 @@ The cost figures are the most decision-useful, because they're measured, not sur
 
 - **~$1.84 per self-service contact vs ~$13.50 per agent-assisted contact** (Gartner). When AI genuinely resolves an issue, it's on the order of 7× cheaper than routing it to a person.
 - **Only 14% of issues fully resolve through traditional self-service** (Gartner). This is the honest counterweight to the cost stat — old-style FAQ pages and deflection widgets barely work. The savings only materialize when the agent can actually *answer*, which is why [grounding matters more than the model](/blog/ai-chatbot-for-online-store).
-- **AI deployments can reduce interaction volume by 40–50%** (McKinsey). A directional figure across implementations, not a guarantee for your store — but it shows the ceiling is high when repetitive contacts get absorbed.
+- **AI deployments can reduce interaction volume by 40–50%** (McKinsey). This comes from a customer-service transformation McKinsey documented at leading institutions — a demonstrated ceiling, not an average or a guarantee for your store — but it shows how much repetitive contact volume can be absorbed.
 
 <div class="callout">
 <p class="callout-title">How to read a "resolution rate"</p>
@@ -76,7 +77,7 @@ The pattern is consistent: customers will happily use a bot for a fast, correct 
 ## What do the statistics say about e-commerce specifically?
 
 - **AI in retail & e-commerce is growing at ~31.8% CAGR (2024–2032)** (Fortune Business Insights) — one of the faster-growing AI verticals.
-- **56% of retail and e-commerce leaders cite increased efficiency** as AI's top transformation (Deloitte).
+- **56% of CEOs rank increased efficiency and reduced costs as generative AI's top hoped-for benefits** (Fortune/Deloitte CEO survey, via Deloitte's retail research) — an expectation, not a measured outcome.
 - **The broader CX management market is growing ~15.8% CAGR (2024–2030)** (Grand View Research).
 
 For a store, the takeaway isn't the market size — it's that the repetitive question types (order status, returns, shipping, sizing) are exactly what AI handles well. That's the mechanism behind the cost stats above, and it's covered in detail in [5 ways an AI agent cuts your support tickets](/blog/reduce-support-tickets-with-ai).
@@ -127,4 +128,4 @@ The figures here are attributed inline to their named sources — Gartner, McKin
 
 Want to measure your own deflection rate instead of trusting a survey? [Try Loqara free](/#get-started) — a grounded AI agent, one line to install, 100 conversations a month on the house.
 
-*Sources: [Zendesk CX Trends](https://www.zendesk.com/blog/ai/productivity/ai-customer-service-statistics/), Gartner, McKinsey, Boston Consulting Group, Deloitte, Fortune Business Insights, and Grand View Research, as compiled and cited mid-2026. Figures are approximate and change as new research is published.*
+*Sources: [Zendesk CX Trends](https://www.zendesk.com/blog/ai/productivity/ai-customer-service-statistics/) (which also compiles the BCG figure), [Gartner cost-per-contact benchmarks](https://www.gartner.com/en/documents/5164231), [Gartner self-service resolution survey](https://www.gartner.com/en/newsroom/press-releases/2024-08-19-gartner-survey-finds-only-14-percent-of-customer-service-issues-are-fully-resolved-in-self-service), [Gartner generative AI projection](https://www.gartner.com/en/newsroom/press-releases/2023-08-30-gartner-reveals-three-technologies-that-will-transform-customer-service-and-support-by-2028), [McKinsey on AI-enabled customer service](https://www.mckinsey.com/capabilities/operations/our-insights/the-next-frontier-of-customer-engagement-ai-enabled-customer-service), [Deloitte on generative AI in retail](https://www.deloitte.com/us/en/industries/consumer/articles/beyond-chatbots-generative-ai.html), [Fortune Business Insights](https://www.fortunebusinessinsights.com/artificial-intelligence-ai-in-retail-market-101968), and [Grand View Research](https://www.grandviewresearch.com/press-release/global-customer-experience-management-cem-market), as compiled and cited mid-2026. Figures are approximate and change as new research is published.*

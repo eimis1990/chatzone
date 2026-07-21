@@ -29,6 +29,22 @@ const isIsoDay = (v) => {
 }
 const REQUIRED_KEYS = ['title', 'description', 'date', 'author', 'image', 'topic']
 
+// Posts human-reviewed in the 2026-07-21 citation sweep (plan task 5.5) and
+// found deliberately citation-free: first-party how-tos and operational advice
+// with no borrowed statistics. Suppresses only the no-external-citations
+// warning; remove a slug here if the post gains factual/statistical claims.
+const CITATION_EXCEPTIONS = new Set([
+  'add-voice-ai-to-online-store',
+  'ai-chatbot-human-handoff',
+  'ai-product-recommendation-chatbot',
+  'capture-leads-with-conversational-chat',
+  'chatbot-roi-metrics-that-matter',
+  'conversational-ai-vs-chatbot',
+  'reduce-support-tickets-with-ai',
+  'voice-ai-for-ecommerce-support',
+  'where-is-my-order-ai',
+])
+
 function parseFrontmatter(raw) {
   const m = raw.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/)
   if (!m) return { data: {}, body: raw }
@@ -108,7 +124,7 @@ for (const p of posts) {
   if (!/class="quick-answer"|^##\s+Quick answer/im.test(body))
     warnings.push(`${slug}: no quick-answer block — confirm the template exception`)
   const hasExternalLink = /\]\(https?:\/\/(?!www\.loqara\.com)[^)]+\)/.test(body)
-  if (!hasExternalLink)
+  if (!hasExternalLink && !CITATION_EXCEPTIONS.has(slug))
     warnings.push(`${slug}: no external citations — review claims per task 5.5`)
 }
 

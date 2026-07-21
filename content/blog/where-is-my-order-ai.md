@@ -2,6 +2,7 @@
 title: '"Where is my order?" — how AI answers your #1 support question automatically'
 description: The most common message in any e-commerce inbox is "where is my order?" Here's why it dominates, and how a grounded AI chat and voice agent verifies identity and answers it automatically, 24/7.
 date: 2026-07-10
+updated: 2026-07-21
 topic: ai-customer-support
 related: reduce-support-tickets-with-ai, automate-returns-with-ai-chatbot, ai-chatbot-human-handoff
 author: Eimantas Kudarauskas
@@ -31,14 +32,14 @@ That repetition is exactly what a grounded AI agent is built to absorb. The shop
 
 ## Why does "where is my order?" dominate support?
 
-It's not that shipping is unusually unreliable — it's that a package spends most of its life outside the customer's view, and every gap in that view produces a message. Checkout confirms the order but not a delivery date. The shipping notification arrives, then goes quiet. The estimate slips a day and anxiety spikes. Multiply that by every order a store processes and you get a queue where one ticket type crowds out everything else — [order status is consistently the largest single driver of overall support volume](/blog/reduce-support-tickets-with-ai), well ahead of product questions or returns.
+It's not that shipping is unusually unreliable — it's that a package spends most of its life outside the customer's view, and every gap in that view produces a message. Checkout confirms the order but not a delivery date. The shipping notification arrives, then goes quiet. The estimate slips a day and anxiety spikes. Multiply that by every order a store processes and you get a queue where one ticket type crowds out everything else — [order status is consistently the most common repetitive ticket we see](/blog/reduce-support-tickets-with-ai), ahead of product questions or returns.
 
 It's also the least interesting question for a human to answer. There's no judgment call, no de-escalation, no writing — just "open the order, read the status, paste it back." That's precisely the kind of repetitive, structured lookup a grounded AI agent handles well, and precisely the kind of ticket that shouldn't need a person at all.
 
 <div class="stat-grid">
 <div class="stat"><div class="stat-num">24/7</div><div class="stat-label">Coverage, including nights and weekends</div></div>
 <div class="stat"><div class="stat-num">&lt;2s</div><div class="stat-label">Typical reply once identity is verified</div></div>
-<div class="stat"><div class="stat-num">~70%</div><div class="stat-label">Of store tickets are repetitive — order status leads them</div></div>
+<div class="stat"><div class="stat-num">~70%</div><div class="stat-label">Of the store questions we see are repetitive — order status leads them</div></div>
 <div class="stat"><div class="stat-num">2</div><div class="stat-label">Details required before any order info is shared</div></div>
 </div>
 
@@ -73,11 +74,11 @@ This is a deliberate trade-off: the identity check adds one small step for the l
 
 ## Chat or voice — how do customers ask?
 
-Either way, and the identity check applies the same regardless. A shopper can type "where's my order" into the widget or ask out loud through the voice agent, in their own language, and get the same verified, live answer back. Voice matters here specifically because "where is my order" is often asked on the move — from a phone, between other things — where typing is the friction point, not the question itself. On Loqara, chat is included and voice is a paid add-on on top of it, so a store can start with chat and turn on voice once it's clear customers want to talk rather than type.
+Either way, and the identity check applies the same regardless. A shopper can type "where's my order" into the widget or ask out loud through the voice agent, in English or Lithuanian, and get the same verified, live answer back. Voice matters here specifically because "where is my order" is often asked on the move — from a phone, between other things — where typing is the friction point, not the question itself. On Loqara, chat is included and voice is a paid add-on on top of it, so a store can start with chat and turn on voice once it's clear customers want to talk rather than type.
 
 ## What can't the AI do with orders?
 
-It answers status. It does not edit an order, cancel it, process a refund, or take a payment — and it isn't trying to. Those actions carry real consequences if gotten wrong, and they're exactly the cases where [a clean handoff to a human matters more than a fast answer](/blog/ai-chatbot-human-handoff). When a shopper asks to cancel or change something, the honest move is for the agent to say so and route the conversation to a person, rather than stretching into territory it wasn't built for. That boundary is what keeps the automated answer trustworthy for the 70% of questions it's genuinely equipped to handle.
+It answers status. It does not edit an order, cancel it, process a refund, or take a payment — and it isn't trying to. Those actions carry real consequences if gotten wrong, and they're exactly the cases where [a clean handoff to a human matters more than a fast answer](/blog/ai-chatbot-human-handoff). When a shopper asks to cancel or change something, the honest move is for the agent to say so and route the conversation to a person, rather than stretching into territory it wasn't built for. That boundary is what keeps the automated answer trustworthy for the repetitive majority of questions it's genuinely equipped to handle.
 
 ## How do I set up automatic order tracking?
 
@@ -106,10 +107,10 @@ Not today. Live order lookup currently runs through WooCommerce and Magento stor
 It says so directly instead of guessing. If the order number and email don't match a real order, or the shopper can't provide both, the agent explains what's missing and offers to bring in a human — the same way a careful support agent would rather ask again than answer with a wrong order.
 
 ### Can customers ask about their order by voice instead of typing?
-Yes. The same identity check and live lookup apply whether the question arrives as typed chat or spoken through the voice agent, in the customer's own language. Voice is a paid add-on on top of the base chat plan, so a store can turn it on once it's clear customers want to talk rather than type.
+Yes. The same identity check and live lookup apply whether the question arrives as typed chat or spoken through the voice agent, in English or Lithuanian. Voice is a paid add-on on top of the base chat plan, so a store can turn it on once it's clear customers want to talk rather than type.
 
 ### How much support volume does automating order status actually remove?
-It varies by store, but order status is typically the single largest category of repetitive tickets — often cited around 70% of support volume when combined with a handful of other recurring questions. Automating just that one lookup, live and 24/7, tends to be the highest-leverage change a store can make before touching anything else.
+It varies by store, but order status is typically the single largest category of repetitive tickets — across the stores we see, roughly 70% of questions are repetitive, and order status leads them. Automating just that one lookup, live and 24/7, tends to be the highest-leverage change a store can make before touching anything else.
 
 ### How long does it take to turn on automatic order tracking?
 Once your store is connected (WooCommerce or Magento) and the widget is embedded — a one-line snippet — order-status answers work immediately, with no separate tracking page to build or maintain. Most stores are live the same day they set it up.

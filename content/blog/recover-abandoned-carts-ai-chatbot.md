@@ -2,13 +2,14 @@
 title: How an AI chatbot recovers abandoned carts (and lifts conversion)
 description: Most carts are abandoned over an unanswered question, not price. Here's how a grounded AI chatbot rescues the sale at the moment of hesitation — and how to measure it.
 date: 2026-07-02
+updated: 2026-07-21
 topic: ecommerce-ai
 author: Eimantas Kudarauskas
 image: /blog/recover-abandoned-carts-ai-chatbot.webp
 related: capture-leads-with-conversational-chat, chatbot-roi-metrics-that-matter, reduce-support-tickets-with-ai
 ---
 
-Roughly seven in ten carts are abandoned. Most stores respond with an email an hour later — "you left something behind!" — which recovers a slice, but only after the moment of interest has cooled. The bigger opportunity is earlier: the shopper is *still on the page*, hovering, one unanswered question away from buying or bouncing. That's where an AI chatbot earns its keep.
+Roughly seven in ten carts are abandoned — the [Baymard Institute](https://baymard.com/lists/cart-abandonment-rate) puts the average at 70.22% across 50 studies. Most stores respond with an email an hour later — "you left something behind!" — which recovers a slice, but only after the moment of interest has cooled. The bigger opportunity is earlier: the shopper is *still on the page*, hovering, one unanswered question away from buying or bouncing. That's where an AI chatbot earns its keep.
 
 Cart recovery emails chase people who already left. A support agent that answers instantly keeps them from leaving in the first place. Used together, they compound — but the real-time layer is the one most stores are missing.
 
@@ -43,8 +44,8 @@ Some abandonment is unavoidable — people browse, compare, and save for later. 
 | Just needs a nudge | "Is there a deal?" | Shares a configured coupon when it's appropriate |
 
 <div class="stat-grid">
-<div class="stat"><div class="stat-num">~70%</div><div class="stat-label">Average cart abandonment rate across e-commerce</div></div>
-<div class="stat"><div class="stat-num">#1</div><div class="stat-label">Cited reason is extra costs/shipping surprises at checkout</div></div>
+<div class="stat"><div class="stat-num">~70%</div><div class="stat-label">Average cart abandonment rate across e-commerce (<a href="https://baymard.com/lists/cart-abandonment-rate" rel="noopener">Baymard Institute</a>, 70.22% avg of 50 studies)</div></div>
+<div class="stat"><div class="stat-num">#1</div><div class="stat-label">Cited reason is extra costs at checkout — 39% of abandoners, per Baymard</div></div>
 <div class="stat"><div class="stat-num">&lt;2s</div><div class="stat-label">First reply from a good agent — before the tab closes</div></div>
 <div class="stat"><div class="stat-num">24/7</div><div class="stat-label">Including the evening/weekend hours most carts fill</div></div>
 </div>
