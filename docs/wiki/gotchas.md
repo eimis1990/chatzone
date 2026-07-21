@@ -198,4 +198,15 @@ hydration mismatch. Render the same nodes and disable animation with a CSS media
 query (`components/landing/Shimmer.tsx:1-15`). Apply this pattern to color scheme,
 viewport, storage, and any browser-only state that changes element structure.
 
-_Last verified: 2026-07-21 (1c43ce2)._
+## Deferred third-party launchers must replay the first interaction
+
+Simply delaying `widget.js` removes the real launcher, so an early visitor click
+either has no target or only starts loading and then requires a second click.
+`WidgetEmbed` renders a lightweight proxy for deferred policies, records whether
+that click should open chat, and clicks the real launcher after the loader fires
+(`components/landing/WidgetEmbed.tsx:43-74`, `104-113`). Keep the default policy
+immediate for owner presentations, cancel both delay and idle callbacks on unmount,
+and remove body-level widget nodes because they live outside React
+(`components/landing/WidgetEmbed.tsx:79-98`).
+
+_Last verified: 2026-07-21 (6b3b5e6)._

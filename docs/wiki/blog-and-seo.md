@@ -128,4 +128,14 @@ browser idle; outer wings use CSS chat skeletons. Click, wrap, and swipe behavio
 are covered in Playwright. Median total transfer is now 1.28 MB and image transfer
 0.30 MB, with Performance 79, 5.83-second lab LCP, and zero CLS.
 
-_Last verified: 2026-07-21 (4d3d71f)._
+Phase 2 completed in `6b3b5e6`: the remaining landing illustrations are responsive,
+global font preloads are limited to Geist Sans and the hero's Plus Jakarta Sans,
+the nav downloads one logo state, and the live landing widget waits six seconds
+plus idle or loads/opens on the first proxy click. `/present` retains immediate
+widget loading. The final three-run median is Performance 85, 4.30-second simulated
+LCP, 0 CLS, 0.94 MB, and 38 requests, versus Performance 61, 11.26 seconds, and
+10.78 MB in the production baseline. The LCP text's observed local render delay is
+~122 ms; the remaining simulated shortfall is a ~35 KB render-blocking CSS audit
+tracked as Task 6.5.
+
+_Last verified: 2026-07-21 (6b3b5e6)._
