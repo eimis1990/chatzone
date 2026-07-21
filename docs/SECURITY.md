@@ -44,6 +44,14 @@ process, separate from these controls.)
   conversations + messages older than the window.
 - **Data rights**: owners can export (`/api/account/export`) and erase
   (Settings → Delete) their organization's data on demand.
+- **Response headers** (`next.config.ts`, added 2026-07-21): `X-Content-Type-Options:
+  nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, a minimal
+  `Permissions-Policy` (camera/geolocation/payment denied; microphone `self` for
+  the voice agent), and `x-powered-by` disabled. A full CSP ships as
+  **Report-Only**; promote to enforcing only after the report-only period shows
+  no violations across product flows (see the comment in `next.config.ts`).
+  Deliberately NO `X-Frame-Options`/`frame-ancestors`: `/embed` must remain
+  embeddable in any customer site.
 
 ## SOC 2 readiness checklist
 

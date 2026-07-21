@@ -3,6 +3,7 @@
 > Loqara is an AI chat & voice agent for modern e-commerce stores. It answers customer questions from your own knowledge base, searches your product catalog, looks up orders, captures leads, and hands conversations off to a human — all embedded with one line of code. Supports English and Lithuanian.
 
 ## What it does
+
 - AI chat agent grounded in your own content (no made-up answers)
 - Real-time voice agent (optional add-on)
 - Product search and order-status lookup against your store
@@ -12,6 +13,7 @@
 - One-line `<script>` embed — live in minutes, no engineers
 
 ## Pricing (EUR per month, billed monthly or annually)
+
 - Free — €0 — 100 conversations/mo, 1 bot, single language (your choice), live handoff, basic analytics
 - Starter — €149 — 1,500 conversations/mo, 2 bots, all languages, lead capture, product search & order lookup, remove Loqara badge
 - Growth — €249 — 4,000 conversations/mo, up to 5 bots, priority support, advanced analytics
@@ -20,62 +22,89 @@
 - No setup fee. Upgrade, downgrade, or cancel anytime.
 
 ## Optional done-for-you setup (one-time, self-serve is always free)
+
 - Essential — €749 — knowledge training on your documents, agent persona & answers configured, installed on your website (~1 week)
 - E-commerce — €995 — everything in Essential plus product catalog connection, order tracking, stock & availability answers (~2 weeks)
 
 ## Channels
+
 - Website chat widget today
 - WhatsApp, Instagram, and Messenger — coming soon
 
 ## Key pages
-- Overview: https://www.loqara.com/
-- Pricing: https://www.loqara.com/#pricing
-- FAQ: https://www.loqara.com/#faq
-- Blog (guides): https://www.loqara.com/blog
+
+- [Overview](https://www.loqara.com/): what Loqara does, pricing, and FAQ
+- [About Loqara](https://www.loqara.com/about): who builds it and how to reach us
+- [Editorial policy](https://www.loqara.com/editorial-policy): how guides are researched, reviewed, and corrected (including AI-assistance disclosure)
+- [Review methodology](https://www.loqara.com/review-methodology): how vendor comparisons are evaluated and our commercial relationship to the market
+- [Blog](https://www.loqara.com/blog): practical guides on AI chat & voice support for e-commerce
+- [Privacy & data handling](https://www.loqara.com/privacy): what we process, retention, subprocessors
+- [Terms of service](https://www.loqara.com/terms): the terms that govern use of Loqara
+
+## Topic hubs
+
+- [AI customer support](https://www.loqara.com/blog/topics/ai-customer-support): cutting tickets, handoff, hallucination control, GDPR, testing
+- [AI for e-commerce](https://www.loqara.com/blog/topics/ecommerce-ai): personalization, recommendations, forecasting, fraud, cart recovery
+- [Platform integrations](https://www.loqara.com/blog/topics/platform-integrations): setup guides for WooCommerce, Shopify, Magento, and any storefront
+- [Voice AI](https://www.loqara.com/blog/topics/voice-ai): when talking beats typing and how to add voice support
+- [AI search visibility](https://www.loqara.com/blog/topics/ai-search-visibility): GEO, Google AI Mode, ChatGPT shopping, agentic commerce
+- [Vendor comparisons](https://www.loqara.com/blog/topics/vendor-comparisons): honest comparisons, alternatives, and pricing breakdowns
 
 ## Popular guides
-- AI for e-commerce — 12 practical store uses: https://www.loqara.com/blog/ai-for-ecommerce
-- Shopify AI assistant guide — Sidekick, Magic, and storefront helpers: https://www.loqara.com/blog/shopify-ai-assistant-guide
-- AI product descriptions for e-commerce: https://www.loqara.com/blog/ai-product-descriptions-ecommerce
-- AI personalization in e-commerce: https://www.loqara.com/blog/ai-personalization-ecommerce
-- AI inventory forecasting for e-commerce: https://www.loqara.com/blog/ai-inventory-forecasting-ecommerce
-- AI fraud detection for e-commerce: https://www.loqara.com/blog/ai-fraud-detection-ecommerce
-- Generative engine optimization for e-commerce: https://www.loqara.com/blog/generative-engine-optimization-ecommerce
-- IndexNow for e-commerce: https://www.loqara.com/blog/indexnow-ecommerce-guide
-- How to measure AI search visibility: https://www.loqara.com/blog/measure-ai-search-visibility-ecommerce
-- Building an AI-ready e-commerce knowledge base: https://www.loqara.com/blog/ecommerce-ai-chatbot-knowledge-base
-- Preventing AI chatbot hallucinations in customer service: https://www.loqara.com/blog/prevent-ai-chatbot-hallucinations
-- How to test an e-commerce AI chatbot before launch: https://www.loqara.com/blog/test-ai-chatbot-before-launch
-- Google AI Mode shopping for e-commerce: https://www.loqara.com/blog/google-ai-mode-shopping-ecommerce
-- Semantic search for e-commerce: https://www.loqara.com/blog/semantic-search-ecommerce
-- Conversational commerce practical guide: https://www.loqara.com/blog/conversational-commerce-guide
-- How to add an AI chatbot to Magento: https://www.loqara.com/blog/ai-chatbot-for-magento
-- Automating e-commerce returns with AI: https://www.loqara.com/blog/automate-returns-with-ai-chatbot
-- Agentic commerce explained for online stores: https://www.loqara.com/blog/agentic-commerce-ecommerce
-- How to get products recommended by ChatGPT shopping: https://www.loqara.com/blog/how-to-get-products-recommended-by-chatgpt
-- AI product recommendation chatbots: https://www.loqara.com/blog/ai-product-recommendation-chatbot
-- Best AI chatbot for Shopify: https://www.loqara.com/blog/best-ai-chatbot-for-shopify
-- Best AI chatbot for WooCommerce: https://www.loqara.com/blog/best-ai-chatbot-for-woocommerce
-- Best AI chatbot for e-commerce: https://www.loqara.com/blog/best-ai-chatbot-for-ecommerce
-- How to choose an AI support agent: https://www.loqara.com/blog/how-to-choose-ai-support-agent
-- AI chatbot ↔ human handoff explained: https://www.loqara.com/blog/ai-chatbot-human-handoff
-- Intercom alternatives for e-commerce: https://www.loqara.com/blog/intercom-alternatives-for-ecommerce
-- Gorgias alternatives for e-commerce: https://www.loqara.com/blog/gorgias-alternatives-for-ecommerce
-- AI chatbots & GDPR: https://www.loqara.com/blog/ai-chatbot-gdpr-data-privacy
-- The 10 best chatbot platforms in 2026: https://www.loqara.com/blog/best-chatbot-platforms
-- Conversational AI vs chatbots: https://www.loqara.com/blog/conversational-ai-vs-chatbot
-- AI voice agents explained: https://www.loqara.com/blog/ai-voice-agents-explained
-- Zendesk AI review (2026): https://www.loqara.com/blog/zendesk-ai-review
-- Tidio vs Zendesk: https://www.loqara.com/blog/tidio-vs-zendesk
-- How much does an AI chatbot cost (2026): https://www.loqara.com/blog/how-much-does-ai-chatbot-cost
-- Can you use ChatGPT for customer service: https://www.loqara.com/blog/chatgpt-for-customer-service
-- AI customer service statistics (2026): https://www.loqara.com/blog/ai-customer-service-statistics
-- Black Friday prep with an AI agent: https://www.loqara.com/blog/black-friday-ai-agent
-- How to add a voice AI agent to your store: https://www.loqara.com/blog/add-voice-ai-to-online-store
-- "Where is my order?" — automating your #1 support question: https://www.loqara.com/blog/where-is-my-order-ai
-- AI customer service for small online stores: https://www.loqara.com/blog/ai-customer-service-small-stores
-- Privacy & data handling: https://www.loqara.com/privacy
-- Terms of service: https://www.loqara.com/terms
+
+- [AI for e-commerce — 12 practical store uses](https://www.loqara.com/blog/ai-for-ecommerce): the cluster pillar on where AI actually earns its keep
+- [Best AI chatbots for e-commerce (2026)](https://www.loqara.com/blog/best-ai-chatbot-for-ecommerce): the flagship comparison
+- [Best AI chatbot for Shopify](https://www.loqara.com/blog/best-ai-chatbot-for-shopify): Shopify-specific comparison
+- [Best AI chatbot for WooCommerce](https://www.loqara.com/blog/best-ai-chatbot-for-woocommerce): WooCommerce-specific comparison
+- [The 10 best chatbot platforms in 2026](https://www.loqara.com/blog/best-chatbot-platforms): broad roundup with real screenshots
+- [How much does an AI chatbot cost (2026)](https://www.loqara.com/blog/how-much-does-ai-chatbot-cost): pricing models decoded
+- [How to choose an AI support agent](https://www.loqara.com/blog/how-to-choose-ai-support-agent): buyer's checklist
+- [How to add an AI chatbot to your online store](https://www.loqara.com/blog/ai-chatbot-for-online-store): the one-line setup explainer
+- [Add an AI agent to WooCommerce](https://www.loqara.com/blog/add-ai-agent-to-woocommerce): step-by-step WooCommerce setup
+- [How to add an AI chatbot to Magento](https://www.loqara.com/blog/ai-chatbot-for-magento): Magento/Adobe Commerce setup
+- [Shopify AI assistant guide](https://www.loqara.com/blog/shopify-ai-assistant-guide): Sidekick, Magic, and storefront helpers
+- [5 ways an AI agent cuts support tickets](https://www.loqara.com/blog/reduce-support-tickets-with-ai): the support-ops pillar
+- ["Where is my order?" — automating the #1 support question](https://www.loqara.com/blog/where-is-my-order-ai): WISMO deflection
+- [Human handoff done right](https://www.loqara.com/blog/ai-chatbot-human-handoff): when AI should step aside
+- [Preventing AI chatbot hallucinations](https://www.loqara.com/blog/prevent-ai-chatbot-hallucinations): grounding and guardrails
+- [AI chatbots & GDPR](https://www.loqara.com/blog/ai-chatbot-gdpr-data-privacy): compliance for store owners, cited to the regulation
+- [How to test an AI chatbot before launch](https://www.loqara.com/blog/test-ai-chatbot-before-launch): e-commerce QA checklist
+- [Building an AI-ready e-commerce knowledge base](https://www.loqara.com/blog/ecommerce-ai-chatbot-knowledge-base): content that makes agents accurate
+- [AI voice agents explained](https://www.loqara.com/blog/ai-voice-agents-explained): the voice pillar
+- [How to add a voice AI agent to your store](https://www.loqara.com/blog/add-voice-ai-to-online-store): voice setup guide
+- [Voice AI for e-commerce support](https://www.loqara.com/blog/voice-ai-for-ecommerce-support): when voice is worth it
+- [Generative engine optimization for e-commerce](https://www.loqara.com/blog/generative-engine-optimization-ecommerce): the GEO pillar
+- [Google AI Mode shopping](https://www.loqara.com/blog/google-ai-mode-shopping-ecommerce): preparing product visibility
+- [How to get products recommended by ChatGPT shopping](https://www.loqara.com/blog/how-to-get-products-recommended-by-chatgpt): AI-shopping visibility
+- [How to measure AI search visibility](https://www.loqara.com/blog/measure-ai-search-visibility-ecommerce): tracking citations and mentions
+- [Agentic commerce explained](https://www.loqara.com/blog/agentic-commerce-ecommerce): what AI buying agents mean for stores
+- [IndexNow for e-commerce](https://www.loqara.com/blog/indexnow-ecommerce-guide): faster recrawls, practical setup
+- [Semantic search for e-commerce](https://www.loqara.com/blog/semantic-search-ecommerce): how modern product search works
+- [AI product recommendation chatbots](https://www.loqara.com/blog/ai-product-recommendation-chatbot): conversational recommendations
+- [AI personalization in e-commerce](https://www.loqara.com/blog/ai-personalization-ecommerce): practical rollout without creepiness
+- [AI inventory forecasting](https://www.loqara.com/blog/ai-inventory-forecasting-ecommerce): fewer stockouts without guessing
+- [AI fraud detection for e-commerce](https://www.loqara.com/blog/ai-fraud-detection-ecommerce): how it works and what it misses
+- [Recovering abandoned carts with an AI chatbot](https://www.loqara.com/blog/recover-abandoned-carts-ai-chatbot): cited Baymard numbers, honest tactics
+- [Conversational commerce playbook](https://www.loqara.com/blog/conversational-commerce-guide): examples and rollout
+- [Automating e-commerce returns with AI](https://www.loqara.com/blog/automate-returns-with-ai-chatbot): returns deflection
+- [Capture more leads with conversational chat](https://www.loqara.com/blog/capture-leads-with-conversational-chat): chat vs static forms
+- [Chatbot ROI: the 4 metrics that matter](https://www.loqara.com/blog/chatbot-roi-metrics-that-matter): measuring honestly
+- [AI customer service statistics (2026)](https://www.loqara.com/blog/ai-customer-service-statistics): 20 stats, each cited to its primary source
+- [Multilingual customer support with AI](https://www.loqara.com/blog/multilingual-ai-customer-support): serving more languages without hiring
+- [Conversational AI vs chatbots](https://www.loqara.com/blog/conversational-ai-vs-chatbot): the difference, explained simply
+- [Can you use ChatGPT for customer service?](https://www.loqara.com/blog/chatgpt-for-customer-service): honest limits of raw ChatGPT
+- [Zendesk AI review (2026)](https://www.loqara.com/blog/zendesk-ai-review): features, pricing, when it's overkill
+- [Tidio vs Zendesk](https://www.loqara.com/blog/tidio-vs-zendesk): head-to-head for stores
+- [Zendesk alternatives for e-commerce](https://www.loqara.com/blog/zendesk-alternatives-for-ecommerce): leaner options compared
+- [Intercom alternatives for e-commerce](https://www.loqara.com/blog/intercom-alternatives-for-ecommerce): per-resolution pricing decoded
+- [Gorgias alternatives for small stores](https://www.loqara.com/blog/gorgias-alternatives-for-ecommerce): when the helpdesk veteran is too much
+- [Tidio alternatives](https://www.loqara.com/blog/tidio-alternatives-for-ecommerce): cheaper AI chat for e-commerce
+- [New AI chatbots to watch in 2026](https://www.loqara.com/blog/new-ai-chatbots-2026): Nvidia, voice agents, vertical AI
+- [Black Friday prep with an AI agent](https://www.loqara.com/blog/black-friday-ai-agent): BFCM readiness checklist
+- [AI customer service for small stores](https://www.loqara.com/blog/ai-customer-service-small-stores): what you actually need
+- [AI product descriptions for e-commerce](https://www.loqara.com/blog/ai-product-descriptions-ecommerce): a safe SEO workflow
 
 ## Contact
+
 - Email: hello@loqara.com
+- Author: [Eimantas Kudarauskas](https://www.loqara.com/authors/eimantas-kudarauskas), founder

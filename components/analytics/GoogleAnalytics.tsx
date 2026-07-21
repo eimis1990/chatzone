@@ -5,7 +5,10 @@ import { usePathname } from 'next/navigation'
 
 /**
  * Google Analytics 4 via the gtag.js snippet, loaded with `next/script`
- * (`afterInteractive`) so it never blocks first paint.
+ * (`lazyOnload`) so it waits for window load and never competes with the hero
+ * for bandwidth (SEO/GEO plan task 6.1 — owner chose delayed over consent-gated;
+ * revisit if the consent posture changes). GA4's enhanced measurement still
+ * records SPA route changes once loaded.
  *
  * Gated on `NEXT_PUBLIC_GA_ID` — when the measurement ID is absent (local dev,
  * previews where you haven't set it), this renders nothing, so analytics stay
@@ -29,9 +32,9 @@ export function GoogleAnalytics() {
     <>
       <Script
         src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
-        strategy="afterInteractive"
+        strategy="lazyOnload"
       />
-      <Script id="ga4-init" strategy="afterInteractive">
+      <Script id="ga4-init" strategy="lazyOnload">
         {`
           window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}

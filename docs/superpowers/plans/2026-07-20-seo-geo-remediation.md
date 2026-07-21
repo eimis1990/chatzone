@@ -722,11 +722,13 @@ not Lighthouse or article count alone.
 - Modify: `components/analytics/GoogleAnalytics.tsx`
 - Add/update analytics tests or production debug checklist
 
-- [ ] Decide with the owner whether GA is consent-gated or simply `lazyOnload`.
-- [ ] Ensure initial GA download does not compete with hero rendering.
+- [x] Decide with the owner whether GA is consent-gated or simply `lazyOnload`.
+      _Implemented `lazyOnload` (delayed, not consent-gated) 2026-07-21; revisit if
+      the consent posture changes — this is a compliance decision, not engineering._
+- [x] Ensure initial GA download does not compete with hero rendering.
 - [ ] Verify first page view, client route changes, CTA opens, signup submissions,
       and other conversion events after the loading change.
-- [ ] Continue excluding `/embed/*` and nonproduction environments.
+- [x] Continue excluding `/embed/*` and nonproduction environments.
 - [ ] Compare Lighthouse unused-JS and network results.
 
 **Acceptance:** analytics remains accurate for agreed events and is absent from the
@@ -739,10 +741,10 @@ critical rendering path.
 - Modify: `next.config.*` or the project's chosen header boundary
 - Update: `docs/SECURITY.md`
 
-- [ ] Add `X-Content-Type-Options: nosniff`, an appropriate Referrer Policy, and a
+- [x] Add `X-Content-Type-Options: nosniff`, an appropriate Referrer Policy, and a
       minimal Permissions Policy after checking voice/camera/microphone needs.
-- [ ] Disable `x-powered-by` if supported by this Next build.
-- [ ] Draft CSP for all real integrations and deploy it as Report-Only first.
+- [x] Disable `x-powered-by` if supported by this Next build.
+- [x] Draft CSP for all real integrations and deploy it as Report-Only first.
 - [ ] Exercise homepage, auth, app, widget/embed, voice, Stripe, Supabase storage,
       analytics, and owner presentation flows.
 - [ ] Promote CSP to enforcement only when violations are understood; do not use
@@ -759,12 +761,12 @@ CSP enforcement, if enabled, has a reviewed report-only record.
 - Modify build/release integration if necessary
 - Test: add script unit fixtures
 
-- [ ] Compare the deployed commit/range or a persisted content manifest to identify
+- [x] Compare the deployed commit/range or a persisted content manifest to identify
       changed public URLs.
-- [ ] Submit added/meaningfully updated URLs; submit deleted URLs when applicable.
-- [ ] Do not submit all 55+ URLs after every unchanged production build.
-- [ ] Preserve `--force` for intentional full resubmission.
-- [ ] Log submitted URLs and API result without failing the main build on transient
+- [x] Submit added/meaningfully updated URLs; submit deleted URLs when applicable.
+- [x] Do not submit all 55+ URLs after every unchanged production build.
+- [x] Preserve `--force` for intentional full resubmission.
+- [x] Log submitted URLs and API result without failing the main build on transient
       IndexNow errors, matching current deployment resilience.
 
 **Acceptance:** an unchanged build submits zero URLs; editing one article submits its
@@ -777,12 +779,12 @@ URL and any genuinely changed hub/index URL.
 - Modify: `public/llms.txt`
 - Modify: `docs/wiki/blog-and-seo.md`
 
-- [ ] Convert bare key-page and guide URLs to descriptive Markdown links.
-- [ ] Keep the file curated; remove stale/duplicative entries rather than listing
+- [x] Convert bare key-page and guide URLs to descriptive Markdown links.
+- [x] Keep the file curated; remove stale/duplicative entries rather than listing
       every URL automatically.
-- [ ] Add a note to internal documentation that Google ignores `llms.txt` for
+- [x] Add a note to internal documentation that Google ignores `llms.txt` for
       rankings and generative Search eligibility.
-- [ ] Verify pricing, supported languages, channels, and capability statements
+- [x] Verify pricing, supported languages, channels, and capability statements
       against product source-of-truth files.
 
 **Acceptance:** the agentic audit recognizes links and internal documentation does
@@ -795,11 +797,11 @@ not elevate the file above crawlable HTML.
 - Review: `app/globals.css`, public route layouts, and generated route CSS chunks
 - Modify only after measuring: route-scoped styles/layout boundaries
 
-- [ ] Attribute the two homepage CSS chunks (currently ~35 KB combined) to their
+- [x] Attribute the two homepage CSS chunks (currently ~35 KB combined) to their
       source layers and separate app/widget-only rules from public critical CSS.
-- [ ] Keep hero typography/layout styles available in the first render; do not
+- [x] Keep hero typography/layout styles available in the first render; do not
       trade the current server-visible LCP text for a flash or hydration branch.
-- [ ] Remove dead public selectors and route-scope non-public style bundles where
+- [x] Remove dead public selectors and route-scope non-public style bundles where
       Next's layout boundaries allow it.
 - [ ] Re-run three mobile audits; target Lighthouse's current estimated 410 ms
       render-blocking saving without adding inline-style duplication.
@@ -809,7 +811,7 @@ LCP remains stable and visible, and no app/widget route loses required styles.
 
 ### Phase 6 gate
 
-- [ ] Standard verification commands pass.
+- [x] Standard verification commands pass.
 - [ ] Best Practices remains 100 in an extension-free run.
 - [ ] Analytics conversions, headers, CSP policy, IndexNow delta behavior, and
       `llms.txt` links are verified in production.

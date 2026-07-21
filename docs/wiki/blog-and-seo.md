@@ -20,6 +20,11 @@ and established topic boundaries; the playbook is the publication quality gate.
   sitemap because every article is already listed; ordinary previous/next/page
   anchors provide its crawl graph. The sitemap is automatic, but `public/llms.txt`
   is a manually curated list: add strategically important new guides there.
+- `llms.txt` scope check (2026-07-21): entries are descriptive Markdown links
+  (`- [Title](url): note`) for consumers that parse the llmstxt.org format.
+  **Google ignores `llms.txt`** for rankings and generative-Search eligibility —
+  it is a low-cost compatibility file for OTHER AI consumers, never a substitute
+  for crawlable HTML, and product facts in it must match `lib/plans-catalog.ts`.
 
 ## Visual system (`.article` CSS in `app/globals.css`)
 

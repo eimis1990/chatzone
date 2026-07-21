@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
+import '@/components/blog/article.css'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { LandingNav } from '@/components/landing/LandingNav'
