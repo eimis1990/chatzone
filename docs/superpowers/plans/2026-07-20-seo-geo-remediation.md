@@ -534,7 +534,7 @@ current visible/product truth.
 - Modify: `app/blog/[slug]/page.tsx`
 - Modify: `app/sitemap.ts`
 
-- [ ] Obtain and fact-check company description, founder role/experience, public
+- [x] Obtain and fact-check company description, founder role/experience, public
       profiles, editorial process, correction contact, and comparison methodology.
 - [x] Add visible links among author bylines, author page, About, policy, and
       methodology pages.
@@ -548,6 +548,9 @@ current visible/product truth.
 
 **Acceptance:** a reader and crawler can move from every article byline to verifiable
 author/publisher/methodology information.
+
+> Owner reviewed and approved the About/author/editorial-policy/review-methodology
+> claims (incl. the AI-assistance disclosure) on 2026-07-21.
 
 ### Task 5.2: Add a controlled topic taxonomy and hub pages
 
@@ -637,6 +640,10 @@ exception.
 support, honest qualification, or removal. A citation count alone is not sufficient.
 
 ### Task 5.6: Add first-party evidence assets
+
+> **Deferred 2026-07-21 (owner decision):** the product is too new for customer
+> case studies, benchmarks, or Search Console demand data. Revisit once real
+> usage exists; do not fabricate evidence in the meantime.
 
 **Files:**
 
