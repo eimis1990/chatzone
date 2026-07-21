@@ -25,7 +25,9 @@ const CSP_REPORT_ONLY = [
   "img-src 'self' data: blob: https:",
   "font-src 'self' data:",
   "media-src 'self' blob: https:",
-  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://www.google-analytics.com https://*.google-analytics.com https://*.googletagmanager.com https://*.elevenlabs.io wss://*.elevenlabs.io",
+  // GA4 beacons fan out to regional collectors + doubleclick (observed in the
+  // report-only period 2026-07-21).
+  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://stats.g.doubleclick.net https://*.googletagmanager.com https://*.elevenlabs.io wss://*.elevenlabs.io",
   "frame-src 'self'",
   "worker-src 'self' blob:",
   "object-src 'none'",
