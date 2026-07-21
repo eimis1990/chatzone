@@ -43,6 +43,15 @@ export interface FaqItem {
   answer: string
 }
 
+export const BLOG_PAGE_SIZE = 12
+
+export interface BlogPage {
+  posts: BlogPost[]
+  page: number
+  totalPages: number
+  totalPosts: number
+}
+
 /** URL-safe slug for a heading anchor (unicode letters/numbers kept). */
 function slugify(s: string): string {
   return s
@@ -226,6 +235,40 @@ export function getAllPosts(): BlogPost[] {
     return []
   }
   return files.map(fileToPost).sort((a, b) => b.date.localeCompare(a.date))
+}
+
+/** The archive always has a first page, even before the first post is published. */
+export function getBlogPageCount(totalPosts: number): number {
+  return Math.max(1, Math.ceil(Math.max(0, totalPosts) / BLOG_PAGE_SIZE))
+}
+
+/** Slice an already sorted post list without allowing empty soft-404 pages. */
+export function getBlogPage(posts: BlogPost[], page: number): BlogPage | null {
+  const totalPages = getBlogPageCount(posts.length)
+  if (!Number.isSafeInteger(page) || page < 1 || page > totalPages) return null
+
+  const start = (page - 1) * BLOG_PAGE_SIZE
+  return {
+    posts: posts.slice(start, start + BLOG_PAGE_SIZE),
+    page,
+    totalPages,
+    totalPosts: posts.length,
+  }
+}
+
+/** `/blog` owns page 1; numbered archive routes begin at page 2. */
+export function parseBlogPageParam(value: string, totalPages: number): number | null {
+  if (!/^[2-9]\d*$/.test(value)) return null
+  const page = Number(value)
+  return Number.isSafeInteger(page) && page <= totalPages ? page : null
+}
+
+/** Static params for canonical numbered archive pages only. */
+export function getBlogPaginationParams(totalPosts: number): Array<{ page: string }> {
+  const totalPages = getBlogPageCount(totalPosts)
+  return Array.from({ length: Math.max(0, totalPages - 1) }, (_, index) => ({
+    page: String(index + 2),
+  }))
 }
 
 export function getPostBySlug(slug: string): BlogPost | null {

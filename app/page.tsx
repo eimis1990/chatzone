@@ -1,6 +1,7 @@
 import { LandingNav } from '@/components/landing/LandingNav'
 import { Hero } from '@/components/landing/Hero'
-import { Features, Stats, HowItWorks, CTASection, Footer } from '@/components/landing/sections'
+import { Features, Stats, HowItWorks, CTASection } from '@/components/landing/sections'
+import { Footer } from '@/components/landing/Footer'
 import { Pricing } from '@/components/landing/Pricing'
 import { SetupPricing } from '@/components/landing/SetupPricing'
 import { Showcase } from '@/components/landing/Showcase'

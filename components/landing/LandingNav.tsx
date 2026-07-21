@@ -36,7 +36,11 @@ export function LandingNav({ solid = false }: { solid?: boolean }) {
       }`}
     >
       <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5">
-        <Link href="/" className={`flex items-center gap-2.5 text-2xl font-bold ${solidNav ? 'text-gray-900' : 'text-white'}`}>
+        <Link
+          href="/"
+          prefetch={false}
+          className={`flex items-center gap-2.5 text-2xl font-bold ${solidNav ? 'text-gray-900' : 'text-white'}`}
+        >
           {/* Colorful fox over the dark hero; black fox once the bar turns white. */}
           <span
             aria-hidden="true"

@@ -1,8 +1,9 @@
 import { notFound } from 'next/navigation'
+import Image from 'next/image'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { LandingNav } from '@/components/landing/LandingNav'
-import { Footer } from '@/components/landing/sections'
+import { Footer } from '@/components/landing/Footer'
 import { ArticleAside } from '@/components/blog/ArticleAside'
 import { RelatedGuides } from '@/components/blog/RelatedGuides'
 import { LinkedinIcon } from '@/components/blog/social-icons'
@@ -113,12 +114,12 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
               </h1>
               <div className="mt-5 flex items-center gap-3">
                 {post.authorImage ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
+                  <Image
                     src={post.authorImage}
                     alt={post.author}
                     width={40}
                     height={40}
+                    sizes="40px"
                     className="size-10 rounded-full object-cover ring-1 ring-black/[0.06]"
                   />
                 ) : null}
@@ -142,14 +143,16 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
             </header>
 
             {post.image && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={post.image}
-                alt={post.title}
-                width={1200}
-                height={675}
-                className="mb-10 aspect-video w-full rounded-2xl object-cover"
-              />
+              <div className="relative mb-10 aspect-video w-full overflow-hidden rounded-2xl">
+                <Image
+                  src={post.image}
+                  alt={post.title}
+                  fill
+                  preload
+                  sizes="(min-width: 1024px) 624px, calc(100vw - 40px)"
+                  className="object-cover"
+                />
+              </div>
             )}
 
             <div className="article" dangerouslySetInnerHTML={{ __html: post.html }} />

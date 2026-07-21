@@ -64,7 +64,12 @@ const nunito = Nunito({
   preload: false,
   display: "swap",
 });
-const jakarta = Plus_Jakarta_Sans({ variable: "--font-jakarta", subsets: ["latin"] });
+const jakarta = Plus_Jakarta_Sans({
+  variable: "--font-jakarta",
+  subsets: ["latin"],
+  preload: false,
+  display: "swap",
+});
 const lora = Lora({
   variable: "--font-lora",
   subsets: ["latin"],

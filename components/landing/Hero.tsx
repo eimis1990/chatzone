@@ -1,5 +1,8 @@
+import { Plus_Jakarta_Sans } from 'next/font/google'
 import { GetStartedDialog } from './GetStartedDialog'
 import { HeroVideo } from './HeroVideo'
+
+const heroFont = Plus_Jakarta_Sans({ subsets: ['latin'], display: 'swap' })
 
 export function Hero() {
   return (
@@ -32,7 +35,7 @@ export function Hero() {
 
           {/* Headline — Plus Jakarta Sans with inline chat/voice icon chips and a
               gradient accent on the closing line. */}
-          <h1 className="text-balance font-[family-name:var(--font-jakarta)] text-[2.15rem] font-bold leading-[1.13] tracking-tight sm:text-[3rem] lg:text-[3.75rem] xl:text-[4.25rem]">
+          <h1 className={`${heroFont.className} text-balance text-[2.15rem] font-bold leading-[1.13] tracking-tight sm:text-[3rem] lg:text-[3.75rem] xl:text-[4.25rem]`}>
             Let your customers
             <br />
             <span className="bg-gradient-to-r from-primary via-[#f59a3c] to-primary bg-clip-text font-extrabold text-transparent">
