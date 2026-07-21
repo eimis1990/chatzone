@@ -111,6 +111,14 @@ Phase 1 shipped on the remediation branch in `9acaebe`: hero/showcase/reveal con
 is server-visible, Lenis is removed in favor of native anchor scrolling, and the
 reduced-motion hero has a hydration-safe poster snapshot. The local production-build
 checkpoint improved median Performance 61 → 79 and lab LCP 11.26 s → 5.83 s;
-Phase 2 still owns the ~7.96 MB hero-video payload.
+Phase 2 still owned the ~7.96 MB hero-video payload at that checkpoint.
 
-_Last verified: 2026-07-21 (9acaebe)._
+Phase 2 hero media shipped in `1c43ce2`: responsive mobile/desktop posters are
+server-first, reduced-motion/Save-Data/2G clients remain poster-only, and the loop
+source is assigned only after the intro ends. Mobile derivatives total 584 KB and
+desktop derivatives 993 KB, down from 7.96 MB. Three local optimized-build audits
+measured a 2.31 MB median page transfer (10.34 MB after Phase 1), Performance 78,
+6.03-second lab LCP, and zero CLS. The next payload constraint is the 1.34 MB image
+transfer, led by the chat-view showcase in Task 2.3.
+
+_Last verified: 2026-07-21 (1c43ce2)._
