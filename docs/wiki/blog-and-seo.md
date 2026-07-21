@@ -119,6 +119,13 @@ source is assigned only after the intro ends. Mobile derivatives total 584 KB an
 desktop derivatives 993 KB, down from 7.96 MB. Three local optimized-build audits
 measured a 2.31 MB median page transfer (10.34 MB after Phase 1), Performance 78,
 6.03-second lab LCP, and zero CLS. The next payload constraint is the 1.34 MB image
-transfer, led by the chat-view showcase in Task 2.3.
+transfer, which was led by the chat-view showcase.
 
-_Last verified: 2026-07-21 (1c43ce2)._
+Task 2.3 shipped in `4d3d71f`: the 11 showcase PNGs became visually checked WebPs,
+natural filename ordering and descriptive labels are explicit, and the carousel
+mounts only its active/immediate-neighbor images. The forward neighbor waits for
+browser idle; outer wings use CSS chat skeletons. Click, wrap, and swipe behavior
+are covered in Playwright. Median total transfer is now 1.28 MB and image transfer
+0.30 MB, with Performance 79, 5.83-second lab LCP, and zero CLS.
+
+_Last verified: 2026-07-21 (4d3d71f)._
