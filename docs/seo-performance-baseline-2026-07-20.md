@@ -151,3 +151,29 @@ observed local LCP is 128 ms and the text element's observed render delay is
 ~122 ms. The dominant actionable insight is two render-blocking CSS files totaling
 ~35 KB, with Lighthouse estimating 410 ms savings. This is tracked as Task 6.5;
 Phase 2's media/image/font/widget budgets are complete.
+
+## Phase 3 blog checkpoint — 2026-07-21
+
+Measured across three serial Lighthouse 13.4.1 runs against the optimized local
+production build after server pagination, responsive blog images, static header
+texture, and archive-prefetch removal:
+
+| Performance | Accessibility | Best Practices | SEO | FCP | LCP | Speed Index | TBT | CLS | Transfer | Requests | Images |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 91 | 100 | 96* | 100 | 1.06 s | 3.46 s | 1.06 s | 9 ms | 0 | 0.41 MB | 36 | 13 |
+
+Page 1 renders 12 of the 51 posts. Five server-generated archive pages expose
+every article through normal anchors with JavaScript disabled; `/blog/page/1`,
+malformed values, and beyond-last values return hard 404s. Only the first cover
+is eager/high priority, card avatars were removed, and image transfer is 0.07 MB.
+Numbered archives are intentionally absent from the sitemap because all canonical
+article URLs are present there already.
+
+Disabling archive and nav-logo prefetch removed speculative article/home route
+data and the unused homepage font from blog startup. The blog now requests one
+0.03 MB font. A homepage smoke audit confirmed its route-scoped Plus Jakarta
+hero preload retained the Phase 2 result: Performance 85, LCP 4.35 seconds,
+0.93 MB, and zero CLS.
+
+`*` Local Best Practices remains 96 only because the production-only Vercel
+Analytics endpoint returns 404 under `next start`; clean production was 100.

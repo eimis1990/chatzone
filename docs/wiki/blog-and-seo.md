@@ -7,11 +7,15 @@ File-based markdown blog that drives organic + AI-engine traffic.
 - Posts are `content/blog/<slug>.md` with frontmatter (title, description, date,
   author, image). `lib/blog.ts` parses them, renders via `marked`, injects H2/H3
   anchor ids, and extracts the "Frequently asked questions" section into
-  **FAQPage JSON-LD**. Pages: `app/blog/` + `app/blog/[slug]/`.
+  **FAQPage JSON-LD**. Pages: `app/blog/`, `app/blog/page/[page]/`, and
+  `app/blog/[slug]/`. The archive is server-paginated at 12 posts: `/blog` owns
+  page 1 and only pages 2..N are valid numbered routes.
 - Author defaults to the site owner (headshot + LinkedIn auto-applied).
 - `app/sitemap.ts` auto-includes every post; `app/robots.ts` + `public/llms.txt`
-  round out discoverability. The sitemap is automatic, but `public/llms.txt` is
-  a manually curated list: add strategically important new guides there.
+  round out discoverability. Archive pagination is deliberately omitted from the
+  sitemap because every article is already listed; ordinary previous/next/page
+  anchors provide its crawl graph. The sitemap is automatic, but `public/llms.txt`
+  is a manually curated list: add strategically important new guides there.
 
 ## Visual system (`.article` CSS in `app/globals.css`)
 
@@ -138,4 +142,16 @@ LCP, 0 CLS, 0.94 MB, and 38 requests, versus Performance 61, 11.26 seconds, and
 ~122 ms; the remaining simulated shortfall is a ~35 KB render-blocking CSS audit
 tracked as Task 6.5.
 
-_Last verified: 2026-07-21 (6b3b5e6)._
+Phase 3 server-paginates all 51 posts into five crawlable archive pages, hard-404s
+duplicate/malformed ranges, and gives numbered pages unique canonicals and metadata.
+Archive cards use responsive `next/image` output with a compact 112 px mobile
+thumbnail, author identity remains text-only, and article/related covers have
+explicit responsive sizes. The blog canvas/RAF grid is now a static CSS texture.
+Automatic prefetch is disabled for archive links and the nav logo so a blog visit
+does not speculatively download article/home route data or the homepage-only Plus
+Jakarta font; the homepage hero now owns that font preload directly. Three local
+optimized mobile runs measured median Performance 91, LCP 3.46 seconds, 0.41 MB,
+36 requests, 13 image requests, and zero CLS. Homepage remained at Performance 85,
+LCP 4.35 seconds, and 0.93 MB in the post-change smoke audit.
+
+_Last verified: 2026-07-21 (Phase 3 remediation branch)._

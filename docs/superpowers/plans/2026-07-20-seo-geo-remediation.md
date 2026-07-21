@@ -333,14 +333,14 @@ indexing and crawl fixes can proceed without reopening the completed media budge
 - Create: `components/blog/BlogPagination.tsx`
 - Test: `tests/unit/blog-pagination.test.ts`
 
-- [ ] Add `BLOG_PAGE_SIZE = 12`, validated page slicing, and total-page helpers.
-- [ ] Keep `/blog` as page 1 and generate static pages 2..N.
-- [ ] Return 404 for page 1 under `/blog/page/1`, zero, negative, nonnumeric, or
+- [x] Add `BLOG_PAGE_SIZE = 12`, validated page slicing, and total-page helpers.
+- [x] Keep `/blog` as page 1 and generate static pages 2..N.
+- [x] Return 404 for page 1 under `/blog/page/1`, zero, negative, nonnumeric, or
       beyond-last pages to prevent duplicate/soft-404 URLs.
-- [ ] Add normal crawlable anchor links for previous, next, and nearby page numbers.
-- [ ] Add self-canonical and unique title/description for each paginated page.
-- [ ] Ensure all 51 posts are reachable by following links from `/blog`.
-- [ ] Decide whether pagination URLs belong in the sitemap; apply one consistent
+- [x] Add normal crawlable anchor links for previous, next, and nearby page numbers.
+- [x] Add self-canonical and unique title/description for each paginated page.
+- [x] Ensure all 51 posts are reachable by following links from `/blog`.
+- [x] Decide whether pagination URLs belong in the sitemap; apply one consistent
       documented rule and test it.
 
 **Acceptance:** `/blog` renders exactly 12 cards; every post is reachable within
@@ -354,14 +354,14 @@ the pagination graph; no client JavaScript is required to discover later posts.
 - Modify: `app/blog/[slug]/page.tsx`
 - Review: `components/blog/RelatedGuides.tsx`
 
-- [ ] Replace public-site plain image elements with `next/image` where appropriate.
-- [ ] Set card `sizes` for one-, two-, and three-column breakpoints.
-- [ ] Make only the first visible cover eligible for eager/high-priority loading;
+- [x] Replace public-site plain image elements with `next/image` where appropriate.
+- [x] Set card `sizes` for one-, two-, and three-column breakpoints.
+- [x] Make only the first visible cover eligible for eager/high-priority loading;
       every remaining cover and avatar is lazy.
-- [ ] Avoid repeating an eager author headshot on every card. Retain author identity
+- [x] Avoid repeating an eager author headshot on every card. Retain author identity
       as text even if card avatars are removed.
-- [ ] Give the article hero accurate responsive sizes and preserve aspect ratio.
-- [ ] Verify existing generated WebP assets are not unnecessarily recompressed or
+- [x] Give the article hero accurate responsive sizes and preserve aspect ratio.
+- [x] Verify existing generated WebP assets are not unnecessarily recompressed or
       enlarged by the optimizer.
 
 **Acceptance:** `/blog` has no mass image preload list, no more than 16 initial
@@ -374,20 +374,20 @@ image requests, and no image-related CLS.
 - Review/modify: `components/magicui/flickering-grid.tsx`
 - Modify: shared blog listing/header component
 
-- [ ] Measure the grid's script/CPU contribution after pagination and image work.
-- [ ] If material, replace it on blog pages with a static CSS background or pause
+- [x] Measure the grid's script/CPU contribution after pagination and image work.
+- [x] If material, replace it on blog pages with a static CSS background or pause
       until after first interaction.
-- [ ] Preserve the visual hierarchy without making the H1 dependent on canvas.
+- [x] Preserve the visual hierarchy without making the H1 dependent on canvas.
 
 **Acceptance:** the blog H1 and listing render without client animation; TBT stays
 within budget on low-end mobile simulation.
 
 ### Phase 3 gate
 
-- [ ] Standard verification commands pass.
-- [ ] Blog median mobile Performance is >= 90 and lab LCP <= 3.5 s.
-- [ ] Blog transfer is <= 1.5 MB and only 12 cards render on page 1.
-- [ ] Pagination works with JavaScript disabled and returns correct canonicals/404s.
+- [x] Standard verification commands pass.
+- [x] Blog median mobile Performance is >= 90 and lab LCP <= 3.5 s.
+- [x] Blog transfer is <= 1.5 MB and only 12 cards render on page 1.
+- [x] Pagination works with JavaScript disabled and returns correct canonicals/404s.
 
 ---
 
