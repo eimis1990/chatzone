@@ -1,6 +1,7 @@
 import { Plus_Jakarta_Sans } from 'next/font/google'
 import { GetStartedDialog } from './GetStartedDialog'
 import { HeroVideo } from './HeroVideo'
+import { BRAND_MARKS } from './brand-marks'
 
 const heroFont = Plus_Jakarta_Sans({ subsets: ['latin'], display: 'swap' })
 
@@ -75,30 +76,37 @@ export function Hero() {
   )
 }
 
-// Real integrations & tech the product runs on — honest credibility, not
-// invented customer logos.
-const BRANDS = [
-  'WooCommerce',
-  'Shopify',
-  'Magento',
-  'WordPress',
-  'OpenAI',
-  'ElevenLabs',
-  'Stripe',
-  'Supabase',
+// Platforms a VISITOR'S store runs on — the commerce providers we integrate
+// with plus site builders the one-line embed works on. Client-relevant
+// credibility (not our internal stack: OpenAI/Stripe/etc. mean nothing to a
+// store owner choosing a chat widget).
+interface MarqueeItem {
+  name: string
+  /** 24x24 svg path (brand-marks.ts); text-only wordmark when absent. */
+  path?: string
+}
+
+const FEED_GLYPH =
+  'M4 3a1 1 0 0 0 0 2 15 15 0 0 1 15 15 1 1 0 0 0 2 0A17 17 0 0 0 4 3Zm0 6a1 1 0 0 0 0 2 9 9 0 0 1 9 9 1 1 0 0 0 2 0A11 11 0 0 0 4 9Zm2.5 8A2.5 2.5 0 1 0 6.5 22a2.5 2.5 0 0 0 0-5Z'
+
+const MARQUEE_ITEMS: MarqueeItem[] = [
+  ...BRAND_MARKS,
+  { name: 'Wix' }, // simple-icons' Wix mark IS the wordmark — icon + text read "WIX Wix"
+  { name: 'Verskis' }, // Lithuanian platform — no public monochrome mark; wordmark reads fine
+  { name: 'Product feeds', path: FEED_GLYPH },
 ]
 
 // One marquee copy must be wider than the viewport, or the two-copy -50% loop
 // reveals empty space mid-scroll. Repeating the short brand list guarantees a
 // single copy overflows even ultra-wide screens, so the loop reads as endless.
-const LOOP = [...BRANDS, ...BRANDS, ...BRANDS]
+const LOOP = [...MARQUEE_ITEMS, ...MARQUEE_ITEMS, ...MARQUEE_ITEMS]
 
-/** Infinite, seamlessly-looping row of brand wordmarks across the hero bottom. */
+/** Infinite, seamlessly-looping row of platform logos across the hero bottom. */
 function BrandMarquee() {
   return (
     <div className="relative z-10 w-full overflow-hidden border-t border-white/10 bg-black/30 py-6 shadow-[0_-1px_0_rgba(255,255,255,0.06)] backdrop-blur-md">
       <p className="mb-3 text-center text-xs font-semibold uppercase tracking-[0.2em] text-white/40">
-        Works with the tools you already use
+        Works wherever your store runs
       </p>
       {/* Fade the logos into the dark glass at both edges (dark, not the bright image). */}
       <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-24 bg-gradient-to-r from-[#101213] via-[#101213]/85 to-transparent sm:w-40" />
@@ -108,10 +116,15 @@ function BrandMarquee() {
           <ul key={copy} className="flex shrink-0 items-center gap-14 pr-14" aria-hidden={copy === 1}>
             {LOOP.map((b, i) => (
               <li
-                key={`${b}-${i}`}
-                className="whitespace-nowrap text-2xl font-semibold tracking-tight text-white/60 transition-colors hover:text-white"
+                key={`${b.name}-${i}`}
+                className="flex items-center gap-3 whitespace-nowrap text-2xl font-semibold tracking-tight text-white/60 transition-colors hover:text-white"
               >
-                {b}
+                {b.path && (
+                  <svg viewBox="0 0 24 24" className="size-7 shrink-0 fill-current" aria-hidden="true">
+                    <path d={b.path} />
+                  </svg>
+                )}
+                {b.name}
               </li>
             ))}
           </ul>
