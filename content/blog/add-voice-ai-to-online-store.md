@@ -2,6 +2,7 @@
 title: How to add a voice AI agent to your online store
 description: A practical, step-by-step guide to adding a real-time voice AI agent to your online store — how it works, the setup steps, honest limits, and what it costs.
 date: 2026-07-10
+updated: 2026-07-21
 topic: voice-ai
 related: ai-voice-agents-explained, voice-ai-for-ecommerce-support, ai-chatbot-for-online-store
 author: Eimantas Kudarauskas
@@ -83,14 +84,14 @@ Voice isn't a separate integration bolted onto your site — in a tool built thi
 
 1. **Ground the text agent first.** Feed it your policies, FAQs, and product content, and connect your store for live product search and identity-checked order lookup — the foundation either way. See the [full setup guide](/blog/ai-chatbot-for-online-store) if you haven't done this yet.
 2. **Turn on the voice add-on.** In Loqara this is a toggle on your existing plan, not a new integration — voice inherits the knowledge, product search, and order lookup the text agent already has.
-3. **Pick and preview a voice.** Choose a voice per language and listen to it exactly as a customer will hear it.
+3. **Pick and preview a voice.** Choose a voice for each supported language — English and Lithuanian in Loqara — and listen to it exactly as a customer will hear it.
 4. **Decide where it appears.** You don't have to switch it on everywhere — a high-consideration product line or a support page is a better first home than your whole catalog.
 5. **Test the call yourself.** Ask it a policy, a product, and an order-status question, and try interrupting it mid-sentence — this is where you catch a content gap before a customer does.
 6. **Go live and watch.** Nothing new to paste — watch real conversations and expand voice if it's earning its keep. If a call gets stuck, the same [clean human handoff](/blog/ai-chatbot-human-handoff) covering your text chat covers voice too, transcript and all, into a shared inbox.
 
 ## What can it do — and what can't it?
 
-What it can do, honestly: answer from your real content with sources rather than guessing, run a live product search and read results back, look up an order after checking identity, hand off cleanly to a human when it's stuck, and do all of this in more than one language.
+What it can do, honestly: answer from your real content with sources rather than guessing, run a live product search and read results back, look up an order after checking identity, hand off cleanly to a human when it's stuck, and do all of this in the languages the voice add-on supports — English and Lithuanian in Loqara's case.
 
 What it still can't do well: hold up in a noisy environment (background noise degrades speech recognition the way it degrades a phone call), replace dense reading — a long returns policy is easier to skim than to hear end-to-end — or rescue an agent that isn't grounded in the first place. Voice makes a good text agent more accessible; it makes a bad one wrong out loud, faster.
 
@@ -115,7 +116,7 @@ With a tool that ships chat and voice in one widget, there's no separate install
 Yes, if it's wired into your store rather than just reading a help center aloud. Loqara's voice agent runs the same live product search and identity-checked order lookup as its text widget, then speaks the results back — for example reading out the top matches for "something like this but cheaper." That's the difference between a voice FAQ and a voice agent doing real commerce work.
 
 ### What languages can a store voice agent speak?
-A well-built voice agent is multilingual — you choose a voice per language and preview it before it goes live, so customers hear answers in the language they're shopping in. The grounding, product search, and order lookup work the same regardless of language; only the voice and the spoken language change.
+That depends on the vendor — voice support is usually a shorter list than the chat side. Loqara's voice agent currently speaks English and Lithuanian; you choose a voice per language and preview it before it goes live. The grounding, product search, and order lookup work the same regardless of language; only the voice and the spoken language change.
 
 ### How much does adding voice cost?
 It's typically priced as an add-on on top of a base chat plan, since real-time speech costs more to run than text. In Loqara the base grounded agent is priced per conversation with a free tier of 100 conversations a month, and voice adds roughly €49/month as of mid-2026 — always check current pricing, since it can shift.

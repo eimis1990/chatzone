@@ -923,9 +923,9 @@ audit before execution because content may change.
 
 ### 29 posts with no external Markdown citations
 
-- [ ] `add-ai-agent-to-woocommerce`
-- [ ] `add-voice-ai-to-online-store`
-- [ ] `ai-chatbot-for-online-store`
+- [x] `add-ai-agent-to-woocommerce`
+- [x] `add-voice-ai-to-online-store`
+- [x] `ai-chatbot-for-online-store`
 - [x] `ai-chatbot-gdpr-data-privacy`
 - [ ] `ai-chatbot-human-handoff`
 - [ ] `ai-customer-service-small-stores`
@@ -934,7 +934,7 @@ audit before execution because content may change.
 - [x] `best-ai-chatbot-for-shopify`
 - [x] `best-ai-chatbot-for-woocommerce`
 - [x] `best-chatbot-platforms`
-- [ ] `black-friday-ai-agent`
+- [x] `black-friday-ai-agent`
 - [ ] `capture-leads-with-conversational-chat`
 - [ ] `chatbot-roi-metrics-that-matter`
 - [x] `chatgpt-for-customer-service`

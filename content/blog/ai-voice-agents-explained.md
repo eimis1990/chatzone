@@ -2,6 +2,7 @@
 title: "AI voice agents explained: when customers can just talk to your website"
 description: What an AI voice agent is, how a voice chatbot works (speech in, LLM, speech out), what it costs per minute, and the honest limits — explained simply.
 date: 2026-07-03
+updated: 2026-07-21
 topic: voice-ai
 related: add-voice-ai-to-online-store, voice-ai-for-ecommerce-support, conversational-ai-vs-chatbot
 author: Eimantas Kudarauskas
@@ -61,7 +62,7 @@ All of this happens fast enough that the exchange feels like a conversation — 
 
 Two shifts, both recent:
 
-**Latency collapsed.** The old approach chained three separate slow systems — transcribe everything, then think, then synthesize everything — and the customer waited through all three. Modern real-time speech stacks (ElevenLabs' conversational voice platform and OpenAI's realtime speech-to-speech models are the two names you'll hear most) stream every stage and overlap them, bringing response times down from several seconds to under one. Below about a second, a pause reads as "thinking"; above it, it reads as "broken."
+**Latency collapsed.** The old approach chained three separate slow systems — transcribe everything, then think, then synthesize everything — and the customer waited through all three. Modern real-time speech stacks ([ElevenLabs' conversational voice platform](https://elevenlabs.io/pricing/agents) and [OpenAI's realtime speech-to-speech models](https://openai.com/index/introducing-gpt-realtime/) — now generally available, with phone-line integration — are the two names you'll hear most) stream every stage and overlap them, bringing response times down from several seconds to around one. Below about a second, a pause reads as "thinking"; above it, it reads as "broken."
 
 **Conversation mechanics got solved.** Interruption handling ("barge-in"), knowing when a speaker has actually finished versus paused, and voices that don't sound like a navigation system — these were the details that made earlier demos feel wrong even when the answers were right. They're now table stakes on the serious platforms.
 
@@ -79,11 +80,11 @@ Anyone selling voice agents without this section is selling too hard.
 
 **Minutes cost real money.** Speech models are billed per minute, and a chatty caller costs more than a typer. That's manageable (numbers below) but it means voice should handle conversations, not be the default for every visitor who'd have happily typed.
 
-One place voice earns its cost quickly: customers who struggle with typing — and language. Because the LLM's understanding is multilingual, a voice agent can hold the call in the customer's own language, which pairs naturally with [multilingual text support](/blog/multilingual-ai-customer-support).
+One place voice earns its cost quickly: customers who struggle with typing — and language. The underlying speech platforms are heavily multilingual ([ElevenLabs' agents support 70+ languages](https://elevenlabs.io/blog/series-d)), but each product ships a specific set — check which languages a vendor's voice agent actually speaks. Loqara's, for instance, currently handles English and Lithuanian. It pairs naturally with [multilingual text support](/blog/multilingual-ai-customer-support).
 
 ## What does an AI voice agent cost?
 
-The industry unit for voice is the **conversation minute**, covering the whole pipeline — transcription, model, synthesis. Across platforms in 2026, all-in costs typically land somewhere between roughly €0.05 and €0.30 per minute depending on voice quality, model, and volume, and vendor pricing usually wraps that in a monthly plan with included minutes plus an overage rate.
+The industry unit for voice is the **conversation minute**, covering the whole pipeline — transcription, model, synthesis. Costs vary with voice quality, model, and volume, but for calibration: [ElevenLabs' agents platform](https://elevenlabs.io/pricing/agents) charges $0.08 per additional call minute, with LLM usage billed on top — so all-in costs land in the tens of cents per minute, and vendor pricing usually wraps that in a monthly plan with included minutes plus an overage rate.
 
 For a concrete, disclosed example: Loqara — our product — prices voice as an add-on at **€49/month including roughly 200 minutes, then €0.20/minute** beyond that, on top of a chat plan. The arithmetic worth doing for any vendor is the same: estimate your voice-inclined traffic (it's a minority of visitors), multiply by a typical call length of a couple of minutes, and compare against what those conversations cost you today in support time — or in customers who bounced rather than typed.
 
@@ -96,7 +97,7 @@ For a concrete, disclosed example: Loqara — our product — prices voice as an
 
 The fastest way to calibrate your expectations is two minutes with a live one — not a promo video, which always sounds better than reality (in both directions: videos hide latency, but also hide how natural real turn-taking feels).
 
-If you want one to poke at right now: the chat widget on [loqara.com](https://www.loqara.com) runs our live voice agent — click the call button, ask it something awkward, interrupt it, try another language. It's the same agent a store would install, answering from our own site's content.
+If you want one to poke at right now: the chat widget on [loqara.com](https://www.loqara.com) runs our live voice agent — click the call button, ask it something awkward, interrupt it, try it in Lithuanian as well as English (the two languages it currently speaks). It's the same agent a store would install, answering from our own site's content.
 
 Then run the same experiment against your own use case: take your ten most common support questions, ask them out loud, and count how many got a correct, grounded, comfortable-to-listen-to answer. That number — not the demo — tells you whether voice is ready for your customers.
 
@@ -115,7 +116,7 @@ Three streaming stages: speech-to-text transcribes the customer as they talk; a 
 Yes, if it's integrated with the store's platform. Through tool calls, a voice agent can search the live catalog for price and stock and look up a specific order after verifying the customer's identity — the same actions a good text agent performs, just spoken. Agents without these integrations can only answer general policy questions.
 
 ### How much does an AI voice agent cost?
-Voice is billed by the conversation minute, since speech models run per second of audio. All-in per-minute costs across the industry typically range from roughly €0.05 to €0.30 depending on quality and volume, and most vendors package this as a monthly add-on with included minutes plus an overage rate on top of a chat plan.
+Voice is billed by the conversation minute, since speech models run per second of audio. All-in per-minute costs typically land in the tens of cents depending on quality and volume (ElevenLabs, for example, charges $0.08 per extra call minute plus LLM usage), and most vendors package this as a monthly add-on with included minutes plus an overage rate on top of a chat plan.
 
 ### When is text chat better than voice?
 Whenever the answer is a list, a link, or a table; whenever the customer is somewhere they can't talk; and whenever sensitive details would have to be read aloud. Voice is an additional channel for people who prefer talking — mobile users, accessibility needs, customers who dislike typing — not a replacement for chat or for human handoff.

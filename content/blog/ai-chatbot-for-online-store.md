@@ -4,7 +4,7 @@ description: A practical guide to adding an AI chat agent to your e-commerce sto
 date: 2026-06-27
 topic: platform-integrations
 related: add-ai-agent-to-woocommerce, ai-chatbot-for-magento, test-ai-chatbot-before-launch
-updated: 2026-06-30
+updated: 2026-07-21
 author: Eimantas Kudarauskas
 image: /blog/ai-chatbot-for-online-store.webp
 ---
@@ -115,7 +115,7 @@ A grounded chatbot won't. Loqara answers only from the content you give it and c
 No. With a one-line embed you add your content, connect your store platform, customise the widget, and paste a single `<script>` tag before `</body>`. Most stores are live the same afternoon, and changes go live the moment you save — no engineering project required.
 
 ### How much does an AI chatbot for an online store cost?
-It depends on the pricing unit, and the differences are large. Loqara is priced per conversation with a genuine free tier of 100 conversations a month, while many helpdesk suites bill per "resolution" on top of seat fees. Model your real monthly volume against each unit before committing, because the same traffic can cost very differently.
+It depends on the pricing unit, and the differences are large. Loqara is priced per conversation with a genuine free tier of 100 conversations a month, while many helpdesk suites bill per "resolution" on top of seat fees ([Intercom's Fin](https://www.intercom.com/pricing), for example, charges $0.99 per resolution). Model your real monthly volume against each unit before committing, because the same traffic can cost very differently.
 
 ### Can the chatbot look up a customer's order?
 Yes. After a quick identity check, the agent can pull order status from your connected store so customers self-serve the most common question of all. It answers around checkout and fulfilment rather than changing checkout itself, which is where most pre- and post-purchase tickets come from.

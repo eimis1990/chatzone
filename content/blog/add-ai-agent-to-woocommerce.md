@@ -4,7 +4,7 @@ description: A practical guide to adding an AI chat and voice agent to your WooC
 date: 2026-06-25
 topic: platform-integrations
 related: best-ai-chatbot-for-woocommerce, ai-chatbot-for-online-store, ecommerce-ai-chatbot-knowledge-base
-updated: 2026-06-30
+updated: 2026-07-21
 author: Eimantas Kudarauskas
 image: /blog/add-ai-agent-to-woocommerce.webp
 ---
@@ -70,11 +70,11 @@ This is what makes answers **grounded** — the agent responds only from the con
 
 Now connect the store itself so the agent can search your **live** products. Instead of a generic "we have several boots," it can answer "show me waterproof boots under €100" with real product names, prices, and links pulled straight from WooCommerce.
 
-In practice this means generating a read-only WooCommerce REST API key (WooCommerce → Settings → Advanced → REST API) and pasting it into Loqara's connector. Because it reads live data, stock and pricing stay accurate without you syncing anything — when you update a product in WooCommerce, the agent reflects it on the next question.
+In practice this means generating a read-only WooCommerce REST API key (WooCommerce → Settings → Advanced → REST API, with permissions set to *Read* — [WooCommerce's own guide](https://woocommerce.com/document/woocommerce-rest-api/) walks through it) and pasting it into Loqara's connector. Because it reads live data, stock and pricing stay accurate without you syncing anything — when you update a product in WooCommerce, the agent reflects it on the next question.
 
 ### Step 3 — Turn on order lookup
 
-This is the step most stores underestimate. Connect order lookup and the agent can answer "where's my order?" itself, after a quick identity check (email plus order number), instead of routing it to you. That single question is the most common ticket almost every store gets — handling it automatically is where the tool pays for itself.
+This is the step most stores underestimate. Connect order lookup and the agent can answer "where's my order?" itself, after a quick identity check (email plus order number), instead of routing it to you. In the stores we work with, that single question is the biggest source of repeat tickets — handling it automatically is where the tool pays for itself.
 
 The same WooCommerce connection that powers product search powers order lookup, so there's nothing extra to set up beyond confirming the permission. See [how AI cuts repetitive support tickets](/blog/reduce-support-tickets-with-ai) for why this matters more than any other feature.
 
@@ -89,7 +89,7 @@ While you're here, decide what happens when the agent reaches its limit. A clean
 The whole install is a single script tag. There's no dedicated plugin to maintain and no theme to rebuild:
 
 1. **Copy the snippet** — Loqara gives you one `<script>` line.
-2. **Paste it before `</body>`** — drop it into your theme's footer template, or use any "header & footer scripts" snippet plugin if you'd rather not touch code.
+2. **Paste it before `</body>`** — drop it into your theme's footer template, or use any ["header & footer scripts" snippet plugin](https://wordpress.org/plugins/header-and-footer-scripts/) if you'd rather not touch code.
 3. **Preview against real questions** — ask the agent the things customers actually ask, and check the answers cite your content.
 4. **Flip it on.** The widget appears in the corner of every page.
 
@@ -106,7 +106,7 @@ A few things separate a smooth launch from a frustrating one:
 
 <div class="callout">
 <p class="callout-title">The one step that earns its keep</p>
-<p>If you do nothing else, connect order lookup. "Where's my order?" is the most repetitive question almost every WooCommerce store fields, and it arrives at all hours. An agent that handles it with a quick identity check — instead of waiting for you to wake up and reply — is the difference between a tool that's nice to have and one that visibly pays for itself in deflected tickets. The catalog connection wins sales; the order connection saves your evenings.</p>
+<p>If you do nothing else, connect order lookup. "Where's my order?" is the most repetitive question we see WooCommerce stores field, and it arrives at all hours. An agent that handles it with a quick identity check — instead of waiting for you to wake up and reply — is the difference between a tool that's nice to have and one that visibly pays for itself in deflected tickets. The catalog connection wins sales; the order connection saves your evenings.</p>
 </div>
 
 ## What good looks like

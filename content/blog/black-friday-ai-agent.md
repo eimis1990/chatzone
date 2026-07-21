@@ -2,6 +2,7 @@
 title: Get your store ready for Black Friday with an AI agent
 description: A practical, timely prep guide for BFCM — how an AI agent absorbs the support surge (order status, shipping cutoffs, returns, sizing) 24/7 while your team handles the hard cases. Plus a readiness checklist and timeline.
 date: 2026-07-07
+updated: 2026-07-21
 topic: ecommerce-ai
 related: recover-abandoned-carts-ai-chatbot, reduce-support-tickets-with-ai, where-is-my-order-ai
 author: Eimantas Kudarauskas
@@ -31,7 +32,7 @@ The stores that get through Black Friday and Cyber Monday (BFCM) with their supp
 
 ## Why does Black Friday break e-commerce support?
 
-Two curves collide. Order volume spikes — often 2–3× a normal week over the BFCM weekend — and so does the volume of *questions* around those orders. Meanwhile your support headcount is flat, your team is tired, and the questions arrive at midnight and on Sunday when no one is staffing the inbox.
+Two curves collide. Order volume spikes — Shopify merchants alone did a record [$14.6 billion over the 2025 BFCM weekend](https://www.shopify.com/investors/press-releases/shopify-merchants-achieve-record-breaking-146-billion-black), up 27% on the year before — and so does the volume of *questions* around those orders. Meanwhile your support headcount is flat, your team is tired, and the questions arrive at midnight and on Sunday when no one is staffing the inbox.
 
 The frustrating part is that most of that volume is repetitive. A shopper asking whether an item will ship in time, a buyer checking their order status, someone confirming your extended returns window — none of these need a human's judgement. But answered by hand, at scale, over a weekend, they swamp everything, including the handful of tickets that genuinely *do* need a person: a damaged item, a wrong charge, a customer deciding between two products worth a real sale.
 
@@ -45,7 +46,7 @@ The point isn't to remove humans. It's to let the agent absorb the predictable v
 
 <div class="stat-grid">
 <div class="stat"><div class="stat-num">24/7</div><div class="stat-label">Coverage over the whole BFCM weekend, no extra headcount</div></div>
-<div class="stat"><div class="stat-num">~70%</div><div class="stat-label">Of surge questions are repetitive (order status, shipping, returns, sizing)</div></div>
+<div class="stat"><div class="stat-num">~70%</div><div class="stat-label">Of surge questions we see are repetitive (order status, shipping, returns, sizing)</div></div>
 <div class="stat"><div class="stat-num">&lt;2s</div><div class="stat-label">Typical first reply, even at 2am on Cyber Monday</div></div>
 <div class="stat"><div class="stat-num">1 line</div><div class="stat-label">To embed the agent on your store</div></div>
 </div>
@@ -65,7 +66,7 @@ You don't need much, but the order matters. Work through these in advance, on yo
 2. **Connect order lookup.** This is the one that pays for itself. Let the agent look up a customer's order status after an identity check so "where's my order?" resolves itself instead of landing in your inbox.
 3. **Set up human handoff.** Decide what routes to a person — refunds, complaints, anything the agent isn't confident about — and make sure it lands in a [shared inbox](/blog/ai-chatbot-human-handoff) where your team can pick it up without the customer repeating themselves.
 4. **Configure working hours.** Tell the agent when humans are actually available so it sets expectations honestly ("a person will reply Monday morning") instead of promising an instant human at 3am.
-5. **Turn on the languages you sell in.** If BFCM brings international traffic, [multilingual support](/blog/multilingual-ai-customer-support) means a shopper gets answered in their own language instead of bouncing.
+5. **Turn on the languages you sell in.** If BFCM brings international traffic, [multilingual support](/blog/multilingual-ai-customer-support) means a shopper gets answered in a language they understand instead of bouncing — with Loqara today that means English and Lithuanian.
 6. **Test on real traffic.** Put it live on a quiet week, watch the real conversations, and fix the gaps — a missing FAQ, a policy the agent phrases awkwardly — while the stakes are low.
 
 That last step is the one people skip and regret. An agent tested on live shoppers in September is a very different thing from one switched on cold the morning of the sale.
@@ -89,7 +90,7 @@ With a one-line embed, the *installation* is same-day — Loqara goes live the a
 
 ## What about the post-purchase "where's my order?" wave?
 
-The sale ends; the questions don't. In the two to three weeks after BFCM, a second wave arrives — everyone who bought over the weekend now wants to know where their package is, why it hasn't shipped, whether it'll arrive before the holidays. This wave is often *larger* than the pre-sale one, and it's almost entirely order-status questions.
+The sale ends; the questions don't. In the two to three weeks after BFCM, a second wave arrives — everyone who bought over the weekend now wants to know where their package is, why it hasn't shipped, whether it'll arrive before the holidays. In our experience this wave can rival or even exceed the pre-sale one, and it's almost entirely order-status questions.
 
 This is exactly what order lookup is for. With it connected, the agent answers "where's my order?" directly from live status after an identity check, at any hour, without a human touching it. Without it, that wave lands on your team in December when they're already stretched thin and the courier delays are worst. Setting up order lookup in the summer readiness checklist isn't just for the sale weekend — it's mostly for the month that follows it. And a smoother post-purchase experience is quietly one of the best ways to [turn a one-time BFCM buyer into a repeat customer](/blog/ai-chatbot-for-online-store).
 
@@ -108,13 +109,13 @@ Start in the summer. The installation itself is same-day with a one-line embed, 
 Three things: your shipping cutoff dates (so shoppers know if an item arrives in time), any extended holiday returns window, and your promo terms — what's discounted, any exclusions, and gift-card rules. Load these as soon as they're confirmed. Because a grounded agent answers only from your content with sources, it states your actual policy rather than guessing under pressure.
 
 ### Will an AI agent handle the "where's my order?" wave after the sale?
-Yes, if you connect order lookup. After BFCM, a large wave of order-status questions arrives as everyone tracks their packages. With order lookup, the agent answers directly from live status after a quick identity check, at any hour, without a human. This post-purchase wave is often bigger than the pre-sale one, so it's the main reason to set lookup up early.
+Yes, if you connect order lookup. After BFCM, a large wave of order-status questions arrives as everyone tracks their packages. With order lookup, the agent answers directly from live status after a quick identity check, at any hour, without a human. This post-purchase wave can be as big as the pre-sale one, so it's the main reason to set lookup up early.
 
 ### Do I still need human support staff during BFCM?
 Yes. The agent absorbs the repetitive volume — order status, shipping, returns, sizing — so your team can focus on the cases that need judgement: complaints, wrong charges, high-value buyers deciding. A clean handoff routes those into a shared inbox with the conversation history attached, so a person steps in without the customer repeating themselves. Fewer humans drowning, not fewer humans.
 
 ### Can the agent answer international shoppers during the holiday rush?
-Yes. Loqara is multilingual, so a shopper who lands during a BFCM promo gets answered in their own language rather than bouncing. If your holiday traffic includes markets you don't staff around the clock, this matters even more — the agent covers those languages 24/7 while your team sleeps.
+Yes, within the languages your agent supports — Loqara currently speaks English and Lithuanian, so a shopper who lands during a BFCM promo gets answered in either rather than bouncing. If your holiday traffic includes markets you don't staff around the clock, this matters even more — the agent covers those languages 24/7 while your team sleeps.
 
 ### How much does it cost to run an AI agent through the surge?
 Loqara is priced per conversation, with a genuine free tier of 100 conversations a month, so you can test on real traffic before the season without committing. Per-conversation pricing also means your cost scales with the surge in a predictable way rather than forcing you to guess a seat count in advance. Voice is an optional paid add-on if you want it.
