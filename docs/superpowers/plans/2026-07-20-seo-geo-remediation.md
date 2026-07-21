@@ -232,15 +232,15 @@ files, visual handoff remains acceptable, and the critical page budget passes.
 - Modify: `components/ui/card-fan-carousel.tsx`
 - Replace: `public/chatviews/*.png` with optimized WebP/AVIF equivalents
 
-- [ ] Convert all 11 screenshots to visually reviewed WebP or AVIF.
-- [ ] Preserve deterministic ordering and meaningful image alt text where the
+- [x] Convert all 11 screenshots to visually reviewed WebP or AVIF.
+- [x] Preserve deterministic ordering and meaningful image alt text where the
       screenshot communicates content.
-- [ ] Mount only the active card and a bounded neighbor set; use placeholders for
+- [x] Mount only the active card and a bounded neighbor set; use placeholders for
       fan positions that do not need full-resolution images.
-- [ ] Use `next/image` with explicit dimensions/fill and accurate `sizes`.
-- [ ] Lazy-load all nonactive/non-neighbor images and prefetch only the next likely
+- [x] Use `next/image` with explicit dimensions/fill and accurate `sizes`.
+- [x] Lazy-load all nonactive/non-neighbor images and prefetch only the next likely
       card after the main page is idle.
-- [ ] Verify carousel wrapping, swipe/click behavior, and no layout shift.
+- [x] Verify carousel wrapping, swipe/click behavior, and no layout shift.
 
 **Acceptance:** initial homepage load requests at most three showcase images and
 the carousel still reaches every design.

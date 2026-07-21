@@ -9,8 +9,8 @@ import { ShowcaseFan } from './ShowcaseFan'
 function chatViewImages(): string[] {
   try {
     return readdirSync(join(process.cwd(), 'public', 'chatviews'))
-      .filter((f) => /\.(webp|png|jpe?g|avif)$/i.test(f))
-      .sort()
+      .filter((f) => /\.(webp|avif)$/i.test(f))
+      .sort((a, b) => a.localeCompare(b, 'en', { numeric: true }))
       .map((f) => `/chatviews/${f}`)
   } catch {
     return []

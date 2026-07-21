@@ -5,9 +5,29 @@ const TITLE = 'A widget that fits your brand'
 const DESCRIPTION =
   'Tweak colors, shapes, backgrounds, voice and more — then push it live to your site in one click. Want something bespoke? Custom designs on request.'
 
+const CHAT_VIEW_ALTS: Record<string, string> = {
+  'chatview-0.webp': 'Purple Loud.Chapted chat widget with four quick actions',
+  'chatview-1.webp': 'Green FAMLAI chat widget with product and booking actions',
+  'chatview-2.webp': 'Rose MONAI chat widget with agent handoff and support actions',
+  'chatview-3.webp': 'Black Foxx.AI chat widget with delivery and returns actions',
+  'chatview-4.webp': 'Blue BunAI chat widget with a compact welcome layout',
+  'chatview-5.webp': 'Red Owla chat widget with product, service, and booking actions',
+  'chatview-6.webp': 'Blue and black DAROM.AI chat widget with quick actions',
+  'chatview-7.webp': 'Beige NAMAI chat widget with a centered brand layout',
+  'chatview-8.webp': 'Pink Sun.Solutions chat widget with five support actions',
+  'chatview-9.webp': 'Amber Smarty chat widget with a dark conversation layout',
+  'chatview-10.webp': 'Cream Domo.AI chat widget with a minimal welcome layout',
+}
+
 /** Showcase variant: a fanned, draggable card carousel on a white background. */
 export function ShowcaseFan({ images }: { images: string[] }) {
-  const cards = images.map((src, i) => ({ imgUrl: src, alt: `Loqara chat widget design ${i + 1}` }))
+  const cards = images.map((src, i) => {
+    const fileName = src.split('/').at(-1) || ''
+    return {
+      imgUrl: src,
+      alt: CHAT_VIEW_ALTS[fileName] || `Loqara chat widget design ${i + 1}`,
+    }
+  })
 
   return (
     // `isolate` keeps the fan cards' z-indexes inside this section's own stacking

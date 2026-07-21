@@ -113,3 +113,18 @@ the chat-view showcase addressed by Task 2.3.
 
 `*` As in Phase 1, local Best Practices is 96 only because the production-only
 Vercel Analytics endpoint returns 404 under `next start`.
+
+### Phase 2 showcase checkpoint
+
+After replacing 11 mounted PNGs with bounded responsive WebPs and zero-byte CSS
+outer-wing placeholders, three additional serial runs produced these medians:
+
+| Performance | Accessibility | Best Practices | SEO | FCP | LCP | Speed Index | TBT | CLS | Transfer | Requests |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 79 | 89 | 96* | 100 | 1.21 s | 5.83 s | 2.16 s | 10 ms | 0 | 1.28 MB | 53 |
+
+Image transfer fell from 1.34 MB at the hero-media checkpoint to 0.30 MB. Total
+transfer is now 88.1% below the 10.78 MB production baseline and 87.6% below the
+10.34 MB Phase 1 local checkpoint. The interaction regression proves at most
+three showcase images are mounted/requested initially and covers side-card click,
+Previous wrap, and swipe navigation across the complete 11-design set.

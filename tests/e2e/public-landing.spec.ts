@@ -140,3 +140,41 @@ test('mobile hero downloads the intro before assigning the loop', async ({ brows
 
   await context.close()
 })
+
+test('showcase bounds image requests and keeps carousel navigation', async ({ page }) => {
+  const chatViewRequests = new Set<string>()
+  page.on('request', (request) => {
+    if (request.url().includes('chatviews')) {
+      chatViewRequests.add(request.url())
+    }
+  })
+
+  await page.goto('/')
+  const carousel = page.getByTestId('widget-design-carousel')
+  await carousel.scrollIntoViewIfNeeded()
+  await expect(carousel.locator('img')).toHaveCount(3)
+  expect(chatViewRequests.size).toBeLessThanOrEqual(3)
+
+  const firstCard = carousel.getByRole('button', { name: /Purple Loud\.Chapted/ })
+  const secondCard = carousel.getByRole('button', { name: /Green FAMLAI/ })
+  const lastCard = carousel.getByRole('button', { name: /Cream Domo\.AI/ })
+
+  await expect(firstCard).toHaveAttribute('aria-current', 'true')
+  await secondCard.click()
+  await expect(secondCard).toHaveAttribute('aria-current', 'true')
+
+  await carousel.getByRole('button', { name: 'Go to design 1', exact: true }).click()
+  await carousel.getByRole('button', { name: 'Previous' }).click()
+  await expect(lastCard).toHaveAttribute('aria-current', 'true')
+
+  const stage = page.getByTestId('widget-design-stage')
+  const box = await stage.boundingBox()
+  expect(box).not.toBeNull()
+  if (box) {
+    await page.mouse.move(box.x + box.width * 0.7, box.y + box.height / 2)
+    await page.mouse.down()
+    await page.mouse.move(box.x + box.width * 0.25, box.y + box.height / 2, { steps: 6 })
+    await page.mouse.up()
+  }
+  await expect(firstCard).toHaveAttribute('aria-current', 'true')
+})
