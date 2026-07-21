@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useSyncExternalStore } from 'react'
+import { useRef, useState, useSyncExternalStore } from 'react'
 import {
   getHeroMediaPolicy,
   HERO_MEDIA_SOURCES,
@@ -67,11 +67,15 @@ function HeroPoster({ withFox }: { withFox: boolean }) {
   )
 }
 
+/** Start downloading the loop this many seconds before the intro ends. */
+const LOOP_PREFETCH_SECONDS = 4
+
 /**
  * The lobby poster is always present first. Video is a progressive enhancement:
- * an intro downloads and plays alone, then the small idle loop is requested only
- * after the intro has ended. Data-saving, slow-network, and reduced-motion users
- * stay on a responsive static poster.
+ * an intro downloads and plays alone; the small idle loop is requested near the
+ * intro's END (not after it), so it is buffered by handoff and starts exactly
+ * when the intro finishes — no frozen frame, no visible pop. Data-saving,
+ * slow-network, and reduced-motion users stay on a responsive static poster.
  */
 export function HeroVideo() {
   const preferenceSnapshot = useSyncExternalStore(
@@ -84,6 +88,10 @@ export function HeroVideo() {
   const [loopRequested, setLoopRequested] = useState(false)
   const [loopPlaying, setLoopPlaying] = useState(false)
   const [failed, setFailed] = useState(false)
+  // The loop starts only when BOTH are true; either event may arrive first.
+  const loopVideoRef = useRef<HTMLVideoElement | null>(null)
+  const loopReadyRef = useRef(false)
+  const introEndedRef = useRef(false)
 
   const policy = getHeroMediaPolicy({
     hydrated,
@@ -106,6 +114,12 @@ export function HeroVideo() {
     video.play().catch(() => setFailed(true))
   }
 
+  const startLoopIfReady = () => {
+    if (!introEndedRef.current || !loopReadyRef.current) return
+    const loop = loopVideoRef.current
+    if (loop && loop.paused) loop.play().catch(() => setFailed(true))
+  }
+
   return (
     <>
       <HeroPoster withFox={false} />
@@ -120,13 +134,28 @@ export function HeroVideo() {
         aria-hidden="true"
         tabIndex={-1}
         onCanPlay={(event) => playOrUsePoster(event.currentTarget)}
-        onEnded={() => setLoopRequested(true)}
+        onTimeUpdate={(event) => {
+          const video = event.currentTarget
+          if (
+            !loopRequested &&
+            Number.isFinite(video.duration) &&
+            video.duration - video.currentTime <= LOOP_PREFETCH_SECONDS
+          ) {
+            setLoopRequested(true)
+          }
+        }}
+        onEnded={() => {
+          setLoopRequested(true)
+          introEndedRef.current = true
+          startLoopIfReady()
+        }}
         onError={() => setFailed(true)}
         className={`${videoClassName} ${loopPlaying ? 'opacity-0' : 'opacity-100'}`}
       />
 
       {loopRequested ? (
         <video
+          ref={loopVideoRef}
           src={media.loop}
           muted
           loop
@@ -134,7 +163,10 @@ export function HeroVideo() {
           preload="auto"
           aria-hidden="true"
           tabIndex={-1}
-          onCanPlay={(event) => playOrUsePoster(event.currentTarget)}
+          onCanPlayThrough={() => {
+            loopReadyRef.current = true
+            startLoopIfReady()
+          }}
           onPlaying={() => setLoopPlaying(true)}
           onError={() => setFailed(true)}
           className={`${videoClassName} ${loopPlaying ? 'opacity-100' : 'opacity-0'}`}

@@ -8,7 +8,7 @@ import { Showcase } from '@/components/landing/Showcase'
 import { Faq } from '@/components/landing/Faq'
 import { FAQ } from '@/components/landing/faq-data'
 import { WidgetEmbed } from '@/components/landing/WidgetEmbed'
-import { getLandingBotKey } from '@/lib/platform-bot'
+import { getLandingBot } from '@/lib/platform-bot'
 import { PLANS, DISPLAY_PLANS } from '@/lib/plans-catalog'
 import { SITE_URL, SITE_NAME } from '@/lib/site'
 import type { Metadata } from 'next'
@@ -94,8 +94,9 @@ const jsonLd = {
 }
 
 export default async function Home() {
-  // Loqara's own bot, shown only when the owner has toggled it on (Owner → Our chatbot).
-  const landingBotKey = await getLandingBotKey()
+  // Loqara's own bot, shown only when the owner has toggled it on (Owner → Our
+  // chatbot). Launcher theme rides along so the deferred proxy button matches.
+  const landingBot = await getLandingBot()
 
   return (
     <>
@@ -116,7 +117,9 @@ export default async function Home() {
         <CTASection />
       </main>
       <Footer />
-      {landingBotKey && <WidgetEmbed botKey={landingBotKey} loadingPolicy="idle" />}
+      {landingBot && (
+        <WidgetEmbed botKey={landingBot.key} launcher={landingBot.launcher} loadingPolicy="idle" />
+      )}
     </>
   )
 }

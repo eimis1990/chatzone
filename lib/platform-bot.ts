@@ -83,15 +83,58 @@ export async function ensurePlatformMembership(orgId: string, userId: string): P
  * break the public landing page render.
  */
 export async function getLandingBotKey(): Promise<string | null> {
+  return (await getLandingBot())?.key ?? null
+}
+
+/**
+ * What the deferred landing proxy launcher must look like to be
+ * indistinguishable from the real widget.js launcher it stands in for
+ * (same fallback chain as widget.js renderLauncher()).
+ */
+export interface LandingLauncherTheme {
+  color: string
+  iconColor: string
+  /** LAUNCHER_ICONS key (lib/launcher-icons.ts). */
+  icon: string
+  /** Px from the viewport edges (widget.js OFFSET default: 20). */
+  bottom: number
+  side: number
+}
+
+/** Mirror of widget.js readable(): dark text on light launcher colors. */
+function readableTextColor(hex: string): string {
+  let h = hex.replace('#', '')
+  if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2]
+  if (h.length !== 6) return '#ffffff'
+  const r = parseInt(h.slice(0, 2), 16)
+  const g = parseInt(h.slice(2, 4), 16)
+  const b = parseInt(h.slice(4, 6), 16)
+  return (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.6 ? '#111827' : '#ffffff'
+}
+
+/** Landing bot's public key + the launcher theme for the deferred proxy button. */
+export async function getLandingBot(): Promise<{ key: string; launcher: LandingLauncherTheme } | null> {
   try {
     const svc = createServiceClient()
     const { data } = await svc
       .from('bots')
-      .select('public_key')
+      .select('public_key, config')
       .eq('show_on_landing', true)
       .limit(1)
-      .maybeSingle<{ public_key: string }>()
-    return data?.public_key ?? null
+      .maybeSingle<{ public_key: string; config: BotConfig }>()
+    if (!data) return null
+    const theme = data.config.theme ?? {}
+    const color = theme.launcherColor || theme.primaryColor || '#6366f1'
+    return {
+      key: data.public_key,
+      launcher: {
+        color,
+        iconColor: theme.launcherIconColor || readableTextColor(color),
+        icon: theme.launcherIcon ?? 'chat',
+        bottom: theme.launcherBottomSpacing ?? 20,
+        side: theme.launcherSideSpacing ?? 20,
+      },
+    }
   } catch {
     return null
   }

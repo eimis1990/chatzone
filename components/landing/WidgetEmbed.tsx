@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { trackEvent } from '@/lib/analytics'
+import { LAUNCHER_ICONS, type LauncherIconKey } from '@/lib/launcher-icons'
+import type { LandingLauncherTheme } from '@/lib/platform-bot'
 
 export type WidgetLoadingPolicy = 'immediate' | 'idle' | 'interaction'
 
@@ -9,6 +11,14 @@ interface WidgetEmbedProps {
   botKey: string
   position?: 'bottom-left' | 'bottom-right'
   loadingPolicy?: WidgetLoadingPolicy
+  /**
+   * Real launcher theme (server-fetched) so the deferred proxy button is
+   * pixel-identical to the widget.js launcher that replaces it — same color,
+   * icon, and offsets. Without it the proxy falls back to brand defaults.
+   * ponytail: circle style only — if the bot ever uses a pill launcher the
+   * proxy still renders a circle for the ~6s before widget.js takes over.
+   */
+  launcher?: LandingLauncherTheme
 }
 
 const LANDING_IDLE_DELAY_MS = 6000
@@ -24,6 +34,7 @@ export function WidgetEmbed({
   botKey,
   position = 'bottom-right',
   loadingPolicy = 'immediate',
+  launcher,
 }: WidgetEmbedProps) {
   const [loaded, setLoaded] = useState(false)
   const loadWidgetRef = useRef<(openAfterLoad?: boolean) => void>(() => {})
@@ -99,7 +110,13 @@ export function WidgetEmbed({
 
   if (loadingPolicy === 'immediate' || loaded) return null
 
-  const sideClass = position === 'bottom-left' ? 'left-5' : 'right-5'
+  // Mirror widget.js renderLauncher(): same 56px circle, same color chain,
+  // same icon set, same viewport offsets — so the real launcher replacing this
+  // proxy is visually a no-op.
+  const iconSvg =
+    LAUNCHER_ICONS[(launcher?.icon ?? 'chat') as LauncherIconKey] ?? LAUNCHER_ICONS.chat
+  const bottom = launcher?.bottom ?? 20
+  const side = launcher?.side ?? 20
 
   return (
     <button
@@ -111,17 +128,15 @@ export function WidgetEmbed({
         trackEvent('landing_widget_launcher_clicked', { loadingPolicy })
         loadWidgetRef.current(true)
       }}
-      className={`fixed bottom-5 ${sideClass} z-[2147483646] flex size-14 items-center justify-center rounded-full bg-primary text-white shadow-[0_4px_16px_rgba(0,0,0,0.25)] transition-transform hover:scale-105 active:scale-95`}
+      style={{
+        bottom: `${bottom}px`,
+        [position === 'bottom-left' ? 'left' : 'right']: `${side}px`,
+        backgroundColor: launcher?.color ?? 'var(--primary)',
+        color: launcher?.iconColor ?? '#ffffff',
+      }}
+      className="fixed z-[2147483646] flex size-14 items-center justify-center rounded-full shadow-[0_4px_16px_rgba(0,0,0,0.25)] transition-transform hover:scale-105 active:scale-95"
     >
-      <svg width="27" height="27" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <path
-          d="M6.5 5.5h11A2.5 2.5 0 0 1 20 8v6a2.5 2.5 0 0 1-2.5 2.5H12L8 19v-2.5H6.5A2.5 2.5 0 0 1 4 14V8a2.5 2.5 0 0 1 2.5-2.5Z"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinejoin="round"
-        />
-        <path d="M8 10h8M8 13h5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-      </svg>
+      <span aria-hidden="true" className="flex" dangerouslySetInnerHTML={{ __html: iconSvg }} />
     </button>
   )
 }
