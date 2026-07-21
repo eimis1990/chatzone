@@ -204,4 +204,45 @@ describe('widget.js loader', () => {
       vi.useRealTimers()
     }
   })
+
+  it('a second script eval on the same page is a no-op (no duplicate launchers)', () => {
+    const { window, document } = setupDOM('DUP_KEY')
+    expect(document.querySelectorAll('[data-cbz-launcher]').length).toBe(1)
+
+    // Re-run the loader in the same DOM (SPA remount racing the old instance,
+    // or a customer pasting the snippet twice).
+    // eslint-disable-next-line no-new-func
+    const again = new Function('window', 'document', 'fetch', widgetSrc)
+    again(window, document, window.fetch)
+
+    expect(document.querySelectorAll('[data-cbz-launcher]').length).toBe(1)
+  })
+
+  it('paints the launcher from the cached theme immediately on repeat visits', () => {
+    const dom = new JSDOM('<!DOCTYPE html><html><body></body></html>', {
+      url: 'https://example.com',
+      runScripts: 'dangerously',
+      resources: 'usable',
+    })
+    const { window } = dom
+    const { document } = window
+    window.localStorage.setItem(
+      'cbz_theme_REPEAT_KEY',
+      JSON.stringify({ theme: { launcherColor: '#c04b0c' }, avatarUrl: '' }),
+    )
+    const script = document.createElement('script')
+    script.setAttribute('data-bot-key', 'REPEAT_KEY')
+    script.setAttribute('src', 'https://app.chatbotzone.com/widget.js')
+    document.head.appendChild(script)
+    Object.defineProperty(document, 'currentScript', { get: () => script, configurable: true })
+    window.fetch = vi.fn(() => new Promise(() => {})) as unknown as typeof window.fetch // config never resolves
+
+    // eslint-disable-next-line no-new-func
+    const fn = new Function('window', 'document', 'fetch', widgetSrc)
+    fn(window, document, window.fetch)
+
+    const launcher = document.querySelector<HTMLElement>('[data-cbz-launcher]')
+    // #c04b0c === rgb(192, 75, 12); jsdom normalizes to rgb()
+    expect(launcher?.style.backgroundColor).toBe('rgb(192, 75, 12)')
+  })
 })

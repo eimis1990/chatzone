@@ -34,8 +34,24 @@
 
   var position = script.getAttribute('data-position') || 'bottom-right'
 
+  // One live widget per page: if a wrapper is already mounted (second embed
+  // snippet, or an SPA remount racing a not-yet-removed instance), skip —
+  // duplicate instances double every surface AND the greeting sound.
+  if (document.querySelector('[data-cbz-wrapper]')) return
+
   // Bot config (theme, logo, launcher options) — fetched after mount.
   var config = null
+
+  // Repeat visits: seed the launcher's paint inputs from the last visit's
+  // theme so the button shows the bot's accent color immediately — without
+  // this, a config fetch slower than the 1.5s reveal safety net flashes the
+  // default purple. First-ever visits still start with the default until the
+  // config arrives (nothing cached to know better).
+  var THEME_CACHE_KEY = 'cbz_theme_' + botKey
+  try {
+    var cachedPaint = JSON.parse(window.localStorage.getItem(THEME_CACHE_KEY) || 'null')
+    if (cachedPaint && cachedPaint.theme) config = cachedPaint
+  } catch (_) {}
 
   // Derive APP_URL from the script's own src origin (same host that serves widget.js)
   var appUrl = ''
@@ -372,6 +388,10 @@
   }
 
   function showProactiveGreeting(settings) {
+    // A torn-down instance (SPA nav removed our DOM, timer survived) must not
+    // fire — WebAudio needs no DOM, so without this the sound plays with no
+    // visible bubble ("ghost pop").
+    if (!document.body || !document.body.contains(proactiveGreeting)) return
     if (isOpen || !settings || !settings.messages || !settings.messages.length) return
     var message = settings.messages[Math.floor(Math.random() * settings.messages.length)]
     if (!message) return
@@ -759,6 +779,15 @@
       .then(function (c) {
         if (c) {
           config = c
+          // Remember the launcher paint inputs for the next visit (see
+          // THEME_CACHE_KEY above). Theme + avatar only — never cache
+          // greeting settings, so scheduling stays tied to fresh config.
+          try {
+            window.localStorage.setItem(
+              THEME_CACHE_KEY,
+              JSON.stringify({ theme: c.theme || {}, avatarUrl: c.avatarUrl || '' })
+            )
+          } catch (_) {}
           // Match the chat window's configured corner radius.
           if (c.theme && typeof c.theme.cornerRadius === 'number') {
             iframeContainer.style.borderRadius = c.theme.cornerRadius + 'px'
