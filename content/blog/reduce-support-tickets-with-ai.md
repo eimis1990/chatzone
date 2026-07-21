@@ -2,6 +2,8 @@
 title: 5 ways an AI agent cuts your e-commerce support tickets
 description: Where support volume actually comes from in e-commerce — and how an AI chat & voice agent removes the repetitive load so your team handles only what matters.
 date: 2026-06-26
+topic: ai-customer-support
+related: where-is-my-order-ai, automate-returns-with-ai-chatbot, ai-chatbot-human-handoff
 updated: 2026-06-30
 author: Eimantas Kudarauskas
 image: /blog/reduce-support-tickets-with-ai.webp

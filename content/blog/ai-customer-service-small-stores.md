@@ -2,6 +2,8 @@
 title: AI customer service for small online stores: what you actually need
 description: An honest guide for solo founders and small teams — what AI customer service genuinely helps a small store with, what to skip, and how to start without hiring or coding anything.
 date: 2026-07-10
+topic: ai-customer-support
+related: reduce-support-tickets-with-ai, how-much-does-ai-chatbot-cost, ai-chatbot-for-online-store
 author: Eimantas Kudarauskas
 image: /blog/ai-customer-service-small-stores.webp
 ---

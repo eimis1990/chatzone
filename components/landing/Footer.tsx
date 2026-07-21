@@ -30,6 +30,18 @@ export function Footer() {
           <span aria-hidden="true" className="text-base font-bold text-white/30">
             •
           </span>
+          <Link href="/about" className="transition-colors hover:text-white">
+            About
+          </Link>
+          <span aria-hidden="true" className="text-base font-bold text-white/30">
+            •
+          </span>
+          <Link href="/editorial-policy" className="transition-colors hover:text-white">
+            Editorial policy
+          </Link>
+          <span aria-hidden="true" className="text-base font-bold text-white/30">
+            •
+          </span>
           <Link href="/privacy" className="transition-colors hover:text-white">
             Privacy
           </Link>

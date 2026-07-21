@@ -2,6 +2,7 @@
 title: "AI product descriptions for e-commerce: a safe SEO workflow"
 description: "Use AI to draft product descriptions at scale without inventing claims, duplicating pages, or weakening SEO. Includes a practical review workflow."
 date: 2026-07-18
+topic: ecommerce-ai
 author: Eimantas Kudarauskas
 image: /blog/ai-product-descriptions-ecommerce.webp
 related: ai-for-ecommerce, generative-engine-optimization-ecommerce, how-to-get-products-recommended-by-chatgpt

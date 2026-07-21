@@ -2,6 +2,8 @@
 title: How to choose an AI support agent for your store
 description: A vendor-neutral checklist for picking an AI chat or voice agent for e-commerce — the pricing-model trap, grounding, real store actions, handoff, and the questions that actually decide it.
 date: 2026-06-27
+topic: vendor-comparisons
+related: best-ai-chatbot-for-ecommerce, how-much-does-ai-chatbot-cost, test-ai-chatbot-before-launch
 updated: 2026-06-30
 author: Eimantas Kudarauskas
 image: /blog/how-to-choose-ai-support-agent.webp
@@ -9,7 +11,7 @@ image: /blog/how-to-choose-ai-support-agent.webp
 
 Every AI support tool demos beautifully. You type a question, it answers in a friendly voice, and you picture the repetitive tickets melting away. Then you install it on your real store, point it at real traffic, and find the polished demo and the day-to-day reality are two different things — including the bill, which can be three or four times what you budgeted for the same volume of conversations.
 
-This is a buyer's checklist, written by people who build one of these tools (Loqara) but would rather you pick the right one than the wrong one. It's vendor-neutral on purpose: the questions below apply whether you're looking at Loqara, an incumbent helpdesk, or a flow-builder. Work through them in order, run the math on your own numbers, and the field narrows fast.
+This is a buyer's checklist, written by people who build one of these tools (Loqara) but would rather you pick the right one than the wrong one. It's vendor-neutral on purpose: the questions below apply whether you're looking at Loqara, an incumbent helpdesk, or a flow-builder. Work through them in order, run the math on your own numbers, and the field narrows fast. (If you're still assembling a shortlist to run through it, start with our [round-up of the best chatbot platforms](/blog/best-chatbot-platforms).)
 
 <blockquote class="quick-answer">Choose by what decides value, not the feature list: the <strong>pricing model</strong> (per-resolution, per-conversation, and per-seat can be <strong>3–4× apart</strong> on the same traffic), <em>grounding</em> so it answers only from your content, real store actions like product search and order lookup, clean human handoff, and a one-line install. Then test it on real traffic before you pay.</blockquote>
 

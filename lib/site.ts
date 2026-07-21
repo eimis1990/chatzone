@@ -21,6 +21,21 @@ export const LEGAL_UPDATED = {
   terms: '2026-07-02',
 } as const
 
+/**
+ * The publishing author (single-author blog). Facts only — role and links are
+ * verifiable; extend via owner input, never invention (design §3.8).
+ */
+export const AUTHOR = {
+  name: 'Eimantas Kudarauskas',
+  slug: 'eimantas-kudarauskas',
+  jobTitle: 'Founder',
+  linkedin: 'https://www.linkedin.com/in/ekudarauskas/',
+  photo: '/ceo.webp',
+} as const
+
+/** Creation/last-substantive-edit dates of the static identity pages. */
+export const IDENTITY_PAGES_UPDATED = '2026-07-21'
+
 /** Render a YYYY-MM-DD date as e.g. "July 2, 2026" for visible "last updated" labels. */
 export function formatUpdated(iso: string): string {
   return new Date(`${iso}T00:00:00Z`).toLocaleDateString('en-US', {

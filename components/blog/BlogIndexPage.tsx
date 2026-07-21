@@ -4,6 +4,7 @@ import { BlogPagination } from '@/components/blog/BlogPagination'
 import { LandingNav } from '@/components/landing/LandingNav'
 import { Footer } from '@/components/landing/Footer'
 import type { BlogPage, BlogPost } from '@/lib/blog'
+import { BLOG_TOPICS } from '@/lib/blog-topics'
 
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString('en-US', {
@@ -13,7 +14,7 @@ function formatDate(iso: string): string {
   })
 }
 
-function PostCard({ post, preloadImage }: { post: BlogPost; preloadImage: boolean }) {
+export function PostCard({ post, preloadImage }: { post: BlogPost; preloadImage: boolean }) {
   const href = `/blog/${post.slug}`
   return (
     <article className="group grid grid-cols-[7rem_minmax(0,1fr)] items-start rounded-3xl border border-black/[0.07] bg-white p-3 shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_12px_32px_-12px_rgba(0,0,0,0.18)] sm:block">
@@ -83,6 +84,18 @@ export function BlogIndexPage({ archive }: { archive: BlogPage }) {
           <p className="mx-auto mt-4 max-w-xl text-lg text-gray-600">
             Practical guides on AI chat &amp; voice support for modern stores.
           </p>
+          <nav aria-label="Browse by topic" className="mt-8 flex flex-wrap justify-center gap-2">
+            {BLOG_TOPICS.map((t) => (
+              <Link
+                key={t.slug}
+                href={`/blog/topics/${t.slug}`}
+                prefetch={false}
+                className="rounded-full border border-black/10 bg-white/70 px-4 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:border-primary/40 hover:text-primary"
+              >
+                {t.name}
+              </Link>
+            ))}
+          </nav>
         </div>
       </section>
 

@@ -2,6 +2,8 @@
 title: Best AI chatbots for e-commerce in 2026
 description: An honest, platform-agnostic comparison of the best AI chatbots for e-commerce — what each does well, how they're priced, and which one fits your store.
 date: 2026-06-30
+topic: vendor-comparisons
+related: best-ai-chatbot-for-shopify, best-ai-chatbot-for-woocommerce, how-to-choose-ai-support-agent
 updated: 2026-06-30
 author: Eimantas Kudarauskas
 image: /blog/best-ai-chatbot-for-ecommerce.webp
@@ -111,7 +113,7 @@ Powerful and endlessly configurable, but heavy and costly for most stores, with 
 
 <p class="pills"><span class="pill">Best for: done-for-you AI</span><span class="pill">Catalog-aware</span></p>
 
-A growing class of AI agents built specifically for online retail — catalog-aware, often managed for you. They can be a strong fit if you want a hands-off setup, though pricing tends to be per resolution or custom, so model your volume before committing.
+A growing class of AI agents built specifically for online retail — catalog-aware, often managed for you. They can be a strong fit if you want a hands-off setup, though pricing tends to be per resolution or custom, so model your volume before committing. We track the newer entrants in this space in our [round-up of new AI chatbots to watch in 2026](/blog/new-ai-chatbots-2026).
 
 ## How do I choose between them?
 

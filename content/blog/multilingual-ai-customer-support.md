@@ -2,6 +2,7 @@
 title: Multilingual customer support with AI (without hiring a bigger team)
 description: How an AI chatbot lets an online store answer shoppers in their own language 24/7 — what it does well, where to keep a human, and how to set it up in an afternoon.
 date: 2026-07-02
+topic: ai-customer-support
 author: Eimantas Kudarauskas
 image: /blog/multilingual-ai-customer-support.webp
 related: voice-ai-for-ecommerce-support, best-ai-chatbot-for-ecommerce, ai-chatbot-for-online-store

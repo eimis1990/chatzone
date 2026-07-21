@@ -445,7 +445,7 @@ generated file contains only deliberate entries.
       or omit `lastModified` where no reliable source exists.
 - [x] Do not instantiate `new Date()` merely because the sitemap was requested.
 - [x] Validate unique URLs, valid ISO dates, and `updated >= date`.
-- [ ] Include new About/author/policy/methodology and topic-hub routes when they
+- [x] Include new About/author/policy/methodology and topic-hub routes when they
       become public in Phase 5.
 
 **Acceptance:** two unchanged sitemap requests/builds produce the same modification
@@ -536,13 +536,13 @@ current visible/product truth.
 
 - [ ] Obtain and fact-check company description, founder role/experience, public
       profiles, editorial process, correction contact, and comparison methodology.
-- [ ] Add visible links among author bylines, author page, About, policy, and
+- [x] Add visible links among author bylines, author page, About, policy, and
       methodology pages.
-- [ ] List authored articles on the author page without loading all cover images.
-- [ ] Enrich article Person schema with canonical author URL, verified `sameAs`,
+- [x] List authored articles on the author page without loading all cover images.
+- [x] Enrich article Person schema with canonical author URL, verified `sameAs`,
       `jobTitle`, and `worksFor` the existing Organization entity.
-- [ ] Add route-specific metadata, canonicals, social cards, and sitemap entries.
-- [ ] Add an honest AI-assistance disclosure policy if automation materially
+- [x] Add route-specific metadata, canonicals, social cards, and sitemap entries.
+- [x] Add an honest AI-assistance disclosure policy if automation materially
       contributes to publication; do not add a performative disclosure unsupported
       by the actual workflow.
 
@@ -560,16 +560,16 @@ author/publisher/methodology information.
 - Modify: `app/sitemap.ts`, blog navigation/listing
 - Test: `tests/unit/blog-topics.test.ts`
 
-- [ ] Define 4–6 stable topics based on actual product/audience intent, for example:
+- [x] Define 4–6 stable topics based on actual product/audience intent, for example:
       AI customer support, ecommerce AI, platform integrations, voice AI, AI search
       visibility, and vendor comparisons.
-- [ ] Assign exactly one primary topic to each article and optional curated secondary
+- [x] Assign exactly one primary topic to each article and optional curated secondary
       relationships only where needed.
-- [ ] Give each hub a unique editorial introduction, pillar page, ordered supporting
+- [x] Give each hub a unique editorial introduction, pillar page, ordered supporting
       guides, and clear audience outcome.
-- [ ] Avoid generating hubs for arbitrary tags or exact-query variants.
-- [ ] Link hubs from the blog index and articles; add indexable canonicals/metadata.
-- [ ] Test that every post has a valid topic and every hub has enough distinct value.
+- [x] Avoid generating hubs for arbitrary tags or exact-query variants.
+- [x] Link hubs from the blog index and articles; add indexable canonicals/metadata.
+- [x] Test that every post has a valid topic and every hub has enough distinct value.
 
 **Acceptance:** every current article belongs to a deliberate topical cluster and no
 hub is a thin duplicate listing.
@@ -582,12 +582,12 @@ hub is a thin duplicate listing.
 - Modify frontmatter for 28 posts listed in Appendix A
 - Test: `tests/unit/blog-related.test.ts`
 
-- [ ] Add explicit `related` slugs to all current posts where editorial selection is
+- [x] Add explicit `related` slugs to all current posts where editorial selection is
       possible.
-- [ ] Replace global-recency fallback with same-topic relevance as a defensive
+- [x] Replace global-recency fallback with same-topic relevance as a defensive
       fallback for future drafts.
-- [ ] Reject nonexistent/self/duplicate related slugs in the audit/test suite.
-- [ ] Ensure related links are reciprocal when that helps readers, without forcing
+- [x] Reject nonexistent/self/duplicate related slugs in the audit/test suite.
+- [x] Ensure related links are reciprocal when that helps readers, without forcing
       every relation to be symmetrical.
 
 **Acceptance:** no published article shows unrelated guides merely because they are
@@ -600,14 +600,14 @@ newest; all 51 current posts have curated related content.
 - Modify affected `content/blog/*.md`
 - Add audit coverage in `scripts/audit-blog-content.mjs`
 
-- [ ] Add at least one meaningful inbound contextual link to each of the 12 orphaned
+- [x] Add at least one meaningful inbound contextual link to each of the 12 orphaned
       posts in Appendix A.
-- [ ] Add a second relevant contextual outbound blog link to
+- [x] Add a second relevant contextual outbound blog link to
       `ai-fraud-detection-ecommerce` and
       `measure-ai-search-visibility-ecommerce`.
-- [ ] Use descriptive anchors that accurately describe the destination; do not
+- [x] Use descriptive anchors that accurately describe the destination; do not
       stuff exact-match keywords unnaturally.
-- [ ] Re-run a graph report and manually review that every link helps the reader's
+- [x] Re-run a graph report and manually review that every link helps the reader's
       next step.
 
 **Acceptance:** zero current posts have no contextual inbound link and all current
@@ -663,14 +663,14 @@ recreated by merely summarizing public web pages.
 - Modify: `package.json` (`audit:blog`)
 - Add fixture tests if parsing logic becomes nontrivial
 
-- [ ] Report duplicate slugs/titles/descriptions, invalid dates, missing images,
+- [x] Report duplicate slugs/titles/descriptions, invalid dates, missing images,
       broken internal links, broken related slugs, missing topics, low outbound
       internal links, zero inbound links, and missing required template sections.
-- [ ] Distinguish errors (objective broken state) from warnings (editorial review).
-- [ ] Fail the command only for objective errors; print actionable slugs for warnings.
-- [ ] Run the audit in the normal pre-release checklist and document it in
+- [x] Distinguish errors (objective broken state) from warnings (editorial review).
+- [x] Fail the command only for objective errors; print actionable slugs for warnings.
+- [x] Run the audit in the normal pre-release checklist and document it in
       `docs/seo-content-loop.md`.
-- [ ] Keep human source-support and helpfulness review explicit; do not claim the
+- [x] Keep human source-support and helpfulness review explicit; do not claim the
       script can score E-E-A-T.
 
 **Acceptance:** `npm run audit:blog` is deterministic, catches a deliberately broken

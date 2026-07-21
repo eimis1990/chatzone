@@ -10,7 +10,8 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "test": "NODE_OPTIONS=--experimental-require-module vitest run",
-    "test:watch": "NODE_OPTIONS=--experimental-require-module vitest"
+    "test:watch": "NODE_OPTIONS=--experimental-require-module vitest",
+    "audit:blog": "node scripts/audit-blog-content.mjs"
   },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.73",

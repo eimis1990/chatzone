@@ -2,6 +2,7 @@
 title: "AI inventory forecasting for e-commerce: reduce stockouts without guessing"
 description: "Learn how AI demand forecasting uses sales, promotions, lead times, and returns—and how to turn forecasts into safer inventory decisions."
 date: 2026-07-18
+topic: ecommerce-ai
 author: Eimantas Kudarauskas
 image: /blog/ai-inventory-forecasting-ecommerce.webp
 related: ai-for-ecommerce, black-friday-ai-agent, where-is-my-order-ai

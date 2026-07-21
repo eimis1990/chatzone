@@ -2,6 +2,7 @@
 title: "IndexNow for e-commerce: a practical setup and monitoring guide"
 description: Learn how IndexNow works for online stores, which product changes to submit, how to implement it safely, and what it can—and cannot—do for AI visibility.
 date: 2026-07-17
+topic: ai-search-visibility
 author: Eimantas Kudarauskas
 image: /blog/indexnow-ecommerce-guide.webp
 related: generative-engine-optimization-ecommerce, measure-ai-search-visibility-ecommerce, how-to-get-products-recommended-by-chatgpt

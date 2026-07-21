@@ -2,6 +2,7 @@
 title: "How to prevent AI chatbot hallucinations in customer service"
 description: Learn why customer-service AI invents answers and how grounding, live data, citations, guardrails, human handoff, and testing reduce the risk.
 date: 2026-07-17
+topic: ai-customer-support
 author: Eimantas Kudarauskas
 image: /blog/prevent-ai-chatbot-hallucinations.webp
 related: ecommerce-ai-chatbot-knowledge-base, test-ai-chatbot-before-launch, ai-chatbot-human-handoff

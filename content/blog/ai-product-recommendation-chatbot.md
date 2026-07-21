@@ -2,6 +2,7 @@
 title: "AI product recommendation chatbots: a practical guide for e-commerce"
 description: Learn how an AI product recommendation chatbot turns natural-language needs into relevant products — plus setup, examples, metrics, and common mistakes.
 date: 2026-07-15
+topic: ecommerce-ai
 author: Eimantas Kudarauskas
 image: /blog/ai-product-recommendation-chatbot.webp
 related: agentic-commerce-ecommerce, recover-abandoned-carts-ai-chatbot, best-ai-chatbot-for-ecommerce

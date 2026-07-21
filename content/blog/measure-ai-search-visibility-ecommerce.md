@@ -2,6 +2,7 @@
 title: "How to measure AI search visibility for your e-commerce store"
 description: "Track AI search visibility with citations, cited pages, referral traffic, conversions, and revenue—without relying on unstable prompt screenshots."
 date: 2026-07-17
+topic: ai-search-visibility
 author: Eimantas Kudarauskas
 image: /blog/measure-ai-search-visibility-ecommerce.webp
 related: generative-engine-optimization-ecommerce, indexnow-ecommerce-guide, how-to-get-products-recommended-by-chatgpt
@@ -187,7 +188,7 @@ Group product, category, policy, comparison, and educational pages. A return-pol
 
 ### 4. Improve existing pages first
 
-Add missing facts, make the direct answer clearer, consolidate overlapping pages, strengthen internal links, and update evidence. Notify participating engines with [IndexNow](/blog/indexnow-ecommerce-guide) when meaningful changes go live.
+Add missing facts, make the direct answer clearer, consolidate overlapping pages, strengthen internal links, and update evidence. Notify participating engines with [IndexNow](/blog/indexnow-ecommerce-guide) when meaningful changes go live. The on-page tactics behind those improvements are covered in our [GEO guide for e-commerce](/blog/generative-engine-optimization-ecommerce).
 
 ### 5. Publish only when there is a distinct gap
 

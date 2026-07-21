@@ -2,6 +2,7 @@
 title: "Google AI Mode shopping: how e-commerce stores can prepare"
 description: Learn how products appear in Google AI Mode shopping, which catalog and page signals matter, and what merchants should fix before conversational search grows.
 date: 2026-07-15
+topic: ai-search-visibility
 author: Eimantas Kudarauskas
 image: /blog/google-ai-mode-shopping-ecommerce.webp
 related: how-to-get-products-recommended-by-chatgpt, agentic-commerce-ecommerce, ai-product-recommendation-chatbot

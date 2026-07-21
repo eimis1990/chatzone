@@ -2,6 +2,8 @@
 title: "AI voice agents explained: when customers can just talk to your website"
 description: What an AI voice agent is, how a voice chatbot works (speech in, LLM, speech out), what it costs per minute, and the honest limits — explained simply.
 date: 2026-07-03
+topic: voice-ai
+related: add-voice-ai-to-online-store, voice-ai-for-ecommerce-support, conversational-ai-vs-chatbot
 author: Eimantas Kudarauskas
 image: /blog/ai-voice-agents-explained.webp
 ---

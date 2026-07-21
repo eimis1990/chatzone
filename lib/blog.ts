@@ -26,6 +26,8 @@ export interface BlogPost {
   headings: Heading[]
   /** Q&A pulled from the post's "Frequently asked questions" section, for FAQ schema. */
   faq: FaqItem[]
+  /** Primary topic slug from the controlled vocabulary (lib/blog-topics.ts). */
+  topic: string
   /** Explicit related-post slugs (frontmatter `related:`); else recent posts are used. */
   related?: string[]
   /** Author's LinkedIn profile URL, shown as a button in the byline. */
@@ -223,6 +225,7 @@ function fileToPost(filename: string): BlogPost {
       ? data.related.split(',').map((s) => s.trim()).filter(Boolean)
       : undefined,
     faq: extractFaq(body),
+    topic: data.topic ?? '',
   }
 }
 
@@ -275,9 +278,16 @@ export function getPostBySlug(slug: string): BlogPost | null {
   return getAllPosts().find((p) => p.slug === slug) ?? null
 }
 
+/** Posts in a topic cluster, newest first (pillar ordering is the hub's concern). */
+export function getPostsByTopic(topic: string): BlogPost[] {
+  return getAllPosts().filter((p) => p.topic === topic)
+}
+
 /**
  * Posts to feature as "related guides" under a post: the explicit `related:`
- * slugs first (in order), then the most recent other posts to fill up to `limit`.
+ * slugs first (in order), then — as a defensive fallback for future drafts —
+ * the newest posts from the SAME topic. Never global recency (design §3.5:
+ * topical relationships are deliberate, not "whatever shipped last").
  */
 export function getRelatedPosts(slug: string, limit = 3): BlogPost[] {
   const all = getAllPosts()
@@ -291,7 +301,7 @@ export function getRelatedPosts(slug: string, limit = 3): BlogPost[] {
   for (const rel of current.related ?? []) add(bySlug.get(rel))
   for (const p of all) {
     if (picks.length >= limit) break
-    add(p)
+    if (p.topic === current.topic) add(p)
   }
   return picks.slice(0, limit)
 }

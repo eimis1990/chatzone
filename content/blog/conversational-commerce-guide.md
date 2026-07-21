@@ -2,6 +2,7 @@
 title: "Conversational commerce: examples and a practical playbook"
 description: Conversational commerce turns chat and voice into product discovery, sales assistance, support, and handoff. See real use cases and how to implement it.
 date: 2026-07-15
+topic: ecommerce-ai
 author: Eimantas Kudarauskas
 image: /blog/conversational-commerce-guide.webp
 related: ai-product-recommendation-chatbot, capture-leads-with-conversational-chat, agentic-commerce-ecommerce

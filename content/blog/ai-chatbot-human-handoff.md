@@ -2,6 +2,8 @@
 title: "Human handoff done right: when AI should step aside"
 description: The best AI agents know their limits. Here's how clean human handoff works, when a bot should escalate, and why it's the feature that makes customers actually trust your chat.
 date: 2026-06-23
+topic: ai-customer-support
+related: reduce-support-tickets-with-ai, prevent-ai-chatbot-hallucinations, ai-customer-service-small-stores
 updated: 2026-06-30
 author: Eimantas Kudarauskas
 image: /blog/ai-chatbot-human-handoff.webp

@@ -2,6 +2,7 @@
 title: "How to test an AI chatbot before launch: e-commerce checklist"
 description: A practical pre-launch test plan covering chatbot knowledge, products, orders, privacy, prompt injection, human handoff, mobile UX, and regressions.
 date: 2026-07-17
+topic: ai-customer-support
 author: Eimantas Kudarauskas
 image: /blog/test-ai-chatbot-before-launch.webp
 related: ecommerce-ai-chatbot-knowledge-base, prevent-ai-chatbot-hallucinations, ai-chatbot-human-handoff

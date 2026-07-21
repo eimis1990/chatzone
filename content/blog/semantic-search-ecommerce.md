@@ -2,6 +2,7 @@
 title: "Semantic search for e-commerce: how product search works"
 description: Semantic search understands what shoppers mean instead of matching only exact keywords. Learn how it works, when it helps, and how to implement it safely.
 date: 2026-07-15
+topic: ecommerce-ai
 author: Eimantas Kudarauskas
 image: /blog/semantic-search-ecommerce.webp
 related: ai-product-recommendation-chatbot, conversational-commerce-guide, ai-chatbot-for-online-store

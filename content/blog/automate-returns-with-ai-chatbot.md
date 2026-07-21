@@ -2,6 +2,7 @@
 title: "How to automate e-commerce returns with an AI chatbot"
 description: Learn which parts of returns an AI chatbot can automate safely — policy answers, triage, order verification, labels, refunds, handoff, and measurement.
 date: 2026-07-15
+topic: ai-customer-support
 author: Eimantas Kudarauskas
 image: /blog/automate-returns-with-ai-chatbot.webp
 related: ai-chatbot-human-handoff, reduce-support-tickets-with-ai, where-is-my-order-ai

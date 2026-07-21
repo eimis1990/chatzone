@@ -2,6 +2,8 @@
 title: Best AI chatbots for WooCommerce in 2026
 description: The best AI chat (and voice) agents for WooCommerce stores — native plugins vs SaaS, what each does well, and how to pick one that reads your real products and orders.
 date: 2026-06-27
+topic: vendor-comparisons
+related: add-ai-agent-to-woocommerce, best-ai-chatbot-for-ecommerce, how-much-does-ai-chatbot-cost
 updated: 2026-06-30
 author: Eimantas Kudarauskas
 image: /blog/best-ai-chatbot-for-woocommerce.webp

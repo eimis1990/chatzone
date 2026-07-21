@@ -2,6 +2,8 @@
 title: How to add an AI chatbot to your online store (the one-line way)
 description: A practical guide to adding an AI chat agent to your e-commerce store — what it should do, how to set it up in minutes, and how to keep answers accurate.
 date: 2026-06-27
+topic: platform-integrations
+related: add-ai-agent-to-woocommerce, ai-chatbot-for-magento, test-ai-chatbot-before-launch
 updated: 2026-06-30
 author: Eimantas Kudarauskas
 image: /blog/ai-chatbot-for-online-store.webp
@@ -83,7 +85,7 @@ This is also why "which model?" is the wrong first question. A bigger model writ
 Getting a grounded agent live is genuinely a same-day job — no developer required. The flow is the same regardless of platform:
 
 1. **Add your knowledge.** Paste your FAQ, upload policy docs, or point it at your store URL. The agent indexes that content so it has something real to ground answers in.
-2. **Connect your store.** Authorise the connector so the agent can search live products and look up orders. Loqara has connectors for [WooCommerce](/blog/best-ai-chatbot-for-woocommerce), Shopify, and Magento, plus a product feed for everything else — this step is what turns answers into *actions*.
+2. **Connect your store.** Authorise the connector so the agent can search live products and look up orders. Loqara has connectors for [WooCommerce](/blog/best-ai-chatbot-for-woocommerce), Shopify, and [Magento](/blog/ai-chatbot-for-magento), plus a product feed for everything else — this step is what turns answers into *actions*.
 3. **Match your brand.** Set colours, corner radius, launcher, and an avatar so the widget looks native to your site, and pick a tone of voice. If you want it, turn on the real-time [voice agent](/blog/voice-ai-for-ecommerce-support) (English and Lithuanian today).
 4. **Preview, then embed.** Test it against your real questions, then drop a single `<script>` tag before `</body>`. The widget appears in the corner and you're answering customers the same afternoon. Edits go live the moment you save.
 

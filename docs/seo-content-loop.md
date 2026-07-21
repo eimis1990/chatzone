@@ -7,6 +7,20 @@ Perplexity, Gemini). Adapted from the Agensi playbook. ~1–2 hours, once a week
 Nothing here auto-publishes. You review every draft before it goes live — the whole
 brand is "honest voice", so a hallucinated price or feature is a real cost, not a typo.
 
+## Pre-release check (every content change)
+
+Run `npm run audit:blog` before publishing. It fails on objective breakage
+(duplicate titles, bad dates, broken internal/related links, missing images or
+topics) and prints warnings for editorial review (posts without external
+citations, missing quick-answer blocks, weak link graph). The script checks
+structure, not truth — whether a source actually supports a claim stays a
+human review step.
+
+**Priority order for content work** (per the 2026-07 SEO/GEO remediation):
+refresh and source existing posts, consolidate overlap, and add first-party
+evidence BEFORE writing net-new articles. New volume on top of an unsourced
+backlog compounds the problem.
+
 ## The ritual (Mondays)
 
 1. **Export Search Console data.** GSC → Performance → last 3 months → filter to

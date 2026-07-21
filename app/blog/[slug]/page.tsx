@@ -8,7 +8,8 @@ import { ArticleAside } from '@/components/blog/ArticleAside'
 import { RelatedGuides } from '@/components/blog/RelatedGuides'
 import { LinkedinIcon } from '@/components/blog/social-icons'
 import { getAllPosts, getPostBySlug, getRelatedPosts } from '@/lib/blog'
-import { SITE_URL, SITE_NAME } from '@/lib/site'
+import { getTopic } from '@/lib/blog-topics'
+import { SITE_URL, SITE_NAME, AUTHOR } from '@/lib/site'
 
 export function generateStaticParams() {
   return getAllPosts().map((p) => ({ slug: p.slug }))
@@ -58,7 +59,19 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
         description: post.description,
         datePublished: post.date,
         dateModified: post.updated ?? post.date,
-        author: { '@type': 'Person', name: post.author },
+        // Canonical author identity — resolves to the public author page.
+        author:
+          post.author === AUTHOR.name
+            ? {
+                '@type': 'Person',
+                '@id': `${SITE_URL}/authors/${AUTHOR.slug}#person`,
+                name: AUTHOR.name,
+                url: `${SITE_URL}/authors/${AUTHOR.slug}`,
+                jobTitle: AUTHOR.jobTitle,
+                sameAs: [AUTHOR.linkedin],
+                worksFor: { '@type': 'Organization', '@id': `${SITE_URL}/#organization`, name: SITE_NAME },
+              }
+            : { '@type': 'Person', name: post.author },
         publisher: {
           '@type': 'Organization',
           name: SITE_NAME,
@@ -95,6 +108,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
   }
 
   const related = getRelatedPosts(slug)
+  const topic = getTopic(post.topic)
   const postUrl = `${SITE_URL}/blog/${slug}`
 
   return (
@@ -110,6 +124,17 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
           <article className="min-w-0">
             <header className="mb-8">
               <p className="text-xs uppercase tracking-wide text-gray-500">
+                {topic && (
+                  <>
+                    <Link
+                      href={`/blog/topics/${topic.slug}`}
+                      className="font-semibold text-primary hover:underline"
+                    >
+                      {topic.name}
+                    </Link>
+                    {' · '}
+                  </>
+                )}
                 {formatDate(post.date)} · {post.readingMinutes} min read
               </p>
               <h1 className="mt-2 text-3xl font-semibold tracking-tight text-gray-900 sm:text-4xl">
@@ -127,7 +152,16 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                   />
                 ) : null}
                 <span className="text-sm leading-tight">
-                  <span className="font-semibold text-gray-900">{post.author}</span>
+                  {post.author === AUTHOR.name ? (
+                    <Link
+                      href={`/authors/${AUTHOR.slug}`}
+                      className="font-semibold text-gray-900 underline-offset-2 hover:underline"
+                    >
+                      {post.author}
+                    </Link>
+                  ) : (
+                    <span className="font-semibold text-gray-900">{post.author}</span>
+                  )}
                   <span className="text-gray-500"> • {post.authorRole}</span>
                 </span>
                 {post.authorLinkedin && (

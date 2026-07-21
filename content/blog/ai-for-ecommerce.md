@@ -2,6 +2,7 @@
 title: "AI for e-commerce: 12 practical ways to power your store in 2026"
 description: "See 12 practical uses of AI in e-commerce, what data each needs, where human review matters, and how to choose a first project that pays back."
 date: 2026-07-18
+topic: ecommerce-ai
 author: Eimantas Kudarauskas
 image: /blog/ai-for-ecommerce.webp
 related: shopify-ai-assistant-guide, ai-personalization-ecommerce, ai-inventory-forecasting-ecommerce

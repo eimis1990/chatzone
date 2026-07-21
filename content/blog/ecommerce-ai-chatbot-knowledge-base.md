@@ -2,6 +2,7 @@
 title: "How to build an AI-ready knowledge base for e-commerce support"
 description: Learn how to structure policies, product guidance, and support answers so an e-commerce AI chatbot can retrieve current facts and hand off safely.
 date: 2026-07-17
+topic: ai-customer-support
 author: Eimantas Kudarauskas
 image: /blog/ecommerce-ai-chatbot-knowledge-base.webp
 related: prevent-ai-chatbot-hallucinations, test-ai-chatbot-before-launch, ai-chatbot-human-handoff
@@ -171,7 +172,7 @@ Did the system fetch the correct source and market? Test paraphrases, typos, sho
 
 ### Answering
 
-Did the answer preserve conditions, avoid unsupported additions, cite the source, and state uncertainty when evidence was insufficient?
+Did the answer preserve conditions, avoid unsupported additions, cite the source, and state uncertainty when evidence was insufficient? This is the layer where hallucinations surface; the failure modes and fixes are covered in our guide to [preventing AI chatbot hallucinations](/blog/prevent-ai-chatbot-hallucinations).
 
 ### Action and escalation
 
