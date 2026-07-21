@@ -726,10 +726,10 @@ not Lighthouse or article count alone.
       _Implemented `lazyOnload` (delayed, not consent-gated) 2026-07-21; revisit if
       the consent posture changes — this is a compliance decision, not engineering._
 - [x] Ensure initial GA download does not compete with hero rendering.
-- [ ] Verify first page view, client route changes, CTA opens, signup submissions,
+- [x] Verify first page view, client route changes, CTA opens, signup submissions,
       and other conversion events after the loading change.
 - [x] Continue excluding `/embed/*` and nonproduction environments.
-- [ ] Compare Lighthouse unused-JS and network results.
+- [x] Compare Lighthouse unused-JS and network results.
 
 **Acceptance:** analytics remains accurate for agreed events and is absent from the
 critical rendering path.
@@ -745,7 +745,7 @@ critical rendering path.
       minimal Permissions Policy after checking voice/camera/microphone needs.
 - [x] Disable `x-powered-by` if supported by this Next build.
 - [x] Draft CSP for all real integrations and deploy it as Report-Only first.
-- [ ] Exercise homepage, auth, app, widget/embed, voice, Stripe, Supabase storage,
+- [x] Exercise homepage, auth, app, widget/embed, voice, Stripe, Supabase storage,
       analytics, and owner presentation flows.
 - [ ] Promote CSP to enforcement only when violations are understood; do not use
       broad `*`/unsafe allowances merely to silence reports.
@@ -803,7 +803,7 @@ not elevate the file above crawlable HTML.
       trade the current server-visible LCP text for a flash or hydration branch.
 - [x] Remove dead public selectors and route-scope non-public style bundles where
       Next's layout boundaries allow it.
-- [ ] Re-run three mobile audits; target Lighthouse's current estimated 410 ms
+- [x] Re-run three mobile audits; target Lighthouse's current estimated 410 ms
       render-blocking saving without adding inline-style duplication.
 
 **Acceptance:** public CSS transfer/render blocking is measurably lower, observed
@@ -812,8 +812,8 @@ LCP remains stable and visible, and no app/widget route loses required styles.
 ### Phase 6 gate
 
 - [x] Standard verification commands pass.
-- [ ] Best Practices remains 100 in an extension-free run.
-- [ ] Analytics conversions, headers, CSP policy, IndexNow delta behavior, and
+- [x] Best Practices remains 100 in an extension-free run.
+- [x] Analytics conversions, headers, CSP policy, IndexNow delta behavior, and
       `llms.txt` links are verified in production.
 
 ---
