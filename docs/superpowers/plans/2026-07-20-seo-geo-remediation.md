@@ -514,9 +514,9 @@ current visible/product truth.
 ### Phase 4 gate
 
 - [x] Standard verification commands pass.
-- [ ] SEO score remains 100 on public routes.
-- [ ] Sitemap, robots, canonical, noindex, OG, Twitter, and JSON-LD smoke matrix passes.
-- [ ] Search Console sitemap is resubmitted after production deployment.
+- [x] SEO score remains 100 on public routes.
+- [x] Sitemap, robots, canonical, noindex, OG, Twitter, and JSON-LD smoke matrix passes.
+- [ ] Search Console sitemap is resubmitted after production deployment. _(owner: deploy is live as of 2026-07-21 — resubmit in GSC now)_
 
 ---
 
