@@ -2,6 +2,10 @@
 
 File-based markdown blog that drives organic + AI-engine traffic.
 
+**Before creating, refreshing, or changing delivery for public content, follow the
+[SEO/GEO playbook](seo-geo-playbook.md).** This page describes the blog machinery
+and established topic boundaries; the playbook is the publication quality gate.
+
 ## Mechanics
 
 - Posts are `content/blog/<slug>.md` with frontmatter (title, description, date,
@@ -31,12 +35,14 @@ labelled comparison cards inside the narrow article + TOC layout; three-column
 tables stack on phones, while two-column tables stay tabular. Do not add manual
 scroll wrappers or per-post table HTML.
 
-## AEO conventions (see `docs/seo-content-loop.md`)
+## Answer-engine conventions
 
 Every post: a `<blockquote class="quick-answer">` (40–60 word direct answer) under
-the intro, question-based H2s, internal links, and a 6+ FAQ section. This is what
-gets cited by ChatGPT/Claude/Perplexity/Gemini. The weekly GSC gap-analysis loop
-(export Search Console → find gaps → write 3–5 posts) is documented there.
+the intro, natural question-based H2s where appropriate, contextual internal links,
+primary evidence, and useful FAQs. These structures improve comprehension and make
+claims easier to extract, but do not guarantee rankings, rich results, or citations.
+The [SEO/GEO playbook](seo-geo-playbook.md) is authoritative; the weekly GSC
+gap-analysis workflow is in `docs/seo-content-loop.md`.
 
 ## Images
 
