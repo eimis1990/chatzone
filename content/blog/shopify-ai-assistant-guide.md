@@ -2,6 +2,7 @@
 title: "Shopify AI assistant guide: Sidekick, Magic, and storefront helpers"
 description: "Understand Shopify Sidekick, Shopify Magic, and customer-facing AI assistants—what each does, where it works, and how to combine them safely."
 date: 2026-07-18
+topic: platform-integrations
 author: Eimantas Kudarauskas
 image: /blog/shopify-ai-assistant-guide.webp
 related: ai-for-ecommerce, best-ai-chatbot-for-shopify, ecommerce-ai-chatbot-knowledge-base

@@ -2,6 +2,8 @@
 title: Capture more leads with conversational chat
 description: Most store chat is treated as support only. Done right, it's also your highest-intent lead channel. Here's how to capture leads in conversation without being pushy.
 date: 2026-06-22
+topic: ecommerce-ai
+related: conversational-commerce-guide, ai-product-recommendation-chatbot, chatbot-roi-metrics-that-matter
 updated: 2026-06-30
 author: Eimantas Kudarauskas
 image: /blog/capture-leads-with-conversational-chat.webp

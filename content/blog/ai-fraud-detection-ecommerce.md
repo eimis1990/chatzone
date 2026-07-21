@@ -2,6 +2,7 @@
 title: "AI fraud detection for e-commerce: how it works and what it misses"
 description: "Learn how e-commerce fraud models score payments and accounts, which signals they use, how false declines happen, and what humans and rules still need to do."
 date: 2026-07-18
+topic: ecommerce-ai
 author: Eimantas Kudarauskas
 image: /blog/ai-fraud-detection-ecommerce.webp
 related: ai-for-ecommerce, ai-chatbot-gdpr-data-privacy, test-ai-chatbot-before-launch
@@ -159,7 +160,7 @@ Labels mature at different speeds. A payment approved today may become a dispute
 6. Document how customers can recover from a block or verify a legitimate order.
 7. Review data access, retention, and vendor terms as carefully as model performance.
 
-Custom models make sense only when volume, differentiated signals, and fraud-team capacity justify their development and monitoring. Most small stores benefit more from configuring proven provider controls and closing operational gaps.
+Custom models make sense only when volume, differentiated signals, and fraud-team capacity justify their development and monitoring. Most small stores benefit more from configuring proven provider controls and closing operational gaps. Fraud scoring is also just one of several places AI earns its keep in a store — our overview of [practical ways AI powers an online store](/blog/ai-for-ecommerce) puts it alongside the others.
 
 ## What are the limits of AI fraud detection?
 

@@ -2,6 +2,8 @@
 title: "Voice AI for e-commerce support: when it's worth it"
 description: Voice AI can answer customers out loud in real time — but it isn't right for every store. Here's when a voice agent pays off, when chat is the better call, and how to start small.
 date: 2026-06-24
+topic: voice-ai
+related: ai-voice-agents-explained, add-voice-ai-to-online-store, multilingual-ai-customer-support
 updated: 2026-06-30
 author: Eimantas Kudarauskas
 image: /blog/voice-ai-for-ecommerce-support.webp
@@ -90,7 +92,7 @@ Voice isn't free, and it isn't always the right fit:
 
 ## How to add voice to your store
 
-Adding voice doesn't have to be a project. With a tool that ships chat and voice in one widget, the path is short — and you stay in control of where it appears and what it costs.
+Adding voice doesn't have to be a project. With a tool that ships chat and voice in one widget, the path is short — and you stay in control of where it appears and what it costs. (We walk the full setup step by step in our guide to [adding a voice AI agent to your online store](/blog/add-voice-ai-to-online-store).)
 
 ### 1. Get chat grounded first
 

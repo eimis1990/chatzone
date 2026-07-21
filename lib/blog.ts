@@ -26,6 +26,8 @@ export interface BlogPost {
   headings: Heading[]
   /** Q&A pulled from the post's "Frequently asked questions" section, for FAQ schema. */
   faq: FaqItem[]
+  /** Primary topic slug from the controlled vocabulary (lib/blog-topics.ts). */
+  topic: string
   /** Explicit related-post slugs (frontmatter `related:`); else recent posts are used. */
   related?: string[]
   /** Author's LinkedIn profile URL, shown as a button in the byline. */
@@ -41,6 +43,15 @@ export interface Heading {
 export interface FaqItem {
   question: string
   answer: string
+}
+
+export const BLOG_PAGE_SIZE = 12
+
+export interface BlogPage {
+  posts: BlogPost[]
+  page: number
+  totalPages: number
+  totalPosts: number
 }
 
 /** URL-safe slug for a heading anchor (unicode letters/numbers kept). */
@@ -214,6 +225,7 @@ function fileToPost(filename: string): BlogPost {
       ? data.related.split(',').map((s) => s.trim()).filter(Boolean)
       : undefined,
     faq: extractFaq(body),
+    topic: data.topic ?? '',
   }
 }
 
@@ -228,13 +240,54 @@ export function getAllPosts(): BlogPost[] {
   return files.map(fileToPost).sort((a, b) => b.date.localeCompare(a.date))
 }
 
+/** The archive always has a first page, even before the first post is published. */
+export function getBlogPageCount(totalPosts: number): number {
+  return Math.max(1, Math.ceil(Math.max(0, totalPosts) / BLOG_PAGE_SIZE))
+}
+
+/** Slice an already sorted post list without allowing empty soft-404 pages. */
+export function getBlogPage(posts: BlogPost[], page: number): BlogPage | null {
+  const totalPages = getBlogPageCount(posts.length)
+  if (!Number.isSafeInteger(page) || page < 1 || page > totalPages) return null
+
+  const start = (page - 1) * BLOG_PAGE_SIZE
+  return {
+    posts: posts.slice(start, start + BLOG_PAGE_SIZE),
+    page,
+    totalPages,
+    totalPosts: posts.length,
+  }
+}
+
+/** `/blog` owns page 1; numbered archive routes begin at page 2. */
+export function parseBlogPageParam(value: string, totalPages: number): number | null {
+  if (!/^[2-9]\d*$/.test(value)) return null
+  const page = Number(value)
+  return Number.isSafeInteger(page) && page <= totalPages ? page : null
+}
+
+/** Static params for canonical numbered archive pages only. */
+export function getBlogPaginationParams(totalPosts: number): Array<{ page: string }> {
+  const totalPages = getBlogPageCount(totalPosts)
+  return Array.from({ length: Math.max(0, totalPages - 1) }, (_, index) => ({
+    page: String(index + 2),
+  }))
+}
+
 export function getPostBySlug(slug: string): BlogPost | null {
   return getAllPosts().find((p) => p.slug === slug) ?? null
 }
 
+/** Posts in a topic cluster, newest first (pillar ordering is the hub's concern). */
+export function getPostsByTopic(topic: string): BlogPost[] {
+  return getAllPosts().filter((p) => p.topic === topic)
+}
+
 /**
  * Posts to feature as "related guides" under a post: the explicit `related:`
- * slugs first (in order), then the most recent other posts to fill up to `limit`.
+ * slugs first (in order), then — as a defensive fallback for future drafts —
+ * the newest posts from the SAME topic. Never global recency (design §3.5:
+ * topical relationships are deliberate, not "whatever shipped last").
  */
 export function getRelatedPosts(slug: string, limit = 3): BlogPost[] {
   const all = getAllPosts()
@@ -248,7 +301,7 @@ export function getRelatedPosts(slug: string, limit = 3): BlogPost[] {
   for (const rel of current.related ?? []) add(bySlug.get(rel))
   for (const p of all) {
     if (picks.length >= limit) break
-    add(p)
+    if (p.topic === current.topic) add(p)
   }
   return picks.slice(0, limit)
 }

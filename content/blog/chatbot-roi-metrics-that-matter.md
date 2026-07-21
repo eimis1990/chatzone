@@ -2,6 +2,8 @@
 title: "Chatbot ROI: the 4 metrics that actually matter"
 description: Forget vanity stats. These four numbers — deflection, handoff rate, leads captured, and CSAT — tell you whether your store's AI agent is genuinely paying for itself.
 date: 2026-06-21
+topic: ai-customer-support
+related: how-much-does-ai-chatbot-cost, reduce-support-tickets-with-ai, ai-customer-service-statistics
 updated: 2026-06-30
 author: Eimantas Kudarauskas
 image: /blog/chatbot-roi-metrics-that-matter.webp
@@ -31,7 +33,7 @@ The good news: proving (or disproving) chatbot ROI is simple once you measure th
 
 ## The metrics that prove ROI
 
-Here are the metrics worth a place on your dashboard. The "what good looks like" column is deliberately a qualified range, not a fabricated precise stat — your real numbers depend on your catalog, your traffic, and how well you've fed the agent your content.
+Here are the metrics worth a place on your dashboard. The "what good looks like" column is deliberately a qualified range, not a fabricated precise stat — your real numbers depend on your catalog, your traffic, and how well you've fed the agent your content. (For industry-wide context on these ranges, see the [AI customer service statistics we've compiled for 2026](/blog/ai-customer-service-statistics).)
 
 | Metric | What it measures | Why it matters | What good looks like |
 | --- | --- | --- | --- |

@@ -2,6 +2,8 @@
 title: How much does an AI chatbot cost in 2026?
 description: An honest store owner's guide to what AI chatbots really cost in 2026 — the three pricing models, what drives the price, hidden fees, and how to estimate your own bill.
 date: 2026-07-07
+topic: vendor-comparisons
+related: chatbot-roi-metrics-that-matter, how-to-choose-ai-support-agent, best-ai-chatbot-for-ecommerce
 updated: 2026-07-07
 author: Eimantas Kudarauskas
 image: /blog/how-much-does-ai-chatbot-cost.webp
@@ -121,7 +123,7 @@ Skip the pricing-page math and start from your own numbers:
 4. **Add the one-off fees.** Layer in any setup, onboarding, or minimum-seat costs. Amortise them over the first year.
 5. **Test on a real free tier first.** The cheapest way to validate any estimate is to run the tool on your actual traffic. A genuine free allowance — Loqara's is 100 conversations a month — lets you see the real numbers before you pay a cent.
 
-Do this once and the "how much does it cost?" question answers itself, in your currency and your volume rather than the vendor's.
+Do this once and the "how much does it cost?" question answers itself, in your currency and your volume rather than the vendor's. If you're a small store still deciding whether AI support is worth it at all, our guide to [AI customer service for small online stores](/blog/ai-customer-service-small-stores) covers that decision from the budget side.
 
 ## Frequently asked questions
 

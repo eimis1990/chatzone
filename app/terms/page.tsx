@@ -1,9 +1,23 @@
 import type { Metadata } from 'next'
+import { LEGAL_UPDATED, formatUpdated } from '@/lib/site'
 
 export const metadata: Metadata = {
   title: 'Terms of Service — Loqara',
   description: 'The terms that govern your use of Loqara.',
   alternates: { canonical: '/terms' },
+  openGraph: {
+    title: 'Terms of Service — Loqara',
+    description: 'The terms that govern your use of Loqara.',
+    url: '/terms',
+    type: 'website',
+    images: [{ url: '/landing/og.jpg?v=4', width: 1200, height: 630, alt: 'Loqara' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Terms of Service — Loqara',
+    description: 'The terms that govern your use of Loqara.',
+    images: ['/landing/og.jpg?v=4'],
+  },
 }
 
 const CONTACT_EMAIL = 'hello@loqara.com'
@@ -13,7 +27,7 @@ export default function TermsPage() {
     <main className="mx-auto w-full max-w-2xl px-6 py-12">
       <h1 className="text-2xl font-semibold">Terms of Service</h1>
       <p className="mt-2 text-sm text-muted-foreground">
-        The terms that govern your use of Loqara. Last updated {new Date().getFullYear()}.
+        The terms that govern your use of Loqara. Last updated {formatUpdated(LEGAL_UPDATED.terms)}.
       </p>
 
       <section className="mt-8 space-y-3">

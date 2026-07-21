@@ -179,3 +179,34 @@ declaration block to `::before` ONLY — `::after` silently ends up with
 renders, the mirror doesn't. Fix: write two standalone rules, one per pseudo.
 Verified via `getComputedStyle(el, '::after').content` returning `"none"`. See
 the `.section-header-gradient` two-sided header glow in globals.css.
+
+## Browser-only preferences must not change the first hydrated tree
+
+`useReducedMotion()` cannot know the browser preference during server rendering.
+Branching directly on it made `HeroVideo` render video on the server and a poster
+on the first reduced-motion client render, causing a full hydration mismatch.
+Keep the server and first client snapshot identical. `HeroVideo` now reads a
+stable server snapshot through `useSyncExternalStore`, subscribes to viewport,
+motion, and connection changes with cleanup, and enables video only after the
+browser snapshot is available (`components/landing/HeroVideo.tsx:38-98`). The
+pure policy also keeps Save-Data and 2G clients poster-only
+(`lib/hero-media.ts:38-56`).
+
+The same rule applies to decorative subtrees: `Shimmer` previously returned
+`null` from a first-client reduced-motion branch and caused a separate CTA
+hydration mismatch. Render the same nodes and disable animation with a CSS media
+query (`components/landing/Shimmer.tsx:1-15`). Apply this pattern to color scheme,
+viewport, storage, and any browser-only state that changes element structure.
+
+## Deferred third-party launchers must replay the first interaction
+
+Simply delaying `widget.js` removes the real launcher, so an early visitor click
+either has no target or only starts loading and then requires a second click.
+`WidgetEmbed` renders a lightweight proxy for deferred policies, records whether
+that click should open chat, and clicks the real launcher after the loader fires
+(`components/landing/WidgetEmbed.tsx:43-74`, `104-113`). Keep the default policy
+immediate for owner presentations, cancel both delay and idle callbacks on unmount,
+and remove body-level widget nodes because they live outside React
+(`components/landing/WidgetEmbed.tsx:79-98`).
+
+_Last verified: 2026-07-21 (6b3b5e6)._

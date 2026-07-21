@@ -10,7 +10,8 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "test": "NODE_OPTIONS=--experimental-require-module vitest run",
-    "test:watch": "NODE_OPTIONS=--experimental-require-module vitest"
+    "test:watch": "NODE_OPTIONS=--experimental-require-module vitest",
+    "audit:blog": "node scripts/audit-blog-content.mjs"
   },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.73",
@@ -30,7 +31,6 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "framer-motion": "^12.40.0",
-    "lenis": "^1.3.23",
     "lucide-react": "^1.21.0",
     "mammoth": "^1.12.0",
     "marked": "^18.0.5",

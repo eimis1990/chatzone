@@ -1,9 +1,13 @@
+import type { Metadata } from 'next'
 import { requireRole, getUserOrgIds } from '@/lib/auth/guards'
 import { createServerClient } from '@/lib/supabase/server'
 import { AppSidebar, type BotLite } from '@/components/client/AppSidebar'
 import { MobileTabBar } from '@/components/client/MobileTabBar'
 import { MobileTopBar } from '@/components/client/MobileTopBar'
 import { Toaster } from '@/components/ui/sonner'
+
+// Dashboard is private — auth protects it; this keeps crawlers from indexing it.
+export const metadata: Metadata = { robots: { index: false, follow: false } }
 
 export default async function ClientLayout({
   children,

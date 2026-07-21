@@ -36,6 +36,8 @@ export interface AnalyticsEvents {
   pricing_plan_click: { plan: string; period: 'monthly' | 'annual'; price: number }
   /** An FAQ accordion item was expanded. */
   faq_opened: { question: string }
+  /** The deferred landing-page chat launcher was clicked. */
+  landing_widget_launcher_clicked: { loadingPolicy: 'idle' | 'interaction' }
 
   // ── Logged-in app usage ────────────────────────────────────────────────
   /** A new bot was created. */

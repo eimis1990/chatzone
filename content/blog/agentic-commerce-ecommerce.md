@@ -2,6 +2,7 @@
 title: "Agentic commerce explained: what online stores need to do in 2026"
 description: Agentic commerce lets AI research, recommend, and sometimes buy products for shoppers. Here is what it means for e-commerce stores — and what to fix now.
 date: 2026-07-15
+topic: ai-search-visibility
 author: Eimantas Kudarauskas
 image: /blog/agentic-commerce-ecommerce.webp
 related: ai-product-recommendation-chatbot, how-to-get-products-recommended-by-chatgpt, ai-chatbot-for-online-store

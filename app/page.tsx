@@ -1,12 +1,12 @@
 import { LandingNav } from '@/components/landing/LandingNav'
 import { Hero } from '@/components/landing/Hero'
-import { Features, Stats, HowItWorks, CTASection, Footer } from '@/components/landing/sections'
+import { Features, Stats, HowItWorks, CTASection } from '@/components/landing/sections'
+import { Footer } from '@/components/landing/Footer'
 import { Pricing } from '@/components/landing/Pricing'
 import { SetupPricing } from '@/components/landing/SetupPricing'
 import { Showcase } from '@/components/landing/Showcase'
 import { Faq } from '@/components/landing/Faq'
 import { FAQ } from '@/components/landing/faq-data'
-import { SmoothScroll } from '@/components/landing/SmoothScroll'
 import { WidgetEmbed } from '@/components/landing/WidgetEmbed'
 import { getLandingBotKey } from '@/lib/platform-bot'
 import { PLANS, DISPLAY_PLANS } from '@/lib/plans-catalog'
@@ -25,8 +25,10 @@ const PAID = DISPLAY_PLANS.map((p) => PLANS[p].monthly)
 const LOW_PRICE = Math.min(...PAID)
 const HIGH_PRICE = Math.max(...PAID)
 
-// Structured data — how Google rich results and AI assistants (GEO) parse what
-// Loqara is, who makes it, what it costs, and the most common questions.
+// Structured data describing what Loqara is, who makes it, and what it costs.
+// Every claim must map to visible page content or real product configuration.
+// FAQ markup mirrors the visible accordion (shared FAQ constant); Google limits
+// FAQ rich results to government/health sites, so none is expected here.
 const jsonLd = {
   '@context': 'https://schema.org',
   '@graph': [
@@ -101,7 +103,6 @@ export default async function Home() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <SmoothScroll />
       <LandingNav />
       <main>
         <Hero />
@@ -115,7 +116,7 @@ export default async function Home() {
         <CTASection />
       </main>
       <Footer />
-      {landingBotKey && <WidgetEmbed botKey={landingBotKey} />}
+      {landingBotKey && <WidgetEmbed botKey={landingBotKey} loadingPolicy="idle" />}
     </>
   )
 }

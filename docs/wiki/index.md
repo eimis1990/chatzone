@@ -30,6 +30,8 @@ Add a line here. How the wiki works: [README.md](README.md).
   done-for-you, RLS/security invariants.
 - [blog-and-seo](blog-and-seo.md) — markdown blog, FAQ schema, AEO conventions,
   image pipeline.
+- [seo-geo-playbook](seo-geo-playbook.md) — mandatory intent, evidence,
+  crawlability, article-format, delivery-budget, and release rules for public content.
 - [voice](voice.md) — ElevenLabs voice add-on.
 - [sales-leads](sales-leads.md) — owner outreach pipeline, prepared-email copy,
   chatbot-aware positioning, and UI behavior.
@@ -45,6 +47,8 @@ Add a line here. How the wiki works: [README.md](README.md).
 - `docs/DEPLOY.md`, `docs/SECURITY.md`, `docs/ROADMAP.md`
 - `docs/CHANNELS_IMPLEMENTATION.md` — paid messaging-channel plan, starting with Messenger
 - `docs/seo-content-loop.md` — weekly GSC content loop + article format
+- `docs/superpowers/specs/2026-07-20-seo-geo-remediation-design.md` — public-site audit decisions, scope, and release budgets
+- `docs/superpowers/plans/2026-07-20-seo-geo-remediation.md` — phased implementation checklist; accessibility is last
 - `docs/loqara-vs-parnidia.md` — competitor comparison
 - `docs/prompt-templates/` — bot system-prompt templates
 

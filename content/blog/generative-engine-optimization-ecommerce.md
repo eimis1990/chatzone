@@ -2,6 +2,7 @@
 title: "Generative engine optimization for e-commerce: a practical GEO guide"
 description: "A practical e-commerce GEO guide to making products, policies, and expertise easier for ChatGPT, Google AI Mode, Copilot, and other AI tools to cite."
 date: 2026-07-17
+topic: ai-search-visibility
 author: Eimantas Kudarauskas
 image: /blog/generative-engine-optimization-ecommerce.webp
 related: how-to-get-products-recommended-by-chatgpt, google-ai-mode-shopping-ecommerce, measure-ai-search-visibility-ecommerce

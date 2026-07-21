@@ -2,6 +2,8 @@
 title: Can you use ChatGPT for customer service?
 description: An honest look at using ChatGPT for customer service — what it does brilliantly, where raw ChatGPT falls short for a store, and why a grounded agent built on top of it is what you actually need.
 date: 2026-07-07
+topic: ai-customer-support
+related: conversational-ai-vs-chatbot, prevent-ai-chatbot-hallucinations, how-to-choose-ai-support-agent
 updated: 2026-07-07
 author: Eimantas Kudarauskas
 image: /blog/chatgpt-for-customer-service.webp

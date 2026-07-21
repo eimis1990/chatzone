@@ -2,6 +2,8 @@
 title: Best AI chatbots for Shopify in 2026
 description: An honest, up-to-date comparison of the best AI chatbots for Shopify — what each does well, how they're priced, and which one actually fits your store.
 date: 2026-06-27
+topic: vendor-comparisons
+related: shopify-ai-assistant-guide, best-ai-chatbot-for-ecommerce, how-much-does-ai-chatbot-cost
 updated: 2026-06-30
 author: Eimantas Kudarauskas
 image: /blog/best-ai-chatbot-for-shopify.webp

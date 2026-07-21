@@ -2,6 +2,7 @@
 title: "AI personalization in e-commerce: examples and a practical rollout"
 description: "Learn how AI personalization works across recommendations, search, email, and shopping assistants—and how to test it without privacy or margin problems."
 date: 2026-07-18
+topic: ecommerce-ai
 author: Eimantas Kudarauskas
 image: /blog/ai-personalization-ecommerce.webp
 related: ai-for-ecommerce, ai-product-recommendation-chatbot, semantic-search-ecommerce

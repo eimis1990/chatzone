@@ -2,6 +2,8 @@
 title: '"Where is my order?" — how AI answers your #1 support question automatically'
 description: The most common message in any e-commerce inbox is "where is my order?" Here's why it dominates, and how a grounded AI chat and voice agent verifies identity and answers it automatically, 24/7.
 date: 2026-07-10
+topic: ai-customer-support
+related: reduce-support-tickets-with-ai, automate-returns-with-ai-chatbot, ai-chatbot-human-handoff
 author: Eimantas Kudarauskas
 image: /blog/where-is-my-order-ai.webp
 ---
@@ -87,7 +89,7 @@ Three steps, roughly:
 
 Shopify isn't part of that live order-lookup connection today — worth knowing up front if that's your platform, so you're not caught out mid-setup.
 
-Order status isn't the only moment a bot pays for itself, either — the same grounded agent that answers "where is my order" is often the one that [catches a hesitating shopper before they abandon their cart](/blog/recover-abandoned-carts-ai-chatbot), for the same reason: it's there, with the right information, at the moment the question comes up.
+Order status isn't the only moment a bot pays for itself, either — the same grounded agent that answers "where is my order" is often the one that [catches a hesitating shopper before they abandon their cart](/blog/recover-abandoned-carts-ai-chatbot), for the same reason: it's there, with the right information, at the moment the question comes up. Returns are the next-biggest repetitive category after order status, and [they can be automated with the same approach](/blog/automate-returns-with-ai-chatbot).
 
 ## Frequently asked questions
 

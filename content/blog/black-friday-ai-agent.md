@@ -2,6 +2,8 @@
 title: Get your store ready for Black Friday with an AI agent
 description: A practical, timely prep guide for BFCM — how an AI agent absorbs the support surge (order status, shipping cutoffs, returns, sizing) 24/7 while your team handles the hard cases. Plus a readiness checklist and timeline.
 date: 2026-07-07
+topic: ecommerce-ai
+related: recover-abandoned-carts-ai-chatbot, reduce-support-tickets-with-ai, where-is-my-order-ai
 author: Eimantas Kudarauskas
 image: /blog/black-friday-ai-agent.webp
 ---

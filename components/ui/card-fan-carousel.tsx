@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { motion, useReducedMotion, type PanInfo } from 'framer-motion'
 
@@ -22,6 +23,19 @@ const WINGS = 3
 const RATIO = 678 / 418
 // The centered card zooms in slightly to draw the eye.
 const CENTER_SCALE = 1.06
+const PLACEHOLDER_COLORS = [
+  '#6d28d9',
+  '#65a30d',
+  '#be4762',
+  '#202124',
+  '#3159c9',
+  '#ef4a50',
+  '#239bd3',
+  '#a5755a',
+  '#e879b0',
+  '#c47d24',
+  '#9f4729',
+]
 
 /**
  * A fanned, draggable card carousel: the active card sits upright, centered and
@@ -40,6 +54,7 @@ export default function SocialCards({
   const [active, setActive] = useState(0)
   const [cardW, setCardW] = useState(260)
   const [paused, setPaused] = useState(false)
+  const [forwardNeighbourReady, setForwardNeighbourReady] = useState(false)
 
   const n = cards.length
 
@@ -52,6 +67,24 @@ export default function SocialCards({
     const ro = new ResizeObserver(apply)
     ro.observe(el)
     return () => ro.disconnect()
+  }, [])
+
+  // The previous card is an immediately visible neighbour. Defer the forward
+  // neighbour (the autoplay direction) until the main thread is idle so the
+  // showcase never competes with the hero's critical rendering work.
+  useEffect(() => {
+    const revealForwardNeighbour = () => setForwardNeighbourReady(true)
+    const idleApi = window as unknown as {
+      requestIdleCallback?: Window['requestIdleCallback']
+      cancelIdleCallback?: Window['cancelIdleCallback']
+    }
+    if (idleApi.requestIdleCallback) {
+      const idleId = idleApi.requestIdleCallback(revealForwardNeighbour, { timeout: 1500 })
+      return () => idleApi.cancelIdleCallback?.(idleId)
+    }
+
+    const timeoutId = setTimeout(revealForwardNeighbour, 400)
+    return () => clearTimeout(timeoutId)
   }, [])
 
   const go = useCallback((dir: number) => setActive((a) => ((a + dir) % n + n) % n), [n])
@@ -110,12 +143,14 @@ export default function SocialCards({
       role="group"
       aria-roledescription="carousel"
       aria-label="Widget designs"
+      data-testid="widget-design-carousel"
     >
       {/* Draggable stage. Cards are absolutely positioned and animate to their
           fan transform; a tap (no movement) focuses a side card. */}
       <motion.div
         className="relative cursor-grab active:cursor-grabbing"
         style={{ height: stageH, touchAction: 'pan-y' }}
+        data-testid="widget-design-stage"
         drag="x"
         dragConstraints={{ left: 0, right: 0 }}
         dragElastic={0.08}
@@ -125,12 +160,14 @@ export default function SocialCards({
           const off = offsetOf(i)
           const abs = Math.abs(off)
           const hidden = abs > WINGS
+          const mountImage = off === 0 || off === -1 || (off === 1 && forwardNeighbourReady)
           return (
             <motion.button
               key={i}
               type="button"
               aria-label={card.alt || `Design ${i + 1}`}
               aria-hidden={hidden}
+              aria-current={off === 0 ? 'true' : undefined}
               tabIndex={off === 0 ? 0 : -1}
               onClick={() => off !== 0 && setActive(i)}
               className="absolute left-1/2 top-1/2 bg-transparent"
@@ -153,17 +190,34 @@ export default function SocialCards({
               }}
               transition={reduce ? { duration: 0 } : { type: 'spring', stiffness: 260, damping: 30 }}
             >
-              {/* Not clipped/rounded — the image keeps its own corner radius and
-                  transparent corners; the drop shadow follows its shape. */}
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={card.imgUrl}
-                alt={card.alt || ''}
-                draggable={false}
-                loading="lazy"
-                className="pointer-events-none h-full w-full object-contain drop-shadow-[0_22px_45px_rgba(15,18,19,0.28)]"
-                style={{ opacity: off === 0 ? 1 : 0.94 }}
-              />
+              {/* Only the active card and immediate neighbours mount full pixels.
+                  Outer wings preserve the composition without requesting all 11
+                  screenshots during the initial page load. */}
+              {mountImage ? (
+                <Image
+                  src={card.imgUrl}
+                  alt={card.alt || ''}
+                  width={840}
+                  height={1360}
+                  sizes="(max-width: 640px) 56vw, (max-width: 1024px) 28vw, 300px"
+                  draggable={false}
+                  loading="lazy"
+                  className="pointer-events-none h-full w-full object-contain drop-shadow-[0_22px_45px_rgba(15,18,19,0.28)]"
+                  style={{ opacity: off === 0 ? 1 : 0.94 }}
+                />
+              ) : (
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none relative block h-full w-full overflow-hidden rounded-[22px] border border-gray-200 shadow-[0_22px_45px_rgba(15,18,19,0.12)]"
+                  style={{
+                    background: `linear-gradient(180deg, ${PLACEHOLDER_COLORS[i % PLACEHOLDER_COLORS.length]} 0 12%, #ffffff 12% 100%)`,
+                  }}
+                >
+                  <span className="absolute left-[8%] right-[8%] top-[18%] h-[9%] rounded-full bg-gray-100" />
+                  <span className="absolute left-[8%] right-[8%] top-[31%] h-[18%] rounded-2xl bg-gray-100" />
+                  <span className="absolute bottom-[8%] left-[8%] right-[8%] h-[7%] rounded-full border border-gray-200" />
+                </span>
+              )}
             </motion.button>
           )
         })}

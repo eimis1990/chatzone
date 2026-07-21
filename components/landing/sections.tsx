@@ -8,7 +8,6 @@ import {
   LanguagesIcon,
 } from 'lucide-react'
 import Image from 'next/image'
-import Link from 'next/link'
 import { Reveal, RevealSlide } from './Reveal'
 import { FeatureSpine, FeatureText } from './ScrollRevealText'
 import { GetStartedDialog } from './GetStartedDialog'
@@ -98,7 +97,7 @@ function FeatureRow({ feature, index }: { feature: Feature; index: number }) {
       <div
         className={`relative aspect-[10/7] overflow-hidden bg-[#f9f9f9] ${reversed ? 'lg:order-2' : ''}`}
       >
-        <RevealSlide from={reversed ? 'right' : 'left'} className="absolute inset-0">
+        <RevealSlide className="absolute inset-0">
           <Image
             src={feature.imageSrc}
             alt={feature.imageAlt}
@@ -123,7 +122,7 @@ function FeatureRow({ feature, index }: { feature: Feature; index: number }) {
 
 export function Features() {
   return (
-    <div id="features">
+    <div id="features" className="scroll-mt-20">
       <section className="bg-white">
         <div className="mx-auto max-w-3xl px-5 pt-24 pb-20 text-center">
           <Reveal>
@@ -170,7 +169,6 @@ export function Stats() {
         {stats.map((s, i) => (
           <Reveal
             key={s.label}
-            delay={i * 0.08}
             className={`border-white/10 px-6 py-12 text-center ${
               i === 0 ? '' : i % 2 === 0 ? 'md:border-l' : 'border-l'
             }`}
@@ -192,7 +190,7 @@ export function HowItWorks() {
     { image: '/landing/how-step-3.webp', title: 'Embed and go live', body: 'Paste one script tag. Your agent is answering — and your inbox is ready for handoffs.' },
   ]
   return (
-    <section id="how" className="bg-[#f6f8f6]">
+    <section id="how" className="scroll-mt-20 bg-[#f6f8f6]">
       <div className="mx-auto max-w-7xl px-5 py-24">
         <Reveal className="mx-auto max-w-2xl text-center">
           <h2 className="text-5xl font-light tracking-tight text-gray-900 sm:text-6xl">Live in an afternoon</h2>
@@ -200,14 +198,16 @@ export function HowItWorks() {
         </Reveal>
         <div className="mt-14 grid gap-6 md:grid-cols-3">
           {steps.map((s, i) => (
-            <Reveal key={s.title} delay={i * 0.1}>
+            <Reveal key={s.title}>
               <div className="group h-full overflow-hidden rounded-2xl border bg-white shadow-sm transition-shadow hover:shadow-md">
                 <div className="bg-[#faf8f5]">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
+                  <Image
                     src={s.image}
                     alt=""
                     aria-hidden="true"
+                    width={900}
+                    height={672}
+                    sizes="(min-width: 1280px) 405px, (min-width: 768px) 31vw, 100vw"
                     className="aspect-[4/3] w-full object-cover"
                   />
                 </div>
@@ -259,50 +259,5 @@ export function CTASection() {
         </Reveal>
       </div>
     </section>
-  )
-}
-
-// ───────────────────────── Footer ─────────────────────────
-export function Footer() {
-  return (
-    <footer className="relative isolate overflow-hidden text-white" style={{ backgroundColor: DARK }}>
-      {/* Faint grid, same as the logged-in app shell */}
-      <div className="shell-grid pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-full" aria-hidden="true" />
-      <div className="mx-auto max-w-7xl px-5 pb-12 pt-20 text-center">
-        {/* Oversized brand wordmark */}
-        <div
-          className="font-semibold leading-none tracking-tight"
-          style={{ fontSize: 'clamp(3rem, 12vw, 10rem)' }}
-        >
-          Loqara<span style={{ color: ACCENT }}>.</span>
-        </div>
-        <p className="mx-auto mt-6 max-w-md text-balance text-base text-white/55">
-          The AI chat &amp; voice agent for modern stores. Answers, leads, orders, and handoff — in one widget.
-        </p>
-
-        {/* Bottom bar (no divider — the footer grid already separates it) */}
-        <div className="mt-10 flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-sm text-white/45">
-          <span>© {2026} Loqara. All rights reserved.</span>
-          <span aria-hidden="true" className="text-base font-bold text-white/30">
-            •
-          </span>
-          <Link href="/blog" className="transition-colors hover:text-white">
-            Blog
-          </Link>
-          <span aria-hidden="true" className="text-base font-bold text-white/30">
-            •
-          </span>
-          <Link href="/privacy" className="transition-colors hover:text-white">
-            Privacy
-          </Link>
-          <span aria-hidden="true" className="text-base font-bold text-white/30">
-            •
-          </span>
-          <Link href="/terms" className="transition-colors hover:text-white">
-            Terms of use
-          </Link>
-        </div>
-      </div>
-    </footer>
   )
 }

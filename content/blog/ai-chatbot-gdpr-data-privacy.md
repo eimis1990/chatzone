@@ -2,6 +2,7 @@
 title: "AI chatbot data privacy & GDPR: what e-commerce owners must know"
 description: A plain-English guide to the data an AI chatbot handles, your GDPR obligations, and the exact questions to ask any vendor before you put one on your store.
 date: 2026-07-02
+topic: ai-customer-support
 author: Eimantas Kudarauskas
 image: /blog/ai-chatbot-gdpr-data-privacy.webp
 related: how-to-choose-ai-support-agent, best-ai-chatbot-for-ecommerce, ai-chatbot-human-handoff

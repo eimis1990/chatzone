@@ -2,6 +2,8 @@
 title: Add an AI agent to your WooCommerce store in one line
 description: A practical guide to adding an AI chat and voice agent to your WooCommerce store — what to connect, how to install it with a single script tag, and how to keep answers accurate.
 date: 2026-06-25
+topic: platform-integrations
+related: best-ai-chatbot-for-woocommerce, ai-chatbot-for-online-store, ecommerce-ai-chatbot-knowledge-base
 updated: 2026-06-30
 author: Eimantas Kudarauskas
 image: /blog/add-ai-agent-to-woocommerce.webp

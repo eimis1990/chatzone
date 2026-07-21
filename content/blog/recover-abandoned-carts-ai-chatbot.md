@@ -2,6 +2,7 @@
 title: How an AI chatbot recovers abandoned carts (and lifts conversion)
 description: Most carts are abandoned over an unanswered question, not price. Here's how a grounded AI chatbot rescues the sale at the moment of hesitation — and how to measure it.
 date: 2026-07-02
+topic: ecommerce-ai
 author: Eimantas Kudarauskas
 image: /blog/recover-abandoned-carts-ai-chatbot.webp
 related: capture-leads-with-conversational-chat, chatbot-roi-metrics-that-matter, reduce-support-tickets-with-ai

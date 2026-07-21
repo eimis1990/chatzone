@@ -2,6 +2,7 @@
 title: "How to add an AI chatbot to Magento and Adobe Commerce"
 description: A practical Magento AI chatbot guide covering catalog search, grounded answers, verified order status, one-line installation, testing, and limitations.
 date: 2026-07-15
+topic: platform-integrations
 author: Eimantas Kudarauskas
 image: /blog/ai-chatbot-for-magento.webp
 related: best-ai-chatbot-for-ecommerce, where-is-my-order-ai, semantic-search-ecommerce

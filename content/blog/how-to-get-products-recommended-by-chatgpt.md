@@ -2,6 +2,7 @@
 title: "How to get your products recommended by ChatGPT shopping"
 description: A practical merchant guide to appearing in ChatGPT shopping results: crawling, product feeds, structured data, product-page content, and GEO measurement.
 date: 2026-07-15
+topic: ai-search-visibility
 author: Eimantas Kudarauskas
 image: /blog/how-to-get-products-recommended-by-chatgpt.webp
 related: agentic-commerce-ecommerce, ai-product-recommendation-chatbot, ai-chatbot-for-online-store

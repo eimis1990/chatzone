@@ -2,6 +2,8 @@
 title: How to add a voice AI agent to your online store
 description: A practical, step-by-step guide to adding a real-time voice AI agent to your online store — how it works, the setup steps, honest limits, and what it costs.
 date: 2026-07-10
+topic: voice-ai
+related: ai-voice-agents-explained, voice-ai-for-ecommerce-support, ai-chatbot-for-online-store
 author: Eimantas Kudarauskas
 image: /blog/add-voice-ai-to-online-store.webp
 ---

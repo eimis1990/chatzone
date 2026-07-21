@@ -1,4 +1,8 @@
+import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
+
+// The embed iframe is widget chrome, not standalone content — never index it.
+export const metadata: Metadata = { robots: { index: false, follow: false } }
 
 /**
  * Minimal layout for the embedded chat iframe. A nested route layout must NOT

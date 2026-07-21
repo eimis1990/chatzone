@@ -2,6 +2,8 @@
 title: "New AI chatbots to watch in 2026: Nvidia, voice agents, and vertical AI"
 description: New AI chatbots are reshaping 2026 — Nvidia's ACE and NIM push, real-time voice agents, agentic AI, and vertical agents. What store owners should actually do.
 date: 2026-07-03
+topic: vendor-comparisons
+related: best-chatbot-platforms, best-ai-chatbot-for-ecommerce, ai-voice-agents-explained
 author: Eimantas Kudarauskas
 image: /blog/new-ai-chatbots-2026.webp
 ---
