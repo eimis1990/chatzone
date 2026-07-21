@@ -1,7 +1,7 @@
 import { Plus_Jakarta_Sans } from 'next/font/google'
 import { GetStartedDialog } from './GetStartedDialog'
 import { HeroVideo } from './HeroVideo'
-import { BRAND_MARKS } from './brand-marks'
+import { BRAND_MARKS, type BrandMark } from './brand-marks'
 
 const heroFont = Plus_Jakarta_Sans({ subsets: ['latin'], display: 'swap' })
 
@@ -80,21 +80,10 @@ export function Hero() {
 // with plus site builders the one-line embed works on. Client-relevant
 // credibility (not our internal stack: OpenAI/Stripe/etc. mean nothing to a
 // store owner choosing a chat widget).
-interface MarqueeItem {
-  name: string
-  /** 24x24 svg path (brand-marks.ts); text-only wordmark when absent. */
-  path?: string
-}
-
 const FEED_GLYPH =
   'M4 3a1 1 0 0 0 0 2 15 15 0 0 1 15 15 1 1 0 0 0 2 0A17 17 0 0 0 4 3Zm0 6a1 1 0 0 0 0 2 9 9 0 0 1 9 9 1 1 0 0 0 2 0A11 11 0 0 0 4 9Zm2.5 8A2.5 2.5 0 1 0 6.5 22a2.5 2.5 0 0 0 0-5Z'
 
-const MARQUEE_ITEMS: MarqueeItem[] = [
-  ...BRAND_MARKS,
-  { name: 'Wix' }, // simple-icons' Wix mark IS the wordmark — icon + text read "WIX Wix"
-  { name: 'Verskis' }, // Lithuanian platform — no public monochrome mark; wordmark reads fine
-  { name: 'Product feeds', path: FEED_GLYPH },
-]
+const MARQUEE_ITEMS: BrandMark[] = [...BRAND_MARKS, { name: 'Product feeds', path: FEED_GLYPH }]
 
 // One marquee copy must be wider than the viewport, or the two-copy -50% loop
 // reveals empty space mid-scroll. Repeating the short brand list guarantees a
@@ -119,12 +108,28 @@ function BrandMarquee() {
                 key={`${b.name}-${i}`}
                 className="flex items-center gap-3 whitespace-nowrap text-2xl font-semibold tracking-tight text-white/60 transition-colors hover:text-white"
               >
-                {b.path && (
-                  <svg viewBox="0 0 24 24" className="size-7 shrink-0 fill-current" aria-hidden="true">
+                {b.wordmark ? (
+                  // The mark IS the brand's lettering — no text label next to it.
+                  <svg
+                    viewBox={b.viewBox}
+                    role="img"
+                    aria-label={b.name}
+                    className="h-6 w-auto shrink-0 fill-current"
+                  >
                     <path d={b.path} />
                   </svg>
+                ) : (
+                  <>
+                    <svg
+                      viewBox={b.viewBox ?? '0 0 24 24'}
+                      className="size-7 shrink-0 fill-current"
+                      aria-hidden="true"
+                    >
+                      <path d={b.path} />
+                    </svg>
+                    {b.name}
+                  </>
                 )}
-                {b.name}
               </li>
             ))}
           </ul>
