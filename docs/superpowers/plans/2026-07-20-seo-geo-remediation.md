@@ -688,15 +688,17 @@ fixture, and passes the repaired content inventory with no errors.
 **External systems:** Google Search Console, Bing Webmaster Tools, analytics
 
 - [ ] Verify domain ownership and sitemap status in Search Console and Bing.
-- [ ] Export current indexed/not-indexed URLs and resolve genuine exclusions.
-- [ ] Record query/page baselines: impressions, clicks, CTR, average position, and
+      _GSC: verified + sitemap resubmitted 2026-07-21. Bing: pending owner decision
+      (verification env var unset; can import from GSC) — see docs/wiki/seo-baselines.md._
+- [x] Export current indexed/not-indexed URLs and resolve genuine exclusions.
+- [x] Record query/page baselines: impressions, clicks, CTR, average position, and
       the current Generative AI performance report where available.
-- [ ] Define a monthly prompt/query sample for brand/product-category visibility in
+- [x] Define a monthly prompt/query sample for brand/product-category visibility in
       AI search; record citations manually or through permitted provider tooling.
-- [ ] Avoid automated scraping of Google results in violation of its terms.
-- [ ] Update `docs/seo-content-loop.md` to prioritize refreshes, consolidation, and
+- [x] Avoid automated scraping of Google results in violation of its terms.
+- [x] Update `docs/seo-content-loop.md` to prioritize refreshes, consolidation, and
       evidence work before net-new volume.
-- [ ] Schedule 7-day and 28-day post-release checkpoints.
+- [x] Schedule 7-day and 28-day post-release checkpoints.
 
 **Acceptance:** future decisions can be tied to Search Console/analytics outcomes,
 not Lighthouse or article count alone.
@@ -707,7 +709,7 @@ not Lighthouse or article count alone.
 - [x] Human editorial review approves identity/methodology claims and all 29 source
       remediation items.
 - [x] Topic hubs and every article are reachable through crawlable internal links.
-- [ ] Search Console/Bing baselines and monitoring dates are recorded.
+- [x] Search Console/Bing baselines and monitoring dates are recorded.
 
 ---
 

@@ -32,6 +32,8 @@ Add a line here. How the wiki works: [README.md](README.md).
   image pipeline.
 - [seo-geo-playbook](seo-geo-playbook.md) — mandatory intent, evidence,
   crawlability, article-format, delivery-budget, and release rules for public content.
+- [seo-baselines](seo-baselines.md) — 2026-07-21 GSC baseline (indexing,
+  clicks/impressions, refresh priorities), checkpoint dates, monthly GEO prompt sample.
 - [voice](voice.md) — ElevenLabs voice add-on.
 - [sales-leads](sales-leads.md) — owner outreach pipeline, prepared-email copy,
   chatbot-aware positioning, and UI behavior.
