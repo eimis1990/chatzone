@@ -704,6 +704,13 @@
     if (launcherRevealed) return
     launcherRevealed = true
     launcher.style.opacity = '1'
+    // Tell any stand-in launcher (the landing page's deferred proxy) that the
+    // real button is now visible, so it can unmount without a blink.
+    try {
+      window.dispatchEvent(new CustomEvent('cbz:launcher-revealed'))
+    } catch (e) {
+      /* CustomEvent unavailable — proxy falls back to its timeout */
+    }
   }
 
   launcher.addEventListener('click', function () {

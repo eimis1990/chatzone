@@ -56,6 +56,28 @@ export function WidgetEmbed({
       launcher?.click()
     }
 
+    // The real launcher mounts invisible and only fades in once its theme
+    // config arrives (widget.js revealLauncher). Keep the proxy on screen until
+    // the real button is MEASURED fully opaque — events and timers both proved
+    // racy against the config fetch, so poll the rendered state instead. The
+    // two buttons are pixel-identical, so the brief overlap is invisible. The
+    // 10s cap only guards against a widget.js that never reveals (it has its
+    // own 1.5s reveal safety net, so the cap should never fire in practice).
+    let watchId: ReturnType<typeof setInterval> | undefined
+    const watchRealLauncher = () => {
+      if (watchId !== undefined) return
+      const startedAt = Date.now()
+      watchId = setInterval(() => {
+        const real = document.querySelector('[data-cbz-launcher]')
+        const revealed = real && Number(getComputedStyle(real).opacity) >= 0.99
+        if (revealed || Date.now() - startedAt > 10_000) {
+          clearInterval(watchId)
+          if (!disposed) setLoaded(true)
+        }
+      }, 100)
+    }
+    window.addEventListener('cbz:launcher-revealed', watchRealLauncher)
+
     const loadWidget = (openAfterLoad = false) => {
       openWhenReady ||= openAfterLoad
 
@@ -75,7 +97,7 @@ export function WidgetEmbed({
       script.setAttribute('data-cbz-embed', '')
       script.addEventListener('load', () => {
         if (disposed) return
-        setLoaded(true)
+        watchRealLauncher()
         if (openWhenReady) requestAnimationFrame(openRealLauncher)
       })
       script.addEventListener('error', () => {
@@ -101,6 +123,8 @@ export function WidgetEmbed({
 
     return () => {
       disposed = true
+      window.removeEventListener('cbz:launcher-revealed', watchRealLauncher)
+      if (watchId !== undefined) clearInterval(watchId)
       if (delayId !== undefined) clearTimeout(delayId)
       if (idleId !== undefined) idleApi.cancelIdleCallback?.(idleId)
       loadWidgetRef.current = () => {}

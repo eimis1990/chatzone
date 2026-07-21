@@ -69,13 +69,20 @@ function HeroPoster({ withFox }: { withFox: boolean }) {
 
 /** Start downloading the loop this many seconds before the intro ends. */
 const LOOP_PREFETCH_SECONDS = 4
+/**
+ * Begin the crossfade this many seconds before the intro ends. Blending two
+ * MOVING videos hides the frame mismatch between the intro's tail and the
+ * loop's start; fading from a frozen last frame reads as a visible pop.
+ */
+const CROSSFADE_LEAD_SECONDS = 0.6
 
 /**
  * The lobby poster is always present first. Video is a progressive enhancement:
  * an intro downloads and plays alone; the small idle loop is requested near the
- * intro's END (not after it), so it is buffered by handoff and starts exactly
- * when the intro finishes — no frozen frame, no visible pop. Data-saving,
- * slow-network, and reduced-motion users stay on a responsive static poster.
+ * intro's END (not after it), so it is buffered by handoff and the crossfade
+ * starts just before the intro finishes — no frozen frame, no visible pop.
+ * Data-saving, slow-network, and reduced-motion users stay on a responsive
+ * static poster.
  */
 export function HeroVideo() {
   const preferenceSnapshot = useSyncExternalStore(
@@ -91,7 +98,7 @@ export function HeroVideo() {
   // The loop starts only when BOTH are true; either event may arrive first.
   const loopVideoRef = useRef<HTMLVideoElement | null>(null)
   const loopReadyRef = useRef(false)
-  const introEndedRef = useRef(false)
+  const handoffDueRef = useRef(false)
 
   const policy = getHeroMediaPolicy({
     hydrated,
@@ -108,14 +115,14 @@ export function HeroVideo() {
 
   const media = HERO_MEDIA_SOURCES[policy.variant]
   const videoClassName =
-    'absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-300'
+    'absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-700'
 
   const playOrUsePoster = (video: HTMLVideoElement) => {
     video.play().catch(() => setFailed(true))
   }
 
   const startLoopIfReady = () => {
-    if (!introEndedRef.current || !loopReadyRef.current) return
+    if (!handoffDueRef.current || !loopReadyRef.current) return
     const loop = loopVideoRef.current
     if (loop && loop.paused) loop.play().catch(() => setFailed(true))
   }
@@ -136,17 +143,18 @@ export function HeroVideo() {
         onCanPlay={(event) => playOrUsePoster(event.currentTarget)}
         onTimeUpdate={(event) => {
           const video = event.currentTarget
-          if (
-            !loopRequested &&
-            Number.isFinite(video.duration) &&
-            video.duration - video.currentTime <= LOOP_PREFETCH_SECONDS
-          ) {
-            setLoopRequested(true)
+          if (!Number.isFinite(video.duration)) return
+          const remaining = video.duration - video.currentTime
+          if (!loopRequested && remaining <= LOOP_PREFETCH_SECONDS) setLoopRequested(true)
+          if (!handoffDueRef.current && remaining <= CROSSFADE_LEAD_SECONDS) {
+            handoffDueRef.current = true
+            startLoopIfReady()
           }
         }}
         onEnded={() => {
+          // Fallback for browsers that fire timeupdate too coarsely.
           setLoopRequested(true)
-          introEndedRef.current = true
+          handoffDueRef.current = true
           startLoopIfReady()
         }}
         onError={() => setFailed(true)}
