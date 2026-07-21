@@ -4,14 +4,14 @@ description: Gorgias is a powerful helpdesk — but its ticket-plus-per-resoluti
 date: 2026-06-27
 topic: vendor-comparisons
 related: zendesk-alternatives-for-ecommerce, tidio-alternatives-for-ecommerce, best-ai-chatbot-for-ecommerce
-updated: 2026-06-30
+updated: 2026-07-21
 author: Eimantas Kudarauskas
 image: /blog/gorgias-alternatives-for-ecommerce.webp
 ---
 
 Gorgias is one of the best-known helpdesks in e-commerce, and deservedly so — it's a genuinely capable, mature platform that pulls email, chat, social, and SMS into one inbox and automates returns and order edits better than almost anyone. If you run an established support team that lives in a shared inbox all day, it's a serious tool. The trouble is that most people searching for a "Gorgias alternative" aren't unhappy with the product. They're unhappy with the *fit*.
 
-The friction is usually weight and cost. Gorgias is a full multichannel helpdesk priced for teams, and its AI Agent bills **per resolution** on top of a ticket-based plan — math that's hard to forecast when you're a lean store doing a few hundred conversations a month. So the real question is rarely "is Gorgias good?" It is. The question is "is it the right *weight* for my store right now?" Below is an honest look at the best alternatives in 2026, who each one actually suits, and how to choose.
+The friction is usually weight and cost. Gorgias is a full multichannel helpdesk priced for teams, and its AI Agent bills **per resolution** on top of a ticket-based plan ([Gorgias pricing](https://www.gorgias.com/pricing)) — math that's hard to forecast when you're a lean store doing a few hundred conversations a month. So the real question is rarely "is Gorgias good?" It is. The question is "is it the right *weight* for my store right now?" Below is an honest look at the best alternatives in 2026, who each one actually suits, and how to choose.
 
 <blockquote class="quick-answer">For most lean and growing stores, the best Gorgias alternative is <strong>Loqara</strong>: grounded AI chat <em>and</em> voice, live product search and order lookup, a one-line install, and predictable per-conversation pricing with a real free tier. Stay on Gorgias if you run a busy multichannel team where its per-resolution AI math already pays off.</blockquote>
 
@@ -39,7 +39,7 @@ It's the wrong call when you're a small or growing store that mostly needs to de
 
 <div class="proscons">
 <div class="pros"><p class="pc-title">Where Gorgias shines</p><ul><li>Mature multichannel helpdesk (email, chat, social, SMS in one inbox)</li><li>Deep automation — macros, rules, returns and order edits</li><li>Strong AI Agent once you're at real support volume</li><li>Built for teams that live in the inbox all day</li></ul></div>
-<div class="cons"><p class="pc-title">Why small stores look elsewhere</p><ul><li>AI billed <em>per resolution</em> on top of a ticket-based plan — hard to forecast</li><li>A resolved AI conversation can also count as a ticket</li><li>Full helpdesk weight most small stores don't need yet</li><li>Priced and billed in USD, around a team workflow</li></ul></div>
+<div class="cons"><p class="pc-title">Why small stores look elsewhere</p><ul><li>AI billed <em>per resolution</em> on top of a ticket-based plan — hard to forecast</li><li>A conversation fully resolved by AI Agent is charged both a ticket fee and an automation fee (<a href="https://docs.gorgias.com/en-US/what-counts-as-a-billable-ticket-or-automated-interaction-199385" rel="nofollow">Gorgias docs</a>)</li><li>Full helpdesk weight most small stores don't need yet</li><li>Priced and billed in USD, around a team workflow</li></ul></div>
 </div>
 
 ## What should I look for in an alternative?
@@ -58,10 +58,10 @@ A side-by-side before the detail. "Store actions" means native product search an
 | --- | --- | --- | --- | --- | --- |
 | **Loqara** | Grounded, included | Product search + order lookup | Yes (add-on) | Per conversation, free tier | Lean–mid stores wanting AI + optional voice |
 | **Gorgias** | Per-resolution add-on | Order edits + returns | No | Tiered + per AI resolution | Established multichannel support teams |
-| **Tidio** | Lyro (paid add-on) | Order lookup | No | Per seat + AI add-on | Beginners who like building flows |
-| **Re:amaze** | Basic, add-on | Native order actions | No | Per seat | Mid-size multichannel stores |
-| **Intercom (Fin)** | Fin, premium | Via apps | No | Per seat + per resolution | Larger SaaS/support orgs |
-| **Zendesk** | Premium add-on | Via apps | No | Per agent + AI add-on | Enterprises already on Zendesk |
+| **Tidio** | Lyro (metered add-on) | Order lookup | No | Per conversation + Lyro add-on | Beginners who like building flows |
+| **Re:amaze** | Included, resolution caps | Native order actions | No | Per seat | Mid-size multichannel stores |
+| **Intercom (Fin)** | Fin, premium | Via apps | Phone (Fin Voice) | Per seat + per resolution | Larger SaaS/support orgs |
+| **Zendesk** | Included, usage-billed | Via apps | No | Per agent + usage-billed AI | Enterprises already on Zendesk |
 | **Help Scout** | AI add-on | Via apps | No | Per seat | Small teams wanting a simple inbox |
 
 <p style="font-size:0.8125rem;color:#6b7280;margin-top:-0.5rem"><em>Details are approximate and as of mid-2026. Always check each vendor's current pricing and app listing.</em></p>
@@ -70,7 +70,7 @@ A side-by-side before the detail. "Store actions" means native product search an
 
 <p class="pills"><span class="pill pill-best">Best for: lean &amp; growing stores</span><span class="pill">Free tier: 100 chats/mo</span><span class="pill">Chat + voice</span></p>
 
-Loqara answers from your own content with citations, searches your live catalog, and looks up a customer's order after a quick identity check — all inside one widget you install with a single line of code. It connects to WooCommerce, Shopify, and Magento (plus a product feed for anything else), so the agent works against your real products and orders, not a static FAQ. It's the only option here with a built-in real-time **[voice agent](/blog/voice-ai-for-ecommerce-support)** (English and Lithuanian), so customers can literally talk to your store. Pricing is per conversation rather than per "resolution," with a genuine free plan (100 conversations/month) and paid plans from €149 — so there's no per-resolution surprise as you grow. Best for small-to-mid stores that want capable AI support without a heavyweight helpdesk.
+Loqara answers from your own content with citations, searches your live catalog, and looks up a customer's order after a quick identity check — all inside one widget you install with a single line of code. It connects to WooCommerce, Shopify, and Magento (plus a product feed for anything else), so the agent works against your real products and orders, not a static FAQ. It's the only option here with a real-time **[voice agent](/blog/voice-ai-for-ecommerce-support)** built into the chat widget itself (English and Lithuanian), so customers can literally talk to your store. Pricing is per conversation rather than per "resolution," with a genuine free plan (100 conversations/month) and paid plans from €149 — so there's no per-resolution surprise as you grow. Best for small-to-mid stores that want capable AI support without a heavyweight helpdesk.
 
 <div class="proscons">
 <div class="pros"><p class="pc-title">Strengths</p><ul><li>Grounded answers with citations — never invents a policy</li><li>Live product search + order lookup built in</li><li>Connectors for WooCommerce, Shopify, Magento (+ product feed)</li><li>Chat <em>and</em> voice in the same widget</li><li>One-line install, live the same day</li><li>Predictable per-conversation pricing, real free tier; shared-inbox handoff, analytics + CSAT</li></ul></div>
@@ -81,35 +81,35 @@ Loqara answers from your own content with citations, searches your live catalog,
 
 <p class="pills"><span class="pill pill-best">Best for: DIY beginners</span><span class="pill">Lyro AI = paid add-on</span></p>
 
-Tidio is approachable and popular, with a visual drag-and-drop builder that's great if you enjoy mapping conversations by hand. Worth a look if you like building flows — just note its Lyro AI is a separate paid add-on, so the "AI chatbot" you're picturing isn't the base product. If you've outgrown manual flows, see our [Tidio alternatives guide](/blog/tidio-alternatives-for-ecommerce).
+Tidio is approachable and popular, with a visual drag-and-drop builder that's great if you enjoy mapping conversations by hand. Worth a look if you like building flows — just note its Lyro AI is a separate paid add-on, starting around $32.50/month billed annually ([Tidio pricing](https://www.tidio.com/pricing/)), so the "AI chatbot" you're picturing isn't the base product. If you've outgrown manual flows, see our [Tidio alternatives guide](/blog/tidio-alternatives-for-ecommerce).
 
 ### Re:amaze — solid multichannel middle ground
 
 <p class="pills"><span class="pill">Best for: mid-size stores</span><span class="pill">Native order actions</span></p>
 
-Re:amaze is a capable multichannel helpdesk with native e-commerce integrations and order actions right inside the chat. A reasonable middle ground if you want a traditional inbox feel that's lighter than Gorgias, with AI as an add-on rather than the core.
+Re:amaze is a capable multichannel helpdesk with native e-commerce integrations and order actions right inside the chat. Plans run $29–$69 per user/month, with an AI agent included in paid plans up to a resolution cap ([Re:amaze pricing](https://www.reamaze.com/pricing)). A reasonable middle ground if you want a traditional inbox feel that's lighter than Gorgias, with AI as a capped extra rather than the core.
 
 ### Help Scout — the simple, human inbox
 
 <p class="pills"><span class="pill">Best for: small teams</span><span class="pill">Clean shared inbox</span></p>
 
-Help Scout has long been the favorite for teams that want a clean, no-clutter shared inbox without enterprise complexity. Its AI features are newer add-ons, so it leans more "tidy email helpdesk" than "AI-first agent." A good fit if your priority is human replies done well, with light automation on top.
+Help Scout has long been the favorite for teams that want a clean, no-clutter shared inbox without enterprise complexity. Plans run $25–$75 per user/month; writing-assist AI is included in paid plans, while its AI Answers chatbot is billed separately at $0.75 per resolution ([Help Scout pricing](https://www.helpscout.com/pricing/)) — so it leans more "tidy email helpdesk" than "AI-first agent." A good fit if your priority is human replies done well, with light automation on top.
 
 ### Intercom (Fin) — premium and polished
 
 <p class="pills"><span class="pill pill-best">Best for: larger SaaS/support orgs</span><span class="pill">Per resolution</span></p>
 
-Fin is one of the strongest AI agents on the market and Intercom's tooling is excellent — but it's priced and positioned for bigger support organisations, not a five-person store. Costs (seats plus per-resolution AI) add up quickly at scale. More in our [Intercom alternatives](/blog/intercom-alternatives-for-ecommerce).
+Fin is one of the strongest AI agents on the market and Intercom's tooling is excellent — but it's priced and positioned for bigger support organisations, not a five-person store. Costs (seats plus Fin at $0.99 per resolution — [Intercom pricing](https://www.intercom.com/pricing)) add up quickly at scale. More in our [Intercom alternatives](/blog/intercom-alternatives-for-ecommerce).
 
 ### Zendesk — the enterprise suite
 
 <p class="pills"><span class="pill">Best for: enterprises already on Zendesk</span><span class="pill">AI = premium add-on</span></p>
 
-Powerful and endlessly configurable, but heavy and expensive for most small stores. Worth it mainly if you're already standardised on Zendesk company-wide and its AI add-on fits your budget. See our [Zendesk alternatives](/blog/zendesk-alternatives-for-ecommerce) if it feels like overkill.
+Powerful and endlessly configurable, but heavy and expensive for most small stores. Plans run $19–$115 per agent/month with AI usage billed per automated resolution ([Zendesk pricing](https://www.zendesk.com/pricing/)). Worth it mainly if you're already standardised on Zendesk company-wide and that usage-billed AI fits your budget. See our [Zendesk alternatives](/blog/zendesk-alternatives-for-ecommerce) if it feels like overkill.
 
 <div class="callout">
 <p class="callout-title">The pricing trap to watch</p>
-<p>"$X per <strong>resolution</strong>" and "$X per <strong>conversation</strong>" are not the same thing, and the difference can be 3–4× on the same traffic. A "resolution" is defined by the vendor and can be triggered generously — and with Gorgias, a resolved AI conversation can also count as a ticket, so you may be billed twice for one thread. A "conversation" is simply one customer thread. Before you commit, model your real monthly volume against each pricing unit. Our <a href="/blog/how-to-choose-ai-support-agent">buyer's checklist</a> walks through the questions that actually decide it, and our piece on the <a href="/blog/chatbot-roi-metrics-that-matter">ROI metrics that matter</a> shows what to measure once you're live.</p>
+<p>"$X per <strong>resolution</strong>" and "$X per <strong>conversation</strong>" are not the same thing, and in our experience the gap on the same traffic can be a real multiple. A "resolution" is defined by the vendor and can be triggered generously — and with Gorgias, a conversation fully resolved by AI Agent is charged both a ticket fee and an automation fee (<a href="https://docs.gorgias.com/en-US/what-counts-as-a-billable-ticket-or-automated-interaction-199385" rel="nofollow">Gorgias docs</a>), so you pay twice for one thread. A "conversation" is simply one customer thread. Before you commit, model your real monthly volume against each pricing unit. Our <a href="/blog/how-to-choose-ai-support-agent">buyer's checklist</a> walks through the questions that actually decide it, and our piece on the <a href="/blog/chatbot-roi-metrics-that-matter">ROI metrics that matter</a> shows what to measure once you're live.</p>
 </div>
 
 ## How to choose your Gorgias alternative
@@ -132,11 +132,11 @@ For a small or growing store, the best alternative is usually a per-conversation
 
 ### Why is Gorgias considered expensive?
 
-Gorgias is a full multichannel helpdesk priced for teams, and its AI Agent bills per resolution on top of a ticket-based plan. A resolved AI conversation can also count as a ticket, so the same thread can be charged twice. That math works well at high volume but is hard to predict for a store doing only a few hundred conversations a month.
+Gorgias is a full multichannel helpdesk priced for teams, and its AI Agent bills per resolution on top of a ticket-based plan ([Gorgias pricing](https://www.gorgias.com/pricing)). A conversation fully resolved by AI Agent is charged both a ticket fee and an automation fee ([Gorgias docs](https://docs.gorgias.com/en-US/what-counts-as-a-billable-ticket-or-automated-interaction-199385)), so the same thread is charged twice. That math works well at high volume but is hard to predict for a store doing only a few hundred conversations a month.
 
 ### What's the difference between per-resolution and per-conversation pricing?
 
-A "conversation" is one customer thread, billed once. A "resolution" is defined by the vendor and can be triggered more generously, so the same traffic can cost 3–4× more under per-resolution pricing. Per-conversation plans like Loqara's are easier to forecast because the unit is simple and predictable.
+A "conversation" is one customer thread, billed once. A "resolution" is defined by the vendor and can be triggered more generously, so in our experience the same traffic can cost meaningfully more under per-resolution pricing. Per-conversation plans like Loqara's are easier to forecast because the unit is simple and predictable.
 
 ### Will a Gorgias alternative still connect to my store's orders?
 

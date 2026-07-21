@@ -2,6 +2,7 @@
 title: The 10 best chatbot platforms in 2026 (with real screenshots)
 description: An honest ranking of the 10 best chatbot platforms in 2026 — real screenshots, real pricing models, and which platform actually fits your business and budget.
 date: 2026-07-03
+updated: 2026-07-21
 topic: vendor-comparisons
 related: best-ai-chatbot-for-ecommerce, how-to-choose-ai-support-agent, conversational-ai-vs-chatbot
 author: Eimantas Kudarauskas
@@ -39,16 +40,16 @@ Three criteria, weighted in this order:
 
 | Platform | AI included? | Pricing model | Voice | Best fit |
 | --- | --- | --- | --- | --- |
-| **Zendesk AI** | Add-on | Per agent + ~$1.50–2 per AI resolution | Via suite | Enterprises on Zendesk |
+| **Zendesk AI** | Add-on | Per agent + per AI resolution | Via suite | Enterprises on Zendesk |
 | **Intercom Fin** | Core product | ~$0.99 per resolution + seats | Yes (Fin Voice) | SaaS & larger support orgs |
-| **Tidio** | Lyro = paid add-on | Per seat + AI add-on | No | Small biz, DIY flows |
-| **Gorgias** | Per-resolution add-on | Tiered + ~$0.90–1 per resolution | Add-on | Established e-commerce teams |
-| **HubSpot (Breeze)** | Credits + outcomes | Seats + credits | No | Teams already on HubSpot CRM |
+| **Tidio** | Lyro = metered add-on | Per billable conversation | No | Small biz, DIY flows |
+| **Gorgias** | Per-resolution add-on | Ticket-volume tiers + per resolution | Add-on | Established e-commerce teams |
+| **HubSpot (Breeze)** | Credits per conversation | Seats + credits | No | Teams already on HubSpot CRM |
 | **Loqara** | Grounded, included | Per conversation, free tier | Yes (add-on) | Small–mid online stores |
 | **Drift (Salesloft)** | Yes | Custom | No | No one new — sunsetting |
 | **Crisp** | Gated to top plan | Per workspace | No | Budget multichannel inbox |
 | **Chatbase** | Core product | Credit-based tiers | Yes | DIY custom-data bots |
-| **Voiceflow** | Bring your own | Per editor + credits | Yes | Agencies & product teams |
+| **Voiceflow** | Bring your own | Usage-based (quote) | Yes | Agencies & product teams |
 
 <p style="font-size:0.8125rem;color:#6b7280;margin-top:-0.5rem"><em>All pricing details are approximate and as of mid-2026 — always check the vendor's pricing page before deciding.</em></p>
 
@@ -59,7 +60,7 @@ Three criteria, weighted in this order:
 <figcaption>Zendesk AI (screenshot: zendesk.com, July 2026)</figcaption>
 </figure>
 
-Zendesk spent 2026 rebuilding itself around what it calls the Resolution Platform — AI agents trained on billions of ticket interactions, sold with outcome-based pricing. The pitch is straightforward: you pay per issue the AI resolves autonomously (roughly $2 pay-as-you-go, closer to $1.50 with committed volume, as of mid-2026), on top of your per-agent seat fees. The agent-assist Copilot is a separate add-on again. It's genuinely one of the most capable AI support stacks on the market, and the omnichannel coverage — email, chat, voice, social — is hard to match.
+Zendesk spent 2026 rebuilding itself around what it calls the Resolution Platform — AI agents trained on billions of ticket interactions, sold with outcome-based pricing. The pitch is straightforward: you pay per issue the AI resolves autonomously — Zendesk doesn't publish the per-resolution rate, so it's quoted by sales — on top of per-agent seat fees that run [$19–$115/agent/month across the Suite plans](https://www.zendesk.com/pricing/). The agent-assist Copilot is a separate add-on again, at $50/agent/month. It's genuinely one of the most capable AI support stacks on the market, and the omnichannel coverage — email, chat, voice, social — is hard to match.
 
 The catch is weight. Zendesk assumes you have a support *organisation*: admins, workflows, triggers, a budget line. For a company already standardised on Zendesk, adding its AI agents is the path of least resistance and the results are good. For a ten-person business, you'd be buying an aircraft carrier to cross a river — and the resolution fees stack on top of seats you're already paying for.
 
@@ -72,9 +73,9 @@ The catch is weight. Zendesk assumes you have a support *organisation*: admins, 
 <figcaption>Intercom Fin (screenshot: intercom.com, July 2026)</figcaption>
 </figure>
 
-Credit where due: Fin is the AI agent everyone else measures against. It answers from your help content, executes multi-step procedures, hands off cleanly, and now speaks on the phone too. Intercom went all-in — the company even renamed its corporate entity to Fin in May 2026, and Salesforce agreed to acquire it for a reported ~$3.6 billion in June. Whatever happens post-acquisition, the product today is excellent.
+Credit where due: Fin is the AI agent everyone else measures against. It answers from your help content, executes multi-step procedures, hands off cleanly, and now speaks on the phone too. Intercom went all-in — the company even [renamed its corporate entity to Fin in May 2026, and Salesforce agreed to acquire it for approximately $3.6 billion in June](https://martech.org/salesforce-acquires-fin-formerly-known-as-intercom/). Whatever happens post-acquisition, the product today is excellent.
 
-Pricing is per outcome: roughly $0.99 per resolution (as of mid-2026 — check the vendor's pricing page, especially with an acquisition in flight). That sounds cheap until you model it: real-world resolution rates plus seat costs for your human team mean a busy support org can see four-figure monthly bills that scale with traffic. And Fin's DNA is SaaS support — for store-specific jobs like live catalog search and order lookups, it leans on integrations rather than doing it natively. We wrote a full breakdown in our [Intercom alternatives for e-commerce](/blog/intercom-alternatives-for-ecommerce) guide.
+Pricing is per outcome: [$0.99 per resolution](https://www.intercom.com/pricing) as of July 2026 — worth re-checking with an acquisition in flight. That sounds cheap until you model it: real-world resolution rates plus seat costs for your human team mean a busy support org can see four-figure monthly bills that scale with traffic. And Fin's DNA is SaaS support — for store-specific jobs like live catalog search and order lookups, it leans on integrations rather than doing it natively. We wrote a full breakdown in our [Intercom alternatives for e-commerce](/blog/intercom-alternatives-for-ecommerce) guide.
 
 **Best for:** SaaS companies and larger support orgs that want the most proven AI agent and can absorb per-resolution economics.
 
@@ -87,7 +88,7 @@ Pricing is per outcome: roughly $0.99 per resolution (as of mid-2026 — check t
 
 Tidio remains the friendliest entry point in the category: a polished live-chat widget, a genuinely pleasant visual flow builder, and enough integrations to cover most small-business setups. If you like the idea of designing conversations by hand — "if customer asks X, show buttons Y and Z" — nobody makes that easier.
 
-The confusion is in the billing. The AI agent you're probably picturing, Lyro, is a *separate paid add-on* on most plans, with its own conversation quota that's distinct from your chat quota and your flow-trigger quota — three meters running at once. As of mid-2026, plans jump from around $59/month straight to a Plus tier around $749/month with very little in between, so growing businesses tend to hit an awkward gap. Check Tidio's pricing page for current numbers, and budget for the add-ons, not the sticker.
+The confusion is in the billing. Tidio charges per *billable conversation* — any thread a human agent replies to — not per seat, and Lyro, the AI agent you're probably picturing, runs on its own separate meter: the free plan includes a one-time 50 AI conversations, and paid Lyro starts around $32.50/month on annual billing. Human-conversation plans run from about $24/month (Starter, 100 conversations) through Growth from ~$49/month, then jump to a Plus tier from $300/month plus usage ([Tidio pricing](https://www.tidio.com/pricing/), July 2026). Two meters running at once — budget against your real conversation volume, not the sticker.
 
 **Best for:** small businesses and beginners who want live chat plus hand-built flows, with light AI on top.
 
@@ -100,7 +101,7 @@ The confusion is in the billing. The AI agent you're probably picturing, Lyro, i
 
 Gorgias is what happens when a helpdesk grows up entirely inside e-commerce. Email, chat, social, SMS, and voice flow into one inbox; the AI Agent can genuinely act — order edits, returns, refunds — because the Shopify integration runs deep. For an established store with a support team living in the inbox all day, it's arguably the most complete package in this list.
 
-The economics are the thing to model carefully. The AI Agent bills per resolved interaction (roughly $0.90–1.00 as of mid-2026), and an automated resolution *still counts as a ticket* against your plan allocation — so the same conversation can hit both meters. Voice and SMS are separately billed add-ons. None of this is unreasonable at scale; it just means lean stores often pay for helpdesk machinery they don't use yet. If that's you, see our [Gorgias alternatives](/blog/gorgias-alternatives-for-ecommerce) rundown.
+The economics are the thing to model carefully. Plans are tiered by ticket volume (never per agent), and the AI Agent bills per resolved conversation on top — Gorgias doesn't publish the per-resolution rate on its [pricing page](https://www.gorgias.com/pricing), so get it in writing before you sign. Voice and SMS are separately billed add-ons that scale with call and text volume. None of this is unreasonable at scale; it just means lean stores often pay for helpdesk machinery they don't use yet. If that's you, see our [Gorgias alternatives](/blog/gorgias-alternatives-for-ecommerce) rundown.
 
 **Best for:** established e-commerce brands with real ticket volume and a multichannel support team.
 
@@ -113,7 +114,7 @@ The economics are the thing to model carefully. The AI Agent bills per resolved 
 
 HubSpot's chatbot story has two layers: the old free rule-based Chatflows builder, and the newer Breeze Customer Agent — an AI agent that answers from your knowledge base and website content, cites sources, and escalates when its confidence drops. Because it lives inside the CRM, every conversation lands on a contact record automatically, which is the real superpower here: marketing, sales, and support see the same customer.
 
-The trade-offs are control and cost accounting. Customisation of the AI's behaviour is limited compared to dedicated platforms, and pricing involves seat fees plus HubSpot Credits plus (since April 2026) outcome-based charges for the Customer Agent — a "resolution" can be counted generously. If you're already paying for HubSpot, Breeze is an easy yes. Adopting the whole HubSpot suite *just* to get the chatbot rarely makes sense.
+The trade-offs are control and cost accounting. Customisation of the AI's behaviour is limited compared to dedicated platforms, and pricing involves seat fees plus HubSpot Credits — the Customer Agent burns roughly [50 credits per conversation, with extra credits at about $0.01 each](https://www.hubspot.com/pricing/service), so busy traffic eats the monthly allowance fast. If you're already paying for HubSpot, Breeze is an easy yes. Adopting the whole HubSpot suite *just* to get the chatbot rarely makes sense.
 
 **Best for:** teams already running on HubSpot CRM who want support conversations tied to contact records.
 
@@ -137,7 +138,7 @@ Now the honest limits. Loqara is young — the incumbents above have years of ed
 <figcaption>Drift under Salesloft (screenshot: salesloft.com, July 2026)</figcaption>
 </figure>
 
-Drift essentially invented conversational marketing — the B2B playbook of chatbots that qualify visitors and book sales meetings. It deserves its place in this list's history section, but that's where it now belongs: after the 2024 Salesloft acquisition, a serious OAuth security breach in September 2025 that affected hundreds of customer organisations, and the Clari–Salesloft merger, the sunset of Drift was announced in March 2026.
+Drift essentially invented conversational marketing — the B2B playbook of chatbots that qualify visitors and book sales meetings. It deserves its place in this list's history section, but that's where it now belongs: after the 2024 Salesloft acquisition, [an OAuth token breach in August 2025 that potentially affected more than 700 customer organisations and took Drift offline that September](https://thehackernews.com/2025/09/salesloft-takes-drift-offline-after.html), and the Clari–Salesloft merger, the sunset of Drift was announced in March 2026.
 
 If you're a Drift customer, the practical advice is simple: plan your migration now rather than waiting for a forced deadline. For sales-focused chat, the ecosystem has plenty of successors; for support-focused chat, everything else on this list is a live, maintained product. We include Drift here because people still search for it — not because you should start anything new on it.
 
@@ -152,7 +153,7 @@ If you're a Drift customer, the practical advice is simple: plan your migration 
 
 Crisp is quietly one of the best value propositions in customer messaging: a clean shared inbox, live chat, a knowledge base, campaigns, and a long integration list, priced per workspace rather than per seat — which gets genuinely cheap for small teams as headcount grows. The product is fast, the widget is pleasant, and the free tier is usable.
 
-The asterisk is AI. Crisp's meaningful AI features are gated to its top-tier Plus plan (around €295/month per workspace as of mid-2026 — check their pricing page), with only token AI allowances below that. So the "affordable" Crisp and the "AI-powered" Crisp are different price points. If what you want is a solid human-first inbox with AI as a garnish, Crisp is excellent. If AI-first support is the goal, the gating undermines the value story.
+The asterisk is AI. Crisp's fully autonomous AI agent is gated to its top-tier Plus plan ([$295/month per workspace](https://crisp.chat/en/pricing/), with paid plans running $45–$295), and lower tiers get only small AI-credit allowances. So the "affordable" Crisp and the "AI-powered" Crisp are different price points. If what you want is a solid human-first inbox with AI as a garnish, Crisp is excellent. If AI-first support is the goal, the gating undermines the value story.
 
 **Best for:** budget-conscious small teams that want a multichannel inbox first and AI second.
 
@@ -165,7 +166,7 @@ The asterisk is AI. Crisp's meaningful AI features are gated to its top-tier Plu
 
 Chatbase rode the "train ChatGPT on your data" wave into a real product: upload documents or point it at your site, and you have a working AI agent embeddable anywhere, with AI Actions for calling external APIs and even voice and telephony on higher tiers. For a generic "answer questions about my content" bot, the speed from zero to live is genuinely impressive.
 
-The costs live in the details. Plans are metered in message credits, and the extras add up: additional agents billed separately, extra credits at a real price when you run dry, and — the one that surprises people — removing the "Powered by Chatbase" branding costs a meaningful monthly fee on its own (as of mid-2026; check their pricing page). It's also a horizontal tool: no native store integrations, so order lookups and product search mean building your own API actions.
+The costs live in the details. Plans are metered in message credits ($0 free through $400/month Pro), and the extras add up: additional agents at $300/agent/year, extra credits at $40 per 1,000 when you run dry, and — the one that surprises people — removing the "Powered by Chatbase" branding costs [$1,188/year on its own](https://www.chatbase.co/pricing). It's also a horizontal tool: no native store integrations, so order lookups and product search mean building your own API actions.
 
 **Best for:** technical DIYers and small teams that want a custom-data bot fast and don't need commerce features out of the box.
 
@@ -178,7 +179,7 @@ The costs live in the details. Plans are metered in message credits, and the ext
 
 Voiceflow is last on this list only because it answers a different question. It isn't a chatbot you install; it's the platform agencies and product teams use to *design and ship* agents — a visual canvas for conversation logic, knowledge bases, your choice of LLMs, and deployment to web chat, voice, and telephony. In the right hands it's the most flexible tool here, and its multi-client workspaces make it a favourite for agencies building bots as a service.
 
-That flexibility is the cost. You are the builder: answer quality, integrations, and maintenance are your job, and the per-editor pricing plus usage credits reward teams who treat the bot as a product, not a plugin. A store owner who just wants questions answered should be nowhere near it; a team with a conversation designer will feel at home.
+That flexibility is the cost. You are the builder: answer quality, integrations, and maintenance are your job, and the usage-based billing — [Voiceflow no longer publishes plan prices; you trial or request a quote](https://www.voiceflow.com/pricing) — rewards teams who treat the bot as a product, not a plugin. A store owner who just wants questions answered should be nowhere near it; a team with a conversation designer will feel at home.
 
 **Best for:** agencies and product teams building custom agents for clients or complex use cases.
 
@@ -197,10 +198,10 @@ One last pattern worth naming: almost every vendor above moved to some form of u
 There's no single winner — it depends on your size and use case. Intercom Fin and Zendesk AI lead for enterprise support, Gorgias for established e-commerce teams, Tidio for small-business DIY, Voiceflow for agencies, and Loqara (our product) for online stores that want grounded AI chat and voice with per-conversation pricing.
 
 ### How much does a chatbot platform cost?
-As of mid-2026, anywhere from free to four figures monthly. The pricing unit matters more than the sticker: per-resolution models (Intercom ~$0.99, Gorgias ~$0.90–1, Zendesk ~$1.50–2) scale with traffic; credit systems (Chatbase, HubSpot) scale with usage; per-conversation models (Loqara, from €0 to €449/month) are the most predictable. Always check the vendor's current pricing page.
+As of mid-2026, anywhere from free to four figures monthly. The pricing unit matters more than the sticker: per-resolution models (Intercom at ~$0.99; Gorgias and Zendesk quote their rates through sales) scale with traffic; credit systems (Chatbase, HubSpot) scale with usage; per-conversation models (Loqara, from €0 to €449/month) are the most predictable. Always check the vendor's current pricing page.
 
 ### What happened to Drift?
-Drift was acquired by Salesloft in 2024, suffered a major OAuth security breach in September 2025, and after the Clari–Salesloft merger its sunset was announced in March 2026. Existing customers should plan a migration; new buyers should choose an actively maintained platform.
+Drift was acquired by Salesloft in 2024, suffered a major OAuth token breach in August 2025 that took the product offline that September, and after the Clari–Salesloft merger its sunset was announced in March 2026. Existing customers should plan a migration; new buyers should choose an actively maintained platform.
 
 ### Do I need an AI chatbot or a rule-based one?
 In 2026, AI-first is the default: grounded AI agents answer natural questions from your real content and hand off when unsure, while rule-based flows only handle the paths you predicted. Rules still make sense as a supplement — structured lead capture, menu-style navigation — but as the primary experience they frustrate more customers than they help.
