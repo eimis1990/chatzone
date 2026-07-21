@@ -4,7 +4,7 @@ description: Most store chat is treated as support only. Done right, it's also y
 date: 2026-06-22
 topic: ecommerce-ai
 related: conversational-commerce-guide, ai-product-recommendation-chatbot, chatbot-roi-metrics-that-matter
-updated: 2026-06-30
+updated: 2026-07-21
 author: Eimantas Kudarauskas
 image: /blog/capture-leads-with-conversational-chat.webp
 ---
@@ -45,7 +45,7 @@ Chat inverts the order. The visitor gets help first — a real answer to a real 
 | **Availability** | Always on, but silent | Always on, and actively helping 24/7 |
 | **Failure mode** | Visitor leaves with no trace | Worst case, you still captured the question |
 
-None of this means forms are useless — a checkout form has a job to do. But for *capturing demand*, a conversation that helps first will out-convert a field-by-field form on the same traffic, and the leads it produces are warmer because the intent was real and the context came along for free. (If you're weighing this against your overall support stack, our [buyer's checklist](/blog/how-to-choose-ai-support-agent) covers what actually matters when choosing an agent.)
+None of this means forms are useless — a checkout form has a job to do. But for *capturing demand*, in our experience a conversation that helps first out-converts a field-by-field form on the same traffic, and the leads it produces are warmer because the intent was real and the context came along for free. (If you're weighing this against your overall support stack, our [buyer's checklist](/blog/how-to-choose-ai-support-agent) covers what actually matters when choosing an agent.)
 
 ## What to ask — and when
 

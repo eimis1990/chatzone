@@ -2,6 +2,7 @@
 title: AI customer service for small online stores: what you actually need
 description: An honest guide for solo founders and small teams — what AI customer service genuinely helps a small store with, what to skip, and how to start without hiring or coding anything.
 date: 2026-07-10
+updated: 2026-07-21
 topic: ai-customer-support
 related: reduce-support-tickets-with-ai, how-much-does-ai-chatbot-cost, ai-chatbot-for-online-store
 author: Eimantas Kudarauskas
@@ -50,13 +51,13 @@ For a store your size, the job is narrow and concrete — not a sprawling featur
 4. **Cover the hours you can't.** Nights, weekends, the afternoon you're at a trade show — 24/7 coverage without adding a night-shift hire is the actual return on investment for a small store.
 
 <div class="stat-grid">
-<div class="stat"><div class="stat-num">~60–70%</div><div class="stat-label">Of a small store's questions tend to repeat: shipping, sizing, "where's my order"</div></div>
+<div class="stat"><div class="stat-num">Most</div><div class="stat-label">Of a small store's questions repeat: shipping, sizing, "where's my order"</div></div>
 <div class="stat"><div class="stat-num">24/7</div><div class="stat-label">Coverage without hiring a weekend or night-shift person</div></div>
 <div class="stat"><div class="stat-num">1 line</div><div class="stat-label">Of code to install a simple, grounded chat widget</div></div>
 <div class="stat"><div class="stat-num">$0</div><div class="stat-label">To start, on a real free tier</div></div>
 </div>
 
-Those figures are directional, not a lab result — your own mix of repetitive questions is the number that actually matters, and you'll know it within a week of watching your inbox.
+We're deliberately not quoting an industry percentage here — your own mix of repetitive questions is the number that actually matters, and you'll know it within a week of watching your inbox.
 
 ## What can you safely skip?
 
@@ -80,7 +81,7 @@ Nothing, to start — that's the whole point of a real free tier. The part worth
 - **Per resolution** can look cheap per unit but the definition is set by the vendor and can add up fast on unpredictable volume.
 - **Per conversation** scales with your actual customer messages, which is usually the easiest unit for a small store to predict and budget against.
 
-We break down how each model plays out at real volumes in [how much an AI chatbot actually costs](/blog/how-much-does-ai-chatbot-cost) — worth ten minutes before you commit to anything with a multi-month contract. Loqara, for what it's worth, is priced per conversation with a free tier of 100 conversations a month and one language included free; more languages and voice are paid add-ons once you actually need them.
+We break down how each model plays out at real volumes in [how much an AI chatbot actually costs](/blog/how-much-does-ai-chatbot-cost) — worth ten minutes before you commit to anything with a multi-month contract. Loqara, for what it's worth, is priced per conversation with a free tier of 100 conversations a month and one language of your choice included; paid plans (from €149/mo) include all languages rather than charging per language, and voice is a paid add-on once you actually need it.
 
 ## How do I set it up without a developer?
 
@@ -117,13 +118,13 @@ No, if you pick the right tool. A grounded agent with a one-line embed installs 
 A grounded agent won't — it should only answer from the content you've given it and cite where the answer came from, handing off to a human when it isn't sure. Bots that answer from a general model without grounding are the ones that invent a return window or shipping date, which creates more tickets than it saves.
 
 ### Should I use a full helpdesk platform like Zendesk or Gorgias instead?
-Only once you have a team actually living in a shared inbox across email, social, and chat all day. Those platforms are built — and priced — for that scale. A lean AI chat widget usually covers a solo founder's or small team's real workload for less money and less setup.
+Only once you have a team actually living in a shared inbox across email, social, and chat all day. Those platforms are built — and priced — for that scale: Zendesk Suite runs $19–$115 per agent per month with AI billed on usage ([zendesk.com/pricing](https://www.zendesk.com/pricing/)), and Gorgias prices by ticket volume with per-resolution AI on top ([gorgias.com/pricing](https://www.gorgias.com/pricing)). A lean AI chat widget usually covers a solo founder's or small team's real workload for less money and less setup.
 
 ### Is voice support necessary for a small store?
 Not to start. Text chat handles most repetitive questions with a simpler setup. Voice is worth adding later as a paid add-on if your customers specifically ask for it or your product is easier to explain out loud than to describe in text.
 
 ### Do I need multilingual support from day one?
-Only if you're already selling to more than one language market. Most small stores start with one language — Loqara's free tier includes one — and add more once international orders justify the cost. Treat multilingual support as an upgrade you reach for later, not something you need to launch with.
+Only if you're already selling to more than one language market. Most small stores start with one language — Loqara's free tier includes one, and paid plans include all languages rather than charging per language — so treat multilingual support as an upgrade you reach for once international orders justify it, not something you need to launch with.
 
 ---
 

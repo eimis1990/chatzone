@@ -4,7 +4,7 @@ description: A vendor-neutral checklist for picking an AI chat or voice agent fo
 date: 2026-06-27
 topic: vendor-comparisons
 related: best-ai-chatbot-for-ecommerce, how-much-does-ai-chatbot-cost, test-ai-chatbot-before-launch
-updated: 2026-06-30
+updated: 2026-07-21
 author: Eimantas Kudarauskas
 image: /blog/how-to-choose-ai-support-agent.webp
 ---
@@ -13,12 +13,12 @@ Every AI support tool demos beautifully. You type a question, it answers in a fr
 
 This is a buyer's checklist, written by people who build one of these tools (Loqara) but would rather you pick the right one than the wrong one. It's vendor-neutral on purpose: the questions below apply whether you're looking at Loqara, an incumbent helpdesk, or a flow-builder. Work through them in order, run the math on your own numbers, and the field narrows fast. (If you're still assembling a shortlist to run through it, start with our [round-up of the best chatbot platforms](/blog/best-chatbot-platforms).)
 
-<blockquote class="quick-answer">Choose by what decides value, not the feature list: the <strong>pricing model</strong> (per-resolution, per-conversation, and per-seat can be <strong>3–4× apart</strong> on the same traffic), <em>grounding</em> so it answers only from your content, real store actions like product search and order lookup, clean human handoff, and a one-line install. Then test it on real traffic before you pay.</blockquote>
+<blockquote class="quick-answer">Choose by what decides value, not the feature list: the <strong>pricing model</strong> (per-resolution, per-conversation, and per-seat can be <strong>several times apart</strong> on the same traffic), <em>grounding</em> so it answers only from your content, real store actions like product search and order lookup, clean human handoff, and a one-line install. Then test it on real traffic before you pay.</blockquote>
 
 <div class="takeaways">
 <p class="takeaways-title">Quick take</p>
 <ul>
-<li><strong>Pricing model decides the bill, not the headline price.</strong> Per-resolution, per-conversation, and per-seat can be 3–4× apart on identical traffic — model your real volume against each unit before you sign.</li>
+<li><strong>Pricing model decides the bill, not the headline price.</strong> Per-resolution, per-conversation, and per-seat be several times apart on identical traffic — model your real volume against each unit before you sign.</li>
 <li><strong>Grounding is the trust feature.</strong> The agent must answer only from your content and say "I'm not sure" otherwise — a confident wrong answer costs more than no answer.</li>
 <li><strong>Real store actions earn the keep.</strong> Live product search and order lookup deflect the tickets that actually repeat; FAQ matching alone doesn't.</li>
 <li><strong>Install effort and handoff are deal-breakers.</strong> A one-line embed you can ship today beats a migration project, and clean human handoff should be on the plan you'd actually buy.</li>
@@ -78,13 +78,13 @@ Decide your success metrics *before* you buy: deflection rate, handoff rate, lea
 
 If you take one thing from this guide, take this. The three pricing models in the market look comparable on a feature page and behave nothing alike on an invoice.
 
-- **Per resolution** — you pay each time the AI "resolves" a conversation. Predictable at scale, but the vendor defines what counts as a resolution, and that definition can be generous. Common among premium suites (think [Intercom](/blog/intercom-alternatives-for-ecommerce) and [Zendesk](/blog/zendesk-alternatives-for-ecommerce) tiers).
-- **Per conversation / interaction** — you pay for every conversation, resolved or not, which means you also pay for the ones the bot *fails*. One customer thread is one unit, which makes it easy to forecast.
-- **Per seat (+ AI add-on)** — you pay per human agent, then bolt the AI on top as a separate line. Common in flow-builder and inbox-first tools like [Tidio](/blog/tidio-alternatives-for-ecommerce) and [Gorgias](/blog/gorgias-alternatives-for-ecommerce); the "AI chatbot" you're picturing often isn't in the base price.
+- **Per resolution** — you pay each time the AI "resolves" a conversation. Predictable at scale, but the vendor defines what counts as a resolution, and that definition can be generous. Common among premium suites: [Intercom's Fin](https://www.intercom.com/pricing) charges $0.99 per resolution, [Zendesk](https://www.zendesk.com/pricing/) bills AI usage per resolution on top of per-agent seats, and [Gorgias](https://www.gorgias.com/pricing) layers per-resolution AI onto ticket-volume tiers (never per agent). Our [Intercom](/blog/intercom-alternatives-for-ecommerce), [Zendesk](/blog/zendesk-alternatives-for-ecommerce), and [Gorgias](/blog/gorgias-alternatives-for-ecommerce) alternatives round-ups dig into each.
+- **Per conversation / interaction** — you pay for every conversation, resolved or not, which means you also pay for the ones the bot *fails*. One customer thread is one unit, which makes it easy to forecast. [Tidio's Lyro](https://www.tidio.com/pricing/) meters its AI this way from around $32.50/month (see our [Tidio alternatives](/blog/tidio-alternatives-for-ecommerce) round-up), and Loqara prices per conversation too.
+- **Per seat (+ AI add-on)** — you pay per human agent, then the AI is either a separate line or a capped inclusion. [Zendesk](https://www.zendesk.com/pricing/) runs $19–$115 per agent/month with Copilot an extra $50 per agent/month, while [Re:amaze](https://www.reamaze.com/pricing) is $29–$69 per user/month with AI included up to usage caps — either way, the "AI chatbot" you're picturing often isn't fully in the base price.
 
 <div class="callout">
 <p class="callout-title">The pricing trap to watch</p>
-<p>"$X per resolution" and "$X per conversation" are <strong>not</strong> the same thing, and the gap can be 3–4× on identical traffic. A "resolution" is whatever the vendor decides it is — sometimes counted generously, so one customer thread bills as several events. A "conversation" is one customer thread, full stop. The only way to compare honestly is to take your real monthly volume and multiply it by each tool's actual billable unit. Loqara prices per conversation with a real free tier (100/month) precisely so the number you forecast is the number you pay.</p>
+<p>"$X per resolution" and "$X per conversation" are <strong>not</strong> the same thing, and the gap be several times apart on identical traffic. A "resolution" is whatever the vendor decides it is — sometimes counted generously, so one customer thread bills as several events. A "conversation" is one customer thread, full stop. The only way to compare honestly is to take your real monthly volume and multiply it by each tool's actual billable unit. Loqara prices per conversation with a real free tier (100/month) precisely so the number you forecast is the number you pay.</p>
 </div>
 
 Whatever model a vendor uses, ask one question: *at my real monthly volume, what's the all-in cost — including the AI, including seats, including overage?* Run that math on your numbers, not the headline price. And check whether the free tier renews every month or is a one-time taste that expires after a few hundred messages.
@@ -103,7 +103,7 @@ A quick gut-check before you commit: install it on your real store, point it at 
 ## Frequently asked questions
 
 ### What's the most important thing to check before buying an AI support agent?
-The pricing model, because it determines your actual bill more than the headline price does. Per-resolution, per-conversation, and per-seat pricing can differ by 3–4× on identical traffic, so model your real monthly volume against each tool's billable unit before you commit. Everything else — grounding, store actions, handoff — matters, but the pricing unit is the one that surprises people.
+The pricing model, because it determines your actual bill more than the headline price does. Per-resolution, per-conversation, and per-seat pricing can differ by several times over on identical traffic, so model your real monthly volume against each tool's billable unit before you commit. Everything else — grounding, store actions, handoff — matters, but the pricing unit is the one that surprises people.
 
 ### What does "grounded" mean and why does it matter?
 A grounded agent answers only from your own content — your policies, FAQs, and product data — and says "I'm not sure" rather than guessing. It matters because a confident wrong answer (an invented returns window, say) creates more tickets and lost trust than no answer at all. Ask any vendor exactly how they prevent fabricated answers, and look for source citations as proof.

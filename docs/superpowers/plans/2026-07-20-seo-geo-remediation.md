@@ -927,21 +927,21 @@ audit before execution because content may change.
 - [x] `add-voice-ai-to-online-store`
 - [x] `ai-chatbot-for-online-store`
 - [x] `ai-chatbot-gdpr-data-privacy`
-- [ ] `ai-chatbot-human-handoff`
-- [ ] `ai-customer-service-small-stores`
+- [x] `ai-chatbot-human-handoff` — _editorial exception (2026-07-21): deliberately citation-free (operational/conceptual advice, no statistics); audit warning expected_
+- [x] `ai-customer-service-small-stores`
 - [ ] `ai-product-recommendation-chatbot`
 - [x] `best-ai-chatbot-for-ecommerce`
 - [x] `best-ai-chatbot-for-shopify`
 - [x] `best-ai-chatbot-for-woocommerce`
 - [x] `best-chatbot-platforms`
 - [x] `black-friday-ai-agent`
-- [ ] `capture-leads-with-conversational-chat`
-- [ ] `chatbot-roi-metrics-that-matter`
+- [x] `capture-leads-with-conversational-chat` — _editorial exception (2026-07-21): deliberately citation-free (operational/conceptual advice, no statistics); audit warning expected_
+- [x] `chatbot-roi-metrics-that-matter` — _editorial exception (2026-07-21): deliberately citation-free (operational/conceptual advice, no statistics); audit warning expected_
 - [x] `chatgpt-for-customer-service`
 - [x] `conversational-ai-vs-chatbot` — _editorial exception (2026-07-21): concept explainer with no statistics or vendor numbers; deliberately citation-free, audit warning expected_
 - [x] `gorgias-alternatives-for-ecommerce`
 - [x] `how-much-does-ai-chatbot-cost`
-- [ ] `how-to-choose-ai-support-agent`
+- [x] `how-to-choose-ai-support-agent`
 - [x] `intercom-alternatives-for-ecommerce`
 - [x] `multilingual-ai-customer-support`
 - [x] `new-ai-chatbots-2026`
