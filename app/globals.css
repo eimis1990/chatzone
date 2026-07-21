@@ -384,9 +384,28 @@
 .landing-brand-marquee {
   animation: brand-marquee 120s linear infinite;
 }
+
+@keyframes landing-button-shimmer {
+  0% {
+    transform: translateX(-180%) skewX(-12deg);
+  }
+  30% {
+    transform: translateX(520%) skewX(-12deg);
+  }
+  100% {
+    transform: translateX(520%) skewX(-12deg);
+  }
+}
+.landing-button-shimmer {
+  animation: landing-button-shimmer 3.7s ease-in-out infinite;
+}
 @media (prefers-reduced-motion: reduce) {
-  .landing-brand-marquee {
+  .landing-brand-marquee,
+  .landing-button-shimmer {
     animation: none;
+  }
+  .landing-button-shimmer {
+    display: none;
   }
 }
 /* Widget launcher "breathe + pulse" — one synced 6s cycle:

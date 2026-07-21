@@ -46,6 +46,42 @@ the product live on the page.
 ## Embed
 `<Script src="/widget.js" data-bot-key="135c8f3f62b77480ef0237e5827ca996" data-position="bottom-right">` (Jarvis — avatar, voice, commerce, EN/LT). Same-origin, so the loader + config fetch just work.
 
+## Hero media delivery
+
+The hero renders a responsive poster in server HTML. After hydration, capable
+browsers request only the intro video; the loop source is not assigned until the
+intro ends. Reduced-motion, Save-Data, and 2G users remain poster-only.
+
+Current derivative assets are generated from the original 1920×1080 H.264 files:
+
+| Asset set | Dimensions | Intro | Loop | Combined |
+|---|---:|---:|---:|---:|
+| Original | 1920×1080 | 3.91 MB / 6.21 Mbps / 5.04 s | 4.05 MB / 5.36 Mbps / 6.04 s | 7.96 MB |
+| Desktop | 1280×720 | 560 KB / 0.88 Mbps | 433 KB / 0.57 Mbps | 993 KB |
+| Mobile | 540×960 | 317 KB / 0.50 Mbps | 267 KB / 0.35 Mbps | 584 KB |
+
+All video variants are H.264 at 24 fps with no audio. Original 1600×900 posters
+are 221–230 KB; desktop derivatives are 162–167 KB and mobile derivatives are
+58–65 KB.
+
+```bash
+# Desktop, 1280×720
+ffmpeg -i public/loqara-hero-intro.mp4 -vf 'scale=1280:-2:flags=lanczos' \
+  -an -c:v libx264 -preset slow -crf 29 -pix_fmt yuv420p \
+  -movflags +faststart public/loqara-hero-intro-desktop.mp4
+
+# Mobile, portrait crop focused on the fox
+ffmpeg -i public/loqara-hero-intro.mp4 \
+  -vf 'crop=608:1080:980:0,scale=540:960:flags=lanczos' \
+  -an -c:v libx264 -preset slow -crf 30 -pix_fmt yuv420p \
+  -movflags +faststart public/loqara-hero-intro-mobile.mp4
+```
+
+Use the same settings for the loop file. Posters use matching 1280×720 and
+540×960 crops. The compositions were checked at 390, 768, 1440, and 1920 CSS px.
+Keep the full-resolution sources until the optimized derivatives have passed
+production network and visual smoke tests.
+
 ## Image prompts (run these; drop results in `public/landing/`)
 See the chat message accompanying this build for the full prompt list (hero,
 feature shots, og image). Slots reference `/landing/*.png` with graceful

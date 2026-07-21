@@ -49,12 +49,93 @@ test('reduced motion keeps a hydration-safe static hero', async ({ browser }) =>
   const context = await browser.newContext({ reducedMotion: 'reduce' })
   const page = await context.newPage()
   const pageErrors: string[] = []
+  const heroVideoRequests: string[] = []
   page.on('pageerror', (error) => pageErrors.push(error.message))
+  page.on('request', (request) => {
+    if (request.url().includes('loqara-hero-') && request.url().endsWith('.mp4')) {
+      heroVideoRequests.push(request.url())
+    }
+  })
 
   await page.goto('/')
   await expect(page.locator('video')).toHaveCount(0)
-  await expect(page.locator('img[src="/loqara-hero-poster.webp"]')).toBeVisible()
+  await expect(page.locator('img[src="/loqara-hero-poster-desktop.webp"]')).toBeVisible()
   await expect(page.locator('.landing-brand-marquee')).toHaveCSS('animation-name', 'none')
+  expect(heroVideoRequests).toEqual([])
+  expect(pageErrors).toEqual([])
+
+  await context.close()
+})
+
+test('save-data keeps the hero poster-only', async ({ browser }) => {
+  const context = await browser.newContext()
+  await context.addInitScript(() => {
+    Object.defineProperty(navigator, 'connection', {
+      configurable: true,
+      value: {
+        effectiveType: '4g',
+        saveData: true,
+        addEventListener: () => {},
+        removeEventListener: () => {},
+      },
+    })
+  })
+  const page = await context.newPage()
+  const heroVideoRequests: string[] = []
+  page.on('request', (request) => {
+    if (request.url().includes('loqara-hero-') && request.url().endsWith('.mp4')) {
+      heroVideoRequests.push(request.url())
+    }
+  })
+
+  await page.goto('/')
+  await expect(page.locator('video')).toHaveCount(0)
+  await expect(page.locator('img[src="/loqara-hero-poster-desktop.webp"]')).toBeVisible()
+  expect(heroVideoRequests).toEqual([])
+
+  await context.close()
+})
+
+test('mobile hero downloads the intro before assigning the loop', async ({ browser }) => {
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 } })
+  const page = await context.newPage()
+  const requestedVideos: string[] = []
+  const pageErrors: string[] = []
+  let activeVideoRequests = 0
+  let maxActiveVideoRequests = 0
+
+  page.on('pageerror', (error) => pageErrors.push(error.message))
+
+  page.on('request', (request) => {
+    if (request.url().includes('loqara-hero-') && request.url().endsWith('.mp4')) {
+      requestedVideos.push(new URL(request.url()).pathname)
+      activeVideoRequests += 1
+      maxActiveVideoRequests = Math.max(maxActiveVideoRequests, activeVideoRequests)
+    }
+  })
+  const finishVideoRequest = (request: { url(): string }) => {
+    if (request.url().includes('loqara-hero-') && request.url().endsWith('.mp4')) {
+      activeVideoRequests -= 1
+    }
+  }
+  page.on('requestfinished', finishVideoRequest)
+  page.on('requestfailed', finishVideoRequest)
+
+  await page.goto('/')
+  await expect(page.locator('video[src="/loqara-hero-intro-mobile.mp4"]')).toHaveCount(1)
+  expect(requestedVideos).toEqual(['/loqara-hero-intro-mobile.mp4'])
+
+  await expect(page.locator('video[src="/loqara-hero-loop-mobile.mp4"]')).toHaveCount(1, {
+    timeout: 10_000,
+  })
+  expect(requestedVideos).toEqual([
+    '/loqara-hero-intro-mobile.mp4',
+    '/loqara-hero-loop-mobile.mp4',
+  ])
+  expect(maxActiveVideoRequests).toBeLessThanOrEqual(1)
+
+  await page.goto('/blog')
+  await expect(page.locator('video')).toHaveCount(0)
   expect(pageErrors).toEqual([])
 
   await context.close()

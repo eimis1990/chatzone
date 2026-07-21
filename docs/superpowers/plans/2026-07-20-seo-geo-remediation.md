@@ -186,16 +186,16 @@ and no page-long Lenis RAF loop runs on the homepage.
 - Modify: `components/landing/Hero.tsx` if the poster moves to server markup
 - Add tests: `tests/unit/hero-media-policy.test.ts` for pure policy decisions
 
-- [ ] Render a responsive poster before any video source is assigned.
-- [ ] Add a pure policy helper for reduced motion, save-data, viewport class, and
+- [x] Render a responsive poster before any video source is assigned.
+- [x] Add a pure policy helper for reduced motion, save-data, viewport class, and
       supported media variants; unit-test all branches.
-- [ ] Under reduced motion or save-data, remain poster-only.
-- [ ] Ensure only the intro video has a `src` during the initial video phase.
-- [ ] Create or assign the loop source only near/after intro completion; do not
+- [x] Under reduced motion or save-data, remain poster-only.
+- [x] Ensure only the intro video has a `src` during the initial video phase.
+- [x] Create or assign the loop source only near/after intro completion; do not
       use two simultaneous `preload="auto"` elements.
-- [ ] On autoplay rejection, decode error, or missing asset, return to the poster.
-- [ ] Keep video decorative (`aria-hidden`, no focus, no essential information).
-- [ ] Verify route transitions clean up playback and listeners.
+- [x] On autoplay rejection, decode error, or missing asset, return to the poster.
+- [x] Keep video decorative (`aria-hidden`, no focus, no essential information).
+- [x] Verify route transitions clean up playback and listeners.
 
 **Acceptance:** browser network logs show at most one hero video downloading at a
 time; reduced-motion/save-data tests show no video requests.
@@ -208,15 +208,15 @@ time; reduced-motion/save-data tests show no video requests.
 - Update: `components/landing/HeroVideo.tsx`
 - Document source/encode command in `docs/LANDING.md`
 
-- [ ] Inventory resolution, duration, bitrate, codec, and size for current intro,
+- [x] Inventory resolution, duration, bitrate, codec, and size for current intro,
       loop, and posters.
-- [ ] Create a mobile crop/encode and a desktop encode. Preserve the seamless
+- [x] Create a mobile crop/encode and a desktop encode. Preserve the seamless
       intro-to-loop handoff.
-- [ ] Target combined mobile intro+loop assets below 2 MB and each individual
+- [x] Target combined mobile intro+loop assets below 2 MB and each individual
       initial video request below 1 MB where acceptable quality allows.
-- [ ] Re-encode posters to responsive WebP/AVIF sizes and verify the fox/copy crop
+- [x] Re-encode posters to responsive WebP/AVIF sizes and verify the fox/copy crop
       at 375 px, 768 px, 1440 px, and ultrawide.
-- [ ] Do not delete original source assets until `rg`, asset references, and a
+- [x] Do not delete original source assets until `rg`, asset references, and a
       production smoke test confirm they are unused. Remove unused public copies
       in a separate, reviewable commit.
 

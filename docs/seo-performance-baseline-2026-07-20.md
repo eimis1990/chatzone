@@ -90,3 +90,26 @@ reveal wrappers, removed Lenis, and made the reduced-motion hero hydration-safe.
 The LCP breakdown now reports approximately 127 ms of element render delay instead
 of the multi-second hydration delay. The remaining lab LCP/transfer constraint is
 the unchanged 7.96 MB hero-video payload, owned by Phase 2.
+
+## Phase 2 hero-media checkpoint — 2026-07-21
+
+Measured across three serial Lighthouse runs against the optimized local
+production build, using the same mobile simulation as Phase 1:
+
+| Performance | Accessibility | Best Practices | SEO | FCP | LCP | Speed Index | TBT | CLS | Transfer | Requests |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 78 | 89 | 96* | 100 | 1.21 s | 6.03 s | 2.23 s | 10 ms | 0 | 2.31 MB | 57 |
+
+The responsive, sequential media state machine reduced total transfer from the
+Phase 1 checkpoint's 10.34 MB to 2.31 MB (−77.7%). Media transfer fell from
+7.96 MB to 0.32 MB because the mobile audit requests the 317 KB intro only; the
+267 KB loop is assigned after the 5.04-second intro completes. The original
+production baseline was 10.78 MB and 11.26-second LCP.
+
+Reduced-motion, Save-Data, and 2G policy paths make zero video requests. Browser
+instrumentation also confirmed the mobile intro and loop never download
+concurrently. The remaining initial payload is led by 1.34 MB of images, primarily
+the chat-view showcase addressed by Task 2.3.
+
+`*` As in Phase 1, local Best Practices is 96 only because the production-only
+Vercel Analytics endpoint returns 404 under `next start`.
