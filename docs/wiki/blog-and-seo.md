@@ -89,4 +89,22 @@ Sidekick/Magic assistance from public storefront chat, so it complements rather
 than replaces `best-ai-chatbot-for-shopify`. Personalization remains broader than
 the conversational recommendation intent owned by `ai-product-recommendation-chatbot`.
 
-_Last verified: 2026-07-18 (AI operations pillar + dual-image article pattern)._
+## 2026-07-20 remediation baseline
+
+The public-site audit found that technical SEO tags are broadly sound, but mobile
+rendering/payload and editorial authority are the current constraints: clean mobile
+Lighthouse measured Performance 61 on `/` (11.3 s lab LCP, ~10.5 MB) and 63 on
+`/blog` (10.8 s lab LCP). The supplied Best Practices 58 was browser-extension
+contamination; a clean run scored 100. The blog index currently renders all 51
+posts, and the content inventory has 29 posts without external Markdown citations,
+28 without explicit `related` frontmatter, and 12 without contextual inbound links.
+
+The planned direction is documented in the
+[design specification](../superpowers/specs/2026-07-20-seo-geo-remediation-design.md)
+and [checkbox execution plan](../superpowers/plans/2026-07-20-seo-geo-remediation.md).
+Accessibility is the final implementation phase. Do not treat `llms.txt` or FAQ
+schema as Google ranking shortcuts; prioritize visible server content, media/image
+budgets, index controls, curated topic relationships, primary evidence, and clear
+publisher/author methodology.
+
+_Last verified: 2026-07-20 (ba6f82d)._
