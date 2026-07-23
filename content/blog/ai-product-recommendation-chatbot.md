@@ -5,7 +5,7 @@ date: 2026-07-15
 topic: ecommerce-ai
 author: Eimantas Kudarauskas
 image: /blog/ai-product-recommendation-chatbot.webp
-related: agentic-commerce-ecommerce, recover-abandoned-carts-ai-chatbot, best-ai-chatbot-for-ecommerce
+related: ai-chatbot-for-furniture-stores, agentic-commerce-ecommerce, best-ai-chatbot-for-ecommerce
 ---
 
 Most store filters assume the shopper already knows the category, terminology, and attributes that matter. Real customers arrive with a messier thought: “I need a gift for a new runner under €80,” or “Which serum works for dry, sensitive skin without fragrance?”
@@ -98,7 +98,7 @@ The strongest fit is a catalog where customers need guidance but do not necessar
 
 **Electronics and accessories.** Compatibility is often the sale. The agent should verify model, connector, dimensions, power, and region rather than suggest something merely similar.
 
-**Home and furniture.** Dimensions, room, style, material, care, lead time, and assembly create high-consideration choices.
+**Home and furniture.** Dimensions, room, style, material, care, lead time, and assembly create high-consideration choices. The dedicated [furniture-store AI chatbot guide](/blog/ai-chatbot-for-furniture-stores) shows how to separate hard fit constraints from softer style preferences without guessing.
 
 **Gifts and speciality products.** Shoppers know the person and occasion but not the category. Natural-language discovery is dramatically easier than browsing every collection.
 

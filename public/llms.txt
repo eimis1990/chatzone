@@ -55,6 +55,7 @@
 - [AI for e-commerce — 12 practical store uses](https://www.loqara.com/blog/ai-for-ecommerce): the cluster pillar on where AI actually earns its keep
 - [Best AI chatbots for e-commerce (2026)](https://www.loqara.com/blog/best-ai-chatbot-for-ecommerce): the flagship comparison
 - [Best AI chatbot for Shopify](https://www.loqara.com/blog/best-ai-chatbot-for-shopify): Shopify-specific comparison
+- [Shopify Inbox vs an AI chatbot](https://www.loqara.com/blog/shopify-inbox-vs-ai-chatbot): when Shopify's native free chat is enough and when dedicated AI earns its cost
 - [Best AI chatbot for WooCommerce](https://www.loqara.com/blog/best-ai-chatbot-for-woocommerce): WooCommerce-specific comparison
 - [The 10 best chatbot platforms in 2026](https://www.loqara.com/blog/best-chatbot-platforms): broad roundup with real screenshots
 - [How much does an AI chatbot cost (2026)](https://www.loqara.com/blog/how-much-does-ai-chatbot-cost): pricing models decoded
@@ -66,6 +67,7 @@
 - [5 ways an AI agent cuts support tickets](https://www.loqara.com/blog/reduce-support-tickets-with-ai): the support-ops pillar
 - ["Where is my order?" — automating the #1 support question](https://www.loqara.com/blog/where-is-my-order-ai): WISMO deflection
 - [Human handoff done right](https://www.loqara.com/blog/ai-chatbot-human-handoff): when AI should step aside
+- [Live chat vs an AI chatbot for e-commerce](https://www.loqara.com/blog/live-chat-vs-ai-chatbot-ecommerce): which customer jobs belong with AI, people, or a hybrid workflow
 - [Preventing AI chatbot hallucinations](https://www.loqara.com/blog/prevent-ai-chatbot-hallucinations): grounding and guardrails
 - [AI chatbots & GDPR](https://www.loqara.com/blog/ai-chatbot-gdpr-data-privacy): compliance for store owners, cited to the regulation
 - [How to test an AI chatbot before launch](https://www.loqara.com/blog/test-ai-chatbot-before-launch): e-commerce QA checklist
@@ -81,6 +83,7 @@
 - [IndexNow for e-commerce](https://www.loqara.com/blog/indexnow-ecommerce-guide): faster recrawls, practical setup
 - [Semantic search for e-commerce](https://www.loqara.com/blog/semantic-search-ecommerce): how modern product search works
 - [AI product recommendation chatbots](https://www.loqara.com/blog/ai-product-recommendation-chatbot): conversational recommendations
+- [AI chatbots for furniture stores](https://www.loqara.com/blog/ai-chatbot-for-furniture-stores): dimension-aware product guidance without guessing
 - [AI personalization in e-commerce](https://www.loqara.com/blog/ai-personalization-ecommerce): practical rollout without creepiness
 - [AI inventory forecasting](https://www.loqara.com/blog/ai-inventory-forecasting-ecommerce): fewer stockouts without guessing
 - [AI fraud detection for e-commerce](https://www.loqara.com/blog/ai-fraud-detection-ecommerce): how it works and what it misses

@@ -104,6 +104,18 @@ Sidekick/Magic assistance from public storefront chat, so it complements rather
 than replaces `best-ai-chatbot-for-shopify`. Personalization remains broader than
 the conversational recommendation intent owned by `ai-product-recommendation-chatbot`.
 
+The July 23 commercial-intent cluster adds three decision pages without reopening
+those umbrella queries. `ai-chatbot-for-furniture-stores` owns the vertical,
+constraint-heavy furniture intent and specializes the generic recommendation
+guide. `shopify-inbox-vs-ai-chatbot` owns the native-free-chat versus dedicated-AI
+decision; it must preserve the current capability boundary that Loqara searches
+Shopify products but does **not** look up Shopify orders. `live-chat-vs-ai-chatbot-ecommerce`
+owns the staffing/routing decision, distinct from the technology taxonomy in
+`conversational-ai-vs-chatbot` and the handoff mechanics in
+`ai-chatbot-human-handoff`. Each post has a text-free cover plus explanatory
+process visual, explicit related slugs, contextual backlinks, useful FAQs, and
+primary/first-party evidence where claims are time-sensitive.
+
 ## 2026-07-20 remediation baseline
 
 The public-site audit found that technical SEO tags are broadly sound, but mobile
@@ -165,4 +177,4 @@ optimized mobile runs measured median Performance 91, LCP 3.46 seconds, 0.41 MB,
 36 requests, 13 image requests, and zero CLS. Homepage remained at Performance 85,
 LCP 4.35 seconds, and 0.93 MB in the post-change smoke audit.
 
-_Last verified: 2026-07-21 (Phase 3 remediation branch)._
+_Last verified: 2026-07-23 (working tree)._

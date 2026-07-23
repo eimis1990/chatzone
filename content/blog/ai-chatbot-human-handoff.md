@@ -3,7 +3,7 @@ title: "Human handoff done right: when AI should step aside"
 description: The best AI agents know their limits. Here's how clean human handoff works, when a bot should escalate, and why it's the feature that makes customers actually trust your chat.
 date: 2026-06-23
 topic: ai-customer-support
-related: reduce-support-tickets-with-ai, prevent-ai-chatbot-hallucinations, ai-customer-service-small-stores
+related: live-chat-vs-ai-chatbot-ecommerce, reduce-support-tickets-with-ai, prevent-ai-chatbot-hallucinations
 updated: 2026-07-21
 author: Eimantas Kudarauskas
 image: /blog/ai-chatbot-human-handoff.webp
@@ -35,7 +35,7 @@ The fix isn't a smarter model. It's a better **human handoff** — knowing when 
 
 It's tempting to judge an AI agent purely on how many tickets it deflects. But deflection measured in isolation rewards the wrong behaviour: a bot that *never* offers a human posts a beautiful deflection number while quietly torching your reputation. The customers it "deflected" didn't get helped — they left. Handoff is the safety valve that keeps automation honest.
 
-Think of the AI's job as removing **repetition**, not removing **people**. Most of what hits your inbox is predictable: order status, sizing, return windows, "do you ship to my country?" A [grounded AI agent](/blog/ai-chatbot-for-online-store) should own that long tail so your team isn't typing the same three answers all day. The genuinely hard, emotional, or high-value conversations — the small share where judgement matters — are exactly where a human should take over. Done this way, automation and humans aren't competing; they're covering for each other.
+Think of the AI's job as removing **repetition**, not removing **people**. Most of what hits your inbox is predictable: order status, sizing, return windows, "do you ship to my country?" A [grounded AI agent](/blog/ai-chatbot-for-online-store) should own the supported repeatable work so your team isn't typing the same three answers all day. The genuinely hard, emotional, or high-value conversations are exactly where a human should take over. Our [live chat vs AI chatbot comparison](/blog/live-chat-vs-ai-chatbot-ecommerce) maps those jobs explicitly. Done this way, automation and humans aren't competing; they're covering for each other.
 
 When the bot hands off cleanly, you get faster first replies, fewer escalations that turn into complaints, and a team that spends its energy on conversations that actually need a brain. When it doesn't, you get the worst of both worlds — angry customers *and* a team firefighting the fallout. Handoff quality is one of [the metrics that actually tell you if your agent is working](/blog/chatbot-roi-metrics-that-matter), not a nice-to-have you bolt on later.
 
