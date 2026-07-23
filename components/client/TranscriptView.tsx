@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { CopyIcon, CheckIcon, PhoneIcon, MessageSquareIcon, ChevronLeftIcon, TriangleAlertIcon } from 'lucide-react'
+import { CopyIcon, CheckIcon, PhoneIcon, MessageCircleIcon, ChevronLeftIcon, TriangleAlertIcon } from 'lucide-react'
 import { formatDistanceToNow } from '@/lib/date-utils'
 import type { Conversation, ConversationChannel, Message } from '@/lib/types'
 
@@ -16,18 +16,20 @@ interface ConversationRow
   channel: ConversationChannel
 }
 
-/** Small pill marking whether a conversation was a voice call or a text chat. */
+/** Small pill marking whether a conversation was a voice call or a text chat.
+ *  Voice = lime, Chat = teal, both white text + a filled icon. (600 shades so
+ *  white stays legible on the fill — lime-500 fails contrast.) */
 function ChannelBadge({ channel }: { channel: ConversationChannel }) {
   const voice = channel === 'voice'
-  const Icon = voice ? PhoneIcon : MessageSquareIcon
+  const Icon = voice ? PhoneIcon : MessageCircleIcon
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-medium ${
-        voice ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'
+      className={`inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-semibold text-white ${
+        voice ? 'bg-lime-600' : 'bg-teal-600'
       }`}
       title={voice ? 'Voice call' : 'Text chat'}
     >
-      <Icon className="size-2.5" aria-hidden="true" />
+      <Icon className="size-2.5" fill="currentColor" stroke="currentColor" aria-hidden="true" />
       {voice ? 'Voice' : 'Chat'}
     </span>
   )
@@ -203,11 +205,11 @@ export function TranscriptView({ conversations, loadMessages, analyze }: Transcr
                         <ChannelBadge channel={conv.channel} />
                         {conv.needs_attention && (
                           <span
-                            className="inline-flex shrink-0 items-center gap-1 rounded-full bg-destructive/10 px-1.5 py-0.5 text-[10px] font-semibold text-destructive"
+                            className="inline-flex size-5 shrink-0 items-center justify-center rounded-full bg-destructive/10 text-destructive"
                             title="Needs attention — the visitor was unhappy or the bot couldn't answer"
+                            aria-label="Needs attention"
                           >
-                            <TriangleAlertIcon className="size-2.5" aria-hidden="true" />
-                            Needs attention
+                            <TriangleAlertIcon className="size-3" aria-hidden="true" />
                           </span>
                         )}
                       </span>
@@ -364,13 +366,18 @@ export function TranscriptView({ conversations, loadMessages, analyze }: Transcr
 function MessageBubble({ message }: { message: Message }) {
   const isUser = message.role === 'user'
   const products = message.products ?? []
+  // A reply the visitor thumbed-down: outline it so the owner can spot exactly
+  // which answer missed (ring, so there's no layout shift vs. other bubbles).
+  const disliked = message.feedback === 'down'
   return (
     <div className={['flex', isUser ? 'justify-end' : 'justify-start'].join(' ')}>
       <div
         className={[
           'max-w-[80%] space-y-1 rounded-lg px-4 py-2.5 text-sm',
           isUser ? 'bg-primary text-primary-foreground' : 'bg-muted text-foreground',
+          disliked ? 'ring-2 ring-destructive/70' : '',
         ].join(' ')}
+        title={disliked ? 'Visitor marked this reply unhelpful' : undefined}
       >
         {message.content && (
           <div className="whitespace-pre-wrap break-words">{message.content}</div>

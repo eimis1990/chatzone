@@ -239,8 +239,8 @@
      edge washes on both sides (same vertical-field idea as the config section
      headers, but red and always-on). Reads as a flagged row without shouting. */
   .attention-cell {
-    background: color-mix(in srgb, var(--destructive) 5%, transparent);
-    box-shadow: inset 3px 0 0 0 var(--destructive);
+    background: color-mix(in srgb, var(--destructive) 2.5%, transparent);
+    box-shadow: inset 2px 0 0 0 color-mix(in srgb, var(--destructive) 70%, transparent);
   }
   .attention-cell::before,
   .attention-cell::after {
@@ -248,7 +248,7 @@
     position: absolute;
     top: 0;
     bottom: 0;
-    width: 8rem;
+    width: 6rem;
     pointer-events: none;
     z-index: 0;
   }
@@ -256,7 +256,7 @@
     left: 0;
     background: linear-gradient(
       to right,
-      color-mix(in srgb, var(--destructive) 15%, transparent),
+      color-mix(in srgb, var(--destructive) 7%, transparent),
       transparent
     );
   }
@@ -264,7 +264,7 @@
     right: 0;
     background: linear-gradient(
       to left,
-      color-mix(in srgb, var(--destructive) 12%, transparent),
+      color-mix(in srgb, var(--destructive) 5%, transparent),
       transparent
     );
   }
