@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { CopyIcon, CheckIcon, PhoneIcon, MessageSquareIcon, ChevronLeftIcon } from 'lucide-react'
+import { CopyIcon, CheckIcon, PhoneIcon, MessageSquareIcon, ChevronLeftIcon, TriangleAlertIcon } from 'lucide-react'
 import { formatDistanceToNow } from '@/lib/date-utils'
 import type { Conversation, ConversationChannel, Message } from '@/lib/types'
 
@@ -28,7 +28,7 @@ function ChannelBadge({ channel }: { channel: ConversationChannel }) {
       title={voice ? 'Voice call' : 'Text chat'}
     >
       <Icon className="size-2.5" aria-hidden="true" />
-      {voice ? 'Voice conversation' : 'Chat conversation'}
+      {voice ? 'Voice' : 'Chat'}
     </span>
   )
 }
@@ -46,6 +46,21 @@ function scoreStyle(score: number | null | undefined): { label: string; cls: str
   if (score >= 4) return { label: 'Success', cls: 'bg-green-100 text-green-800' }
   if (score === 3) return { label: 'Mixed', cls: 'bg-amber-100 text-amber-800' }
   return { label: 'Needs work', cls: 'bg-red-100 text-red-700' }
+}
+
+/** The chat's AI-handling rating as a labeled pill (nothing when unscored). */
+function RatingBadge({ score }: { score: number | null | undefined }) {
+  const s = scoreStyle(score)
+  if (!s) return null
+  return (
+    <span
+      className={`inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${s.cls}`}
+      title={`AI handling: ${s.label}`}
+    >
+      {s.label}
+      <span className="opacity-70">{score}/5</span>
+    </span>
+  )
 }
 
 /** Small clipboard button — copies a value and flashes a check. */
@@ -164,10 +179,13 @@ export function TranscriptView({ conversations, loadMessages, analyze }: Transcr
           <ul className="min-h-0 flex-1 divide-y overflow-y-auto">
             {visible.map((conv) => {
               const isActive = conv.id === selectedId
-              const s = scoreStyle(conv.success_score)
               return (
-                <li key={conv.id} className="relative">
-                  {/* Whole cell selects the conversation… */}
+                <li
+                  key={conv.id}
+                  className={`relative overflow-hidden ${conv.needs_attention ? 'attention-cell' : ''}`}
+                >
+                  {/* Whole cell selects the conversation. Selection/hover use a
+                      translucent wash so the attention glow shows through. */}
                   <button
                     type="button"
                     onClick={() => {
@@ -175,55 +193,37 @@ export function TranscriptView({ conversations, loadMessages, analyze }: Transcr
                       setMobileTab('chat')
                     }}
                     className={[
-                      'block w-full px-3 py-3 text-left transition-colors',
-                      isActive ? 'bg-muted' : 'hover:bg-muted/50',
+                      'relative z-[1] block w-full px-3 py-3 text-left transition-colors',
+                      isActive ? 'bg-muted/70' : 'hover:bg-muted/40',
                     ].join(' ')}
                   >
-                    {/* Top row: channel badge (+ attention dot) · score + message count */}
+                    {/* Top row: channel badge (+ attention flag) · message count */}
                     <div className="flex items-center justify-between gap-2">
                       <span className="flex min-w-0 items-center gap-1.5">
                         <ChannelBadge channel={conv.channel} />
                         {conv.needs_attention && (
                           <span
-                            className="size-1.5 shrink-0 rounded-full bg-destructive"
-                            title="Needs attention"
-                            aria-label="Needs attention"
-                          />
-                        )}
-                      </span>
-                      <span className="flex shrink-0 items-center gap-1.5">
-                        {s && (
-                          <span
-                            className={`rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${s.cls}`}
-                            title={`AI handling: ${s.label}`}
+                            className="inline-flex shrink-0 items-center gap-1 rounded-full bg-destructive/10 px-1.5 py-0.5 text-[10px] font-semibold text-destructive"
+                            title="Needs attention — the visitor was unhappy or the bot couldn't answer"
                           >
-                            {conv.success_score}/5
+                            <TriangleAlertIcon className="size-2.5" aria-hidden="true" />
+                            Needs attention
                           </span>
                         )}
-                        <span className="text-xs text-muted-foreground">
-                          {conv.message_count} message{conv.message_count !== 1 ? 's' : ''}
-                        </span>
+                      </span>
+                      <span className="shrink-0 text-xs text-muted-foreground">
+                        {conv.message_count} message{conv.message_count !== 1 ? 's' : ''}
                       </span>
                     </div>
 
-                    {/* Bottom row: time · truncated id (copy button overlays on the right) */}
+                    {/* Bottom row: time · AI-handling rating */}
                     <div className="mt-2 flex items-center justify-between gap-2">
                       <span className="shrink-0 text-xs text-muted-foreground">
                         {formatDistanceToNow(conv.last_message_at)}
                       </span>
-                      <span
-                        className="min-w-0 max-w-[110px] truncate pr-7 text-right font-mono text-[11px] text-muted-foreground/70"
-                        style={{ direction: 'rtl' }}
-                        title={conv.id}
-                      >
-                        {conv.id}
-                      </span>
+                      <RatingBadge score={conv.success_score} />
                     </div>
                   </button>
-                  {/* …except the copy control, absolutely placed bottom-right. */}
-                  <span className="absolute bottom-2.5 right-2">
-                    <CopyButton value={conv.id} label="Copy conversation ID" />
-                  </span>
                 </li>
               )
             })}
