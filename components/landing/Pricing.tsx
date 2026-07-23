@@ -2,6 +2,7 @@ import {
   PhoneCallIcon,
   MessageSquareIcon,
   ArrowUpRightIcon,
+  SofaIcon,
   type LucideIcon,
 } from 'lucide-react'
 import { PricingTable } from './PricingTable'
@@ -12,6 +13,12 @@ const ADDONS: { icon: LucideIcon; name: string; price: string; desc: string }[] 
     name: 'Voice agent',
     price: '€49/mo + €0.20/min',
     desc: 'Real-time phone & in-widget voice calls powered by ElevenLabs. ~200 minutes included, then per-minute.',
+  },
+  {
+    icon: SofaIcon,
+    name: 'Room visualizer',
+    price: '€29/mo',
+    desc: 'Shoppers upload a room photo and see your products placed in it — AI renders in the chat, 100 per month included.',
   },
   {
     icon: MessageSquareIcon,
@@ -66,7 +73,7 @@ export function Pricing() {
           <p className="mx-auto mt-3 max-w-xl text-center text-white/70">
             Bolt on the extras you need — including a voice agent most chat tools don’t offer.
           </p>
-          <div className="mt-8 grid gap-5 sm:grid-cols-3">
+          <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {ADDONS.map((a) => {
               const Icon = a.icon
               return (

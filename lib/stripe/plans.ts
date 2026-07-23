@@ -1,14 +1,26 @@
 import 'server-only'
 import type { Plan, BillingInterval } from '@/lib/types'
-import { PLANS, PURCHASABLE_PLANS, DISPLAY_PLANS, POPULAR_PLAN, VOICE_ADDON } from '@/lib/plans-catalog'
+import {
+  PLANS,
+  PURCHASABLE_PLANS,
+  DISPLAY_PLANS,
+  POPULAR_PLAN,
+  VOICE_ADDON,
+  VISUALIZER_ADDON,
+} from '@/lib/plans-catalog'
 
 // Re-export the shared catalog so existing server imports keep working.
-export { PLANS, PURCHASABLE_PLANS, DISPLAY_PLANS, POPULAR_PLAN, VOICE_ADDON }
+export { PLANS, PURCHASABLE_PLANS, DISPLAY_PLANS, POPULAR_PLAN, VOICE_ADDON, VISUALIZER_ADDON }
 export type { PlanMeta } from '@/lib/plans-catalog'
 
 /** Stripe Price ID for the Voice add-on (monthly), or null when not configured. */
 export function getVoicePriceId(): string | null {
   return process.env.STRIPE_PRICE_VOICE_MONTH ?? null
+}
+
+/** Stripe Price ID for the Room visualizer add-on (monthly), or null when not configured. */
+export function getVisualizerPriceId(): string | null {
+  return process.env.STRIPE_PRICE_VISUALIZER_MONTH ?? null
 }
 
 /** Stripe Price ID for a one-time setup package, or null when not configured. */

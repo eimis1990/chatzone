@@ -1,6 +1,6 @@
 import 'server-only'
 import { requireStripe, getStripe } from './client'
-import { getVoicePriceId, planFromPriceId } from './plans'
+import { getVoicePriceId, getVisualizerPriceId, planFromPriceId } from './plans'
 import { syncSubscriptionToOrg } from './sync'
 import { createServiceClient } from '@/lib/supabase/service'
 
@@ -78,18 +78,15 @@ export async function changeBasePlan(subscriptionId: string, newPriceId: string)
   await syncSubscriptionToOrg(updated)
 }
 
-/** Add or remove the Voice add-on item on an existing subscription. */
-export async function setVoiceAddon(subscriptionId: string, enabled: boolean): Promise<void> {
+/** Add or remove a recurring add-on item (by price) on an existing subscription. */
+async function setAddonItem(subscriptionId: string, priceId: string, enabled: boolean): Promise<void> {
   const stripe = requireStripe()
-  const voicePriceId = getVoicePriceId()
-  if (!voicePriceId) throw new Error('Voice add-on price is not configured.')
-
   const sub = await stripe.subscriptions.retrieve(subscriptionId)
-  const existing = sub.items.data.find((i) => i.price?.id === voicePriceId)
+  const existing = sub.items.data.find((i) => i.price?.id === priceId)
 
   if (enabled && !existing) {
     const updated = await stripe.subscriptions.update(subscriptionId, {
-      items: [{ price: voicePriceId }],
+      items: [{ price: priceId }],
       proration_behavior: 'create_prorations',
     })
     await syncSubscriptionToOrg(updated)
@@ -100,4 +97,18 @@ export async function setVoiceAddon(subscriptionId: string, enabled: boolean): P
     })
     await syncSubscriptionToOrg(updated)
   }
+}
+
+/** Add or remove the Voice add-on item on an existing subscription. */
+export async function setVoiceAddon(subscriptionId: string, enabled: boolean): Promise<void> {
+  const priceId = getVoicePriceId()
+  if (!priceId) throw new Error('Voice add-on price is not configured.')
+  await setAddonItem(subscriptionId, priceId, enabled)
+}
+
+/** Add or remove the Room visualizer add-on item on an existing subscription. */
+export async function setVisualizerAddon(subscriptionId: string, enabled: boolean): Promise<void> {
+  const priceId = getVisualizerPriceId()
+  if (!priceId) throw new Error('Room visualizer add-on price is not configured.')
+  await setAddonItem(subscriptionId, priceId, enabled)
 }

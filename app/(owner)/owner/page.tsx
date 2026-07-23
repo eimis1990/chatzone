@@ -51,7 +51,7 @@ export default async function OwnerDashboardPage() {
       .gte('last_seen_at', sevenDaysAgo),
     supabase
       .from('organizations')
-      .select('is_platform, plan, subscription_status, billing_interval, voice_addon'),
+      .select('is_platform, plan, subscription_status, billing_interval, voice_addon, visualizer_addon'),
   ])
 
   const revenue = computeMrr((billingOrgs ?? []) as BillingOrg[])

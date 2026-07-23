@@ -266,6 +266,8 @@ export interface BotConfig {
   richResponses?: boolean
   /** "See it in your room" AI product visualizer (furniture stores). */
   roomVisualizer?: boolean
+  /** Image model for room renders (default: Nano Banana Pro / Gemini). */
+  roomVisualizerModel?: 'nano-banana-pro' | 'gpt-image-2'
   model: string
   temperature: number
   leadCapture: {

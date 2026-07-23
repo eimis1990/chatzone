@@ -10,23 +10,41 @@ their room. Spec: `docs/superpowers/specs/2026-07-19-room-visualizer-design.md`.
   (`lib/validation/schemas.ts:244`) → `BotConfig.roomVisualizer?`
   (`lib/types.ts:260`) → exposed as `PublicBotConfig.roomVisualizer`
   (`lib/widget-config.ts:270`).
-- Configurator toggle lives in the Store section (`components/client/ConfigForm.tsx`,
-  `CommerceSection`), rendered only when the page passes `showRoomVisualizer` —
-  currently only the demo-bot editor (`app/(owner)/owner/demos/[botId]/configure/page.tsx`).
-  ⚠️ The *rest* of CommerceSection is visible to clients — pre-existing gap,
-  tracked separately.
+- Configurator: own top-level "Room visualizer" section
+  (`components/client/VisualizerSection.tsx`) with the enable toggle + engine
+  select, gated by the `canUseVisualizer` prop (add-on / demo).
 
-## Demo-bots-only gate (pre-GA)
+## Paid add-on gate (GA 2026-07-23)
 
-The feature is hidden from clients until GA. Server-enforced in two places,
-both keyed on `organizations.is_demo` (the Loqara Demos org, `lib/demo-org.ts`):
+The feature is a **€29/mo add-on** (`VISUALIZER_ADDON` in `lib/plans-catalog.ts`:
+100 renders/month pool + the 5-per-conversation cap; overage deliberately not
+advertised yet). Stripe mirrors the subscription item onto
+`organizations.visualizer_addon` (`lib/stripe/sync.ts`), same as voice; price id
+comes from `STRIPE_PRICE_VISUALIZER_MONTH` (absent → subscription card shows
+"Coming soon"). Owner demo orgs (`is_demo`) are always allowed and exempt from
+the monthly pool.
 
-- `app/api/widget-config/route.ts` forces `roomVisualizer: false` in the public
-  config when the bot's org isn't the demo org.
-- `app/api/widget/visualize/route.ts` returns 403 for non-demo orgs even if the
-  bot's flag is set.
+Server-enforced in two places:
 
-To GA the feature: delete both gates + the `showRoomVisualizer` prop plumbing.
+- `app/api/widget-config/route.ts` forces `roomVisualizer: false` unless
+  (`is_demo` OR `visualizer_addon`) AND the monthly pool has renders left —
+  the tray quietly disappears for the rest of the month when the pool is spent.
+- `app/api/widget/visualize/route.ts` mirrors the same entitlement (403) and
+  pool check (429, before any model spend), then consumes the pool via the
+  atomic `increment_visualizer_usage(org)` RPC after a successful render.
+
+Usage lives in `visualizer_usage (org_id, month, renders)` (migration
+`20260723090000`); members can read their own org's rows.
+
+## Engine choice
+
+`config.roomVisualizerModel`: `nano-banana-pro` (default, Gemini) or
+`gpt-image-2` (OpenAI `/v1/images/edits`, raw-fetch multipart like
+`lib/ai/transcribe.ts`; `quality=high`; gpt-image-2 REJECTS `input_fidelity` —
+verified live). Selected in the configurator's Room visualizer section
+(`components/client/VisualizerSection.tsx`), which replaced the old row inside
+the Store section; gating prop is `canUseVisualizer` (demo pages pass true,
+client/owner-client pages pass `Boolean(org.visualizer_addon)`).
 
 ## Widget UI
 

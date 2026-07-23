@@ -242,6 +242,8 @@ export const botConfigFormSchema = z.object({
   richResponses: z.boolean().default(true),
   /** "See it in your room" AI visualizer (furniture stores). */
   roomVisualizer: z.boolean().default(false),
+  /** Which image model renders the room scenes. */
+  roomVisualizerModel: z.enum(['nano-banana-pro', 'gpt-image-2']).default('nano-banana-pro'),
   model: z.string().default(DEFAULT_CHAT_MODEL),
   temperature: z.number().min(0).max(2).default(DEFAULT_TEMPERATURE),
   leadCapture: z

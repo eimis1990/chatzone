@@ -60,8 +60,22 @@ emails, and manual status progression.
   `openLead.email_body` (`components/owner/SalesLeadsTable.tsx:559`, `:644`).
   The separate mail-app action is allowed to include recipient, subject, and
   body (`:560`). Do not reintroduce a `Tema:` prefix into clipboard copy.
-- Manual name/URL/email signature lines do not belong in stored bodies; the
-  sending provider supplies the signature.
+- Manual name/URL/email signature lines do not belong in stored bodies. Webmail
+  adds the configured signature, but API sends must append the same branded
+  signature explicitly.
+
+## Operational sending
+
+- "Next Ready lead" follows the screen order: `status = 'ready'`, highest score
+  first, then company name (`app/(owner)/owner/leads/page.tsx:15`).
+- Send the live row's `email_subject` and `email_body` snapshots unchanged from
+  `hello@loqara.com` with the Loqara sender name and branded signature. Validate
+  recipient, subject, and body before sending.
+- Treat the lifecycle update as a post-send commit: confirm the exact recipient
+  and subject in the provider's Sent folder, then conditionally change only that
+  row from `ready` to `email_sent` with a fresh `updated_at`
+  (`app/(owner)/owner/leads/actions.ts:12`). If delivery is not confirmed, leave
+  the status untouched.
 
 ## Prospect seeds
 
@@ -82,4 +96,4 @@ emails, and manual status progression.
   research and keep status `ready` until outreach or a buyer response occurs
   (`supabase/migrations/20260720130000_add_mobel_sales_lead.sql:1`).
 
-_Last verified: 2026-07-20 (working tree)._
+_Last verified: 2026-07-23 (live Guru Baldai send)._

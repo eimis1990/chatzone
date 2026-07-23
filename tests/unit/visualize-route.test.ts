@@ -4,6 +4,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 const single = vi.fn()
 const orgSingle = vi.fn()
 const convSingle = vi.fn()
+const usageSingle = vi.fn()
+const rpcMock = vi.fn()
 const inFn = vi.fn()
 const updateEq2 = vi.fn()
 
@@ -14,6 +16,8 @@ vi.mock('@/lib/supabase/service', () => ({
         return { select: () => ({ eq: () => ({ single }) }) }
       if (table === 'organizations')
         return { select: () => ({ eq: () => ({ single: orgSingle }) }) }
+      if (table === 'visualizer_usage')
+        return { select: () => ({ eq: () => ({ eq: () => ({ maybeSingle: usageSingle }) }) }) }
       if (table === 'conversations')
         return {
           select: () => ({ eq: () => ({ eq: () => ({ single: convSingle }) }) }),
@@ -23,6 +27,7 @@ vi.mock('@/lib/supabase/service', () => ({
         return { select: () => ({ eq: () => ({ in: inFn }) }) }
       throw new Error(`unexpected table ${table}`)
     },
+    rpc: rpcMock,
   }),
 }))
 
@@ -53,10 +58,14 @@ function bot(overrides: Record<string, unknown> = {}) {
   }
 }
 
+// Each test gets its own IP: the per-IP limiter (capacity 5) is a module-level
+// singleton, so sharing one bucket across the whole file trips 429s.
+let ipCounter = 0
 function req(body: Record<string, unknown>) {
+  ipCounter += 1
   return new Request('http://localhost/api/widget/visualize', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'x-forwarded-for': `198.51.100.${ipCounter}` },
     body: JSON.stringify({
       publicKey: 'pk',
       conversationId: CONV,
@@ -70,7 +79,9 @@ function req(body: Record<string, unknown>) {
 beforeEach(() => {
   vi.clearAllMocks()
   single.mockResolvedValue({ data: bot() })
-  orgSingle.mockResolvedValue({ data: { is_demo: true } })
+  orgSingle.mockResolvedValue({ data: { is_demo: true, visualizer_addon: false } })
+  usageSingle.mockResolvedValue({ data: null })
+  rpcMock.mockResolvedValue({ error: null })
   convSingle.mockResolvedValue({ data: { id: CONV, visualizer_renders: 0 } })
   inFn.mockResolvedValue({
     data: [{ external_id: 'p1', title: 'Oak Sofa', image_url: 'https://store.example/sofa.jpg' }],
@@ -93,9 +104,41 @@ describe('POST /api/widget/visualize', () => {
     expect((await POST(req({}))).status).toBe(403)
   })
 
-  it("403 when the bot's org isn't the demo org, even with the flag on", async () => {
-    orgSingle.mockResolvedValue({ data: { is_demo: false } })
+  it("403 when the org has neither the demo flag nor the visualizer add-on", async () => {
+    orgSingle.mockResolvedValue({ data: { is_demo: false, visualizer_addon: false } })
     expect((await POST(req({}))).status).toBe(403)
+  })
+
+  it('an add-on org renders and spends from the monthly pool (RPC called)', async () => {
+    orgSingle.mockResolvedValue({ data: { is_demo: false, visualizer_addon: true } })
+    usageSingle.mockResolvedValue({ data: { renders: 42 } })
+    const res = await POST(req({}))
+    expect(res.status).toBe(200)
+    expect(rpcMock).toHaveBeenCalledWith('increment_visualizer_usage', { p_org_id: undefined })
+  })
+
+  it('429 before any model spend once the monthly pool is exhausted', async () => {
+    orgSingle.mockResolvedValue({ data: { is_demo: false, visualizer_addon: true } })
+    usageSingle.mockResolvedValue({ data: { renders: 100 } })
+    const res = await POST(req({}))
+    expect(res.status).toBe(429)
+    const body = (await res.json()) as { remaining?: number }
+    expect(body.remaining).toBe(0)
+    expect(renderRoomScene).not.toHaveBeenCalled()
+  })
+
+  it('demo orgs never touch the monthly pool', async () => {
+    const res = await POST(req({}))
+    expect(res.status).toBe(200)
+    expect(rpcMock).not.toHaveBeenCalled()
+  })
+
+  it('passes the configured image model through to the renderer', async () => {
+    single.mockResolvedValue({ data: bot({ roomVisualizerModel: 'gpt-image-2' }) })
+    expect((await POST(req({}))).status).toBe(200)
+    expect(renderRoomScene).toHaveBeenCalledWith(
+      expect.objectContaining({ model: 'gpt-image-2' }),
+    )
   })
 
   it('429 when the conversation hit the render cap, with remaining: 0', async () => {

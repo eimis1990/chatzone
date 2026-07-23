@@ -115,3 +115,19 @@ export const VOICE_ADDON = {
   blurb: 'Let customers talk to your bot by voice. Real-time speech in and out.',
   features: ['~200 minutes included', 'Then €0.20 / min', 'Works with any paid plan'],
 } as const
+
+/**
+ * The Room visualizer add-on — AI "see it in your room" product renders in the
+ * chat widget. Flat monthly fee with a monthly render pool; when the pool is
+ * spent the feature quietly hides until the next cycle (no overage billing for
+ * now — deliberately not advertised until we decide to meter it).
+ */
+export const VISUALIZER_ADDON = {
+  key: 'visualizer',
+  name: 'Room visualizer',
+  monthly: 29,
+  rendersIncluded: 100,
+  rendersPerConversation: 5,
+  blurb: 'Let shoppers see your products in their own room — AI photo renders right in the chat.',
+  features: ['100 renders / month included', 'Up to 5 renders per conversation', 'Works with any paid plan'],
+} as const

@@ -9,8 +9,10 @@ import {
   sanitizeInstruction,
   renderRoomScene,
   closestAspectRatio,
+  visualizerUsageMonth,
   type InlineImage,
 } from '@/lib/room-visualizer'
+import { VISUALIZER_ADDON } from '@/lib/plans-catalog'
 import type { Bot } from '@/lib/types'
 
 export const maxDuration = 60 // image generation is slow
@@ -52,14 +54,31 @@ export async function POST(req: Request) {
   const { data: bot } = await svc.from('bots').select('*').eq('public_key', publicKey).single<Bot>()
   if (!bot || bot.status !== 'active') return json({ error: 'Bot not available.' }, 404)
   if (!bot.config.roomVisualizer) return json({ error: 'Not enabled.' }, 403)
-  // Demo-bots-only for now (mirrors the widget-config gate) — client bots can't
-  // spend Gemini renders even with the flag set. Remove when the feature goes GA.
+  // Requires the paid Room visualizer add-on (owner demo orgs are exempt) —
+  // mirrors the widget-config gate, so nobody can spend renders via raw API
+  // calls that the widget wouldn't offer.
   const { data: org } = await svc
     .from('organizations')
-    .select('is_demo')
+    .select('is_demo, visualizer_addon')
     .eq('id', bot.org_id)
-    .single<{ is_demo: boolean | null }>()
-  if (!org?.is_demo) return json({ error: 'Not enabled.' }, 403)
+    .single<{ is_demo: boolean | null; visualizer_addon: boolean | null }>()
+  const isDemo = Boolean(org?.is_demo)
+  if (!isDemo && !org?.visualizer_addon) return json({ error: 'Not enabled.' }, 403)
+
+  // Monthly render pool (per org; demo orgs exempt). Checked BEFORE any model
+  // spend; widget-config also hides the tray once the pool is gone, so this is
+  // mostly a backstop for sessions already open when the pool ran out.
+  if (!isDemo) {
+    const { data: usage } = await svc
+      .from('visualizer_usage')
+      .select('renders')
+      .eq('org_id', bot.org_id)
+      .eq('month', visualizerUsageMonth())
+      .maybeSingle<{ renders: number }>()
+    if ((usage?.renders ?? 0) >= VISUALIZER_ADDON.rendersIncluded) {
+      return json({ error: 'The room visualizer is taking a break this month — please check back soon.', remaining: 0 }, 429)
+    }
+  }
   if (!isOriginAllowed(origin, bot.config.allowedDomains ?? [])) {
     return json({ error: 'Origin not allowed.' }, 403)
   }
@@ -124,6 +143,7 @@ export async function POST(req: Request) {
       productImages,
       titles: products.map((p) => p!.title),
       instruction: sanitizeInstruction(instruction),
+      model: bot.config.roomVisualizerModel,
       ...(roomWidth && roomHeight ? { aspectRatio: closestAspectRatio(roomWidth, roomHeight) } : {}),
     })
   } catch (err) {
@@ -140,6 +160,14 @@ export async function POST(req: Request) {
     .eq('id', conv.id)
     .eq('bot_id', bot.id)
   if (incrementError) console.error('[visualizer] cap increment failed:', incrementError)
+
+  // Spend from the monthly pool (atomic upsert-increment; demo orgs exempt).
+  if (!isDemo) {
+    const { error: usageError } = await svc.rpc('increment_visualizer_usage', {
+      p_org_id: bot.org_id,
+    })
+    if (usageError) console.error('[visualizer] usage increment failed:', usageError)
+  }
 
   return json({
     image: `data:${rendered.mimeType};base64,${rendered.data}`,

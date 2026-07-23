@@ -10,6 +10,7 @@ import {
   PhoneCallIcon,
   MessageSquareIcon,
   ArrowUpRightIcon,
+  SofaIcon,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -51,12 +52,16 @@ interface BillingPanelProps {
   voiceActive: boolean
   voiceConfigured: boolean
   voice: { name: string; monthly: number; blurb: string; features: string[] }
+  visualizerActive: boolean
+  visualizerConfigured: boolean
+  visualizer: { name: string; monthly: number; blurb: string; features: string[] }
   plans: BillingPlanOption[]
   selectPlan: (
     plan: Plan,
     interval: BillingInterval,
   ) => Promise<{ url?: string; ok?: boolean; error?: string }>
   setVoice: (enabled: boolean) => Promise<{ ok?: boolean; error?: string }>
+  setVisualizer: (enabled: boolean) => Promise<{ ok?: boolean; error?: string }>
   openPortal: () => Promise<{ url?: string; error?: string }>
   setupPackages?: {
     id: 'essential' | 'ecommerce'
@@ -93,9 +98,13 @@ export function BillingPanel({
   voiceActive,
   voiceConfigured,
   voice,
+  visualizerActive,
+  visualizerConfigured,
+  visualizer,
   plans,
   selectPlan,
   setVoice,
+  setVisualizer,
   openPortal,
   setupPackages = [],
   purchasedSetups = [],
@@ -105,6 +114,7 @@ export function BillingPanel({
   const [annual, setAnnual] = useState(interval !== 'month')
   const [busy, setBusy] = useState<string | null>(null)
   const [confirmVoice, setConfirmVoice] = useState(false)
+  const [confirmVisualizer, setConfirmVisualizer] = useState(false)
   const [, startTransition] = useTransition()
 
   const perMonth = (m: number) => (annual ? Math.round((m * 10) / 12) : m)
@@ -154,6 +164,20 @@ export function BillingPanel({
         resolve(
           await setVoice(enabled),
           enabled ? 'Voice agent added.' : 'Voice agent removed.',
+        )
+      } finally {
+        setBusy(null)
+      }
+    })
+  }
+
+  const runVisualizer = (enabled: boolean) => {
+    setBusy('visualizer')
+    startTransition(async () => {
+      try {
+        resolve(
+          await setVisualizer(enabled),
+          enabled ? 'Room visualizer added.' : 'Room visualizer removed.',
         )
       } finally {
         setBusy(null)
@@ -377,7 +401,7 @@ export function BillingPanel({
               </p>
             </div>
 
-            <div className="grid gap-5 md:grid-cols-3">
+            <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
               {/* Voice agent — interactive */}
               <div className="flex flex-col rounded-2xl border bg-card p-6 shadow-sm">
                 <div className="flex items-center justify-between">
@@ -428,6 +452,60 @@ export function BillingPanel({
                   </Button>
                 )}
                 {voiceConfigured && !isPaying && !voiceActive && (
+                  <p className="mt-1.5 text-xs text-muted-foreground">Available with any paid plan</p>
+                )}
+              </div>
+
+              {/* Room visualizer — interactive */}
+              <div className="flex flex-col rounded-2xl border bg-card p-6 shadow-sm">
+                <div className="flex items-center justify-between">
+                  <span className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    <SofaIcon className="size-5" />
+                  </span>
+                  {visualizerActive ? (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+                      <CheckIcon className="size-3" /> Active
+                    </span>
+                  ) : (
+                    <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                      Add-on
+                    </span>
+                  )}
+                </div>
+                <h3 className="mt-3 font-semibold">{visualizer.name}</h3>
+                <p className="mt-1 text-lg font-bold">
+                  €{visualizer.monthly}
+                  <span className="text-sm font-normal text-muted-foreground"> /mo</span>
+                </p>
+                <p className="mt-1 text-sm text-muted-foreground">{visualizer.blurb}</p>
+
+                {visualizerConfigured ? (
+                  visualizerActive ? (
+                    <Button
+                      className="mt-4"
+                      variant="outline"
+                      disabled={anyBusy}
+                      onClick={() => runVisualizer(false)}
+                    >
+                      {busy === 'visualizer' && <Loader2Icon className="size-4 animate-spin" />}
+                      Remove
+                    </Button>
+                  ) : (
+                    <Button
+                      className="mt-4"
+                      disabled={anyBusy || !isPaying}
+                      onClick={() => setConfirmVisualizer(true)}
+                    >
+                      {busy === 'visualizer' && <Loader2Icon className="size-4 animate-spin" />}
+                      Add room visualizer
+                    </Button>
+                  )
+                ) : (
+                  <Button className="mt-4" variant="outline" disabled>
+                    Coming soon
+                  </Button>
+                )}
+                {visualizerConfigured && !isPaying && !visualizerActive && (
                   <p className="mt-1.5 text-xs text-muted-foreground">Available with any paid plan</p>
                 )}
               </div>
@@ -537,6 +615,34 @@ export function BillingPanel({
           </p>
         </>
       )}
+
+      {/* Confirm adding the Room visualizer add-on (extra recurring charge). */}
+      <Dialog open={confirmVisualizer} onOpenChange={setConfirmVisualizer}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add the Room visualizer?</DialogTitle>
+            <DialogDescription>
+              This adds <span className="font-medium text-foreground">€{visualizer.monthly}/mo</span>{' '}
+              to your subscription, prorated for the rest of the current billing period. It includes
+              100 renders per month; you can remove it anytime.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setConfirmVisualizer(false)} disabled={anyBusy}>
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                setConfirmVisualizer(false)
+                runVisualizer(true)
+              }}
+              disabled={anyBusy}
+            >
+              Continue
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Confirm adding the Voice add-on (extra recurring charge). */}
       <Dialog open={confirmVoice} onOpenChange={setConfirmVoice}>

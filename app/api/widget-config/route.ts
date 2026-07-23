@@ -2,6 +2,8 @@ import { createServiceClient } from '@/lib/supabase/service'
 import { isOriginAllowed, corsHeaders } from '@/lib/widget-auth'
 import { publicBotConfig } from '@/lib/widget-config'
 import { entitlementsFor } from '@/lib/entitlements'
+import { VISUALIZER_ADDON } from '@/lib/plans-catalog'
+import { visualizerUsageMonth } from '@/lib/room-visualizer'
 import type { Bot, Plan } from '@/lib/types'
 
 export async function OPTIONS(req: Request) {
@@ -46,14 +48,33 @@ export async function GET(req: Request) {
   // add-on for the org.
   const { data: org } = await svc
     .from('organizations')
-    .select('plan, voice_addon, is_demo')
+    .select('plan, voice_addon, is_demo, visualizer_addon')
     .eq('id', bot.org_id)
-    .single<{ plan: Plan | null; voice_addon: boolean | null; is_demo: boolean | null }>()
+    .single<{
+      plan: Plan | null
+      voice_addon: boolean | null
+      is_demo: boolean | null
+      visualizer_addon: boolean | null
+    }>()
   const entitlements = entitlementsFor(org?.plan ?? 'free')
 
-  // Room visualizer is demo-bots-only for now — never expose it on client bots,
-  // whatever their config says. Remove this once the feature goes GA.
-  if (!org?.is_demo) bot.config.roomVisualizer = false
+  // Room visualizer: needs the paid add-on (owner demo orgs are exempt), and
+  // hides quietly for the rest of the month once the render pool is spent —
+  // the tray simply doesn't appear, visitors never see an error.
+  if (bot.config.roomVisualizer) {
+    const allowed = Boolean(org?.is_demo || org?.visualizer_addon)
+    let poolLeft = true
+    if (allowed && !org?.is_demo) {
+      const { data: usage } = await svc
+        .from('visualizer_usage')
+        .select('renders')
+        .eq('org_id', bot.org_id)
+        .eq('month', visualizerUsageMonth())
+        .maybeSingle<{ renders: number }>()
+      poolLeft = (usage?.renders ?? 0) < VISUALIZER_ADDON.rendersIncluded
+    }
+    if (!allowed || !poolLeft) bot.config.roomVisualizer = false
+  }
 
   // Stamp "last seen" so the owner can tell this bot is embedded & live. The
   // row is already loaded, so we only write when it's stale (≤ every 10 min).

@@ -3,12 +3,13 @@ import { createServerClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { BillingPanel } from '@/components/client/BillingPanel'
 import { isStripeConfigured, getStripe, checkoutTaxParams } from '@/lib/stripe/client'
-import { getPriceId, getVoicePriceId, getSetupPriceId, PLANS, DISPLAY_PLANS, VOICE_ADDON } from '@/lib/stripe/plans'
+import { getPriceId, getVoicePriceId, getVisualizerPriceId, getSetupPriceId, PLANS, DISPLAY_PLANS, VOICE_ADDON, VISUALIZER_ADDON } from '@/lib/stripe/plans'
 import { SETUP_PACKAGES } from '@/lib/setup-packages'
 import { ensureStripeCustomer } from '@/lib/stripe/customer'
 import {
   changeBasePlan,
   setVoiceAddon,
+  setVisualizerAddon,
   reconcileOrgFromStripe,
   activeSubscriptionId,
 } from '@/lib/stripe/manage'
@@ -33,7 +34,7 @@ export default async function SubscriptionPage({
     const { data, error } = await sb
       .from('organizations')
       .select(
-        'plan, subscription_status, billing_interval, current_period_end, cancel_at_period_end, stripe_customer_id, stripe_subscription_id, voice_addon',
+        'plan, subscription_status, billing_interval, current_period_end, cancel_at_period_end, stripe_customer_id, stripe_subscription_id, voice_addon, visualizer_addon',
       )
       .eq('id', oid)
       .single()
@@ -46,6 +47,7 @@ export default async function SubscriptionPage({
       stripe_customer_id: string | null
       stripe_subscription_id: string | null
       voice_addon: boolean | null
+      visualizer_addon: boolean | null
     }>
     return {
       plan: d.plan ?? ('free' as Plan),
@@ -55,6 +57,7 @@ export default async function SubscriptionPage({
       cancelAtPeriodEnd: d.cancel_at_period_end ?? false,
       hasCustomer: Boolean(d.stripe_customer_id),
       voiceActive: Boolean(d.voice_addon),
+      visualizerActive: Boolean(d.visualizer_addon),
       subscriptionId: d.stripe_subscription_id ?? null,
     }
   }
@@ -106,6 +109,7 @@ export default async function SubscriptionPage({
       cancelAtPeriodEnd: false,
       hasCustomer: false,
       voiceActive: false,
+      visualizerActive: false,
       subscriptionId: null as string | null,
     }
     usage = { conversationsUsed: 0, botsUsed: 0 }
@@ -232,6 +236,28 @@ export default async function SubscriptionPage({
     }
   }
 
+  /** Add or remove the Room visualizer add-on on the existing subscription. */
+  async function setVisualizer(enabled: boolean): Promise<{ ok?: boolean; error?: string }> {
+    'use server'
+    const ids = await getUserOrgIds()
+    const oid = ids[0]
+    if (!oid) return { error: 'No organization found.' }
+    const stripe = getStripe()
+    if (!stripe) return { error: 'Billing is not enabled yet.' }
+    if (!getVisualizerPriceId()) return { error: 'Room visualizer add-on isn\u2019t configured yet.' }
+
+    try {
+      const existingSubId = await activeSubscriptionId(oid)
+      if (!existingSubId) {
+        return { error: 'Add a paid plan first, then you can enable the room visualizer.' }
+      }
+      await setVisualizerAddon(existingSubId, enabled)
+      return { ok: true }
+    } catch (err) {
+      return { error: err instanceof Error ? err.message : 'Could not update the room visualizer add-on.' }
+    }
+  }
+
   /** Open the Stripe Billing Customer Portal (org verified). */
   async function openPortal(): Promise<{ url?: string; error?: string }> {
     'use server'
@@ -291,6 +317,14 @@ export default async function SubscriptionPage({
           blurb: VOICE_ADDON.blurb,
           features: [...VOICE_ADDON.features],
         }}
+        visualizerActive={billing.visualizerActive}
+        visualizerConfigured={Boolean(getVisualizerPriceId())}
+        visualizer={{
+          name: VISUALIZER_ADDON.name,
+          monthly: VISUALIZER_ADDON.monthly,
+          blurb: VISUALIZER_ADDON.blurb,
+          features: [...VISUALIZER_ADDON.features],
+        }}
         plans={planOptions}
         setupPackages={SETUP_PACKAGES.map((p) => ({
           id: p.id,
@@ -302,6 +336,7 @@ export default async function SubscriptionPage({
         purchasedSetups={purchasedSetups}
         selectPlan={selectPlan}
         setVoice={setVoice}
+        setVisualizer={setVisualizer}
         buySetup={buySetup}
         openPortal={openPortal}
       />

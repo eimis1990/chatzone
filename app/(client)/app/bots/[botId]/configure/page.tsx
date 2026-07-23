@@ -25,9 +25,9 @@ export default async function ConfigurePage({
   // Plan entitlements + the Voice add-on gate which controls are editable.
   const { data: org } = await supabase
     .from('organizations')
-    .select('plan, voice_addon')
+    .select('plan, voice_addon, visualizer_addon')
     .eq('id', data.org_id)
-    .single<{ plan: Plan | null; voice_addon: boolean | null }>()
+    .single<{ plan: Plan | null; voice_addon: boolean | null; visualizer_addon: boolean | null }>()
   const ent = entitlementsFor(org?.plan ?? 'free')
 
   return (
@@ -39,6 +39,7 @@ export default async function ConfigurePage({
       canUseLeadCapture={ent.leadCapture}
       canUseDictation={ent.dictation}
       canUseVoice={Boolean(org?.voice_addon)}
+      canUseVisualizer={Boolean(org?.visualizer_addon)}
       voiceLocked={(org?.plan ?? 'free') === 'free'}
       audience="client"
     />

@@ -1,9 +1,13 @@
 /**
- * Room visualizer — Gemini image editing that places selected store products
- * into a visitor's room photo. Server-only (Node): never import from edge
- * routes or the prompt path.
+ * Room visualizer — image editing that places selected store products into a
+ * visitor's room photo. Two engines: Gemini ("Nano Banana Pro", default) and
+ * OpenAI GPT Image 2, selected per bot via config.roomVisualizerModel.
+ * Server-only (Node): never import from edge routes or the prompt path.
  */
 import { GoogleGenAI } from '@google/genai'
+import { getEnv } from '@/lib/env'
+
+export type VisualizerModel = 'nano-banana-pro' | 'gpt-image-2'
 
 export interface InlineImage {
   /** Raw base64 payload (no `data:` prefix). */
@@ -19,6 +23,14 @@ const MAX_INSTRUCTION_CHARS = 200
 // intact while swapping/adding products. ~3x the cost of gemini-2.5-flash-image;
 // drop back to that constant if spend becomes an issue.
 const MODEL = 'gemini-3-pro-image-preview'
+
+/**
+ * Month key for the visualizer_usage table — first day of the current UTC
+ * month, matching the DB's `date_trunc('month', now())::date`.
+ */
+export function visualizerUsageMonth(now = new Date()): string {
+  return `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}-01`
+}
 
 export function sanitizeInstruction(raw: string | undefined): string {
   if (!raw) return ''
@@ -77,14 +89,22 @@ export function buildVisualizePrompt(titles: string[], instruction: string): str
     .join('\n')
 }
 
-export async function renderRoomScene(args: {
+interface RenderArgs {
   roomImage: InlineImage
   productImages: InlineImage[]
   titles: string[]
   instruction: string
   /** Supported Gemini aspect string (see closestAspectRatio); omit for model default. */
   aspectRatio?: string
-}): Promise<InlineImage> {
+  /** Engine — defaults to Nano Banana Pro (best at keeping the room intact). */
+  model?: VisualizerModel
+}
+
+export async function renderRoomScene(args: RenderArgs): Promise<InlineImage> {
+  return args.model === 'gpt-image-2' ? renderWithGptImage(args) : renderWithGemini(args)
+}
+
+async function renderWithGemini(args: RenderArgs): Promise<InlineImage> {
   const apiKey = process.env.GEMINI_API_KEY
   if (!apiKey) throw new Error('GEMINI_API_KEY is not configured')
   const ai = new GoogleGenAI({ apiKey })
@@ -109,4 +129,54 @@ export async function renderRoomScene(args: {
   const out = response.candidates?.[0]?.content?.parts?.find((p) => p.inlineData?.data)
   if (!out?.inlineData?.data) throw new Error('Gemini returned no image')
   return { data: out.inlineData.data, mimeType: out.inlineData.mimeType ?? 'image/png' }
+}
+
+/** GPT Image accepts fixed sizes only — pick the closest to the room's aspect. */
+export function gptImageSize(aspectRatio: string | undefined): string {
+  if (!aspectRatio) return 'auto'
+  const [w, h] = aspectRatio.split(':').map(Number)
+  if (!(w > 0) || !(h > 0)) return 'auto'
+  const r = w / h
+  if (r > 1.15) return '1536x1024'
+  if (r < 0.87) return '1024x1536'
+  return '1024x1024'
+}
+
+/**
+ * OpenAI GPT Image 2 via the images/edits endpoint (multipart, raw fetch —
+ * house style, see lib/ai/transcribe.ts). Room photo first, then products, so
+ * buildVisualizePrompt's numbering matches.
+ */
+async function renderWithGptImage(args: RenderArgs): Promise<InlineImage> {
+  const form = new FormData()
+  form.append('model', 'gpt-image-2')
+  form.append('prompt', buildVisualizePrompt(args.titles, args.instruction))
+  form.append('size', gptImageSize(args.aspectRatio))
+  // 'high' quality — room preservation falls apart below it. (No input_fidelity
+  // param here: gpt-image-2 rejects it — verified live 2026-07-23.)
+  form.append('quality', 'high')
+
+  const images = [args.roomImage, ...args.productImages]
+  images.forEach((img, i) => {
+    const ext = img.mimeType.split('/')[1] ?? 'png'
+    form.append(
+      'image[]',
+      new Blob([Buffer.from(img.data, 'base64')], { type: img.mimeType }),
+      i === 0 ? `room.${ext}` : `product-${i}.${ext}`,
+    )
+  })
+
+  const res = await fetch('https://api.openai.com/v1/images/edits', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${getEnv().OPENAI_API_KEY}` },
+    body: form,
+  })
+  if (!res.ok) {
+    const body = await res.text().catch(() => '')
+    throw new Error(`GPT Image HTTP ${res.status}: ${body.slice(0, 300)}`)
+  }
+  const data = (await res.json()) as { data?: { b64_json?: string }[] }
+  const b64 = data.data?.[0]?.b64_json
+  if (!b64) throw new Error('GPT Image returned no image')
+  return { data: b64, mimeType: 'image/png' }
 }

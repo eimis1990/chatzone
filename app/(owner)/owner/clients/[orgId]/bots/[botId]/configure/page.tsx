@@ -32,9 +32,9 @@ export default async function OwnerConfigurePage({
 
   const { data: org } = await service
     .from('organizations')
-    .select('plan, voice_addon')
+    .select('plan, voice_addon, visualizer_addon')
     .eq('id', orgId)
-    .single<{ plan: Plan | null; voice_addon: boolean | null }>()
+    .single<{ plan: Plan | null; voice_addon: boolean | null; visualizer_addon: boolean | null }>()
   const ent = entitlementsFor(org?.plan ?? 'free')
 
   return (
@@ -46,6 +46,7 @@ export default async function OwnerConfigurePage({
       canUseLeadCapture={ent.leadCapture}
       canUseDictation={ent.dictation}
       canUseVoice={Boolean(org?.voice_addon)}
+      canUseVisualizer={Boolean(org?.visualizer_addon)}
       onSave={saveClientBotConfig}
       topSlot={<OwnerBotTabs key="owner-bot-tabs" orgId={orgId} botId={botId} />}
     />

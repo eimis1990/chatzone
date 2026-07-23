@@ -7,6 +7,7 @@ const org = (o: Partial<BillingOrg>): BillingOrg => ({
   subscription_status: 'inactive',
   billing_interval: null,
   voice_addon: false,
+  visualizer_addon: false,
   ...o,
 })
 
@@ -19,6 +20,12 @@ describe('computeMrr', () => {
     expect(r.payingClients).toBe(1)
     expect(r.byPlan).toEqual({ growth: 1 })
     expect(r.voiceAddons).toBe(1)
+  })
+
+  it('counts the room visualizer add-on into MRR', () => {
+    const r = computeMrr([org({ plan: 'starter', subscription_status: 'active', billing_interval: 'month', visualizer_addon: true })])
+    expect(r.mrr).toBe(149 + 29)
+    expect(r.visualizerAddons).toBe(1)
   })
 
   it('normalizes an annual plan (billed 10×/yr) to a monthly figure', () => {

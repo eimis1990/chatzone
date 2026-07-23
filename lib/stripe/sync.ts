@@ -1,7 +1,7 @@
 import 'server-only'
 import type Stripe from 'stripe'
 import { createServiceClient } from '@/lib/supabase/service'
-import { planFromPriceId, getVoicePriceId } from './plans'
+import { planFromPriceId, getVoicePriceId, getVisualizerPriceId } from './plans'
 import type { Plan, BillingInterval, SubscriptionStatus } from '@/lib/types'
 
 /** Map Stripe's subscription status onto ours (unknowns → inactive). */
@@ -43,15 +43,18 @@ export async function syncSubscriptionToOrg(sub: Stripe.Subscription): Promise<v
   const status = mapStatus(sub.status)
 
   // A subscription can hold the base plan plus add-on items. Find the item
-  // whose price maps to a plan; separately detect the voice add-on item.
+  // whose price maps to a plan; separately detect the add-on items.
   const items = sub.items?.data ?? []
   const voicePriceId = getVoicePriceId()
+  const visualizerPriceId = getVisualizerPriceId()
   let match: { plan: Plan; interval: BillingInterval } | null = null
   let hasVoice = false
+  let hasVisualizer = false
   for (const it of items) {
     const pid = it.price?.id
     if (!pid) continue
     if (voicePriceId && pid === voicePriceId) hasVoice = true
+    if (visualizerPriceId && pid === visualizerPriceId) hasVisualizer = true
     const m = planFromPriceId(pid)
     if (m) match = m
   }
@@ -70,6 +73,7 @@ export async function syncSubscriptionToOrg(sub: Stripe.Subscription): Promise<v
       current_period_end: periodEndIso(sub),
       cancel_at_period_end: sub.cancel_at_period_end ?? false,
       voice_addon: paying && hasVoice,
+      visualizer_addon: paying && hasVisualizer,
     })
     .eq('stripe_customer_id', customerId)
 }
