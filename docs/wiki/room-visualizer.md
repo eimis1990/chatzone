@@ -27,7 +27,7 @@ the monthly pool.
 Server-enforced in two places:
 
 - `app/api/widget-config/route.ts` forces `roomVisualizer: false` unless
-  (`is_demo` OR `visualizer_addon`) AND the monthly pool has renders left —
+  (`isInternalOrg` OR `visualizer_addon`) AND the monthly pool has renders left —
   the tray quietly disappears for the rest of the month when the pool is spent.
 - `app/api/widget/visualize/route.ts` mirrors the same entitlement (403) and
   pool check (429, before any model spend), then consumes the pool via the

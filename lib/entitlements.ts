@@ -81,3 +81,14 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
 export function entitlementsFor(plan: Plan | null | undefined): Entitlements {
   return ENTITLEMENTS[plan ?? 'free'] ?? ENTITLEMENTS.free
 }
+
+/**
+ * Internal orgs — the platform org (owner's own chatbot, `is_platform`) and the
+ * demo org (prospect showcase bots, `is_demo`) — always have every paid add-on,
+ * bypassing the Stripe paywall and any per-month pools. Client orgs never do.
+ * The single predicate every add-on gate should use, so the two internal orgs
+ * behave identically everywhere.
+ */
+export function isInternalOrg(org: { is_demo?: boolean | null; is_platform?: boolean | null } | null | undefined): boolean {
+  return Boolean(org?.is_demo || org?.is_platform)
+}

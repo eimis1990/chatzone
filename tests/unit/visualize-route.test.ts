@@ -79,7 +79,7 @@ function req(body: Record<string, unknown>) {
 beforeEach(() => {
   vi.clearAllMocks()
   single.mockResolvedValue({ data: bot() })
-  orgSingle.mockResolvedValue({ data: { is_demo: true, visualizer_addon: false } })
+  orgSingle.mockResolvedValue({ data: { is_demo: true, is_platform: false, visualizer_addon: false } })
   usageSingle.mockResolvedValue({ data: null })
   rpcMock.mockResolvedValue({ error: null })
   convSingle.mockResolvedValue({ data: { id: CONV, visualizer_renders: 0 } })
@@ -128,6 +128,14 @@ describe('POST /api/widget/visualize', () => {
   })
 
   it('demo orgs never touch the monthly pool', async () => {
+    const res = await POST(req({}))
+    expect(res.status).toBe(200)
+    expect(rpcMock).not.toHaveBeenCalled()
+  })
+
+  it('the platform org (owner chatbot) is entitled and pool-exempt', async () => {
+    orgSingle.mockResolvedValue({ data: { is_demo: false, is_platform: true, visualizer_addon: false } })
+    usageSingle.mockResolvedValue({ data: { renders: 500 } }) // way over pool — still fine
     const res = await POST(req({}))
     expect(res.status).toBe(200)
     expect(rpcMock).not.toHaveBeenCalled()

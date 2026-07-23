@@ -1,7 +1,7 @@
 import { createServiceClient } from '@/lib/supabase/service'
 import { isOriginAllowed, corsHeaders } from '@/lib/widget-auth'
 import { publicBotConfig } from '@/lib/widget-config'
-import { entitlementsFor } from '@/lib/entitlements'
+import { entitlementsFor, isInternalOrg } from '@/lib/entitlements'
 import { VISUALIZER_ADDON } from '@/lib/plans-catalog'
 import { visualizerUsageMonth } from '@/lib/room-visualizer'
 import type { Bot, Plan } from '@/lib/types'
@@ -48,23 +48,27 @@ export async function GET(req: Request) {
   // add-on for the org.
   const { data: org } = await svc
     .from('organizations')
-    .select('plan, voice_addon, is_demo, visualizer_addon')
+    .select('plan, voice_addon, is_demo, is_platform, visualizer_addon')
     .eq('id', bot.org_id)
     .single<{
       plan: Plan | null
       voice_addon: boolean | null
       is_demo: boolean | null
+      is_platform: boolean | null
       visualizer_addon: boolean | null
     }>()
   const entitlements = entitlementsFor(org?.plan ?? 'free')
+  // Internal orgs (owner's own chatbot + demo bots) always have every add-on
+  // and skip the render pool; only real client orgs hit the paywall.
+  const internal = isInternalOrg(org)
 
-  // Room visualizer: needs the paid add-on (owner demo orgs are exempt), and
+  // Product visualizer: needs the paid add-on (internal orgs exempt), and
   // hides quietly for the rest of the month once the render pool is spent —
   // the tray simply doesn't appear, visitors never see an error.
   if (bot.config.roomVisualizer) {
-    const allowed = Boolean(org?.is_demo || org?.visualizer_addon)
+    const allowed = internal || Boolean(org?.visualizer_addon)
     let poolLeft = true
-    if (allowed && !org?.is_demo) {
+    if (allowed && !internal) {
       const { data: usage } = await svc
         .from('visualizer_usage')
         .select('renders')
@@ -83,5 +87,5 @@ export async function GET(req: Request) {
     await svc.from('bots').update({ last_seen_at: new Date().toISOString() }).eq('id', bot.id)
   }
 
-  return json(publicBotConfig(bot.config, entitlements, Boolean(org?.voice_addon)))
+  return json(publicBotConfig(bot.config, entitlements, internal || Boolean(org?.voice_addon)))
 }

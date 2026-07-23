@@ -13,6 +13,7 @@ import {
   type InlineImage,
 } from '@/lib/room-visualizer'
 import { VISUALIZER_ADDON } from '@/lib/plans-catalog'
+import { isInternalOrg } from '@/lib/entitlements'
 import type { Bot } from '@/lib/types'
 
 export const maxDuration = 60 // image generation is slow
@@ -54,21 +55,21 @@ export async function POST(req: Request) {
   const { data: bot } = await svc.from('bots').select('*').eq('public_key', publicKey).single<Bot>()
   if (!bot || bot.status !== 'active') return json({ error: 'Bot not available.' }, 404)
   if (!bot.config.roomVisualizer) return json({ error: 'Not enabled.' }, 403)
-  // Requires the paid Room visualizer add-on (owner demo orgs are exempt) —
-  // mirrors the widget-config gate, so nobody can spend renders via raw API
-  // calls that the widget wouldn't offer.
+  // Requires the paid Product visualizer add-on (internal orgs — owner chatbot
+  // + demo bots — are exempt). Mirrors the widget-config gate, so nobody can
+  // spend renders via raw API calls that the widget wouldn't offer.
   const { data: org } = await svc
     .from('organizations')
-    .select('is_demo, visualizer_addon')
+    .select('is_demo, is_platform, visualizer_addon')
     .eq('id', bot.org_id)
-    .single<{ is_demo: boolean | null; visualizer_addon: boolean | null }>()
-  const isDemo = Boolean(org?.is_demo)
-  if (!isDemo && !org?.visualizer_addon) return json({ error: 'Not enabled.' }, 403)
+    .single<{ is_demo: boolean | null; is_platform: boolean | null; visualizer_addon: boolean | null }>()
+  const internal = isInternalOrg(org)
+  if (!internal && !org?.visualizer_addon) return json({ error: 'Not enabled.' }, 403)
 
-  // Monthly render pool (per org; demo orgs exempt). Checked BEFORE any model
-  // spend; widget-config also hides the tray once the pool is gone, so this is
-  // mostly a backstop for sessions already open when the pool ran out.
-  if (!isDemo) {
+  // Monthly render pool (per org; internal orgs exempt). Checked BEFORE any
+  // model spend; widget-config also hides the tray once the pool is gone, so
+  // this is mostly a backstop for sessions already open when the pool ran out.
+  if (!internal) {
     const { data: usage } = await svc
       .from('visualizer_usage')
       .select('renders')
@@ -161,8 +162,8 @@ export async function POST(req: Request) {
     .eq('bot_id', bot.id)
   if (incrementError) console.error('[visualizer] cap increment failed:', incrementError)
 
-  // Spend from the monthly pool (atomic upsert-increment; demo orgs exempt).
-  if (!isDemo) {
+  // Spend from the monthly pool (atomic upsert-increment; internal orgs exempt).
+  if (!internal) {
     const { error: usageError } = await svc.rpc('increment_visualizer_usage', {
       p_org_id: bot.org_id,
     })

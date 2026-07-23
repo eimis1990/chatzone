@@ -5,6 +5,7 @@ import { createRateLimiter } from '@/lib/ratelimit'
 import { ensureAgent, getConversationToken } from '@/lib/ai/elevenlabs-agent'
 import { MissingVoiceKeyError } from '@/lib/ai/tts'
 import { isOverConversationLimit } from '@/lib/usage'
+import { isInternalOrg } from '@/lib/entitlements'
 import type { Bot } from '@/lib/types'
 
 export const maxDuration = 30
@@ -38,12 +39,13 @@ export async function POST(req: Request) {
   if (!bot || bot.status !== 'active') return json({ error: 'Bot not available' }, 404)
   if (!bot.config.voice?.enabled) return json({ error: 'Voice not enabled' }, 403)
   // Voice is a paid add-on — reject calls when the org doesn't have it active.
+  // Internal orgs (owner chatbot + demo bots) always pass.
   const { data: org } = await svc
     .from('organizations')
-    .select('voice_addon')
+    .select('voice_addon, is_demo, is_platform')
     .eq('id', bot.org_id)
-    .single<{ voice_addon: boolean | null }>()
-  if (!org?.voice_addon) return json({ error: 'Voice add-on not active' }, 403)
+    .single<{ voice_addon: boolean | null; is_demo: boolean | null; is_platform: boolean | null }>()
+  if (!isInternalOrg(org) && !org?.voice_addon) return json({ error: 'Voice add-on not active' }, 403)
   // Hard block: no calls once the org is over its monthly conversation pool.
   if (await isOverConversationLimit(svc, bot.org_id)) {
     return json({ error: 'Agent offline — monthly limit reached' }, 403)
