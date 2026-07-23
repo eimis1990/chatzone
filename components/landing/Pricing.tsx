@@ -18,7 +18,7 @@ const ADDONS: { icon: LucideIcon; name: string; price: string; desc: string }[] 
     icon: SofaIcon,
     name: 'Room visualizer',
     price: '€29/mo',
-    desc: 'Shoppers upload a room photo and see your products placed in it — AI renders in the chat, 100 per month included.',
+    desc: 'Let shoppers visualize your furniture in their own home — AI renders right in the chat.',
   },
   {
     icon: MessageSquareIcon,
