@@ -38,7 +38,10 @@ const PLANS = [
 ]
 // Add-ons attach to a base subscription as an extra item (not a separate sub).
 // Voice is a flat monthly fee for now; per-minute metering comes in a later pass.
-const ADDONS = [{ key: 'voice', name: 'Voice agent', monthly: 49 }]
+const ADDONS = [
+  { key: 'voice', name: 'Voice agent', monthly: 49 },
+  { key: 'visualizer', name: 'Room visualizer', monthly: 29 },
+]
 // One-time "done-for-you" setup packages (no recurring price).
 const SETUP = [
   { key: 'essential', envKey: 'ESSENTIAL', name: 'Setup — Essential', price: 749 },
