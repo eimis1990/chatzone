@@ -13,6 +13,8 @@ Add a line here. How the wiki works: [README.md](README.md).
 
 - [widget-and-embed](widget-and-embed.md) — widget load paths, `publicBotConfig`
   gating, the origin allowlist + first-party bypass, embed snippet UI.
+- [visitor-abuse-protection](visitor-abuse-protection.md) — prompt probing,
+  harassment/spam detection, 24-hour bot-scoped blocks, blocked widget/voice flow.
 - [bot-config](bot-config.md) — `botConfigSchema`, the shared `ConfigForm`
   (client + owner), system prompts.
 - [plans-and-entitlements](plans-and-entitlements.md) — per-plan limits and where

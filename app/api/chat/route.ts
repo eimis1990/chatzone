@@ -13,6 +13,16 @@ import { createRateLimiter } from '@/lib/ratelimit'
 import { detectHandoffIntent, HANDOFF_ACK } from '@/lib/handoff'
 import { notifyHandoffRequested } from '@/lib/notify'
 import { isOverConversationLimit, maybeSendUsageWarning } from '@/lib/usage'
+import { assessVisitorAbuse } from '@/lib/security/visitor-abuse'
+import {
+  blockVisitor,
+  getActiveVisitorBlock,
+  loadRecentVisitorMessages,
+} from '@/lib/visitor-blocks'
+import {
+  VISITOR_BLOCK_DURATION_MS,
+  VISITOR_BLOCK_HEADER,
+} from '@/lib/visitor-block-shared'
 import type { Bot, BotLanguage, Citation, HandoffStatus } from '@/lib/types'
 import type { CommerceProduct, OrderStatus } from '@/lib/commerce/types'
 
@@ -34,10 +44,10 @@ export async function OPTIONS(req: Request) {
 export async function POST(req: Request) {
   const origin = req.headers.get('origin')
   const cors = corsHeaders(origin)
-  const json = (body: unknown, status = 200) =>
+  const json = (body: unknown, status = 200, extraHeaders: Record<string, string> = {}) =>
     new Response(JSON.stringify(body), {
       status,
-      headers: { ...cors, 'Content-Type': 'application/json' },
+      headers: { ...cors, ...extraHeaders, 'Content-Type': 'application/json' },
     })
 
   const body = await req.json().catch(() => null)
@@ -61,9 +71,17 @@ export async function POST(req: Request) {
       ? parsed.data.language
       : defaultLanguage(bot.config)
 
-  // Origin allowlist + rate limit.
+  // Origin allowlist + active visitor block + rate limit.
   if (!isOriginAllowed(origin, bot.config.allowedDomains ?? [])) {
     return json({ error: 'Origin not allowed' }, 403)
+  }
+  const activeBlock = await getActiveVisitorBlock(svc, bot.id, visitorId)
+  if (activeBlock) {
+    return json(
+      { error: 'Visitor blocked', code: 'visitor_blocked', blockedUntil: activeBlock.expiresAt },
+      403,
+      { [VISITOR_BLOCK_HEADER]: activeBlock.expiresAt },
+    )
   }
   if (!limiter.check(`${bot.id}:${visitorId}`)) {
     return json({ error: 'Rate limit exceeded' }, 429)
@@ -79,6 +97,7 @@ export async function POST(req: Request) {
       .select('id, handoff_status, had_fallback')
       .eq('id', convId)
       .eq('bot_id', bot.id)
+      .eq('visitor_id', visitorId)
       .single<{ id: string; handoff_status: HandoffStatus | null; had_fallback: boolean | null }>()
     if (!existing) convId = null
     else {
@@ -102,11 +121,46 @@ export async function POST(req: Request) {
     void maybeSendUsageWarning(svc, bot.org_id)
   }
 
-  // Persist the user message; bump conversation activity.
-  await svc.from('messages').insert({ conversation_id: convId, role: 'user', content: message })
+  // Assess across this visitor's recent turns before adding the current one.
+  // The triggering message is still persisted for audit, but the model and
+  // human-handoff path never receive another turn after a block decision.
+  const recentUserMessages = await loadRecentVisitorMessages(svc, bot.id, visitorId)
+  const abuse = assessVisitorAbuse(message, recentUserMessages)
+  const { data: userMessageRow } = await svc
+    .from('messages')
+    .insert({ conversation_id: convId, role: 'user', content: message })
+    .select('id')
+    .single<{ id: string }>()
   await svc.from('conversations').update({ last_message_at: new Date().toISOString() }).eq('id', convId)
 
   const handoffHeaders = { ...cors, 'x-conversation-id': convId }
+
+  if (abuse.shouldBlock) {
+    const fallbackExpiry = new Date(Date.now() + VISITOR_BLOCK_DURATION_MS).toISOString()
+    let blockedUntil = fallbackExpiry
+    try {
+      const block = await blockVisitor(svc, {
+        botId: bot.id,
+        visitorId,
+        assessment: abuse,
+        conversationId: convId,
+        triggerMessageId: userMessageRow?.id,
+      })
+      blockedUntil = block.expiresAt
+    } catch (error) {
+      // Still terminate this browser session if persistence is transiently
+      // unavailable; the error is logged so the durable block can be repaired.
+      console.error('[chat] Failed to persist automatic visitor block', error)
+    }
+    return json(
+      { error: 'Visitor blocked', code: 'visitor_blocked', blockedUntil },
+      403,
+      {
+        'x-conversation-id': convId,
+        [VISITOR_BLOCK_HEADER]: blockedUntil,
+      },
+    )
+  }
 
   // A human is queued (`requested`) or actively handling (`live`): record the
   // visitor turn but do NOT auto-reply — the agent answers from the inbox.

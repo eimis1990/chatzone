@@ -7,6 +7,7 @@ import { MessageList, type ChatMessage } from './MessageList'
 import { ProductListView } from './ProductCards'
 import { RoomTray, RoomStudio, roomLabels, MAX_ROOM_PRODUCTS, type RoomSelect, type RoomPhoto } from './RoomVisualizer'
 import { Composer } from './Composer'
+import { VisitorBlockedScreen } from './VisitorBlockedScreen'
 import { VoiceCallButton, type CallState } from '@/components/voice/VoiceCallButton'
 import { LeadForm } from './LeadForm'
 import { WelcomeScreen } from './WelcomeScreen'
@@ -21,6 +22,10 @@ import { readableTextColor, isLightColor } from '@/lib/utils'
 import { tintToward } from '@/lib/theme-extract'
 import { languageMeta } from '@/lib/i18n/languages'
 import { normalizeVoiceTranscript } from '@/lib/voice/transcript'
+import {
+  VISITOR_BLOCK_HEADER,
+  VisitorBlockedError,
+} from '@/lib/visitor-block-shared'
 
 interface ChatWindowProps {
   config: PublicBotConfig
@@ -212,6 +217,10 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
   const startVoiceRef = useRef<(() => void) | null>(null)
   const [voiceIssue, setVoiceIssue] = useState<'mic-denied' | 'unavailable' | 'error' | null>(null)
   const visitorIdRef = useRef<string>('')
+  const [blockedUntil, setBlockedUntil] = useState<string | null>(null)
+  const [checkingVisitorBlock, setCheckingVisitorBlock] = useState(
+    () => Boolean(transport.getBlockStatus),
+  )
   // Latest messages, for building request history without re-creating callbacks.
   const messagesRef = useRef<ChatMessage[]>([])
   useEffect(() => {
@@ -302,6 +311,12 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
   const handleVoiceReady = useCallback((c: { end: () => void; start: () => void }) => {
     endVoiceRef.current = c.end
     startVoiceRef.current = c.start
+  }, [])
+
+  const activateVisitorBlock = useCallback((expiresAt: string) => {
+    endVoiceRef.current?.()
+    setBlockedUntil(expiresAt)
+    setStreaming(false)
   }, [])
 
   // Voice search returns semantic candidates without displaying them. The
@@ -422,8 +437,10 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
   const botBubbleColor =
     config.theme.botBubbleColor || (darkChat ? tintToward(chatBg, 0.1) : undefined)
 
-  // Restore/generate visitorId from localStorage on mount
+  // Restore/generate visitorId from localStorage, then check the live block
+  // before rendering any interactive widget chrome.
   useEffect(() => {
+    let active = true
     const key = 'cbz_visitor_id'
     let id = ''
     try {
@@ -436,7 +453,25 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
       id = crypto.randomUUID()
     }
     visitorIdRef.current = id
-  }, [])
+    if (!transport.getBlockStatus) {
+      return () => {
+        active = false
+      }
+    }
+    void transport
+      .getBlockStatus(id)
+      .then((status) => {
+        if (active && status.blocked && status.blockedUntil) {
+          setBlockedUntil(status.blockedUntil)
+        }
+      })
+      .finally(() => {
+        if (active) setCheckingVisitorBlock(false)
+      })
+    return () => {
+      active = false
+    }
+  }, [transport])
 
   /**
    * After a full chat turn, fetch the real DB message ids for the conversation
@@ -525,6 +560,11 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
             visitorId: visitorIdRef.current,
             history,
           })
+          const blockExpiry = res.headers.get(VISITOR_BLOCK_HEADER)
+          if (blockExpiry) {
+            activateVisitorBlock(blockExpiry)
+            return
+          }
           const cid = res.headers.get('x-conversation-id')
           if (cid) setConversationId(cid)
           const h = res.headers.get('x-handoff') as HandoffStatus | null
@@ -550,6 +590,12 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
           visitorId: visitorIdRef.current,
           history,
         })
+
+        const blockExpiry = res.headers.get(VISITOR_BLOCK_HEADER)
+        if (blockExpiry) {
+          activateVisitorBlock(blockExpiry)
+          return
+        }
 
         const convId = res.headers.get('x-conversation-id')
         if (convId) setConversationId(convId)
@@ -685,7 +731,7 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
         setStreaming(false)
       }
     },
-    [streaming, conversationId, leadDismissed, config.leadCapture, activeLang, transport, syncMessageIds, updateHandoff, buildHistory]
+    [streaming, conversationId, leadDismissed, config.leadCapture, activeLang, transport, syncMessageIds, updateHandoff, buildHistory, activateVisitorBlock]
   )
 
   /** "Open URL" quick action: reply with a short note + a button to the link. */
@@ -851,8 +897,17 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
   )
 
   const getVoiceToken = useCallback(
-    (): Promise<{ token: string; voiceId?: string }> => transport.getVoiceToken(activeLang),
-    [transport, activeLang],
+    async (): Promise<{ token: string; voiceId?: string }> => {
+      try {
+        return await transport.getVoiceToken(activeLang, visitorIdRef.current)
+      } catch (error) {
+        if (error instanceof VisitorBlockedError) {
+          activateVisitorBlock(error.blockedUntil)
+        }
+        throw error
+      }
+    },
+    [transport, activeLang, activateVisitorBlock],
   )
 
   const voiceEnabled = Boolean(config.voice?.enabled)
@@ -891,6 +946,14 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
   // Whether the chat body is dark — drives readable colors for chips/text that
   // sit directly on the background (e.g. the "talk to a person" button).
   const darkBody = !isLightColor(bgColor)
+
+  if (checkingVisitorBlock) {
+    return <div className="h-full w-full bg-white" aria-busy="true" aria-label="Loading" />
+  }
+
+  if (blockedUntil) {
+    return <VisitorBlockedScreen language={activeLang} />
+  }
 
   return (
     <div

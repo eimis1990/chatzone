@@ -71,4 +71,12 @@ for the active language rather than randomizing on each form render
   (+ `SnippetCopy.tsx`), rendered by the client's Embed page **and** the owner's
   Embed tab ([access-model](access-model.md)).
 
-_Last verified: 2026-07-10._
+## Temporary visitor blocks
+
+The live iframe checks its browser-local visitor id before rendering interactive
+chrome. An active block replaces the entire widget with the white/red blocked
+screen; chat responses can trigger the same state through an exposed expiry
+header. Preview transport stays unblocked. See
+[visitor-abuse-protection](visitor-abuse-protection.md).
+
+_Last verified: 2026-07-23 (02fbe04)._

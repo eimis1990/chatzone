@@ -6,12 +6,15 @@ import { ensureAgent, getConversationToken } from '@/lib/ai/elevenlabs-agent'
 import { MissingVoiceKeyError } from '@/lib/ai/tts'
 import { isOverConversationLimit } from '@/lib/usage'
 import { isInternalOrg } from '@/lib/entitlements'
+import { getActiveVisitorBlock } from '@/lib/visitor-blocks'
+import { VISITOR_BLOCK_HEADER } from '@/lib/visitor-block-shared'
 import type { Bot } from '@/lib/types'
 
 export const maxDuration = 30
 const limiter = createRateLimiter({ capacity: 5, refillPerSec: 0.2 })
 const bodySchema = z.object({
   publicKey: z.string().min(1),
+  visitorId: z.string().min(1).max(128),
   language: z.enum(['en', 'lt']).optional(),
 })
 
@@ -23,8 +26,11 @@ export async function OPTIONS(req: Request) {
 export async function POST(req: Request) {
   const origin = req.headers.get('origin')
   const cors = corsHeaders(origin)
-  const json = (b: unknown, status = 200) =>
-    new Response(JSON.stringify(b), { status, headers: { ...cors, 'Content-Type': 'application/json' } })
+  const json = (b: unknown, status = 200, extraHeaders: Record<string, string> = {}) =>
+    new Response(JSON.stringify(b), {
+      status,
+      headers: { ...cors, ...extraHeaders, 'Content-Type': 'application/json' },
+    })
 
   const body = await req.json().catch(() => null)
   const parsed = bodySchema.safeParse(body)
@@ -37,6 +43,17 @@ export async function POST(req: Request) {
     .eq('public_key', parsed.data.publicKey)
     .single<Bot>()
   if (!bot || bot.status !== 'active') return json({ error: 'Bot not available' }, 404)
+  if (!isOriginAllowed(origin, bot.config.allowedDomains ?? [])) {
+    return json({ error: 'Origin not allowed' }, 403)
+  }
+  const activeBlock = await getActiveVisitorBlock(svc, bot.id, parsed.data.visitorId)
+  if (activeBlock) {
+    return json(
+      { error: 'Visitor blocked', code: 'visitor_blocked', blockedUntil: activeBlock.expiresAt },
+      403,
+      { [VISITOR_BLOCK_HEADER]: activeBlock.expiresAt },
+    )
+  }
   if (!bot.config.voice?.enabled) return json({ error: 'Voice not enabled' }, 403)
   // Voice is a paid add-on — reject calls when the org doesn't have it active.
   // Internal orgs (owner chatbot + demo bots) always pass.
@@ -50,10 +67,9 @@ export async function POST(req: Request) {
   if (await isOverConversationLimit(svc, bot.org_id)) {
     return json({ error: 'Agent offline — monthly limit reached' }, 403)
   }
-  if (!isOriginAllowed(origin, bot.config.allowedDomains ?? [])) {
-    return json({ error: 'Origin not allowed' }, 403)
+  if (!limiter.check(`${bot.id}:${parsed.data.visitorId}`)) {
+    return json({ error: 'Rate limit exceeded' }, 429)
   }
-  if (!limiter.check(bot.id)) return json({ error: 'Rate limit exceeded' }, 429)
 
   try {
     const agentId = await ensureAgent(svc, bot)

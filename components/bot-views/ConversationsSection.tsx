@@ -2,6 +2,15 @@ import { createServerClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { TranscriptView } from '@/components/client/TranscriptView'
 import { analyzeConversation } from '@/lib/ai/conversation-intel'
+import {
+  extendActiveVisitorBlock,
+  getActiveVisitorBlocks,
+  unblockVisitor,
+} from '@/lib/visitor-blocks'
+import type {
+  VisitorBlockManagementAction,
+  VisitorBlockManagementResult,
+} from '@/lib/visitor-block-shared'
 import type { Conversation, Message } from '@/lib/types'
 
 /**
@@ -21,6 +30,7 @@ interface ConversationRow
   success_score: number | null
   success_reason: string | null
   channel: 'chat' | 'voice'
+  block_expires_at: string | null
 }
 
 export interface ConversationAnalysisResult {
@@ -82,6 +92,12 @@ export async function ConversationsSection({ botId }: { botId: string }) {
     }
   }
 
+  const activeBlocks = await getActiveVisitorBlocks(
+    createServiceClient(),
+    botId,
+    conversations.map((conversation) => conversation.visitor_id),
+  )
+
   const rows: ConversationRow[] = conversations.map((c) => ({
     id: c.id,
     visitor_id: c.visitor_id,
@@ -94,6 +110,7 @@ export async function ConversationsSection({ botId }: { botId: string }) {
     success_score: c.success_score ?? null,
     success_reason: c.success_reason ?? null,
     channel: c.channel ?? 'chat',
+    block_expires_at: activeBlocks.get(c.visitor_id)?.expiresAt ?? null,
   }))
 
   /**
@@ -162,6 +179,41 @@ export async function ConversationsSection({ botId }: { botId: string }) {
     return result
   }
 
+  /**
+   * Server Action — changes a block only after RLS proves that the current user
+   * can read this exact conversation and it belongs to the current bot.
+   */
+  async function manageVisitorBlock(
+    conversationId: string,
+    action: VisitorBlockManagementAction,
+  ): Promise<VisitorBlockManagementResult> {
+    'use server'
+    if (action !== 'unblock' && action !== 'extend') {
+      throw new Error('Unsupported visitor block action')
+    }
+
+    const sb = await createServerClient()
+    const { data: conversation } = await sb
+      .from('conversations')
+      .select('visitor_id')
+      .eq('id', conversationId)
+      .eq('bot_id', botId)
+      .maybeSingle<{ visitor_id: string }>()
+    if (!conversation) throw new Error('Conversation not found')
+
+    const svc = createServiceClient()
+    if (action === 'unblock') {
+      await unblockVisitor(svc, botId, conversation.visitor_id)
+      return { blocked: false, expiresAt: null }
+    }
+
+    const extended = await extendActiveVisitorBlock(svc, botId, conversation.visitor_id)
+    return {
+      blocked: Boolean(extended),
+      expiresAt: extended?.expiresAt ?? null,
+    }
+  }
+
   return (
     <div className="flex h-full flex-col gap-0 overflow-hidden p-0 md:gap-4 md:p-6">
       {/* Header is desktop-only; on mobile the list is full-bleed under the
@@ -173,7 +225,12 @@ export async function ConversationsSection({ botId }: { botId: string }) {
         </p>
       </div>
 
-      <TranscriptView conversations={rows} loadMessages={loadMessages} analyze={analyze} />
+      <TranscriptView
+        conversations={rows}
+        loadMessages={loadMessages}
+        analyze={analyze}
+        manageVisitorBlock={manageVisitorBlock}
+      />
     </div>
   )
 }

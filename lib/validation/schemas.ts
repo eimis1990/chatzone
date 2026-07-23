@@ -383,7 +383,7 @@ export const crawlSchema = z.object({
 // ---------------------------------------------------------------------------
 export const chatRequestSchema = z.object({
   publicKey: z.string().min(1),
-  visitorId: z.string().min(1),
+  visitorId: z.string().min(1).max(128),
   conversationId: z.string().uuid().optional(),
   message: z.string().min(1).max(4000),
   language: z.enum(['en', 'lt']).optional(),

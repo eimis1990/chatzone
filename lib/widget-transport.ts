@@ -10,6 +10,11 @@
  */
 import type { BotLanguage, HandoffStatus } from '@/lib/types'
 import type { CommerceProduct, OrderStatus } from '@/lib/commerce/types'
+import {
+  VISITOR_BLOCK_HEADER,
+  VisitorBlockedError,
+  type VisitorBlockStatus,
+} from '@/lib/visitor-block-shared'
 
 export interface SendChatParams {
   message: string
@@ -45,10 +50,12 @@ export interface ChatTransport {
   ): Promise<{ products?: CommerceProduct[]; summary?: string }>
   /** Knowledge-base lookup for the voice `search_knowledge` tool (spoken answers). */
   searchKnowledge(query: string): Promise<{ answer: string }>
+  /** Check whether this live visitor is in a temporary bot-scoped block. */
+  getBlockStatus?(visitorId: string): Promise<VisitorBlockStatus>
   /** Voice `get_product_details` tool: full details for one product by spoken name. */
   getProductDetailsByName(productName: string): Promise<{ summary: string }>
   /** Short-lived ElevenLabs token for a live voice call. */
-  getVoiceToken(language: BotLanguage): Promise<{ token: string; voiceId?: string }>
+  getVoiceToken(language: BotLanguage, visitorId: string): Promise<{ token: string; voiceId?: string }>
   /** Real persisted message ids (so feedback can target them). */
   fetchMessages(conversationId: string): Promise<{ id: string; role: string; content: string }[]>
   /** Visitor thumbs feedback on a bot reply. */
@@ -129,13 +136,25 @@ export function createWidgetTransport(publicKey: string): ChatTransport {
       return (await res.json()) as { summary: string }
     },
 
-    async getVoiceToken(language) {
+    async getBlockStatus(visitorId) {
+      const res = await fetch('/api/widget/block-status', {
+        method: 'POST',
+        headers: JSON_HEADERS,
+        body: JSON.stringify({ publicKey, visitorId }),
+      })
+      if (!res.ok) return { blocked: false }
+      return (await res.json()) as VisitorBlockStatus
+    },
+
+    async getVoiceToken(language, visitorId) {
       const res = await fetch('/api/widget/voice-token', {
         method: 'POST',
         headers: JSON_HEADERS,
-        body: JSON.stringify({ publicKey, language }),
+        body: JSON.stringify({ publicKey, visitorId, language }),
       })
       if (!res.ok) {
+        const blockedUntil = res.headers.get(VISITOR_BLOCK_HEADER)
+        if (blockedUntil) throw new VisitorBlockedError(blockedUntil)
         const data = (await res.json().catch(() => ({}))) as { error?: string }
         throw new Error(
           res.status === 503 ? 'Voice calling unavailable' : (data.error ?? 'Token request failed'),

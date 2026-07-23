@@ -80,6 +80,11 @@ on **ElevenLabs Conversational AI**.
   the org's `voice_addon`, the monthly conversation limit, and domain
   allowlist before calling `ensureAgent` + `getConversationToken`
   (`app/api/widget/voice-token/route.ts:38-63`).
+- Token minting also requires the browser `visitorId` and rejects active
+  bot-scoped 24-hour blocks before ElevenLabs spend. Voice agents carry the
+  official `end_call` built-in system tool and terminate direct harassment,
+  repeated explicit bait/spam, or prompt/secret extraction. See
+  [visitor-abuse-protection](visitor-abuse-protection.md).
 - Agent/tool synchronization errors remain generic to the browser, but both
   voice-token routes log the server-side exception and ElevenLabs' bounded API
   response body. Do not reduce these failures to status-only errors again;
@@ -103,8 +108,6 @@ Stripe price/product is configured to be.
 See also [plans-and-entitlements](plans-and-entitlements.md) for how
 `voice_addon` fits into the broader entitlements model.
 
-_Last verified: 2026-07-17._
-
 ## ASR language drift (LT → LV)
 
 Scribe realtime's per-utterance language detection sometimes transcribes short
@@ -116,3 +119,5 @@ The one working lever is `asr.keywords`: `buildAgentConfig` seeds ~20 Lithuanian
 conversation/commerce anchors + the bot's display name for every lt-enabled bot
 (hash `v28-lt-asr-keywords`). Biasing, not a guarantee — expect improvement,
 not elimination.
+
+_Last verified: 2026-07-23 (02fbe04)._

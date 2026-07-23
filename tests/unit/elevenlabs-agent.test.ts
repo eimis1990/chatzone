@@ -84,6 +84,14 @@ describe('buildAgentConfig', () => {
     expect(prompt).toContain('write every number as digits')
   })
 
+  it('configures the end-call system tool for abusive or probing callers', () => {
+    const cfg = buildAgentConfig(makeBot(), ['search-tool'])
+    const prompt = cfg.conversation_config.agent.prompt
+    expect(prompt.built_in_tools.end_call.params.system_tool_type).toBe('end_call')
+    expect(prompt.built_in_tools.end_call.description).toContain('harasses')
+    expect(prompt.prompt).toContain('call `end_call` immediately')
+  })
+
   it('adds only the selected provider guidance to the voice product tools', () => {
     const base = defaultBotConfig('Bot')
     const verskis = {

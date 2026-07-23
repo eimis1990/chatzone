@@ -2,7 +2,12 @@
 
 import { useState } from 'react'
 import { CopyIcon, CheckIcon, PhoneIcon, MessageCircleIcon, ChevronLeftIcon, TriangleAlertIcon } from 'lucide-react'
+import { VisitorBlockManagementCard } from '@/components/client/VisitorBlockManagementCard'
 import { formatDistanceToNow } from '@/lib/date-utils'
+import type {
+  VisitorBlockManagementAction,
+  VisitorBlockManagementResult,
+} from '@/lib/visitor-block-shared'
 import type { Conversation, ConversationChannel, Message } from '@/lib/types'
 
 interface ConversationRow
@@ -14,6 +19,7 @@ interface ConversationRow
   success_score: number | null
   success_reason: string | null
   channel: ConversationChannel
+  block_expires_at: string | null
 }
 
 /** Small pill marking whether a conversation was a voice call or a text chat.
@@ -96,9 +102,19 @@ interface TranscriptViewProps {
   loadMessages: (conversationId: string) => Promise<Message[]>
   /** Returns (and lazily generates) the AI summary/topics for a conversation. */
   analyze: (conversationId: string) => Promise<Analysis>
+  /** Unblocks or extends the selected visitor's active block. */
+  manageVisitorBlock: (
+    conversationId: string,
+    action: VisitorBlockManagementAction,
+  ) => Promise<VisitorBlockManagementResult>
 }
 
-export function TranscriptView({ conversations, loadMessages, analyze }: TranscriptViewProps) {
+export function TranscriptView({
+  conversations,
+  loadMessages,
+  analyze,
+  manageVisitorBlock,
+}: TranscriptViewProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null)
   // Mobile: chat transcript vs AI review are shown one at a time via a segmented
   // control (desktop shows both side by side).
@@ -108,6 +124,7 @@ export function TranscriptView({ conversations, loadMessages, analyze }: Transcr
   const [attentionOnly, setAttentionOnly] = useState(false)
   const [analysis, setAnalysis] = useState<Analysis | null>(null)
   const [analyzing, setAnalyzing] = useState(false)
+  const [blockOverrides, setBlockOverrides] = useState<Record<string, string | null>>({})
 
   async function handleSelect(id: string) {
     if (id === selectedId) {
@@ -144,6 +161,11 @@ export function TranscriptView({ conversations, loadMessages, analyze }: Transcr
   }
 
   const selected = conversations.find((c) => c.id === selectedId)
+  const selectedBlockExpiresAt = selected
+    ? Object.hasOwn(blockOverrides, selected.visitor_id)
+      ? blockOverrides[selected.visitor_id]
+      : selected.block_expires_at
+    : null
   const visible = attentionOnly ? conversations.filter((c) => c.needs_attention) : conversations
   const attentionCount = conversations.filter((c) => c.needs_attention).length
 
@@ -310,6 +332,18 @@ export function TranscriptView({ conversations, loadMessages, analyze }: Transcr
                   <h3 className="text-sm font-semibold">Conversation review</h3>
                 </div>
                 <div className="min-h-0 flex-1 space-y-3 overflow-y-auto p-4">
+                  {selected && selectedBlockExpiresAt && (
+                    <VisitorBlockManagementCard
+                      expiresAt={selectedBlockExpiresAt}
+                      onAction={(action) => manageVisitorBlock(selected.id, action)}
+                      onChange={(expiresAt) =>
+                        setBlockOverrides((current) => ({
+                          ...current,
+                          [selected.visitor_id]: expiresAt,
+                        }))
+                      }
+                    />
+                  )}
                   {analyzing && !analysis ? (
                     <p className="text-xs text-muted-foreground">Analyzing conversation…</p>
                   ) : analysis?.summary ? (
