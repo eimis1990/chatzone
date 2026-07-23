@@ -53,7 +53,7 @@ export function WidgetEmbed({
 
     const openRealLauncher = () => {
       const launcher = document.querySelector<HTMLButtonElement>('[data-cbz-launcher]')
-      launcher?.click()
+      if (launcher && launcher.getAttribute('aria-expanded') !== 'true') launcher.click()
     }
 
     // The real launcher mounts invisible and only fades in once its theme
@@ -78,13 +78,33 @@ export function WidgetEmbed({
     }
     window.addEventListener('cbz:launcher-revealed', watchRealLauncher)
 
+    const clearIdlePreload = () => {
+      if (delayId !== undefined) {
+        clearTimeout(delayId)
+        delayId = undefined
+      }
+      if (idleId !== undefined) {
+        idleApi.cancelIdleCallback?.(idleId)
+        idleId = undefined
+      }
+    }
+
     const loadWidget = (openAfterLoad = false) => {
       openWhenReady ||= openAfterLoad
+      // A real user open cancels the pending idle pre-load. Otherwise it would
+      // still fire at 6s, re-enter here, and — because openWhenReady is set —
+      // click (toggle) the already-open widget shut, after which the scheduled
+      // greeting fires into the closed state as if it were a fresh load.
+      if (openAfterLoad) clearIdlePreload()
 
       const existingLauncher = document.querySelector<HTMLButtonElement>('[data-cbz-launcher]')
       if (existingLauncher) {
         setLoaded(true)
-        if (openWhenReady) existingLauncher.click()
+        // Only open on an explicit user click, and never toggle a widget that
+        // is already open (aria-expanded is maintained by widget.js).
+        if (openAfterLoad && existingLauncher.getAttribute('aria-expanded') !== 'true') {
+          existingLauncher.click()
+        }
         return
       }
       if (script) return
