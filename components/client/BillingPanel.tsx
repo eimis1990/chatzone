@@ -177,7 +177,7 @@ export function BillingPanel({
       try {
         resolve(
           await setVisualizer(enabled),
-          enabled ? 'Room visualizer added.' : 'Room visualizer removed.',
+          enabled ? 'Product visualizer added.' : 'Product visualizer removed.',
         )
       } finally {
         setBusy(null)
@@ -456,7 +456,7 @@ export function BillingPanel({
                 )}
               </div>
 
-              {/* Room visualizer — interactive */}
+              {/* Product visualizer — interactive */}
               <div className="flex flex-col rounded-2xl border bg-card p-6 shadow-sm">
                 <div className="flex items-center justify-between">
                   <span className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
@@ -616,11 +616,11 @@ export function BillingPanel({
         </>
       )}
 
-      {/* Confirm adding the Room visualizer add-on (extra recurring charge). */}
+      {/* Confirm adding the Product visualizer add-on (extra recurring charge). */}
       <Dialog open={confirmVisualizer} onOpenChange={setConfirmVisualizer}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add the Room visualizer?</DialogTitle>
+            <DialogTitle>Add the Product visualizer?</DialogTitle>
             <DialogDescription>
               This adds <span className="font-medium text-foreground">€{visualizer.monthly}/mo</span>{' '}
               to your subscription, prorated for the rest of the current billing period. It includes

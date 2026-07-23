@@ -64,11 +64,14 @@ export async function reconcileOrgFromStripe(orgId: string): Promise<void> {
  */
 export async function changeBasePlan(subscriptionId: string, newPriceId: string): Promise<void> {
   const stripe = requireStripe()
-  const voicePriceId = getVoicePriceId()
+  // Exclude every add-on price when locating the base item — otherwise the
+  // fallback could mistake an add-on for the plan and "upgrade" it away.
+  const addonPriceIds = new Set([getVoicePriceId(), getVisualizerPriceId()].filter(Boolean))
   const sub = await stripe.subscriptions.retrieve(subscriptionId)
+  const notAddon = (i: { price?: { id?: string } | null }) => !addonPriceIds.has(i.price?.id ?? '')
   const baseItem =
-    sub.items.data.find((i) => i.price?.id !== voicePriceId && planFromPriceId(i.price?.id ?? '')) ??
-    sub.items.data.find((i) => i.price?.id !== voicePriceId)
+    sub.items.data.find((i) => notAddon(i) && planFromPriceId(i.price?.id ?? '')) ??
+    sub.items.data.find(notAddon)
   if (!baseItem) throw new Error('No base plan item found on the subscription.')
 
   const updated = await stripe.subscriptions.update(subscriptionId, {
@@ -106,9 +109,9 @@ export async function setVoiceAddon(subscriptionId: string, enabled: boolean): P
   await setAddonItem(subscriptionId, priceId, enabled)
 }
 
-/** Add or remove the Room visualizer add-on item on an existing subscription. */
+/** Add or remove the Product visualizer add-on item on an existing subscription. */
 export async function setVisualizerAddon(subscriptionId: string, enabled: boolean): Promise<void> {
   const priceId = getVisualizerPriceId()
-  if (!priceId) throw new Error('Room visualizer add-on price is not configured.')
+  if (!priceId) throw new Error('Product visualizer add-on price is not configured.')
   await setAddonItem(subscriptionId, priceId, enabled)
 }

@@ -236,7 +236,7 @@ export default async function SubscriptionPage({
     }
   }
 
-  /** Add or remove the Room visualizer add-on on the existing subscription. */
+  /** Add or remove the Product visualizer add-on on the existing subscription. */
   async function setVisualizer(enabled: boolean): Promise<{ ok?: boolean; error?: string }> {
     'use server'
     const ids = await getUserOrgIds()
@@ -244,17 +244,17 @@ export default async function SubscriptionPage({
     if (!oid) return { error: 'No organization found.' }
     const stripe = getStripe()
     if (!stripe) return { error: 'Billing is not enabled yet.' }
-    if (!getVisualizerPriceId()) return { error: 'Room visualizer add-on isn\u2019t configured yet.' }
+    if (!getVisualizerPriceId()) return { error: 'Product visualizer add-on isn\u2019t configured yet.' }
 
     try {
       const existingSubId = await activeSubscriptionId(oid)
       if (!existingSubId) {
-        return { error: 'Add a paid plan first, then you can enable the room visualizer.' }
+        return { error: 'Add a paid plan first, then you can enable the product visualizer.' }
       }
       await setVisualizerAddon(existingSubId, enabled)
       return { ok: true }
     } catch (err) {
-      return { error: err instanceof Error ? err.message : 'Could not update the room visualizer add-on.' }
+      return { error: err instanceof Error ? err.message : 'Could not update the product visualizer add-on.' }
     }
   }
 

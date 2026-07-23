@@ -40,7 +40,7 @@ const PLANS = [
 // Voice is a flat monthly fee for now; per-minute metering comes in a later pass.
 const ADDONS = [
   { key: 'voice', name: 'Voice agent', monthly: 49 },
-  { key: 'visualizer', name: 'Room visualizer', monthly: 29 },
+  { key: 'visualizer', name: 'Product visualizer', monthly: 29 },
 ]
 // One-time "done-for-you" setup packages (no recurring price).
 const SETUP = [

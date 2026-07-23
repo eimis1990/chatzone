@@ -18,7 +18,7 @@ export function getVoicePriceId(): string | null {
   return process.env.STRIPE_PRICE_VOICE_MONTH ?? null
 }
 
-/** Stripe Price ID for the Room visualizer add-on (monthly), or null when not configured. */
+/** Stripe Price ID for the Product visualizer add-on (monthly), or null when not configured. */
 export function getVisualizerPriceId(): string | null {
   return process.env.STRIPE_PRICE_VISUALIZER_MONTH ?? null
 }

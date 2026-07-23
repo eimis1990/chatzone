@@ -1,7 +1,7 @@
 'use client'
 
 /**
- * VisualizerSection — Room visualizer configuration block for ConfigForm.
+ * VisualizerSection — Product visualizer configuration block for ConfigForm.
  *
  * Renders:
  *  - Master enable toggle (roomVisualizer) — lets widget visitors upload a room
@@ -10,7 +10,7 @@
  *    GPT Image 2, shown once the feature is enabled
  *
  * Gating mirrors VoiceSection: the section is always visible, but without the
- * Room visualizer add-on the toggle links to the subscription page instead.
+ * Product visualizer add-on the toggle links to the subscription page instead.
  */
 
 import { Controller, type Control, type UseFormWatch } from 'react-hook-form'
@@ -34,7 +34,7 @@ type FormValues = z.input<typeof botConfigFormSchema>
 interface VisualizerSectionProps {
   control: Control<FormValues>
   watch: UseFormWatch<FormValues>
-  /** Org has the Room visualizer add-on (owner demo bots pass true). */
+  /** Org has the Product visualizer add-on (owner demo bots pass true). */
   canUseVisualizer?: boolean
   /** 'client' links to the client subscription page for the add-on hint. */
   audience?: 'owner' | 'client'
@@ -69,7 +69,7 @@ export function VisualizerSection({
             <SofaIcon className="size-5" aria-hidden="true" />
           </span>
           <div>
-            <CardTitle className="text-sm font-semibold leading-tight">Room visualizer</CardTitle>
+            <CardTitle className="text-sm font-semibold leading-tight">Product visualizer</CardTitle>
             <CardDescription className="text-xs leading-tight">
               Let visitors see your products placed in a photo of their own room.
             </CardDescription>
@@ -80,7 +80,7 @@ export function VisualizerSection({
       <CardContent className="flex flex-col gap-3 bg-muted/70 py-3">
         <div className="flex items-center justify-between gap-3 rounded-lg border bg-card p-3">
           <div>
-            <p className="text-sm font-medium">Enable room visualizer</p>
+            <p className="text-sm font-medium">Enable product visualizer</p>
             <p className="text-xs text-muted-foreground">
               Visitors upload a room photo and get an AI render with the selected products placed
               in it — up to 5 renders per conversation.
@@ -94,7 +94,7 @@ export function VisualizerSection({
                 checked={(field.value ?? false) && canUseVisualizer}
                 onCheckedChange={field.onChange}
                 disabled={!canUseVisualizer}
-                aria-label="Enable room visualizer"
+                aria-label="Enable product visualizer"
               />
             )}
           />
@@ -103,11 +103,11 @@ export function VisualizerSection({
         {!canUseVisualizer &&
           (audience === 'client' ? (
             <a href="/app/subscription" className="text-xs text-primary hover:underline">
-              Requires the Room visualizer add-on — see plans &amp; add-ons
+              Requires the Product visualizer add-on — see plans &amp; add-ons
             </a>
           ) : (
             <p className="text-xs text-muted-foreground">
-              Requires the Room visualizer add-on on this organization&apos;s subscription.
+              Requires the Product visualizer add-on on this organization&apos;s subscription.
             </p>
           ))}
 

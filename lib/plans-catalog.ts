@@ -117,14 +117,14 @@ export const VOICE_ADDON = {
 } as const
 
 /**
- * The Room visualizer add-on — AI "see it in your room" product renders in the
+ * The Product visualizer add-on — AI "see it in your room" product renders in the
  * chat widget. Flat monthly fee with a monthly render pool; when the pool is
  * spent the feature quietly hides until the next cycle (no overage billing for
  * now — deliberately not advertised until we decide to meter it).
  */
 export const VISUALIZER_ADDON = {
   key: 'visualizer',
-  name: 'Room visualizer',
+  name: 'Product visualizer',
   monthly: 29,
   rendersIncluded: 100,
   rendersPerConversation: 5,
