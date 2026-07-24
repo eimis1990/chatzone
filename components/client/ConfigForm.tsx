@@ -282,11 +282,12 @@ export function ConfigForm({
       if (Array.isArray(arr)) {
         content![lang].suggestedQuestions = arr.map((q) =>
           typeof q === 'string'
-            ? { label: q, prompt: '', url: '' }
+            ? { label: q, prompt: '', url: '', query: '' }
             : {
                 label: (q as { label?: string }).label ?? '',
                 prompt: (q as { prompt?: string }).prompt ?? '',
                 url: (q as { url?: string }).url ?? '',
+                query: (q as { query?: string }).query ?? '',
                 action: (q as { action?: SuggestedQuestionAction }).action,
               },
         )

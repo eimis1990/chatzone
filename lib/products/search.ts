@@ -72,15 +72,19 @@ export async function searchCatalog(
   if (!c?.enabled) return []
 
   let query = rawQuery.trim()
-  if (/^https?:\/\//i.test(query)) {
+  // A store page URL anywhere in the query (owners often write "show products
+  // from this page <url>") → list that page's products directly, first 20 by
+  // default, in the store's own order.
+  const pageUrl = query.match(/https?:\/\/\S+/i)?.[0]?.replace(/[)\]>,.;!?]+$/, '')
+  if (pageUrl) {
     try {
-      const listed = await listStoreProductsByUrl(c, query, Math.max(limit, 12))
+      const listed = await listStoreProductsByUrl(c, pageUrl, Math.max(limit, 20))
       const inStock = listed.filter((p) => p.inStock)
       if (inStock.length) return inStock
     } catch (err) {
       console.error('[agent] listing products by URL failed, falling back to search:', err)
     }
-    query = urlSlugWords(query) || query
+    query = urlSlugWords(pageUrl) || query
   }
 
   try {

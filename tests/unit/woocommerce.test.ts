@@ -177,4 +177,44 @@ describe('listWooProductsByUrl', () => {
     })
     expect(products).toEqual([])
   })
+
+  it('scrapes the page HTML and preserves its product order', async () => {
+    const html =
+      '<li><a data-product_id="2"></a></li><li><a data-product_id="1"></a></li>'
+    const fetchImpl = vi.fn(async (url: string) => {
+      const u = String(url)
+      if (u === 'https://shop.test/naujienos/') {
+        return { ok: true, status: 200, text: async () => html, headers: new Headers() }
+      }
+      if (u.includes('include=2,1')) {
+        // Store API returns in its own order — the lister must restore page order.
+        return {
+          ok: true,
+          status: 200,
+          json: async () => [ { ...sample, id: 1, name: 'First by id' }, { ...sample, id: 2, name: 'First on page' } ],
+          headers: new Headers(),
+        }
+      }
+      return { ok: true, status: 200, json: async () => [], headers: new Headers() }
+    }) as unknown as typeof fetch
+    const products = await listWooProductsByUrl(
+      'https://shop.test',
+      'https://shop.test/naujienos/',
+      12,
+      { fetchImpl },
+    )
+    expect(products.map((p) => p.title)).toEqual(['First on page', 'First by id'])
+  })
+
+  it('never fetches a page on a different host than the store', async () => {
+    const fetchImpl = storeFetch({ catSlug: 'kvepalai' })
+    await listWooProductsByUrl(
+      'https://shop.test',
+      'https://evil.example/produkto-kategorija/kvepalai/',
+      12,
+      { fetchImpl },
+    )
+    const fetched = (fetchImpl as ReturnType<typeof vi.fn>).mock.calls.map((c) => String(c[0]))
+    expect(fetched.every((u) => u.startsWith('https://shop.test/'))).toBe(true)
+  })
 })

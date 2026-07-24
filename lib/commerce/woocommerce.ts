@@ -154,11 +154,42 @@ export function lastPathSegment(pageUrl: string): string {
   }
 }
 
+/** Hosts match ignoring a leading "www." (owners mix the two forms). */
+function sameStoreHost(storeUrl: string, pageUrl: string): boolean {
+  const host = (u: string) => new URL(u).hostname.replace(/^www\./, '')
+  try {
+    return host(storeUrl) === host(pageUrl)
+  } catch {
+    return false
+  }
+}
+
 /**
- * List products from a category/tag archive page URL (e.g. /produkto-zyma/x/,
- * /product-category/y/). Permalink bases vary per store/language, so we take
- * the LAST path segment as the term slug and try category first, then tag.
- * Returns [] when neither resolves — the caller falls back to search.
+ * Product ids scraped from a storefront page's HTML, in DOM order — the exact
+ * order the visitor sees. Woo themes stamp every card with `data-product_id`
+ * and/or an `?add-to-cart=` link.
+ */
+export function scrapePageProductIds(html: string, max: number): number[] {
+  const ids = new Set<number>()
+  for (const re of [/data-product_id="(\d+)"/g, /[?&;]add-to-cart=(\d+)/g]) {
+    for (const m of html.matchAll(re)) ids.add(Number(m[1]))
+    if (ids.size) break
+  }
+  return [...ids].slice(0, max)
+}
+
+/**
+ * List products from a store page URL in the page's own order.
+ *
+ * The page HTML is the source of truth for "what the visitor sees at the top":
+ * scrape its product ids in DOM order and hydrate them via the Store API. That
+ * covers category/tag archives AND custom pages built from product shortcodes
+ * or blocks. Only same-host URLs are fetched (the query can carry visitor
+ * text, and the store host already passed the egress guard).
+ *
+ * Fallback: resolve the URL's last path segment as a category/tag term slug
+ * via the Store API (permalink bases vary per store/language). Returns []
+ * when nothing resolves — the caller falls back to search.
  */
 export async function listWooProductsByUrl(
   storeUrl: string,
@@ -168,6 +199,34 @@ export async function listWooProductsByUrl(
 ): Promise<CommerceProduct[]> {
   const fetchImpl = deps.fetchImpl ?? fetch
   const base = storeOrigin(storeUrl)
+
+  if (sameStoreHost(storeUrl, pageUrl)) {
+    try {
+      const page = await fetchImpl(pageUrl, {
+        headers: { ...STOREFRONT_HEADERS, Accept: 'text/html' },
+      })
+      if (page.ok) {
+        const ids = scrapePageProductIds(await page.text(), limit)
+        if (ids.length) {
+          const res = await fetchImpl(
+            `${base}/wp-json/wc/store/v1/products?include=${ids.join(',')}&per_page=${ids.length}`,
+            { headers: STOREFRONT_HEADERS },
+          )
+          if (res.ok) {
+            const rows = (await res.json()) as WooProduct[]
+            const byId = new Map(rows.map((p) => [p.id, normalizeWooProduct(p)]))
+            const products = ids
+              .map((id) => byId.get(id))
+              .filter((p): p is CommerceProduct => Boolean(p))
+            if (products.length) return products
+          }
+        }
+      }
+    } catch {
+      // Page unreachable or unexpected markup — fall through to term resolution.
+    }
+  }
+
   const slug = lastPathSegment(pageUrl)
   if (!slug) return []
 

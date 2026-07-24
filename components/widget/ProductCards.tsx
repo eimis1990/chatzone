@@ -28,6 +28,8 @@ interface Labels {
   seeAll: string
   back: string
   results: string
+  topResults: string
+  seeAllInStore: string
   outOfStock: string
   products: string
 }
@@ -40,6 +42,8 @@ export function labelsFor(language: 'en' | 'lt'): Labels {
         seeAll: 'Žiūrėti visus',
         back: 'Atgal',
         results: 'Visi rezultatai',
+        topResults: 'Top',
+        seeAllInStore: 'Žiūrėti visus parduotuvėje',
         outOfStock: 'Nėra sandėlyje',
         products: 'Produktai',
       }
@@ -49,10 +53,16 @@ export function labelsFor(language: 'en' | 'lt'): Labels {
         seeAll: 'See all',
         back: 'Back',
         results: 'All results',
+        topResults: 'Top',
+        seeAllInStore: 'See all in the store',
         outOfStock: 'Out of stock',
         products: 'Products',
       }
 }
+
+/** URL-sourced listings cap at this many products (searchCatalog's default) —
+ *  a full batch means the store page likely has more behind it. */
+const URL_LIST_LIMIT = 20
 
 export function ProductCards({
   products,
@@ -110,6 +120,8 @@ interface ProductListViewProps {
   primaryColor?: string
   language?: 'en' | 'lt'
   onClose: () => void
+  /** Store page the products came from — a full batch renders a "see all" link. */
+  sourceUrl?: string
   /** Analytics: the visitor followed a product link out of the chat. */
   onProductClick?: (product: CommerceProduct) => void
   /** Room visualizer selection plumbing — omitted when the feature is off. */
@@ -127,10 +139,14 @@ export function ProductListView({
   primaryColor = '#4f46e5',
   language = 'en',
   onClose,
+  sourceUrl,
   onProductClick,
   roomSelect,
 }: ProductListViewProps) {
   const labels = labelsFor(language)
+  // A full batch from a store page means the page likely has more products —
+  // be honest in the header and offer the page itself at the end of the list.
+  const truncated = Boolean(sourceUrl) && products.length >= URL_LIST_LIMIT
 
   return (
     <motion.div
@@ -160,7 +176,7 @@ export function ProductListView({
           {labels.back}
         </button>
         <span className="text-xs opacity-80">
-          {labels.results} ({products.length})
+          {truncated ? `${labels.topResults} ${products.length}` : `${labels.results} (${products.length})`}
         </span>
       </div>
 
@@ -179,6 +195,25 @@ export function ProductListView({
             />
           ))}
         </div>
+
+        {/* The list only holds the page's top batch — link out to the rest. */}
+        {truncated && (
+          <a
+            href={sourceUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex w-full items-center justify-center gap-1.5 text-sm font-medium py-2.5 transition-opacity hover:opacity-85 active:opacity-70 outline-none focus-visible:ring-2"
+            style={{
+              backgroundColor: primaryColor,
+              color: readableTextColor(primaryColor),
+              border: isLightColor(primaryColor) ? '1px solid rgba(0,0,0,0.12)' : undefined,
+              borderRadius: `${Math.min(bubbleRadius, 12)}px`,
+            }}
+          >
+            {labels.seeAllInStore}
+            <ExternalLinkIcon />
+          </a>
+        )}
       </div>
     </motion.div>
   )

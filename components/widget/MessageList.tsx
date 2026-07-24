@@ -19,6 +19,9 @@ export interface ChatMessage {
   displayContent?: string
   streaming?: boolean
   products?: CommerceProduct[]
+  /** Store page these products were listed from (a URL-based "Show products"
+   *  quick action) — lets the full list link out to the complete page. */
+  productsSourceUrl?: string
   /** An order-status lookup result, rendered as a card. */
   order?: OrderStatus
   /** A link button (from an "open URL" quick action). */
@@ -45,7 +48,7 @@ interface MessageListProps {
   botBubbleColor?: string
   /** Dark chat background — glass bubbles switch to a dark-scheme treatment. */
   darkBackground?: boolean
-  onSeeAllProducts?: (products: CommerceProduct[]) => void
+  onSeeAllProducts?: (products: CommerceProduct[], sourceUrl?: string) => void
   onFeedback?: (messageId: string, value: 'up' | 'down') => void
   /** Analytics: a product card link was followed (messageId = persisted id when known). */
   onProductClick?: (product: CommerceProduct, messageId?: string) => void
@@ -257,7 +260,7 @@ export function MessageList({
                 bubbleRadius={bubbleRadius}
                 primaryColor={primaryColor}
                 language={activeLang}
-                onSeeAll={onSeeAllProducts}
+                onSeeAll={(products) => onSeeAllProducts?.(products, msg.productsSourceUrl)}
                 onProductClick={(p) => onProductClick?.(p, UUID_RE.test(msg.id) ? msg.id : undefined)}
                 roomSelect={roomSelect}
               />

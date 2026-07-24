@@ -75,6 +75,16 @@ Store connectors + product search. Separate from [RAG chunks](rag-and-knowledge.
 - If semantic matches exist but live hydration comes back empty, that's treated as "store API
   unreachable" and surfaced as an error rather than silently falling through to keyword search
   reading as "out of stock" (`lib/products/search.ts:95-98`).
+- **Store page URLs as queries**: a URL *anywhere* in the query text (owners write
+  "show products from this page <url>" in quick actions) routes to
+  `listStoreProductsByUrl` — first 20, in the page's own order (`lib/products/search.ts:75`).
+  For WooCommerce the page HTML itself is the order source of truth: scrape
+  `data-product_id`/`?add-to-cart=` ids in DOM order, hydrate via Store API `include=`,
+  reorder to match the page (`listWooProductsByUrl`, `lib/commerce/woocommerce.ts`). That
+  covers category/tag archives AND custom pages like karakara.lt `/naujienos/` (neither a
+  category nor a tag — term resolution alone returns [] there). Only same-host-as-store
+  URLs are page-fetched (visitor text can carry URLs); fallback is last-path-segment
+  category→tag term resolution, then slug-words keyword search.
 - Catalog sync (`lib/products/sync.ts`) works for the same four providers (not just
   WooCommerce); it fetches → tags → embeds → upserts/prunes `product_embeddings`. Verskis is
   fetched from `products.xml` sitemaps with a 16-worker pool; every main product page contributes

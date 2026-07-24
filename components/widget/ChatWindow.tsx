@@ -200,7 +200,10 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
   const [showLeadForm, setShowLeadForm] = useState(false)
   const [leadDismissed, setLeadDismissed] = useState(false)
   // When set, the full-height product list overlay covers the chat body.
-  const [listProducts, setListProducts] = useState<CommerceProduct[] | null>(null)
+  const [listProducts, setListProducts] = useState<{
+    products: CommerceProduct[]
+    sourceUrl?: string
+  } | null>(null)
   // Room visualizer: products picked from cards, and the studio overlay.
   const [roomSelection, setRoomSelection] = useState<CommerceProduct[]>([])
   const [studioOpen, setStudioOpen] = useState(false)
@@ -765,8 +768,14 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
       try {
         const data = await transport.search(query)
         const products = data.products ?? []
+        // A store page URL in the query → the full list can link out to it.
+        const sourceUrl = query.match(/https?:\/\/\S+/i)?.[0]?.replace(/[)\]>,.;!?]+$/, '')
         done = products.length
-          ? { content: PRODUCTS_ACTION_NOTE[activeLang] ?? PRODUCTS_ACTION_NOTE.en, products }
+          ? {
+              content: PRODUCTS_ACTION_NOTE[activeLang] ?? PRODUCTS_ACTION_NOTE.en,
+              products,
+              productsSourceUrl: sourceUrl,
+            }
           : { content: PRODUCTS_ACTION_EMPTY[activeLang] ?? PRODUCTS_ACTION_EMPTY.en }
       } catch {
         done = { content: PRODUCTS_ACTION_EMPTY[activeLang] ?? PRODUCTS_ACTION_EMPTY.en }
@@ -1222,7 +1231,7 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
             bubbleBorderWidth={bubbleBorderWidth}
             botBubbleColor={botBubbleColor}
             darkBackground={darkChat}
-            onSeeAllProducts={setListProducts}
+            onSeeAllProducts={(products, sourceUrl) => setListProducts({ products, sourceUrl })}
             onFeedback={handleFeedback}
             onProductClick={trackProductClick}
             onLinkClick={trackLinkClick}
@@ -1332,7 +1341,8 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
         <AnimatePresence>
           {listProducts && (
             <ProductListView
-              products={listProducts}
+              products={listProducts.products}
+              sourceUrl={listProducts.sourceUrl}
               bubbleRadius={bubbleRadius}
               primaryColor={primaryColor}
               language={activeLang}
