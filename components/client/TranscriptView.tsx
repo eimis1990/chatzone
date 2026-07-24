@@ -23,15 +23,15 @@ interface ConversationRow
 }
 
 /** Small pill marking whether a conversation was a voice call or a text chat.
- *  Voice = lime, Chat = teal, both white text + a filled icon. (600 shades so
- *  white stays legible on the fill — lime-500 fails contrast.) */
+ *  Voice = lime, Chat = teal: a pale tinted background with a vivid, filled
+ *  icon + label in the same hue. */
 function ChannelBadge({ channel }: { channel: ConversationChannel }) {
   const voice = channel === 'voice'
   const Icon = voice ? PhoneIcon : MessageCircleIcon
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-semibold text-white ${
-        voice ? 'bg-lime-600' : 'bg-teal-600'
+      className={`inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${
+        voice ? 'bg-lime-100 text-lime-700' : 'bg-teal-100 text-teal-700'
       }`}
       title={voice ? 'Voice call' : 'Text chat'}
     >
@@ -206,10 +206,11 @@ export function TranscriptView({
               return (
                 <li
                   key={conv.id}
-                  className={`relative overflow-hidden ${conv.needs_attention ? 'attention-cell' : ''}`}
+                  className={`relative ${conv.needs_attention ? 'bg-red-700/10' : ''}`}
                 >
-                  {/* Whole cell selects the conversation. Selection/hover use a
-                      translucent wash so the attention glow shows through. */}
+                  {/* Whole cell selects the conversation. Selected cell is marked
+                      by a left accent bar (translucent bg wash lets a red
+                      needs-attention tint still read underneath). */}
                   <button
                     type="button"
                     onClick={() => {
@@ -218,7 +219,9 @@ export function TranscriptView({
                     }}
                     className={[
                       'relative z-[1] block w-full px-3 py-3 text-left transition-colors',
-                      isActive ? 'bg-muted/70' : 'hover:bg-muted/40',
+                      isActive
+                        ? 'bg-muted/60 shadow-[inset_3px_0_0_0_var(--primary)]'
+                        : 'hover:bg-muted/40',
                     ].join(' ')}
                   >
                     {/* Top row: channel badge (+ attention flag) · message count */}
