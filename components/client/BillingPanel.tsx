@@ -313,7 +313,7 @@ export function BillingPanel({
                 onClick={() => setAnnual(true)}
                 className={`rounded-full px-4 py-1.5 font-medium transition-colors ${annual ? 'bg-muted shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
               >
-                Annual <span className="text-primary">· save ~17%</span>
+                Annual <span className="text-primary">· 2 months free</span>
               </button>
             </div>
           </div>

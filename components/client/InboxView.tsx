@@ -75,6 +75,15 @@ export function InboxView({
   const [draft, setDraft] = useState('')
   const [sending, setSending] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
+  const composerRef = useRef<HTMLTextAreaElement>(null)
+
+  // Auto-grow the composer to fit its content (typed or dictated), capped by max-h.
+  useEffect(() => {
+    const el = composerRef.current
+    if (!el) return
+    el.style.height = 'auto'
+    el.style.height = `${el.scrollHeight}px`
+  }, [draft])
 
   const refresh = useCallback(async () => {
     setList(await loadList())
@@ -374,6 +383,7 @@ export function InboxView({
             {/* Composer */}
             <div className="flex flex-shrink-0 items-end gap-2 border-t p-3">
               <textarea
+                ref={composerRef}
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}
                 onKeyDown={(e) => {

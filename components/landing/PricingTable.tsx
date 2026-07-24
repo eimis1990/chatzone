@@ -33,7 +33,7 @@ export function PricingTable() {
             }}
             className={`rounded-full px-4 py-1.5 font-medium transition-colors ${annual ? 'bg-white text-[#101213]' : 'text-white/70 hover:text-white'}`}
           >
-            Annual <span className="text-primary">· save ~17%</span>
+            Annual <span className="text-primary">· 2 months free</span>
           </button>
         </div>
       </div>
