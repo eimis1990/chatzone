@@ -31,7 +31,7 @@ function ChannelBadge({ channel }: { channel: ConversationChannel }) {
   return (
     <span
       className={`inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${
-        voice ? 'bg-lime-100 text-lime-700' : 'bg-teal-100 text-teal-700'
+        voice ? 'bg-lime-50 text-lime-700' : 'bg-teal-50 text-teal-700'
       }`}
       title={voice ? 'Voice call' : 'Text chat'}
     >
@@ -206,7 +206,7 @@ export function TranscriptView({
               return (
                 <li
                   key={conv.id}
-                  className={`relative ${conv.needs_attention ? 'bg-red-700/10' : ''}`}
+                  className={`relative ${conv.needs_attention ? 'bg-red-700/5' : ''}`}
                 >
                   {/* Whole cell selects the conversation. Selected cell is marked
                       by a left accent bar (translucent bg wash lets a red
