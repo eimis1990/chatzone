@@ -168,8 +168,14 @@ export default async function BotsPage() {
             // Same card, two tap targets: Configure on desktop (build), Analytics
             // on mobile (monitor). Only one link is visible per breakpoint.
             const card = (Icon: typeof SettingsIcon, label: string) => (
-              <Card className="flex h-full flex-col transition-all group-hover:-translate-y-0.5 group-hover:shadow-md group-focus-visible:ring-2 group-focus-visible:ring-ring">
-                <CardHeader>
+              <Card className="relative flex h-full flex-col overflow-hidden transition-all group-hover:-translate-y-0.5 group-hover:shadow-md group-focus-visible:ring-2 group-focus-visible:ring-ring">
+                {/* Brand-colored glow in the top-right corner (matches demo cards). */}
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute -right-10 -top-10 size-28 rounded-full opacity-20 blur-2xl transition-opacity group-hover:opacity-35"
+                  style={{ backgroundColor: primaryColor }}
+                />
+                <CardHeader className="relative z-10">
                   <div className="flex items-start gap-3">
                     {avatar ? (
                       // eslint-disable-next-line @next/next/no-img-element
@@ -207,8 +213,8 @@ export default async function BotsPage() {
                 </CardHeader>
                 {/* Greeting grows; the status + delete row pins to the card bottom
                     so short and long greetings align across the grid. */}
-                <CardContent className="flex flex-1 flex-col gap-3">
-                  <p className="line-clamp-2 text-sm text-muted-foreground">{greeting}</p>
+                <CardContent className="relative z-10 flex flex-1 flex-col gap-3">
+                  <p className="line-clamp-1 text-sm text-muted-foreground">{greeting}</p>
                   <div className="mt-auto flex items-center justify-between">
                     <LiveIndicator lastSeenAt={bot.last_seen_at} />
                     <DeleteBotButton botId={bot.id} botName={bot.name} />
