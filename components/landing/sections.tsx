@@ -203,110 +203,34 @@ export function HowItWorks() {
 // ───────────────────────── Big CTA band ─────────────────────────
 
 /**
- * The closing panel's light. Pure CSS + inline SVG rather than an image, so it
- * scales to any panel size, costs no bytes, and stays crisp: a single hot source
- * at the top edge, a measurement grid that fades before it reaches the corners,
- * and two curved sails raking in from the sides with filaments where their
- * bright rims land. All decorative — hidden from assistive tech.
+ * The closing panel's light: a warm bloom from a source just above the panel's
+ * top edge, and a measurement grid that lives in the top part of the panel and
+ * fades out before it reaches the middle. CSS only — no image, no SVG — so it
+ * scales to any panel size and costs nothing. Decorative, hidden from AT.
  */
 function CTALight() {
+  const topFade = 'radial-gradient(72% 76% at 50% 0%, #000 0%, rgba(0,0,0,0.55) 46%, transparent 78%)'
   return (
     <>
-      {/* the source: a hot slit at the top edge, blooming down the middle */}
       <span
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-72"
+        className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-80"
         style={{
           background:
-            'radial-gradient(58% 100% at 50% 0%, rgba(233,118,52,0.34) 0%, rgba(233,118,52,0.10) 42%, transparent 74%)',
+            'radial-gradient(58% 100% at 50% 0%, rgba(233,118,52,0.36) 0%, rgba(233,118,52,0.12) 44%, transparent 76%)',
         }}
       />
-      <span
-        aria-hidden
-        className="pointer-events-none absolute top-0 left-1/2 -z-10 h-[3px] w-40 -translate-x-1/2 sm:w-56"
-        style={{
-          background: 'linear-gradient(90deg, transparent, #ffb886, transparent)',
-          boxShadow: '0 0 26px 4px rgba(233,118,52,0.55)',
-        }}
-      />
-
-      {/* the grid, faded out well before the corners */}
       <span
         aria-hidden
         className="pointer-events-none absolute inset-0 -z-10"
         style={{
           backgroundImage:
-            'linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px)',
+            'linear-gradient(to right, rgba(255,255,255,0.055) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.055) 1px, transparent 1px)',
           backgroundSize: '92px 92px',
-          maskImage: 'radial-gradient(58% 58% at 50% 32%, #000 0%, transparent 78%)',
-          WebkitMaskImage: 'radial-gradient(58% 58% at 50% 32%, #000 0%, transparent 78%)',
+          maskImage: topFade,
+          WebkitMaskImage: topFade,
         }}
       />
-
-      <span
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-1/2"
-        style={{
-          background: 'linear-gradient(to top, rgba(12,8,6,0.72) 0%, rgba(12,8,6,0.22) 46%, transparent 100%)',
-        }}
-      />
-
-      <svg
-        aria-hidden
-        viewBox="0 0 1200 560"
-        preserveAspectRatio="xMidYMid slice"
-        className="pointer-events-none absolute inset-0 -z-10 size-full"
-      >
-        <defs>
-          <linearGradient id="ctaSail" x1="0.62" y1="0" x2="0" y2="0.92">
-            <stop offset="0%" stopColor="#e97634" stopOpacity="0" />
-            <stop offset="46%" stopColor="#e97634" stopOpacity="0.09" />
-            <stop offset="82%" stopColor="#e97634" stopOpacity="0.2" />
-            <stop offset="100%" stopColor="#e97634" stopOpacity="0.06" />
-          </linearGradient>
-          <linearGradient id="ctaRim" x1="0" y1="0" x2="0.3" y2="1">
-            <stop offset="0%" stopColor="#e97634" stopOpacity="0" />
-            <stop offset="62%" stopColor="#ffb27a" stopOpacity="0.42" />
-            <stop offset="100%" stopColor="#ffd3ae" stopOpacity="0.95" />
-          </linearGradient>
-          <filter id="ctaSoft" x="-40%" y="-40%" width="180%" height="180%">
-            <feGaussianBlur stdDeviation="22" />
-          </filter>
-          <filter id="ctaBloom" x="-40%" y="-40%" width="180%" height="180%">
-            <feGaussianBlur stdDeviation="5" />
-          </filter>
-          <filter id="ctaFilament" x="-60%" y="-60%" width="220%" height="220%">
-            <feGaussianBlur stdDeviation="1.6" />
-          </filter>
-        </defs>
-
-        {/* One sail, drawn once and mirrored. The rim bows outward so the panel's
-            middle stays dark and the light hugs each edge, brightest where the
-            curve lands at the bottom. */}
-        <g id="ctaSailShape">
-          <path
-            d="M 176 -40 C 160 190 232 400 396 600 L -80 600 L -80 -40 Z"
-            fill="url(#ctaSail)"
-            filter="url(#ctaSoft)"
-          />
-          <path
-            d="M 176 -40 C 160 190 232 400 396 600"
-            fill="none"
-            stroke="url(#ctaRim)"
-            strokeWidth="2"
-            filter="url(#ctaBloom)"
-          />
-          {/* filaments spraying off the rim's hot end */}
-          <g stroke="#ffd0a6" fill="none" filter="url(#ctaFilament)">
-            <path d="M 268 452 C 344 512 430 552 528 574" strokeWidth="1.5" strokeOpacity="0.85" />
-            <path d="M 258 474 C 316 536 394 574 482 594" strokeWidth="1.1" strokeOpacity="0.6" />
-            <path d="M 286 430 C 372 486 470 522 572 544" strokeWidth="1" strokeOpacity="0.42" />
-            <path d="M 250 496 C 288 558 348 596 418 610" strokeWidth="0.9" strokeOpacity="0.34" />
-            <path d="M 296 412 C 396 462 502 494 610 512" strokeWidth="0.8" strokeOpacity="0.24" />
-          </g>
-        </g>
-        <use href="#ctaSailShape" transform="translate(1200,0) scale(-1,1)" />
-      </svg>
     </>
   )
 }
@@ -323,7 +247,7 @@ export function CTASection() {
               rather than a flat dark band. The panel is lit from a single source
               at its top edge: the light spills down the middle and rakes in from
               both sides along two curved sails (see CTALight). */}
-          <div className="relative isolate overflow-hidden rounded-3xl border border-white/10 bg-[#0c0806] px-6 py-20 text-center sm:px-10 sm:py-28">
+          <div className="relative isolate overflow-hidden rounded-3xl border border-white/10 bg-[#0c0806] px-6 py-16 text-center sm:px-10 sm:py-24">
             <CTALight />
             <h2 className="relative mx-auto max-w-xl text-balance text-5xl font-light tracking-tight sm:text-6xl">
               Add an AI agent to your site today
