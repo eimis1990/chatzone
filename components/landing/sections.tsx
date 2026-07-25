@@ -203,27 +203,31 @@ export function HowItWorks() {
 // ───────────────────────── Big CTA band ─────────────────────────
 
 /**
- * Real widget conversations around the CTA's edges — solid cards, all one size,
- * gently tilted (nothing past 6°): one per corner, plus a mid-edge sliver each
- * side at xl that tucks behind its corner cards. They bleed off the panel so
- * only fragments show, and the corner cards never overlap one another. Hand-
- * placed (never random) and verified to stay clear of the centre column where
- * the heading, copy and button live, at every width.
+ * Real widget conversations framing the CTA: four cards per side, one size,
+ * fanned along an arc like a held hand of cards — top of each fan tucked
+ * furthest out, each lower card painting over the one above it. They bleed off
+ * the panel so only fragments show, and sit close to the copy without ever
+ * crossing into it (hand-placed, verified at every width).
+ *
+ * Hovering anywhere on the panel parts the fans: every card eases a little
+ * further out along its own side, so the copy gets room the moment attention
+ * arrives. Transform only — cheap, smooth, and reversible.
  *
  * Corner-only by design — below `lg` the panel is barely wider than its own
  * text, so there is no margin to scatter into and the group is dropped.
  */
 const SCATTER = [
-  // mid-edge slivers first, so the corner cards paint over them (deck order)
-  { src: '/chatviews/chatview-10.webp', className: 'top-1/2 -left-40 hidden -translate-y-1/2 rotate-2 xl:block' },
-  { src: '/chatviews/chatview-6.webp', className: 'top-1/2 -right-40 hidden -translate-y-1/2 -rotate-2 xl:block' },
-  // one card per corner
-  { src: '/chatviews/chatview-1.webp', className: '-top-24 -left-20 -rotate-6' },
-  { src: '/chatviews/chatview-4.webp', className: '-bottom-32 -left-2 rotate-3 xl:left-24' },
-  { src: '/chatviews/chatview-7.webp', className: '-top-24 -right-20 rotate-6' },
-  { src: '/chatviews/chatview-9.webp', className: '-right-2 -bottom-32 -rotate-3 xl:right-24' },
+  // left arc, top to bottom — later cards paint over earlier ones
+  { src: '/chatviews/chatview-1.webp', className: '-top-28 left-24 hidden -rotate-[10deg] xl:block group-hover:-translate-x-4 group-hover:-translate-y-2' },
+  { src: '/chatviews/chatview-10.webp', className: 'top-16 -left-16 -rotate-[5deg] group-hover:-translate-x-5' },
+  { src: '/chatviews/chatview-2.webp', className: 'top-56 -left-10 rotate-[2deg] group-hover:-translate-x-5' },
+  { src: '/chatviews/chatview-4.webp', className: '-bottom-24 left-32 hidden rotate-[9deg] xl:block group-hover:-translate-x-4 group-hover:translate-y-2' },
+  // right arc, mirrored
+  { src: '/chatviews/chatview-7.webp', className: '-top-28 right-24 hidden rotate-[10deg] xl:block group-hover:translate-x-4 group-hover:-translate-y-2' },
+  { src: '/chatviews/chatview-6.webp', className: 'top-16 -right-16 rotate-[5deg] group-hover:translate-x-5' },
+  { src: '/chatviews/chatview-8.webp', className: 'top-56 -right-10 -rotate-[2deg] group-hover:translate-x-5' },
+  { src: '/chatviews/chatview-9.webp', className: 'right-32 -bottom-24 hidden -rotate-[9deg] xl:block group-hover:translate-x-4 group-hover:translate-y-2' },
 ]
-
 
 function ScatteredViews() {
   return (
@@ -231,12 +235,12 @@ function ScatteredViews() {
       {SCATTER.map((v) => (
         <div
           key={v.src}
-          className={`absolute w-[200px] overflow-hidden rounded-xl border border-white/15 ${v.className}`}
-          // Solid, just toned: dimmed and slightly desaturated so nine other
+          className={`absolute w-[200px] overflow-hidden rounded-xl border border-white/15 transition-transform duration-700 ease-out ${v.className}`}
+          // Solid, just toned: dimmed and slightly desaturated so eight other
           // brands' widget colours sit behind the CTA instead of against it.
           style={{ filter: 'saturate(0.8) brightness(0.82)', boxShadow: '0 28px 56px -20px rgba(0,0,0,0.85)' }}
         >
-          <Image src={v.src} alt="" width={420} height={680} sizes="230px" className="h-auto w-full" />
+          <Image src={v.src} alt="" width={420} height={680} sizes="200px" className="h-auto w-full" />
         </div>
       ))}
       {/* a tight pool of the panel's own dark under the copy — gone before it
@@ -263,7 +267,7 @@ export function CTASection() {
           {/* Framed as its own contained panel so the closing CTA reads as a card
               rather than a flat dark band. `overflow-hidden` is what crops the
               scattered conversations at the panel's edges. */}
-          <div className="relative isolate overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] px-6 py-16 text-center sm:px-10">
+          <div className="group relative isolate overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] px-6 py-16 text-center sm:px-10">
             <ScatteredViews />
             <h2 className="relative mx-auto max-w-xl text-balance text-5xl font-light tracking-tight sm:text-6xl">
               Add an AI agent to your site today
