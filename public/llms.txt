@@ -84,6 +84,10 @@
 - [Semantic search for e-commerce](https://www.loqara.com/blog/semantic-search-ecommerce): how modern product search works
 - [AI product recommendation chatbots](https://www.loqara.com/blog/ai-product-recommendation-chatbot): conversational recommendations
 - [AI chatbots for furniture stores](https://www.loqara.com/blog/ai-chatbot-for-furniture-stores): dimension-aware product guidance without guessing
+- [AI chatbots for electronics stores](https://www.loqara.com/blog/ai-chatbot-for-electronics-stores): exact model and specification checks that prevent compatibility mistakes
+- [AI chatbots for B2B e-commerce](https://www.loqara.com/blog/ai-chatbot-for-b2b-ecommerce): technical-buyer qualification before a sales or engineering handoff
+- [Prevent avoidable returns with AI](https://www.loqara.com/blog/ai-chatbot-prevent-avoidable-returns): optional pre-return troubleshooting without blocking legitimate returns
+- [AI chatbots for beauty and skincare stores](https://www.loqara.com/blog/ai-chatbot-for-beauty-skincare-stores): ingredient and product guidance without medical claims
 - [AI personalization in e-commerce](https://www.loqara.com/blog/ai-personalization-ecommerce): practical rollout without creepiness
 - [AI inventory forecasting](https://www.loqara.com/blog/ai-inventory-forecasting-ecommerce): fewer stockouts without guessing
 - [AI fraud detection for e-commerce](https://www.loqara.com/blog/ai-fraud-detection-ecommerce): how it works and what it misses

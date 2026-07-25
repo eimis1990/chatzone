@@ -5,7 +5,7 @@ date: 2026-07-15
 topic: ecommerce-ai
 author: Eimantas Kudarauskas
 image: /blog/ai-product-recommendation-chatbot.webp
-related: ai-chatbot-for-furniture-stores, agentic-commerce-ecommerce, best-ai-chatbot-for-ecommerce
+related: ai-chatbot-for-furniture-stores, ai-chatbot-for-electronics-stores, ai-chatbot-for-beauty-skincare-stores
 ---
 
 Most store filters assume the shopper already knows the category, terminology, and attributes that matter. Real customers arrive with a messier thought: “I need a gift for a new runner under €80,” or “Which serum works for dry, sensitive skin without fragrance?”
@@ -94,15 +94,15 @@ The strongest fit is a catalog where customers need guidance but do not necessar
 
 **Fashion and footwear.** Fit, occasion, climate, material, style, and price interact. A conversation can translate “smart enough for work but comfortable for walking” into usable constraints.
 
-**Beauty and skincare.** Skin type, concern, ingredients, fragrance, routine, and budget matter. This category needs careful claims and a clear boundary between product guidance and medical advice.
+**Beauty and skincare.** Ingredients, fragrance, texture, routine, format, and budget matter. This category needs careful claims and a clear boundary between product guidance and medical advice; our [beauty and skincare chatbot guide](/blog/ai-chatbot-for-beauty-skincare-stores) shows exactly where that line belongs.
 
-**Electronics and accessories.** Compatibility is often the sale. The agent should verify model, connector, dimensions, power, and region rather than suggest something merely similar.
+**Electronics and accessories.** Compatibility is often the sale. The agent should verify model, connector, dimensions, power, and region rather than suggest something merely similar. See the dedicated [electronics compatibility assistant guide](/blog/ai-chatbot-for-electronics-stores) for the data and refusal rules.
 
 **Home and furniture.** Dimensions, room, style, material, care, lead time, and assembly create high-consideration choices. The dedicated [furniture-store AI chatbot guide](/blog/ai-chatbot-for-furniture-stores) shows how to separate hard fit constraints from softer style preferences without guessing.
 
 **Gifts and speciality products.** Shoppers know the person and occasion but not the category. Natural-language discovery is dramatically easier than browsing every collection.
 
-**Large B2B catalogs.** Buyers may describe an application or specification. The assistant can narrow thousands of SKUs, provided the data is precise and complex orders can reach a specialist.
+**Large B2B catalogs.** Buyers may describe an application or specification. The assistant can narrow thousands of SKUs, provided the data is precise and complex orders can reach a specialist. The [B2B technical-buyer qualification guide](/blog/ai-chatbot-for-b2b-ecommerce) covers the brief and handoff in detail.
 
 Small catalogs can benefit too, but the assistant may create less incremental value if every product is already visible on one page.
 

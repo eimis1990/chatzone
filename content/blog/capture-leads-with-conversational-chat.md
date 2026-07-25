@@ -3,7 +3,7 @@ title: Capture more leads with conversational chat
 description: Most store chat is treated as support only. Done right, it's also your highest-intent lead channel. Here's how to capture leads in conversation without being pushy.
 date: 2026-06-22
 topic: ecommerce-ai
-related: conversational-commerce-guide, ai-product-recommendation-chatbot, chatbot-roi-metrics-that-matter
+related: ai-chatbot-for-b2b-ecommerce, conversational-commerce-guide, ai-product-recommendation-chatbot
 updated: 2026-07-21
 author: Eimantas Kudarauskas
 image: /blog/capture-leads-with-conversational-chat.webp
@@ -68,6 +68,8 @@ Timing is the whole game. Ask too early and you're a toll booth; ask at the righ
 A captured email sitting in a dashboard isn't a lead — it's a missed one. The value is realised only when the right person follows up while the intent is still warm, and that means qualifying and routing need to happen without anyone babysitting the inbox.
 
 This is where a grounded AI agent earns its place. Because it has already had the conversation, it knows *why* the lead came in — the product, the question, the objection — so qualification isn't a separate guessing step bolted on afterwards. A high-intent "ready to buy, just need sizing" thread can be flagged differently from a "browsing for next season" one. The agent answers from your own content and catalog first — [grounded answers, not invented ones](/blog/ai-chatbot-for-online-store) — and only reaches for the lead capture when it genuinely can't fully resolve the question or when the visitor shows clear buying intent. That restraint is what keeps it from feeling pushy.
+
+Technical B2B requests need a deeper brief than ordinary lead capture. Application, mandatory specifications, quantity, destination, deadline, and unresolved risks should travel with the conversation; the [B2B e-commerce chatbot guide](/blog/ai-chatbot-for-b2b-ecommerce) shows how to collect that context without pretending the bot can engineer a solution or issue a quote.
 
 Routing should land the lead where your team already works, with the full conversation attached so nothing is lost:
 

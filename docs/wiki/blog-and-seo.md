@@ -116,6 +116,19 @@ owns the staffing/routing decision, distinct from the technology taxonomy in
 process visual, explicit related slugs, contextual backlinks, useful FAQs, and
 primary/first-party evidence where claims are time-sensitive.
 
+The July 25 specific-use-case cluster specializes four different customer jobs
+without retargeting the broad recommendation or returns pages:
+`ai-chatbot-for-electronics-stores` owns exact device/accessory compatibility;
+`ai-chatbot-for-b2b-ecommerce` owns technical-buyer qualification before a sales
+or engineering handoff; `ai-chatbot-prevent-avoidable-returns` owns optional,
+low-risk troubleshooting **before** the return process described by
+`automate-returns-with-ai-chatbot`; and
+`ai-chatbot-for-beauty-skincare-stores` owns non-medical product/ingredient
+guidance. Preserve their boundaries: no invented compatibility or suitability,
+binding quotes or account pricing, blocked return routes, diagnosis, treatment,
+or allergy guarantees. Each uses an editorial cover plus a separate realistic
+customer-use scene, both text-free 1200×800 WebP assets.
+
 ## 2026-07-20 remediation baseline
 
 The public-site audit found that technical SEO tags are broadly sound, but mobile
@@ -177,4 +190,4 @@ optimized mobile runs measured median Performance 91, LCP 3.46 seconds, 0.41 MB,
 36 requests, 13 image requests, and zero CLS. Homepage remained at Performance 85,
 LCP 4.35 seconds, and 0.93 MB in the post-change smoke audit.
 
-_Last verified: 2026-07-23 (working tree)._
+_Last verified: 2026-07-25 (working tree)._

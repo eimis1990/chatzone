@@ -5,7 +5,7 @@ date: 2026-07-15
 topic: ecommerce-ai
 author: Eimantas Kudarauskas
 image: /blog/semantic-search-ecommerce.webp
-related: ai-product-recommendation-chatbot, conversational-commerce-guide, ai-chatbot-for-online-store
+related: ai-product-recommendation-chatbot, ai-chatbot-for-electronics-stores, ai-chatbot-for-b2b-ecommerce
 ---
 
 A shopper searches for “smart shoes for standing all day.” Your catalog calls them “supportive leather trainers.” Exact keyword search may return nothing even though the right product is there.
@@ -134,6 +134,8 @@ Strong use cases include:
 - gift discovery and occasion-based searches;
 - long-tail queries combining several attributes;
 - support and chat interfaces where people speak naturally.
+
+Meaning alone still cannot prove a hard technical relationship. An [electronics compatibility assistant](/blog/ai-chatbot-for-electronics-stores) should combine semantic discovery with exact model and specification rules, while a [B2B qualification assistant](/blog/ai-chatbot-for-b2b-ecommerce) should preserve mandatory constraints and route engineering judgment to a specialist.
 
 It adds less value to a five-product store or a catalog dominated by exact part numbers. There, navigation and exact search may already solve the problem.
 

@@ -5,7 +5,7 @@ date: 2026-07-15
 topic: ai-customer-support
 author: Eimantas Kudarauskas
 image: /blog/automate-returns-with-ai-chatbot.webp
-related: ai-chatbot-human-handoff, reduce-support-tickets-with-ai, where-is-my-order-ai
+related: ai-chatbot-prevent-avoidable-returns, ai-chatbot-human-handoff, reduce-support-tickets-with-ai
 ---
 
 Returns automation is often sold as one button: the customer asks, the AI approves, the label appears, and the refund happens. Real stores have more rules than that. Final-sale items, damaged goods, exchanges, international shipping, warranty claims, return windows, fraud signals, and exceptions all change the path.
@@ -156,7 +156,7 @@ Yes, often upstream.
 
 Many returns begin with a product-expectation gap. Conversational help can clarify size, compatibility, material, dimensions, care, delivery, and what is included before purchase. An [AI product recommendation chatbot](/blog/ai-product-recommendation-chatbot) can steer a customer away from a poor fit.
 
-After purchase, the assistant can answer setup and care questions that might otherwise become “doesn’t work” returns.
+After purchase, the assistant can answer setup and care questions that might otherwise become “doesn’t work” returns. The dedicated [pre-return troubleshooting guide](/blog/ai-chatbot-prevent-avoidable-returns) explains how to offer that help without hiding or delaying the legitimate return route.
 
 Return conversations also reveal systematic problems:
 
