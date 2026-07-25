@@ -13,7 +13,9 @@ import { useReduce } from './use-reduce'
  * The bars are gaps, not borders, so thickness stays exact at every width and
  * the bay restacks to a single column with nothing to redraw.
  */
-const INK = '#121413'
+// Same value as the Pricing band below (#101213) so the frame's bottom bar
+// merges into it and the panes read as inset into one dark field.
+const INK = '#101213'
 const GLASS = '#eceeeb'
 
 const STEPS = [
