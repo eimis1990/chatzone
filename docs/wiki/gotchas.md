@@ -226,7 +226,7 @@ framer-motion's `useReducedMotion()` resolves to `false` during SSR and to the
 real preference on the client, so ANY render branch on it — `{!reduce && <X/>}`,
 `style={reduce ? undefined : {...}}` — makes the client's first tree differ from
 the server HTML and throws "Hydration failed" on a reduce-preferring machine.
-Use `useReduce()` (`components/preview/use-reduce.ts`), a `useSyncExternalStore`
+Use `useReduce()` (`components/landing/use-reduce.ts`), a `useSyncExternalStore`
 matchMedia read with a `false` server snapshot: React re-renders after hydration
 instead of warning. Same class of bug as the color-scheme case above.
 (Discovered 2026-07-25 building the landing candidates.)

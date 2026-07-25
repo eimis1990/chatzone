@@ -12,6 +12,7 @@ import { Reveal, RevealSlide } from './Reveal'
 import { FeatureSpine, FeatureText } from './ScrollRevealText'
 import { GetStartedDialog } from './GetStartedDialog'
 import { FlickeringGrid } from '@/components/magicui/flickering-grid'
+import { SetupPanes } from './SetupPanes'
 
 // Brand accent for inline styles — resolves to the --primary CSS variable so
 // the whole landing follows a single source of truth (see app/globals.css).
@@ -184,11 +185,6 @@ export function Stats() {
 
 // ───────────────────────── How it works ─────────────────────────
 export function HowItWorks() {
-  const steps = [
-    { image: '/landing/how-step-1.webp', title: 'Connect your knowledge', body: 'Add docs, FAQs, or your site, and link WooCommerce or Shopify for live products.' },
-    { image: '/landing/how-step-2.webp', title: 'Customize the widget', body: 'Pick colors, fonts, launcher, and voice. Preview it exactly as customers will see it.' },
-    { image: '/landing/how-step-3.webp', title: 'Embed and go live', body: 'Paste one script tag. Your agent is answering — and your inbox is ready for handoffs.' },
-  ]
   return (
     <section id="how" className="scroll-mt-20 bg-[#f6f8f6]">
       <div className="mx-auto max-w-7xl px-5 py-24">
@@ -196,31 +192,8 @@ export function HowItWorks() {
           <h2 className="text-5xl font-light tracking-tight text-gray-900 sm:text-6xl">Live in an afternoon</h2>
           <p className="mt-4 text-lg text-gray-600">No engineers required — set it up, preview it, ship it.</p>
         </Reveal>
-        <div className="mt-14 grid gap-6 md:grid-cols-3">
-          {steps.map((s, i) => (
-            <Reveal key={s.title}>
-              <div className="group h-full overflow-hidden rounded-2xl border bg-white shadow-sm transition-shadow hover:shadow-md">
-                <div className="bg-[#faf8f5]">
-                  <Image
-                    src={s.image}
-                    alt=""
-                    aria-hidden="true"
-                    width={900}
-                    height={672}
-                    sizes="(min-width: 1280px) 405px, (min-width: 768px) 31vw, 100vw"
-                    className="aspect-[4/3] w-full object-cover"
-                  />
-                </div>
-                <div className="p-6 pt-5">
-                  <div className="text-sm font-semibold" style={{ color: ACCENT }}>
-                    Step {i + 1}
-                  </div>
-                  <h3 className="mt-1 text-lg font-semibold text-gray-900">{s.title}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-gray-600">{s.body}</p>
-                </div>
-              </div>
-            </Reveal>
-          ))}
+        <div className="mt-14">
+          <SetupPanes />
         </div>
       </div>
     </section>
