@@ -203,35 +203,47 @@ export function HowItWorks() {
 // ───────────────────────── Big CTA band ─────────────────────────
 
 /**
- * The closing panel's light: a warm bloom from a source just above the panel's
- * top edge, and a measurement grid that lives in the top part of the panel and
- * fades out before it reaches the middle. CSS only — no image, no SVG — so it
- * scales to any panel size and costs nothing. Decorative, hidden from AT.
+ * Real widget conversations scattered into the panel's corners at odd angles,
+ * bleeding off the edges so only fragments show. Positions are hand-placed
+ * rather than random: they must stay clear of the centre column where the
+ * heading, copy and button live, at every width.
+ *
+ * Corner-only by design — below `lg` the panel is barely wider than its own
+ * text, so there is no margin to scatter into and the group is dropped.
  */
-function CTALight() {
-  const topFade = 'radial-gradient(72% 76% at 50% 0%, #000 0%, rgba(0,0,0,0.55) 46%, transparent 78%)'
+const SCATTER = [
+  { src: '/chatviews/chatview-10.webp', className: '-top-12 -left-14 w-[196px] -rotate-12' },
+  { src: '/chatviews/chatview-4.webp', className: '-bottom-20 left-8 w-[164px] rotate-6' },
+  { src: '/chatviews/chatview-7.webp', className: '-top-16 -right-12 w-[184px] rotate-12' },
+  { src: '/chatviews/chatview-9.webp', className: '-right-16 -bottom-14 w-[200px] -rotate-9' },
+  { src: '/chatviews/chatview-3.webp', className: 'top-1/2 -left-28 hidden w-[150px] rotate-3 xl:block' },
+]
+
+function ScatteredViews() {
   return (
-    <>
+    <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 hidden lg:block">
+      {SCATTER.map((v) => (
+        <div
+          key={v.src}
+          className={`absolute overflow-hidden rounded-xl border border-white/10 ${v.className}`}
+          // Held back deliberately: these are texture at the edge of the frame,
+          // not content. Desaturated so other brands' widget colours cannot
+          // out-shout the CTA.
+          style={{ opacity: 0.45, filter: 'saturate(0.7)', boxShadow: '0 24px 48px -20px rgba(0,0,0,0.8)' }}
+        >
+          <Image src={v.src} alt="" width={420} height={680} sizes="200px" className="h-auto w-full" />
+        </div>
+      ))}
+      {/* keeps the centre column on clean ground and dissolves whatever drifts
+          toward it — the fragments never compete with the copy */}
       <span
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-80"
+        className="absolute inset-0"
         style={{
           background:
-            'radial-gradient(58% 100% at 50% 0%, rgba(233,118,52,0.36) 0%, rgba(233,118,52,0.12) 44%, transparent 76%)',
+            'radial-gradient(58% 66% at 50% 50%, rgba(16,18,19,0.97) 0%, rgba(16,18,19,0.9) 46%, rgba(16,18,19,0) 84%)',
         }}
       />
-      <span
-        aria-hidden
-        className="pointer-events-none absolute inset-0 -z-10"
-        style={{
-          backgroundImage:
-            'linear-gradient(to right, rgba(255,255,255,0.055) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.055) 1px, transparent 1px)',
-          backgroundSize: '92px 92px',
-          maskImage: topFade,
-          WebkitMaskImage: topFade,
-        }}
-      />
-    </>
+    </div>
   )
 }
 
@@ -244,19 +256,18 @@ export function CTASection() {
       <div className="mx-auto max-w-7xl px-5 py-24">
         <Reveal>
           {/* Framed as its own contained panel so the closing CTA reads as a card
-              rather than a flat dark band. The panel is lit from a single source
-              at its top edge: the light spills down the middle and rakes in from
-              both sides along two curved sails (see CTALight). */}
-          <div className="relative isolate overflow-hidden rounded-3xl border border-white/10 bg-[#0c0806] px-6 py-16 text-center sm:px-10 sm:py-24">
-            <CTALight />
+              rather than a flat dark band. `overflow-hidden` is what crops the
+              scattered conversations at the panel's edges. */}
+          <div className="relative isolate overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] px-6 py-16 text-center sm:px-10">
+            <ScatteredViews />
             <h2 className="relative mx-auto max-w-xl text-balance text-5xl font-light tracking-tight sm:text-6xl">
               Add an AI agent to your site today
             </h2>
-            <p className="relative mx-auto mt-5 max-w-lg text-base leading-relaxed text-white/70 sm:text-lg">
+            <p className="relative mx-auto mt-4 max-w-lg text-base leading-relaxed text-white/70 sm:text-lg">
               Free to start and live in one line of code. Set it up this afternoon, and your
               customers feel the difference tonight.
             </p>
-            <div className="relative mt-10 flex flex-col items-center gap-3">
+            <div className="relative mt-8 flex flex-col items-center gap-3">
               <GetStartedDialog
                 source="cta"
                 shimmer
