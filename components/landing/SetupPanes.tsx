@@ -85,15 +85,15 @@ function Pane({ step, index }: { step: (typeof STEPS)[number]; index: number }) 
 
 export function SetupPanes() {
   return (
-    <div
-      className="grid lg:grid-cols-3"
-      // Top bar is a hairline like the bars between panes; the sides keep their
-      // heavier mullion and the bottom one merges into the Pricing band anyway.
-      style={{ backgroundColor: INK, padding: '1px 8px 8px', gap: 1 }}
-    >
-      {STEPS.map((step, i) => (
-        <Pane key={step.title} step={step} index={i} />
-      ))}
+    // The ink runs full-bleed and straight into the Pricing band below it; the
+    // panes stop at the landing's own content width, so the dark fills the sides.
+    // Top edge stays a hairline, matching the bars between panes.
+    <div style={{ backgroundColor: INK, paddingTop: 1, paddingBottom: 8 }}>
+      <div className="mx-auto grid max-w-7xl px-4 sm:px-6 lg:grid-cols-3" style={{ gap: 1 }}>
+        {STEPS.map((step, i) => (
+          <Pane key={step.title} step={step} index={i} />
+        ))}
+      </div>
     </div>
   )
 }
