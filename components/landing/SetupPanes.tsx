@@ -57,7 +57,7 @@ function Pane({ step, index }: { step: (typeof STEPS)[number]; index: number }) 
         className="pointer-events-none absolute inset-0 z-10 opacity-0 transition-opacity duration-500 ease-out group-hover/pane:opacity-100"
         style={{ background: `radial-gradient(120% 100% at 50% 0%, ${step.accent}1f, transparent 70%)` }}
       />
-      <div ref={ref} className="relative aspect-[16/10] overflow-hidden bg-[#e3e6e2]">
+      <div ref={ref} className="relative aspect-[4/3] overflow-hidden bg-[#e3e6e2]">
         <motion.div className="absolute inset-0" style={reduce ? undefined : { filter, scale }}>
           <Image
             src={step.src}
@@ -87,7 +87,9 @@ export function SetupPanes() {
   return (
     <div
       className="grid lg:grid-cols-3"
-      style={{ backgroundColor: INK, padding: 8, gap: 1 }}
+      // Top bar is a hairline like the bars between panes; the sides keep their
+      // heavier mullion and the bottom one merges into the Pricing band anyway.
+      style={{ backgroundColor: INK, padding: '1px 8px 8px', gap: 1 }}
     >
       {STEPS.map((step, i) => (
         <Pane key={step.title} step={step} index={i} />
