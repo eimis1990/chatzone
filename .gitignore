@@ -13,3 +13,5 @@ next-env.d.ts
 *.tsbuildinfo
 cycle*.png
 .vercel
+
+.impeccable/live/
