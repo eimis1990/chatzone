@@ -203,9 +203,10 @@ export function HowItWorks() {
 // ───────────────────────── Big CTA band ─────────────────────────
 
 /**
- * Real widget conversations scattered around the CTA's edges — solid cards, not
- * ghosts: full opacity, lightly toned down, deep shadows, composed as loose
- * fans in the corners that bleed off the panel so only fragments show. Hand-
+ * Real widget conversations around the CTA's edges — solid cards, all one size,
+ * gently tilted (nothing past 6°): one per corner, plus a mid-edge sliver each
+ * side at xl that tucks behind its corner cards. They bleed off the panel so
+ * only fragments show, and the corner cards never overlap one another. Hand-
  * placed (never random) and verified to stay clear of the centre column where
  * the heading, copy and button live, at every width.
  *
@@ -213,18 +214,16 @@ export function HowItWorks() {
  * text, so there is no margin to scatter into and the group is dropped.
  */
 const SCATTER = [
-  // left fan
-  { src: '/chatviews/chatview-1.webp', className: '-top-16 -left-16 w-[230px] -rotate-12' },
-  { src: '/chatviews/chatview-10.webp', className: 'top-[34%] -left-24 w-[190px] rotate-6' },
-  { src: '/chatviews/chatview-4.webp', className: '-bottom-24 -left-10 w-[215px] rotate-[9deg]' },
-  { src: '/chatviews/chatview-5.webp', className: '-bottom-16 left-44 hidden w-[170px] -rotate-6 xl:block' },
-  { src: '/chatviews/chatview-2.webp', className: '-top-14 left-36 hidden w-[140px] rotate-4 xl:block' },
-  // right fan
-  { src: '/chatviews/chatview-7.webp', className: '-top-20 -right-14 w-[220px] rotate-[10deg]' },
-  { src: '/chatviews/chatview-6.webp', className: 'top-[30%] -right-24 hidden w-[185px] -rotate-[8deg] xl:block' },
-  { src: '/chatviews/chatview-9.webp', className: '-right-12 -bottom-20 w-[215px] -rotate-6' },
-  { src: '/chatviews/chatview-8.webp', className: 'right-36 -bottom-24 hidden w-[150px] rotate-8 xl:block' },
+  // mid-edge slivers first, so the corner cards paint over them (deck order)
+  { src: '/chatviews/chatview-10.webp', className: 'top-1/2 -left-40 hidden -translate-y-1/2 rotate-2 xl:block' },
+  { src: '/chatviews/chatview-6.webp', className: 'top-1/2 -right-40 hidden -translate-y-1/2 -rotate-2 xl:block' },
+  // one card per corner
+  { src: '/chatviews/chatview-1.webp', className: '-top-24 -left-20 -rotate-6' },
+  { src: '/chatviews/chatview-4.webp', className: '-bottom-32 -left-2 rotate-3 xl:left-24' },
+  { src: '/chatviews/chatview-7.webp', className: '-top-24 -right-20 rotate-6' },
+  { src: '/chatviews/chatview-9.webp', className: '-right-2 -bottom-32 -rotate-3 xl:right-24' },
 ]
+
 
 function ScatteredViews() {
   return (
@@ -232,7 +231,7 @@ function ScatteredViews() {
       {SCATTER.map((v) => (
         <div
           key={v.src}
-          className={`absolute overflow-hidden rounded-xl border border-white/15 ${v.className}`}
+          className={`absolute w-[200px] overflow-hidden rounded-xl border border-white/15 ${v.className}`}
           // Solid, just toned: dimmed and slightly desaturated so nine other
           // brands' widget colours sit behind the CTA instead of against it.
           style={{ filter: 'saturate(0.8) brightness(0.82)', boxShadow: '0 28px 56px -20px rgba(0,0,0,0.85)' }}
