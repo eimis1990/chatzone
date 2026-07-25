@@ -187,15 +187,15 @@ export function Stats() {
 export function HowItWorks() {
   return (
     <section id="how" className="scroll-mt-20 bg-[#f6f8f6]">
-      <div className="mx-auto max-w-7xl px-5 pt-24 pb-14">
+      <div className="mx-auto max-w-7xl px-5 py-24">
         <Reveal className="mx-auto max-w-2xl text-center">
           <h2 className="text-5xl font-light tracking-tight text-gray-900 sm:text-6xl">Live in an afternoon</h2>
           <p className="mt-4 text-lg text-gray-600">No engineers required — set it up, preview it, ship it.</p>
         </Reveal>
+        <div className="mt-14">
+          <SetupPanes />
+        </div>
       </div>
-      {/* Full-bleed: the glazing frame runs to both screen edges and its bottom
-          bar butts straight into the Pricing band, which is the same ink. */}
-      <SetupPanes />
     </section>
   )
 }

@@ -6,16 +6,11 @@ import { motion, useScroll, useTransform } from 'framer-motion'
 import { useReduce } from './use-reduce'
 
 /**
- * The three setup steps as glazed panes: one matte-black frame, panes divided by
- * true-thickness glazing bars (the grid's own gaps), each step's image frosted
- * until you reach it and then clearing to daylight. Hover backlights the pane.
- *
- * The bars are gaps, not borders, so thickness stays exact at every width and
- * the bay restacks to a single column with nothing to redraw.
+ * The three setup steps as square-cornered panes with a hairline of the section's
+ * own ground between them: no radius, no border, no shadow. Each step's image is
+ * frosted until you reach it and then clears to daylight; hover backlights the
+ * pane in that step's accent.
  */
-// Same value as the Pricing band below (#101213) so the frame's bottom bar
-// merges into it and the panes read as inset into one dark field.
-const INK = '#101213'
 const GLASS = '#eceeeb'
 
 const STEPS = [
@@ -85,15 +80,10 @@ function Pane({ step, index }: { step: (typeof STEPS)[number]; index: number }) 
 
 export function SetupPanes() {
   return (
-    // The ink runs full-bleed and straight into the Pricing band below it; the
-    // panes stop at the landing's own content width, so the dark fills the sides.
-    // Top edge stays a hairline, matching the bars between panes.
-    <div style={{ backgroundColor: INK, paddingTop: 1, paddingBottom: 8 }}>
-      <div className="mx-auto grid max-w-7xl px-4 sm:px-6 lg:grid-cols-3" style={{ gap: 1 }}>
-        {STEPS.map((step, i) => (
-          <Pane key={step.title} step={step} index={i} />
-        ))}
-      </div>
+    <div className="grid gap-2 lg:grid-cols-3">
+      {STEPS.map((step, i) => (
+        <Pane key={step.title} step={step} index={i} />
+      ))}
     </div>
   )
 }
