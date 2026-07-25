@@ -203,20 +203,27 @@ export function HowItWorks() {
 // ───────────────────────── Big CTA band ─────────────────────────
 
 /**
- * Real widget conversations scattered into the panel's corners at odd angles,
- * bleeding off the edges so only fragments show. Positions are hand-placed
- * rather than random: they must stay clear of the centre column where the
- * heading, copy and button live, at every width.
+ * Real widget conversations scattered around the CTA's edges — solid cards, not
+ * ghosts: full opacity, lightly toned down, deep shadows, composed as loose
+ * fans in the corners that bleed off the panel so only fragments show. Hand-
+ * placed (never random) and verified to stay clear of the centre column where
+ * the heading, copy and button live, at every width.
  *
  * Corner-only by design — below `lg` the panel is barely wider than its own
  * text, so there is no margin to scatter into and the group is dropped.
  */
 const SCATTER = [
-  { src: '/chatviews/chatview-10.webp', className: '-top-12 -left-14 w-[196px] -rotate-12' },
-  { src: '/chatviews/chatview-4.webp', className: '-bottom-20 left-8 w-[164px] rotate-6' },
-  { src: '/chatviews/chatview-7.webp', className: '-top-16 -right-12 w-[184px] rotate-12' },
-  { src: '/chatviews/chatview-9.webp', className: '-right-16 -bottom-14 w-[200px] -rotate-9' },
-  { src: '/chatviews/chatview-3.webp', className: 'top-1/2 -left-28 hidden w-[150px] rotate-3 xl:block' },
+  // left fan
+  { src: '/chatviews/chatview-1.webp', className: '-top-16 -left-16 w-[230px] -rotate-12' },
+  { src: '/chatviews/chatview-10.webp', className: 'top-[34%] -left-24 w-[190px] rotate-6' },
+  { src: '/chatviews/chatview-4.webp', className: '-bottom-24 -left-10 w-[215px] rotate-[9deg]' },
+  { src: '/chatviews/chatview-5.webp', className: '-bottom-16 left-44 hidden w-[170px] -rotate-6 xl:block' },
+  { src: '/chatviews/chatview-2.webp', className: '-top-14 left-36 hidden w-[140px] rotate-4 xl:block' },
+  // right fan
+  { src: '/chatviews/chatview-7.webp', className: '-top-20 -right-14 w-[220px] rotate-[10deg]' },
+  { src: '/chatviews/chatview-6.webp', className: 'top-[30%] -right-24 hidden w-[185px] -rotate-[8deg] xl:block' },
+  { src: '/chatviews/chatview-9.webp', className: '-right-12 -bottom-20 w-[215px] -rotate-6' },
+  { src: '/chatviews/chatview-8.webp', className: 'right-36 -bottom-24 hidden w-[150px] rotate-8 xl:block' },
 ]
 
 function ScatteredViews() {
@@ -225,22 +232,21 @@ function ScatteredViews() {
       {SCATTER.map((v) => (
         <div
           key={v.src}
-          className={`absolute overflow-hidden rounded-xl border border-white/10 ${v.className}`}
-          // Held back deliberately: these are texture at the edge of the frame,
-          // not content. Desaturated so other brands' widget colours cannot
-          // out-shout the CTA.
-          style={{ opacity: 0.45, filter: 'saturate(0.7)', boxShadow: '0 24px 48px -20px rgba(0,0,0,0.8)' }}
+          className={`absolute overflow-hidden rounded-xl border border-white/15 ${v.className}`}
+          // Solid, just toned: dimmed and slightly desaturated so nine other
+          // brands' widget colours sit behind the CTA instead of against it.
+          style={{ filter: 'saturate(0.8) brightness(0.82)', boxShadow: '0 28px 56px -20px rgba(0,0,0,0.85)' }}
         >
-          <Image src={v.src} alt="" width={420} height={680} sizes="200px" className="h-auto w-full" />
+          <Image src={v.src} alt="" width={420} height={680} sizes="230px" className="h-auto w-full" />
         </div>
       ))}
-      {/* keeps the centre column on clean ground and dissolves whatever drifts
-          toward it — the fragments never compete with the copy */}
+      {/* a tight pool of the panel's own dark under the copy — gone before it
+          reaches the cards, so they stay solid while the centre stays clean */}
       <span
         className="absolute inset-0"
         style={{
           background:
-            'radial-gradient(58% 66% at 50% 50%, rgba(16,18,19,0.97) 0%, rgba(16,18,19,0.9) 46%, rgba(16,18,19,0) 84%)',
+            'radial-gradient(44% 58% at 50% 50%, rgba(16,18,19,0.92) 0%, rgba(16,18,19,0.55) 52%, rgba(16,18,19,0) 74%)',
         }}
       />
     </div>
