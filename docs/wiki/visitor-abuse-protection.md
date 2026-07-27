@@ -5,13 +5,40 @@ Prompt wording is defense in depth; the server owns the actual stop decision.
 
 ## Detection and block lifecycle
 
-- `assessVisitorAbuse` is deterministic and high-confidence: immediate block for
-  directed slurs/threats, repeated-message floods, and explicit hidden-prompt or
-  secret extraction; softer model/tool/role probes require a sustained sequence
-  (`lib/security/visitor-abuse.ts:83`).
+Two tiers: deterministic regex tripwires (instant, free, high-confidence) and a
+dynamic model review (cheap, background, judgment-based).
+
+- Tier 1 — `assessVisitorAbuse` is deterministic and high-confidence: immediate
+  block for directed slurs/threats, repeated-message floods, and explicit
+  hidden-prompt or secret extraction; softer model/tool/role probes require a
+  sustained sequence (`lib/security/visitor-abuse.ts:83`).
+- Tier 2 — `assessVisitorIntent` (`lib/ai/abuse-intel.ts`) sends the visitor's
+  recent turns (envelopes stripped) to gpt-4o-mini for a block verdict covering
+  what regexes can't: sustained trolling / no-genuine-intent engagement
+  (`bad_faith` reason), plus dynamic judgment on the four regex categories. It
+  skips itself below three visitor turns, is prompted to prefer NOT blocking,
+  and fails safe (any error → no block). The chat route fires it in the
+  background after tier 1 passes — same `void` pattern as
+  `maybeSendUsageWarning` — so replies are never delayed; a verdict becomes an
+  active block before the visitor's next turn. Audit details carry
+  `detector: 'llm-v1'` and the model's one-sentence rationale
+  (`app/api/chat/route.ts:170`, `lib/visitor-blocks.ts:174`).
+- Replayed against real prod histories (2026-07-27): the quick-action false
+  positive never blocks; the trolling visitor blocks at turn 6 (`bad_faith`),
+  the prompt-probing visitor at turn 4 (`prompt_attack`) — five turns earlier
+  than the regex tier managed.
 - A single technical question, legitimate adult-content policy question, product
   complaint, or profanity about a service is not enough to block. Keep these
   false-positive guards covered by `tests/unit/visitor-abuse.test.ts`.
+- Quick-action clicks arrive wrapped in a widget-authored envelope whose own
+  wording ("internal instruction") reads as a capability probe. The detector
+  strips the envelope and assesses only the visitor-controllable label + prompt
+  — applied to the current message **and** history, since stored messages keep
+  the envelope forever (`lib/security/visitor-abuse.ts:55`,
+  `components/widget/ChatWindow.tsx:846`). Any scaffold text added around
+  visitor messages must stay invisible to `assessVisitorAbuse`, or repeated
+  clicks read as a sustained probe sequence and auto-block (2026-07-27 false
+  positive).
 - `/api/chat` checks an active block before model spend, scopes a supplied
   conversation id to both bot **and visitor**, then assesses recent user turns.
   The triggering message is persisted for audit; the model and handoff path are
@@ -68,4 +95,4 @@ existing rate limiter remains complementary; stronger cross-device enforcement
 would require a separately reviewed IP/fingerprint policy with privacy and
 false-positive tradeoffs.
 
-_Last verified: 2026-07-23._
+_Last verified: 2026-07-27._

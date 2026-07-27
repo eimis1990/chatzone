@@ -230,3 +230,14 @@ Use `useReduce()` (`components/landing/use-reduce.ts`), a `useSyncExternalStore`
 matchMedia read with a `false` server snapshot: React re-renders after hydration
 instead of warning. Same class of bug as the color-scheme case above.
 (Discovered 2026-07-25 building the landing candidates.)
+
+## Vitest hooks call a returned function as teardown
+
+`beforeEach(() => mock.mockReset())` looks harmless, but `mockReset()` returns
+the mock itself and vitest invokes a hook's returned *function* as the test's
+teardown — so the mock gets a phantom extra call after every test. If its
+implementation at that moment returns a rejected promise (`mockRejectedValue`),
+the teardown rejection fails the test with the mock's error and a stack that
+points at the `new Error(...)` line, nowhere near the real cause. Always brace
+hook bodies: `beforeEach(() => { mock.mockReset() })`.
+(Discovered 2026-07-27 testing `lib/ai/abuse-intel.ts`.)

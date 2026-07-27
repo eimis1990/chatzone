@@ -14,6 +14,7 @@ import { detectHandoffIntent, HANDOFF_ACK } from '@/lib/handoff'
 import { notifyHandoffRequested } from '@/lib/notify'
 import { isOverConversationLimit, maybeSendUsageWarning } from '@/lib/usage'
 import { assessVisitorAbuse } from '@/lib/security/visitor-abuse'
+import { assessVisitorIntent } from '@/lib/ai/abuse-intel'
 import {
   blockVisitor,
   getActiveVisitorBlock,
@@ -161,6 +162,26 @@ export async function POST(req: Request) {
       },
     )
   }
+
+  // Tier-2 dynamic review: a cheap model call over the visitor's recent turns,
+  // fired in the background (same pattern as maybeSendUsageWarning) so the
+  // current reply is never delayed. A verdict lands as an active block before
+  // the visitor's next turn. It skips itself below three visitor turns.
+  void assessVisitorIntent(message, recentUserMessages)
+    .then((verdict) =>
+      verdict.shouldBlock
+        ? blockVisitor(svc, {
+            botId: bot.id,
+            visitorId,
+            assessment: verdict,
+            conversationId: convId ?? undefined,
+            triggerMessageId: userMessageRow?.id,
+            detector: 'llm-v1',
+            rationale: verdict.rationale,
+          })
+        : undefined,
+    )
+    .catch((error) => console.error('[chat] Background intent review failed', error))
 
   // A human is queued (`requested`) or actively handling (`live`): record the
   // visitor turn but do NOT auto-reply — the agent answers from the inbox.

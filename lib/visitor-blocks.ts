@@ -154,6 +154,8 @@ export async function blockVisitor(
     conversationId?: string
     triggerMessageId?: string
     source?: 'automatic' | 'manual'
+    detector?: string
+    rationale?: string
     now?: Date
   },
 ): Promise<ActiveVisitorBlock> {
@@ -167,7 +169,11 @@ export async function blockVisitor(
       bot_id: input.botId,
       visitor_id: input.visitorId,
       reason: input.assessment.reason,
-      details: { signals: input.assessment.signals, detector: 'v1' },
+      details: {
+        signals: input.assessment.signals,
+        detector: input.detector ?? 'v1',
+        ...(input.rationale ? { rationale: input.rationale } : {}),
+      },
       conversation_id: input.conversationId ?? null,
       trigger_message_id: input.triggerMessageId ?? null,
       source: input.source ?? 'automatic',

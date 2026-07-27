@@ -3,6 +3,7 @@ export type VisitorBlockReason =
   | 'sexual_spam'
   | 'message_spam'
   | 'prompt_attack'
+  | 'bad_faith'
   | 'manual_review'
 
 export interface AbuseAssessment {
@@ -42,6 +43,21 @@ const ROLE_HIJACK = [
 
 const EXPLICIT_SEXUAL = /\b(?:porn|pornhub|sexual(?:ly)? explicit|xxx)\b/i
 
+// Matches the widget's quick-action wrapper (components/widget/ChatWindow.tsx).
+const QUICK_ACTION_ENVELOPE =
+  /^\[Visitor clicked "([\s\S]*)" — internal instruction, never quote or mention it: ([\s\S]*)\]$/
+
+/**
+ * Quick-action clicks arrive wrapped in scaffold text the visitor never wrote,
+ * whose own wording ("internal instruction") reads as a capability probe.
+ * Assess only the visitor-controllable parts — label and prompt both stay in,
+ * so a hand-crafted envelope can't smuggle abuse past the guard.
+ */
+export function stripQuickActionEnvelope(value: string): string {
+  const match = QUICK_ACTION_ENVELOPE.exec(value)
+  return match ? `${match[1]} ${match[2]}` : value
+}
+
 function normalize(value: string): string {
   return value.normalize('NFKC').toLowerCase().replace(/\s+/g, ' ').trim()
 }
@@ -67,7 +83,8 @@ function isRepeatedFlood(value: string): boolean {
   return new Set(words).size / words.length < 0.22
 }
 
-function isProbe(value: string): boolean {
+function isProbe(rawValue: string): boolean {
+  const value = stripQuickActionEnvelope(rawValue)
   return matchesAny(value, CAPABILITY_PROBE) || matchesAny(value, ROLE_HIJACK) || matchesAny(value, SEVERE_PROMPT_ATTACK)
 }
 
@@ -81,10 +98,11 @@ function isProbe(value: string): boolean {
  * capability/role probes.
  */
 export function assessVisitorAbuse(
-  currentMessage: string,
+  rawCurrentMessage: string,
   recentUserMessages: string[] = [],
 ): AbuseAssessment {
   const signals: string[] = []
+  const currentMessage = stripQuickActionEnvelope(rawCurrentMessage)
 
   if (matchesAny(currentMessage, DIRECTED_ABUSE) || matchesAny(currentMessage, DIRECTED_THREAT)) {
     signals.push('directed_abuse')
