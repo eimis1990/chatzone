@@ -14,6 +14,7 @@ import {
   BugIcon,
   FileTextIcon,
   LayersIcon,
+  BlocksIcon,
   InboxIcon,
   MessagesSquareIcon,
   BarChart3Icon,
@@ -57,7 +58,7 @@ const NAV: NavItem[] = [
     icon: LayersIcon,
     children: [
       { label: 'System prompts', href: '/owner/prompts', icon: FileTextIcon },
-      // Components, themes, … slot in here when they get versioned.
+      { label: 'Components', href: '/owner/components', icon: BlocksIcon },
     ],
   },
   { label: 'Voices', href: '/owner/voices', icon: MicVocalIcon },
@@ -99,7 +100,10 @@ export function OwnerSidebar({
 
       <nav className="flex-1 overflow-y-auto px-2 pb-2">
         {NAV.map(({ label, href, icon: Icon, exact, children }) => {
-          const active = isActive(href, exact)
+          // A section is active on its own route OR any child's (children can
+          // live outside the parent's path, e.g. Versioning → Components).
+          const active =
+            isActive(href, exact) || (children?.some((c) => isActive(c.href, c.exact)) ?? false)
           return (
             <div key={href}>
               <Link

@@ -585,6 +585,7 @@ export function ConfigForm({
     model: watchedValues.model,
     temperature: watchedValues.temperature,
     systemPrompt: watchedValues.systemPrompt,
+    components: watchedValues.components,
     persona: watchedValues.persona,
     richResponses: watchedValues.richResponses,
     leadCapture: watchedValues.leadCapture,

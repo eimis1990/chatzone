@@ -263,6 +263,10 @@ export interface BotConfig {
   /** Version the test playground runs instead of the live one (not applied to
    *  the live widget). Resolved server-side in /api/preview/chat. */
   previewSystemPromptVersionId?: string
+  /** Component-library variant per component key (lib/widget-components/meta.ts),
+   *  e.g. { 'product-cards': 'compact' }. Unknown keys/variants fall back to the
+   *  component's first variant. */
+  components?: Record<string, string>
   persona: {
     tone: string
     verbosity: 'concise' | 'balanced' | 'detailed'

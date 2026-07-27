@@ -138,6 +138,8 @@ export interface PublicBotConfig {
   }
   /** Widget offers the "see it in your room" product visualizer. */
   roomVisualizer: boolean
+  /** Component-library variant per component key (e.g. product-cards → compact). */
+  components?: Record<string, string>
   /** Hide the "Powered by Loqara" badge (true on plans that allow it). */
   hideBadge?: boolean
   /** Whisper dictation in the composer (paid plans). */
@@ -269,6 +271,7 @@ export function publicBotConfig(
       sttEnabled: false,
     },
     roomVisualizer: config.roomVisualizer ?? false,
+    components: config.components,
   }
 
   if (config.tagline) {

@@ -16,7 +16,9 @@ Add a line here. How the wiki works: [README.md](README.md).
 - [visitor-abuse-protection](visitor-abuse-protection.md) — prompt probing,
   harassment/spam detection, 24-hour bot-scoped blocks, blocked widget/voice flow.
 - [bot-config](bot-config.md) — `botConfigSchema`, the shared `ConfigForm`
-  (client + owner), system prompts.
+  (client + owner), system prompts (versioned: draft + publish, per-bot pinning).
+- [widget-component-library](widget-component-library.md) — provider folders for
+  chat components, per-bot variants, runtime enforcement.
 - [plans-and-entitlements](plans-and-entitlements.md) — per-plan limits and where
   each is enforced server-side.
 - [languages-i18n](languages-i18n.md) — language registry, per-bot selection,

@@ -56,6 +56,8 @@ interface MessageListProps {
   onLinkClick?: (url: string, kind: 'answer' | 'action', messageId?: string) => void
   /** Room visualizer selection plumbing — omitted when the feature is off. */
   roomSelect?: RoomSelect
+  /** Component-library variants (config.components), e.g. product-cards → compact. */
+  componentVariants?: Record<string, string>
 }
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -77,6 +79,7 @@ export function MessageList({
   onProductClick,
   onLinkClick,
   roomSelect,
+  componentVariants,
 }: MessageListProps) {
   // Custom bot bubble color applies only outside glass mode (glass is its own style).
   const botBubbleStyle =
@@ -259,6 +262,7 @@ export function MessageList({
                 products={msg.products}
                 bubbleRadius={bubbleRadius}
                 primaryColor={primaryColor}
+                variant={componentVariants?.['product-cards'] === 'compact' ? 'compact' : 'default'}
                 language={activeLang}
                 onSeeAll={(products) => onSeeAllProducts?.(products, msg.productsSourceUrl)}
                 onProductClick={(p) => onProductClick?.(p, UUID_RE.test(msg.id) ? msg.id : undefined)}

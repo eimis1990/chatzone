@@ -4,6 +4,7 @@ import { publicBotConfig } from '@/lib/widget-config'
 import { entitlementsFor, isInternalOrg } from '@/lib/entitlements'
 import { VISUALIZER_ADDON } from '@/lib/plans-catalog'
 import { visualizerUsageMonth } from '@/lib/room-visualizer'
+import { assignedComponents } from '@/lib/widget-components/availability'
 import type { Bot, Plan } from '@/lib/types'
 
 export async function OPTIONS(req: Request) {
@@ -78,6 +79,14 @@ export async function GET(req: Request) {
       poolLeft = (usage?.renders ?? 0) < VISUALIZER_ADDON.rendersIncluded
     }
     if (!allowed || !poolLeft) bot.config.roomVisualizer = false
+  }
+
+  // Component-library folders: strip core components the owner un-assigned.
+  // (Provider-specific ones — product cards, order status — gate in /api/chat.)
+  const allowedComponents = await assignedComponents(svc, bot.config.commerce?.provider ?? null)
+  if (!allowedComponents.has('room-visualizer')) bot.config.roomVisualizer = false
+  if (!allowedComponents.has('lead-form') && bot.config.leadCapture) {
+    bot.config.leadCapture.enabled = false
   }
 
   // Stamp "last seen" so the owner can tell this bot is embedded & live. The

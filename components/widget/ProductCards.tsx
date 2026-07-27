@@ -11,6 +11,8 @@ interface ProductCardsProps {
   bubbleRadius?: number
   primaryColor?: string
   language?: 'en' | 'lt'
+  /** Component-library variant: 'default' = swipeable image cards, 'compact' = stacked rows. */
+  variant?: 'default' | 'compact'
   /** Open the full-height list overlay for this message's products. */
   onSeeAll?: (products: CommerceProduct[]) => void
   /** Analytics: the visitor followed a product link out of the chat. */
@@ -69,6 +71,7 @@ export function ProductCards({
   bubbleRadius = 16,
   primaryColor = '#4f46e5',
   language = 'en',
+  variant = 'default',
   onSeeAll,
   onProductClick,
   roomSelect,
@@ -79,7 +82,21 @@ export function ProductCards({
 
   return (
     <div className="w-full mt-2 space-y-2" aria-label={labels.products}>
-      {/* Full-width cards; swipe horizontally (snap) to see the rest. */}
+      {variant === 'compact' ? (
+        <div className="space-y-2" role="list">
+          {products.slice(0, CARD_LIMIT).map((product) => (
+            <CompactProductCard
+              key={product.id}
+              product={product}
+              bubbleRadius={bubbleRadius}
+              primaryColor={primaryColor}
+              outOfStockLabel={labels.outOfStock}
+              onProductClick={onProductClick}
+            />
+          ))}
+        </div>
+      ) : (
+      /* Full-width cards; swipe horizontally (snap) to see the rest. */
       <div
         className="flex gap-3 overflow-x-auto pb-1 snap-x snap-mandatory"
         style={{ scrollbarWidth: 'thin' }}
@@ -98,6 +115,7 @@ export function ProductCards({
           />
         ))}
       </div>
+      )}
 
       {hasMore && (
         <button
@@ -341,6 +359,77 @@ function ProductCard({
           })()}
       </div>
     </div>
+  )
+}
+
+/** Compact variant — stacked full-width rows with a small thumbnail; the whole
+ *  row links out. No visualizer toggle (rows are too small for a second action). */
+function CompactProductCard({
+  product,
+  bubbleRadius,
+  primaryColor,
+  outOfStockLabel,
+  onProductClick,
+}: {
+  product: CommerceProduct
+  bubbleRadius: number
+  primaryColor: string
+  outOfStockLabel: string
+  onProductClick?: (product: CommerceProduct) => void
+}) {
+  return (
+    <a
+      href={product.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      onClick={() => onProductClick?.(product)}
+      className="flex items-center gap-2.5 border bg-background p-2 transition-colors hover:bg-gray-50 outline-none focus-visible:ring-2"
+      style={{ borderRadius: `${Math.min(bubbleRadius, 14)}px` }}
+      role="listitem"
+    >
+      <div
+        className="relative size-14 shrink-0 overflow-hidden bg-white"
+        style={{ borderRadius: `${Math.min(bubbleRadius, 10)}px` }}
+      >
+        {product.imageUrl ? (
+          <img
+            src={product.imageUrl}
+            alt=""
+            loading="lazy"
+            className="w-full h-full object-contain"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center" aria-hidden="true">
+            <PlaceholderIcon />
+          </div>
+        )}
+      </div>
+      <div className="min-w-0 flex-1">
+        <p
+          className="text-xs font-medium leading-tight text-foreground"
+          style={{
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+          }}
+          title={product.title}
+        >
+          {product.title}
+        </p>
+        <p className="mt-0.5 text-sm font-bold text-foreground tabular-nums">{product.price}</p>
+        {!product.inStock && (
+          <p className="text-[10px] font-medium text-muted-foreground">{outOfStockLabel}</p>
+        )}
+      </div>
+      <span
+        className="shrink-0 text-lg leading-none"
+        style={{ color: primaryColor }}
+        aria-hidden="true"
+      >
+        ›
+      </span>
+    </a>
   )
 }
 

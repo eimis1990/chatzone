@@ -11,6 +11,7 @@ import type { CommerceProduct, OrderStatus } from '@/lib/commerce/types'
 import { createRateLimiter } from '@/lib/ratelimit'
 import { DEFAULT_CHAT_MODEL, DEFAULT_TEMPERATURE } from '@/lib/ai/chat-models'
 import { searchCatalog } from '@/lib/products/search'
+import { assignedComponents } from '@/lib/widget-components/availability'
 
 export const maxDuration = 60
 
@@ -44,6 +45,9 @@ export async function POST(req: Request) {
   if (!bot) return json({ error: 'Bot not found' }, 404)
 
   const svc = createServiceClient()
+
+  // Component-library folders — preview mirrors live gating.
+  const allowedComponents = await assignedComponents(svc, config.commerce?.provider ?? null)
 
   // Preview-version override: run the pinned preview version's content instead
   // of the live snapshot. Validated against the SAVED bot's prompt family so a
@@ -103,10 +107,12 @@ export async function POST(req: Request) {
             ),
           candidates,
           shownMap,
+          allowedComponents,
         )
       : undefined,
     productSink,
     orderSink,
     candidates,
+    suppressProducts: !allowedComponents.has('product-cards'),
   })
 }

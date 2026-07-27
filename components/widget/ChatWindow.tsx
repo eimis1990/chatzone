@@ -1236,6 +1236,7 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
             onProductClick={trackProductClick}
             onLinkClick={trackLinkClick}
             roomSelect={roomSelect}
+            componentVariants={config.components}
           />
         )}
 

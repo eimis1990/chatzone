@@ -24,6 +24,7 @@ import {
   VISITOR_BLOCK_DURATION_MS,
   VISITOR_BLOCK_HEADER,
 } from '@/lib/visitor-block-shared'
+import { assignedComponents } from '@/lib/widget-components/availability'
 import type { Bot, BotLanguage, Citation, HandoffStatus } from '@/lib/types'
 import type { CommerceProduct, OrderStatus } from '@/lib/commerce/types'
 
@@ -241,6 +242,8 @@ export async function POST(req: Request) {
   }
 
   const commerce = commerceEnabled(bot.config)
+  // Component-library folders: what this provider (+ core) may render.
+  const allowedComponents = await assignedComponents(svc, bot.config.commerce?.provider ?? null)
   const baseHeaders = { ...handoffHeaders, 'x-handoff': 'bot' }
 
   // Weak retrieval with no product search → fallback + lead-capture signal.
@@ -265,7 +268,10 @@ export async function POST(req: Request) {
       handoff = 'requested'
       void notifyHandoffRequested(svc, bot, message)
     }
-    const leadTrigger = bot.config.leadCapture?.enabled && bot.config.leadCapture.trigger === 'on_fallback'
+    const leadTrigger =
+      bot.config.leadCapture?.enabled &&
+      bot.config.leadCapture.trigger === 'on_fallback' &&
+      allowedComponents.has('lead-form')
     return ndjsonText(fallback, {
       ...baseHeaders,
       'x-lead-capture': leadTrigger ? '1' : '0',
@@ -311,11 +317,13 @@ export async function POST(req: Request) {
           },
           candidates,
           shownMap,
+          allowedComponents,
         )
       : undefined,
     productSink,
     orderSink,
     candidates,
+    suppressProducts: !allowedComponents.has('product-cards'),
     errorText: contentFor(bot.config, lang).fallbackMessage,
     onText: async (text) => {
       await svc.from('messages').insert({

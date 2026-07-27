@@ -41,6 +41,8 @@ type LiveConfig = {
   model?: string
   temperature?: number
   systemPrompt?: string
+  /** Component-library variants (componentKey → variantId) for preview parity. */
+  components?: Record<string, string>
   persona?: Partial<BotConfig['persona']>
   leadCapture?: {
     enabled?: boolean
@@ -530,6 +532,7 @@ function buildPreviewPublicConfig(config: LiveConfig): PublicBotConfig {
       sttEnabled: config.voice?.sttEnabled ?? true,
     },
     roomVisualizer: false,
+    components: config.components,
   }
 
   if (config.avatarUrl) result.avatarUrl = config.avatarUrl

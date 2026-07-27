@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { SlidersHorizontalIcon, DatabaseIcon, Code2Icon } from 'lucide-react'
+import { SlidersHorizontalIcon, DatabaseIcon, Code2Icon, BlocksIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 /** Configure / Knowledge / Embed tabs for the owner editing a client's bot. */
@@ -21,6 +21,7 @@ export function OwnerBotTabs({
   const tabs = [
     { label: 'Configure', href: `${base}/configure`, icon: SlidersHorizontalIcon },
     { label: 'Knowledge', href: `${base}/knowledge`, icon: DatabaseIcon },
+    { label: 'Components', href: `${base}/components`, icon: BlocksIcon },
     { label: 'Embed', href: `${base}/embed`, icon: Code2Icon },
   ]
 

@@ -48,6 +48,9 @@ export function makeProductTools(
    *  by id without a fresh search. Kept OUT of `candidates` so the response
    *  layer's safety net never re-renders stale cards on non-product turns. */
   shown?: Map<string, CommerceProduct>,
+  /** Component-library availability for this bot's provider (provider_components
+   *  folders). Omitted = everything allowed. Can only NARROW code capabilities. */
+  allowedComponents?: Set<string>,
 ): ToolSet {
   const queryGuidance = providerSearchQueryGuidance(config.commerce)
   const displayGuidance = providerDisplayGuidance(config.commerce)
@@ -222,8 +225,9 @@ export function makeProductTools(
     })
   }
 
-  // Order status — only when REST credentials are configured.
-  if (orderLookupEnabled(config.commerce)) {
+  // Order status — only when REST credentials are configured AND the provider's
+  // component folder includes the order-status card.
+  if (orderLookupEnabled(config.commerce) && (allowedComponents?.has('order-status') ?? true)) {
     tools.order_status = tool({
       description:
         'Look up the status of an existing order. You MUST have BOTH the order number AND the email ' +
@@ -309,6 +313,9 @@ export function ndjsonChatResponse(
     orderSink?: OrderStatus[]
     /** Candidates gathered via search_products (for the single-result net). */
     candidates?: Map<string, CommerceProduct>
+    /** Component-library gating: provider folder lacks product-cards → the reply
+     *  stays text-only (tools still run; the model can answer in prose). */
+    suppressProducts?: boolean
   } & NdjsonOptions,
 ): Response {
   const result = streamText({
@@ -328,6 +335,7 @@ export function ndjsonChatResponse(
       let fullText = ''
       let emittedProductKey = ''
       const emitProductsIfChanged = () => {
+        if (opts.suppressProducts) return
         const products = opts.productSink ?? []
         if (!products.length) return
         const key = products.map((product) => product.id).join('\u0000')

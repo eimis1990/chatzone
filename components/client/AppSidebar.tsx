@@ -9,6 +9,7 @@ import {
   ChevronDownIcon,
   ChevronRightIcon,
   SlidersHorizontalIcon,
+  BlocksIcon,
   DatabaseIcon,
   MessagesSquareIcon,
   InboxIcon,
@@ -25,6 +26,7 @@ import { ReportBugButton } from '@/components/ReportBugButton'
 
 const SECTIONS: { label: string; href: string; icon: LucideIcon }[] = [
   { label: 'Configure', href: 'configure', icon: SlidersHorizontalIcon },
+  { label: 'Components', href: 'components', icon: BlocksIcon },
   { label: 'Knowledge', href: 'knowledge', icon: DatabaseIcon },
   { label: 'Inbox', href: 'inbox', icon: InboxIcon },
   { label: 'Conversations', href: 'conversations', icon: MessagesSquareIcon },
