@@ -75,7 +75,51 @@ post-deploy state is what gets measured.
 
 ## Bing
 
-Not verified as of 2026-07-21 (`NEXT_PUBLIC_BING_SITE_VERIFICATION` unset; the
-option to import from GSC exists). Owner decision pending — low priority.
+The property is now present in Bing Webmaster Tools and producing both web-search
+and AI Performance exports. The exact verification mechanism is still
+`⚠️ verify`: `NEXT_PUBLIC_BING_SITE_VERIFICATION` may remain unset if the owner
+used DNS or the GSC import instead.
 
-_Last verified: 2026-07-21._
+## Interim refresh — 2026-07-26
+
+The supplied "last 3 months" GSC export contains only 29 calendar rows
+(2026-06-25 → 2026-07-23), with impressions on 28 days. Treat it as a four-week
+new-site baseline, not a 90-day performance verdict.
+
+- Property-level GSC chart: **18 clicks / 1,556 impressions / 1.16% CTR**.
+- Country split: Lithuania supplies **15/18 clicks** from 29 impressions at
+  position 2.66; the US + UK supply **1,014 impressions and zero clicks** at
+  positions 60.15 and 68.99. Discovery is reaching the intended English markets,
+  but still at unclickable positions.
+- The Jul 6–12 new-site test peaked at 901 weekly impressions. The latest four
+  complete rows stabilized at 38, 51, 46, and 46 impressions/day; do not mistake
+  the fall from the test spike for a sustained decline.
+- The visible query table is dominated by two clusters:
+  conversational-AI-vs-chatbot variants = **516 impressions at weighted position
+  83.77**; Zendesk variants = **474 at 55.44**. The matching pages now show
+  568 impressions at 83.28 and 527 at 51.23.
+- Page-one watch list remains too small for snippet conclusions:
+  `ai-customer-service-statistics` = 69 impressions at 9.94;
+  `new-ai-chatbots-2026` = 31 at 6.39. Both have zero clicks, but the former was
+  materially refreshed on Jul 21.
+- Content age is a major confounder: the repo now has 58 posts, 27 dated Jul 15
+  or later. Seven are dated Jul 23 or later, so this export gives them at most one
+  partial day; four Jul 25 posts have no GSC exposure in the file.
+- GSC's query export shows zero clicks even though the chart shows 18. This is
+  expected privacy/truncation behavior at low volume; page-table totals also use
+  different aggregation. Use chart/country totals for site KPIs and page-filtered
+  query exports for page decisions.
+- Bing web search is still statistically empty: **15 impressions / zero clicks**.
+  Bing AI Performance is the early positive signal: **85 citations across 14 of
+  26 days** (Jun 29 → Jul 24), with one or two cited Loqara pages per active day.
+  All four sampled grounding queries are Zendesk evaluation/review intents;
+  export the cited-pages table next time before attributing that activity to a
+  specific URL.
+
+Decision: keep the Jul 28 indexing checkpoint and Aug 18 28-day post-remediation
+checkpoint. Do not resume bulk publishing from this snapshot. First export
+page-filtered queries for the two impression magnets and the two page-one watch
+pages; judge lasting SEO progress after the current Jul 21 crawl/index/content
+state has had a full 28 days.
+
+_Last verified: 2026-07-26._
