@@ -142,15 +142,30 @@ function VariantDrawer({
         <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-4">
           {meta.variants.map((v) => {
             const isCurrent = v.id === currentVariantId
+            const inert = saving !== null || isCurrent
+            const pick = () => {
+              if (!inert) void apply(v.id)
+            }
             return (
-              <button
+              // div[role=button]: previews contain real <button>s — a <button>
+              // wrapper would nest them (invalid HTML, hydration error).
+              <div
                 key={v.id}
-                type="button"
-                disabled={saving !== null || isCurrent}
-                onClick={() => apply(v.id)}
+                role="button"
+                tabIndex={inert ? -1 : 0}
+                aria-disabled={inert}
+                onClick={pick}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    pick()
+                  }
+                }}
                 className={cn(
-                  'w-full rounded-xl border bg-card p-3 text-left transition-all',
-                  isCurrent ? 'border-primary ring-2 ring-primary/30' : 'hover:border-foreground/20',
+                  'w-full rounded-xl border bg-card p-3 text-left transition-all outline-none focus-visible:ring-2 focus-visible:ring-primary/40',
+                  isCurrent
+                    ? 'border-primary ring-2 ring-primary/30'
+                    : 'cursor-pointer hover:border-foreground/20',
                 )}
               >
                 <div className="flex items-start justify-between gap-2">
@@ -171,7 +186,7 @@ function VariantDrawer({
                 <div className="pointer-events-none mt-2 overflow-hidden rounded-lg border bg-white p-3">
                   <ComponentPreview componentKey={meta.key} variantId={v.id} />
                 </div>
-              </button>
+              </div>
             )
           })}
         </div>

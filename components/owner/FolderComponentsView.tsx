@@ -183,13 +183,22 @@ function AddComponentsDrawer({
           {components.map((meta) => {
             const isSelected = selected.has(meta.key)
             return (
-              <button
+              // div[role=button]: previews contain real <button>s (LeadForm
+              // dismiss, card CTAs) — a <button> wrapper would nest them (invalid HTML).
+              <div
                 key={meta.key}
-                type="button"
+                role="button"
+                tabIndex={0}
                 onClick={() => toggle(meta.key)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    toggle(meta.key)
+                  }
+                }}
                 aria-pressed={isSelected}
                 className={cn(
-                  'w-full rounded-xl border bg-card p-3 text-left transition-all',
+                  'w-full cursor-pointer rounded-xl border bg-card p-3 text-left transition-all outline-none focus-visible:ring-2 focus-visible:ring-primary/40',
                   isSelected
                     ? 'border-primary ring-2 ring-primary/30'
                     : 'hover:border-foreground/20',
@@ -213,7 +222,7 @@ function AddComponentsDrawer({
                 <div className="pointer-events-none mt-2 overflow-hidden rounded-lg border bg-white p-3">
                   <ComponentPreview componentKey={meta.key} />
                 </div>
-              </button>
+              </div>
             )
           })}
         </div>
