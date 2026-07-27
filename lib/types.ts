@@ -256,6 +256,13 @@ export interface BotConfig {
   /** Id of the reusable system_prompts library entry this bot uses (owner-managed).
    *  When set, `systemPrompt` holds a snapshot of that entry's content. */
   systemPromptId?: string
+  /** Published version of the family this bot runs LIVE. On save, the server
+   *  re-snapshots that version's content into `systemPrompt` (versions are
+   *  immutable, so the snapshot can never drift). */
+  systemPromptVersionId?: string
+  /** Version the test playground runs instead of the live one (not applied to
+   *  the live widget). Resolved server-side in /api/preview/chat. */
+  previewSystemPromptVersionId?: string
   persona: {
     tone: string
     verbosity: 'concise' | 'balanced' | 'detailed'
@@ -358,7 +365,8 @@ export interface LintFinding {
   suggestedFix?: string
 }
 
-/** A reusable, owner-managed system prompt in the prompt library. */
+/** A reusable, owner-managed system prompt in the prompt library.
+ *  `content` is the DRAFT — visible to bots only once published as a version. */
 export interface SystemPrompt {
   id: string
   name: string
@@ -366,6 +374,25 @@ export interface SystemPrompt {
   created_by: string | null
   created_at: string
   updated_at: string
+}
+
+/** An immutable published version of a library prompt. */
+export interface SystemPromptVersion {
+  id: string
+  prompt_id: string
+  version: number
+  content: string
+  note: string | null
+  published_at: string
+  published_by: string | null
+}
+
+/** Version metadata safe to send to client users (no prompt content). */
+export interface PromptVersionMeta {
+  id: string
+  version: number
+  note: string | null
+  published_at: string
 }
 
 export type HandoffStatus = 'bot' | 'requested' | 'live' | 'resolved'

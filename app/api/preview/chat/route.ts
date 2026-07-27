@@ -40,10 +40,25 @@ export async function POST(req: Request) {
   if (!user) return json({ error: 'Unauthorized' }, 401)
   if (!limiter.check(user.id)) return json({ error: 'Rate limit exceeded' }, 429)
 
-  const { data: bot } = await supabase.from('bots').select('id').eq('id', botId).single()
+  const { data: bot } = await supabase.from('bots').select('id, config').eq('id', botId).single()
   if (!bot) return json({ error: 'Bot not found' }, 404)
 
   const svc = createServiceClient()
+
+  // Preview-version override: run the pinned preview version's content instead
+  // of the live snapshot. Validated against the SAVED bot's prompt family so a
+  // forged request can't run another family's prompt.
+  if (config.previewSystemPromptVersionId) {
+    const savedFamily = (bot.config as BotConfig | null)?.systemPromptId
+    if (savedFamily) {
+      const { data: v } = await svc
+        .from('system_prompt_versions')
+        .select('prompt_id, content')
+        .eq('id', config.previewSystemPromptVersionId)
+        .maybeSingle()
+      if (v?.prompt_id === savedFamily) config.systemPrompt = v.content
+    }
+  }
   const commerce = commerceEnabled(config)
   const retrieval = await retrieveContext(botId, message, {}, serviceRetrievalDeps(svc))
 

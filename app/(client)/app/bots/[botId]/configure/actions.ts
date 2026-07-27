@@ -4,6 +4,7 @@ import { requireRole } from '@/lib/auth/guards'
 import { createServerClient } from '@/lib/supabase/server'
 import { botConfigSchema } from '@/lib/validation/schemas'
 import { syncVoiceAgent } from '@/lib/ai/elevenlabs-agent'
+import { resolvePromptVersionSnapshot } from '@/lib/prompt-versions'
 import type { BotConfig } from '@/lib/types'
 
 export interface SaveConfigResult {
@@ -29,6 +30,11 @@ export async function saveConfig(
   }
 
   const config: BotConfig = parsed.data
+
+  // Pinned prompt version → re-snapshot its content server-side (clients never
+  // send or see prompt text).
+  const versionError = await resolvePromptVersionSnapshot(config)
+  if (versionError) return { success: false, error: versionError }
 
   // Optional internal bot name (sidebar label). Validate length when provided.
   const update: { config: BotConfig; name?: string } = { config }

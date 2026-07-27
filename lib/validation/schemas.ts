@@ -231,6 +231,8 @@ export const botConfigFormSchema = z.object({
   proactiveGreeting: proactiveGreetingSchema,
   systemPrompt: z.string().min(1).max(SYSTEM_PROMPT_MAX),
   systemPromptId: z.string().uuid().optional(),
+  systemPromptVersionId: z.string().uuid().optional(),
+  previewSystemPromptVersionId: z.string().uuid().optional(),
   persona: z
     .object({
       tone: z.string().default('friendly'),

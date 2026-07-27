@@ -4,6 +4,7 @@ import { requireRole } from '@/lib/auth/guards'
 import { createServiceClient } from '@/lib/supabase/service'
 import { botConfigSchema } from '@/lib/validation/schemas'
 import { syncVoiceAgent } from '@/lib/ai/elevenlabs-agent'
+import { resolvePromptVersionSnapshot } from '@/lib/prompt-versions'
 import type { BotConfig } from '@/lib/types'
 import type { SaveConfigResult } from '@/app/(client)/app/bots/[botId]/configure/actions'
 
@@ -25,6 +26,11 @@ export async function saveClientBotConfig(
   }
 
   const config: BotConfig = parsed.data
+
+  // Pinned prompt version → re-snapshot its content server-side.
+  const versionError = await resolvePromptVersionSnapshot(config)
+  if (versionError) return { success: false, error: versionError }
+
   const update: { config: BotConfig; name?: string } = { config }
   if (typeof name === 'string') {
     const trimmed = name.trim()

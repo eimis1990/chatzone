@@ -4,7 +4,15 @@ import { useState, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { marked } from 'marked'
 import { toast } from 'sonner'
-import { PlusIcon, PencilIcon, EyeIcon, Trash2Icon, FileTextIcon } from 'lucide-react'
+import {
+  PlusIcon,
+  PencilIcon,
+  EyeIcon,
+  Trash2Icon,
+  FileTextIcon,
+  HistoryIcon,
+  UploadIcon,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import '@/components/blog/article.css'
 import { Input } from '@/components/ui/input'
@@ -14,19 +22,34 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { formatDistanceToNow } from '@/lib/date-utils'
 import { cn } from '@/lib/utils'
 import { SYSTEM_PROMPT_MAX } from '@/lib/validation/schemas'
-import type { SystemPrompt } from '@/lib/types'
-import { createSystemPrompt, updateSystemPrompt, deleteSystemPrompt } from '@/app/(owner)/owner/prompts/actions'
+import type { SystemPrompt, SystemPromptVersion } from '@/lib/types'
+import {
+  createSystemPrompt,
+  updateSystemPrompt,
+  deleteSystemPrompt,
+  publishSystemPrompt,
+} from '@/app/(owner)/owner/prompts/actions'
+
+export interface VersionUsage {
+  botName: string
+  orgName: string
+}
 
 interface Props {
   prompts: SystemPrompt[]
-  /** systemPromptId → number of bots using it. */
+  /** All published versions, newest first. */
+  versions: SystemPromptVersion[]
+  /** systemPromptId → number of bots using the family. */
   usage: Record<string, number>
+  /** versionId (or `unversioned:<promptId>`) → bots pinned to it. */
+  versionUsage: Record<string, VersionUsage[]>
 }
 
 type Mode =
   | { kind: 'create' }
   | { kind: 'edit'; prompt: SystemPrompt }
   | { kind: 'view'; prompt: SystemPrompt }
+  | { kind: 'history'; prompt: SystemPrompt }
   | null
 
 // Height = 90% of the viewport; width = 80% of that height (72vh), so the
@@ -36,9 +59,14 @@ type Mode =
 const DIALOG_SIZE =
   'flex h-[90vh] w-[72vh] max-w-[calc(100vw-2rem)] sm:max-w-[calc(100vw-2rem)] flex-col'
 
-export function SystemPromptsManager({ prompts, usage }: Props) {
+export function SystemPromptsManager({ prompts, versions, usage, versionUsage }: Props) {
   const router = useRouter()
   const [mode, setMode] = useState<Mode>(null)
+
+  const versionsOf = useCallback(
+    (promptId: string) => versions.filter((v) => v.prompt_id === promptId),
+    [versions],
+  )
 
   return (
     <>
@@ -57,6 +85,8 @@ export function SystemPromptsManager({ prompts, usage }: Props) {
 
         {prompts.map((p) => {
           const count = usage[p.id] ?? 0
+          const latest = versionsOf(p.id)[0]
+          const draftEdited = latest ? latest.content !== p.content : p.content.trim().length > 0
           return (
             <div
               key={p.id}
@@ -66,15 +96,23 @@ export function SystemPromptsManager({ prompts, usage }: Props) {
                 <span className="flex size-10 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
                   <FileTextIcon className="size-5" aria-hidden="true" />
                 </span>
-                <span
-                  className={cn(
-                    'rounded-full px-2 py-0.5 text-xs font-medium',
-                    count > 0 ? 'bg-green-100 text-green-700' : 'bg-muted text-muted-foreground',
-                  )}
-                  title={`Used in ${count} bot${count === 1 ? '' : 's'}`}
-                >
-                  {count} bot{count === 1 ? '' : 's'}
-                </span>
+                <div className="flex items-center gap-1.5">
+                  <span
+                    className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground"
+                    title={latest ? `Latest published version` : 'Never published'}
+                  >
+                    {latest ? `v${latest.version}` : 'unpublished'}
+                  </span>
+                  <span
+                    className={cn(
+                      'rounded-full px-2 py-0.5 text-xs font-medium',
+                      count > 0 ? 'bg-green-100 text-green-700' : 'bg-muted text-muted-foreground',
+                    )}
+                    title={`Used in ${count} bot${count === 1 ? '' : 's'}`}
+                  >
+                    {count} bot{count === 1 ? '' : 's'}
+                  </span>
+                </div>
               </div>
 
               <div className="min-w-0">
@@ -84,6 +122,11 @@ export function SystemPromptsManager({ prompts, usage }: Props) {
                 <p className="mt-0.5 text-xs text-muted-foreground">
                   Created {formatDistanceToNow(p.created_at)}
                 </p>
+                {draftEdited && (
+                  <p className="mt-0.5 text-xs font-medium text-amber-600">
+                    {latest ? `Draft edited since v${latest.version}` : 'Draft not published yet'}
+                  </p>
+                )}
               </div>
 
               <div className="mt-auto flex items-center gap-2 pt-1">
@@ -105,6 +148,16 @@ export function SystemPromptsManager({ prompts, usage }: Props) {
                 >
                   <PencilIcon className="size-3.5" /> Edit
                 </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  title="Version history"
+                  aria-label="Version history"
+                  onClick={() => setMode({ kind: 'history', prompt: p })}
+                >
+                  <HistoryIcon className="size-3.5" />
+                </Button>
               </div>
             </div>
           )
@@ -115,6 +168,7 @@ export function SystemPromptsManager({ prompts, usage }: Props) {
         <PromptEditor
           key={mode.kind === 'edit' ? mode.prompt.id : 'new'}
           initial={mode.kind === 'edit' ? mode.prompt : null}
+          latestVersion={mode.kind === 'edit' ? versionsOf(mode.prompt.id)[0] : undefined}
           usageCount={mode.kind === 'edit' ? (usage[mode.prompt.id] ?? 0) : 0}
           onClose={() => setMode(null)}
           onSaved={() => {
@@ -131,6 +185,15 @@ export function SystemPromptsManager({ prompts, usage }: Props) {
       {mode?.kind === 'view' && (
         <PromptViewer prompt={mode.prompt} onClose={() => setMode(null)} />
       )}
+
+      {mode?.kind === 'history' && (
+        <VersionHistory
+          prompt={mode.prompt}
+          versions={versionsOf(mode.prompt.id)}
+          versionUsage={versionUsage}
+          onClose={() => setMode(null)}
+        />
+      )}
     </>
   )
 }
@@ -138,12 +201,14 @@ export function SystemPromptsManager({ prompts, usage }: Props) {
 // ── Create / Edit ────────────────────────────────────────────────────────────
 function PromptEditor({
   initial,
+  latestVersion,
   usageCount,
   onClose,
   onSaved,
   onDeleted,
 }: {
   initial: SystemPrompt | null
+  latestVersion?: SystemPromptVersion
   usageCount: number
   onClose: () => void
   onSaved: () => void
@@ -152,6 +217,8 @@ function PromptEditor({
   const [name, setName] = useState(initial?.name ?? '')
   const [content, setContent] = useState(initial?.content ?? '')
   const [saving, setSaving] = useState(false)
+  const [publishing, setPublishing] = useState(false)
+  const [note, setNote] = useState('')
 
   const save = useCallback(async () => {
     if (!name.trim()) {
@@ -162,7 +229,7 @@ function PromptEditor({
     try {
       if (initial) await updateSystemPrompt(initial.id, name.trim(), content)
       else await createSystemPrompt(name.trim(), content)
-      toast.success(initial ? 'Prompt updated' : 'Prompt created')
+      toast.success(initial ? 'Draft saved — no bots affected' : 'Prompt created')
       onSaved()
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Failed to save')
@@ -170,6 +237,22 @@ function PromptEditor({
       setSaving(false)
     }
   }, [initial, name, content, onSaved])
+
+  // Save the draft, then freeze it as the next version.
+  const publish = useCallback(async () => {
+    if (!initial) return
+    setSaving(true)
+    try {
+      await updateSystemPrompt(initial.id, name.trim() || initial.name, content)
+      await publishSystemPrompt(initial.id, note)
+      toast.success(`Published v${(latestVersion?.version ?? 0) + 1} — bots stay on their pinned version until switched`)
+      onSaved()
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to publish')
+    } finally {
+      setSaving(false)
+    }
+  }, [initial, name, content, note, latestVersion, onSaved])
 
   const remove = useCallback(async () => {
     if (!initial) return
@@ -207,7 +290,14 @@ function PromptEditor({
         </div>
         <div className="flex min-h-0 flex-1 flex-col space-y-1.5">
           <div className="flex items-center justify-between">
-            <Label htmlFor="prompt-content">Prompt (Markdown supported)</Label>
+            <Label htmlFor="prompt-content">
+              Draft (Markdown supported)
+              {latestVersion && (
+                <span className="ml-1.5 font-normal text-muted-foreground">
+                  — latest published: v{latestVersion.version}
+                </span>
+              )}
+            </Label>
             <span
               className={cn(
                 'text-xs tabular-nums',
@@ -225,6 +315,28 @@ function PromptEditor({
             className="min-h-0 flex-1 resize-none font-mono text-sm leading-relaxed"
           />
         </div>
+
+        {publishing && initial && (
+          <div className="flex items-end gap-2 rounded-lg border bg-muted/40 p-2.5">
+            <div className="flex-1 space-y-1">
+              <Label htmlFor="publish-note" className="text-xs">
+                What changed? (shown in version dropdowns)
+              </Label>
+              <Input
+                id="publish-note"
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                placeholder="e.g. better upsell handling"
+                maxLength={200}
+                autoFocus
+              />
+            </div>
+            <Button type="button" size="sm" onClick={publish} disabled={saving}>
+              {saving ? 'Publishing…' : `Publish v${(latestVersion?.version ?? 0) + 1}`}
+            </Button>
+          </div>
+        )}
+
         <div className="flex items-center justify-between gap-2">
           {initial ? (
             <Button type="button" variant="ghost" size="sm" onClick={remove} disabled={saving}>
@@ -238,13 +350,24 @@ function PromptEditor({
             <Button type="button" variant="outline" size="sm" onClick={onClose} disabled={saving}>
               Cancel
             </Button>
+            {initial && !publishing && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setPublishing(true)}
+                disabled={saving || content.length > SYSTEM_PROMPT_MAX || !content.trim()}
+              >
+                <UploadIcon className="size-3.5" /> Publish…
+              </Button>
+            )}
             <Button
               type="button"
               size="sm"
               onClick={save}
               disabled={saving || content.length > SYSTEM_PROMPT_MAX}
             >
-              {saving ? 'Saving…' : initial ? 'Save changes' : 'Create prompt'}
+              {saving ? 'Saving…' : initial ? 'Save draft' : 'Create prompt'}
             </Button>
           </div>
         </div>
@@ -253,17 +376,117 @@ function PromptEditor({
   )
 }
 
+// ── Version history ─────────────────────────────────────────────────────────
+function VersionHistory({
+  prompt,
+  versions,
+  versionUsage,
+  onClose,
+}: {
+  prompt: SystemPrompt
+  versions: SystemPromptVersion[]
+  versionUsage: Record<string, VersionUsage[]>
+  onClose: () => void
+}) {
+  const [viewing, setViewing] = useState<SystemPromptVersion | null>(null)
+  const unversioned = versionUsage[`unversioned:${prompt.id}`] ?? []
+
+  if (viewing) {
+    return (
+      <VersionContentViewer
+        title={`${prompt.name} — v${viewing.version}`}
+        content={viewing.content}
+        onClose={() => setViewing(null)}
+      />
+    )
+  }
+
+  return (
+    <Dialog open onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className={DIALOG_SIZE}>
+        <DialogHeader>
+          <DialogTitle>{prompt.name} — versions</DialogTitle>
+        </DialogHeader>
+        <div className="min-h-0 flex-1 space-y-2 overflow-y-auto">
+          {versions.length === 0 && (
+            <p className="text-sm text-muted-foreground">
+              Nothing published yet. Publish the draft to create v1.
+            </p>
+          )}
+          {versions.map((v) => {
+            const pinned = versionUsage[v.id] ?? []
+            return (
+              <div key={v.id} className="rounded-lg border bg-card p-3">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-semibold">
+                      v{v.version}
+                    </span>
+                    <span className="text-sm">{v.note ?? <span className="text-muted-foreground">No note</span>}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={cn(
+                        'rounded-full px-2 py-0.5 text-xs font-medium',
+                        pinned.length > 0
+                          ? 'bg-green-100 text-green-700'
+                          : 'bg-muted text-muted-foreground',
+                      )}
+                    >
+                      {pinned.length} bot{pinned.length === 1 ? '' : 's'}
+                    </span>
+                    <Button type="button" variant="outline" size="sm" onClick={() => setViewing(v)}>
+                      <EyeIcon className="size-3.5" /> View
+                    </Button>
+                  </div>
+                </div>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Published {formatDistanceToNow(v.published_at)}
+                </p>
+                {pinned.length > 0 && (
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {pinned.map((u) => `${u.botName} (${u.orgName})`).join(' · ')}
+                  </p>
+                )}
+              </div>
+            )
+          })}
+          {unversioned.length > 0 && (
+            <div className="rounded-lg border border-dashed bg-muted/30 p-3">
+              <p className="text-xs font-medium text-amber-700">
+                Unversioned snapshot — linked to this prompt before versioning existed; pick a
+                version in their config to pin them.
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {unversioned.map((u) => `${u.botName} (${u.orgName})`).join(' · ')}
+              </p>
+            </div>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
 // ── View (rendered Markdown) ───────────────────────────────────────────────────
-function PromptViewer({ prompt, onClose }: { prompt: SystemPrompt; onClose: () => void }) {
+function VersionContentViewer({
+  title,
+  content,
+  onClose,
+}: {
+  title: string
+  content: string
+  onClose: () => void
+}) {
   const html = useMemo(
-    () => marked.parse(prompt.content || '_Empty prompt._', { async: false }) as string,
-    [prompt.content],
+    () => marked.parse(content || '_Empty prompt._', { async: false }) as string,
+    [content],
   )
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
       <DialogContent className={DIALOG_SIZE}>
         <DialogHeader>
-          <DialogTitle>{prompt.name}</DialogTitle>
+          <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
         <div className="min-h-0 flex-1 overflow-y-auto rounded-lg border bg-muted/20 p-5">
           <article className="article" dangerouslySetInnerHTML={{ __html: html }} />
@@ -271,4 +494,8 @@ function PromptViewer({ prompt, onClose }: { prompt: SystemPrompt; onClose: () =
       </DialogContent>
     </Dialog>
   )
+}
+
+function PromptViewer({ prompt, onClose }: { prompt: SystemPrompt; onClose: () => void }) {
+  return <VersionContentViewer title={`${prompt.name} — draft`} content={prompt.content} onClose={onClose} />
 }

@@ -94,8 +94,18 @@ export async function startOnboardingBot(
       .eq('name', templateName)
       .maybeSingle<{ id: string; content: string }>()
     if (template?.content) {
-      config.systemPrompt = template.content
+      // Pin the latest PUBLISHED version (fall back to the draft if the
+      // template was never published).
+      const { data: latest } = await svc
+        .from('system_prompt_versions')
+        .select('id, content')
+        .eq('prompt_id', template.id)
+        .order('version', { ascending: false })
+        .limit(1)
+        .maybeSingle<{ id: string; content: string }>()
+      config.systemPrompt = latest?.content ?? template.content
       config.systemPromptId = template.id
+      config.systemPromptVersionId = latest?.id
       changed = true
     }
     // Missing template row is non-fatal — the bot keeps the default prompt.

@@ -100,11 +100,25 @@
 Knowledge / Embed** via `components/owner/OwnerBotTabs.tsx`. The owner can also
 create a bot for a client (`createBotForOrg`). See [access-model](access-model.md).
 
-## System prompts
+## System prompts (versioned)
 
-Owner-only `system_prompts` table + `/owner/prompts`. A bot references one via
-`config.systemPromptId`, which snapshots the content into `config.systemPrompt`
-(runtime reads the snapshot). Editing a prompt re-pushes to referencing bots.
+Owner-only `system_prompts` table + `/owner/prompts` (sidebar: Versioning →
+System prompts). `system_prompts.content` is the **draft**; publishing freezes
+it as an immutable row in `system_prompt_versions` (unique `(prompt_id,
+version)`, migration `20260727130000`). **Editing/publishing never touches
+bots** — the old re-push loop is gone.
+
+A bot pins `config.systemPromptId` (family) + `config.systemPromptVersionId`
+(live) + optional `config.previewSystemPromptVersionId` (test chat only). The
+runtime still reads only the `config.systemPrompt` snapshot; both save actions
+re-snapshot the pinned live version's content server-side via
+`resolvePromptVersionSnapshot` (`lib/prompt-versions.ts`) — so clients apply
+versions without ever seeing prompt text. `/api/preview/chat` swaps in the
+preview version's content, validated against the saved bot's family. Client
+metadata (version/note/date, no content) comes from
+`listAssistantVersions` (`lib/actions/prompt-versions.ts`); the client UI is the
+"Assistant version" section in `ConfigForm`. Onboarding pins the template's
+latest published version.
 
 Prompt sources are kept in `docs/prompt-templates/`. The specialized **Furniture
 Store** prompt (`docs/prompt-templates/furniture-store.md`) treats dimensions,
@@ -113,4 +127,4 @@ other constraints when one is relaxed; and requires base-category search + live
 details before claiming no match. It is published in `system_prompts` and assigned
 to the Mobel bot (and the separate 3IMIS/Chafox Verskis test bot).
 
-_Last verified: 2026-07-17._
+_Last verified: 2026-07-27._

@@ -13,6 +13,7 @@ import {
   DatabaseIcon,
   BugIcon,
   FileTextIcon,
+  LayersIcon,
   InboxIcon,
   MessagesSquareIcon,
   BarChart3Icon,
@@ -50,7 +51,15 @@ const NAV: NavItem[] = [
       { label: 'Analytics', href: '/owner/chatbot/analytics', icon: BarChart3Icon },
     ],
   },
-  { label: 'System prompts', href: '/owner/prompts', icon: FileTextIcon },
+  {
+    label: 'Versioning',
+    href: '/owner/prompts',
+    icon: LayersIcon,
+    children: [
+      { label: 'System prompts', href: '/owner/prompts', icon: FileTextIcon },
+      // Components, themes, … slot in here when they get versioned.
+    ],
+  },
   { label: 'Voices', href: '/owner/voices', icon: MicVocalIcon },
   { label: 'Signups', href: '/owner/signups', icon: MailIcon },
   { label: 'Sales leads', href: '/owner/leads', icon: TargetIcon },

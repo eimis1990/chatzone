@@ -47,7 +47,8 @@ import {
   QUICK_ACTION_SUGGESTIONS,
   buildQuickAction,
 } from '@/lib/quick-action-suggestions'
-import type { BotLanguage, SuggestedQuestionAction, SystemPrompt } from '@/lib/types'
+import type { BotLanguage, PromptVersionMeta, SuggestedQuestionAction, SystemPrompt, SystemPromptVersion } from '@/lib/types'
+import { listAssistantVersions } from '@/lib/actions/prompt-versions'
 import type { z } from 'zod'
 import { saveConfig, type SaveConfigResult } from '@/app/(client)/app/bots/[botId]/configure/actions'
 import { Button } from '@/components/ui/button'
@@ -1577,6 +1578,9 @@ export function ConfigForm({
           </CardContent>
         </CollapsibleSection>
 
+        {/* ── Assistant version (client-facing; owners manage versions in AI behaviour) ── */}
+        {!showAdvanced && <AssistantVersionSection botId={botId} watch={watch} setValue={setValue} />}
+
         {/* ── AI Behaviour ── */}
         {showAdvanced && (<>
         <CollapsibleSection header={<SectionHeader
@@ -1962,6 +1966,124 @@ export function ConfigForm({
 // -------------------------------------------------------------------------
 // SystemPromptSelect — pick a reusable prompt from the owner's library
 // -------------------------------------------------------------------------
+/** Sentinel for the preview dropdown's "no override" option (Select values are strings). */
+const PREVIEW_SAME_AS_LIVE = '__live__'
+
+function versionLabel(v: { version: number; note: string | null; published_at: string }) {
+  return `v${v.version}${v.note ? ` — ${v.note}` : ''} · ${formatDistanceToNow(v.published_at)}`
+}
+
+/**
+ * Client-facing "Assistant version" card: pick which published version runs
+ * live and which one the test chat previews. Metadata only — clients never see
+ * prompt text; the live snapshot is resolved server-side on save.
+ */
+function AssistantVersionSection({
+  botId,
+  watch,
+  setValue,
+}: {
+  botId: string
+  watch: UseFormWatch<FormValues>
+  setValue: UseFormSetValue<FormValues>
+}) {
+  const [versions, setVersions] = useState<PromptVersionMeta[]>([])
+  const familyId = watch('systemPromptId')
+  const liveVersionId = watch('systemPromptVersionId')
+  const previewVersionId = watch('previewSystemPromptVersionId')
+
+  useEffect(() => {
+    if (!familyId) return
+    let cancelled = false
+    listAssistantVersions(botId).then((v) => {
+      if (!cancelled) setVersions(v)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [botId, familyId])
+
+  if (!familyId || versions.length === 0) return null
+  const latest = versions[0]
+  const updateAvailable = liveVersionId && latest.id !== liveVersionId
+
+  return (
+    <CollapsibleSection
+      header={
+        <SectionHeader
+          icon={SparklesIcon}
+          title="Assistant version"
+          description={
+            updateAvailable
+              ? 'New version available — test it in preview before switching it live.'
+              : 'Test new behaviour in preview before switching it live.'
+          }
+        />
+      }
+    >
+      <CardContent className="flex flex-col gap-3 bg-muted/70 py-3">
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div className="space-y-1">
+            <Label className="text-xs">Live version</Label>
+            <Select
+              value={liveVersionId ?? null}
+              onValueChange={(id: string | null) => {
+                if (id) setValue('systemPromptVersionId', id, { shouldDirty: true })
+              }}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Original version" />
+              </SelectTrigger>
+              <SelectContent>
+                {versions.map((v) => (
+                  <SelectItem key={v.id} value={v.id}>
+                    {versionLabel(v)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">Used by your live chat widget.</p>
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs">Preview version</Label>
+            <Select
+              value={previewVersionId ?? PREVIEW_SAME_AS_LIVE}
+              onValueChange={(value: string | null) =>
+                setValue(
+                  'previewSystemPromptVersionId',
+                  value === PREVIEW_SAME_AS_LIVE || !value ? undefined : value,
+                  { shouldDirty: true },
+                )
+              }
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={PREVIEW_SAME_AS_LIVE}>Same as live</SelectItem>
+                {versions.map((v) => (
+                  <SelectItem key={v.id} value={v.id}>
+                    {versionLabel(v)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">
+              Only affects the test chat on this page — your visitors never see it.
+            </p>
+          </div>
+        </div>
+        {updateAvailable && (
+          <p className="text-xs text-amber-600">
+            v{latest.version}
+            {latest.note ? ` (${latest.note})` : ''} is available. Set it as the preview version,
+            save, test it in the chat preview — then switch Live when you&apos;re happy.
+          </p>
+        )}
+      </CardContent>
+    </CollapsibleSection>
+  )
+}
 function SystemPromptSelect({
   watch,
   setValue,
@@ -1972,34 +2094,62 @@ function SystemPromptSelect({
   errors: FieldErrors<FormValues>
 }) {
   const [prompts, setPrompts] = useState<Pick<SystemPrompt, 'id' | 'name' | 'content'>[]>([])
+  const [versions, setVersions] = useState<
+    Pick<SystemPromptVersion, 'id' | 'prompt_id' | 'version' | 'content' | 'note' | 'published_at'>[]
+  >([])
   const [loaded, setLoaded] = useState(false)
   const selectedId = watch('systemPromptId')
+  const liveVersionId = watch('systemPromptVersionId')
+  const previewVersionId = watch('previewSystemPromptVersionId')
   const currentContent = watch('systemPrompt') ?? ''
 
   useEffect(() => {
     let cancelled = false
     const supabase = createBrowserClient()
-    supabase
-      .from('system_prompts')
-      .select('id, name, content')
-      .order('created_at', { ascending: false })
-      .then(({ data }) => {
-        if (!cancelled) {
-          setPrompts((data ?? []) as Pick<SystemPrompt, 'id' | 'name' | 'content'>[])
-          setLoaded(true)
-        }
-      })
+    Promise.all([
+      supabase.from('system_prompts').select('id, name, content').order('created_at', { ascending: false }),
+      supabase
+        .from('system_prompt_versions')
+        .select('id, prompt_id, version, content, note, published_at')
+        .order('version', { ascending: false }),
+    ]).then(([p, v]) => {
+      if (cancelled) return
+      setPrompts((p.data ?? []) as Pick<SystemPrompt, 'id' | 'name' | 'content'>[])
+      setVersions((v.data ?? []) as typeof versions)
+      setLoaded(true)
+    })
     return () => {
       cancelled = true
     }
   }, [])
 
+  const familyVersions = versions.filter((v) => v.prompt_id === selectedId)
+  const latest = familyVersions[0]
   const isCustom = !selectedId && currentContent.trim().length > 0
+
+  // Picking a family pins the latest published version (or falls back to the
+  // draft content for a never-published prompt).
   const pick = (id: string | null) => {
     const p = prompts.find((x) => x.id === id)
     if (!p) return
+    const newest = versions.find((v) => v.prompt_id === p.id)
     setValue('systemPromptId', p.id, { shouldDirty: true })
-    setValue('systemPrompt', p.content, { shouldDirty: true, shouldValidate: true })
+    setValue('systemPromptVersionId', newest?.id, { shouldDirty: true })
+    setValue('previewSystemPromptVersionId', undefined, { shouldDirty: true })
+    setValue('systemPrompt', newest?.content ?? p.content, { shouldDirty: true, shouldValidate: true })
+  }
+
+  const pickLive = (versionId: string | null) => {
+    const v = familyVersions.find((x) => x.id === versionId)
+    if (!v) return
+    setValue('systemPromptVersionId', v.id, { shouldDirty: true })
+    setValue('systemPrompt', v.content, { shouldDirty: true, shouldValidate: true })
+  }
+
+  const pickPreview = (value: string | null) => {
+    setValue('previewSystemPromptVersionId', value === PREVIEW_SAME_AS_LIVE || !value ? undefined : value, {
+      shouldDirty: true,
+    })
   }
 
   return (
@@ -2049,6 +2199,50 @@ function SystemPromptSelect({
         <p className="text-xs text-amber-600">
           This bot uses a custom prompt that isn&apos;t in your library. Pick one above to replace it.
         </p>
+      )}
+
+      {/* Version pinning — live + preview. Versions are immutable; publishing in
+          the library never changes this bot until a newer version is picked here. */}
+      {selectedId && familyVersions.length > 0 && (
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div className="space-y-1">
+            <Label className="text-xs">Live version</Label>
+            <Select value={liveVersionId ?? null} onValueChange={pickLive}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Unversioned snapshot" />
+              </SelectTrigger>
+              <SelectContent>
+                {familyVersions.map((v) => (
+                  <SelectItem key={v.id} value={v.id}>
+                    {versionLabel(v)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs">Preview version (test chat only)</Label>
+            <Select value={previewVersionId ?? PREVIEW_SAME_AS_LIVE} onValueChange={pickPreview}>
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={PREVIEW_SAME_AS_LIVE}>Same as live</SelectItem>
+                {familyVersions.map((v) => (
+                  <SelectItem key={v.id} value={v.id}>
+                    {versionLabel(v)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          {latest && liveVersionId && latest.id !== liveVersionId && (
+            <p className="text-xs text-amber-600 sm:col-span-2">
+              v{latest.version} is available — test it as the preview version, then switch Live when
+              you&apos;re happy.
+            </p>
+          )}
+        </div>
       )}
       {currentContent.trim() && (
         <div className="max-h-40 overflow-y-auto whitespace-pre-wrap rounded-md border bg-muted/30 p-2 font-mono text-xs text-muted-foreground">
