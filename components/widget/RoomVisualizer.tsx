@@ -102,6 +102,9 @@ interface RoomTrayProps {
   products: CommerceProduct[]
   primaryColor: string
   language: 'en' | 'lt'
+  /** Component-library variant: 'subtle' = white card with an accent button
+   *  instead of the full brand-colored strip. */
+  variant?: 'default' | 'subtle'
   onRemove: (id: string) => void
   onOpen: () => void
 }
@@ -110,9 +113,17 @@ interface RoomTrayProps {
  * Compact selected-products strip pinned above the composer. Brand-accent
  * card that slides up from under the composer when the first product is added.
  */
-export function RoomTray({ products, primaryColor, language, onRemove, onOpen }: RoomTrayProps) {
+export function RoomTray({
+  products,
+  primaryColor,
+  language,
+  variant = 'default',
+  onRemove,
+  onOpen,
+}: RoomTrayProps) {
   const labels = roomLabels(language)
-  const textColor = readableTextColor(primaryColor)
+  const subtle = variant === 'subtle'
+  const textColor = subtle ? '#111827' : readableTextColor(primaryColor)
   return (
     <AnimatePresence initial={false}>
       {products.length > 0 && (
@@ -122,8 +133,10 @@ export function RoomTray({ products, primaryColor, language, onRemove, onOpen }:
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 56, opacity: 0 }}
           transition={{ duration: 0.28, ease: [0.25, 0.46, 0.45, 0.94] }}
-          className="mx-3 mb-2 flex items-center gap-2.5 rounded-xl p-2 pl-2.5 shadow-md"
-          style={{ backgroundColor: primaryColor, color: textColor }}
+          className={`mx-3 mb-2 flex items-center gap-2.5 rounded-xl p-2 pl-2.5 ${
+            subtle ? 'border border-gray-200 bg-white shadow-sm' : 'shadow-md'
+          }`}
+          style={subtle ? { color: textColor } : { backgroundColor: primaryColor, color: textColor }}
         >
           <div className="flex -space-x-2">
             {products.map((p) => (
@@ -133,7 +146,9 @@ export function RoomTray({ products, primaryColor, language, onRemove, onOpen }:
                 onClick={() => onRemove(p.id)}
                 aria-label={labels.removeProduct(p.title)}
                 title={`${p.title} ✕`}
-                className="relative size-9 shrink-0 overflow-hidden rounded-lg border-2 border-white bg-white outline-none focus-visible:ring-2"
+                className={`relative size-9 shrink-0 overflow-hidden rounded-lg border-2 bg-white outline-none focus-visible:ring-2 ${
+                  subtle ? 'border-gray-200' : 'border-white'
+                }`}
               >
                 {p.imageUrl ? (
                   <img src={p.imageUrl} alt={p.title} className="h-full w-full object-cover" />
@@ -149,8 +164,14 @@ export function RoomTray({ products, primaryColor, language, onRemove, onOpen }:
           <button
             type="button"
             onClick={onOpen}
-            className="shrink-0 rounded-lg bg-white px-3.5 py-2 text-xs font-bold shadow-sm transition-transform hover:scale-[1.03] active:scale-[0.98] outline-none focus-visible:ring-2"
-            style={{ color: isLightColor(primaryColor) ? '#111' : primaryColor }}
+            className={`shrink-0 rounded-lg px-3.5 py-2 text-xs font-bold shadow-sm transition-transform hover:scale-[1.03] active:scale-[0.98] outline-none focus-visible:ring-2 ${
+              subtle ? '' : 'bg-white'
+            }`}
+            style={
+              subtle
+                ? { backgroundColor: primaryColor, color: readableTextColor(primaryColor) }
+                : { color: isLightColor(primaryColor) ? '#111' : primaryColor }
+            }
           >
             {labels.trayTryCta} ✨
           </button>

@@ -13,17 +13,32 @@ import { LeadForm } from '@/components/widget/LeadForm'
 import { RoomTray } from '@/components/widget/RoomVisualizer'
 import type { CommerceProduct, OrderStatus } from '@/lib/commerce/types'
 
+// Product shots generated for these samples — scripts/gen-component-previews.mjs.
 const SAMPLE_PRODUCTS: CommerceProduct[] = [
   {
     id: 'demo-1',
     title: 'Oslo 3-seat sofa, oak legs',
     price: '€749',
     url: '#',
-    imageUrl: '/landing/faq-illustration.webp',
+    imageUrl: '/component-previews/sofa.webp',
     inStock: true,
   },
-  { id: 'demo-2', title: 'Luna lounge chair', price: '€329', url: '#', inStock: true },
-  { id: 'demo-3', title: 'Nordic coffee table', price: '€189', url: '#', inStock: false },
+  {
+    id: 'demo-2',
+    title: 'Luna lounge chair',
+    price: '€329',
+    url: '#',
+    imageUrl: '/component-previews/chair.webp',
+    inStock: true,
+  },
+  {
+    id: 'demo-3',
+    title: 'Nordic coffee table',
+    price: '€189',
+    url: '#',
+    imageUrl: '/component-previews/table.webp',
+    inStock: false,
+  },
 ]
 
 const SAMPLE_ORDER: OrderStatus = {
@@ -52,13 +67,22 @@ const PREVIEWS: Record<string, () => ReactNode> = {
   'order-status:default': () => (
     <OrderStatusCard order={SAMPLE_ORDER} primaryColor={PREVIEW_PRIMARY} />
   ),
+  'order-status:timeline': () => (
+    <OrderStatusCard order={SAMPLE_ORDER} primaryColor={PREVIEW_PRIMARY} variant="timeline" />
+  ),
   'lead-form:default': () => (
     <LeadForm
-      fields={[
-        { key: 'name', label: 'Name', required: true },
-        { key: 'email', label: 'Email', required: true },
-      ]}
+      fields={SAMPLE_LEAD_FIELDS}
       primaryColor={PREVIEW_PRIMARY}
+      onSubmit={noopAsync}
+      onDismiss={noop}
+    />
+  ),
+  'lead-form:minimal': () => (
+    <LeadForm
+      fields={SAMPLE_LEAD_FIELDS}
+      primaryColor={PREVIEW_PRIMARY}
+      variant="minimal"
       onSubmit={noopAsync}
       onDismiss={noop}
     />
@@ -72,7 +96,22 @@ const PREVIEWS: Record<string, () => ReactNode> = {
       onOpen={noop}
     />
   ),
+  'room-visualizer:subtle': () => (
+    <RoomTray
+      products={SAMPLE_PRODUCTS.slice(0, 2)}
+      primaryColor={PREVIEW_PRIMARY}
+      language="en"
+      variant="subtle"
+      onRemove={noop}
+      onOpen={noop}
+    />
+  ),
 }
+
+const SAMPLE_LEAD_FIELDS = [
+  { key: 'name', label: 'Name', required: true },
+  { key: 'email', label: 'Email', required: true },
+]
 
 export function ComponentPreview({
   componentKey,

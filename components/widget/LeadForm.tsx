@@ -37,11 +37,21 @@ interface LeadFormProps {
   lang?: BotLanguage
   /** Custom heading; empty → the built-in default for `lang`. */
   title?: string
+  /** Component-library variant: 'minimal' = frameless, placeholder-labelled fields. */
+  variant?: 'default' | 'minimal'
   onSubmit: (data: Record<string, string>) => Promise<void>
   onDismiss: () => void
 }
 
-export function LeadForm({ fields, primaryColor, lang = 'en', title, onSubmit, onDismiss }: LeadFormProps) {
+export function LeadForm({
+  fields,
+  primaryColor,
+  lang = 'en',
+  title,
+  variant = 'default',
+  onSubmit,
+  onDismiss,
+}: LeadFormProps) {
   const t = STRINGS[lang] ?? STRINGS.en
   const heading = title?.trim() || t.title
   const [values, setValues] = useState<Record<string, string>>(
@@ -77,6 +87,50 @@ export function LeadForm({ fields, primaryColor, lang = 'en', title, onSubmit, o
       <div className="mx-4 mb-4 rounded-xl border border-gray-200 bg-white p-4 text-center">
         <div className="text-2xl mb-2">✓</div>
         <p className="text-sm font-medium text-gray-800">{t.thanks}</p>
+      </div>
+    )
+  }
+
+  // Minimal variant — frameless: quiet heading with inline dismiss, pill
+  // inputs labelled by placeholder, slim submit. Same behavior, less chrome.
+  if (variant === 'minimal') {
+    return (
+      <div className="mx-4 mb-4">
+        <div className="mb-1.5 flex items-center justify-between">
+          <p className="text-xs font-medium text-gray-500">{heading}</p>
+          <button
+            onClick={onDismiss}
+            aria-label="Dismiss"
+            className="text-gray-400 hover:text-gray-600 text-base leading-none"
+          >
+            ×
+          </button>
+        </div>
+        <form onSubmit={handleSubmit} className="space-y-2" noValidate>
+          {fields.map((field) => (
+            <input
+              key={field.key}
+              id={`lead-${field.key}`}
+              type={field.key === 'email' ? 'email' : 'text'}
+              value={values[field.key] ?? ''}
+              onChange={(e) => setValues((prev) => ({ ...prev, [field.key]: e.target.value }))}
+              required={field.required}
+              aria-label={field.label}
+              placeholder={`${field.label}${field.required ? ' *' : ''}`}
+              className="w-full rounded-full border border-gray-200 bg-white px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-offset-0"
+              style={{ '--tw-ring-color': primaryColor } as React.CSSProperties}
+            />
+          ))}
+          {error && <p className="text-xs text-red-600" role="alert">{error}</p>}
+          <button
+            type="submit"
+            disabled={submitting}
+            className="w-full rounded-full py-2 text-sm font-medium text-white transition-opacity hover:opacity-80 disabled:opacity-50"
+            style={{ backgroundColor: primaryColor }}
+          >
+            {submitting ? t.sending : t.send}
+          </button>
+        </form>
       </div>
     )
   }

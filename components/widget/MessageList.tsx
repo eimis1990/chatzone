@@ -278,6 +278,7 @@ export function MessageList({
                 bubbleRadius={bubbleRadius}
                 primaryColor={primaryColor}
                 language={activeLang}
+                variant={componentVariants?.['order-status'] === 'timeline' ? 'timeline' : 'default'}
               />
             </div>
           )}

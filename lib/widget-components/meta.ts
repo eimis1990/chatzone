@@ -47,6 +47,11 @@ export const WIDGET_COMPONENTS: WidgetComponentMeta[] = [
     description: 'Live order lookup result: status badge, items, total, tracking.',
     variants: [
       { id: 'default', name: 'Standard', description: 'Header with status badge, item list and totals.' },
+      {
+        id: 'timeline',
+        name: 'Delivery timeline',
+        description: 'Adds a progress stepper — Ordered → Processing → Shipped → Delivered.',
+      },
     ],
   },
   {
@@ -56,6 +61,11 @@ export const WIDGET_COMPONENTS: WidgetComponentMeta[] = [
     core: true,
     variants: [
       { id: 'default', name: 'Standard', description: 'Name + email form with a dismiss link.' },
+      {
+        id: 'minimal',
+        name: 'Minimal',
+        description: 'Frameless pill inputs labelled by placeholder — quieter, blends into the chat.',
+      },
     ],
   },
   {
@@ -67,7 +77,12 @@ export const WIDGET_COMPONENTS: WidgetComponentMeta[] = [
       {
         id: 'default',
         name: 'Standard',
-        description: 'Selection tray above the composer plus the render studio.',
+        description: 'Bold brand-colored tray above the composer plus the render studio.',
+      },
+      {
+        id: 'subtle',
+        name: 'Subtle',
+        description: 'Quiet white tray with an accent button — for brands that want less color.',
       },
     ],
   },

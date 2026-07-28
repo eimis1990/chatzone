@@ -8,6 +8,22 @@ interface OrderStatusCardProps {
   bubbleRadius?: number
   primaryColor: string
   language?: 'en' | 'lt'
+  /** Component-library variant: 'timeline' adds a delivery progress stepper. */
+  variant?: 'default' | 'timeline'
+}
+
+// Timeline steps + which step a status has reached (-1 = not a linear status,
+// e.g. cancelled/refunded — those render without the stepper).
+const TIMELINE_STEPS = {
+  en: ['Ordered', 'Processing', 'Shipped', 'Delivered'],
+  lt: ['Užsakyta', 'Vykdomas', 'Išsiųstas', 'Pristatyta'],
+}
+const TIMELINE_INDEX: Record<string, number> = {
+  pending: 0,
+  'on-hold': 0,
+  processing: 1,
+  shipped: 2,
+  completed: 3,
 }
 
 const LABELS = {
@@ -27,7 +43,13 @@ const STATUS: Record<string, { en: string; lt: string; cls: string }> = {
   failed: { en: 'Failed', lt: 'Nepavyko', cls: 'bg-red-100 text-red-700' },
 }
 
-export function OrderStatusCard({ order, bubbleRadius = 16, primaryColor, language = 'en' }: OrderStatusCardProps) {
+export function OrderStatusCard({
+  order,
+  bubbleRadius = 16,
+  primaryColor,
+  language = 'en',
+  variant = 'default',
+}: OrderStatusCardProps) {
   if (!order.found) return null
   const t = LABELS[language] ?? LABELS.en
   const radius = `${Math.min(bubbleRadius, 16)}px`
@@ -36,6 +58,8 @@ export function OrderStatusCard({ order, bubbleRadius = 16, primaryColor, langua
   const statusLabel = status ? status[language] ?? status.en : order.status ?? '—'
   const statusCls = status?.cls ?? 'bg-gray-100 text-gray-700'
   const totalText = [order.total, order.currency].filter(Boolean).join(' ')
+  const timelineIndex = variant === 'timeline' ? (TIMELINE_INDEX[statusKey] ?? -1) : -1
+  const steps = TIMELINE_STEPS[language] ?? TIMELINE_STEPS.en
 
   return (
     <div
@@ -52,6 +76,39 @@ export function OrderStatusCard({ order, bubbleRadius = 16, primaryColor, langua
           {statusLabel}
         </span>
       </div>
+
+      {/* Delivery timeline (variant) — dots + connectors, filled up to the
+          current step. Non-linear statuses (cancelled/refunded) skip it. */}
+      {timelineIndex >= 0 && (
+        <div className="px-3 pt-2.5 pb-1" aria-label={steps[timelineIndex]}>
+          <div className="flex items-center">
+            {steps.map((_, i) => (
+              <div key={i} className={`flex items-center ${i > 0 ? 'flex-1' : ''}`}>
+                {i > 0 && (
+                  <div
+                    className="h-0.5 flex-1 rounded-full"
+                    style={{ backgroundColor: i <= timelineIndex ? primaryColor : '#e5e7eb' }}
+                  />
+                )}
+                <div
+                  className="size-2.5 shrink-0 rounded-full"
+                  style={{
+                    backgroundColor: i <= timelineIndex ? primaryColor : '#e5e7eb',
+                    outline: i === timelineIndex ? `3px solid ${primaryColor}33` : undefined,
+                  }}
+                />
+              </div>
+            ))}
+          </div>
+          <div className="mt-1 flex justify-between text-[10px] text-gray-500">
+            {steps.map((label, i) => (
+              <span key={label} className={i === timelineIndex ? 'font-semibold text-gray-900' : ''}>
+                {label}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Items */}
       {order.items && order.items.length > 0 && (

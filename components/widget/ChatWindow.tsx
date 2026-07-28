@@ -1247,6 +1247,7 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
             primaryColor={primaryColor}
             lang={activeLang}
             title={config.leadCapture.title}
+            variant={config.components?.['lead-form'] === 'minimal' ? 'minimal' : 'default'}
             onSubmit={handleLeadSubmit}
             onDismiss={() => {
               setShowLeadForm(false)
@@ -1303,6 +1304,7 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
               products={roomSelection}
               primaryColor={primaryColor}
               language={activeLang}
+              variant={config.components?.['room-visualizer'] === 'subtle' ? 'subtle' : 'default'}
               onRemove={(id) => setRoomSelection((prev) => prev.filter((p) => p.id !== id))}
               onOpen={() => setStudioOpen(true)}
             />
