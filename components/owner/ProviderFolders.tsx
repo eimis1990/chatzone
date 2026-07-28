@@ -14,12 +14,12 @@ export function ProviderFolders({
   folders: (ComponentFolder & { count: number })[]
 }) {
   return (
-    <div className="grid gap-8 sm:grid-cols-2 xl:grid-cols-3">
+    <div className="flex flex-wrap gap-2">
       {folders.map((f) => (
         <Link
           key={f.id}
           href={`/owner/components/${f.id}`}
-          className="group flex flex-col items-center rounded-2xl p-6 pt-10 transition-colors hover:bg-muted/50"
+          className="group flex w-52 flex-col items-center rounded-2xl p-5 pt-9 transition-colors hover:bg-muted/50"
           aria-label={`${f.label} — ${f.count} variant${f.count === 1 ? '' : 's'}`}
         >
           <FolderVisual />
