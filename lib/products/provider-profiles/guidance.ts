@@ -28,7 +28,9 @@ const promptGuidance: Readonly<Record<CommerceProvider, CommerceProviderPromptGu
   feed: {},
   travelline: {
     queryGuidance:
-      'This is a HOTEL. search_products browses room TYPES (no prices — prices depend on dates). ' +
+      'This is a HOTEL (possibly a chain — offers are then prefixed with the hotel name; if the ' +
+      'guest names a hotel or city, display only the matching hotel\'s offers). search_products ' +
+      'browses room TYPES (no prices — prices depend on dates). ' +
       'Whenever the guest wants prices or to book, first collect check-in date, check-out date, and ' +
       'number of adults (plus ages of any children), then call check_availability — NEVER quote a ' +
       'price that did not come from check_availability results.',

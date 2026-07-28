@@ -15,6 +15,11 @@ import type { CommerceConfig } from '@/lib/commerce/capabilities'
  * payment), while the dateless path lists room TYPES from the Content API for
  * "what rooms do you have" browsing.
  *
+ * `tlPropertyId` accepts ONE OR MANY property ids (comma/space separated) — a
+ * chain client searches all their hotels in one call (TL's multi-property
+ * search, max 200 ids). With multiple hotels, titles are prefixed with the
+ * hotel name and room ids with the property id.
+ *
  * All egress goes to the fixed partner host — no tenant-supplied URLs, so no
  * SSRF guard needed here. Docs: https://www.travelline.ru/dev-portal/docs/api/
  */
@@ -24,7 +29,15 @@ const AUTH_URL = `${TL_HOST}/auth/token`
 const SEARCH_BASE = `${TL_HOST}/api/search/v1`
 const CONTENT_BASE = `${TL_HOST}/api/content/v1`
 
-type TlCreds = Pick<CommerceConfig, 'tlClientId' | 'tlClientSecret' | 'tlPropertyId'>
+type TlCreds = Pick<CommerceConfig, 'tlClientId' | 'tlClientSecret'>
+
+/** Parse the configured property id(s) — comma/whitespace separated. */
+export function tlPropertyIds(config: Pick<CommerceConfig, 'tlPropertyId'>): string[] {
+  return (config.tlPropertyId ?? '')
+    .split(/[\s,;]+/)
+    .map((s) => s.trim())
+    .filter(Boolean)
+}
 
 // ── Auth: client-credentials tokens live 15 min; cache per client id. ────────
 const tokenCache = new Map<string, { token: string; expiresAt: number }>()
@@ -51,10 +64,22 @@ async function getToken(creds: TlCreds, deps: CommerceDeps): Promise<string> {
   return json.access_token
 }
 
-async function tlGet<T>(url: string, creds: TlCreds, deps: CommerceDeps): Promise<T> {
+async function tlRequest<T>(
+  url: string,
+  creds: TlCreds,
+  deps: CommerceDeps,
+  init?: { method?: string; body?: unknown },
+): Promise<T> {
   const f = deps.fetchImpl ?? fetch
   const token = await getToken(creds, deps)
-  const res = await f(url, { headers: { Authorization: `Bearer ${token}` } })
+  const res = await f(url, {
+    method: init?.method ?? 'GET',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      ...(init?.body ? { 'Content-Type': 'application/json' } : {}),
+    },
+    ...(init?.body ? { body: JSON.stringify(init.body) } : {}),
+  })
   if (!res.ok) throw new Error(`TravelLine request failed (${res.status}) ${url}`)
   return (await res.json()) as T
 }
@@ -84,31 +109,38 @@ interface TlProperty {
 const contentCache = new Map<string, { property: TlProperty; expiresAt: number }>()
 const CONTENT_TTL_MS = 10 * 60 * 1000
 
-export async function getTravellineProperty(
-  config: CommerceConfig,
-  deps: CommerceDeps = {},
+async function getProperty(
+  creds: TlCreds,
+  propertyId: string,
+  deps: CommerceDeps,
 ): Promise<TlProperty> {
-  const key = config.tlPropertyId ?? ''
-  const cached = contentCache.get(key)
+  const cached = contentCache.get(propertyId)
   if (cached && cached.expiresAt > Date.now()) return cached.property
-  const property = await tlGet<TlProperty>(
-    `${CONTENT_BASE}/properties/${encodeURIComponent(key)}?include=all`,
-    config,
+  const property = await tlRequest<TlProperty>(
+    `${CONTENT_BASE}/properties/${encodeURIComponent(propertyId)}?include=all`,
+    creds,
     deps,
   )
-  contentCache.set(key, { property, expiresAt: Date.now() + CONTENT_TTL_MS })
+  contentCache.set(propertyId, { property, expiresAt: Date.now() + CONTENT_TTL_MS })
   return property
 }
 
+/** All configured properties' content (chains have several hotels). */
+async function getProperties(config: CommerceConfig, deps: CommerceDeps): Promise<TlProperty[]> {
+  const ids = tlPropertyIds(config)
+  return Promise.all(ids.map((id) => getProperty(config, id, deps)))
+}
+
 // ── Dated availability search — the real booking path. ──────────────────────
+/** Superset of DetailedRoomStay (single-property GET) and ShortRoomStay
+ *  (multi-property POST — no availability/cancellation/checksum). */
 interface TlRoomStay {
+  propertyId?: string
   roomType?: { id?: string }
   ratePlan?: { id?: string }
   availability?: number
   currencyCode?: string
   total?: { priceBeforeTax?: number; taxAmount?: number }
-  stayDates?: { arrivalDateTime?: string; departureDateTime?: string }
-  guestCount?: { adultCount?: number; childAges?: number[] }
   cancellationPolicy?: { freeCancellationPossible?: boolean; freeCancellationDeadlineLocal?: string }
   mealPlanCode?: string
   bookingFormLink?: string
@@ -135,56 +167,90 @@ function nightsBetween(arrival: string, departure: string): number {
   return Math.max(1, Math.round(ms / 86_400_000))
 }
 
-/** Live room-stay offers for a date range, as product cards. */
+/** Live room-stay offers for a date range, as product cards. Searches every
+ *  configured property (single GET for one hotel, multi-property POST for a chain). */
 export async function searchTravellineRooms(
   config: CommerceConfig,
   params: TlAvailabilityParams,
   deps: CommerceDeps = {},
 ): Promise<CommerceProduct[]> {
-  const qs = new URLSearchParams({
-    arrivalDate: params.arrivalDate,
-    departureDate: params.departureDate,
-    adults: String(params.adults),
-  })
-  for (const age of params.childAges ?? []) qs.append('childAges', String(age))
+  const ids = tlPropertyIds(config)
+  if (ids.length === 0) return []
+  const multi = ids.length > 1
 
-  const [result, property] = await Promise.all([
-    tlGet<{ roomStays?: TlRoomStay[] }>(
-      `${SEARCH_BASE}/properties/${encodeURIComponent(config.tlPropertyId ?? '')}/room-stays?${qs}`,
-      config,
-      deps,
-    ),
-    getTravellineProperty(config, deps).catch(() => null),
+  const stayPromise: Promise<TlRoomStay[]> = multi
+    ? tlRequest<{ roomStays?: TlRoomStay[] }>(`${SEARCH_BASE}/properties/room-stays/search`, config, deps, {
+        method: 'POST',
+        body: {
+          propertyIds: ids,
+          arrivalDate: params.arrivalDate,
+          departureDate: params.departureDate,
+          adults: params.adults,
+          ...(params.childAges?.length ? { childAges: params.childAges } : {}),
+        },
+      }).then((r) => (r.roomStays ?? []).map((s) => ({ ...s })))
+    : (() => {
+        const qs = new URLSearchParams({
+          arrivalDate: params.arrivalDate,
+          departureDate: params.departureDate,
+          adults: String(params.adults),
+        })
+        for (const age of params.childAges ?? []) qs.append('childAges', String(age))
+        return tlRequest<{ roomStays?: TlRoomStay[] }>(
+          `${SEARCH_BASE}/properties/${encodeURIComponent(ids[0])}/room-stays?${qs}`,
+          config,
+          deps,
+        ).then((r) => (r.roomStays ?? []).map((s) => ({ ...s, propertyId: s.propertyId ?? ids[0] })))
+      })()
+
+  const [stays, properties] = await Promise.all([
+    stayPromise,
+    getProperties(config, deps).catch(() => [] as TlProperty[]),
   ])
 
-  const roomTypeById = new Map((property?.roomTypes ?? []).map((r) => [r.id, r]))
-  const ratePlanById = new Map((property?.ratePlans ?? []).map((r) => [r.id, r]))
+  const propertyById = new Map(properties.map((p) => [p.id, p]))
   const nights = nightsBetween(params.arrivalDate, params.departureDate)
   const guests = params.adults + (params.childAges?.length ?? 0)
 
-  return (result.roomStays ?? []).map((stay, i) => {
-    const roomType = stay.roomType?.id ? roomTypeById.get(stay.roomType.id) : undefined
-    const ratePlan = stay.ratePlan?.id ? ratePlanById.get(stay.ratePlan.id) : undefined
+  return stays.map((stay, i) => {
+    const property = stay.propertyId ? propertyById.get(stay.propertyId) : properties[0]
+    const roomType = stay.roomType?.id
+      ? property?.roomTypes?.find((r) => r.id === stay.roomType!.id)
+      : undefined
+    const ratePlan = stay.ratePlan?.id
+      ? property?.ratePlans?.find((r) => r.id === stay.ratePlan!.id)
+      : undefined
     const roomName = roomType?.name ?? stay.fullPlacementsName ?? 'Room'
     const rateName = ratePlan?.name
-    const cancellation = stay.cancellationPolicy?.freeCancellationPossible
-      ? 'free cancellation'
-      : 'non-refundable'
+    let title = rateName && rateName !== roomName ? `${roomName} — ${rateName}` : roomName
+    if (multi && property?.name) title = `${property.name} — ${title}`
+
     const shortParts = [
       `${nights} night${nights === 1 ? '' : 's'}`,
       `${guests} guest${guests === 1 ? '' : 's'}`,
-      cancellation,
     ]
+    // ShortRoomStay (multi-property) has no cancellation policy — say nothing
+    // rather than falsely claiming "non-refundable".
+    if (stay.cancellationPolicy) {
+      shortParts.push(
+        stay.cancellationPolicy.freeCancellationPossible ? 'free cancellation' : 'non-refundable',
+      )
+    }
     if (stay.mealPlanCode) shortParts.push(`meal plan ${stay.mealPlanCode}`)
+
     return {
-      id: stay.checksum ?? `${stay.roomType?.id ?? 'room'}:${stay.ratePlan?.id ?? 'rate'}:${i}`,
-      title: rateName && rateName !== roomName ? `${roomName} — ${rateName}` : roomName,
+      id:
+        stay.checksum ??
+        `${stay.propertyId ?? 'p'}:${stay.roomType?.id ?? 'room'}:${stay.ratePlan?.id ?? 'rate'}:${i}`,
+      title,
       price: formatPrice(stay.total?.priceBeforeTax, stay.currencyCode ?? property?.currency),
       // The TL booking engine link with dates/room prefilled — checkout happens
       // on TravelLine's side (their Search API terms require it; we avoid PCI).
       url: stay.bookingFormLink || config.storeUrl || '#',
       imageUrl: roomType?.images?.[0]?.url,
-      inStock: (stay.availability ?? 0) > 0,
+      // Offers without an availability count (multi-property short results) are
+      // returned because they're bookable — treat as available.
+      inStock: stay.availability == null ? true : stay.availability > 0,
       shortDescription: shortParts.join(' · '),
       details: [
         roomType?.description,
@@ -203,33 +269,44 @@ export async function searchTravellineRooms(
 // ── Dateless browsing: room TYPES from content (search_products path). ──────
 const fold = (s: string) => s.toLowerCase().normalize('NFKD').replace(/[̀-ͯ]/g, '')
 
+/** Room-type id disambiguated per property for multi-hotel configs. */
+const roomRef = (propertyId: string, roomTypeId: string, multi: boolean) =>
+  multi ? `${propertyId}:${roomTypeId}` : roomTypeId
+
 export async function searchTravellineRoomTypes(
   config: CommerceConfig,
   params: ProductSearchParams,
   deps: CommerceDeps = {},
 ): Promise<CommerceProduct[]> {
-  const property = await getTravellineProperty(config, deps)
-  const rooms = property.roomTypes ?? []
+  const properties = await getProperties(config, deps)
+  const multi = properties.length > 1
+  const all = properties.flatMap((property) =>
+    (property.roomTypes ?? []).map((room) => ({ property, room })),
+  )
   const tokens = fold(params.query).split(/\s+/).filter((t) => t.length > 2)
   const matches = tokens.length
-    ? rooms.filter((r) => {
-        const hay = fold([r.name, r.description, r.categoryName].filter(Boolean).join(' '))
+    ? all.filter(({ property, room }) => {
+        const hay = fold(
+          [room.name, room.description, room.categoryName, multi ? property.name : undefined]
+            .filter(Boolean)
+            .join(' '),
+        )
         return tokens.some((t) => hay.includes(t))
       })
-    : rooms
+    : all
   // A generic query ("rooms", "kambariai") often matches nothing token-wise —
   // room browsing should show the catalog rather than a false "no results".
-  const list = matches.length ? matches : rooms
-  return list.slice(0, params.limit ?? 24).map((r) => ({
-    id: r.id,
-    title: r.name ?? 'Room',
+  const list = matches.length ? matches : all
+  return list.slice(0, params.limit ?? 24).map(({ property, room }) => ({
+    id: roomRef(property.id, room.id, multi),
+    title: multi && property.name ? `${property.name} — ${room.name ?? 'Room'}` : room.name ?? 'Room',
     // No dates → no price. The check_availability tool quotes real totals.
     price: '',
     url: config.storeUrl || '#',
-    imageUrl: r.images?.[0]?.url,
+    imageUrl: room.images?.[0]?.url,
     inStock: true,
-    shortDescription: [r.categoryName, occupancySummary(r)].filter(Boolean).join(' · '),
-    details: r.description?.slice(0, 800),
+    shortDescription: [room.categoryName, occupancySummary(room)].filter(Boolean).join(' · '),
+    details: room.description?.slice(0, 800),
   }))
 }
 
@@ -240,40 +317,51 @@ function occupancySummary(r: TlRoomType): string | undefined {
   return `sleeps ${beds}${extra}`
 }
 
-/** Full room-type details from content — powers the get_product_details tool. */
+/** Full room-type details from content — powers the get_product_details tool.
+ *  Accepts plain room-type ids and `propertyId:roomTypeId` refs (multi-hotel). */
 export async function fetchTravellineRoomDetails(
   config: CommerceConfig,
   ids: string[],
   deps: CommerceDeps = {},
 ): Promise<ProductDetails[]> {
-  const property = await getTravellineProperty(config, deps)
-  const byId = new Map((property.roomTypes ?? []).map((r) => [r.id, r]))
+  const properties = await getProperties(config, deps)
+  const rooms = properties.flatMap((property) =>
+    (property.roomTypes ?? []).map((room) => ({ property, room })),
+  )
   return ids
-    .map((id) => byId.get(id))
-    .filter((r): r is TlRoomType => Boolean(r))
-    .map((r) => ({
-      id: r.id,
-      title: r.name ?? 'Room',
-      description: r.description?.slice(0, 1500),
+    .map((ref) => {
+      const [maybePid, maybeRoomId] = ref.includes(':') ? ref.split(':', 2) : [undefined, ref]
+      return rooms.find(
+        ({ property, room }) =>
+          room.id === maybeRoomId && (maybePid === undefined || property.id === maybePid),
+      )
+    })
+    .filter((hit): hit is { property: TlProperty; room: TlRoomType } => Boolean(hit))
+    .map(({ property, room }) => ({
+      id: roomRef(property.id, room.id, properties.length > 1),
+      title: room.name ?? 'Room',
+      description: room.description?.slice(0, 1500),
       attributes: [
-        r.categoryName ? `Category: ${r.categoryName}` : undefined,
-        occupancySummary(r) ? `Occupancy: ${occupancySummary(r)}` : undefined,
-        r.size?.value ? `Size: ${r.size.value} ${r.size.unit ?? 'm²'}` : undefined,
-        r.amenities?.length
-          ? `Amenities: ${r.amenities.map((a) => a.name).filter(Boolean).slice(0, 20).join(', ')}`
+        properties.length > 1 && property.name ? `Hotel: ${property.name}` : undefined,
+        room.categoryName ? `Category: ${room.categoryName}` : undefined,
+        occupancySummary(room) ? `Occupancy: ${occupancySummary(room)}` : undefined,
+        room.size?.value ? `Size: ${room.size.value} ${room.size.unit ?? 'm²'}` : undefined,
+        room.amenities?.length
+          ? `Amenities: ${room.amenities.map((a) => a.name).filter(Boolean).slice(0, 20).join(', ')}`
           : undefined,
       ].filter((a): a is string => Boolean(a)),
     }))
 }
 
-/** Configurator "Test connection": token + property fetch → room type count. */
+/** Configurator "Test connection": token + every property fetch → room type count. */
 export async function validateTravellineStore(
   config: CommerceConfig,
   deps: CommerceDeps = {},
 ): Promise<{ ok: boolean; total: number }> {
   try {
-    const property = await getTravellineProperty(config, deps)
-    return { ok: Boolean(property?.id), total: property.roomTypes?.length ?? 0 }
+    const properties = await getProperties(config, deps)
+    const ok = properties.length > 0 && properties.every((p) => Boolean(p?.id))
+    return { ok, total: properties.reduce((sum, p) => sum + (p.roomTypes?.length ?? 0), 0) }
   } catch {
     return { ok: false, total: 0 }
   }

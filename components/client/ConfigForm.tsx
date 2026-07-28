@@ -630,7 +630,7 @@ export function ConfigForm({
         </div>
 
         {/* ── Display ── */}
-        <CollapsibleSection defaultOpen header={<SectionHeader
+        <CollapsibleSection header={<SectionHeader
               icon={MonitorIcon}
               title="Display"
               description="Bot name and avatar shown to visitors."
@@ -2665,7 +2665,7 @@ function CommerceSection({ control, watch, setValue, botId }: CommerceSectionPro
                 </div>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div className="space-y-1.5">
-                    <Label htmlFor="tlPropertyId">Property ID</Label>
+                    <Label htmlFor="tlPropertyId">Property ID(s)</Label>
                     <Controller
                       name="commerce.tlPropertyId"
                       control={control}
@@ -2675,7 +2675,7 @@ function CommerceSection({ control, watch, setValue, botId }: CommerceSectionPro
                           value={field.value ?? ''}
                           onChange={field.onChange}
                           onBlur={field.onBlur}
-                          placeholder="e.g. 12345"
+                          placeholder="12345 — or for a chain: 12345, 67890"
                           autoComplete="off"
                           className="font-mono text-sm"
                         />
@@ -2703,9 +2703,9 @@ function CommerceSection({ control, watch, setValue, botId }: CommerceSectionPro
                 </div>
                 <p className="text-xs text-muted-foreground">
                   API credentials come from the hotel&apos;s TravelLine account (API connections) or a
-                  TravelLine partner agreement. The assistant checks live availability and prices,
-                  and booking finishes on the hotel&apos;s TravelLine booking form — payment never
-                  happens in chat.
+                  TravelLine partner agreement. Hotel chains: list every property ID separated by
+                  commas — the assistant searches availability across all of them at once. Booking
+                  finishes on the hotel&apos;s TravelLine booking form — payment never happens in chat.
                 </p>
               </div>
             )}

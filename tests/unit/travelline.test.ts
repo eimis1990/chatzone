@@ -4,6 +4,7 @@ import {
   searchTravellineRoomTypes,
   fetchTravellineRoomDetails,
   validateTravellineStore,
+  tlPropertyIds,
 } from '@/lib/commerce/travelline'
 import type { CommerceConfig } from '@/lib/commerce/capabilities'
 
@@ -154,6 +155,91 @@ describe('fetchTravellineRoomDetails', () => {
     expect(details[0].description).toContain('city view')
     expect(details[0].attributes?.join(' | ')).toContain('Wi-Fi')
     expect(details[0].attributes?.join(' | ')).toContain('22 m²')
+  })
+})
+
+describe('multi-property (hotel chains)', () => {
+  const PROPERTY_B = {
+    id: '888',
+    name: 'Seaside Villa',
+    currency: 'EUR',
+    roomTypes: [
+      { id: 'rt-9', name: 'Sea View Double', description: 'Waves included.', images: [] },
+    ],
+    ratePlans: [],
+  }
+  const MULTI_STAYS = {
+    roomStays: [
+      {
+        propertyId: '777',
+        roomType: { id: 'rt-1' },
+        ratePlan: { id: 'rp-1' },
+        currencyCode: 'EUR',
+        total: { priceBeforeTax: 240 },
+        bookingFormLink: 'https://book.tl/777',
+        // ShortRoomStay: no availability / cancellationPolicy / checksum.
+      },
+      {
+        propertyId: '888',
+        roomType: { id: 'rt-9' },
+        currencyCode: 'EUR',
+        total: { priceBeforeTax: 310 },
+        bookingFormLink: 'https://book.tl/888',
+      },
+    ],
+  }
+
+  function multiFetch() {
+    const posts: string[] = []
+    const impl = (async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input)
+      const json = (body: unknown) => new Response(JSON.stringify(body), { status: 200 })
+      if (url.includes('/auth/token')) return json({ access_token: 'tok', expires_in: 900 })
+      if (url.includes('/properties/room-stays/search')) {
+        posts.push(String(init?.body))
+        return json(MULTI_STAYS)
+      }
+      if (url.includes('/api/content/v1/properties/888')) return json(PROPERTY_B)
+      if (url.includes('/api/content/v1/properties/')) return json(PROPERTY)
+      return new Response('not found', { status: 404 })
+    }) as unknown as typeof fetch
+    return { impl, posts }
+  }
+
+  it('parses one or many property ids', () => {
+    expect(tlPropertyIds({ tlPropertyId: '777' })).toEqual(['777'])
+    expect(tlPropertyIds({ tlPropertyId: ' 777, 888;999 ' })).toEqual(['777', '888', '999'])
+    expect(tlPropertyIds({ tlPropertyId: '' })).toEqual([])
+  })
+
+  it('uses the multi-property POST, prefixes hotel names, and treats offers as available', async () => {
+    const { impl, posts } = multiFetch()
+    const cfg = { ...CONFIG, tlClientId: 'cid-multi', tlPropertyId: '777, 888' }
+    const offers = await searchTravellineRooms(
+      cfg,
+      { arrivalDate: '2026-08-10', departureDate: '2026-08-12', adults: 2 },
+      { fetchImpl: impl },
+    )
+    expect(posts).toHaveLength(1)
+    expect(JSON.parse(posts[0]).propertyIds).toEqual(['777', '888'])
+    expect(offers.map((o) => o.title)).toEqual([
+      'Hotel Demo — Standard Double — Flexible rate',
+      'Seaside Villa — Sea View Double',
+    ])
+    // ShortRoomStay has no availability count and no cancellation policy —
+    // offers are bookable, and we must not claim "non-refundable".
+    expect(offers.every((o) => o.inStock)).toBe(true)
+    expect(offers[0].shortDescription).not.toContain('refundable')
+  })
+
+  it('browses room types across hotels with property-scoped ids', async () => {
+    const { impl } = multiFetch()
+    const cfg = { ...CONFIG, tlClientId: 'cid-multi-2', tlPropertyId: '777,888' }
+    const rooms = await searchTravellineRoomTypes(cfg, { query: 'waves' }, { fetchImpl: impl })
+    expect(rooms.map((r) => r.title)).toEqual(['Seaside Villa — Sea View Double'])
+    expect(rooms[0].id).toBe('888:rt-9')
+    const details = await fetchTravellineRoomDetails(cfg, ['888:rt-9'], { fetchImpl: impl })
+    expect(details[0].attributes?.join(' | ')).toContain('Hotel: Seaside Villa')
   })
 })
 
