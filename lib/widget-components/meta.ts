@@ -39,6 +39,12 @@ export const WIDGET_COMPONENTS: WidgetComponentMeta[] = [
         name: 'Compact rows',
         description: 'Space-saving stacked rows with a small thumbnail — the whole row links out.',
       },
+      {
+        id: 'overlay',
+        name: 'Image overlay',
+        description:
+          'Full-bleed photo cards — title over the image, price badge in the corner, tap anywhere to open.',
+      },
     ],
   },
   {

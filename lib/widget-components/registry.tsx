@@ -64,6 +64,9 @@ const PREVIEWS: Record<string, () => ReactNode> = {
   'product-cards:compact': () => (
     <ProductCards products={SAMPLE_PRODUCTS} primaryColor={PREVIEW_PRIMARY} variant="compact" />
   ),
+  'product-cards:overlay': () => (
+    <ProductCards products={SAMPLE_PRODUCTS} primaryColor={PREVIEW_PRIMARY} variant="overlay" />
+  ),
   'order-status:default': () => (
     <OrderStatusCard order={SAMPLE_ORDER} primaryColor={PREVIEW_PRIMARY} />
   ),

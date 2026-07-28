@@ -10,6 +10,11 @@ import { formatMessage, stripCitations } from '@/lib/format-message'
 import type { CommerceProduct, OrderStatus } from '@/lib/commerce/types'
 import type { RoomSelect } from './RoomVisualizer'
 
+/** Narrow a config-supplied variant id to what ProductCards implements. */
+function productCardsVariant(id: string | undefined): 'default' | 'compact' | 'overlay' {
+  return id === 'compact' || id === 'overlay' ? id : 'default'
+}
+
 export interface ChatMessage {
   id: string
   role: 'user' | 'assistant'
@@ -262,7 +267,7 @@ export function MessageList({
                 products={msg.products}
                 bubbleRadius={bubbleRadius}
                 primaryColor={primaryColor}
-                variant={componentVariants?.['product-cards'] === 'compact' ? 'compact' : 'default'}
+                variant={productCardsVariant(componentVariants?.['product-cards'])}
                 language={activeLang}
                 onSeeAll={(products) => onSeeAllProducts?.(products, msg.productsSourceUrl)}
                 onProductClick={(p) => onProductClick?.(p, UUID_RE.test(msg.id) ? msg.id : undefined)}

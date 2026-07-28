@@ -11,8 +11,10 @@ interface ProductCardsProps {
   bubbleRadius?: number
   primaryColor?: string
   language?: 'en' | 'lt'
-  /** Component-library variant: 'default' = swipeable image cards, 'compact' = stacked rows. */
-  variant?: 'default' | 'compact'
+  /** Component-library variant: 'default' = swipeable image cards, 'compact' =
+   *  stacked rows, 'overlay' = full-bleed image cards (title on a bottom scrim,
+   *  price badge top-right, the whole card links out — no button). */
+  variant?: 'default' | 'compact' | 'overlay'
   /** Open the full-height list overlay for this message's products. */
   onSeeAll?: (products: CommerceProduct[]) => void
   /** Analytics: the visitor followed a product link out of the chat. */
@@ -86,6 +88,23 @@ export function ProductCards({
         <div className="space-y-2" role="list">
           {products.slice(0, CARD_LIMIT).map((product) => (
             <CompactProductCard
+              key={product.id}
+              product={product}
+              bubbleRadius={bubbleRadius}
+              primaryColor={primaryColor}
+              outOfStockLabel={labels.outOfStock}
+              onProductClick={onProductClick}
+            />
+          ))}
+        </div>
+      ) : variant === 'overlay' ? (
+        <div
+          className="flex gap-3 overflow-x-auto pb-1 snap-x snap-mandatory"
+          style={{ scrollbarWidth: 'thin' }}
+          role="list"
+        >
+          {products.slice(0, CARD_LIMIT).map((product) => (
+            <OverlayProductCard
               key={product.id}
               product={product}
               bubbleRadius={bubbleRadius}
@@ -359,6 +378,82 @@ function ProductCard({
           })()}
       </div>
     </div>
+  )
+}
+
+/** Overlay variant — full-bleed image card: title on a bottom scrim, price as
+ *  a badge in the top-right corner, and the WHOLE card links out (no button).
+ *  No visualizer toggle (the card has no room for a second action). */
+function OverlayProductCard({
+  product,
+  bubbleRadius,
+  primaryColor,
+  outOfStockLabel,
+  onProductClick,
+}: {
+  product: CommerceProduct
+  bubbleRadius: number
+  primaryColor: string
+  outOfStockLabel: string
+  onProductClick?: (product: CommerceProduct) => void
+}) {
+  return (
+    <a
+      href={product.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      onClick={() => onProductClick?.(product)}
+      aria-label={`${product.title} — ${product.price}`}
+      className="relative block snap-start overflow-hidden border bg-white transition-transform active:scale-[0.98] outline-none focus-visible:ring-2"
+      style={{ borderRadius: `${bubbleRadius}px`, width: '72%', height: 240, flexShrink: 0 }}
+      role="listitem"
+    >
+      {product.imageUrl ? (
+        <img
+          src={product.imageUrl}
+          alt=""
+          loading="lazy"
+          className={`h-full w-full object-cover ${product.inStock ? '' : 'opacity-60 grayscale'}`}
+        />
+      ) : (
+        <div className="flex h-full w-full items-center justify-center bg-gray-50" aria-hidden="true">
+          <PlaceholderIcon />
+        </div>
+      )}
+
+      {/* Price badge — top right */}
+      {product.price && (
+        <span
+          className="absolute top-2 right-2 rounded-full px-2.5 py-1 text-xs font-bold shadow-sm"
+          style={{ backgroundColor: primaryColor, color: readableTextColor(primaryColor) }}
+        >
+          {product.price}
+        </span>
+      )}
+
+      {/* Out of stock — top left */}
+      {!product.inStock && (
+        <span className="absolute top-2 left-2 rounded-full border bg-white/85 px-2 py-0.5 text-[10px] font-medium text-gray-700 backdrop-blur-sm">
+          {outOfStockLabel}
+        </span>
+      )}
+
+      {/* Bottom scrim + title */}
+      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/35 to-transparent px-3 pt-8 pb-2.5">
+        <p
+          className="text-sm font-medium leading-tight text-white"
+          style={{
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+          }}
+          title={product.title}
+        >
+          {product.title}
+        </p>
+      </div>
+    </a>
   )
 }
 
