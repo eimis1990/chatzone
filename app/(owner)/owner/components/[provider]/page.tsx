@@ -19,7 +19,7 @@ export default async function ComponentFolderPage({
   const supabase = await createServerClient()
   const { data } = await supabase
     .from('provider_components')
-    .select('component_key')
+    .select('component_key, variant_id')
     .eq('provider', folder.id)
 
   return (
@@ -36,7 +36,10 @@ export default async function ComponentFolderPage({
       </div>
       <FolderComponentsView
         folderId={folder.id}
-        assignedKeys={(data ?? []).map((r) => r.component_key as string)}
+        assigned={(data ?? []).map((r) => ({
+          componentKey: r.component_key as string,
+          variantId: (r.variant_id as string) ?? 'default',
+        }))}
       />
     </div>
   )

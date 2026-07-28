@@ -6,40 +6,63 @@ import { toast } from 'sonner'
 import { PlusIcon, Trash2Icon, XIcon, CheckIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { WIDGET_COMPONENTS, type WidgetComponentMeta } from '@/lib/widget-components/meta'
+import {
+  WIDGET_COMPONENTS,
+  type WidgetComponentMeta,
+  type WidgetComponentVariantMeta,
+} from '@/lib/widget-components/meta'
 import { ComponentPreview } from '@/lib/widget-components/registry'
 import {
   addProviderComponents,
   removeProviderComponent,
+  type VariantRef,
 } from '@/app/(owner)/owner/components/actions'
+
+interface VariantEntry {
+  meta: WidgetComponentMeta
+  variant: WidgetComponentVariantMeta
+}
+
+/** All (component, variant) pairs in the registry. */
+function allVariantEntries(): VariantEntry[] {
+  return WIDGET_COMPONENTS.flatMap((meta) => meta.variants.map((variant) => ({ meta, variant })))
+}
+
+const refKey = (r: VariantRef) => `${r.componentKey}:${r.variantId}`
 
 export function FolderComponentsView({
   folderId,
-  assignedKeys,
+  assigned,
 }: {
   folderId: string
-  assignedKeys: string[]
+  /** Variant rows assigned to this folder. */
+  assigned: VariantRef[]
 }) {
   const router = useRouter()
   const [drawerOpen, setDrawerOpen] = useState(false)
-  const [viewingVariants, setViewingVariants] = useState<WidgetComponentMeta | null>(null)
   const [busy, setBusy] = useState(false)
 
-  const assigned = WIDGET_COMPONENTS.filter((c) => assignedKeys.includes(c.key))
-  const unassigned = WIDGET_COMPONENTS.filter((c) => !assignedKeys.includes(c.key))
+  const assignedSet = new Set(assigned.map(refKey))
+  const entries = allVariantEntries()
+  const assignedEntries = entries.filter((e) =>
+    assignedSet.has(refKey({ componentKey: e.meta.key, variantId: e.variant.id })),
+  )
+  const unassignedEntries = entries.filter(
+    (e) => !assignedSet.has(refKey({ componentKey: e.meta.key, variantId: e.variant.id })),
+  )
 
   const remove = useCallback(
-    async (meta: WidgetComponentMeta) => {
+    async (e: VariantEntry) => {
       if (
         !window.confirm(
-          `Remove "${meta.name}" from this folder? Bots on this provider will stop showing it.`,
+          `Remove "${e.meta.name} — ${e.variant.name}" from this folder? Clients on this provider can no longer pick it.`,
         )
       )
         return
       setBusy(true)
       try {
-        await removeProviderComponent(folderId, meta.key)
-        toast.success(`${meta.name} removed`)
+        await removeProviderComponent(folderId, e.meta.key, e.variant.id)
+        toast.success(`${e.meta.name} — ${e.variant.name} removed`)
         router.refresh()
       } catch (err) {
         toast.error(err instanceof Error ? err.message : 'Failed to remove')
@@ -65,27 +88,22 @@ export function FolderComponentsView({
           <span className="text-sm font-medium">Add components</span>
         </button>
 
-        {assigned.map((meta) => (
+        {assignedEntries.map((e) => (
           <div
-            key={meta.key}
+            key={refKey({ componentKey: e.meta.key, variantId: e.variant.id })}
             className="flex min-h-[220px] flex-col gap-3 rounded-xl border bg-card p-4 transition-all hover:border-foreground/15 hover:shadow-sm"
           >
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">
-                <p className="truncate font-medium text-foreground">{meta.name}</p>
-                <p className="text-xs text-muted-foreground">{meta.description}</p>
+                <p className="truncate font-medium text-foreground">{e.meta.name}</p>
+                <p className="text-xs text-muted-foreground">{e.variant.description}</p>
               </div>
-              <button
-                type="button"
-                onClick={() => setViewingVariants(meta)}
-                className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary"
-                title="View all variants"
-              >
-                {meta.variants.length} variant{meta.variants.length === 1 ? '' : 's'}
-              </button>
+              <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                {e.variant.name}
+              </span>
             </div>
             <div className="pointer-events-none flex-1 overflow-hidden rounded-lg border bg-white p-3">
-              <ComponentPreview componentKey={meta.key} />
+              <ComponentPreview componentKey={e.meta.key} variantId={e.variant.id} />
             </div>
             <Button
               type="button"
@@ -93,7 +111,7 @@ export function FolderComponentsView({
               size="sm"
               className="self-end"
               disabled={busy}
-              onClick={() => remove(meta)}
+              onClick={() => remove(e)}
             >
               <Trash2Icon className="size-3.5 text-destructive" />
               <span className="text-destructive">Remove</span>
@@ -102,16 +120,16 @@ export function FolderComponentsView({
         ))}
       </div>
 
-      {assigned.length === 0 && (
+      {assignedEntries.length === 0 && (
         <p className="text-sm text-muted-foreground">
-          Nothing here yet — add components so bots on this provider can render them.
+          Nothing here yet — add component variants so bots on this provider can render them.
         </p>
       )}
 
       {drawerOpen && (
         <AddComponentsDrawer
           folderId={folderId}
-          components={unassigned}
+          entries={unassignedEntries}
           onClose={() => setDrawerOpen(false)}
           onAdded={() => {
             setDrawerOpen(false)
@@ -119,74 +137,19 @@ export function FolderComponentsView({
           }}
         />
       )}
-
-      {viewingVariants && (
-        <VariantGalleryDrawer meta={viewingVariants} onClose={() => setViewingVariants(null)} />
-      )}
     </>
   )
 }
 
-/** Read-only gallery of a component's variants. The folder makes the COMPONENT
- *  available (once — duplicates are blocked by the DB unique constraint); each
- *  bot picks which of these variants it renders on its own Components page. */
-function VariantGalleryDrawer({
-  meta,
-  onClose,
-}: {
-  meta: WidgetComponentMeta
-  onClose: () => void
-}) {
-  return (
-    <div
-      className="fixed inset-0 z-50"
-      role="dialog"
-      aria-modal="true"
-      aria-label={`${meta.name} variants`}
-    >
-      <button
-        type="button"
-        aria-label="Close"
-        className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"
-        onClick={onClose}
-      />
-      <div className="absolute inset-y-0 right-0 flex w-full max-w-md flex-col bg-background shadow-2xl">
-        <div className="flex items-center justify-between border-b px-4 py-3">
-          <div>
-            <p className="font-semibold">{meta.name} — variants</p>
-            <p className="text-xs text-muted-foreground">
-              All styles this component ships with. Each bot picks its own on its Components page.
-            </p>
-          </div>
-          <Button type="button" variant="ghost" size="sm" onClick={onClose} aria-label="Close drawer">
-            <XIcon className="size-4" />
-          </Button>
-        </div>
-        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-4">
-          {meta.variants.map((v) => (
-            <div key={v.id} className="rounded-xl border bg-card p-3">
-              <p className="text-sm font-medium">{v.name}</p>
-              <p className="text-xs text-muted-foreground">{v.description}</p>
-              <div className="pointer-events-none mt-2 overflow-hidden rounded-lg border bg-white p-3">
-                <ComponentPreview componentKey={meta.key} variantId={v.id} />
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  )
-}
-
-/** Right-side drawer listing unassigned components as rendered cards with multi-select. */
+/** Right-side drawer listing unassigned variants as rendered cards with multi-select. */
 function AddComponentsDrawer({
   folderId,
-  components,
+  entries,
   onClose,
   onAdded,
 }: {
   folderId: string
-  components: WidgetComponentMeta[]
+  entries: VariantEntry[]
   onClose: () => void
   onAdded: () => void
 }) {
@@ -204,8 +167,11 @@ function AddComponentsDrawer({
   const add = async () => {
     setSaving(true)
     try {
-      await addProviderComponents(folderId, [...selected])
-      toast.success(`Added ${selected.size} component${selected.size === 1 ? '' : 's'}`)
+      const refs: VariantRef[] = entries
+        .filter((e) => selected.has(refKey({ componentKey: e.meta.key, variantId: e.variant.id })))
+        .map((e) => ({ componentKey: e.meta.key, variantId: e.variant.id }))
+      await addProviderComponents(folderId, refs)
+      toast.success(`Added ${refs.length} variant${refs.length === 1 ? '' : 's'}`)
       onAdded()
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Failed to add')
@@ -226,7 +192,7 @@ function AddComponentsDrawer({
           <div>
             <p className="font-semibold">Add components</p>
             <p className="text-xs text-muted-foreground">
-              Select what bots on this provider may render.
+              Pick the variants clients on this provider may use.
             </p>
           </div>
           <Button type="button" variant="ghost" size="sm" onClick={onClose} aria-label="Close drawer">
@@ -235,26 +201,27 @@ function AddComponentsDrawer({
         </div>
 
         <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-4">
-          {components.length === 0 && (
+          {entries.length === 0 && (
             <p className="text-sm text-muted-foreground">
-              Every component is already in this folder. New components are added in code — they
-              appear here automatically.
+              Every variant is already in this folder. New components and variants are added in
+              code — they appear here automatically.
             </p>
           )}
-          {components.map((meta) => {
-            const isSelected = selected.has(meta.key)
+          {entries.map((e) => {
+            const key = refKey({ componentKey: e.meta.key, variantId: e.variant.id })
+            const isSelected = selected.has(key)
             return (
               // div[role=button]: previews contain real <button>s (LeadForm
               // dismiss, card CTAs) — a <button> wrapper would nest them (invalid HTML).
               <div
-                key={meta.key}
+                key={key}
                 role="button"
                 tabIndex={0}
-                onClick={() => toggle(meta.key)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault()
-                    toggle(meta.key)
+                onClick={() => toggle(key)}
+                onKeyDown={(ev) => {
+                  if (ev.key === 'Enter' || ev.key === ' ') {
+                    ev.preventDefault()
+                    toggle(key)
                   }
                 }}
                 aria-pressed={isSelected}
@@ -267,8 +234,10 @@ function AddComponentsDrawer({
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-medium">{meta.name}</p>
-                    <p className="text-xs text-muted-foreground">{meta.description}</p>
+                    <p className="truncate text-sm font-medium">
+                      {e.meta.name} — {e.variant.name}
+                    </p>
+                    <p className="text-xs text-muted-foreground">{e.variant.description}</p>
                   </div>
                   <span
                     className={cn(
@@ -281,7 +250,7 @@ function AddComponentsDrawer({
                   </span>
                 </div>
                 <div className="pointer-events-none mt-2 overflow-hidden rounded-lg border bg-white p-3">
-                  <ComponentPreview componentKey={meta.key} />
+                  <ComponentPreview componentKey={e.meta.key} variantId={e.variant.id} />
                 </div>
               </div>
             )
@@ -293,8 +262,8 @@ function AddComponentsDrawer({
             {saving
               ? 'Adding…'
               : selected.size > 0
-                ? `Add ${selected.size} component${selected.size === 1 ? '' : 's'}`
-                : 'Select components to add'}
+                ? `Add ${selected.size} variant${selected.size === 1 ? '' : 's'}`
+                : 'Select variants to add'}
           </Button>
         </div>
       </div>

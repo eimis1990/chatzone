@@ -11,24 +11,26 @@ import { ComponentPreview } from '@/lib/widget-components/registry'
 import { setComponentVariant } from '@/lib/actions/component-variants'
 
 /**
- * A bot's Components page: every component available to its provider folder,
- * rendered with the bot's current variant. "Change" opens a right-side drawer
- * with all variants rendered — picking one applies immediately.
+ * A bot's Components page: every component variant the owner assigned to this
+ * bot's provider folder, rendered with the bot's current choice. "Change"
+ * opens a right-side drawer with the ASSIGNED variants rendered — picking one
+ * applies immediately.
  */
 export function BotComponentsView({
   botId,
-  assignedKeys,
+  available,
   currentVariants,
 }: {
   botId: string
-  assignedKeys: string[]
+  /** componentKey → variant ids assigned to this bot's provider folder. */
+  available: Record<string, string[]>
   /** config.components — componentKey → variantId. */
   currentVariants: Record<string, string>
 }) {
   const router = useRouter()
   const [changing, setChanging] = useState<WidgetComponentMeta | null>(null)
 
-  const assigned = WIDGET_COMPONENTS.filter((c) => assignedKeys.includes(c.key))
+  const assigned = WIDGET_COMPONENTS.filter((c) => (available[c.key]?.length ?? 0) > 0)
 
   if (assigned.length === 0) {
     return (
@@ -42,8 +44,12 @@ export function BotComponentsView({
     <>
       <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
         {assigned.map((meta) => {
-          const variantId = currentVariants[meta.key] ?? meta.variants[0]?.id
-          const variant = meta.variants.find((v) => v.id === variantId) ?? meta.variants[0]
+          const allowedIds = available[meta.key] ?? []
+          // The current choice must be an ASSIGNED variant — stale choices fall
+          // back to the first assigned one (mirrors widget-config sanitizing).
+          const chosen = currentVariants[meta.key]
+          const variantId = allowedIds.includes(chosen) ? chosen : allowedIds[0]
+          const variant = meta.variants.find((v) => v.id === variantId)
           return (
             <div
               key={meta.key}
@@ -54,13 +60,13 @@ export function BotComponentsView({
                 <p className="text-xs text-muted-foreground">{meta.description}</p>
               </div>
               <div className="pointer-events-none flex-1 overflow-hidden rounded-lg border bg-white p-3">
-                <ComponentPreview componentKey={meta.key} variantId={variant?.id} />
+                <ComponentPreview componentKey={meta.key} variantId={variantId} />
               </div>
               <div className="flex items-center justify-between gap-2">
                 <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
                   {variant?.name ?? 'Standard'}
                 </span>
-                {meta.variants.length > 1 && (
+                {allowedIds.length > 1 && (
                   <Button type="button" variant="outline" size="sm" onClick={() => setChanging(meta)}>
                     <RepeatIcon className="size-3.5" /> Change
                   </Button>
@@ -75,7 +81,12 @@ export function BotComponentsView({
         <VariantDrawer
           botId={botId}
           meta={changing}
-          currentVariantId={currentVariants[changing.key] ?? changing.variants[0]?.id}
+          allowedIds={available[changing.key] ?? []}
+          currentVariantId={
+            available[changing.key]?.includes(currentVariants[changing.key])
+              ? currentVariants[changing.key]
+              : available[changing.key]?.[0]
+          }
           onClose={() => setChanging(null)}
           onChanged={() => {
             setChanging(null)
@@ -90,17 +101,21 @@ export function BotComponentsView({
 function VariantDrawer({
   botId,
   meta,
+  allowedIds,
   currentVariantId,
   onClose,
   onChanged,
 }: {
   botId: string
   meta: WidgetComponentMeta
+  allowedIds: string[]
   currentVariantId?: string
   onClose: () => void
   onChanged: () => void
 }) {
   const [saving, setSaving] = useState<string | null>(null)
+
+  const variants = meta.variants.filter((v) => allowedIds.includes(v.id))
 
   const apply = async (variantId: string) => {
     setSaving(variantId)
@@ -140,7 +155,7 @@ function VariantDrawer({
         </div>
 
         <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-4">
-          {meta.variants.map((v) => {
+          {variants.map((v) => {
             const isCurrent = v.id === currentVariantId
             const inert = saving !== null || isCurrent
             const pick = () => {

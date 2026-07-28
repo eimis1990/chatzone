@@ -1,10 +1,17 @@
 import { describe, it, expect } from 'vitest'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { WIDGET_COMPONENTS, componentMeta, variantIdFor } from '@/lib/widget-components/meta'
-import { assignedComponents, CORE_FOLDER } from '@/lib/widget-components/availability'
+import {
+  assignedComponents,
+  assignedComponentVariants,
+  CORE_FOLDER,
+} from '@/lib/widget-components/availability'
 import { COMPONENT_FOLDERS, folderById } from '@/lib/widget-components/folders'
 
-function fakeSvc(rows: { provider: string; component_key: string }[], fail = false) {
+function fakeSvc(
+  rows: { provider: string; component_key: string; variant_id: string }[],
+  fail = false,
+) {
   return {
     from: () => ({
       select: () => ({
@@ -37,36 +44,43 @@ describe('widget component registry', () => {
   })
 })
 
-describe('assignedComponents', () => {
+describe('assignedComponentVariants', () => {
   const rows = [
-    { provider: 'woocommerce', component_key: 'product-cards' },
-    { provider: 'woocommerce', component_key: 'order-status' },
-    { provider: 'shopify', component_key: 'product-cards' },
-    { provider: 'core', component_key: 'lead-form' },
+    { provider: 'woocommerce', component_key: 'product-cards', variant_id: 'default' },
+    { provider: 'woocommerce', component_key: 'product-cards', variant_id: 'compact' },
+    { provider: 'woocommerce', component_key: 'order-status', variant_id: 'default' },
+    { provider: 'shopify', component_key: 'product-cards', variant_id: 'default' },
+    { provider: 'core', component_key: 'lead-form', variant_id: 'default' },
   ]
 
-  it('merges the provider folder with core', async () => {
-    const set = await assignedComponents(fakeSvc(rows), 'woocommerce')
-    expect(set.has('product-cards')).toBe(true)
-    expect(set.has('order-status')).toBe(true)
-    expect(set.has('lead-form')).toBe(true)
+  it('merges the provider folder with core, per variant', async () => {
+    const map = await assignedComponentVariants(fakeSvc(rows), 'woocommerce')
+    expect([...(map.get('product-cards') ?? [])].sort()).toEqual(['compact', 'default'])
+    expect(map.get('order-status')?.has('default')).toBe(true)
+    expect(map.get('lead-form')?.has('default')).toBe(true)
   })
 
-  it('a provider only sees its own folder', async () => {
-    const set = await assignedComponents(fakeSvc(rows), 'shopify')
-    expect(set.has('order-status')).toBe(false)
-    expect(set.has('lead-form')).toBe(true)
+  it('a provider only sees its own assigned variants', async () => {
+    const map = await assignedComponentVariants(fakeSvc(rows), 'shopify')
+    expect(map.get('product-cards')?.has('compact')).toBe(false)
+    expect(map.has('order-status')).toBe(false)
   })
 
   it('no provider → core only', async () => {
-    const set = await assignedComponents(fakeSvc(rows), null)
-    expect(set.has('product-cards')).toBe(false)
-    expect(set.has('lead-form')).toBe(true)
+    const map = await assignedComponentVariants(fakeSvc(rows), null)
+    expect(map.has('product-cards')).toBe(false)
+    expect(map.has('lead-form')).toBe(true)
   })
 
-  it('fails open on read errors so live widgets keep working', async () => {
-    const set = await assignedComponents(fakeSvc(rows, true), 'woocommerce')
+  it('fails open (all components, all variants) on read errors', async () => {
+    const map = await assignedComponentVariants(fakeSvc(rows, true), 'woocommerce')
+    expect(map.get('product-cards')?.has('compact')).toBe(true)
+    expect(map.has('lead-form')).toBe(true)
+  })
+
+  it('assignedComponents derives the key set', async () => {
+    const set = await assignedComponents(fakeSvc(rows), 'woocommerce')
     expect(set.has('product-cards')).toBe(true)
-    expect(set.has('lead-form')).toBe(true)
+    expect(set.has('room-visualizer')).toBe(false)
   })
 })

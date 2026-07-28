@@ -20,12 +20,12 @@ export function ProviderFolders({
           key={f.id}
           href={`/owner/components/${f.id}`}
           className="group flex flex-col items-center rounded-2xl p-6 pt-10 transition-colors hover:bg-muted/50"
-          aria-label={`${f.label} — ${f.count} component${f.count === 1 ? '' : 's'}`}
+          aria-label={`${f.label} — ${f.count} variant${f.count === 1 ? '' : 's'}`}
         >
           <FolderVisual />
           <p className="mt-5 font-medium text-foreground">{f.label}</p>
           <p className="text-xs text-muted-foreground">
-            {f.count} component{f.count === 1 ? '' : 's'}
+            {f.count} variant{f.count === 1 ? '' : 's'}
           </p>
           <p className="mt-0.5 text-center text-xs text-muted-foreground/70">{f.description}</p>
         </Link>

@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation'
 import { requireRole } from '@/lib/auth/guards'
 import { createServerClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
-import { assignedComponents } from '@/lib/widget-components/availability'
+import { assignedComponentVariants } from '@/lib/widget-components/availability'
 import { BotComponentsView } from '@/components/client/BotComponentsView'
 import type { Bot } from '@/lib/types'
 
@@ -26,7 +26,7 @@ export default async function BotComponentsPage({
     .single<Pick<Bot, 'id' | 'config'>>()
   if (!bot) notFound()
 
-  const allowed = await assignedComponents(
+  const allowed = await assignedComponentVariants(
     createServiceClient(),
     bot.config.commerce?.provider ?? null,
   )
@@ -42,7 +42,7 @@ export default async function BotComponentsPage({
       </div>
       <BotComponentsView
         botId={bot.id}
-        assignedKeys={[...allowed]}
+        available={Object.fromEntries([...allowed].map(([k, v]) => [k, [...v]]))}
         currentVariants={bot.config.components ?? {}}
       />
     </div>

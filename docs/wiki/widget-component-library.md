@@ -11,20 +11,25 @@ components. Shipped 2026-07-27 (spec:
    keyed `${componentKey}:${variantId}` — the two files MUST stay in sync).
    Components: product-cards (default + compact), order-status, lead-form,
    room-visualizer. Variants are parallel alternatives, not a timeline.
-2. **Provider folders (DB)** — `provider_components (provider, component_key)`,
-   migration `20260727150000` (applied to prod, backfilled to match the old
-   implicit gating). `provider` ∈ `CommerceProvider` ∪ `'core'`; folder list
-   derives from `lib/widget-components/folders.ts`, whose `satisfies
+2. **Provider folders (DB)** — `provider_components (provider, component_key,
+   variant_id)`, unique triple (migrations `20260727150000` +
+   `20260728080000`, applied to prod). Assignment is **VARIANT-level**: the
+   owner adds specific variants to a folder, and only those are selectable by
+   bots on that provider. `provider` ∈ `CommerceProvider` ∪ `'core'`; folder
+   list derives from `lib/widget-components/folders.ts`, whose `satisfies
    Record<CommerceProvider, string>` makes a new provider a compile error until
    labeled — that's how folders "auto-create".
-3. **Bot variant choice** — `config.components: Record<key, variantId>`;
-   unknown ids fall back to the first variant (`variantIdFor`).
+3. **Bot variant choice** — `config.components: Record<key, variantId>`, must
+   be one of the folder's assigned variants (`setComponentVariant` validates;
+   widget-config sanitizes stale choices to the first assigned variant).
 
 ## Enforcement (narrows code capabilities, never widens)
 
-- `assignedComponents(svc, provider)` (`lib/widget-components/availability.ts`)
-  merges the provider folder + core. **Fails open** on read errors so a DB
-  hiccup can't strip live widgets.
+- `assignedComponentVariants(svc, provider)`
+  (`lib/widget-components/availability.ts`) → `Map<key, Set<variantId>>`,
+  merging the provider folder + core; `assignedComponents` derives the key set
+  for the chat-route gates. **Fails open** (all components, all variants) on
+  read errors so a DB hiccup can't strip live widgets.
 - `/api/chat` + `/api/preview/chat`: no `product-cards` → `suppressProducts`
   (text-only reply, tools still run); no `order-status` → order tool not
   offered (`makeProductTools` last param); no `lead-form` → fallback-trigger
@@ -37,8 +42,9 @@ components. Shipped 2026-07-27 (spec:
 ## Screens
 
 - Owner: `/owner/components` (Versioning → Components) — Uiverse folder cards
-  (`components/owner/ProviderFolders.tsx`) → `/owner/components/[provider]`
-  grid + add-drawer (`FolderComponentsView.tsx`).
+  (`components/owner/ProviderFolders.tsx`) → `/owner/components/[provider]`:
+  one card per assigned VARIANT, add-drawer lists unassigned variants
+  (`FolderComponentsView.tsx`).
 - Per bot: client `/app/bots/[botId]/components` + owner twin
   `/owner/clients/[orgId]/bots/[botId]/components` (tab in OwnerBotTabs), both
   rendering `BotComponentsView` → variant drawer →

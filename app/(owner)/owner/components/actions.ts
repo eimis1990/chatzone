@@ -6,39 +6,58 @@ import { createServerClient } from '@/lib/supabase/server'
 import { componentMeta } from '@/lib/widget-components/meta'
 import { folderById } from '@/lib/widget-components/folders'
 
-function assertValid(folderId: string, keys: string[]) {
+export interface VariantRef {
+  componentKey: string
+  variantId: string
+}
+
+function assertValid(folderId: string, refs: VariantRef[]) {
   if (!folderById(folderId)) throw new Error('Unknown folder.')
-  for (const key of keys) {
-    if (!componentMeta(key)) throw new Error(`Unknown component: ${key}`)
+  for (const { componentKey, variantId } of refs) {
+    const meta = componentMeta(componentKey)
+    if (!meta) throw new Error(`Unknown component: ${componentKey}`)
+    if (!meta.variants.some((v) => v.id === variantId)) {
+      throw new Error(`Unknown variant: ${componentKey}/${variantId}`)
+    }
   }
 }
 
-export async function addProviderComponents(folderId: string, keys: string[]): Promise<void> {
-  await requireRole('owner')
-  assertValid(folderId, keys)
-  if (keys.length === 0) return
-  const supabase = await createServerClient()
-  const { error } = await supabase
-    .from('provider_components')
-    .upsert(
-      keys.map((component_key) => ({ provider: folderId, component_key })),
-      { onConflict: 'provider,component_key', ignoreDuplicates: true },
-    )
-  if (error) throw new Error(error.message)
+function revalidate(folderId: string) {
   revalidatePath('/owner/components')
   revalidatePath(`/owner/components/${folderId}`)
 }
 
-export async function removeProviderComponent(folderId: string, key: string): Promise<void> {
+export async function addProviderComponents(folderId: string, refs: VariantRef[]): Promise<void> {
   await requireRole('owner')
-  assertValid(folderId, [key])
+  assertValid(folderId, refs)
+  if (refs.length === 0) return
+  const supabase = await createServerClient()
+  const { error } = await supabase.from('provider_components').upsert(
+    refs.map(({ componentKey, variantId }) => ({
+      provider: folderId,
+      component_key: componentKey,
+      variant_id: variantId,
+    })),
+    { onConflict: 'provider,component_key,variant_id', ignoreDuplicates: true },
+  )
+  if (error) throw new Error(error.message)
+  revalidate(folderId)
+}
+
+export async function removeProviderComponent(
+  folderId: string,
+  componentKey: string,
+  variantId: string,
+): Promise<void> {
+  await requireRole('owner')
+  assertValid(folderId, [{ componentKey, variantId }])
   const supabase = await createServerClient()
   const { error } = await supabase
     .from('provider_components')
     .delete()
     .eq('provider', folderId)
-    .eq('component_key', key)
+    .eq('component_key', componentKey)
+    .eq('variant_id', variantId)
   if (error) throw new Error(error.message)
-  revalidatePath('/owner/components')
-  revalidatePath(`/owner/components/${folderId}`)
+  revalidate(folderId)
 }

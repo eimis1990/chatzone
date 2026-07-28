@@ -5,7 +5,7 @@ import { getSessionUser } from '@/lib/auth/guards'
 import { createServerClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { componentMeta } from '@/lib/widget-components/meta'
-import { assignedComponents } from '@/lib/widget-components/availability'
+import { assignedComponentVariants } from '@/lib/widget-components/availability'
 import type { BotConfig } from '@/lib/types'
 
 /**
@@ -50,10 +50,10 @@ export async function setComponentVariant(
   }
   if (!bot) return { success: false, error: 'Bot not found.' }
 
-  // The component must be available to this bot's provider folder (+ core).
-  const allowed = await assignedComponents(svc, bot.config.commerce?.provider ?? null)
-  if (!allowed.has(componentKey)) {
-    return { success: false, error: 'This component is not available for this bot.' }
+  // The VARIANT must be assigned to this bot's provider folder (+ core).
+  const allowed = await assignedComponentVariants(svc, bot.config.commerce?.provider ?? null)
+  if (!allowed.get(componentKey)?.has(variantId)) {
+    return { success: false, error: 'This variant is not available for this bot.' }
   }
 
   const config: BotConfig = {

@@ -4,7 +4,7 @@ import { publicBotConfig } from '@/lib/widget-config'
 import { entitlementsFor, isInternalOrg } from '@/lib/entitlements'
 import { VISUALIZER_ADDON } from '@/lib/plans-catalog'
 import { visualizerUsageMonth } from '@/lib/room-visualizer'
-import { assignedComponents } from '@/lib/widget-components/availability'
+import { assignedComponentVariants } from '@/lib/widget-components/availability'
 import type { Bot, Plan } from '@/lib/types'
 
 export async function OPTIONS(req: Request) {
@@ -83,10 +83,24 @@ export async function GET(req: Request) {
 
   // Component-library folders: strip core components the owner un-assigned.
   // (Provider-specific ones — product cards, order status — gate in /api/chat.)
-  const allowedComponents = await assignedComponents(svc, bot.config.commerce?.provider ?? null)
-  if (!allowedComponents.has('room-visualizer')) bot.config.roomVisualizer = false
-  if (!allowedComponents.has('lead-form') && bot.config.leadCapture) {
+  const allowedVariants = await assignedComponentVariants(
+    svc,
+    bot.config.commerce?.provider ?? null,
+  )
+  if (!allowedVariants.has('room-visualizer')) bot.config.roomVisualizer = false
+  if (!allowedVariants.has('lead-form') && bot.config.leadCapture) {
     bot.config.leadCapture.enabled = false
+  }
+  // Sanitize the bot's variant choices: an un-assigned choice (owner removed
+  // the variant after the bot picked it) falls back to the first assigned one.
+  if (bot.config.components) {
+    const sanitized: Record<string, string> = {}
+    for (const [key, variantId] of Object.entries(bot.config.components)) {
+      const set = allowedVariants.get(key)
+      if (!set || set.size === 0) continue
+      sanitized[key] = set.has(variantId) ? variantId : [...set][0]
+    }
+    bot.config.components = sanitized
   }
 
   // Stamp "last seen" so the owner can tell this bot is embedded & live. The
