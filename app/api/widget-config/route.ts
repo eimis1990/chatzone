@@ -91,6 +91,11 @@ export async function GET(req: Request) {
   if (!allowedVariants.has('lead-form') && bot.config.leadCapture) {
     bot.config.leadCapture.enabled = false
   }
+  if (!allowedVariants.has('quick-actions') && bot.config.content) {
+    for (const lang of Object.values(bot.config.content)) {
+      if (lang) lang.suggestedQuestions = []
+    }
+  }
   // Sanitize the bot's variant choices: an un-assigned choice (owner removed
   // the variant after the bot picked it) falls back to the first assigned one.
   if (bot.config.components) {

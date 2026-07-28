@@ -11,6 +11,12 @@ import { VisitorBlockedScreen } from './VisitorBlockedScreen'
 import { VoiceCallButton, type CallState } from '@/components/voice/VoiceCallButton'
 import { LeadForm } from './LeadForm'
 import { WelcomeScreen } from './WelcomeScreen'
+import type { QuickActionsVariant } from './QuickActionButtons'
+
+/** Narrow a config-supplied variant id to what QuickActionButtons implements. */
+function quickActionsVariant(id: string | undefined): QuickActionsVariant {
+  return id === 'pills' || id === 'list' ? id : 'default'
+}
 import type { PublicBotConfig } from '@/lib/widget-config'
 import { sqLabel, sqMode, sqPrompt, sqQuery, sqUrl } from '@/lib/widget-config'
 import { SiriOrb } from './SiriOrb'
@@ -1216,6 +1222,7 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
             glassBubbles={glassBubbles}
             bubbleBorderColor={bubbleBorderColor}
             bubbleBorderWidth={bubbleBorderWidth}
+            quickActionsVariant={quickActionsVariant(config.components?.['quick-actions'])}
             onSelect={handleQuickAction}
           />
         ) : (

@@ -1,9 +1,8 @@
 'use client'
 
 import { motion, useReducedMotion, type Variants } from 'framer-motion'
-import { ArrowDownIcon } from 'lucide-react'
 import { readableTextColor, isLightColor } from '@/lib/utils'
-import { sqLabel } from '@/lib/widget-config'
+import { QuickActionButtons, type QuickActionsVariant } from './QuickActionButtons'
 import type { SuggestedQuestion } from '@/lib/types'
 
 interface WelcomeScreenProps {
@@ -24,6 +23,8 @@ interface WelcomeScreenProps {
   /** Optional border on the greeting bubble + action tiles (width 0 = none). */
   bubbleBorderColor?: string
   bubbleBorderWidth?: number
+  /** Component-library variant for the action buttons (quick-actions). */
+  quickActionsVariant?: QuickActionsVariant
   /** Receives the clicked action and its index (so the host can fetch / send). */
   onSelect: (action: SuggestedQuestion, index: number) => void
 }
@@ -49,6 +50,7 @@ export function WelcomeScreen({
   glassBubbles = false,
   bubbleBorderColor = '#e5e7eb',
   bubbleBorderWidth = 0,
+  quickActionsVariant = 'default',
   onSelect,
 }: WelcomeScreenProps) {
   const radius = `${Math.min(bubbleRadius, 16)}px`
@@ -72,11 +74,6 @@ export function WelcomeScreen({
   const glassClasses = darkBg
     ? 'bg-white/10 backdrop-blur-md ring-1 ring-white/15'
     : 'bg-white/40 backdrop-blur-md ring-1 ring-white/50'
-  const visibleQuestions = suggestedQuestions.slice(0, 6)
-  // With an odd number of tiles the last one would sit alone in a half-width
-  // cell — span it full width instead so the grid never looks lopsided.
-  const orphanLast = visibleQuestions.length % 2 === 1
-
   const reduce = useReducedMotion()
 
   // Subtle staggered entrance. With reduced motion we drop the slide + stagger
@@ -149,47 +146,21 @@ export function WelcomeScreen({
         </motion.div>
       ) : null}
 
-      {/* Suggested-action tiles — 2 per row, bottom-aligned above the composer.
-          An odd trailing tile spans the full width so the grid stays balanced. */}
-      {visibleQuestions.length > 0 && (
-        <motion.div className="mt-auto grid grid-cols-2 gap-2 pt-6" variants={container}>
-          {visibleQuestions.map((q, i) => {
-            const fullWidth = orphanLast && i === visibleQuestions.length - 1
-            const label = sqLabel(q)
-            return (
-              <motion.button
-                key={i}
-                type="button"
-                onClick={() => onSelect(q, i)}
-                variants={item}
-                className={`group relative flex min-h-[64px] flex-col justify-end overflow-hidden p-3 text-left text-sm font-medium leading-snug ${
-                  glassBubbles
-                    ? glassClasses
-                    : surface
-                      ? ''
-                      : 'border border-gray-200 bg-white'
-                } ${glassBubbles && darkBg ? 'text-gray-50' : surface ? '' : 'text-gray-800'}${fullWidth ? ' col-span-2' : ''}`}
-                style={{ borderRadius: radius, ...bubbleBorder, ...surfaceStyle }}
-              >
-                {/* Soft glow in the top-right corner, tinted to the header color.
-                    Intensifies on hover instead of a background change. */}
-                <span
-                  aria-hidden="true"
-                  className="pointer-events-none absolute -right-5 -top-5 size-16 rounded-full opacity-30 blur-2xl transition-opacity duration-300 group-hover:opacity-65"
-                  style={{ backgroundColor: primaryColor }}
-                />
-                {/* Arrow sits in the glow; nudges down on hover to signal it's pressable */}
-                <ArrowDownIcon
-                  aria-hidden="true"
-                  className="absolute right-3 top-3 size-4 transition-transform duration-200 ease-out group-hover:translate-y-1"
-                  style={{ color: accentColor }}
-                />
-                <span className="relative">{label}</span>
-              </motion.button>
-            )
-          })}
-        </motion.div>
-      )}
+      {/* Suggested-action buttons — component-library 'quick-actions' variants. */}
+      <QuickActionButtons
+        questions={suggestedQuestions}
+        variant={quickActionsVariant}
+        primaryColor={primaryColor}
+        accentColor={accentColor}
+        radius={radius}
+        glassBubbles={glassBubbles}
+        glassClasses={glassClasses}
+        hasSurface={Boolean(surface)}
+        surfaceStyle={surfaceStyle}
+        bubbleBorder={bubbleBorder}
+        darkBg={darkBg}
+        onSelect={onSelect}
+      />
     </motion.div>
   )
 }

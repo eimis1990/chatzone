@@ -11,6 +11,7 @@ import { ProductCards } from '@/components/widget/ProductCards'
 import { OrderStatusCard } from '@/components/widget/OrderStatusCard'
 import { LeadForm } from '@/components/widget/LeadForm'
 import { RoomTray } from '@/components/widget/RoomVisualizer'
+import { QuickActionButtons } from '@/components/widget/QuickActionButtons'
 import type { CommerceProduct, OrderStatus } from '@/lib/commerce/types'
 
 // Product shots generated for these samples — scripts/gen-component-previews.mjs.
@@ -54,6 +55,8 @@ const SAMPLE_ORDER: OrderStatus = {
 }
 
 const PREVIEW_PRIMARY = '#e8590c'
+
+const SAMPLE_ACTIONS = ['Show bestsellers', 'Track my order', 'Opening hours', 'Talk to a human']
 const noopAsync = async () => {}
 const noop = () => {}
 
@@ -72,6 +75,25 @@ const PREVIEWS: Record<string, () => ReactNode> = {
   ),
   'order-status:timeline': () => (
     <OrderStatusCard order={SAMPLE_ORDER} primaryColor={PREVIEW_PRIMARY} variant="timeline" />
+  ),
+  'quick-actions:default': () => (
+    <QuickActionButtons questions={SAMPLE_ACTIONS} primaryColor={PREVIEW_PRIMARY} onSelect={noop} />
+  ),
+  'quick-actions:pills': () => (
+    <QuickActionButtons
+      questions={SAMPLE_ACTIONS}
+      variant="pills"
+      primaryColor={PREVIEW_PRIMARY}
+      onSelect={noop}
+    />
+  ),
+  'quick-actions:list': () => (
+    <QuickActionButtons
+      questions={SAMPLE_ACTIONS}
+      variant="list"
+      primaryColor={PREVIEW_PRIMARY}
+      onSelect={noop}
+    />
   ),
   'lead-form:default': () => (
     <LeadForm

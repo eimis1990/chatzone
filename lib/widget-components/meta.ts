@@ -61,6 +61,29 @@ export const WIDGET_COMPONENTS: WidgetComponentMeta[] = [
     ],
   },
   {
+    key: 'quick-actions',
+    name: 'Quick action buttons',
+    description: 'Suggested actions on the welcome screen — the first thing visitors can tap.',
+    core: true,
+    variants: [
+      {
+        id: 'default',
+        name: 'Tiles',
+        description: 'Two-column tiles with a soft brand glow and a corner arrow.',
+      },
+      {
+        id: 'pills',
+        name: 'Pills',
+        description: 'Centered wrap of compact rounded chips — light and space-saving.',
+      },
+      {
+        id: 'list',
+        name: 'List',
+        description: 'Stacked full-width menu rows with a chevron — clear and scannable.',
+      },
+    ],
+  },
+  {
     key: 'lead-form',
     name: 'Lead capture form',
     description: 'In-chat form that collects the visitor’s contact details.',
