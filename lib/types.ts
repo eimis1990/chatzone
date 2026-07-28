@@ -292,7 +292,7 @@ export interface BotConfig {
   /** Live product search (e-commerce). */
   commerce: {
     enabled: boolean
-    provider: 'woocommerce' | 'shopify' | 'magento' | 'verskis' | 'feed'
+    provider: 'woocommerce' | 'shopify' | 'magento' | 'verskis' | 'feed' | 'travelline'
     storeUrl: string
     /** WooCommerce REST consumer key/secret — server-only, for order lookups. */
     restKey?: string
@@ -304,6 +304,10 @@ export interface BotConfig {
     magentoToken?: string
     /** Product feed URL (JSON/XML/CSV) for the 'feed' provider. */
     feedUrl?: string
+    /** TravelLine Partner API credentials (server-only) + hotel property id. */
+    tlClientId?: string
+    tlClientSecret?: string
+    tlPropertyId?: string
     /** A static discount the agent can offer on discount intent. */
     discount?: { enabled: boolean; code?: string; description?: string }
   }

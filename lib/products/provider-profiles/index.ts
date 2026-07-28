@@ -8,6 +8,7 @@ import type {
   CommerceProviderProfile,
   CompleteDisplaySelectionInput,
 } from './types'
+import { travellineProductSearchProfile } from './travelline'
 import { verskisProductSearchProfile } from './verskis'
 import { woocommerceProductSearchProfile } from './woocommerce'
 export {
@@ -24,6 +25,7 @@ export const commerceProviderProfiles = Object.freeze({
   magento: magentoProductSearchProfile,
   verskis: verskisProductSearchProfile,
   feed: feedProductSearchProfile,
+  travelline: travellineProductSearchProfile,
 }) satisfies Readonly<Record<CommerceProvider, CommerceProviderProfile>>
 
 export function commerceProviderProfile(config: CommerceConfig): CommerceProviderProfile {

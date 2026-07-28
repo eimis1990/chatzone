@@ -2276,6 +2276,9 @@ function CommerceSection({ control, watch, setValue, botId }: CommerceSectionPro
   const restSecret = watch('commerce.restSecret') ?? ''
   const magentoToken = watch('commerce.magentoToken') ?? ''
   const feedUrl = watch('commerce.feedUrl') ?? ''
+  const tlClientId = watch('commerce.tlClientId') ?? ''
+  const tlClientSecret = watch('commerce.tlClientSecret') ?? ''
+  const tlPropertyId = watch('commerce.tlPropertyId') ?? ''
   const discountEnabled = watch('commerce.discount.enabled')
   const [testState, setTestState] = useState<CommerceTestState>({ status: 'idle' })
   const [orderTest, setOrderTest] = useState<{
@@ -2405,7 +2408,9 @@ function CommerceSection({ control, watch, setValue, botId }: CommerceSectionPro
       ? Boolean(shopifyDomain.trim() && shopifyToken.trim())
       : provider === 'feed'
         ? Boolean(feedUrl.trim())
-        : Boolean(storeUrl.trim())
+        : provider === 'travelline'
+          ? Boolean(tlClientId.trim() && tlClientSecret.trim() && tlPropertyId.trim())
+          : Boolean(storeUrl.trim())
 
   const skipNextTestResetRef = useRef(false)
 
@@ -2424,7 +2429,14 @@ function CommerceSection({ control, watch, setValue, botId }: CommerceSectionPro
           ? { provider, shopifyDomain: shopifyDomain.trim(), shopifyToken: shopifyToken.trim() }
           : provider === 'feed'
             ? { provider, feedUrl: feedUrl.trim() }
-            : { provider, storeUrl: storeUrl.trim() }
+            : provider === 'travelline'
+              ? {
+                  provider,
+                  tlClientId: tlClientId.trim(),
+                  tlClientSecret: tlClientSecret.trim(),
+                  tlPropertyId: tlPropertyId.trim(),
+                }
+              : { provider, storeUrl: storeUrl.trim() }
       const res = await fetch('/api/commerce/validate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -2451,10 +2463,10 @@ function CommerceSection({ control, watch, setValue, botId }: CommerceSectionPro
     } catch {
       setTestState({ status: 'error', message: 'Network error — please try again.' })
     }
-  }, [provider, storeUrl, shopifyDomain, shopifyToken, feedUrl, testReady, setValue])
+  }, [provider, storeUrl, shopifyDomain, shopifyToken, feedUrl, tlClientId, tlClientSecret, tlPropertyId, testReady, setValue])
 
   // Reset test state when the connection inputs change.
-  const connKey = `${provider}:${storeUrl}:${shopifyDomain}:${shopifyToken}:${feedUrl}`
+  const connKey = `${provider}:${storeUrl}:${shopifyDomain}:${shopifyToken}:${feedUrl}:${tlClientId}:${tlClientSecret}:${tlPropertyId}`
   const prevConnRef = useRef(connKey)
   if (prevConnRef.current !== connKey) {
     prevConnRef.current = connKey
@@ -2506,6 +2518,7 @@ function CommerceSection({ control, watch, setValue, botId }: CommerceSectionPro
                       <SelectItem value="magento">Magento</SelectItem>
                       <SelectItem value="verskis">Verskis</SelectItem>
                       <SelectItem value="feed">Product feed (XML / CSV / JSON)</SelectItem>
+                      <SelectItem value="travelline">TravelLine (hotels)</SelectItem>
                     </SelectContent>
                   </Select>
                 )}
@@ -2610,6 +2623,93 @@ function CommerceSection({ control, watch, setValue, botId }: CommerceSectionPro
               </div>
             )}
 
+            {/* TravelLine: Partner API credentials + hotel property id. */}
+            {provider === 'travelline' && (
+              <div className="space-y-3">
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="tlClientId">Client ID</Label>
+                    <Controller
+                      name="commerce.tlClientId"
+                      control={control}
+                      render={({ field }) => (
+                        <Input
+                          id="tlClientId"
+                          value={field.value ?? ''}
+                          onChange={field.onChange}
+                          onBlur={field.onBlur}
+                          autoComplete="off"
+                          className="font-mono text-sm"
+                        />
+                      )}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="tlClientSecret">Client secret</Label>
+                    <Controller
+                      name="commerce.tlClientSecret"
+                      control={control}
+                      render={({ field }) => (
+                        <Input
+                          id="tlClientSecret"
+                          type="password"
+                          value={field.value ?? ''}
+                          onChange={field.onChange}
+                          onBlur={field.onBlur}
+                          autoComplete="off"
+                          className="font-mono text-sm"
+                        />
+                      )}
+                    />
+                  </div>
+                </div>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="tlPropertyId">Property ID</Label>
+                    <Controller
+                      name="commerce.tlPropertyId"
+                      control={control}
+                      render={({ field }) => (
+                        <Input
+                          id="tlPropertyId"
+                          value={field.value ?? ''}
+                          onChange={field.onChange}
+                          onBlur={field.onBlur}
+                          placeholder="e.g. 12345"
+                          autoComplete="off"
+                          className="font-mono text-sm"
+                        />
+                      )}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="commerceStoreUrlTl">Hotel website (optional)</Label>
+                    <Controller
+                      name="commerce.storeUrl"
+                      control={control}
+                      render={({ field }) => (
+                        <Input
+                          id="commerceStoreUrlTl"
+                          value={field.value ?? ''}
+                          onChange={field.onChange}
+                          onBlur={field.onBlur}
+                          placeholder="https://yourhotel.com"
+                          autoComplete="url"
+                          inputMode="url"
+                        />
+                      )}
+                    />
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  API credentials come from the hotel&apos;s TravelLine account (API connections) or a
+                  TravelLine partner agreement. The assistant checks live availability and prices,
+                  and booking finishes on the hotel&apos;s TravelLine booking form — payment never
+                  happens in chat.
+                </p>
+              </div>
+            )}
+
             {/* Test connection button + result */}
             <div className="flex items-center gap-3 flex-wrap">
               <Button
@@ -2625,7 +2725,9 @@ function CommerceSection({ control, watch, setValue, botId }: CommerceSectionPro
               {testState.status === 'ok' && (
                 <TestBadge variant="ok">
                   {testState.count > 0
-                    ? `Connected — ${testState.count.toLocaleString()} product${testState.count !== 1 ? 's' : ''} in catalog`
+                    ? provider === 'travelline'
+                      ? `Connected — ${testState.count} room type${testState.count !== 1 ? 's' : ''}`
+                      : `Connected — ${testState.count.toLocaleString()} product${testState.count !== 1 ? 's' : ''} in catalog`
                     : 'Connected'}
                 </TestBadge>
               )}

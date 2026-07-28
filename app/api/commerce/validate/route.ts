@@ -6,11 +6,16 @@ import { validateStore, validateOrderAccess } from '@/lib/commerce'
 export const maxDuration = 20
 
 const bodySchema = z.object({
-  provider: z.enum(['woocommerce', 'shopify', 'magento', 'verskis', 'feed']).default('woocommerce'),
+  provider: z
+    .enum(['woocommerce', 'shopify', 'magento', 'verskis', 'feed', 'travelline'])
+    .default('woocommerce'),
   storeUrl: z.string().optional(),
   shopifyDomain: z.string().optional(),
   shopifyToken: z.string().optional(),
   feedUrl: z.string().optional(),
+  tlClientId: z.string().optional(),
+  tlClientSecret: z.string().optional(),
+  tlPropertyId: z.string().optional(),
   // 'store' = catalog connectivity; 'orders' = REST creds (order lookup).
   mode: z.enum(['store', 'orders']).default('store'),
   restKey: z.string().optional(),
@@ -51,6 +56,9 @@ export async function POST(req: Request) {
     shopifyDomain: parsed.data.shopifyDomain,
     shopifyToken: parsed.data.shopifyToken,
     feedUrl: parsed.data.feedUrl,
+    tlClientId: parsed.data.tlClientId,
+    tlClientSecret: parsed.data.tlClientSecret,
+    tlPropertyId: parsed.data.tlPropertyId,
   })
 
   // WooCommerce is the default selection, so store owners commonly paste a
@@ -76,6 +84,7 @@ export async function POST(req: Request) {
       verskis: 'Could not read the Verskis storefront at that URL.',
       feed: 'Could not read a product feed at that URL (expects JSON, XML, or CSV).',
       woocommerce: 'Could not reach the WooCommerce Store API at that URL.',
+      travelline: 'Could not authenticate with TravelLine — check the client ID, secret, and property ID.',
     }
     return NextResponse.json({ ok: false, error: errors[parsed.data.provider] ?? errors.woocommerce })
   }

@@ -75,7 +75,7 @@ type LiveConfig = {
   }
   commerce?: {
     enabled?: boolean
-    provider?: 'woocommerce' | 'shopify' | 'magento' | 'verskis' | 'feed'
+    provider?: 'woocommerce' | 'shopify' | 'magento' | 'verskis' | 'feed' | 'travelline'
     storeUrl?: string
     restKey?: string
     restSecret?: string
@@ -83,6 +83,9 @@ type LiveConfig = {
     shopifyToken?: string
     magentoToken?: string
     feedUrl?: string
+    tlClientId?: string
+    tlClientSecret?: string
+    tlPropertyId?: string
     discount?: { enabled?: boolean; code?: string; description?: string }
   }
 }

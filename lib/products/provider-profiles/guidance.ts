@@ -26,6 +26,15 @@ const promptGuidance: Readonly<Record<CommerceProvider, CommerceProviderPromptGu
       'preview cards and the rest remain available behind the full-results list.',
   },
   feed: {},
+  travelline: {
+    queryGuidance:
+      'This is a HOTEL. search_products browses room TYPES (no prices — prices depend on dates). ' +
+      'Whenever the guest wants prices or to book, first collect check-in date, check-out date, and ' +
+      'number of adults (plus ages of any children), then call check_availability — NEVER quote a ' +
+      'price that did not come from check_availability results.',
+    displayGuidance:
+      'A hotel has few room types — display every relevant option rather than a subset.',
+  },
 })
 
 export const verskisPromptGuidance = promptGuidance.verskis

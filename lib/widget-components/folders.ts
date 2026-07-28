@@ -10,6 +10,7 @@ const PROVIDER_LABELS = {
   magento: 'Magento',
   verskis: 'Verskis',
   feed: 'Product feed',
+  travelline: 'TravelLine',
 } satisfies Record<CommerceProvider, string>
 
 export interface ComponentFolder {

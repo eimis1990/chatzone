@@ -30,6 +30,11 @@ import {
 } from '@/lib/commerce/magento'
 import { searchFeed, validateFeed } from '@/lib/commerce/feed'
 import {
+  searchTravellineRoomTypes,
+  fetchTravellineRoomDetails,
+  validateTravellineStore,
+} from '@/lib/commerce/travelline'
+import {
   fetchVerskisProductDetails,
   listVerskisProductsByUrl,
   searchVerskisProducts,
@@ -85,6 +90,9 @@ export async function searchStore(
       return searchVerskisProducts(config.storeUrl, params, deps)
     case 'feed':
       return searchFeed(config.feedUrl ?? '', params, deps)
+    case 'travelline':
+      // Dateless room-type browsing; dated offers go through check_availability.
+      return searchTravellineRoomTypes(config, params, deps)
     default:
       return []
   }
@@ -134,6 +142,8 @@ export async function getProductDetails(
       return fetchShopifyProductDetails(config.shopifyDomain!, config.shopifyToken!, ids, deps)
     case 'verskis':
       return fetchVerskisProductDetails(config.storeUrl, ids, deps)
+    case 'travelline':
+      return fetchTravellineRoomDetails(config, ids, deps)
     default:
       return []
   }
@@ -147,6 +157,9 @@ export async function validateStore(
     shopifyDomain?: string
     shopifyToken?: string
     feedUrl?: string
+    tlClientId?: string
+    tlClientSecret?: string
+    tlPropertyId?: string
   },
   deps: CommerceDeps = {},
 ): Promise<{ ok: boolean; total: number }> {
@@ -164,6 +177,20 @@ export async function validateStore(
       return config.storeUrl ? validateVerskisStore(config.storeUrl, deps) : { ok: false, total: 0 }
     case 'feed':
       return config.feedUrl ? validateFeed(config.feedUrl, deps) : { ok: false, total: 0 }
+    case 'travelline':
+      return config.tlClientId && config.tlClientSecret && config.tlPropertyId
+        ? validateTravellineStore(
+            {
+              enabled: true,
+              provider: 'travelline',
+              storeUrl: config.storeUrl ?? '',
+              tlClientId: config.tlClientId,
+              tlClientSecret: config.tlClientSecret,
+              tlPropertyId: config.tlPropertyId,
+            },
+            deps,
+          )
+        : { ok: false, total: 0 }
     default:
       return { ok: false, total: 0 }
   }

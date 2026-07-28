@@ -19,6 +19,7 @@ describe('commerce provider profiles', () => {
       'feed',
       'magento',
       'shopify',
+      'travelline',
       'verskis',
       'woocommerce',
     ])

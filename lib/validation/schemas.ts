@@ -263,7 +263,9 @@ export const botConfigFormSchema = z.object({
   commerce: z
     .object({
       enabled: z.boolean().default(false),
-      provider: z.enum(['woocommerce', 'shopify', 'magento', 'verskis', 'feed']).default('woocommerce'),
+      provider: z
+        .enum(['woocommerce', 'shopify', 'magento', 'verskis', 'feed', 'travelline'])
+        .default('woocommerce'),
       storeUrl: z.string().default(''),
       restKey: z.string().optional().or(z.literal('')),
       restSecret: z.string().optional().or(z.literal('')),
@@ -271,6 +273,9 @@ export const botConfigFormSchema = z.object({
       shopifyToken: z.string().optional().or(z.literal('')),
       magentoToken: z.string().optional().or(z.literal('')),
       feedUrl: z.string().optional().or(z.literal('')),
+      tlClientId: z.string().optional().or(z.literal('')),
+      tlClientSecret: z.string().optional().or(z.literal('')),
+      tlPropertyId: z.string().optional().or(z.literal('')),
       discount: z
         .object({
           enabled: z.boolean().default(false),

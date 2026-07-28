@@ -20,6 +20,10 @@ export interface CommerceConfig {
   magentoToken?: string
   /** Product feed URL (JSON/XML/CSV) for the 'feed' provider. */
   feedUrl?: string
+  /** TravelLine Partner API credentials (server-only) + hotel property id. */
+  tlClientId?: string
+  tlClientSecret?: string
+  tlPropertyId?: string
   /** A static discount the agent can offer on discount intent. */
   discount?: { enabled: boolean; code?: string; description?: string }
 }
@@ -37,6 +41,8 @@ export function storeConfigured(config: CommerceConfig | undefined | null): bool
       return Boolean(config.storeUrl)
     case 'feed':
       return Boolean(config.feedUrl)
+    case 'travelline':
+      return Boolean(config.tlClientId && config.tlClientSecret && config.tlPropertyId)
     default:
       return false
   }
@@ -48,7 +54,9 @@ export function productDetailsSupported(config: CommerceConfig | undefined | nul
   return (
     config.provider === 'woocommerce' ||
     config.provider === 'shopify' ||
-    config.provider === 'verskis'
+    config.provider === 'verskis' ||
+    // Room-type details come from the Content API (description, amenities, occupancy).
+    config.provider === 'travelline'
   )
 }
 

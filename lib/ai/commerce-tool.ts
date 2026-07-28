@@ -19,6 +19,7 @@ import {
   orderLookupEnabled,
   storeConfigured,
 } from '@/lib/commerce'
+import { searchTravellineRooms } from '@/lib/commerce/travelline'
 
 /**
  * Builds the product tools for a commerce-enabled bot:
@@ -164,6 +165,75 @@ export function makeProductTools(
         return { shown: chosen.length }
       },
     }),
+  }
+
+  // Hotel availability (TravelLine only): dated room-stay offers with real
+  // prices and a prefilled booking-engine link. Results register as candidates
+  // so display_products renders them as cards, same as search results.
+  if (config.commerce?.provider === 'travelline' && storeConfigured(config.commerce)) {
+    tools.check_availability = tool({
+      description:
+        'Check live room availability and prices for a stay. You MUST have the check-in date, ' +
+        'check-out date, and number of adults before calling — ask the guest for whatever is ' +
+        'missing (and ages of any children). Dates are ISO YYYY-MM-DD; resolve relative dates ' +
+        '("next weekend", "kitą savaitgalį") to concrete dates first, asking if ambiguous. ' +
+        'Returns bookable offers with the TOTAL price for the whole stay and a booking link — ' +
+        'these are the ONLY prices you may quote. After reviewing, call display_products with ' +
+        'the ids the guest should see; the card button takes them to the booking form with ' +
+        'everything prefilled.',
+      inputSchema: z.object({
+        checkIn: z.string().describe('Check-in date, YYYY-MM-DD'),
+        checkOut: z.string().describe('Check-out date, YYYY-MM-DD'),
+        adults: z.number().int().min(1).max(20).describe('Number of adults'),
+        childAges: z
+          .array(z.number().int().min(0).max(17))
+          .optional()
+          .describe('Ages of children joining the stay, one entry per child'),
+      }),
+      execute: async ({ checkIn, checkOut, adults, childAges }) => {
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(checkIn) || !/^\d{4}-\d{2}-\d{2}$/.test(checkOut)) {
+          return { error: 'Dates must be ISO YYYY-MM-DD. Ask the guest to clarify the dates.' }
+        }
+        if (checkOut <= checkIn) {
+          return { error: 'Check-out must be after check-in. Ask the guest to clarify the dates.' }
+        }
+        try {
+          const offers = await searchTravellineRooms(config.commerce!, {
+            arrivalDate: checkIn,
+            departureDate: checkOut,
+            adults,
+            childAges,
+          })
+          latestSearchQuery = `${checkIn}..${checkOut}`
+          latestSearchProducts = offers
+          offers.forEach((p) => candidates.set(p.id, p))
+          if (!offers.length) {
+            return {
+              noAvailability: true,
+              nextAction:
+                'No rooms are available for those exact dates/party. Offer to check nearby dates ' +
+                'or a different party size — do not invent alternatives or prices.',
+            }
+          }
+          return offers.map((p) => ({
+            id: p.id,
+            title: p.title,
+            totalPriceForStay: p.price,
+            available: p.inStock,
+            summary: p.shortDescription,
+            details: p.details,
+          }))
+        } catch (err) {
+          console.error('[agent] check_availability failed:', err)
+          return {
+            error:
+              'Availability lookup failed temporarily. Retry once; if it fails again, tell the ' +
+              'guest you could not check availability right now — do NOT guess prices or ' +
+              'availability.',
+          }
+        }
+      },
+    })
   }
 
   // Full live details — only where the provider has a live details path
