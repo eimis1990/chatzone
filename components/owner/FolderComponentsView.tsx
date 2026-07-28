@@ -22,6 +22,7 @@ export function FolderComponentsView({
 }) {
   const router = useRouter()
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const [viewingVariants, setViewingVariants] = useState<WidgetComponentMeta | null>(null)
   const [busy, setBusy] = useState(false)
 
   const assigned = WIDGET_COMPONENTS.filter((c) => assignedKeys.includes(c.key))
@@ -74,9 +75,14 @@ export function FolderComponentsView({
                 <p className="truncate font-medium text-foreground">{meta.name}</p>
                 <p className="text-xs text-muted-foreground">{meta.description}</p>
               </div>
-              <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+              <button
+                type="button"
+                onClick={() => setViewingVariants(meta)}
+                className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary"
+                title="View all variants"
+              >
                 {meta.variants.length} variant{meta.variants.length === 1 ? '' : 's'}
-              </span>
+              </button>
             </div>
             <div className="pointer-events-none flex-1 overflow-hidden rounded-lg border bg-white p-3">
               <ComponentPreview componentKey={meta.key} />
@@ -113,7 +119,62 @@ export function FolderComponentsView({
           }}
         />
       )}
+
+      {viewingVariants && (
+        <VariantGalleryDrawer meta={viewingVariants} onClose={() => setViewingVariants(null)} />
+      )}
     </>
+  )
+}
+
+/** Read-only gallery of a component's variants. The folder makes the COMPONENT
+ *  available (once — duplicates are blocked by the DB unique constraint); each
+ *  bot picks which of these variants it renders on its own Components page. */
+function VariantGalleryDrawer({
+  meta,
+  onClose,
+}: {
+  meta: WidgetComponentMeta
+  onClose: () => void
+}) {
+  return (
+    <div
+      className="fixed inset-0 z-50"
+      role="dialog"
+      aria-modal="true"
+      aria-label={`${meta.name} variants`}
+    >
+      <button
+        type="button"
+        aria-label="Close"
+        className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"
+        onClick={onClose}
+      />
+      <div className="absolute inset-y-0 right-0 flex w-full max-w-md flex-col bg-background shadow-2xl">
+        <div className="flex items-center justify-between border-b px-4 py-3">
+          <div>
+            <p className="font-semibold">{meta.name} — variants</p>
+            <p className="text-xs text-muted-foreground">
+              All styles this component ships with. Each bot picks its own on its Components page.
+            </p>
+          </div>
+          <Button type="button" variant="ghost" size="sm" onClick={onClose} aria-label="Close drawer">
+            <XIcon className="size-4" />
+          </Button>
+        </div>
+        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-4">
+          {meta.variants.map((v) => (
+            <div key={v.id} className="rounded-xl border bg-card p-3">
+              <p className="text-sm font-medium">{v.name}</p>
+              <p className="text-xs text-muted-foreground">{v.description}</p>
+              <div className="pointer-events-none mt-2 overflow-hidden rounded-lg border bg-white p-3">
+                <ComponentPreview componentKey={meta.key} variantId={v.id} />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
   )
 }
 
