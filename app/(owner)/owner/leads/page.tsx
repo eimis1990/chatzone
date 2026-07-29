@@ -6,7 +6,7 @@ import type { SalesLead } from '@/lib/types'
 /**
  * Owner sales pipeline: researched Lithuanian prospects, ranked by a
  * chance-to-close score, each with a prepared cold email. Status moves through
- * ready → email sent → accepted/rejected → client.
+ * ready → email sent → follow-up email → accepted/rejected → client.
  */
 export default async function SalesLeadsPage() {
   await requireRole('owner')
@@ -28,7 +28,7 @@ export default async function SalesLeadsPage() {
         </p>
       </div>
 
-      <SalesLeadsTable leads={leads} />
+      <SalesLeadsTable leads={leads} asOf={new Date().toISOString()} />
     </div>
   )
 }

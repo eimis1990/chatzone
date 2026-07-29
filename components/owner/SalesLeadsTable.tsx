@@ -60,6 +60,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { setLeadStatus } from '@/app/(owner)/owner/leads/actions'
+import { formatStatusAge } from '@/lib/sales-leads'
 import type { SalesLead, SalesLeadStatus } from '@/lib/types'
 
 const STATUS_META: Record<SalesLeadStatus, { label: string; classes: string }> = {
@@ -68,12 +69,23 @@ const STATUS_META: Record<SalesLeadStatus, { label: string; classes: string }> =
     label: 'Email sent',
     classes: 'border-amber-200 bg-amber-50 text-amber-700',
   },
+  follow_up_email: {
+    label: 'Follow-up email',
+    classes: 'border-sky-200 bg-sky-50 text-sky-700',
+  },
   rejected: { label: 'Rejected', classes: 'border-red-200 bg-red-50 text-red-700' },
   accepted: { label: 'Accepted', classes: 'border-emerald-200 bg-emerald-50 text-emerald-700' },
   client: { label: 'Our client', classes: 'border-primary bg-primary text-primary-foreground' },
 }
 
-const STATUS_ORDER: SalesLeadStatus[] = ['ready', 'email_sent', 'rejected', 'accepted', 'client']
+const STATUS_ORDER: SalesLeadStatus[] = [
+  'ready',
+  'email_sent',
+  'follow_up_email',
+  'rejected',
+  'accepted',
+  'client',
+]
 
 function host(url: string): string {
   try {
@@ -170,7 +182,7 @@ function StatusSelect({
         <SelectTrigger
           size="sm"
           aria-label={`Status for ${lead.name}`}
-          className={cn('h-8 min-w-32 rounded-lg font-medium', STATUS_META[lead.status].classes)}
+          className={cn('h-8 min-w-36 rounded-lg font-medium', STATUS_META[lead.status].classes)}
         >
           <SelectValue />
         </SelectTrigger>
@@ -185,6 +197,22 @@ function StatusSelect({
         </SelectContent>
       </Select>
     </span>
+  )
+}
+
+function StatusAge({ lead, asOf }: { lead: SalesLead; asOf: string }) {
+  return (
+    <time
+      dateTime={lead.status_updated_at}
+      title={new Date(lead.status_updated_at).toLocaleString('en-GB', {
+        dateStyle: 'medium',
+        timeStyle: 'short',
+        timeZone: 'Europe/Vilnius',
+      })}
+      className="whitespace-nowrap text-xs tabular-nums text-muted-foreground"
+    >
+      {formatStatusAge(lead.status_updated_at, asOf)}
+    </time>
   )
 }
 
@@ -259,7 +287,14 @@ function DetailItem({
   )
 }
 
-export function SalesLeadsTable({ leads: initialLeads }: { leads: SalesLead[] }) {
+export function SalesLeadsTable({
+  leads: initialLeads,
+  asOf,
+}: {
+  leads: SalesLead[]
+  /** Server-render timestamp keeps relative labels stable through hydration. */
+  asOf: string
+}) {
   const [leads, setLeads] = useState(initialLeads)
   const [query, setQuery] = useState('')
   const [vertical, setVertical] = useState<string | null>(null)
@@ -281,13 +316,19 @@ export function SalesLeadsTable({ leads: initialLeads }: { leads: SalesLead[] })
 
   const changeStatus = (id: string, status: SalesLeadStatus) => {
     const previous = leads
-    setLeads(leads.map((lead) => (lead.id === id ? { ...lead, status } : lead)))
-    setOpenLead((lead) => (lead?.id === id ? { ...lead, status } : lead))
+    const changedAt = new Date().toISOString()
+    setLeads(leads.map((lead) => (
+      lead.id === id ? { ...lead, status, status_updated_at: changedAt } : lead
+    )))
+    setOpenLead((lead) => (
+      lead?.id === id ? { ...lead, status, status_updated_at: changedAt } : lead
+    ))
     startTransition(async () => {
       try {
         await setLeadStatus(id, status)
       } catch {
         setLeads(previous)
+        setOpenLead((lead) => previous.find((item) => item.id === lead?.id) ?? lead)
         toast.error('Failed to update status')
       }
     })
@@ -427,16 +468,16 @@ export function SalesLeadsTable({ leads: initialLeads }: { leads: SalesLead[] })
 
         <CardContent className="px-0">
           <div className="hidden md:block">
-            <Table className="min-w-[1040px]">
+            <Table className="min-w-[1020px]">
               <TableHeader className="bg-muted/30">
                 <TableRow className="hover:bg-muted/30">
                   <TableHead className="w-20 border-r pl-4 text-xs uppercase tracking-wide text-muted-foreground">Score</TableHead>
-                  <TableHead className="border-r text-xs uppercase tracking-wide text-muted-foreground">Company</TableHead>
+                  <TableHead className="w-48 border-r text-xs uppercase tracking-wide text-muted-foreground">Company</TableHead>
                   <TableHead className="border-r text-xs uppercase tracking-wide text-muted-foreground">Platform</TableHead>
                   <TableHead className="border-r text-xs uppercase tracking-wide text-muted-foreground">Category</TableHead>
-                  <TableHead className="border-r text-xs uppercase tracking-wide text-muted-foreground">Chatbot</TableHead>
                   <TableHead className="border-r text-xs uppercase tracking-wide text-muted-foreground">Contact</TableHead>
-                  <TableHead className="text-xs uppercase tracking-wide text-muted-foreground">Status</TableHead>
+                  <TableHead className="border-r text-xs uppercase tracking-wide text-muted-foreground">Status</TableHead>
+                  <TableHead className="w-28 text-xs uppercase tracking-wide text-muted-foreground">Updated</TableHead>
                   <TableHead className="w-10"><span className="sr-only">Open</span></TableHead>
                 </TableRow>
               </TableHeader>
@@ -457,16 +498,15 @@ export function SalesLeadsTable({ leads: initialLeads }: { leads: SalesLead[] })
                   >
                     <TableCell className="border-r pl-4"><ScoreTile value={lead.score} /></TableCell>
                     <TableCell className="border-r">
-                      <div className="min-w-52">
-                        <span className="block font-medium text-foreground">{lead.name}</span>
+                      <div className="w-44 min-w-0">
+                        <span className="block truncate font-medium text-foreground">{lead.name}</span>
                         {lead.legal_name && (
-                          <span className="mt-0.5 block max-w-56 truncate text-xs text-muted-foreground">{lead.legal_name}</span>
+                          <span className="mt-0.5 block truncate text-xs text-muted-foreground">{lead.legal_name}</span>
                         )}
                       </div>
                     </TableCell>
                     <TableCell className="border-r"><PlatformBadge platform={lead.platform} /></TableCell>
                     <TableCell className="border-r"><Badge variant="secondary">{lead.vertical}</Badge></TableCell>
-                    <TableCell className="border-r"><BotBadge has={lead.has_chatbot} /></TableCell>
                     <TableCell className="border-r">
                       <div className="flex min-w-44 flex-col gap-0.5">
                         {lead.email ? (
@@ -480,7 +520,8 @@ export function SalesLeadsTable({ leads: initialLeads }: { leads: SalesLead[] })
                         {lead.phone && <span className="text-xs tabular-nums text-muted-foreground">{lead.phone}</span>}
                       </div>
                     </TableCell>
-                    <TableCell><StatusSelect lead={lead} onChange={changeStatus} /></TableCell>
+                    <TableCell className="border-r"><StatusSelect lead={lead} onChange={changeStatus} /></TableCell>
+                    <TableCell><StatusAge lead={lead} asOf={asOf} /></TableCell>
                     <TableCell>
                       <ArrowUpRightIcon className="size-4 text-muted-foreground transition-colors group-hover:text-primary" aria-hidden="true" />
                     </TableCell>
@@ -504,9 +545,12 @@ export function SalesLeadsTable({ leads: initialLeads }: { leads: SalesLead[] })
                     </span>
                   </span>
                 </button>
-                <div className="flex items-center justify-between gap-3 pl-13">
-                  <span className="truncate text-xs text-muted-foreground">{lead.email || lead.phone || 'No contact details'}</span>
-                  <StatusSelect lead={lead} onChange={changeStatus} />
+                <div className="flex items-end justify-between gap-3 pl-13">
+                  <span className="truncate pb-1.5 text-xs text-muted-foreground">{lead.email || lead.phone || 'No contact details'}</span>
+                  <span className="flex shrink-0 flex-col items-end gap-1">
+                    <StatusSelect lead={lead} onChange={changeStatus} />
+                    <StatusAge lead={lead} asOf={asOf} />
+                  </span>
                 </div>
               </div>
             ))}
@@ -589,7 +633,10 @@ export function SalesLeadsTable({ leads: initialLeads }: { leads: SalesLead[] })
                 <ExternalLinkIcon data-icon="inline-start" />
                 Visit website
               </Button>
-              <div className="ml-auto"><StatusSelect lead={openLead} onChange={changeStatus} /></div>
+              <div className="ml-auto flex flex-col items-end gap-1">
+                <StatusSelect lead={openLead} onChange={changeStatus} />
+                <StatusAge lead={openLead} asOf={asOf} />
+              </div>
             </div>
 
             <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-5 [scrollbar-gutter:stable]">

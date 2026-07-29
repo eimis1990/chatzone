@@ -45,6 +45,7 @@ const sharedParagraphs = [
   'Tai nėra įprastas DUK langas: „Loqara“ supranta patikslinimus ir išlaiko pokalbio kontekstą, todėl lankytojas gali klausti natūraliai – panašiai kaip bendraudamas su konsultantu.',
   'Galiu be jokių įsipareigojimų paruošti trumpą demo pagal jūsų svetainę, kad patys įvertintumėte, ar tai būtų naudinga.',
   'Ar norėtumėte jį pamatyti?',
+  'Jei tokie pasiūlymai šiuo metu neaktualūs, tiesiog atsakykite „ne“ – daugiau nerašysiu.',
 ]
 
 const buildBody = (opening, vertical) => [

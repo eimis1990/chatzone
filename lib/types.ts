@@ -467,7 +467,13 @@ export interface MatchedChunk {
   similarity: number
 }
 
-export type SalesLeadStatus = 'ready' | 'email_sent' | 'rejected' | 'accepted' | 'client'
+export type SalesLeadStatus =
+  | 'ready'
+  | 'email_sent'
+  | 'follow_up_email'
+  | 'rejected'
+  | 'accepted'
+  | 'client'
 
 /** Owner outreach pipeline row (researched prospect company). */
 export interface SalesLead {
@@ -492,6 +498,8 @@ export interface SalesLead {
   /** Whether the prospect already runs a chatbot (null = unknown). */
   has_chatbot: boolean | null
   status: SalesLeadStatus
+  /** Last lifecycle status change; unaffected by prepared-email edits. */
+  status_updated_at: string
   created_at: string
   updated_at: string
 }

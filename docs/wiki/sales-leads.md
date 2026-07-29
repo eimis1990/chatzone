@@ -10,8 +10,9 @@ emails, and manual status progression.
   `supabase/migrations/0036_sales_leads.sql:8`; `has_chatbot` was added in
   `0037_sales_leads_has_chatbot.sql:7`.
 - The client UI filters locally by text, vertical, status, and chatbot presence
-  (`components/owner/SalesLeadsTable.tsx:287`). Status changes are optimistic,
-  persist through `setLeadStatus`, and roll back on error (`:274`).
+  (`components/owner/SalesLeadsTable.tsx:297`). Status changes are optimistic,
+  persist through `setLeadStatus`, update `status_updated_at`, and roll back both
+  status and timestamp on error (`:313`; `app/(owner)/owner/leads/actions.ts:18`).
 - The route heading follows the same compact title/subtitle pattern as other
   owner pages (`app/(owner)/owner/leads/page.tsx:23`). Desktop uses a flat,
   score-first data grid with platform in its own column; below `md`, leads become
@@ -19,9 +20,21 @@ emails, and manual status progression.
   (`components/owner/SalesLeadsTable.tsx:421`, `:485`). City is intentionally
   detail-only (`:591`).
 - Score is represented by the same compact percentage tile in the table, mobile
-  list, and detail panel (`components/owner/SalesLeadsTable.tsx:86`). Status
-  colors are lifecycle semantics: neutral Ready, amber Email sent, red Rejected,
-  green Accepted, and accent-orange Our client (`:65`).
+  list, and detail panel (`components/owner/SalesLeadsTable.tsx:98`). Status
+  colors are lifecycle semantics: neutral Ready, amber Email sent, blue
+  Follow-up email, red Rejected, green Accepted, and accent-orange Our client
+  (`:66`).
+- Desktop keeps Company compact, omits the redundant Chatbot column, and places
+  a relative status age immediately after Status (`components/owner/SalesLeadsTable.tsx:467`).
+  Chatbot qualification is still available in the summary/filter, mobile cards,
+  and detail panel. The page supplies one server timestamp so relative labels do
+  not change during hydration (`app/(owner)/owner/leads/page.tsx:31`);
+  `lib/sales-leads.ts:10` owns the formatter.
+- `status_updated_at` is deliberately separate from generic `updated_at`.
+  Prepared-email rewrites must not make a lead appear newly contacted. The July
+  29 migration backfilled existing rows from `updated_at` as the best available
+  historical estimate; future lifecycle changes set both timestamps
+  (`supabase/migrations/20260729105857_sales_leads_follow_up_opt_out.sql:1`).
 - Lead selection and drawer visibility are separate state. Keeping the selected
   lead mounted while `Dialog` closes lets Base UI finish the exit transition
   (`components/owner/SalesLeadsTable.tsx:260`, `:526`). The drawer uses scoped
@@ -52,6 +65,12 @@ emails, and manual status progression.
 - First-touch copy emphasizes contextual Lithuanian conversation rather than a
   FAQ widget. Plan allowances (1,500–12,000 conversations) are intentionally
   omitted until a prospect is evaluating the product.
+- Every prepared cold email ends with the exact polite opt-out:
+  `Jei tokie pasiūlymai šiuo metu neaktualūs, tiesiog atsakykite „ne“ – daugiau
+  nerašysiu.` The July 29 migration appended it once to all existing non-empty
+  bodies without changing lifecycle timestamps, and the rewrite generator keeps
+  it in future bodies (`supabase/migrations/20260729105857_sales_leads_follow_up_opt_out.sql:31`;
+  `scripts/rewrite-sales-lead-emails.mjs:44`).
 - Bulk rewrites go through the dry-run/repair/apply workflow in
   `scripts/rewrite-sales-lead-emails.mjs:235`; validation checks full row
   coverage, duplicate ids, unsupported behavior claims, incumbent-chatbot
@@ -73,9 +92,12 @@ emails, and manual status progression.
   recipient, subject, and body before sending.
 - Treat the lifecycle update as a post-send commit: confirm the exact recipient
   and subject in the provider's Sent folder, then conditionally change only that
-  row from `ready` to `email_sent` with a fresh `updated_at`
-  (`app/(owner)/owner/leads/actions.ts:12`). If delivery is not confirmed, leave
+  row from `ready` to `email_sent` with fresh `status_updated_at` and `updated_at`
+  (`app/(owner)/owner/leads/actions.ts:18`). If delivery is not confirmed, leave
   the status untouched.
+- After a follow-up is confirmed in Sent, move the row from `email_sent` to
+  `follow_up_email`; this records the follow-up time using the same dedicated
+  status timestamp. A follow-up status is not inferred from elapsed time.
 
 ## Prospect seeds
 
@@ -96,4 +118,4 @@ emails, and manual status progression.
   research and keep status `ready` until outreach or a buyer response occurs
   (`supabase/migrations/20260720130000_add_mobel_sales_lead.sql:1`).
 
-_Last verified: 2026-07-23 (live Guru Baldai send)._
+_Last verified: 2026-07-29 (live schema and all 241 prepared email bodies)._
