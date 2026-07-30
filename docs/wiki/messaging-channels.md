@@ -4,12 +4,19 @@
 
 - The paid Channels card is still disabled and marked **Coming soon**
   (`components/client/BillingPanel.tsx:513`).
-- The Meta webhook route is LIVE in production
-  (`app/api/channels/meta/webhook/route.ts`): GET verify handshake, timing-safe
-  signature validation (`lib/channels/meta.ts`), fixed-reply spike from the
-  env Page token (`META_APP_SECRET` / `META_WEBHOOK_VERIFY_TOKEN` /
-  `META_PAGE_ACCESS_TOKEN`). No connection tables, OAuth routes, or Inbox
-  delivery yet. Architecture and delivery order live in
+- Messenger AI replies are LIVE in production (verified end-to-end
+  2026-07-30): `app/api/channels/meta/webhook/route.ts` verifies signatures
+  (`lib/channels/meta.ts`), dedupes by message id via
+  `channel_webhook_events`, resolves the Page through `channel_connections`,
+  persists contacts/conversations/messages (`channel='messenger'`), and
+  answers via `lib/channels/processor.ts` — the widget's grounding pipeline
+  without streaming/commerce/handoff-escalation. Migration
+  `20260730220000_channel_connections.sql` (service-role-only RLS).
+- Still spike-grade: outbound send uses the env `META_PAGE_ACCESS_TOKEN`
+  (per-connection `access_token_cipher` is in the schema but unused), no OAuth
+  routes, no Inbox outbound delivery (handoff intent is deliberately NOT
+  detected — a human couldn't reply on the channel yet), no abuse guard on the
+  Messenger path. Delivery order lives in
   [`../CHANNELS_IMPLEMENTATION.md`](../CHANNELS_IMPLEMENTATION.md).
 - The shared v1 boundary is one external Page/account connected to one bot.
   Prove Messenger first, then reuse the adapter boundary for Instagram and
