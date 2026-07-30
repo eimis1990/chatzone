@@ -4,9 +4,12 @@
 
 - The paid Channels card is still disabled and marked **Coming soon**
   (`components/client/BillingPanel.tsx:513`).
-- No channel connection tables, OAuth routes, Meta webhook route, provider
-  adapter, or external-channel Inbox delivery exist yet. The intended
-  architecture and delivery order live in
+- The Meta webhook route is LIVE in production
+  (`app/api/channels/meta/webhook/route.ts`): GET verify handshake, timing-safe
+  signature validation (`lib/channels/meta.ts`), fixed-reply spike from the
+  env Page token (`META_APP_SECRET` / `META_WEBHOOK_VERIFY_TOKEN` /
+  `META_PAGE_ACCESS_TOKEN`). No connection tables, OAuth routes, or Inbox
+  delivery yet. Architecture and delivery order live in
   [`../CHANNELS_IMPLEMENTATION.md`](../CHANNELS_IMPLEMENTATION.md).
 - The shared v1 boundary is one external Page/account connected to one bot.
   Prove Messenger first, then reuse the adapter boundary for Instagram and
@@ -33,8 +36,13 @@
   test payloads once a live HTTPS callback URL exists.
 - Messenger has testing access for `business_management`,
   `pages_manage_metadata`, `pages_messaging`, and `pages_show_list`.
-  `pages_read_engagement` is not added yet. No webhook or test Page is
-  connected.
+  `pages_read_engagement` is not added yet. App-level `page` webhook is
+  subscribed (fields `messages`, `messaging_postbacks`) to
+  `https://www.loqara.com/api/channels/meta/webhook`, and the Loqara-owned
+  test Page is connected with a generated Page token and page-level
+  `subscribed_apps`. Gotcha: `POST /me/subscribed_apps` succeeds with the
+  dashboard-generated Page token but the GET read-back needs
+  `pages_manage_metadata` on the user grant.
 - Instagram is using the **Instagram Login** setup path. Its checklist still
   needs `instagram_business_basic`, `instagram_business_manage_comments`, and
   `instagram_business_manage_messages`, plus a tester account, webhook, and
