@@ -1504,13 +1504,18 @@ export function ConfigForm({
                       <Switch aria-label="Header logo" checked={!(field.value ?? false)} onCheckedChange={(checked) => field.onChange(!checked)} />
                     )} />
                   </CompactToggle>
+                  <CompactToggle label="Expandable widget" description="Visitors can widen the chat window">
+                    <Controller name="theme.expandButton" control={control} render={({ field }) => (
+                      <Switch aria-label="Expandable widget" checked={field.value ?? false} onCheckedChange={field.onChange} />
+                    )} />
+                  </CompactToggle>
                   {(watch('voice.enabled') ?? false) && (
-                    <CompactToggle label="Call from message field" description="Call button inside the composer">
+                    <CompactToggle label="Call from message field" description="Off = call button floats next to the launcher">
                       <Controller name="theme.callButtonPlacement" control={control} render={({ field }) => (
                         <Switch
                           aria-label="Call from message field"
-                          checked={(field.value ?? 'header') === 'composer'}
-                          onCheckedChange={(checked) => field.onChange(checked ? 'composer' : 'header')}
+                          checked={(field.value ?? 'launcher') === 'composer'}
+                          onCheckedChange={(checked) => field.onChange(checked ? 'composer' : 'launcher')}
                         />
                       )} />
                     </CompactToggle>

@@ -210,9 +210,12 @@ export interface BotConfig {
     showCallButton?: boolean
     /** Icon-only square call button instead of the labeled pill. */
     compactCallButton?: boolean
-    /** Where the call button lives: the header bar, or inside the message field
-     *  (composer) — where it morphs into the send button while typing. */
-    callButtonPlacement?: 'header' | 'composer'
+    /** Where the call button lives: floating next to the launcher, or inside
+     *  the message field (composer) — where it morphs into the send button
+     *  while typing. 'header' is the legacy value, treated as 'launcher'. */
+    callButtonPlacement?: 'header' | 'composer' | 'launcher'
+    /** Header button letting visitors widen the chat panel by 20%. */
+    expandButton?: boolean
     /** Show the "talk to a person" human-handoff button (once a chat is underway). */
     showHandoffButton?: boolean
     /** Background color for the voice call button (text auto-contrasts). */

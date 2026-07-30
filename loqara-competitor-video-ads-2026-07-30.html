@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Loqara competitor video-ad swipe file</title>
+  <style>
+    :root {
+      --ink: #18201d;
+      --muted: #64706b;
+      --paper: #f7f6f1;
+      --card: #fffef9;
+      --line: #dce1dc;
+      --green: #165a46;
+      --lime: #d9f86c;
+      --orange: #ff7a45;
+      --blue: #e6efff;
+      --shadow: 0 16px 42px rgba(22, 41, 34, .08);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 12% 0%, rgba(217, 248, 108, .38), transparent 25rem),
+        var(--paper);
+      font: 15px/1.55 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    a { color: inherit; }
+    .wrap { width: min(1180px, calc(100% - 32px)); margin: 0 auto; }
+    header { padding: 72px 0 42px; }
+    .eyebrow {
+      display: inline-flex;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: var(--lime);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    h1 {
+      max-width: 850px;
+      margin: 18px 0 14px;
+      font-size: clamp(38px, 6vw, 72px);
+      line-height: .98;
+      letter-spacing: -.055em;
+    }
+    .lede { max-width: 800px; margin: 0; color: var(--muted); font-size: 18px; }
+    .notice {
+      margin: 30px 0 0;
+      padding: 18px 20px;
+      border: 1px solid #f2c7b6;
+      border-left: 5px solid var(--orange);
+      border-radius: 14px;
+      background: #fff7f2;
+    }
+    section { padding: 26px 0 46px; }
+    h2 { margin: 0 0 8px; font-size: 30px; letter-spacing: -.035em; }
+    .section-note { margin: 0 0 24px; color: var(--muted); }
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 28px; }
+    .stat {
+      padding: 20px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(255, 254, 249, .78);
+    }
+    .stat strong { display: block; font-size: 30px; line-height: 1; }
+    .stat span { display: block; margin-top: 8px; color: var(--muted); }
+    .legend { display: flex; flex-wrap: wrap; gap: 10px; margin: 18px 0 26px; }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: #eaf4ef;
+      color: var(--green);
+      font-size: 12px;
+      font-weight: 750;
+    }
+    .pill.adjacent { background: var(--blue); color: #2f4f85; }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+    article {
+      display: flex;
+      flex-direction: column;
+      min-height: 100%;
+      padding: 22px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: var(--card);
+      box-shadow: var(--shadow);
+    }
+    .topline { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .brand { font-weight: 850; letter-spacing: -.015em; }
+    .num {
+      color: var(--muted);
+      font-size: 12px;
+      font-variant-numeric: tabular-nums;
+    }
+    article h3 { margin: 14px 0 8px; font-size: 21px; line-height: 1.2; letter-spacing: -.025em; }
+    article p { margin: 0 0 12px; color: var(--muted); }
+    dl { display: grid; grid-template-columns: 90px 1fr; gap: 7px 10px; margin: 2px 0 18px; }
+    dt { color: var(--muted); font-size: 12px; font-weight: 750; text-transform: uppercase; letter-spacing: .04em; }
+    dd { margin: 0; }
+    .watch {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: auto;
+      padding: 11px 14px;
+      border-radius: 12px;
+      background: var(--ink);
+      color: white;
+      font-weight: 800;
+      text-decoration: none;
+    }
+    .watch:hover { background: var(--green); }
+    .matrix { overflow-x: auto; border: 1px solid var(--line); border-radius: 18px; background: var(--card); }
+    table { width: 100%; border-collapse: collapse; min-width: 780px; }
+    th, td { padding: 14px 16px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { background: #eef1ec; font-size: 12px; text-transform: uppercase; letter-spacing: .05em; }
+    tr:last-child td { border-bottom: 0; }
+    .guidance { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .guidance div { padding: 20px; border-radius: 16px; background: var(--green); color: white; }
+    .guidance strong { display: block; margin-bottom: 8px; color: var(--lime); font-size: 19px; }
+    .guidance p { margin: 0; color: #dcebe5; }
+    .sources { columns: 2; padding-left: 20px; }
+    .sources li { break-inside: avoid; margin: 0 0 10px; }
+    footer { padding: 28px 0 54px; color: var(--muted); font-size: 13px; }
+    @media (max-width: 820px) {
+      header { padding-top: 48px; }
+      .stats, .grid, .guidance { grid-template-columns: 1fr; }
+      .sources { columns: 1; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <span class="eyebrow">Loqara research · 30 July 2026</span>
+      <h1>Competitor video-ad swipe file</h1>
+      <p class="lede">Twelve official Instagram Reels selling AI chat, customer support, lead qualification, and conversion. Every link was opened and verified as a video on the competitor’s official account.</p>
+      <div class="notice"><strong>Important:</strong> these are official promotional Reels with clear product or commercial messaging. Instagram does not disclose whether a normal Reel was boosted, so none is labeled “confirmed paid” without Meta Ad Library evidence. Use them as creative references, not as proof of current media spend.</div>
+      <div class="stats">
+        <div class="stat"><strong>12</strong><span>verified videos</span></div>
+        <div class="stat"><strong>5</strong><span>competitor groups</span></div>
+        <div class="stat"><strong>10</strong><span>directly relevant promos</span></div>
+        <div class="stat"><strong>2</strong><span>adjacent enterprise examples</span></div>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section>
+      <h2>The videos</h2>
+      <p class="section-note">“Direct” means the creative sells capabilities close to Loqara. “Adjacent” is useful for messaging inspiration but promotes a broader support platform.</p>
+      <div class="legend">
+        <span class="pill"><span class="dot"></span> Direct competitor creative</span>
+        <span class="pill adjacent"><span class="dot"></span> Adjacent enterprise benchmark</span>
+      </div>
+      <div class="grid">
+        <article>
+          <div class="topline"><span class="brand">Tidio / Lyro</span><span class="num">01 · Direct</span></div>
+          <h3>“Your customers don’t want to wait”</h3>
+          <p>A clean problem–solution Reel: busy support team, impatient customers, then Lyro as the always-on answer.</p>
+          <dl><dt>Angle</dt><dd>Instant, context-aware AI support</dd><dt>Hook</dt><dd>Support is busy; customers will not wait</dd><dt>Steal</dt><dd>Lead with waiting-time pain before naming the product</dd></dl>
+          <a class="watch" href="https://www.instagram.com/tidiocx/reel/DWqdTy7Dz8f/">Watch on Instagram ↗</a>
+        </article>
+
+        <article>
+          <div class="topline"><span class="brand">Tidio</span><span class="num">02 · Direct</span></div>
+          <h3>Shopify traffic without enough sales</h3>
+          <p>Creator-led short-form video that turns three features—cart recovery, instant answers, and AI support—into a conversion story.</p>
+          <dl><dt>Angle</dt><dd>Turn store traffic into revenue</dd><dt>Hook</dt><dd>Your Shopify store has traffic, but not sales</dd><dt>Steal</dt><dd>Use a familiar ecommerce symptom and a three-benefit payoff</dd></dl>
+          <a class="watch" href="https://www.instagram.com/tidiocx/reel/DWf12vCgQ4K/">Watch on Instagram ↗</a>
+        </article>
+
+        <article>
+          <div class="topline"><span class="brand">Gorgias</span><span class="num">03 · Direct</span></div>
+          <h3>Pharmaceutical-ad parody for support pain</h3>
+          <p>A personality-first creative built around high ticket volume and low customer satisfaction, ending with a sales CTA.</p>
+          <dl><dt>Angle</dt><dd>Relief from overloaded customer support</dd><dt>Hook</dt><dd>High ticket volume? Low CSAT?</dd><dt>Steal</dt><dd>Borrow a recognizable ad format and make the category pain the joke</dd></dl>
+          <a class="watch" href="https://www.instagram.com/gorgias.io/reel/DHl7Du3uo5E/">Watch on Instagram ↗</a>
+        </article>
+
+        <article>
+          <div class="topline"><span class="brand">Gorgias AI Agent</span><span class="num">04 · Direct</span></div>
+          <h3>Shopping-assistant launch teaser</h3>
+          <p>A short suspense-led launch creative tagged around AI Agent and Shopping Assistant rather than explaining every feature.</p>
+          <dl><dt>Angle</dt><dd>Anticipation for an AI shopping assistant</dd><dt>Hook</dt><dd>Something new launches tomorrow</dd><dt>Steal</dt><dd>Use a two-part teaser and reveal for a Loqara feature launch</dd></dl>
+          <a class="watch" href="https://www.instagram.com/gorgias.io/reel/DMIoOvOxEyF/">Watch on Instagram ↗</a>
+        </article>
+
+        <article>
+          <div class="topline"><span class="brand">Landbot</span><span class="num">05 · Direct</span></div>
+          <h3>“The difference between a bot that chats and an agent that converts”</h3>
+          <p>Motion-graphic integration wheel showing the agent connected to CRM, email, WhatsApp, AI models, and webhooks.</p>
+          <dl><dt>Angle</dt><dd>Connected agent that qualifies and enriches leads</dd><dt>Hook</dt><dd>Connecting tools is not the magic</dd><dt>Steal</dt><dd>Visualize the ecosystem, then translate integrations into a business outcome</dd></dl>
+          <a class="watch" href="https://www.instagram.com/landbot.io/reel/DbGIEEqgOjh/">Watch on Instagram ↗</a>
+        </article>
+
+        <article>
+          <div class="topline"><span class="brand">Text / LiveChat</span><span class="num">06 · Direct</span></div>
+          <h3>Real-time revenue opportunities for Shopify</h3>
+          <p>Product announcement reframing customer questions as live buying signals the support team can act on.</p>
+          <dl><dt>Angle</dt><dd>Proactive ecommerce conversion</dd><dt>Hook</dt><dd>Your customers already show buying signals</dd><dt>Steal</dt><dd>Reframe support conversations as revenue opportunities</dd></dl>
+          <a class="watch" href="https://www.instagram.com/text_hq/reel/DXrfzGgjEO8/">Watch on Instagram ↗</a>
+        </article>
+
+        <article>
+          <div class="topline"><span class="brand">Text AI</span><span class="num">07 · Direct</span></div>
+          <h3>Lead qualified and consultation booked automatically</h3>
+          <p>A tiny customer scenario shows the AI moving from product question to lead qualification, recommendation, and booking.</p>
+          <dl><dt>Angle</dt><dd>AI completes a revenue workflow</dd><dt>Hook</dt><dd>Tom asked about an office coffee kit</dd><dt>Steal</dt><dd>Tell one realistic conversation story instead of listing capabilities</dd></dl>
+          <a class="watch" href="https://www.instagram.com/text_hq/reel/DXHJsLTjm0J/">Watch on Instagram ↗</a>
+        </article>
+
+        <article>
+          <div class="topline"><span class="brand">Text App</span><span class="num">08 · Direct</span></div>
+          <h3>“Yes, we used AI to make this ad”</h3>
+          <p>A self-aware AI creative pivots into the product promise: unified chat, email, and tickets in one AI-powered inbox.</p>
+          <dl><dt>Angle</dt><dd>AI-powered omnichannel service</dd><dt>Hook</dt><dd>Yes, AI made this ad</dd><dt>Steal</dt><dd>Use the production method itself as the pattern interrupt</dd></dl>
+          <a class="watch" href="https://www.instagram.com/text_hq/reel/DQJ8jR-CcFG/">Watch on Instagram ↗</a>
+        </article>
+
+        <article>
+          <div class="topline"><span class="brand">LiveChat / Text</span><span class="num">09 · Direct</span></div>
+          <h3>All-in-one chat, ticketing, chatbots, and automation</h3>
+          <p>A product walkthrough framed as the antidote to a cluttered support workspace and too many tabs.</p>
+          <dl><dt>Angle</dt><dd>Replace fragmented tools with one platform</dd><dt>Hook</dt><dd>Your team’s favorite workspace does not need 12 tabs</dd><dt>Steal</dt><dd>Show the “before” mess, then reveal the unified experience</dd></dl>
+          <a class="watch" href="https://www.instagram.com/text_hq/reel/DPTguwxiDOt/">Watch on Instagram ↗</a>
+        </article>
+
+        <article>
+          <div class="topline"><span class="brand">LiveChat / Text</span><span class="num">10 · Direct</span></div>
+          <h3>Customer proof: rebuilt support in 24 hours</h3>
+          <p>A compact customer story pairs rising support volume with a fast implementation and an explicit free-trial CTA.</p>
+          <dl><dt>Angle</dt><dd>Fast setup while support volume grows</dd><dt>Hook</dt><dd>Your tools stopped growing with the business</dd><dt>Steal</dt><dd>Combine a specific time-to-value claim with customer evidence</dd></dl>
+          <a class="watch" href="https://www.instagram.com/text_hq/reel/DUTF7-4io3k/">Watch on Instagram ↗</a>
+        </article>
+
+        <article>
+          <div class="topline"><span class="brand">Zendesk</span><span class="num">11 · Adjacent</span></div>
+          <h3>Self-improving AI agents launch</h3>
+          <p>Event recap used as a product-launch ad for autonomous agents, proactive copilots, and unified knowledge.</p>
+          <dl><dt>Angle</dt><dd>Enterprise vision and category leadership</dd><dt>Hook</dt><dd>An autonomous service workforce</dd><dt>Steal</dt><dd>Name the future state, then group features under that bigger idea</dd></dl>
+          <a class="watch" href="https://www.instagram.com/zendesk/reel/DYlgIjHFQrL/">Watch on Instagram ↗</a>
+        </article>
+
+        <article>
+          <div class="topline"><span class="brand">Zendesk</span><span class="num">12 · Adjacent</span></div>
+          <h3>Agent Builder and autonomous service</h3>
+          <p>A second event-led launch creative lists the components behind the AI-agent proposition and promises resolution at scale.</p>
+          <dl><dt>Angle</dt><dd>AI-agent platform breadth</dd><dt>Hook</dt><dd>Day two delivered the autonomous-service vision</dd><dt>Steal</dt><dd>Use a fast feature montage after establishing the strategic promise</dd></dl>
+          <a class="watch" href="https://www.instagram.com/zendesk/reel/DYi_bPwmtax/">Watch on Instagram ↗</a>
+        </article>
+      </div>
+    </section>
+
+    <section>
+      <h2>Competitor pattern matrix</h2>
+      <p class="section-note">A compact view of what each brand repeatedly tries to make the buyer believe.</p>
+      <div class="matrix">
+        <table>
+          <thead><tr><th>Competitor</th><th>Primary promise</th><th>Typical hook</th><th>Creative style</th><th>Loqara opening</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Tidio</strong></td><td>More Shopify sales with instant AI support</td><td>Traffic is not converting; customers are waiting</td><td>Creator-led, direct-response</td><td>Be more concrete about product discovery and order questions</td></tr>
+            <tr><td><strong>Gorgias</strong></td><td>Relieve ecommerce support pain and add an AI shopper</td><td>Ticket volume, low CSAT, launch curiosity</td><td>Humor, parody, teaser</td><td>Pair Loqara’s commercial value with a recognizable social format</td></tr>
+            <tr><td><strong>Landbot</strong></td><td>An integrated agent converts, not merely chats</td><td>Integrations alone are not enough</td><td>Motion graphics, ecosystem map</td><td>Show Loqara taking an action after answering the question</td></tr>
+            <tr><td><strong>Text / LiveChat</strong></td><td>Turn service conversations into revenue</td><td>Buying signals, tool overload, repetitive work</td><td>Scenarios, announcements, customer proof</td><td>Own the simple “website conversation → sale” narrative</td></tr>
+            <tr><td><strong>Zendesk</strong></td><td>Autonomous service at enterprise scale</td><td>A new operating model for customer service</td><td>Event footage, vision-led launch</td><td>Avoid enterprise abstraction; demonstrate the widget in action</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <h2>What Loqara should test next</h2>
+      <p class="section-note">The most reusable ideas from this swipe file, translated into Loqara-specific creative.</p>
+      <div class="guidance">
+        <div><strong>1. Shopify symptom hook</strong><p>“People visit your store, ask questions, then disappear.” Show Loqara answering a product question and guiding the shopper to the right item.</p></div>
+        <div><strong>2. One conversation story</strong><p>Start with a realistic question, then show product discovery, order lookup, lead capture, or human handoff in under 20 seconds.</p></div>
+        <div><strong>3. Bot vs. revenue agent</strong><p>Contrast a generic FAQ bot with Loqara taking the next commercial action. Make the difference visible, not theoretical.</p></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Sources and verification</h2>
+      <p class="section-note">Research used official social accounts and official product pages. Reels were checked for an Instagram video player on 30 July 2026.</p>
+      <ul class="sources">
+        <li><a href="https://www.instagram.com/tidiocx/">Tidio official Instagram</a> · <a href="https://www.tidio.com/">official site</a></li>
+        <li><a href="https://www.instagram.com/gorgias.io/">Gorgias official Instagram</a> · <a href="https://www.gorgias.com/ai-agent">AI Agent product page</a></li>
+        <li><a href="https://www.instagram.com/landbot.io/">Landbot official Instagram</a> · <a href="https://landbot.io/">official site</a></li>
+        <li><a href="https://www.instagram.com/text_hq/">Text official Instagram</a> · <a href="https://www.instagram.com/livechat/">LiveChat official Instagram</a> · <a href="https://www.text.com/">official site</a></li>
+        <li><a href="https://www.instagram.com/zendesk/">Zendesk official Instagram</a> · <a href="https://www.zendesk.com/">official site</a></li>
+      </ul>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">Prepared for Loqara · Direct post links may require an Instagram login. Promotional status is verified from the content; paid-media status is not.</div>
+  </footer>
+</body>
+</html>

@@ -12,7 +12,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
-import { XIcon } from 'lucide-react'
+import { PhoneIcon, XIcon } from 'lucide-react'
 import { LAUNCHER_ICONS, LAUNCHER_CLOSE_ICONS } from '@/lib/launcher-icons'
 import { ChatWindow } from '@/components/widget/ChatWindow'
 import { DEFAULT_CHAT_MODEL, DEFAULT_TEMPERATURE } from '@/lib/ai/chat-models'
@@ -121,6 +121,23 @@ export function TestChat({ botId, config, activeLang, dictationEnabled = false }
   const configRef = useRef(config)
   configRef.current = config
 
+  // Host-side widget chrome the live embed gets from widget.js — mirrored here
+  // so the preview behaves identically. ChatWindow posts to window.parent,
+  // which in the preview IS this window.
+  const [previewExpanded, setPreviewExpanded] = useState(false)
+  const [previewCallState, setPreviewCallState] = useState<'idle' | 'active'>('idle')
+  useEffect(() => {
+    const onMessage = (e: MessageEvent) => {
+      if (!e.data) return
+      if (e.data.type === 'cbz-expand') setPreviewExpanded(!!e.data.expanded)
+      else if (e.data.type === 'cbz-call-state') {
+        setPreviewCallState(e.data.state === 'idle' ? 'idle' : 'active')
+      }
+    }
+    window.addEventListener('message', onMessage)
+    return () => window.removeEventListener('message', onMessage)
+  }, [])
+
   const publicConfig = { ...buildPreviewPublicConfig(config), dictation: dictationEnabled }
   const cornerRadius = config.theme?.cornerRadius ?? 16
   const primaryColor = config.theme?.primaryColor ?? '#4f46e5'
@@ -189,7 +206,12 @@ export function TestChat({ botId, config, activeLang, dictationEnabled = false }
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.92, y: 12 }}
             transition={{ duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
-            style={{ transformOrigin: 'bottom right', width: '420px' }}
+            style={{
+              transformOrigin: 'bottom right',
+              // Same +20% "widen" the live wrapper animates (see cbz-expand in widget.js).
+              width: previewExpanded ? '504px' : '420px',
+              transition: 'width 0.32s cubic-bezier(0.16, 1, 0.3, 1)',
+            }}
             className="absolute bottom-[72px] right-0 flex flex-col gap-1.5 pointer-events-auto"
           >
             {/* The real widget — identical to the live embed */}
@@ -220,9 +242,17 @@ export function TestChat({ botId, config, activeLang, dictationEnabled = false }
                   href={POWERED_BY_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="underline hover:text-muted-foreground transition-colors"
+                  className="inline-flex items-center gap-[3px] align-bottom hover:text-muted-foreground transition-colors"
                 >
-                  Loqara
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="/loqara-logo-colorful.webp"
+                    alt=""
+                    width={13}
+                    height={13}
+                    className="size-[13px] rounded-[3px]"
+                  />
+                  <span className="underline">Loqara</span>
                 </a>
               </p>
             </div>
@@ -269,6 +299,54 @@ export function TestChat({ botId, config, activeLang, dictationEnabled = false }
             />
           </motion.div>
         )}
+      </AnimatePresence>
+
+      {/* Voice call pill — floats next to the launcher while the chat is open,
+          exactly like the live widget's (widget.js). Drives the in-widget voice
+          session via the same postMessage protocol. */}
+      <AnimatePresence>
+        {isOpen &&
+          (config.voice?.enabled ?? false) &&
+          (config.theme?.showCallButton ?? true) &&
+          config.theme?.callButtonPlacement !== 'composer' && (
+            <motion.button
+              key="call-pill"
+              type="button"
+              initial={prefersReducedMotion ? false : { opacity: 0, y: 6, scale: 0.92 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 6, scale: 0.92 }}
+              transition={{ duration: 0.24, ease: [0.16, 1, 0.3, 1] }}
+              onClick={() =>
+                window.postMessage(
+                  { type: previewCallState === 'idle' ? 'cbz-start-call' : 'cbz-end-call' },
+                  '*',
+                )
+              }
+              className={`pointer-events-auto absolute bottom-0 right-[66px] flex h-14 items-center justify-center gap-2 whitespace-nowrap rounded-full text-[15px] font-semibold shadow-lg transition-colors ${
+                config.theme?.compactCallButton ? 'w-14' : 'px-5'
+              }`}
+              style={{
+                backgroundColor:
+                  previewCallState === 'active'
+                    ? '#ef4444'
+                    : config.theme?.callButtonColor || '#22c55e',
+                color: readableTextColor(
+                  previewCallState === 'active'
+                    ? '#ef4444'
+                    : config.theme?.callButtonColor || '#22c55e',
+                ),
+              }}
+            >
+              <PhoneIcon className="size-5" aria-hidden="true" />
+              {!(config.theme?.compactCallButton ?? false) && (
+                <span>
+                  {previewCallState === 'active'
+                    ? activeLang === 'lt' ? 'Baigti pokalbį' : 'End call'
+                    : activeLang === 'lt' ? 'Kalbėtis su agentu' : 'Talk with Agent'}
+                </span>
+              )}
+            </motion.button>
+          )}
       </AnimatePresence>
 
       {/* Launcher bubble — circle or pill, optional company logo + one-shot pulse.
@@ -487,7 +565,9 @@ function buildPreviewPublicConfig(config: LiveConfig): PublicBotConfig {
       hideHeaderLogo: config.theme?.hideHeaderLogo ?? false,
       showCallButton: config.theme?.showCallButton ?? true,
       compactCallButton: config.theme?.compactCallButton ?? false,
-      callButtonPlacement: config.theme?.callButtonPlacement ?? 'header',
+      // Same normalization as publicBotConfig: legacy 'header' → 'launcher'.
+      callButtonPlacement: config.theme?.callButtonPlacement === 'composer' ? 'composer' : 'launcher',
+      expandButton: config.theme?.expandButton ?? false,
       showHandoffButton: config.theme?.showHandoffButton ?? true,
       navButtonRadius: config.theme?.navButtonRadius ?? 12,
       backgroundColor: config.theme?.backgroundColor ?? '#ffffff',

@@ -478,11 +478,14 @@
     // sizeWidget() (responsive) rather than fixed here.
     display: 'none', // hidden until first open (flex applied on open)
     flexDirection: 'column',
-    // Open/close animation (scale + fade from the launcher corner).
+    // Open/close animation (scale + fade from the launcher corner). Width is in
+    // the transition for the visitor-driven "widen" toggle (cbz-expand).
     opacity: '0',
     transform: 'translateY(12px) scale(0.96)',
     transformOrigin: isRight ? 'bottom right' : 'bottom left',
-    transition: 'opacity 0.24s ease, transform 0.28s cubic-bezier(0.16, 1, 0.3, 1)',
+    transition:
+      'opacity 0.24s ease, transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), ' +
+      'width 0.32s cubic-bezier(0.16, 1, 0.3, 1)',
     willChange: 'opacity, transform',
   })
 
@@ -516,7 +519,7 @@
       iframeContainer.style.boxShadow = 'none'
       poweredBy.style.display = 'none'
     } else {
-      wrapper.style.width = IFRAME_WIDTH + 'px'
+      wrapper.style.width = Math.round(IFRAME_WIDTH * (isExpanded ? EXPAND_FACTOR : 1)) + 'px'
       wrapper.style.top = 'auto'
       wrapper.style.left = 'auto'
       wrapper.style.right = 'auto'
@@ -536,6 +539,11 @@
     }
     // Keep launcher visibility correct across a rotation/resize while open.
     if (isOpen) launcher.style.display = isMobile() ? 'none' : 'flex'
+    // The call pill follows the launcher: hidden on the mobile sheet.
+    if (isOpen) {
+      if (isMobile()) hideCallButton()
+      else showCallButton()
+    }
     // Keep the iframe's header (✕ vs avatar) in sync across rotation/resize.
     sendViewport()
   }
@@ -554,7 +562,11 @@
   })
   poweredBy.innerHTML =
     'Powered by <a href="' + POWERED_BY_URL + '" target="_blank" rel="noopener noreferrer" ' +
-    'style="color:rgba(0,0,0,0.5);text-decoration:underline;font-family:inherit;">Loqara</a>'
+    'style="color:rgba(0,0,0,0.5);text-decoration:none;font-family:inherit;display:inline-flex;' +
+    'align-items:center;gap:3px;vertical-align:bottom;">' +
+    '<img src="' + appUrl + '/loqara-logo-colorful.webp" alt="" width="13" height="13" ' +
+    'style="display:block;width:13px;height:13px;border-radius:3px;" />' +
+    '<span style="text-decoration:underline;">Loqara</span></a>'
 
   wrapper.appendChild(iframeContainer)
   wrapper.appendChild(poweredBy)
@@ -565,6 +577,112 @@
 
   var iframe = null
   var isOpen = false
+  // Visitor-driven "widen" toggle (in-iframe header button → cbz-expand).
+  var isExpanded = false
+  var EXPAND_FACTOR = 1.2
+
+  // ── Voice call pill (next to the launcher while the chat is open) ────────
+  // The voice session itself lives INSIDE the iframe (mic permission is scoped
+  // there); this pill only starts/ends it via postMessage and mirrors state.
+  var PHONE_ICON =
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+    'stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20" aria-hidden="true">' +
+    '<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 ' +
+    '19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 ' +
+    '2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 ' +
+    '2.81.7A2 2 0 0 1 22 16.92z"/></svg>'
+  var callState = 'idle'
+  var callBtn = document.createElement('button')
+  callBtn.setAttribute('data-cbz-call', '')
+  callBtn.setAttribute('type', 'button')
+  css(callBtn, {
+    position: 'fixed',
+    zIndex: Z_INDEX,
+    height: LAUNCHER_SIZE + 'px',
+    borderRadius: LAUNCHER_SIZE / 2 + 'px',
+    border: 'none',
+    cursor: 'pointer',
+    display: 'none',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '8px',
+    boxShadow: '0 4px 16px rgba(0,0,0,0.25)',
+    fontFamily: 'system-ui,-apple-system,sans-serif',
+    fontSize: '15px',
+    fontWeight: '600',
+    whiteSpace: 'nowrap',
+    lineHeight: '1',
+    opacity: '0',
+    transform: 'translateY(6px) scale(0.92)',
+    transformOrigin: isRight ? 'bottom right' : 'bottom left',
+    transition: 'opacity 0.22s ease, transform 0.26s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease',
+    outline: 'none',
+  })
+
+  function voiceCallAvailable() {
+    return !!(
+      config &&
+      config.voice &&
+      config.voice.enabled &&
+      config.theme &&
+      config.theme.showCallButton !== false &&
+      config.theme.callButtonPlacement !== 'composer'
+    )
+  }
+
+  // Idle = brand call color + "Talk with Agent"; in a call = red "End call".
+  function renderCallButton() {
+    var theme = (config && config.theme) || {}
+    var lt = (config && (config.defaultLanguage || (config.languages || [])[0])) === 'lt'
+    var inCall = callState !== 'idle'
+    var bg = inCall ? '#ef4444' : theme.callButtonColor || '#22c55e'
+    var compact = !!theme.compactCallButton
+    callBtn.style.backgroundColor = bg
+    callBtn.style.color = readable(bg)
+    callBtn.style.width = compact ? LAUNCHER_SIZE + 'px' : 'auto'
+    callBtn.style.padding = compact ? '0' : '0 20px'
+    var label = inCall
+      ? lt ? 'Baigti pokalbį' : 'End call'
+      : lt ? 'Kalbėtis su agentu' : 'Talk with Agent'
+    callBtn.setAttribute('aria-label', label)
+    callBtn.innerHTML = compact ? PHONE_ICON : PHONE_ICON + '<span>' + escapeHtml(label) + '</span>'
+    // Sits beside the launcher, toward the screen center.
+    callBtn.style.bottom = bottomOffset() + 'px'
+    callBtn.style[isRight ? 'right' : 'left'] = sideOffset() + LAUNCHER_SIZE + 10 + 'px'
+    callBtn.style[isRight ? 'left' : 'right'] = 'auto'
+  }
+
+  var callBtnHideTimer = null
+  function showCallButton() {
+    if (!voiceCallAvailable() || isMobile()) return
+    if (callBtnHideTimer) {
+      clearTimeout(callBtnHideTimer)
+      callBtnHideTimer = null
+    }
+    renderCallButton()
+    callBtn.style.display = 'flex'
+    void callBtn.offsetHeight // reflow so the entrance transition runs
+    callBtn.style.opacity = '1'
+    callBtn.style.transform = 'translateY(0) scale(1)'
+  }
+
+  function hideCallButton() {
+    callBtn.style.opacity = '0'
+    callBtn.style.transform = 'translateY(6px) scale(0.92)'
+    if (callBtnHideTimer) clearTimeout(callBtnHideTimer)
+    callBtnHideTimer = setTimeout(function () {
+      if (!isOpen) callBtn.style.display = 'none'
+      callBtnHideTimer = null
+    }, 260)
+  }
+
+  callBtn.addEventListener('click', function () {
+    if (!iframe || !iframe.contentWindow) return
+    iframe.contentWindow.postMessage(
+      { type: callState === 'idle' ? 'cbz-start-call' : 'cbz-end-call' },
+      '*'
+    )
+  })
 
   // Tell the iframe whether we're a full-screen mobile sheet, so its header can
   // show a ✕ instead of the avatar. The iframe can't tell on its own — its own
@@ -622,6 +740,7 @@
     // floating launcher (it would cover the composer). Desktop keeps it.
     if (isMobile()) launcher.style.display = 'none'
     renderLauncher()
+    showCallButton()
   }
 
   var closeTimer = null
@@ -640,6 +759,7 @@
     launcher.setAttribute('aria-expanded', 'false')
     launcher.setAttribute('aria-label', 'Open chat')
     renderLauncher()
+    hideCallButton()
   }
 
   // Paints the launcher from config: theme color + contrast, optional company
@@ -755,6 +875,17 @@
     } else if (e.data.type === 'cbz-ready') {
       // Iframe mounted and is asking for the current viewport.
       sendViewport()
+    } else if (e.data.type === 'cbz-expand') {
+      // Visitor toggled the in-header "widen" button — animate the panel width
+      // (the wrapper's width transition does the smoothing). Desktop only; the
+      // mobile sheet is already full-screen.
+      isExpanded = !!e.data.expanded
+      if (!isMobile()) {
+        wrapper.style.width = Math.round(IFRAME_WIDTH * (isExpanded ? EXPAND_FACTOR : 1)) + 'px'
+      }
+    } else if (e.data.type === 'cbz-call-state') {
+      callState = e.data.state === 'idle' ? 'idle' : 'active'
+      renderCallButton()
     }
   })
 
@@ -764,6 +895,7 @@
   document.body.appendChild(pulseRings[0])
   document.body.appendChild(pulseRings[1])
   document.body.appendChild(proactiveGreeting)
+  document.body.appendChild(callBtn)
   document.body.appendChild(launcher)
 
   // Safety net: reveal with the default look if config is slow or unreachable,

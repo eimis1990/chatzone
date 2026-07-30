@@ -162,8 +162,11 @@ export const botConfigFormSchema = z.object({
       showCallButton: z.boolean().default(true),
       // Icon-only square call button instead of the labeled pill.
       compactCallButton: z.boolean().default(false),
-      // Call button in the header bar, or inside the message field (composer).
-      callButtonPlacement: z.enum(['header', 'composer']).default('header'),
+      // Call button next to the launcher, or inside the message field
+      // (composer). 'header' is the legacy stored value → rendered at launcher.
+      callButtonPlacement: z.enum(['header', 'composer', 'launcher']).default('launcher'),
+      // Header button letting visitors widen the chat panel by 20%.
+      expandButton: z.boolean().default(false),
       // Show the "talk to a person" human-handoff button.
       showHandoffButton: z.boolean().default(true),
       // Background color for the voice call button (text auto-contrasts).
@@ -208,7 +211,8 @@ export const botConfigFormSchema = z.object({
       hideHeaderLogo: false,
       showCallButton: true,
       compactCallButton: false,
-      callButtonPlacement: 'header',
+      callButtonPlacement: 'launcher',
+      expandButton: false,
       showHandoffButton: true,
       navButtonRadius: 12,
       backgroundColor: '#ffffff',

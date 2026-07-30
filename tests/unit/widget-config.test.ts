@@ -73,7 +73,13 @@ describe('publicBotConfig', () => {
     const pub = publicBotConfig(fullConfig)
     expect(pub.displayName).toBe('Test Bot')
     expect(pub.avatarUrl).toBe('https://example.com/avatar.png')
-    expect(pub.theme).toEqual(fullConfig.theme)
+    // The public theme normalizes legacy 'header' call placement to 'launcher'
+    // and always carries the expandButton flag.
+    expect(pub.theme).toEqual({
+      ...fullConfig.theme,
+      callButtonPlacement: 'launcher',
+      expandButton: false,
+    })
     expect(pub.theme.fontWeight).toBe(600)
     expect(pub.languages).toEqual(['en'])
     expect(pub.content.en?.greeting).toBe('Hello! How can I help?')

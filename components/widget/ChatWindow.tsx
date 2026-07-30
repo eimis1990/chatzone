@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useRef, useEffect } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { HeadsetIcon, RotateCcwIcon, XIcon } from 'lucide-react'
+import { ChevronsLeftRightIcon, ChevronsRightLeftIcon, HeadsetIcon, RotateCcwIcon, XIcon } from 'lucide-react'
 import { MessageList, type ChatMessage } from './MessageList'
 import { ProductListView } from './ProductCards'
 import { RoomTray, RoomStudio, roomLabels, MAX_ROOM_PRODUCTS, type RoomSelect, type RoomPhoto } from './RoomVisualizer'
@@ -299,6 +299,20 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
   const handleCallState = useCallback((s: CallState) => {
     callStateRef.current = s
     setCallState(s)
+    // The launcher-adjacent call pill (widget.js / TestChat) mirrors the state.
+    window.parent?.postMessage({ type: 'cbz-call-state', state: s }, '*')
+  }, [])
+
+  // Launcher-adjacent call pill lives OUTSIDE the iframe — it drives the
+  // in-iframe voice session via postMessage.
+  useEffect(() => {
+    const onMessage = (e: MessageEvent) => {
+      if (e.source !== window.parent || !e.data) return
+      if (e.data.type === 'cbz-start-call') startVoiceRef.current?.()
+      else if (e.data.type === 'cbz-end-call') endVoiceRef.current?.()
+    }
+    window.addEventListener('message', onMessage)
+    return () => window.removeEventListener('message', onMessage)
   }, [])
 
   // Voice utterances (visitor + agent) flow into the chat transcript. The agent
@@ -934,6 +948,8 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
     voiceEnabled && showCallButton && (config.theme.callButtonPlacement ?? 'header') === 'composer'
   const callActive = callState !== 'idle'
   const callButtonColor = config.theme.callButtonColor || '#22c55e'
+  // Visitor-driven "widen" toggle (theme.expandButton) — the host animates.
+  const [panelExpanded, setPanelExpanded] = useState(false)
   const navButtonRadius = config.theme.navButtonRadius ?? 12
   // Full-screen mobile sheet has square top corners (it meets the screen edge).
   const headerBorderRadius = isMobile ? '0' : `${cornerRadius}px ${cornerRadius}px 0 0`
@@ -1057,7 +1073,10 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
             composer's button drives it via startVoiceRef/endVoiceRef). */}
         {voiceEnabled && showCallButton && (
           <VoiceCallButton
-            appearance={callInComposer ? 'none' : 'compact'}
+            // Header rendering is retired: the call button now lives next to
+            // the launcher (widget.js pill) or in the composer. This mount is
+            // headless either way — it owns the voice session.
+            appearance="none"
             iconOnly={config.theme.compactCallButton ?? false}
             getToken={getVoiceToken}
             primaryColor="#ffffff"
@@ -1077,6 +1096,41 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
             onProductDetails={handleVoiceProductDetails}
             className="flex-shrink-0"
           />
+        )}
+
+        {/* Widen toggle — asks the host (widget.js / TestChat) to animate the
+            panel 20% wider. Desktop only: the mobile sheet is already full-screen. */}
+        {config.theme.expandButton && !isMobile && (
+          <button
+            type="button"
+            onClick={() => {
+              const next = !panelExpanded
+              setPanelExpanded(next)
+              window.parent?.postMessage({ type: 'cbz-expand', expanded: next }, '*')
+            }}
+            title={
+              panelExpanded
+                ? activeLang === 'lt' ? 'Susiaurinti' : 'Shrink'
+                : activeLang === 'lt' ? 'Praplėsti' : 'Widen'
+            }
+            aria-label={
+              panelExpanded
+                ? activeLang === 'lt' ? 'Susiaurinti langą' : 'Shrink chat window'
+                : activeLang === 'lt' ? 'Praplėsti langą' : 'Widen chat window'
+            }
+            aria-pressed={panelExpanded}
+            className="flex size-8 flex-shrink-0 items-center justify-center transition hover:brightness-90"
+            style={{
+              backgroundColor: 'color-mix(in srgb, currentColor 15%, transparent)',
+              borderRadius: `${navButtonRadius}px`,
+            }}
+          >
+            {panelExpanded ? (
+              <ChevronsRightLeftIcon className="size-4" aria-hidden="true" />
+            ) : (
+              <ChevronsLeftRightIcon className="size-4" aria-hidden="true" />
+            )}
+          </button>
         )}
 
         {/* Language picker — flag-only square, multilingual bots with the

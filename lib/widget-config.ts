@@ -92,7 +92,10 @@ export interface PublicBotConfig {
     hideHeaderLogo?: boolean
     showCallButton?: boolean
     compactCallButton?: boolean
-    callButtonPlacement?: 'header' | 'composer'
+    /** Normalized: legacy 'header' becomes 'launcher' for the public widget. */
+    callButtonPlacement?: 'launcher' | 'composer'
+    /** Header button letting visitors widen the chat panel by 20%. */
+    expandButton?: boolean
     showHandoffButton?: boolean
     callButtonColor?: string
     navButtonRadius?: number
@@ -212,7 +215,9 @@ export function publicBotConfig(
       headerStyle: config.theme.headerStyle ?? 'classic',
       hideHeaderLogo: config.theme.hideHeaderLogo ?? false,
       compactCallButton: config.theme.compactCallButton ?? false,
-      callButtonPlacement: config.theme.callButtonPlacement ?? 'header',
+      // Legacy 'header' placement renders at the launcher now.
+      callButtonPlacement: config.theme.callButtonPlacement === 'composer' ? 'composer' : 'launcher',
+      expandButton: config.theme.expandButton ?? false,
       showHandoffButton: config.theme.showHandoffButton ?? true,
       navButtonRadius: config.theme.navButtonRadius ?? 12,
       backgroundColor: config.theme.backgroundColor ?? '#ffffff',
