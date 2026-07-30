@@ -21,7 +21,7 @@ import type { ChatTransport } from '@/lib/widget-transport'
 import type { PublicBotConfig } from '@/lib/widget-config'
 import { playGreetingSound } from '@/lib/greeting-sound'
 import type { BotConfig, BotLanguage, SuggestedQuestion } from '@/lib/types'
-import { POWERED_BY_URL, readableTextColor } from '@/lib/utils'
+import { readableTextColor } from '@/lib/utils'
 import { fontStack } from '@/lib/fonts'
 
 const DEFAULT_VOICE_ID = '21m00Tcm4TlvDq8ikWAM'
@@ -234,29 +234,8 @@ export function TestChat({ botId, config, activeLang, dictationEnabled = false }
               />
             </div>
 
-            {/* Preview chrome — Powered by pill (matching the live widget: a
-                white pill so it reads on ANY host-page background). */}
-            {!(config.theme?.hideBadge ?? false) && (
-              <div className="flex justify-end px-1">
-                <a
-                  href={POWERED_BY_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 rounded-full bg-white/90 px-2 py-[3px] text-[10px] text-gray-600 shadow-sm ring-1 ring-black/5 backdrop-blur-sm transition-colors hover:text-gray-900"
-                >
-                  <span>Powered by</span>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src="/loqara-logo-colorful.webp"
-                    alt=""
-                    width={13}
-                    height={13}
-                    className="size-[13px] rounded-[3px]"
-                  />
-                  <span className="font-medium">Loqara</span>
-                </a>
-              </div>
-            )}
+            {/* "Powered by Loqara" renders inside ChatWindow (under the
+                composer) — nothing to add here. */}
           </motion.div>
         )}
       </AnimatePresence>
@@ -631,6 +610,8 @@ function buildPreviewPublicConfig(config: LiveConfig): PublicBotConfig {
     },
     roomVisualizer: false,
     components: config.components,
+    // Preview assumes the plan allows hiding — the live widget enforces it.
+    hideBadge: config.theme?.hideBadge ?? false,
   }
 
   if (config.avatarUrl) result.avatarUrl = config.avatarUrl

@@ -366,8 +366,8 @@ export function Composer({
           </>
         )}
       </form>
-      {/* "Powered by Loqara" is rendered by the widget loader chrome (widget.js),
-         below the close button — matching the reference layout. */}
+      {/* "Powered by Loqara" is rendered by ChatWindow directly below this
+         composer (inside the widget, so its color tracks the chat background). */}
     </div>
   )
 }

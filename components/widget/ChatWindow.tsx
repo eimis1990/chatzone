@@ -24,7 +24,7 @@ import type { ChatTransport } from '@/lib/widget-transport'
 import type { BotLanguage, HandoffStatus, SuggestedQuestion } from '@/lib/types'
 import type { CommerceProduct, OrderStatus } from '@/lib/commerce/types'
 import { fontStack } from '@/lib/fonts'
-import { readableTextColor, isLightColor } from '@/lib/utils'
+import { readableTextColor, isLightColor, POWERED_BY_URL } from '@/lib/utils'
 import { tintToward } from '@/lib/theme-extract'
 import { languageMeta } from '@/lib/i18n/languages'
 import { normalizeVoiceTranscript } from '@/lib/voice/transcript'
@@ -1406,6 +1406,31 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
               : undefined
           }
         />
+
+        {/* "Powered by Loqara" — INSIDE the widget (under the composer, centered)
+            so its color always reads against the configured chat background,
+            no matter what the host page behind the panel looks like. */}
+        {!config.hideBadge && (
+          <div className="flex justify-center pb-1.5" style={{ backgroundColor: bgColor }}>
+            <a
+              href={POWERED_BY_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-[10px] leading-none transition-opacity hover:opacity-100"
+              style={{ color: darkBody ? 'rgba(255,255,255,0.6)' : 'rgba(17,24,39,0.45)' }}
+            >
+              <span>Powered by</span>
+              <img
+                src="/loqara-logo-colorful.webp"
+                alt=""
+                width={12}
+                height={12}
+                className="size-3 rounded-[3px]"
+              />
+              <span className="font-medium">Loqara</span>
+            </a>
+          </div>
+        )}
 
         {/* Full-height product list overlay (covers messages + composer) */}
         <AnimatePresence>

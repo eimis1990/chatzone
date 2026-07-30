@@ -75,14 +75,12 @@ describe('widget.js loader', () => {
     ).toBeTruthy()
   })
 
-  it('links the Powered by Loqara badge to the marketing website', () => {
+  it('renders no host-page Powered-by badge (it lives inside the iframe now)', () => {
     const { document } = setupDOM('TEST_KEY_123')
-    // The badge is now a pill: <a> wraps "Powered by" + logo + "Loqara".
     const poweredBy = Array.from(document.querySelectorAll<HTMLAnchorElement>('a')).find(
-      (link) => link.textContent?.includes('Powered by') && link.textContent.includes('Loqara'),
+      (link) => link.textContent?.includes('Powered by'),
     )
-
-    expect(poweredBy?.href).toBe('https://www.loqara.com/')
+    expect(poweredBy).toBeUndefined()
   })
 
   it('does NOT mount an iframe before the launcher is clicked', () => {

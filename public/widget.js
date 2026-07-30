@@ -12,7 +12,7 @@
  *  2. Injects a floating launcher <button> into the page.
  *  3. On first click, lazy-creates an <iframe> pointed at /embed/{key}.
  *  4. Toggles open/close on subsequent launcher clicks.
- *  5. When open: renders a "Powered by Loqara" link below the iframe.
+ *  ("Powered by Loqara" renders inside the iframe, under the composer.)
  */
 ;(function () {
   'use strict'
@@ -74,7 +74,6 @@
   var IFRAME_HEIGHT = 680
   var OFFSET = 20
   var Z_INDEX = 2147483647 // max z-index
-  var POWERED_BY_URL = 'https://www.loqara.com'
 
   var isRight = position !== 'bottom-left'
 
@@ -517,7 +516,6 @@
       iframeContainer.style.height = 'auto'
       iframeContainer.style.borderRadius = '0px'
       iframeContainer.style.boxShadow = 'none'
-      poweredBy.style.display = 'none'
     } else {
       wrapper.style.width = Math.round(IFRAME_WIDTH * (isExpanded ? EXPAND_FACTOR : 1)) + 'px'
       wrapper.style.top = 'auto'
@@ -530,7 +528,6 @@
       // Cap to the viewport so it never overflows short screens (matches preview).
       iframeContainer.style.height = 'min(' + IFRAME_HEIGHT + 'px, calc(100dvh - 112px))'
       iframeContainer.style.boxShadow = '0 8px 40px rgba(0,0,0,0.18)'
-      poweredBy.style.display = badgeDisplay()
       // borderRadius restored below from config.cornerRadius (or its 16px default).
       iframeContainer.style.borderRadius =
         (config && config.theme && typeof config.theme.cornerRadius === 'number'
@@ -548,39 +545,12 @@
     sendViewport()
   }
 
-  // ── Powered-by link (below the iframe, right-aligned) ─────────────────────
-  // No separate close button: the launcher bubble toggles open/close.
-  var poweredBy = document.createElement('div')
-  css(poweredBy, {
-    display: 'none', // hidden until config says whether the badge is allowed — no flash
-    justifyContent: 'flex-end',
-    marginTop: '8px',
-    paddingRight: '2px',
-    fontSize: '10px',
-    lineHeight: '1.4',
-    fontFamily: 'system-ui, -apple-system, sans-serif',
-  })
-  // A white pill (not bare text): host-page backgrounds vary section to section
-  // — often dark — and a translucent pill stays readable on all of them without
-  // any background sampling.
-  poweredBy.innerHTML =
-    '<a href="' + POWERED_BY_URL + '" target="_blank" rel="noopener noreferrer" ' +
-    'style="display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:999px;' +
-    'background:rgba(255,255,255,0.92);color:#4b5563;text-decoration:none;' +
-    'box-shadow:0 1px 4px rgba(0,0,0,0.12);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);">' +
-    '<span>Powered by</span>' +
-    '<img src="' + appUrl + '/loqara-logo-colorful.webp" alt="" width="13" height="13" ' +
-    'style="display:block;width:13px;height:13px;border-radius:3px;" />' +
-    '<span style="font-weight:500;">Loqara</span></a>'
-  // Show only once a config (fetched or cached) says the badge is allowed.
-  function badgeDisplay() {
-    return config && !config.hideBadge ? 'flex' : 'none'
-  }
+  // The "Powered by Loqara" badge renders INSIDE the iframe (under the
+  // composer) — the widget owns that background, so the badge is always
+  // legible regardless of the host page behind the panel.
 
   wrapper.appendChild(iframeContainer)
-  wrapper.appendChild(poweredBy)
 
-  // Size the wrapper now that all its children exist (sizeWidget reads poweredBy).
   sizeWidget()
   window.addEventListener('resize', sizeWidget)
 
@@ -938,20 +908,13 @@
           try {
             window.localStorage.setItem(
               THEME_CACHE_KEY,
-              JSON.stringify({
-                theme: c.theme || {},
-                avatarUrl: c.avatarUrl || '',
-                // Cached so a repeat visit paints the badge state correctly
-                // before this fetch resolves (no show-then-hide flash).
-                hideBadge: !!c.hideBadge,
-              })
+              JSON.stringify({ theme: c.theme || {}, avatarUrl: c.avatarUrl || '' })
             )
           } catch (_) {}
           // Match the chat window's configured corner radius.
           if (c.theme && typeof c.theme.cornerRadius === 'number') {
             iframeContainer.style.borderRadius = c.theme.cornerRadius + 'px'
           }
-          poweredBy.style.display = badgeDisplay()
           renderLauncher()
           scheduleProactiveGreeting()
           // The visitor may have opened the chat before this config arrived —
