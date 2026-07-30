@@ -34,6 +34,15 @@ const envSchema = z.object({
   // CLOSED when this is unset (retention purge simply won't run), so set it in
   // production to enable the daily purge.
   CRON_SECRET: z.string().min(1).optional(),
+  // Optional: Meta (Messenger/Instagram) channel integration. The webhook
+  // route fails closed when these are absent. APP_SECRET signs webhook
+  // payloads; VERIFY_TOKEN is the value we echo-check during Meta's GET
+  // verification handshake.
+  META_APP_SECRET: z.string().min(1).optional(),
+  META_WEBHOOK_VERIFY_TOKEN: z.string().min(1).optional(),
+  // ponytail: spike-only single Page token; replaced by per-connection
+  // encrypted tokens in channel_connections when the OAuth flow lands.
+  META_PAGE_ACCESS_TOKEN: z.string().min(1).optional(),
   // Optional: Jina Reader API key for higher crawl limits. URL ingestion works
   // keyless (IP rate-limited) and falls back to a direct fetch if unavailable.
   JINA_API_KEY: z.string().min(1).optional(),

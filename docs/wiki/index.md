@@ -39,6 +39,8 @@ Add a line here. How the wiki works: [README.md](README.md).
 - [seo-baselines](seo-baselines.md) — 2026-07-21 GSC baseline (indexing,
   clicks/impressions, refresh priorities), checkpoint dates, monthly GEO prompt sample.
 - [voice](voice.md) — ElevenLabs voice add-on.
+- [messaging-channels](messaging-channels.md) — Meta app status, production
+  approval gates, and the Loqara channel-integration critical path.
 - [sales-leads](sales-leads.md) — owner outreach pipeline, prepared-email copy,
   chatbot-aware positioning, and UI behavior.
 - [linkedin-content](linkedin-content.md) — draggable owner content board,
