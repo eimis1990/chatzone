@@ -1509,6 +1509,11 @@ export function ConfigForm({
                       <Switch aria-label="Expandable widget" checked={field.value ?? false} onCheckedChange={field.onChange} />
                     )} />
                   </CompactToggle>
+                  <CompactToggle label="Hide Loqara badge" description="Removes “Powered by Loqara” (paid plans)">
+                    <Controller name="theme.hideBadge" control={control} render={({ field }) => (
+                      <Switch aria-label="Hide Loqara badge" checked={field.value ?? false} onCheckedChange={field.onChange} />
+                    )} />
+                  </CompactToggle>
                   {(watch('voice.enabled') ?? false) && (
                     <CompactToggle label="Call from message field" description="Off = call button floats next to the launcher">
                       <Controller name="theme.callButtonPlacement" control={control} render={({ field }) => (

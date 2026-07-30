@@ -530,7 +530,7 @@
       // Cap to the viewport so it never overflows short screens (matches preview).
       iframeContainer.style.height = 'min(' + IFRAME_HEIGHT + 'px, calc(100dvh - 112px))'
       iframeContainer.style.boxShadow = '0 8px 40px rgba(0,0,0,0.18)'
-      poweredBy.style.display = config && config.hideBadge ? 'none' : ''
+      poweredBy.style.display = badgeDisplay()
       // borderRadius restored below from config.cornerRadius (or its 16px default).
       iframeContainer.style.borderRadius =
         (config && config.theme && typeof config.theme.cornerRadius === 'number'
@@ -552,21 +552,30 @@
   // No separate close button: the launcher bubble toggles open/close.
   var poweredBy = document.createElement('div')
   css(poweredBy, {
-    textAlign: 'right',
+    display: 'none', // hidden until config says whether the badge is allowed — no flash
+    justifyContent: 'flex-end',
     marginTop: '8px',
     paddingRight: '2px',
     fontSize: '10px',
-    color: 'rgba(0,0,0,0.35)',
     lineHeight: '1.4',
     fontFamily: 'system-ui, -apple-system, sans-serif',
   })
+  // A white pill (not bare text): host-page backgrounds vary section to section
+  // — often dark — and a translucent pill stays readable on all of them without
+  // any background sampling.
   poweredBy.innerHTML =
-    'Powered by <a href="' + POWERED_BY_URL + '" target="_blank" rel="noopener noreferrer" ' +
-    'style="color:rgba(0,0,0,0.5);text-decoration:none;font-family:inherit;display:inline-flex;' +
-    'align-items:center;gap:3px;vertical-align:bottom;">' +
+    '<a href="' + POWERED_BY_URL + '" target="_blank" rel="noopener noreferrer" ' +
+    'style="display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:999px;' +
+    'background:rgba(255,255,255,0.92);color:#4b5563;text-decoration:none;' +
+    'box-shadow:0 1px 4px rgba(0,0,0,0.12);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);">' +
+    '<span>Powered by</span>' +
     '<img src="' + appUrl + '/loqara-logo-colorful.webp" alt="" width="13" height="13" ' +
     'style="display:block;width:13px;height:13px;border-radius:3px;" />' +
-    '<span style="text-decoration:underline;">Loqara</span></a>'
+    '<span style="font-weight:500;">Loqara</span></a>'
+  // Show only once a config (fetched or cached) says the badge is allowed.
+  function badgeDisplay() {
+    return config && !config.hideBadge ? 'flex' : 'none'
+  }
 
   wrapper.appendChild(iframeContainer)
   wrapper.appendChild(poweredBy)
@@ -929,19 +938,25 @@
           try {
             window.localStorage.setItem(
               THEME_CACHE_KEY,
-              JSON.stringify({ theme: c.theme || {}, avatarUrl: c.avatarUrl || '' })
+              JSON.stringify({
+                theme: c.theme || {},
+                avatarUrl: c.avatarUrl || '',
+                // Cached so a repeat visit paints the badge state correctly
+                // before this fetch resolves (no show-then-hide flash).
+                hideBadge: !!c.hideBadge,
+              })
             )
           } catch (_) {}
           // Match the chat window's configured corner radius.
           if (c.theme && typeof c.theme.cornerRadius === 'number') {
             iframeContainer.style.borderRadius = c.theme.cornerRadius + 'px'
           }
-          // Paid plans hide the "Powered by Loqara" badge.
-          if (c.hideBadge) {
-            poweredBy.style.display = 'none'
-          }
+          poweredBy.style.display = badgeDisplay()
           renderLauncher()
           scheduleProactiveGreeting()
+          // The visitor may have opened the chat before this config arrived —
+          // surfaces that depend on it (the call pill) re-evaluate now.
+          if (isOpen) showCallButton()
         }
       })
       .catch(function () {})

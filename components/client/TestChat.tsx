@@ -234,16 +234,17 @@ export function TestChat({ botId, config, activeLang, dictationEnabled = false }
               />
             </div>
 
-            {/* Preview chrome — Powered by (right-aligned, matching the live widget) */}
-            <div className="px-1 text-right">
-              <p className="text-[10px] text-muted-foreground/60">
-                Powered by{' '}
+            {/* Preview chrome — Powered by pill (matching the live widget: a
+                white pill so it reads on ANY host-page background). */}
+            {!(config.theme?.hideBadge ?? false) && (
+              <div className="flex justify-end px-1">
                 <a
                   href={POWERED_BY_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-[3px] align-bottom hover:text-muted-foreground transition-colors"
+                  className="inline-flex items-center gap-1 rounded-full bg-white/90 px-2 py-[3px] text-[10px] text-gray-600 shadow-sm ring-1 ring-black/5 backdrop-blur-sm transition-colors hover:text-gray-900"
                 >
+                  <span>Powered by</span>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src="/loqara-logo-colorful.webp"
@@ -252,10 +253,10 @@ export function TestChat({ botId, config, activeLang, dictationEnabled = false }
                     height={13}
                     className="size-[13px] rounded-[3px]"
                   />
-                  <span className="underline">Loqara</span>
+                  <span className="font-medium">Loqara</span>
                 </a>
-              </p>
-            </div>
+              </div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>

@@ -167,6 +167,8 @@ export const botConfigFormSchema = z.object({
       callButtonPlacement: z.enum(['header', 'composer', 'launcher']).default('launcher'),
       // Header button letting visitors widen the chat panel by 20%.
       expandButton: z.boolean().default(false),
+      // Hide the "Powered by Loqara" badge (server enforces the plan gate).
+      hideBadge: z.boolean().default(false),
       // Show the "talk to a person" human-handoff button.
       showHandoffButton: z.boolean().default(true),
       // Background color for the voice call button (text auto-contrasts).
@@ -213,6 +215,7 @@ export const botConfigFormSchema = z.object({
       compactCallButton: false,
       callButtonPlacement: 'launcher',
       expandButton: false,
+      hideBadge: false,
       showHandoffButton: true,
       navButtonRadius: 12,
       backgroundColor: '#ffffff',

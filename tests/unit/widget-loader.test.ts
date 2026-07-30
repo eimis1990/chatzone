@@ -77,8 +77,9 @@ describe('widget.js loader', () => {
 
   it('links the Powered by Loqara badge to the marketing website', () => {
     const { document } = setupDOM('TEST_KEY_123')
+    // The badge is now a pill: <a> wraps "Powered by" + logo + "Loqara".
     const poweredBy = Array.from(document.querySelectorAll<HTMLAnchorElement>('a')).find(
-      (link) => link.textContent === 'Loqara',
+      (link) => link.textContent?.includes('Powered by') && link.textContent.includes('Loqara'),
     )
 
     expect(poweredBy?.href).toBe('https://www.loqara.com/')

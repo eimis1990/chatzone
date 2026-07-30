@@ -263,7 +263,9 @@ export function publicBotConfig(
       title: config.leadCapture.title,
       fields: config.leadCapture.fields,
     },
-    hideBadge: entitlements?.removeBadge ?? false,
+    // Hiding is an owner/client CHOICE (theme.hideBadge), honored only on plans
+    // that allow it — a plan upgrade alone never hides the badge silently.
+    hideBadge: (entitlements?.removeBadge ?? false) && (config.theme.hideBadge ?? false),
     // Dictation is plan-gated (paid tiers). Without entitlements info (e.g.
     // configurator preview builds its own config), leave it off here.
     dictation: entitlements?.dictation ?? false,

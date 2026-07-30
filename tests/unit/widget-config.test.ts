@@ -247,13 +247,23 @@ describe('publicBotConfig — plan entitlements gating', () => {
     expect(pub.defaultLanguage).toBe('en')
   })
 
-  it('Starter plan: all languages, lead capture, badge hidden', () => {
+  it('Starter plan: all languages, lead capture; badge stays unless opted out', () => {
     const pub = publicBotConfig(maxedConfig, entitlementsFor('starter'))
     expect(pub.languages).toEqual(['en', 'lt'])
     expect(pub.defaultLanguage).toBe('lt')
     expect(pub.content.lt).toBeDefined()
     expect(pub.leadCapture.enabled).toBe(true)
-    expect(pub.hideBadge).toBe(true)
+    // Hiding the badge is an explicit choice (theme.hideBadge), not a plan side effect.
+    expect(pub.hideBadge).toBe(false)
+  })
+
+  it('paid plan + theme.hideBadge hides the badge; free plan cannot', () => {
+    const optedOut: BotConfig = {
+      ...maxedConfig,
+      theme: { ...maxedConfig.theme, hideBadge: true },
+    }
+    expect(publicBotConfig(optedOut, entitlementsFor('starter')).hideBadge).toBe(true)
+    expect(publicBotConfig(optedOut, entitlementsFor('free')).hideBadge).toBe(false)
   })
 
   it('Free plan never enables lead capture even if config says so', () => {

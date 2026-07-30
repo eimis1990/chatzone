@@ -216,6 +216,8 @@ export interface BotConfig {
     callButtonPlacement?: 'header' | 'composer' | 'launcher'
     /** Header button letting visitors widen the chat panel by 20%. */
     expandButton?: boolean
+    /** Hide the "Powered by Loqara" badge (honored only on plans that allow it). */
+    hideBadge?: boolean
     /** Show the "talk to a person" human-handoff button (once a chat is underway). */
     showHandoffButton?: boolean
     /** Background color for the voice call button (text auto-contrasts). */
