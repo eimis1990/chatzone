@@ -410,7 +410,18 @@ export interface PromptVersionMeta {
 
 export type HandoffStatus = 'bot' | 'requested' | 'live' | 'resolved'
 
-export type ConversationChannel = 'chat' | 'voice'
+export type ConversationChannel = 'chat' | 'voice' | 'messenger'
+
+/** One external messaging account (Facebook Page, later IG) wired to a bot. */
+export interface ChannelConnection {
+  id: string
+  org_id: string
+  bot_id: string
+  provider: 'messenger' | 'instagram'
+  external_account_id: string
+  display_name: string | null
+  status: 'connecting' | 'active' | 'paused' | 'action_required' | 'disconnected'
+}
 
 export interface Conversation {
   id: string

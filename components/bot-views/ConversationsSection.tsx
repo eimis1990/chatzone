@@ -11,7 +11,7 @@ import type {
   VisitorBlockManagementAction,
   VisitorBlockManagementResult,
 } from '@/lib/visitor-block-shared'
-import type { Conversation, Message } from '@/lib/types'
+import type { Conversation, ConversationChannel, Message } from '@/lib/types'
 
 /**
  * Shared Conversations view — used by the client bot pages AND the owner's
@@ -29,7 +29,7 @@ interface ConversationRow
   needs_attention: boolean
   success_score: number | null
   success_reason: string | null
-  channel: 'chat' | 'voice'
+  channel: ConversationChannel
   block_expires_at: string | null
 }
 
