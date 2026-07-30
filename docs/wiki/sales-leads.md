@@ -50,6 +50,11 @@ emails, and manual status progression.
 - `email_subject` and `email_body` are operational snapshots stored on each
   lead, not generated at send time. Existing-chatbot leads should acknowledge
   the incumbent respectfully and give a concrete reason to compare.
+- Every first-touch body starts with `Laba diena,` followed by a blank line.
+  Validate this alongside the opt-out before sending. Migration
+  `20260730033800_restore_greeting_to_researched_sales_leads.sql:1` repaired the
+  greeting omitted from the July 29 researched batch without changing lifecycle
+  timestamps.
 - Prepared-email openings use two sentences: a verifiable observation grounded
   in `hook`/the previous opening, then one concrete task Loqara could help with.
   Do not turn inferred buyer behavior into fact (for example, "customers often
@@ -102,13 +107,24 @@ emails, and manual status progression.
 ## Prospect seeds
 
 - Researched batches belong in timestamped, idempotent migrations with
-  `on conflict (website) do nothing`, so records inserted into the live pipeline
-  during research are not duplicated when deployment later applies the migration
-  (`supabase/migrations/20260720120000_add_furniture_sales_leads.sql:1`).
+  normalized-host and normalized-email guards plus
+  `on conflict (website) do nothing`. Exact batch-size assertions should make
+  the migration fail atomically if live data changed during research
+  (`supabase/migrations/20260729201426_add_59_verified_sales_leads.sql:1`).
 - Resolve suggested domains to their canonical storefront before inserting. A
   supplied alias or typo can otherwise bypass the unique website constraint; the
   July 2026 furniture batch resolved `sofaformabaldai.lt` to `sofaforma.lt` and
   detected that Guru Baldai was already present rather than inserting it twice.
+- Public-web prospecting uses first-party evidence for the final row. The
+  verifier checks the homepage plus same-origin contact/about pages, extracts
+  public business contacts, detects common commerce platforms and chat widgets,
+  and records canonical redirects (`scripts/research-sales-leads.mjs:1`). Search
+  results can discover candidates, but do not qualify a row by themselves.
+- The 2026-07-29 research batch added 59 Lithuania-focused small/mid-market
+  specialists across furniture, cycling, beauty, HVAC, home improvement, pets,
+  fishing, automotive, and security. All 59 landed as `ready`, with a public
+  email, prepared copy, opt-out, and no chat widget detected in public HTML
+  (`supabase/migrations/20260729201426_add_59_verified_sales_leads.sql:1`).
 - Platform compatibility is part of qualification, not a reason to invent an
   integration. WooCommerce, Shopify, Magento, and Verskis can use Smart product
   search directly; PrestaShop/CS-Cart/custom sites should explicitly say that a
@@ -118,4 +134,5 @@ emails, and manual status progression.
   research and keep status `ready` until outreach or a buyer response occurs
   (`supabase/migrations/20260720130000_add_mobel_sales_lead.sql:1`).
 
-_Last verified: 2026-07-29 (live schema and all 241 prepared email bodies)._
+_Last verified: 2026-07-30 (live schema; 300 leads total, including the repaired
+59-lead researched batch)._

@@ -19,6 +19,44 @@ export interface SyncProgress {
   synced?: number
 }
 
+/** Postgres cancelled the statement (statement_timeout) — 57014. */
+function isTimeoutError(error: { message: string; code?: string }): boolean {
+  return error.code === '57014' || error.message.includes('statement timeout')
+}
+
+/**
+ * Run `items` through `run` in chunks, HALVING the chunk size and retrying the
+ * same position whenever Postgres reports a statement timeout. Writing
+ * 1536-dim vectors pays an HNSW graph-insert per row, so a fixed batch that
+ * fits one store blows the statement_timeout on a bigger/busier one — this
+ * adapts instead of failing the whole sync. A single row that still times out
+ * is a real problem and surfaces as an error.
+ */
+export async function runChunkedWrite<T>(
+  items: T[],
+  startSize: number,
+  // PromiseLike: supabase query builders are thenables, not real Promises.
+  run: (chunk: T[]) => PromiseLike<{ error: { message: string; code?: string } | null }>,
+  label: string,
+  onDone?: (written: number) => void,
+): Promise<void> {
+  let i = 0
+  let size = startSize
+  while (i < items.length) {
+    const chunk = items.slice(i, i + size)
+    const { error } = await run(chunk)
+    if (error) {
+      if (isTimeoutError(error) && chunk.length > 1) {
+        size = Math.max(1, Math.floor(chunk.length / 2))
+        continue // retry the same position with a smaller batch
+      }
+      throw new Error(`${label} failed: ${error.message}`)
+    }
+    i += chunk.length
+    onDone?.(i)
+  }
+}
+
 /**
  * Sync a bot's store catalog into the semantic product index: fetch → tag
  * (derived + AI) → embed → upsert + prune. The upsert-then-prune order keeps
@@ -112,27 +150,28 @@ export async function syncProductCatalog(
   // a 504 once left a bot searching 400 of 2,582 products.
   const totalWork = rows.length + unchangedIds.length
   report({ phase: 'indexing', processed: 0, total: totalWork })
-  for (let i = 0; i < rows.length; i += 100) {
-    const { error } = await db
-      .from('product_embeddings')
-      .upsert(rows.slice(i, i + 100), { onConflict: 'bot_id,external_id' })
-    if (error) throw new Error(`product_embeddings upsert failed: ${error.message}`)
-    report({ phase: 'indexing', processed: Math.min(i + 100, rows.length), total: totalWork })
-  }
+  // 50 to start (not 100): each timed-out attempt wastes a full statement_timeout
+  // waiting for the cancel, so over-large first batches are expensive mistakes.
+  await runChunkedWrite(
+    rows,
+    50,
+    (chunk) => db.from('product_embeddings').upsert(chunk, { onConflict: 'bot_id,external_id' }),
+    'product_embeddings upsert',
+    (written) => report({ phase: 'indexing', processed: written, total: totalWork }),
+  )
   // Unchanged rows just get their stamp bumped so the prune below keeps them.
-  for (let i = 0; i < unchangedIds.length; i += 200) {
-    const { error } = await db
-      .from('product_embeddings')
-      .update({ synced_at: startedAt })
-      .eq('bot_id', bot.id)
-      .in('external_id', unchangedIds.slice(i, i + 200))
-    if (error) throw new Error(`product_embeddings bump failed: ${error.message}`)
-    report({
-      phase: 'indexing',
-      processed: rows.length + Math.min(i + 200, unchangedIds.length),
-      total: totalWork,
-    })
-  }
+  await runChunkedWrite(
+    unchangedIds,
+    200,
+    (chunk) =>
+      db
+        .from('product_embeddings')
+        .update({ synced_at: startedAt })
+        .eq('bot_id', bot.id)
+        .in('external_id', chunk),
+    'product_embeddings bump',
+    (written) => report({ phase: 'indexing', processed: rows.length + written, total: totalWork }),
+  )
   // Remove products no longer in the catalog (rows this run didn't touch).
   await db.from('product_embeddings').delete().eq('bot_id', bot.id).lt('synced_at', startedAt)
   report({ phase: 'done', synced: products.length })
