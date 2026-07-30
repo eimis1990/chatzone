@@ -613,9 +613,9 @@
     whiteSpace: 'nowrap',
     lineHeight: '1',
     opacity: '0',
-    transform: 'translateY(6px) scale(0.92)',
+    transform: 'translateY(18px)',
     transformOrigin: isRight ? 'bottom right' : 'bottom left',
-    transition: 'opacity 0.22s ease, transform 0.26s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease',
+    transition: 'opacity 0.24s ease, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease',
     outline: 'none',
   })
 
@@ -653,6 +653,7 @@
   }
 
   var callBtnHideTimer = null
+  var callBtnShowTimer = null
   function showCallButton() {
     if (!voiceCallAvailable() || isMobile()) return
     if (callBtnHideTimer) {
@@ -662,18 +663,29 @@
     renderCallButton()
     callBtn.style.display = 'flex'
     void callBtn.offsetHeight // reflow so the entrance transition runs
-    callBtn.style.opacity = '1'
-    callBtn.style.transform = 'translateY(0) scale(1)'
+    // Rises from below the edge, 0.3s after the panel starts opening — the
+    // panel lands first, then the pill follows.
+    if (callBtnShowTimer) clearTimeout(callBtnShowTimer)
+    callBtnShowTimer = setTimeout(function () {
+      callBtnShowTimer = null
+      if (!isOpen) return
+      callBtn.style.opacity = '1'
+      callBtn.style.transform = 'translateY(0)'
+    }, 300)
   }
 
   function hideCallButton() {
+    if (callBtnShowTimer) {
+      clearTimeout(callBtnShowTimer)
+      callBtnShowTimer = null
+    }
     callBtn.style.opacity = '0'
-    callBtn.style.transform = 'translateY(6px) scale(0.92)'
+    callBtn.style.transform = 'translateY(18px)'
     if (callBtnHideTimer) clearTimeout(callBtnHideTimer)
     callBtnHideTimer = setTimeout(function () {
       if (!isOpen) callBtn.style.display = 'none'
       callBtnHideTimer = null
-    }, 260)
+    }, 300)
   }
 
   callBtn.addEventListener('click', function () {

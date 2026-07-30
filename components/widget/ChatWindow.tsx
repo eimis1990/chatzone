@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useRef, useEffect } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ChevronsLeftRightIcon, ChevronsRightLeftIcon, HeadsetIcon, RotateCcwIcon, XIcon } from 'lucide-react'
+import { ChevronsLeftRightIcon, ChevronsRightLeftIcon, HeadsetIcon, RefreshCcwIcon, XIcon } from 'lucide-react'
 import { MessageList, type ChatMessage } from './MessageList'
 import { ProductListView } from './ProductCards'
 import { RoomTray, RoomStudio, roomLabels, MAX_ROOM_PRODUCTS, type RoomSelect, type RoomPhoto } from './RoomVisualizer'
@@ -1098,41 +1098,6 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
           />
         )}
 
-        {/* Widen toggle — asks the host (widget.js / TestChat) to animate the
-            panel 20% wider. Desktop only: the mobile sheet is already full-screen. */}
-        {config.theme.expandButton && !isMobile && (
-          <button
-            type="button"
-            onClick={() => {
-              const next = !panelExpanded
-              setPanelExpanded(next)
-              window.parent?.postMessage({ type: 'cbz-expand', expanded: next }, '*')
-            }}
-            title={
-              panelExpanded
-                ? activeLang === 'lt' ? 'Susiaurinti' : 'Shrink'
-                : activeLang === 'lt' ? 'Praplėsti' : 'Widen'
-            }
-            aria-label={
-              panelExpanded
-                ? activeLang === 'lt' ? 'Susiaurinti langą' : 'Shrink chat window'
-                : activeLang === 'lt' ? 'Praplėsti langą' : 'Widen chat window'
-            }
-            aria-pressed={panelExpanded}
-            className="flex size-8 flex-shrink-0 items-center justify-center transition hover:brightness-90"
-            style={{
-              backgroundColor: 'color-mix(in srgb, currentColor 15%, transparent)',
-              borderRadius: `${navButtonRadius}px`,
-            }}
-          >
-            {panelExpanded ? (
-              <ChevronsRightLeftIcon className="size-4" aria-hidden="true" />
-            ) : (
-              <ChevronsLeftRightIcon className="size-4" aria-hidden="true" />
-            )}
-          </button>
-        )}
-
         {/* Language picker — flag-only square, multilingual bots with the
             selector enabled. Disabled during a voice call (the call is bound
             to the language it started in). */}
@@ -1145,13 +1110,18 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
               title={languageMeta(activeLang).nativeLabel}
               aria-label={activeLang === 'lt' ? 'Pakeisti kalbą' : 'Change language'}
               aria-expanded={langMenuOpen}
-              className="flex size-8 items-center justify-center text-base transition hover:brightness-90 disabled:opacity-50"
+              className="flex size-8 items-center justify-center transition hover:brightness-90 disabled:opacity-50"
               style={{
                 backgroundColor: 'color-mix(in srgb, currentColor 15%, transparent)',
                 borderRadius: `${navButtonRadius}px`,
               }}
             >
-              <span aria-hidden="true">{languageMeta(activeLang).flag}</span>
+              {/* Language code, not a flag — tiny emoji flags are barely legible
+                  on colored headers (and render as "LT"-style codes anyway on
+                  some platforms). The dropdown keeps flag + native name. */}
+              <span aria-hidden="true" className="text-[11px] font-bold tracking-wide">
+                {activeLang.toUpperCase()}
+              </span>
             </button>
             {langMenuOpen && (
               <>
@@ -1197,8 +1167,44 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
             borderRadius: `${navButtonRadius}px`,
           }}
         >
-          <RotateCcwIcon className="size-4" aria-hidden="true" />
+          <RefreshCcwIcon className="size-3.5" aria-hidden="true" />
         </button>
+
+        {/* Widen toggle — LAST in the row (top-right corner). Asks the host
+            (widget.js / TestChat) to animate the panel 20% wider. Desktop
+            only: the mobile sheet is already full-screen. */}
+        {config.theme.expandButton && !isMobile && (
+          <button
+            type="button"
+            onClick={() => {
+              const next = !panelExpanded
+              setPanelExpanded(next)
+              window.parent?.postMessage({ type: 'cbz-expand', expanded: next }, '*')
+            }}
+            title={
+              panelExpanded
+                ? activeLang === 'lt' ? 'Susiaurinti' : 'Shrink'
+                : activeLang === 'lt' ? 'Praplėsti' : 'Widen'
+            }
+            aria-label={
+              panelExpanded
+                ? activeLang === 'lt' ? 'Susiaurinti langą' : 'Shrink chat window'
+                : activeLang === 'lt' ? 'Praplėsti langą' : 'Widen chat window'
+            }
+            aria-pressed={panelExpanded}
+            className="flex size-8 flex-shrink-0 items-center justify-center transition hover:brightness-90"
+            style={{
+              backgroundColor: 'color-mix(in srgb, currentColor 15%, transparent)',
+              borderRadius: `${navButtonRadius}px`,
+            }}
+          >
+            {panelExpanded ? (
+              <ChevronsRightLeftIcon className="size-4" aria-hidden="true" />
+            ) : (
+              <ChevronsLeftRightIcon className="size-4" aria-hidden="true" />
+            )}
+          </button>
+        )}
       </div>
 
       {/* Body — messages + composer. Relative so the product list can overlay it;

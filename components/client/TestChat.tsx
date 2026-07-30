@@ -312,10 +312,24 @@ export function TestChat({ botId, config, activeLang, dictationEnabled = false }
             <motion.button
               key="call-pill"
               type="button"
-              initial={prefersReducedMotion ? false : { opacity: 0, y: 6, scale: 0.92 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 6, scale: 0.92 }}
-              transition={{ duration: 0.24, ease: [0.16, 1, 0.3, 1] }}
+              initial={prefersReducedMotion ? false : { opacity: 0, y: 18 }}
+              // Rises from below 0.3s after the panel starts opening (matches
+              // widget.js). Delay lives on the ENTRANCE transition only — the
+              // exit dismisses immediately.
+              animate={{
+                opacity: 1,
+                y: 0,
+                transition: {
+                  duration: 0.3,
+                  ease: [0.16, 1, 0.3, 1],
+                  delay: prefersReducedMotion ? 0 : 0.3,
+                },
+              }}
+              exit={{
+                opacity: 0,
+                y: 18,
+                transition: { duration: 0.24, ease: [0.16, 1, 0.3, 1] },
+              }}
               onClick={() =>
                 window.postMessage(
                   { type: previewCallState === 'idle' ? 'cbz-start-call' : 'cbz-end-call' },
