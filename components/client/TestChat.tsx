@@ -231,6 +231,11 @@ export function TestChat({ botId, config, activeLang, dictationEnabled = false }
                 transport={transport}
                 initialLanguage={activeLang}
                 onRequestClose={() => setIsOpen(false)}
+                // The preview is always the DESKTOP widget (a fixed 420px card
+                // with its own launcher + call pill). Without this it would
+                // follow the config screen's width and render mobile chrome —
+                // a header ✕ and a second call button — inside the card.
+                isMobileOverride={false}
               />
             </div>
 

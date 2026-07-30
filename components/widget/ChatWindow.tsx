@@ -946,6 +946,10 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
   // VoiceCallButton still mounts headlessly to own the call session.
   const callInComposer =
     voiceEnabled && showCallButton && (config.theme.callButtonPlacement ?? 'header') === 'composer'
+  // Mobile: the panel is a full-screen sheet and the launcher (which carries the
+  // host-side call pill) is hidden — so launcher placement falls back to the
+  // header, the only chrome a visitor can still reach.
+  const callInHeader = voiceEnabled && showCallButton && !callInComposer && isMobile
   const callActive = callState !== 'idle'
   const callButtonColor = config.theme.callButtonColor || '#22c55e'
   // Visitor-driven "widen" toggle (theme.expandButton) — the host animates.
@@ -1069,14 +1073,13 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
         </div>
 
         {/* Voice call button — when voice is on and the client hasn't hidden it.
-            Composer placement mounts it headlessly (owns the session; the
-            composer's button drives it via startVoiceRef/endVoiceRef). */}
+            Visible here ONLY on mobile (see callInHeader); on desktop it renders
+            as the pill beside the launcher, and composer placement puts it in
+            the message field. Every other case mounts headlessly, because this
+            component owns the voice session either way. */}
         {voiceEnabled && showCallButton && (
           <VoiceCallButton
-            // Header rendering is retired: the call button now lives next to
-            // the launcher (widget.js pill) or in the composer. This mount is
-            // headless either way — it owns the voice session.
-            appearance="none"
+            appearance={callInHeader ? 'compact' : 'none'}
             iconOnly={config.theme.compactCallButton ?? false}
             getToken={getVoiceToken}
             primaryColor="#ffffff"
