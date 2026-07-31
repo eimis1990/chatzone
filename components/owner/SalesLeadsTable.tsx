@@ -118,19 +118,23 @@ const STATUS_ORDER: SalesLeadStatus[] = [
 /** Statuses grouped behind the "Emails sent" quick tab (awaiting a reply). */
 const AWAITING_REPLY: SalesLeadStatus[] = ['email_sent', 'follow_up_email']
 
-/** Status filter: a single stage, the awaiting-reply group, or everything. */
-type StatusFilter = 'all' | 'awaiting_reply' | SalesLeadStatus
+/** Statuses grouped behind the "Demo" quick tab — the whole demo track. */
+const DEMO_TRACK: SalesLeadStatus[] = ['wants_demo', 'demo_ready', 'demo_presented']
+
+/** Status filter: a single stage, one of the groups, or everything. */
+type StatusFilter = 'all' | 'awaiting_reply' | 'demo_track' | SalesLeadStatus
 
 const QUICK_TABS: { value: StatusFilter; label: string }[] = [
   { value: 'all', label: 'All' },
   { value: 'ready', label: 'Ready' },
-  { value: 'wants_demo', label: 'Wants demo' },
+  { value: 'demo_track', label: 'Demo' },
   { value: 'awaiting_reply', label: 'Emails sent' },
 ]
 
 function matchesStatusFilter(lead: SalesLead, filter: StatusFilter): boolean {
   if (filter === 'all') return true
   if (filter === 'awaiting_reply') return AWAITING_REPLY.includes(lead.status)
+  if (filter === 'demo_track') return DEMO_TRACK.includes(lead.status)
   return lead.status === filter
 }
 
@@ -442,6 +446,7 @@ export function SalesLeadsTable({
       noBot: leads.length - hasBot,
       followUpDue,
       awaitingReply: AWAITING_REPLY.reduce((sum, status) => sum + (byStatus.get(status) ?? 0), 0),
+      demoTrack: DEMO_TRACK.reduce((sum, status) => sum + (byStatus.get(status) ?? 0), 0),
       averageScore: leads.length ? Math.round(scoreSum / leads.length) : 0,
     }
   }, [leads, asOf])
@@ -452,7 +457,9 @@ export function SalesLeadsTable({
       ? leads.length
       : filter === 'awaiting_reply'
         ? counts.awaitingReply
-        : (counts.byStatus.get(filter) ?? 0)
+        : filter === 'demo_track'
+          ? counts.demoTrack
+          : (counts.byStatus.get(filter) ?? 0)
 
   const hasActiveFilters = Boolean(query.trim() || vertical || statusFilter !== 'all')
 
@@ -571,9 +578,11 @@ export function SalesLeadsTable({
                   onClick={() => setStatusFilter(tab.value)}
                   className={cn(
                     'flex flex-1 items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-all',
+                    // `bg-card` is pure white (unlike --background, a light
+                    // grey), so the selected tab actually lifts off the track.
                     active
-                      ? 'bg-background text-foreground shadow-sm ring-1 ring-border'
-                      : 'text-muted-foreground hover:bg-background/60 hover:text-foreground',
+                      ? 'bg-card text-foreground shadow-sm ring-1 ring-border'
+                      : 'text-muted-foreground hover:bg-card/60 hover:text-foreground',
                   )}
                 >
                   <span className="truncate">{tab.label}</span>
@@ -632,6 +641,7 @@ export function SalesLeadsTable({
                 <SelectGroup>
                   <SelectItem value="all">All statuses ({leads.length})</SelectItem>
                   <SelectItem value="awaiting_reply">Emails sent ({counts.awaitingReply})</SelectItem>
+                  <SelectItem value="demo_track">Demo — all stages ({counts.demoTrack})</SelectItem>
                   {STATUS_ORDER.map((status) => (
                     <SelectItem key={status} value={status}>
                       {STATUS_META[status].label} ({statusCount(status)})
