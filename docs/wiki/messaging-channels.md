@@ -65,10 +65,15 @@
   (required to serve client Pages; adds Business verification → Access
   verification → App Review gates before publish). `pages_read_engagement`
   added — all five Messenger permissions now "Ready for testing".
-- Remaining before external clients: contact-email verification (Meta's link
-  to hello@loqara.com), Business Verification (business details + document,
-  owner-only), then Access verification (~5-day Meta review), App Review with
-  screencast, publish. Testing on Loqara-owned assets works today.
+- Remaining before external clients — the gate is now COMPANY REGISTRATION:
+  Loqara has no legal entity yet (owner plans an MB/UAB later), and Meta's
+  Business Verification requires registration documents. Chain: register
+  MB/UAB → Business Verification → Access verification (~5-day Meta review) →
+  App Review with screencast → publish. Start registration a few weeks before
+  wanting paying channel clients. Contact-email verification is NOT currently
+  a Meta required action (checked 2026-07-31) — it only blocks publish;
+  hello@loqara.com had received nothing (check spam/ImprovMX log before
+  re-triggering). Dev on Loqara-owned assets is unaffected.
 
 ## Critical path
 
