@@ -12,11 +12,16 @@
   answers via `lib/channels/processor.ts` — the widget's grounding pipeline
   without streaming/commerce/handoff-escalation. Migration
   `20260730220000_channel_connections.sql` (service-role-only RLS).
-- Still spike-grade: outbound send uses the env `META_PAGE_ACCESS_TOKEN`
-  (per-connection `access_token_cipher` is in the schema but unused), no OAuth
-  routes, no Inbox outbound delivery (handoff intent is deliberately NOT
-  detected — a human couldn't reply on the channel yet), no abuse guard on the
-  Messenger path. Delivery order lives in
+- Inbox ⇄ Messenger loop is wired (2026-07-31): handoff intent escalates from
+  the Messenger path (`lib/channels/processor.ts`), agent replies deliver via
+  `lib/channels/outbound.ts` — Meta send happens BEFORE the local insert, so a
+  rejected reply (24h window, dead token) surfaces as a toast + restored draft
+  instead of a phantom sent message. Both inbox surfaces share
+  `deliverAgentMessage`; Messenger badges in Inbox + Conversations views.
+- Still spike-grade: outbound uses the env `META_PAGE_ACCESS_TOKEN`
+  (per-connection `access_token_cipher` in schema, unused), no OAuth routes,
+  no abuse guard on the Messenger path, no billing entitlement checks.
+  Delivery order lives in
   [`../CHANNELS_IMPLEMENTATION.md`](../CHANNELS_IMPLEMENTATION.md).
 - The shared v1 boundary is one external Page/account connected to one bot.
   Prove Messenger first, then reuse the adapter boundary for Instagram and
