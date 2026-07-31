@@ -175,14 +175,20 @@ function PlatformBadge({ platform, onAccent = false }: { platform: string | null
   )
 }
 
-/** The lead's category chip — secondary normally, translucent on the accent row. */
+/** The lead's category chip — secondary normally, translucent on the accent row.
+ *  Long Lithuanian category names are truncated (full text in the tooltip) so
+ *  the column can stay narrow enough for the table to fit without scrolling. */
 function VerticalBadge({ vertical, onAccent = false }: { vertical: string; onAccent?: boolean }) {
   return (
     <Badge
       variant={onAccent ? 'outline' : 'secondary'}
-      className={onAccent ? 'border-white/30 bg-white/10 text-primary-foreground' : undefined}
+      title={vertical}
+      className={cn(
+        'max-w-full',
+        onAccent && 'border-white/30 bg-white/10 text-primary-foreground',
+      )}
     >
-      {vertical}
+      <span className="truncate">{vertical}</span>
     </Badge>
   )
 }
@@ -551,7 +557,7 @@ export function SalesLeadsTable({
         <CardContent className="flex flex-col gap-4">
           {/* Quick tabs — the three stages worth one click, plus All. */}
           <div
-            className="flex w-full flex-wrap gap-1 rounded-xl bg-muted/60 p-1"
+            className="flex w-full gap-1 rounded-lg border bg-muted p-1"
             role="group"
             aria-label="Quick status filter"
           >
@@ -564,14 +570,21 @@ export function SalesLeadsTable({
                   aria-pressed={active}
                   onClick={() => setStatusFilter(tab.value)}
                   className={cn(
-                    'flex-1 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors',
+                    'flex flex-1 items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-all',
                     active
-                      ? 'bg-background text-foreground shadow-sm'
-                      : 'text-muted-foreground hover:text-foreground',
+                      ? 'bg-background text-foreground shadow-sm ring-1 ring-border'
+                      : 'text-muted-foreground hover:bg-background/60 hover:text-foreground',
                   )}
                 >
-                  {tab.label}
-                  <span className="ml-1.5 tabular-nums opacity-60">{statusCount(tab.value)}</span>
+                  <span className="truncate">{tab.label}</span>
+                  <span
+                    className={cn(
+                      'shrink-0 rounded px-1.5 py-0.5 text-xs font-semibold tabular-nums',
+                      active ? 'bg-primary/10 text-primary' : 'bg-foreground/10 text-muted-foreground',
+                    )}
+                  >
+                    {statusCount(tab.value)}
+                  </span>
                 </button>
               )
             })}
@@ -645,13 +658,15 @@ export function SalesLeadsTable({
 
         <CardContent className="px-0">
           <div className="hidden md:block">
-            <Table className="min-w-[1020px]">
+            {/* Narrow enough to fit a laptop viewport beside the sidebar — the
+                Category column truncates rather than widening the table. */}
+            <Table className="min-w-[900px]">
               <TableHeader className="bg-muted/30">
                 <TableRow className="hover:bg-muted/30">
                   <TableHead className="w-20 border-r pl-4 text-xs uppercase tracking-wide text-muted-foreground">Score</TableHead>
                   <TableHead className="w-48 border-r text-xs uppercase tracking-wide text-muted-foreground">Company</TableHead>
                   <TableHead className="border-r text-xs uppercase tracking-wide text-muted-foreground">Platform</TableHead>
-                  <TableHead className="border-r text-xs uppercase tracking-wide text-muted-foreground">Category</TableHead>
+                  <TableHead className="w-36 border-r text-xs uppercase tracking-wide text-muted-foreground">Category</TableHead>
                   <TableHead className="border-r text-xs uppercase tracking-wide text-muted-foreground">Contact</TableHead>
                   <TableHead className="border-r text-xs uppercase tracking-wide text-muted-foreground">Status</TableHead>
                   <TableHead className="w-28 text-xs uppercase tracking-wide text-muted-foreground">Updated</TableHead>
@@ -708,13 +723,15 @@ export function SalesLeadsTable({
                         <PlatformBadge platform={lead.platform} onAccent={isClient} />
                       </TableCell>
                       <TableCell className={cellBorder}>
-                        <VerticalBadge vertical={lead.vertical} onAccent={isClient} />
+                        <div className="w-32 min-w-0">
+                          <VerticalBadge vertical={lead.vertical} onAccent={isClient} />
+                        </div>
                       </TableCell>
                       <TableCell className={cellBorder}>
-                        <div className="flex min-w-44 flex-col gap-0.5">
+                        <div className="flex min-w-40 flex-col gap-0.5">
                           {lead.email ? (
                             <span className="flex items-center gap-1 text-xs">
-                              <span className="max-w-44 truncate">{lead.email}</span>
+                              <span className="max-w-40 truncate">{lead.email}</span>
                               <CopyButton
                                 text={lead.email}
                                 label="Copy email address"
