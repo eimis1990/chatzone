@@ -59,14 +59,16 @@
   icon, and category are unset. The existing Loqara legal pages are
   `app/privacy/page.tsx` and `app/terms/page.tsx`, but privacy copy does not yet
   describe Meta/social-message processing (`app/privacy/page.tsx:23-28`).
-- External client assets require the production approval path: Loqara Business
-  Portfolio, Business Verification, Tech Provider/access verification, Advanced
-  Access/App Review, then publish. Testing before that is limited to app roles
-  and Loqara-owned/test assets.
-- Business Portfolio creation is temporarily blocked by Meta's account limit.
-  Three old portfolios were scheduled for deletion on 2026-07-30; retry after
-  the 24-hour deletion window. One remaining portfolio cannot be deleted while
-  it owns a Pixel.
+- Production approval path (2026-07-31 state): **Loqara Business** portfolio
+  created (ID `1577119393903065`), Loqara Page added to it, app attached to the
+  portfolio, and the app is irreversibly designated a **Tech Provider**
+  (required to serve client Pages; adds Business verification → Access
+  verification → App Review gates before publish). `pages_read_engagement`
+  added — all five Messenger permissions now "Ready for testing".
+- Remaining before external clients: contact-email verification (Meta's link
+  to hello@loqara.com), Business Verification (business details + document,
+  owner-only), then Access verification (~5-day Meta review), App Review with
+  screencast, publish. Testing on Loqara-owned assets works today.
 
 ## Critical path
 
