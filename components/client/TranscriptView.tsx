@@ -26,17 +26,23 @@ interface ConversationRow
  *  Voice = lime, Chat = teal: a pale tinted background with a vivid, filled
  *  icon + label in the same hue. */
 function ChannelBadge({ channel }: { channel: ConversationChannel }) {
-  const voice = channel === 'voice'
-  const Icon = voice ? PhoneIcon : MessageCircleIcon
+  const style = {
+    voice: { Icon: PhoneIcon, label: 'Voice', cls: 'bg-lime-50 text-lime-700', title: 'Voice call' },
+    messenger: {
+      Icon: MessageCircleIcon,
+      label: 'Messenger',
+      cls: 'bg-blue-50 text-blue-700',
+      title: 'Facebook Messenger',
+    },
+    chat: { Icon: MessageCircleIcon, label: 'Chat', cls: 'bg-teal-50 text-teal-700', title: 'Text chat' },
+  }[channel]
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${
-        voice ? 'bg-lime-50 text-lime-700' : 'bg-teal-50 text-teal-700'
-      }`}
-      title={voice ? 'Voice call' : 'Text chat'}
+      className={`inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${style.cls}`}
+      title={style.title}
     >
-      <Icon className="size-2.5" fill="currentColor" stroke="currentColor" aria-hidden="true" />
-      {voice ? 'Voice' : 'Chat'}
+      <style.Icon className="size-2.5" fill="currentColor" stroke="currentColor" aria-hidden="true" />
+      {style.label}
     </span>
   )
 }

@@ -2,6 +2,7 @@ import { requireUser } from '@/lib/auth/guards'
 import { createServerClient } from '@/lib/supabase/server'
 import { InboxView, type InboxItem } from '@/components/client/InboxView'
 import { nextHandoffStatus, type HandoffAction } from '@/lib/handoff'
+import { deliverAgentMessage, type AgentSendResult } from '@/lib/channels/outbound'
 import type { HandoffStatus, Message } from '@/lib/types'
 
 /**
@@ -20,7 +21,7 @@ async function fetchInboxList(botId: string): Promise<InboxItem[]> {
   const sb = await createServerClient()
   const { data: convs } = await sb
     .from('conversations')
-    .select('id, visitor_id, handoff_status, handoff_requested_at, last_message_at, assigned_to')
+    .select('id, visitor_id, handoff_status, handoff_requested_at, last_message_at, assigned_to, channel')
     .eq('bot_id', botId)
     .neq('handoff_status', 'bot')
     .order('last_message_at', { ascending: false })
@@ -71,27 +72,16 @@ export async function InboxSection({ botId }: { botId: string }) {
    * Posts a human-agent reply and takes the conversation live + assigned to the
    * acting agent. RLS (messages_member_insert / conversations_member_update)
    * enforces that the conversation belongs to one of the agent's orgs.
+   * External-channel conversations also deliver through the provider.
    */
   async function sendAgentMessage(
     conversationId: string,
     content: string,
-  ): Promise<{ id: string; content: string; created_at: string } | null> {
+  ): Promise<AgentSendResult> {
     'use server'
     const session = await requireUser()
-    const trimmed = content.trim()
-    if (!trimmed) return null
     const sb = await createServerClient()
-    const { data: msg, error } = await sb
-      .from('messages')
-      .insert({ conversation_id: conversationId, role: 'assistant', content: trimmed, from_human: true, citations: [] })
-      .select('id, content, created_at')
-      .single<{ id: string; content: string; created_at: string }>()
-    if (error || !msg) return null
-    await sb
-      .from('conversations')
-      .update({ handoff_status: 'live', assigned_to: session.id, last_message_at: new Date().toISOString() })
-      .eq('id', conversationId)
-    return msg
+    return deliverAgentMessage(sb, conversationId, content, session.id)
   }
 
   /** Transition a conversation's handoff state (take / resolve / return). */

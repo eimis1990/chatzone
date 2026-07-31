@@ -5,6 +5,8 @@ import { retrieveContext, serviceRetrievalDeps } from '@/lib/ai/retrieval'
 import { buildMessages, contentFor, defaultLanguage, type ChatMessage } from '@/lib/ai/prompt'
 import { DEFAULT_CHAT_MODEL, DEFAULT_TEMPERATURE } from '@/lib/ai/chat-models'
 import { rewriteQuery } from '@/lib/ai/query-rewrite'
+import { detectHandoffIntent, HANDOFF_ACK } from '@/lib/handoff'
+import { notifyHandoffRequested } from '@/lib/notify'
 import type { Bot, Citation } from '@/lib/types'
 
 /**
@@ -12,9 +14,9 @@ import type { Bot, Citation } from '@/lib/types'
  * first). Reuses the same grounding pipeline as the widget chat route
  * (retrieval → rewrite-retry → prompt build → model), minus widget-only
  * concerns: no streaming, no commerce tools/product cards (deferred for
- * Messenger v1 per docs/CHANNELS_IMPLEMENTATION.md), no handoff escalation
- * (Inbox outbound delivery doesn't exist yet — promising a human who cannot
- * reply on the channel would be worse than a fallback answer).
+ * Messenger v1 per docs/CHANNELS_IMPLEMENTATION.md). Handoff intent escalates
+ * to the Inbox exactly like the widget — agent replies deliver back through
+ * lib/channels/outbound.ts.
  *
  * Persists the assistant message and returns its text, or the fallback
  * message when retrieval is too weak to answer safely.
@@ -26,6 +28,22 @@ export async function processChannelMessage(
 ): Promise<string> {
   const { conversationId, message } = opts
   const lang = defaultLanguage(bot.config)
+
+  // Visitor explicitly asks for a human → escalate + acknowledge (no LLM).
+  // Checked in every enabled language, mirroring app/api/chat/route.ts.
+  const handoffLangs = bot.config.languages?.length ? bot.config.languages : [lang]
+  if (handoffLangs.some((l) => detectHandoffIntent(message, l))) {
+    await svc
+      .from('conversations')
+      .update({ handoff_status: 'requested', handoff_requested_at: new Date().toISOString() })
+      .eq('id', conversationId)
+    void notifyHandoffRequested(svc, bot, message)
+    const ack = HANDOFF_ACK[lang] ?? HANDOFF_ACK.en
+    await svc
+      .from('messages')
+      .insert({ conversation_id: conversationId, role: 'assistant', content: ack, citations: [] })
+    return ack
+  }
 
   const { data: historyRows } = await svc
     .from('messages')

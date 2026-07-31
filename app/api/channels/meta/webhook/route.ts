@@ -165,6 +165,10 @@ async function handleInbound(
     await finish('processed', connection.id)
     return
   }
+  // A resolved handoff episode is over; the bot resumes for this new turn.
+  if (handoff === 'resolved') {
+    await svc.from('conversations').update({ handoff_status: 'bot' }).eq('id', convId)
+  }
 
   const reply = await processChannelMessage(svc, bot, { conversationId: convId, message: msg.text })
 

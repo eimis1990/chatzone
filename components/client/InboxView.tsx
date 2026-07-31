@@ -11,11 +11,13 @@ import {
   CircleDotIcon,
   ChevronLeftIcon,
 } from 'lucide-react'
+import { toast } from 'sonner'
 import { createBrowserClient } from '@/lib/supabase/browser'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import type { HandoffStatus, Message } from '@/lib/types'
+import type { ConversationChannel, HandoffStatus, Message } from '@/lib/types'
 import type { HandoffAction } from '@/lib/handoff'
+import type { AgentSendResult } from '@/lib/channels/outbound'
 
 export interface InboxItem {
   id: string
@@ -25,6 +27,7 @@ export interface InboxItem {
   last_message_at: string
   assigned_to: string | null
   preview: string
+  channel?: ConversationChannel
 }
 
 type Filter = 'open' | 'resolved' | 'all'
@@ -35,10 +38,7 @@ interface InboxViewProps {
   initialList: InboxItem[]
   loadList: () => Promise<InboxItem[]>
   loadThread: (conversationId: string) => Promise<Message[]>
-  sendAgentMessage: (
-    conversationId: string,
-    content: string,
-  ) => Promise<{ id: string; content: string; created_at: string } | null>
+  sendAgentMessage: (conversationId: string, content: string) => Promise<AgentSendResult>
   handoffAction: (conversationId: string, action: HandoffAction) => Promise<{ status: HandoffStatus }>
 }
 
@@ -47,6 +47,16 @@ const STATUS_STYLE: Record<HandoffStatus, { label: string; cls: string }> = {
   requested: { label: 'Needs human', cls: 'bg-amber-100 text-amber-800' },
   live: { label: 'Live', cls: 'bg-primary/15 text-primary' },
   resolved: { label: 'Resolved', cls: 'bg-muted text-muted-foreground' },
+}
+
+/** Blue pill marking a conversation from an external channel (Messenger). */
+function MessengerBadge() {
+  return (
+    <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-1.5 py-0.5 text-[10px] font-semibold text-blue-700">
+      <SendIcon className="size-2.5" aria-hidden="true" />
+      Messenger
+    </span>
+  )
 }
 
 function timeAgo(iso: string | null): string {
@@ -183,26 +193,31 @@ export function InboxView({
     if (!text || !selectedId || sending) return
     setSending(true)
     setDraft('')
-    const msg = await sendAgentMessage(selectedId, text)
-    if (msg) {
-      setThread((prev) =>
-        prev.some((x) => x.id === msg.id)
-          ? prev
-          : [
-              ...prev,
-              {
-                id: msg.id,
-                conversation_id: selectedId,
-                role: 'assistant',
-                content: msg.content,
-                citations: [],
-                token_count: null,
-                created_at: msg.created_at,
-                from_human: true,
-              } as Message,
-            ],
-      )
+    const result = await sendAgentMessage(selectedId, text)
+    if (!result.ok) {
+      // Keep the agent's text — a failed delivery must not eat the draft.
+      setDraft(text)
+      toast.error(result.error)
+      setSending(false)
+      return
     }
+    setThread((prev) =>
+      prev.some((x) => x.id === result.id)
+        ? prev
+        : [
+            ...prev,
+            {
+              id: result.id,
+              conversation_id: selectedId,
+              role: 'assistant',
+              content: result.content,
+              citations: [],
+              token_count: null,
+              created_at: result.created_at,
+              from_human: true,
+            } as Message,
+          ],
+    )
     await refresh()
     setSending(false)
   }, [draft, selectedId, sending, sendAgentMessage, refresh])
@@ -274,8 +289,11 @@ export function InboxView({
                 )}
               >
                 <div className="flex items-center justify-between gap-2">
-                  <span className="truncate font-mono text-xs text-muted-foreground">
-                    {c.visitor_id.slice(0, 8)}
+                  <span className="flex min-w-0 items-center gap-1.5">
+                    <span className="truncate font-mono text-xs text-muted-foreground">
+                      {c.visitor_id.slice(0, 8)}
+                    </span>
+                    {c.channel === 'messenger' && <MessengerBadge />}
                   </span>
                   <span className={cn('rounded px-1.5 py-0.5 text-[10px] font-medium', s.cls)}>{s.label}</span>
                 </div>
@@ -325,6 +343,7 @@ export function InboxView({
                   )}
                 />
                 <span className="font-mono text-sm">{selected.visitor_id.slice(0, 12)}</span>
+                {selected.channel === 'messenger' && <MessengerBadge />}
                 <span className={cn('rounded px-1.5 py-0.5 text-[10px] font-medium', STATUS_STYLE[selectedStatus].cls)}>
                   {STATUS_STYLE[selectedStatus].label}
                 </span>
