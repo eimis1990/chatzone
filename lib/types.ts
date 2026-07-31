@@ -487,8 +487,11 @@ export type SalesLeadStatus =
   | 'ready'
   | 'email_sent'
   | 'follow_up_email'
+  | 'wants_demo'
+  | 'demo_ready'
+  | 'demo_presented'
+  | 'testing_bot'
   | 'rejected'
-  | 'accepted'
   | 'client'
 
 /** Owner outreach pipeline row (researched prospect company). */

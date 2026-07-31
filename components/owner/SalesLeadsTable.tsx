@@ -6,6 +6,7 @@ import {
   BotIcon,
   Building2Icon,
   CheckIcon,
+  ClockAlertIcon,
   CopyIcon,
   ExternalLinkIcon,
   FilterXIcon,
@@ -60,9 +61,17 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { setLeadStatus } from '@/app/(owner)/owner/leads/actions'
-import { formatStatusAge } from '@/lib/sales-leads'
+import {
+  FOLLOW_UP_AFTER_DAYS,
+  formatStatusAge,
+  isContacted,
+  needsFollowUp,
+} from '@/lib/sales-leads'
 import type { SalesLead, SalesLeadStatus } from '@/lib/types'
 
+/** Pipeline stages, each with its own hue so progress is readable at a glance:
+ *  grey (untouched) → amber/sky (waiting on them) → violet/blue/teal (demo
+ *  track) → emerald (trialling) → accent (won) · red (lost). */
 const STATUS_META: Record<SalesLeadStatus, { label: string; classes: string }> = {
   ready: { label: 'Ready', classes: 'border-border bg-muted text-foreground' },
   email_sent: {
@@ -73,19 +82,57 @@ const STATUS_META: Record<SalesLeadStatus, { label: string; classes: string }> =
     label: 'Follow-up email',
     classes: 'border-sky-200 bg-sky-50 text-sky-700',
   },
+  wants_demo: {
+    label: 'Wants demo',
+    classes: 'border-violet-200 bg-violet-50 text-violet-700',
+  },
+  demo_ready: {
+    label: 'Demo ready',
+    classes: 'border-blue-200 bg-blue-50 text-blue-700',
+  },
+  demo_presented: {
+    label: 'Demo presented',
+    classes: 'border-teal-200 bg-teal-50 text-teal-700',
+  },
+  testing_bot: {
+    label: 'Testing bot',
+    classes: 'border-emerald-200 bg-emerald-50 text-emerald-700',
+  },
   rejected: { label: 'Rejected', classes: 'border-red-200 bg-red-50 text-red-700' },
-  accepted: { label: 'Accepted', classes: 'border-emerald-200 bg-emerald-50 text-emerald-700' },
   client: { label: 'Our client', classes: 'border-primary bg-primary text-primary-foreground' },
 }
 
+/** Lifecycle order — drives the status dropdown. */
 const STATUS_ORDER: SalesLeadStatus[] = [
   'ready',
   'email_sent',
   'follow_up_email',
-  'rejected',
-  'accepted',
+  'wants_demo',
+  'demo_ready',
+  'demo_presented',
+  'testing_bot',
   'client',
+  'rejected',
 ]
+
+/** Statuses grouped behind the "Emails sent" quick tab (awaiting a reply). */
+const AWAITING_REPLY: SalesLeadStatus[] = ['email_sent', 'follow_up_email']
+
+/** Status filter: a single stage, the awaiting-reply group, or everything. */
+type StatusFilter = 'all' | 'awaiting_reply' | SalesLeadStatus
+
+const QUICK_TABS: { value: StatusFilter; label: string }[] = [
+  { value: 'all', label: 'All' },
+  { value: 'ready', label: 'Ready' },
+  { value: 'wants_demo', label: 'Wants demo' },
+  { value: 'awaiting_reply', label: 'Emails sent' },
+]
+
+function matchesStatusFilter(lead: SalesLead, filter: StatusFilter): boolean {
+  if (filter === 'all') return true
+  if (filter === 'awaiting_reply') return AWAITING_REPLY.includes(lead.status)
+  return lead.status === filter
+}
 
 function host(url: string): string {
   try {
@@ -95,11 +142,18 @@ function host(url: string): string {
   }
 }
 
-function ScoreTile({ value }: { value: number }) {
+/** `onAccent` = rendered on the solid-accent "Our client" row, where the usual
+ *  muted/primary tints would disappear. */
+function ScoreTile({ value, onAccent = false }: { value: number; onAccent?: boolean }) {
   const pct = Math.max(0, Math.min(100, value))
   return (
     <span
-      className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-primary/20 bg-primary/5 text-xs font-semibold tabular-nums text-primary"
+      className={cn(
+        'flex size-10 shrink-0 items-center justify-center rounded-lg border text-xs font-semibold tabular-nums',
+        onAccent
+          ? 'border-white/30 bg-white/15 text-primary-foreground'
+          : 'border-primary/20 bg-primary/5 text-primary',
+      )}
       aria-label={`Chance to close ${pct}%`}
     >
       {pct}%
@@ -107,10 +161,28 @@ function ScoreTile({ value }: { value: number }) {
   )
 }
 
-function PlatformBadge({ platform }: { platform: string | null }) {
+function PlatformBadge({ platform, onAccent = false }: { platform: string | null; onAccent?: boolean }) {
   return (
-    <Badge variant="outline" className="font-normal text-muted-foreground">
+    <Badge
+      variant="outline"
+      className={cn(
+        'font-normal',
+        onAccent ? 'border-white/30 bg-white/10 text-primary-foreground' : 'text-muted-foreground',
+      )}
+    >
       {platform || 'Other'}
+    </Badge>
+  )
+}
+
+/** The lead's category chip — secondary normally, translucent on the accent row. */
+function VerticalBadge({ vertical, onAccent = false }: { vertical: string; onAccent?: boolean }) {
+  return (
+    <Badge
+      variant={onAccent ? 'outline' : 'secondary'}
+      className={onAccent ? 'border-white/30 bg-white/10 text-primary-foreground' : undefined}
+    >
+      {vertical}
     </Badge>
   )
 }
@@ -134,10 +206,12 @@ function CopyButton({
   text,
   label,
   compact = false,
+  onAccent = false,
 }: {
   text: string
   label: string
   compact?: boolean
+  onAccent?: boolean
 }) {
   const [copied, setCopied] = useState(false)
 
@@ -156,6 +230,7 @@ function CopyButton({
       type="button"
       variant={compact ? 'ghost' : 'outline'}
       size={compact ? 'icon-xs' : 'sm'}
+      className={onAccent ? 'text-primary-foreground hover:bg-white/15 hover:text-primary-foreground' : undefined}
       aria-label={label}
       title={label}
       onClick={(event) => {
@@ -172,9 +247,11 @@ function CopyButton({
 function StatusSelect({
   lead,
   onChange,
+  onAccent = false,
 }: {
   lead: SalesLead
   onChange: (id: string, status: SalesLeadStatus) => void
+  onAccent?: boolean
 }) {
   return (
     <span onClick={(event) => event.stopPropagation()}>
@@ -182,8 +259,14 @@ function StatusSelect({
         <SelectTrigger
           size="sm"
           aria-label={`Status for ${lead.name}`}
-          className={cn('h-8 min-w-36 rounded-lg font-medium', STATUS_META[lead.status].classes)}
+          className={cn(
+            'h-8 min-w-36 rounded-lg font-medium',
+            onAccent
+              ? 'border-white/40 bg-white/15 text-primary-foreground hover:bg-white/25'
+              : STATUS_META[lead.status].classes,
+          )}
         >
+
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
@@ -200,7 +283,15 @@ function StatusSelect({
   )
 }
 
-function StatusAge({ lead, asOf }: { lead: SalesLead; asOf: string }) {
+function StatusAge({
+  lead,
+  asOf,
+  onAccent = false,
+}: {
+  lead: SalesLead
+  asOf: string
+  onAccent?: boolean
+}) {
   return (
     <time
       dateTime={lead.status_updated_at}
@@ -209,37 +300,55 @@ function StatusAge({ lead, asOf }: { lead: SalesLead; asOf: string }) {
         timeStyle: 'short',
         timeZone: 'Europe/Vilnius',
       })}
-      className="whitespace-nowrap text-xs tabular-nums text-muted-foreground"
+      className={cn(
+        'whitespace-nowrap text-xs tabular-nums',
+        onAccent ? 'text-primary-foreground/75' : 'text-muted-foreground',
+      )}
     >
       {formatStatusAge(lead.status_updated_at, asOf)}
     </time>
   )
 }
 
-function MetricCard({
+/**
+ * Pipeline headline stat — same card language as the Demos screen: rounded
+ * surface, a tinted corner glow that brightens on hover, icon tile, big number.
+ * `tone` is a hex so the glow and the tile share one hue.
+ */
+function StatCard({
   label,
   value,
   detail,
   icon: Icon,
+  tone,
 }: {
   label: string
   value: number | string
   detail: string
   icon: typeof UsersIcon
+  tone: string
 }) {
   return (
-    <Card size="sm" className="shadow-sm ring-foreground/5">
-      <CardHeader>
-        <CardDescription>{label}</CardDescription>
-        <CardAction className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
-          <Icon className="size-4" aria-hidden="true" />
-        </CardAction>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-1">
-        <CardTitle className="text-2xl font-semibold tabular-nums">{value}</CardTitle>
-        <p className="text-xs text-muted-foreground">{detail}</p>
-      </CardContent>
-    </Card>
+    <div className="group relative overflow-hidden rounded-2xl border bg-card p-5 transition-shadow hover:shadow-md">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -right-10 -top-10 size-28 rounded-full opacity-20 blur-2xl transition-opacity group-hover:opacity-35"
+        style={{ backgroundColor: tone }}
+      />
+      <div className="relative z-10 flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="truncate text-xs font-medium text-muted-foreground">{label}</p>
+          <p className="mt-2 text-3xl font-semibold leading-none tabular-nums">{value}</p>
+        </div>
+        <span
+          className="flex size-10 shrink-0 items-center justify-center rounded-xl"
+          style={{ backgroundColor: `color-mix(in srgb, ${tone} 14%, transparent)`, color: tone }}
+        >
+          <Icon className="size-4.5" aria-hidden="true" />
+        </span>
+      </div>
+      <p className="relative z-10 mt-3 text-xs text-muted-foreground">{detail}</p>
+    </div>
   )
 }
 
@@ -298,21 +407,48 @@ export function SalesLeadsTable({
   const [leads, setLeads] = useState(initialLeads)
   const [query, setQuery] = useState('')
   const [vertical, setVertical] = useState<string | null>(null)
-  const [statusFilter, setStatusFilter] = useState<SalesLeadStatus | 'all'>('all')
-  const [botFilter, setBotFilter] = useState<'all' | 'no' | 'yes'>('all')
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
   const [openLead, setOpenLead] = useState<SalesLead | null>(null)
   const [isDetailOpen, setIsDetailOpen] = useState(false)
   const [, startTransition] = useTransition()
 
-  const verticals = useMemo(() => [...new Set(leads.map((lead) => lead.vertical))], [leads])
-  const noBotCount = useMemo(() => leads.filter((lead) => !lead.has_chatbot).length, [leads])
-  const hasBotCount = leads.length - noBotCount
-  const readyCount = useMemo(() => leads.filter((lead) => lead.status === 'ready').length, [leads])
-  const averageScore = leads.length
-    ? Math.round(leads.reduce((sum, lead) => sum + lead.score, 0) / leads.length)
-    : 0
+  const verticals = useMemo(
+    () => [...new Set(leads.map((lead) => lead.vertical))].sort((a, b) => a.localeCompare(b)),
+    [leads],
+  )
+  const counts = useMemo(() => {
+    const byStatus = new Map<SalesLeadStatus, number>()
+    let contacted = 0
+    let hasBot = 0
+    let followUpDue = 0
+    let scoreSum = 0
+    for (const lead of leads) {
+      byStatus.set(lead.status, (byStatus.get(lead.status) ?? 0) + 1)
+      if (isContacted(lead.status)) contacted += 1
+      if (lead.has_chatbot) hasBot += 1
+      if (needsFollowUp(lead, asOf)) followUpDue += 1
+      scoreSum += lead.score
+    }
+    return {
+      byStatus,
+      contacted,
+      hasBot,
+      noBot: leads.length - hasBot,
+      followUpDue,
+      awaitingReply: AWAITING_REPLY.reduce((sum, status) => sum + (byStatus.get(status) ?? 0), 0),
+      averageScore: leads.length ? Math.round(scoreSum / leads.length) : 0,
+    }
+  }, [leads, asOf])
 
-  const hasActiveFilters = Boolean(query.trim() || vertical || statusFilter !== 'all' || botFilter !== 'all')
+  /** Count for a quick tab / dropdown entry. */
+  const statusCount = (filter: StatusFilter) =>
+    filter === 'all'
+      ? leads.length
+      : filter === 'awaiting_reply'
+        ? counts.awaitingReply
+        : (counts.byStatus.get(filter) ?? 0)
+
+  const hasActiveFilters = Boolean(query.trim() || vertical || statusFilter !== 'all')
 
   const changeStatus = (id: string, status: SalesLeadStatus) => {
     const previous = leads
@@ -337,9 +473,7 @@ export function SalesLeadsTable({
   const filtered = useMemo(() => {
     let list = leads
     if (vertical) list = list.filter((lead) => lead.vertical === vertical)
-    if (statusFilter !== 'all') list = list.filter((lead) => lead.status === statusFilter)
-    if (botFilter === 'no') list = list.filter((lead) => !lead.has_chatbot)
-    if (botFilter === 'yes') list = list.filter((lead) => lead.has_chatbot)
+    if (statusFilter !== 'all') list = list.filter((lead) => matchesStatusFilter(lead, statusFilter))
     if (query.trim()) {
       const normalized = query.trim().toLowerCase()
       list = list.filter((lead) =>
@@ -351,13 +485,12 @@ export function SalesLeadsTable({
       )
     }
     return list
-  }, [leads, vertical, statusFilter, botFilter, query])
+  }, [leads, vertical, statusFilter, query])
 
   const resetFilters = () => {
     setQuery('')
     setVertical(null)
     setStatusFilter('all')
-    setBotFilter('all')
   }
 
   const openDetails = (lead: SalesLead) => {
@@ -368,10 +501,38 @@ export function SalesLeadsTable({
   return (
     <div className="flex flex-col gap-5">
       <section className="grid grid-cols-2 gap-3 xl:grid-cols-4" aria-label="Pipeline summary">
-        <MetricCard label="Total prospects" value={leads.length} detail="Researched companies" icon={UsersIcon} />
-        <MetricCard label="Open opportunities" value={noBotCount} detail="No existing chatbot" icon={SparklesIcon} />
-        <MetricCard label="Switch opportunities" value={hasBotCount} detail="Already using chat" icon={BotIcon} />
-        <MetricCard label="Ready to contact" value={readyCount} detail={`Average priority ${averageScore}%`} icon={SendIcon} />
+        <StatCard
+          label="Total leads"
+          value={leads.length}
+          detail={`${counts.noBot} without a chatbot · ${counts.hasBot} switch`}
+          icon={UsersIcon}
+          tone="#e8590c"
+        />
+        <StatCard
+          label="Emails sent"
+          value={counts.contacted}
+          detail={
+            counts.followUpDue > 0
+              ? `${counts.followUpDue} waiting ${FOLLOW_UP_AFTER_DAYS}+ days — follow up`
+              : `${counts.awaitingReply} awaiting a reply`
+          }
+          icon={SendIcon}
+          tone="#f59e0b"
+        />
+        <StatCard
+          label="Ready to contact"
+          value={statusCount('ready')}
+          detail={`Not emailed yet · average priority ${counts.averageScore}%`}
+          icon={TargetIcon}
+          tone="#0ea5e9"
+        />
+        <StatCard
+          label="Switch opportunities"
+          value={counts.hasBot}
+          detail="Already using a chatbot"
+          icon={BotIcon}
+          tone="#8b5cf6"
+        />
       </section>
 
       <Card className="shadow-none">
@@ -388,7 +549,35 @@ export function SalesLeadsTable({
           )}
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
-          <div className="grid gap-3 lg:grid-cols-[minmax(260px,1fr)_190px_230px]">
+          {/* Quick tabs — the three stages worth one click, plus All. */}
+          <div
+            className="flex w-full flex-wrap gap-1 rounded-xl bg-muted/60 p-1"
+            role="group"
+            aria-label="Quick status filter"
+          >
+            {QUICK_TABS.map((tab) => {
+              const active = statusFilter === tab.value
+              return (
+                <button
+                  key={tab.value}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() => setStatusFilter(tab.value)}
+                  className={cn(
+                    'flex-1 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors',
+                    active
+                      ? 'bg-background text-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground',
+                  )}
+                >
+                  {tab.label}
+                  <span className="ml-1.5 tabular-nums opacity-60">{statusCount(tab.value)}</span>
+                </button>
+              )
+            })}
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-[minmax(220px,1fr)_220px_200px]">
             <label className="relative block">
               <span className="sr-only">Search sales leads</span>
               <SearchIcon className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
@@ -400,56 +589,44 @@ export function SalesLeadsTable({
               />
             </label>
 
-            <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as SalesLeadStatus | 'all')}>
-              <SelectTrigger aria-label="Filter by status" className="h-10 w-full bg-background">
+            {/* Categories moved off the horizontal scroller into a dropdown. */}
+            <Select
+              value={vertical ?? 'all'}
+              onValueChange={(value) => setVertical(value === 'all' ? null : value)}
+            >
+              <SelectTrigger aria-label="Filter by category" className="h-10 w-full bg-background">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
-                  <SelectItem value="all">All statuses</SelectItem>
-                  {STATUS_ORDER.map((status) => (
-                    <SelectItem key={status} value={status}>
-                      {STATUS_META[status].label} ({leads.filter((lead) => lead.status === status).length})
+                  <SelectItem value="all">All categories ({leads.length})</SelectItem>
+                  {verticals.map((item) => (
+                    <SelectItem key={item} value={item}>
+                      {item} ({leads.filter((lead) => lead.vertical === item).length})
                     </SelectItem>
                   ))}
                 </SelectGroup>
               </SelectContent>
             </Select>
 
-            <Select value={botFilter} onValueChange={(value) => setBotFilter(value as 'all' | 'no' | 'yes')}>
-              <SelectTrigger aria-label="Filter by existing chatbot" className="h-10 w-full bg-background">
+            {/* Full stage list — the tabs cover the common three, this reaches
+                the demo track, clients, and rejections. */}
+            <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as StatusFilter)}>
+              <SelectTrigger aria-label="Filter by status" className="h-10 w-full bg-background">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
-                  <SelectItem value="all">Any chatbot status</SelectItem>
-                  <SelectItem value="no">Open opportunity ({noBotCount})</SelectItem>
-                  <SelectItem value="yes">Switch opportunity ({hasBotCount})</SelectItem>
+                  <SelectItem value="all">All statuses ({leads.length})</SelectItem>
+                  <SelectItem value="awaiting_reply">Emails sent ({counts.awaitingReply})</SelectItem>
+                  {STATUS_ORDER.map((status) => (
+                    <SelectItem key={status} value={status}>
+                      {STATUS_META[status].label} ({statusCount(status)})
+                    </SelectItem>
+                  ))}
                 </SelectGroup>
               </SelectContent>
             </Select>
-          </div>
-
-          <div className="flex gap-2 overflow-x-auto pb-1" aria-label="Filter by category">
-            <Button
-              type="button"
-              variant={vertical === null ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setVertical(null)}
-            >
-              All {leads.length}
-            </Button>
-            {verticals.map((item) => (
-              <Button
-                key={item}
-                type="button"
-                variant={vertical === item ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setVertical(vertical === item ? null : item)}
-              >
-                {item} {leads.filter((lead) => lead.vertical === item).length}
-              </Button>
-            ))}
           </div>
         </CardContent>
       </Card>
@@ -482,78 +659,171 @@ export function SalesLeadsTable({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filtered.map((lead) => (
-                  <TableRow
-                    key={lead.id}
-                    tabIndex={0}
-                    aria-label={`Open ${lead.name}`}
-                    onClick={() => openDetails(lead)}
-                    onKeyDown={(event) => {
-                      if (event.key === 'Enter' || event.key === ' ') {
-                        event.preventDefault()
-                        openDetails(lead)
-                      }
-                    }}
-                    className="group cursor-pointer focus-visible:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  >
-                    <TableCell className="border-r pl-4"><ScoreTile value={lead.score} /></TableCell>
-                    <TableCell className="border-r">
-                      <div className="w-44 min-w-0">
-                        <span className="block truncate font-medium text-foreground">{lead.name}</span>
-                        {lead.legal_name && (
-                          <span className="mt-0.5 block truncate text-xs text-muted-foreground">{lead.legal_name}</span>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell className="border-r"><PlatformBadge platform={lead.platform} /></TableCell>
-                    <TableCell className="border-r"><Badge variant="secondary">{lead.vertical}</Badge></TableCell>
-                    <TableCell className="border-r">
-                      <div className="flex min-w-44 flex-col gap-0.5">
-                        {lead.email ? (
-                          <span className="flex items-center gap-1 text-xs">
-                            <span className="max-w-44 truncate">{lead.email}</span>
-                            <CopyButton text={lead.email} label="Copy email address" compact />
-                          </span>
-                        ) : (
-                          <span className="text-xs text-muted-foreground">No email</span>
-                        )}
-                        {lead.phone && <span className="text-xs tabular-nums text-muted-foreground">{lead.phone}</span>}
-                      </div>
-                    </TableCell>
-                    <TableCell className="border-r"><StatusSelect lead={lead} onChange={changeStatus} /></TableCell>
-                    <TableCell><StatusAge lead={lead} asOf={asOf} /></TableCell>
-                    <TableCell>
-                      <ArrowUpRightIcon className="size-4 text-muted-foreground transition-colors group-hover:text-primary" aria-hidden="true" />
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {filtered.map((lead) => {
+                  // Won leads own the whole row in the accent color; a first
+                  // email left unanswered past the threshold gets a faint amber
+                  // wash so follow-ups are easy to spot while scanning.
+                  const isClient = lead.status === 'client'
+                  const stale = needsFollowUp(lead, asOf)
+                  const cellBorder = isClient ? 'border-r border-white/20' : 'border-r'
+                  return (
+                    <TableRow
+                      key={lead.id}
+                      tabIndex={0}
+                      aria-label={`Open ${lead.name}`}
+                      onClick={() => openDetails(lead)}
+                      onKeyDown={(event) => {
+                        if (event.key === 'Enter' || event.key === ' ') {
+                          event.preventDefault()
+                          openDetails(lead)
+                        }
+                      }}
+                      className={cn(
+                        'group cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                        isClient &&
+                          'bg-primary text-primary-foreground hover:bg-primary/90 has-aria-expanded:bg-primary/90 focus-visible:bg-primary/90',
+                        !isClient && stale && 'bg-amber-50/60 hover:bg-amber-100/70 focus-visible:bg-amber-100/70',
+                        !isClient && !stale && 'focus-visible:bg-muted/50',
+                      )}
+                    >
+                      <TableCell className={cn(cellBorder, 'pl-4')}>
+                        <ScoreTile value={lead.score} onAccent={isClient} />
+                      </TableCell>
+                      <TableCell className={cellBorder}>
+                        <div className="w-44 min-w-0">
+                          <span className="block truncate font-medium">{lead.name}</span>
+                          {lead.legal_name && (
+                            <span
+                              className={cn(
+                                'mt-0.5 block truncate text-xs',
+                                isClient ? 'text-primary-foreground/75' : 'text-muted-foreground',
+                              )}
+                            >
+                              {lead.legal_name}
+                            </span>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell className={cellBorder}>
+                        <PlatformBadge platform={lead.platform} onAccent={isClient} />
+                      </TableCell>
+                      <TableCell className={cellBorder}>
+                        <VerticalBadge vertical={lead.vertical} onAccent={isClient} />
+                      </TableCell>
+                      <TableCell className={cellBorder}>
+                        <div className="flex min-w-44 flex-col gap-0.5">
+                          {lead.email ? (
+                            <span className="flex items-center gap-1 text-xs">
+                              <span className="max-w-44 truncate">{lead.email}</span>
+                              <CopyButton
+                                text={lead.email}
+                                label="Copy email address"
+                                compact
+                                onAccent={isClient}
+                              />
+                            </span>
+                          ) : (
+                            <span
+                              className={cn(
+                                'text-xs',
+                                isClient ? 'text-primary-foreground/75' : 'text-muted-foreground',
+                              )}
+                            >
+                              No email
+                            </span>
+                          )}
+                          {lead.phone && (
+                            <span
+                              className={cn(
+                                'text-xs tabular-nums',
+                                isClient ? 'text-primary-foreground/75' : 'text-muted-foreground',
+                              )}
+                            >
+                              {lead.phone}
+                            </span>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell className={cellBorder}>
+                        <StatusSelect lead={lead} onChange={changeStatus} onAccent={isClient} />
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-col gap-0.5">
+                          <StatusAge lead={lead} asOf={asOf} onAccent={isClient} />
+                          {stale && !isClient && (
+                            <span className="flex items-center gap-1 text-xs font-medium text-amber-700">
+                              <ClockAlertIcon className="size-3" aria-hidden="true" />
+                              Follow up
+                            </span>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <ArrowUpRightIcon
+                          className={cn(
+                            'size-4 transition-colors',
+                            isClient
+                              ? 'text-primary-foreground/70'
+                              : 'text-muted-foreground group-hover:text-primary',
+                          )}
+                          aria-hidden="true"
+                        />
+                      </TableCell>
+                    </TableRow>
+                  )
+                })}
               </TableBody>
             </Table>
           </div>
 
           <div className="flex flex-col divide-y md:hidden">
-            {filtered.map((lead) => (
-              <div key={lead.id} className="flex flex-col gap-3 p-4">
-                <button type="button" className="flex w-full items-start gap-3 text-left" onClick={() => openDetails(lead)}>
-                  <ScoreTile value={lead.score} />
-                  <span className="min-w-0 flex-1">
-                    <span className="font-medium">{lead.name}</span>
-                    <span className="mt-1 flex flex-wrap items-center gap-2">
-                      <PlatformBadge platform={lead.platform} />
-                      <Badge variant="secondary">{lead.vertical}</Badge>
-                      <BotBadge has={lead.has_chatbot} />
+            {filtered.map((lead) => {
+              const isClient = lead.status === 'client'
+              const stale = needsFollowUp(lead, asOf)
+              return (
+                <div
+                  key={lead.id}
+                  className={cn(
+                    'flex flex-col gap-3 p-4',
+                    isClient && 'bg-primary text-primary-foreground',
+                    !isClient && stale && 'bg-amber-50/60',
+                  )}
+                >
+                  <button type="button" className="flex w-full items-start gap-3 text-left" onClick={() => openDetails(lead)}>
+                    <ScoreTile value={lead.score} onAccent={isClient} />
+                    <span className="min-w-0 flex-1">
+                      <span className="font-medium">{lead.name}</span>
+                      <span className="mt-1 flex flex-wrap items-center gap-2">
+                        <PlatformBadge platform={lead.platform} onAccent={isClient} />
+                        <VerticalBadge vertical={lead.vertical} onAccent={isClient} />
+                        {!isClient && <BotBadge has={lead.has_chatbot} />}
+                      </span>
                     </span>
-                  </span>
-                </button>
-                <div className="flex items-end justify-between gap-3 pl-13">
-                  <span className="truncate pb-1.5 text-xs text-muted-foreground">{lead.email || lead.phone || 'No contact details'}</span>
-                  <span className="flex shrink-0 flex-col items-end gap-1">
-                    <StatusSelect lead={lead} onChange={changeStatus} />
-                    <StatusAge lead={lead} asOf={asOf} />
-                  </span>
+                  </button>
+                  <div className="flex items-end justify-between gap-3 pl-13">
+                    <span
+                      className={cn(
+                        'truncate pb-1.5 text-xs',
+                        isClient ? 'text-primary-foreground/75' : 'text-muted-foreground',
+                      )}
+                    >
+                      {stale && !isClient ? (
+                        <span className="flex items-center gap-1 font-medium text-amber-700">
+                          <ClockAlertIcon className="size-3 shrink-0" aria-hidden="true" />
+                          Follow up due
+                        </span>
+                      ) : (
+                        lead.email || lead.phone || 'No contact details'
+                      )}
+                    </span>
+                    <span className="flex shrink-0 flex-col items-end gap-1">
+                      <StatusSelect lead={lead} onChange={changeStatus} onAccent={isClient} />
+                      <StatusAge lead={lead} asOf={asOf} onAccent={isClient} />
+                    </span>
+                  </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
 
           {filtered.length === 0 && (
