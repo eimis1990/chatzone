@@ -4,6 +4,7 @@ import type { CommerceProduct } from '@/lib/commerce/types'
 import type { Audience } from './catalog'
 import { embedOne } from '@/lib/ai/embeddings'
 import { searchStore, listStoreProductsByUrl } from '@/lib/commerce'
+import { applyProductSearchSynonyms } from '@/lib/products/synonyms'
 import {
   commerceProviderProfile,
   type IndexedProductMatch,
@@ -86,6 +87,8 @@ export async function searchCatalog(
     }
     query = urlSlugWords(pageUrl) || query
   }
+
+  query = await applyProductSearchSynonyms(db, bot.id, query)
 
   try {
     const semantic = commerceProviderProfile(c).semantic

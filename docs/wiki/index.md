@@ -25,6 +25,8 @@ Add a line here. How the wiki works: [README.md](README.md).
   free-tier single language, content de-anchored from English.
 - [rag-and-knowledge](rag-and-knowledge.md) — ingestion pipeline + hybrid retrieval.
 - [commerce](commerce.md) — store connectors + live product search.
+- [demand-radar](demand-radar.md) — unresolved shopper-demand aggregation,
+  merchant action review, and the approval-gated store write-back boundary.
 - [commerce-provider-profiles](commerce-provider-profiles.md) — provider isolation
   invariant, per-provider search/RPC ownership, extension checklist.
 - [room-visualizer](room-visualizer.md) — "see it in your room" AI renders:

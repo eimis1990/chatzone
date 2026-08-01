@@ -20,10 +20,22 @@ const bot = {
   },
 } as unknown as Parameters<typeof searchCatalog>[0]
 
-// searchCatalog only touches db when a semantic index exists; the woo path
-// short-circuits before that, so a stub is enough.
 const db = {
-  from: () => ({ select: () => ({ eq: async () => ({ count: 0 }) }) }),
+  from: (table: string) => {
+    if (table === 'product_search_synonyms') {
+      return {
+        select: () => ({
+          eq: () => ({
+            order: () => ({
+              limit: async () => ({ data: [], error: null }),
+            }),
+          }),
+        }),
+      }
+    }
+
+    return { select: () => ({ eq: async () => ({ count: 0 }) }) }
+  },
 } as unknown as SupabaseClient
 
 const product = (id: string, inStock = true) => ({

@@ -19,6 +19,8 @@ d('RLS tenancy isolation', () => {
   const ids: Record<string, string> = {}
   let botA = ''
   let botB = ''
+  let planA = ''
+  let planB = ''
 
   beforeAll(async () => {
     // Create three auth users (profiles auto-created by trigger).
@@ -65,6 +67,35 @@ d('RLS tenancy isolation', () => {
       .single()
     botA = bA!.id
     botB = bB!.id
+
+    const { data: plans, error: planError } = await svc
+      .from('demand_action_plans')
+      .insert([
+        {
+          bot_id: botA,
+          opportunity_key: `plan-a-${stamp}`,
+          opportunity_title: 'Plan A',
+          issue_type: 'product_gap',
+          selected_actions: ['add_missing_synonym'],
+        },
+        {
+          bot_id: botB,
+          opportunity_key: `plan-b-${stamp}`,
+          opportunity_title: 'Plan B',
+          issue_type: 'product_gap',
+          selected_actions: ['add_missing_synonym'],
+        },
+      ])
+      .select('id, bot_id')
+    if (planError) throw planError
+    planA = plans!.find((plan) => plan.bot_id === botA)!.id
+    planB = plans!.find((plan) => plan.bot_id === botB)!.id
+
+    const { error: synonymError } = await svc.from('product_search_synonyms').insert([
+      { bot_id: botA, phrase: `couch-a-${stamp}`, replacement: 'sofa', action_plan_id: planA },
+      { bot_id: botB, phrase: `couch-b-${stamp}`, replacement: 'sofa', action_plan_id: planB },
+    ])
+    if (synonymError) throw synonymError
   }, 30000)
 
   afterAll(async () => {
@@ -109,5 +140,43 @@ d('RLS tenancy isolation', () => {
     const a = await signedInClient(emails.clientA, PW)
     const { error } = await a.from('bots').insert({ org_id: ids.orgB, name: 'evil' })
     expect(error).not.toBeNull()
+  })
+
+  it('scopes Demand Radar plans and synonyms to the bot organization', async () => {
+    const a = await signedInClient(emails.clientA, PW)
+    const [{ data: plans }, { data: synonyms }] = await Promise.all([
+      a.from('demand_action_plans').select('id'),
+      a.from('product_search_synonyms').select('action_plan_id'),
+    ])
+
+    expect((plans ?? []).map((plan) => plan.id)).toContain(planA)
+    expect((plans ?? []).map((plan) => plan.id)).not.toContain(planB)
+    expect((synonyms ?? []).map((synonym) => synonym.action_plan_id)).toContain(planA)
+    expect((synonyms ?? []).map((synonym) => synonym.action_plan_id)).not.toContain(planB)
+  })
+
+  it('rejects cross-organization Demand Radar writes', async () => {
+    const a = await signedInClient(emails.clientA, PW)
+    const { error } = await a.from('demand_action_plans').insert({
+      bot_id: botB,
+      opportunity_key: `evil-${stamp}`,
+      opportunity_title: 'Cross-org plan',
+      issue_type: 'product_gap',
+      selected_actions: ['fix_product_attributes'],
+    })
+    expect(error).not.toBeNull()
+  })
+
+  it('keeps Demand Radar plans and synonyms hidden from anonymous users', async () => {
+    const anon = anonClient()
+    const [{ data: plans, error: planError }, { data: synonyms, error: synonymError }] = await Promise.all([
+      anon.from('demand_action_plans').select('id'),
+      anon.from('product_search_synonyms').select('id'),
+    ])
+
+    expect(plans ?? []).toHaveLength(0)
+    expect(synonyms ?? []).toHaveLength(0)
+    expect(planError).not.toBeNull()
+    expect(synonymError).not.toBeNull()
   })
 })

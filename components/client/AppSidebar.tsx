@@ -15,6 +15,7 @@ import {
   InboxIcon,
   UsersIcon,
   BarChart3Icon,
+  RadarIcon,
   Code2Icon,
   SettingsIcon,
   CreditCardIcon,
@@ -32,6 +33,7 @@ const SECTIONS: { label: string; href: string; icon: LucideIcon }[] = [
   { label: 'Conversations', href: 'conversations', icon: MessagesSquareIcon },
   { label: 'Leads', href: 'leads', icon: UsersIcon },
   { label: 'Analytics', href: 'analytics', icon: BarChart3Icon },
+  { label: 'Demand Radar', href: 'demand-radar', icon: RadarIcon },
   { label: 'Embed', href: 'embed', icon: Code2Icon },
 ]
 
@@ -51,11 +53,11 @@ export function AppSidebar({ bots, userEmail }: { bots: BotLite[]; userEmail: st
   const itemBase =
     'flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm transition-colors'
   // Top-level active item (Home, Settings, or My Bots when a bot is open) —
-  // solid accent-green pill with dark text.
+  // solid brand-accent pill with contrasting text.
   const solidGreen = 'bg-primary font-medium text-primary-foreground shadow-sm'
-  // The selected bot row — a faint 10% accent tint with lime text.
+  // The selected bot row — a faint accent tint with accent text.
   const tintPill = 'bg-primary/10 font-medium text-primary'
-  // The active section (Configure, etc.) — green text + icon, no background.
+  // The active section (Configure, etc.) — accent text + icon, no background.
   const textOnly = 'font-medium text-primary'
   const idle = 'text-sidebar-foreground/70 hover:bg-white/10 hover:text-white'
 

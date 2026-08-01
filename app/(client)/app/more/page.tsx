@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { BarChart3Icon, MessagesSquareIcon, MonitorIcon, ChevronRightIcon } from 'lucide-react'
+import { BarChart3Icon, MessagesSquareIcon, MonitorIcon, ChevronRightIcon, RadarIcon } from 'lucide-react'
 import { requireRole, getUserOrgIds } from '@/lib/auth/guards'
 import { createServerClient } from '@/lib/supabase/server'
 import { SignOutButton } from '@/components/client/SignOutButton'
@@ -30,6 +30,19 @@ export default async function MorePage() {
               <Link key={b.id} href={`/app/bots/${b.id}/analytics`} className={row}>
                 <span className="flex items-center gap-2.5 truncate">
                   <BarChart3Icon className="size-4 shrink-0 text-primary" aria-hidden="true" />
+                  <span className="truncate">{b.name}</span>
+                </span>
+                <ChevronRightIcon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+              </Link>
+            ))}
+          </div>
+
+          <h2 className="pt-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">Demand Radar</h2>
+          <div className="space-y-2">
+            {bots.map((b) => (
+              <Link key={b.id} href={`/app/bots/${b.id}/demand-radar`} className={row}>
+                <span className="flex items-center gap-2.5 truncate">
+                  <RadarIcon className="size-4 shrink-0 text-primary" aria-hidden="true" />
                   <span className="truncate">{b.name}</span>
                 </span>
                 <ChevronRightIcon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />

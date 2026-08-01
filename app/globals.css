@@ -65,6 +65,9 @@
   /* Derived accent shades — single source is --primary above. */
   --primary-hover: color-mix(in srgb, var(--primary) 86%, black);
   --primary-soft: color-mix(in srgb, var(--primary) 50%, white);
+  --info-foreground: #1d4ed8;
+  --info-soft: #eff6ff;
+  --info-border: #bfdbfe;
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
@@ -101,6 +104,9 @@
   --popover-foreground: oklch(0.985 0 0);
   --primary: oklch(0.922 0 0);
   --primary-foreground: oklch(0.205 0 0);
+  --info-foreground: #bfdbfe;
+  --info-soft: color-mix(in srgb, #3b82f6 16%, transparent);
+  --info-border: color-mix(in srgb, #60a5fa 38%, transparent);
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.269 0 0);
