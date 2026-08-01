@@ -30,7 +30,19 @@ Owner-only planning workspace for moving posts from an angle to publish-ready co
   by `supabase/migrations/20260711112234_linkedin_post_order_and_visuals.sql:2`.
 - Draft visuals are local 1200×628 PNG/WebP assets under `public/linkedin/`. The
   image URL and meaningful alt text live with each post so the drawer can
-  preview and copy both.
+  preview and copy both. The 16 current drafts have a cohesive, text-free
+  illustrated set generated with Higgsfield's GPT Image 2 workflow; source
+  prompts live in `scripts/linkedin-image-prompts.mjs` and the versioned assets
+  end in `-illustrated.webp`.
+- `scripts/generate-linkedin-higgsfield-visuals.mjs` regenerates that current
+  set at 2K and normalizes each result to a centre-cropped 1200×628 WebP. It is
+  resumable by default, with `--force` and `--only <filename>` for intentional
+  replacements.
+- Deploy new local assets before changing live `linkedin_posts.image_url` rows.
+  `scripts/apply-linkedin-draft-visuals.mjs` is a dry run unless `--apply` is
+  passed and updates only posts that are still drafts; this prevents the board
+  from pointing at asset paths that production cannot serve yet. The original
+  images stay in place for rollback.
 - `scripts/generate-linkedin-visuals.mjs` deterministically rebuilds the branded
   “Loqara Field Notes” visual set. The ten-post July 2026 editorial series uses
   OpenAI-generated, text-free tactile 3D metaphors; its reproducible art
@@ -53,4 +65,4 @@ Owner-only planning workspace for moving posts from an angle to publish-ready co
   paragraphs, concrete evidence or a useful framework, and no engagement bait.
   Ideas stay brief; drafts contain complete publishable copy.
 
-_Last verified: 2026-07-15 (working tree)._
+_Last verified: 2026-08-01 (working tree)._

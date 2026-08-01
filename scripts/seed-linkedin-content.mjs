@@ -69,8 +69,8 @@ It still needs the same discipline as text chat: real catalogue data, conversati
 
 Voice does not replace the store interface. It gives customers another way into it.`,
     link: 'https://www.loqara.com/blog/voice-ai-for-ecommerce-support',
-    image_url: '/linkedin/03-voice-shopping.png',
-    image_alt: 'A mobile store conversation turning a spoken request into three relevant running-shoe product results.',
+    image_url: '/linkedin/03-voice-shopping-illustrated.webp',
+    image_alt: 'A shopper with both hands occupied sends an orange voice trail through several choices toward one weather-ready running shoe.',
   },
   {
     id: '45138260-6e18-482a-9e5a-800532c6ae3f',
@@ -90,8 +90,8 @@ That is the useful role for an AI agent: resolve the repetitive layer from real 
 
 The goal is not a support inbox with no humans. It is a day with fewer avoidable interruptions.`,
     link: 'https://www.loqara.com/blog/reduce-support-tickets-with-ai',
-    image_url: '/linkedin/04-repetitive-questions.png',
-    image_alt: 'Repeated order, shipping, stock, and returns questions being cleared from a solo store owner’s crowded workday.',
+    image_url: '/linkedin/04-repetitive-questions-illustrated.webp',
+    image_alt: 'A solo store owner packs an order inside a calm workspace while repeated support questions swirl into one automated path.',
   },
   {
     id: '0c374f60-2f73-491b-90e5-9a22648a5446',
@@ -113,8 +113,8 @@ Message volume tells you that the widget was busy. Resolution quality tells you 
 
 Good analytics should make weak answers visible, not bury them under a large activity number.`,
     link: 'https://www.loqara.com/blog/chatbot-roi-metrics-that-matter',
-    image_url: '/linkedin/05-support-metrics.png',
-    image_alt: 'A clean analytics view replacing a large message-count vanity metric with resolution, fallback, handoff, and revenue signals.',
+    image_url: '/linkedin/05-support-metrics-illustrated.webp',
+    image_alt: 'An unstable tower of speech bubbles contrasts with solid symbols for resolution, fallback, handoff, and commercial outcomes.',
   },
   {
     id: '57764012-de66-49e0-8112-774e99556205',
@@ -133,8 +133,8 @@ The lead is warmer because the visitor already received help, and the business g
 
 Lead capture works better when it feels like the next step in a useful exchange, not an entry fee.`,
     link: 'https://www.loqara.com/blog/capture-leads-with-conversational-chat',
-    image_url: '/linkedin/06-conversational-lead.png',
-    image_alt: 'A rigid five-field contact form transforming into a helpful conversation that naturally ends with an email handoff.',
+    image_url: '/linkedin/06-conversational-lead-illustrated.webp',
+    image_alt: 'A rigid wall of blank form fields breaks open as a helpful product answer reaches an email handoff only afterwards.',
   },
   {
     id: '6bb4b086-3d5f-4ae5-a9ed-ec99033ff333',
@@ -154,8 +154,8 @@ For Loqara, I wanted the integration to feel like one capability rather than ano
 
 The store stays on WooCommerce. The owner keeps control. The support agent simply has access to the information it needs.`,
     link: 'https://www.loqara.com/blog/best-ai-chatbot-for-woocommerce',
-    image_url: '/linkedin/07-woocommerce-stack.png',
-    image_alt: 'A tangled stack of disconnected WooCommerce support plugins simplified into one connected customer conversation.',
+    image_url: '/linkedin/07-woocommerce-stack-illustrated.webp',
+    image_alt: 'Tangled plugin cables around a small online shop become one clean conversation connected to products, policy, orders, and people.',
   },
   {
     id: '4fd1af10-4cb3-4c90-a610-33eec5ff9c95',
@@ -174,8 +174,8 @@ The happy path is useful for a sales call. Edge cases reveal the actual product.
 
 If an agent fails the first or third test, I would not connect it to live customers yet.`,
     link: 'https://www.loqara.com/blog/how-to-choose-ai-support-agent',
-    image_url: '/linkedin/08-five-tests.png',
-    image_alt: 'Five practical test cards for hallucination, language, order privacy, human handoff, and answer sources.',
+    image_url: '/linkedin/08-five-tests-illustrated.webp',
+    image_alt: 'A conversational agent is surrounded by five test portals for uncertainty, language, order privacy, human handoff, and sources.',
   },
   {
     id: '968f7f5f-3e4a-4cb4-8bee-5decf401aff6',
@@ -192,8 +192,8 @@ That narrower need is the space I am building Loqara for.
 
 Choosing software is not about finding the longest feature list. It is about paying for the operating model you actually have.`,
     link: 'https://www.loqara.com/blog/gorgias-alternatives-for-ecommerce',
-    image_url: '/linkedin/09-right-sized-support.png',
-    image_alt: 'A small online store choosing a right-sized conversational support tool instead of an oversized enterprise control room.',
+    image_url: '/linkedin/09-right-sized-support-illustrated.webp',
+    image_alt: 'A tiny online shop chooses a compact support toolkit beside an enormous, mostly unused enterprise control machine.',
   },
   {
     id: '74c54440-2c79-418e-a255-4ff107a580e7',
@@ -210,8 +210,8 @@ For an online store, I think a useful agent should combine five things: the stor
 
 Without context, every follow-up makes the customer start again. With context, the interaction begins to feel like actual help.`,
     link: 'https://www.loqara.com/blog/conversational-ai-vs-chatbot',
-    image_url: '/linkedin/10-context-memory.png',
-    image_alt: 'Two connected customer follow-up questions about a coffee machine, contrasted with two disconnected FAQ search results.',
+    image_url: '/linkedin/10-context-memory-illustrated.webp',
+    image_alt: 'Two moments around the same coffee machine stay connected by one orange conversation ribbon as a cleaning requirement is added.',
   },
   {
     id: '9095a072-057f-463d-a6a5-7c9d3121fa57',
@@ -228,8 +228,8 @@ The agent uses the store’s structured data during the conversation, verifies i
 
 The best support interface should not force the merchant to recreate information Shopify already has.`,
     link: 'https://www.loqara.com/blog/best-ai-chatbot-for-shopify',
-    image_url: '/linkedin/11-shopify-context.png',
-    image_alt: 'A Shopify catalogue and order timeline flowing directly into one contextual customer chat.',
+    image_url: '/linkedin/11-shopify-context-illustrated.webp',
+    image_alt: 'Store shelves, product variants, inventory, and order context flow into one continuous customer conversation.',
   },
   {
     id: '10000000-0000-4000-8000-000000000012',
@@ -264,8 +264,8 @@ For a local store, natural Lithuanian is not a bonus feature. It is the differen
 
 Multilingual support should preserve the conversation, not merely translate each message.`,
     link: 'https://www.loqara.com/blog/multilingual-ai-customer-support',
-    image_url: '/linkedin/13-lithuanian-language.png',
-    image_alt: 'A natural Lithuanian customer conversation staying coherent while product data contains mixed international terms.',
+    image_url: '/linkedin/13-lithuanian-language-illustrated.webp',
+    image_alt: 'A Baltic-inspired loom weaves varied speech ribbons and international product symbols into one coherent conversation fabric.',
   },
   {
     id: '10000000-0000-4000-8000-000000000014',
@@ -282,8 +282,8 @@ Pricing still needs sensible boundaries because AI has real operating costs. But
 
 Useful software should invite use. It should not make the owner watch a meter after every customer.`,
     link: 'https://www.loqara.com/blog/how-much-does-ai-chatbot-cost',
-    image_url: '/linkedin/14-generous-limits.png',
-    image_alt: 'A clear monthly conversation allowance absorbing normal traffic and campaign spikes without a stressful per-message meter.',
+    image_url: '/linkedin/14-generous-limits-illustrated.webp',
+    image_alt: 'A large transparent reservoir absorbs everyday conversations and a campaign wave with generous headroom beside a discarded meter.',
   },
   {
     id: '10000000-0000-4000-8000-000000000015',
@@ -303,8 +303,8 @@ That is where conversational product support can help: answer from the catalogue
 
 Not every abandoned cart is recoverable. But a store should at least have a way to hear the question before the tab closes.`,
     link: 'https://www.loqara.com/blog/recover-abandoned-carts-ai-chatbot',
-    image_url: '/linkedin/15-cart-question.png',
-    image_alt: 'An abandoned shopping cart revealing hidden questions about fit, compatibility, delivery, and returns.',
+    image_url: '/linkedin/15-cart-question-illustrated.webp',
+    image_alt: 'A cart pauses at a checkout canyon among doubts about fit, compatibility, delivery, and returns as a lantern reveals a bridge.',
   },
   {
     id: '10000000-0000-4000-8000-000000000016',
@@ -325,8 +325,8 @@ A GDPR page is necessary, but it cannot compensate for careless product design.
 
 The safest answer is often not “our AI is secure.” It is showing exactly what data the feature uses, when it uses it, and what it refuses to reveal.`,
     link: 'https://www.loqara.com/blog/ai-chatbot-gdpr-data-privacy',
-    image_url: '/linkedin/16-privacy-by-design.png',
-    image_alt: 'A customer conversation protected by identity verification, scoped store data, minimal contact capture, and controlled human access.',
+    image_url: '/linkedin/16-privacy-by-design-illustrated.webp',
+    image_alt: 'A cutaway privacy vault protects a conversation through identity, minimal contact, scoped store data, and authorised human-access gates.',
   },
   {
     id: '10000000-0000-4000-8000-000000000017',
@@ -345,8 +345,8 @@ This is why I keep Loqara deliberately focused on customer conversations rather 
 
 The product should fit the team that exists today, not the support department the store may have in five years.`,
     link: 'https://www.loqara.com/blog/ai-customer-service-small-stores',
-    image_url: '/linkedin/17-small-store-capacity.png',
-    image_alt: 'A solo store operator gaining breathing room as routine customer conversations are resolved beside their fulfilment work.',
+    image_url: '/linkedin/17-small-store-capacity-illustrated.webp',
+    image_alt: 'A solo store owner packs orders while orange paths quietly handle routine product, parcel, and support questions around the workspace.',
   },
   {
     id: '10000000-0000-4000-8000-000000000018',
@@ -367,8 +367,8 @@ Automation magnifies the quality of its preparation.
 
 Campaign day should be the moment the system absorbs pressure, not the first time anyone discovers what it says to customers.`,
     link: 'https://www.loqara.com/blog/black-friday-ai-agent',
-    image_url: '/linkedin/18-campaign-readiness.png',
-    image_alt: 'A five-step support readiness checklist completed before a sharp Black Friday traffic spike.',
+    image_url: '/linkedin/18-campaign-readiness-illustrated.webp',
+    image_alt: 'A small online store faces an incoming campaign wave behind five stable readiness steps for knowledge, products, privacy, testing, and handoff.',
   },
   {
     id: '10000000-0000-4000-8000-000000000019',
@@ -385,8 +385,8 @@ I use OpenAI models inside Loqara, but the product is the surrounding discipline
 
 The model makes conversation possible. The product design makes the conversation dependable.`,
     link: 'https://www.loqara.com/blog/chatgpt-for-customer-service',
-    image_url: '/linkedin/19-model-vs-system.png',
-    image_alt: 'A language model at the centre of a wider support system containing store knowledge, tools, privacy controls, analytics, and human handoff.',
+    image_url: '/linkedin/19-model-vs-system-illustrated.webp',
+    image_alt: 'One conversational prism connects to a wider support system of store knowledge, commerce, privacy, measurement, language, and human help.',
   },
   {
     id: '10000000-0000-4000-8000-000000000020',
