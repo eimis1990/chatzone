@@ -55,6 +55,8 @@ Add a line here. How the wiki works: [README.md](README.md).
 ## Related docs (not in the wiki — linked, not duplicated)
 
 - `docs/DEPLOY.md`, `docs/SECURITY.md`, `docs/ROADMAP.md`
+- `docs/POTENTIAL_FEATURES.md` — product-differentiation backlog for the widget,
+  merchant tools, and possible standalone services
 - `docs/CHANNELS_IMPLEMENTATION.md` — paid messaging-channel plan, starting with Messenger
 - `docs/seo-content-loop.md` — weekly GSC content loop + article format
 - `docs/superpowers/specs/2026-07-20-seo-geo-remediation-design.md` — public-site audit decisions, scope, and release budgets
