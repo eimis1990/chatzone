@@ -78,18 +78,23 @@ export default async function PresentPage({ params }: { params: Promise<{ botId:
         />
       ) : null}
 
-      <div className="pointer-events-none absolute inset-x-0 top-0 flex items-start justify-between p-6">
+      {/* Client's name leads; our logo sits underneath as the quiet attribution. */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 flex items-start p-6">
         <div className={hasBackdrop ? 'rounded-xl bg-white/85 px-3 py-2 shadow-sm backdrop-blur' : ''}>
-          <p className="text-xs uppercase tracking-wide text-muted-foreground">Loqara demo</p>
           <h1 className="text-xl font-semibold">{bot.name}</h1>
+          <span className="mt-1 flex items-center gap-1.5 text-sm font-bold text-gray-900">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/loqara-logo-colorful.webp"
+              alt=""
+              aria-hidden="true"
+              width={20}
+              height={20}
+              className="size-5 shrink-0 object-contain"
+            />
+            Loqara<span className="text-primary">.</span>
+          </span>
         </div>
-        <p
-          className={`text-xs text-muted-foreground ${
-            hasBackdrop ? 'rounded-full bg-white/85 px-3 py-2 shadow-sm backdrop-blur' : ''
-          }`}
-        >
-          Click the launcher to start ↘
-        </p>
       </div>
       <WidgetEmbed botKey={bot.public_key} />
     </div>
