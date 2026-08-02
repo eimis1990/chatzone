@@ -89,16 +89,21 @@ d('provider-specific product ranking RPCs', () => {
     ])
   })
 
-  it('keeps the provider-neutral matcher independently callable', async () => {
+  it('provider-neutral matcher is field-aware too (color beats component color)', async () => {
     const { data, error } = await svc.rpc('match_products', {
       p_bot_id: botId,
       p_embedding: unitVec(),
-      p_query_text: 'white chairs',
+      p_query_text: 'kėdės baltos spalvos',
       p_k: 4,
       p_audience: null,
     })
 
     expect(error).toBeNull()
-    expect(data).toHaveLength(4)
+    const ids = data?.map((row: { external_id: string }) => row.external_id)
+    // Fully-covered matches rank by field precision: main color beats component
+    // color. The uncovered tail (green chair, white table) falls back to fused
+    // vector order, which is tie-broken arbitrarily here (identical embeddings).
+    expect(ids?.slice(0, 2)).toEqual(['white-chair', 'white-legs-chair'])
+    expect(ids).toHaveLength(4)
   })
 })

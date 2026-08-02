@@ -141,18 +141,42 @@ Three sharp edges found via the "slim lady" incident (2026-07-12), all live-debu
   (`lib/products/search.ts`): the model volunteers `audience: 'unisex'` even when
   told not to, and the RPC filter would then EXCLUDE women/men/kids-tagged items —
   that's how "Slim Lady" (tagged women) vanished from its own search.
-- **Verskis inflected attribute queries use a provider-only field-aware matcher** (migrations
-  `20260717114744` through `20260717115738`). Lithuanian `baltos kėdės` does
-  not FTS-match indexed `Spalva: Balta` under the `simple` dictionary. The RPC
-  combines strict four-character prefixes with lower-priority three-character
-  prefixes (for mutations such as `kėdė` → `kėdžių`), then scores product-type
-  matches in the title and hard qualifiers in structured attribute values. Main
+- **The field-aware matcher is now shared by ALL indexed providers** (migration
+  `20260802100000`). Originally built for Verskis (migrations `20260717114744`
+  through `20260717115738`): Lithuanian `baltos kėdės` does not FTS-match
+  indexed `Spalva: Balta` under the `simple` dictionary, so the RPC combines
+  strict four-character prefixes with lower-priority three-character prefixes
+  (for mutations such as `kėdė` → `kėdžių`), then scores product-type matches
+  in the title and hard qualifiers in structured attribute values. Main
   `Spalva` / `Color` is separate from component color, so `Kojų spalva: Balta`
-  cannot make a beige chair rank as a white chair. Live Mobel regression:
-  `virtuvinių kėdžių baltos spalvos` retrieves all 11 exact white dining chairs
-  in the top 24; `baltos kėdės` puts all 11 in the first 11. Migration
-  `20260717162814` moved this logic to `match_products_verskis` and restored
-  provider-neutral `match_products` for WooCommerce, Shopify, and Magento.
+  cannot make a beige chair rank as a white chair. Migration `20260717162814`
+  had isolated this as `match_products_verskis` as a precaution; after
+  "white sofa" returned random-color sofas on baldaila.lt (WooCommerce),
+  `20260802100000` promoted the same body into the neutral `match_products` —
+  it acts purely on the shared `buildDoc` format, so it was never
+  store-specific. ⚠️ Raw promotion regressed cross-language queries (homebynb
+  "scented candle" → top 8 full of "Candy" lip balms: one loose-prefix title
+  hit outranked every vector match), so `20260802110000` gates the
+  count-dominant tiers on FULL query coverage — match counts outrank the fused
+  RRF/vector order only when the doc corroborates every query token; partial
+  coincidences fall back to semantic order. The verskis RPC keeps the ungated
+  body (canonical LT queries). Live Baldaila regression: `balta sofa` ranks
+  `Spalva: Balta` first, then white-mixes (`Juoda-Balta`, `Baltai-pilka`);
+  `pilka sofa lova` → all-grey top 8. homebynb recall eval
+  (`scripts/eval-products.mjs`): 16/17 — the one fail ("pledas") is a stale
+  case, the store no longer sells blankets.
+  ⚠️ Color matching is same-language: EN "white sofa" against an LT catalog
+  matches nothing in attributes — the prompt makes the model query in the
+  catalog language ("balta sofa").
+- **Hard attribute constraints (color/material/size) are a prompt-level
+  protocol** (chat `lib/ai/prompt.ts` PRODUCT SEARCH step 4; voice
+  `lib/ai/elevenlabs-agent.ts`, hash `v31-color-constraints`): verify each
+  candidate's attributes before displaying; a multi-value attribute
+  (`Spalva: balta, pilka`) or a "spalvų pasirinkimas" / color-options note
+  counts as *orderable* in the requested color (tell the shopper to pick it on
+  the product page); when nothing matches exactly, show only the closest
+  neighbours (white → cream/ivory/light grey/light beige) and say explicitly
+  there's no exact match — never pad with random colors.
 
 The chat route logs every model search (`[agent] search_products query=...`,
 `app/api/chat/route.ts`) — check it first when ranking looks wrong; the model's
@@ -161,10 +185,13 @@ query is often not what the shopper typed.
 ## Product details for the model
 
 `searchCatalog` carries the indexed `doc` along on semantic matches as
-`CommerceProduct.details` (`docToDetails` strips the title line, caps 400 chars —
-`lib/products/search.ts`). `search_products` returns it to the model for the top
-8 results by default, or 20 for Verskis through its provider profile (token/recall budget;
-`lib/ai/commerce-tool.ts:52-110`), so the agent can
+`CommerceProduct.details` (`docToDetails` strips the title line, moves the
+`Attributes:` line FIRST, caps 600 chars — `lib/products/search.ts`; before the
+reorder, long category/tag lines pushed the color line past the cap on half of
+baldaila.lt's sofas, making color verification impossible). `search_products`
+returns it to the model for the top 8 results by default, or 20 for WooCommerce
+and Verskis through their provider profiles (token/recall budget;
+`lib/ai/commerce-tool.ts`), so the agent can
 judge fit, answer product questions, and compare using categories/tags/attributes
 and the longer description. Cards don't render `details`; most keyword fallbacks
 have none, while Verskis enriches its selected live results from product pages.

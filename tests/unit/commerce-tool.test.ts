@@ -68,8 +68,8 @@ describe('search_products failure handling', () => {
     })
   })
 
-  it('includes details for the top 8 results only (token budget)', async () => {
-    const many: CommerceProduct[] = Array.from({ length: 10 }, (_, i) => ({
+  it('includes details for the top 20 Woo results only (token budget)', async () => {
+    const many: CommerceProduct[] = Array.from({ length: 22 }, (_, i) => ({
       id: `p${i}`,
       title: `Product ${i}`,
       price: '10 €',
@@ -83,9 +83,9 @@ describe('search_products failure handling', () => {
       {} as never,
     )) as { details?: string }[]
     expect(result[0].details).toContain('attr 0')
-    expect(result[7].details).toContain('attr 7')
-    expect(result[8].details).toBeUndefined()
-    expect(result[9].details).toBeUndefined()
+    expect(result[19].details).toContain('attr 19')
+    expect(result[20].details).toBeUndefined()
+    expect(result[21].details).toBeUndefined()
   })
 
   it('lets Verskis review the first 20 structured candidates without changing neutral providers', async () => {

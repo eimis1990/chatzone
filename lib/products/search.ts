@@ -18,12 +18,18 @@ export interface SearchOptions {
 /**
  * The indexed doc, trimmed for the model: drop the first line (the title — the
  * product already carries it) and cap the rest. What remains is the comparison
- * material: audience, categories, tags, attributes, longer description.
+ * material: attributes, audience, categories, tags, longer description.
+ * Attributes go FIRST — they carry the facts hard constraints are verified
+ * against (color, material, dimensions), and long category/tag lines used to
+ * push them past the cap (half of baldaila.lt's sofas lost their color line).
  */
 export function docToDetails(doc: string | null | undefined): string | undefined {
   if (!doc) return undefined
-  const rest = doc.split('\n').slice(1).join('\n').trim()
-  return rest ? rest.slice(0, 400) : undefined
+  const lines = doc.split('\n').slice(1)
+  const attrs = lines.filter((l) => l.startsWith('Attributes:'))
+  const rest = lines.filter((l) => !l.startsWith('Attributes:'))
+  const out = [...attrs, ...rest].join('\n').trim()
+  return out ? out.slice(0, 600) : undefined
 }
 
 /** Whether this bot has a synced semantic product index. */

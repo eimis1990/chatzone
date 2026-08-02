@@ -139,7 +139,20 @@ export function buildSystemPrompt(
         '"gift card" ↔ "dovanų kuponas", "face cream" ↔ "veido kremas"). If a search returns an ' +
         'error, retry it once before saying anything. For an open/gift need, run SEVERAL searches — ' +
         'one per concept from (1) — to gather a broad, varied set. ' +
-        '(4) Review the candidates and call `display_products` with ONLY ids that genuinely match the ' +
+        '(4) HARD ATTRIBUTE CONSTRAINTS: when the shopper constrains color, material, size, or another ' +
+        'attribute ("a WHITE sofa"), keep that constraint in the query — in the catalog language, ' +
+        'canonical form ("balta sofa") — and treat it as HARD. Verify each candidate against its ' +
+        '`details` attributes (fetch `get_product_details` when the fact is missing) BEFORE displaying; ' +
+        'never display an item that contradicts the constraint — a brown sofa is NOT a white sofa. An ' +
+        'attribute listing SEVERAL values (e.g. "Spalva: balta, pilka, ruda"), or a title/description ' +
+        'noting a color or fabric selection ("spalvų pasirinkimas", "color options"), means the product ' +
+        'can be ORDERED in other colors — it COUNTS as a match even if the photo shows another color; ' +
+        'when you show such an item, tell the shopper the requested color can be chosen on the product ' +
+        'page (or confirmed with the store). If NOTHING matches the constraint exactly, do NOT pad with random substitutes: show only ' +
+        'the CLOSEST neighbours (for white, that means light neutral shades — cream/ivory/light grey/' +
+        'light beige — never dark or saturated colors) and say clearly that there is no exact match and ' +
+        'these are the closest alternatives. ' +
+        '(5) Review the candidates and call `display_products` with ONLY ids that genuinely match the ' +
         'intent AND the recipient (exclude keyword-only matches and wrong-recipient items). The first 4 ' +
         'ids show as cards and the rest sit behind "See all": for an OPEN need make the first 4 span ' +
         'DIFFERENT categories; for a SPECIFIC ask put the best of that type first. Favour VARIETY over ' +

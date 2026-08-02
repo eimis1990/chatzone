@@ -17,9 +17,21 @@ describe('docToDetails', () => {
     expect(details).toContain('Sojų vaško žvakė')
   })
 
-  it('caps at 400 chars', () => {
+  it('caps at 600 chars', () => {
     const doc = 'Title\n' + 'x'.repeat(1000)
-    expect(docToDetails(doc)!.length).toBe(400)
+    expect(docToDetails(doc)!.length).toBe(600)
+  })
+
+  it('keeps the Attributes line ahead of long category/tag lines so the cap never eats it', () => {
+    const doc = [
+      'Sofa-lova M36',
+      'Categories: ' + 'Svetainės baldai, '.repeat(20),
+      'Tags: ' + 'sofa, '.repeat(50),
+      'Attributes: Spalva: Balta; Ilgis: 200 cm',
+      'Aprašymas.',
+    ].join('\n')
+    const details = docToDetails(doc)!
+    expect(details.startsWith('Attributes: Spalva: Balta')).toBe(true)
   })
 
   it('returns undefined for null, empty, or title-only docs', () => {

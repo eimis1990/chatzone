@@ -81,8 +81,9 @@ describe('commerce provider profiles', () => {
 
     expect(providerSearchQueryGuidance(woo)).toBe('')
     expect(providerSearchQueryGuidance(verskis)).toContain('canonical form')
-    expect(providerCandidateDetailsLimit(woo)).toBe(8)
+    expect(providerCandidateDetailsLimit(woo)).toBe(20)
     expect(providerCandidateDetailsLimit(verskis)).toBe(20)
+    expect(providerCandidateDetailsLimit(feed)).toBe(8)
     expect(providerDisplayGuidance(woo)).toBe('')
     expect(providerDisplayGuidance(verskis)).toContain('pass exactly 20 ids')
     expect(commerceProviderProfile(feed).semantic).toBeUndefined()

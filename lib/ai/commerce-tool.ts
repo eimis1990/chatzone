@@ -66,6 +66,8 @@ export function makeProductTools(
         'the product type plus at most 1-2 qualifiers, e.g. "kvapni žvakė" or "veido kremas sausai ' +
         'odai". ' +
         (queryGuidance ? `${queryGuidance} ` : '') +
+        'Keep any stated hard attribute (color, material, size) in the query, expressed in the ' +
+        'catalog language in canonical form ("balta sofa", not an inflected sentence). ' +
         'When the shopper names a ' +
         'specific BRAND or PRODUCT NAME, pass that name VERBATIM ' +
         'as the query instead of a category. If it returns an { error }, retry the same search once ' +
@@ -134,7 +136,11 @@ export function makeProductTools(
         '(avoid showing near-identical items — vary the brand, type, or price). For an OPEN or GIFT ' +
         'request ("gift ideas for her", "something for the home") be GENEROUS — show a rich, varied ' +
         'selection (aim for ~12-20 relevant products) so the shopper has plenty to browse. For a ' +
-        'NAMED product or tightly constrained comparison, a focused handful is enough. Pass up to ' +
+        'NAMED product or tightly constrained comparison, a focused handful is enough. When the ' +
+        'shopper constrained an attribute (e.g. color), pass ONLY ids whose attributes verify it — ' +
+        'an attribute listing the requested value among several options counts (the shopper can ' +
+        'order that option); if none match exactly, pass only the closest alternatives (for a color: ' +
+        'the nearest light/neutral shades) and say so in your reply. Pass up to ' +
         '20 ids. ' +
         (displayGuidance ? displayGuidance : ''),
       inputSchema: z.object({

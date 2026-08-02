@@ -9,6 +9,10 @@ import type { CommerceProviderProfile } from './types'
 
 export const woocommerceProductSearchProfile: CommerceProviderProfile = {
   provider: 'woocommerce',
+  // Woo docs carry structured attributes (Spalva/Color, material, size). The
+  // model needs them on the full candidate pool to verify hard constraints
+  // ("white sofa") and to pick closest-shade fallbacks — 8 was too few.
+  candidateDetailsLimit: 20,
   catalogSync: {
     configured: (config) => Boolean(config.storeUrl),
     fetch: (config, onFetched) => fetchWooCatalog(config.storeUrl, fetch, onFetched),
