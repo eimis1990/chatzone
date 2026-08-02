@@ -8,7 +8,7 @@ import {
   productRawHash,
   type RawProduct,
 } from './catalog'
-import { aiEnrich, type Enrichment } from './enrich'
+import { aiEnrich, aiColorEnrich, hasMainColorAttribute, type Enrichment } from './enrich'
 import { commerceProviderProfile } from './provider-profiles'
 
 /** A stage of the sync, reported for the live progress UI. */
@@ -118,6 +118,20 @@ export async function syncProductCatalog(
       report({ phase: 'enriching', processed, total }),
     )
     for (const [id, value] of enriched) ai.set(id, value)
+
+    // Photo-derived main color for products whose store data has no color
+    // attribute (furniture catalogs often list only fabric codes while the
+    // whiteness lives in the photo). Appended as a "Color: …" attribute so the
+    // ranking RPC's color field and the model's verification both see it.
+    // Runs after the raw hashes were computed, so it never affects the diff.
+    const needsColor = changed.filter((p) => p.imageUrl && !hasMainColorAttribute(p.attributes))
+    if (needsColor.length) {
+      const colors = await aiColorEnrich(needsColor)
+      for (const p of needsColor) {
+        const c = colors.get(p.id)
+        if (c?.length) p.attributes.push(`Color: ${c.join(', ')}`)
+      }
+    }
   }
   const tagsFor = (p: RawProduct) => [...new Set([...deriveTags(p), ...(ai.get(p.id)?.tags ?? [])])]
   // Explicit store categories win; AI fills the gaps; unknown → 'unisex' (shows

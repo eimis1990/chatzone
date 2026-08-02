@@ -80,3 +80,90 @@ export async function aiEnrich(
   await Promise.all(Array.from({ length: Math.min(CONCURRENCY, batches.length) }, worker))
   return map
 }
+
+/** True when attributes already state the product's MAIN color ("Spalva: Balta").
+ *  Anchored at the attribute-name start so component colors ("Porankių Spalva",
+ *  "Kojų spalva") don't count — they describe a part, not the product. */
+export function hasMainColorAttribute(attributes: string[]): boolean {
+  return attributes.some((a) => /^(spalva|colou?r)\s*:/i.test(a.trim()))
+}
+
+// Vision batches are smaller than text batches: many images per call degrade
+// id↔photo alignment.
+const COLOR_BATCH = 6
+const colorSchema = z.object({
+  items: z.array(z.object({ id: z.string(), colors: z.array(z.string()) })),
+})
+
+/**
+ * Main product color(s) read from the product PHOTO, for products whose store
+ * data has no color attribute (very common on furniture catalogs, where a
+ * visibly white sofa lists only fabric codes). Returned per id; [] when color
+ * is unclear or not a meaningful buying attribute for that product type.
+ * The values become a "Color: …" attribute so the ranking RPC's color field
+ * and the model's verification protocol both work on them.
+ */
+export async function aiColorEnrich(
+  products: RawProduct[],
+): Promise<Map<string, string[]>> {
+  const map = new Map<string, string[]>()
+  const withImages = products.filter((p) => p.imageUrl)
+  const batches: RawProduct[][] = []
+  for (let i = 0; i < withImages.length; i += COLOR_BATCH) {
+    batches.push(withImages.slice(i, i + COLOR_BATCH))
+  }
+
+  let next = 0
+  const runBatch = async (batch: RawProduct[]): Promise<void> => {
+    try {
+      const { object } = await generateObject({
+        model: openai('gpt-4o-mini'),
+        schema: colorSchema,
+        messages: [
+          {
+            role: 'user',
+            content: [
+              {
+                type: 'text' as const,
+                text:
+                  'Each numbered product below is followed by its photo. For each, return the ' +
+                  "PRODUCT'S OWN main visible color(s) — 1-3 simple lowercase color words in the " +
+                  "CATALOG'S language, judged from the products' titles and categories (for a " +
+                  'Lithuanian catalog: "balta", "pilka", "ruda" — never English words there, even ' +
+                  'when a title is a bare product code). Judge only the product itself, never ' +
+                  'packaging, background, or props. Return [] when the color is unclear, a busy ' +
+                  'multicolor print, or not a meaningful buying attribute for this product type ' +
+                  '(e.g. consumables, cosmetics contents). Return exactly one entry per product id.',
+              },
+              ...batch.flatMap((p) => [
+                {
+                  type: 'text' as const,
+                  text: `[${p.id}] ${p.title} — ${p.categories.join(', ')}`,
+                },
+                {
+                  type: 'image' as const,
+                  image: new URL(p.imageUrl!),
+                  providerOptions: { openai: { imageDetail: 'low' } },
+                },
+              ]),
+            ],
+          },
+        ],
+      })
+      for (const it of object.items) {
+        if (it.colors.length) map.set(it.id, it.colors.slice(0, 3))
+      }
+    } catch {
+      // Batch failed → those products simply keep no derived color.
+    }
+  }
+
+  const worker = async (): Promise<void> => {
+    while (next < batches.length) {
+      const batch = batches[next++]
+      await runBatch(batch)
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(CONCURRENCY, batches.length) }, worker))
+  return map
+}

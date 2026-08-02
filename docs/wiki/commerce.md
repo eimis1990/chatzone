@@ -168,6 +168,24 @@ Three sharp edges found via the "slim lady" incident (2026-07-12), all live-debu
   ⚠️ Color matching is same-language: EN "white sofa" against an LT catalog
   matches nothing in attributes — the prompt makes the model query in the
   catalog language ("balta sofa").
+- **Main-color extraction is field-boundary anchored** (migration
+  `20260802120000`, neutral RPC only): the bare pattern `'Spalva: (…)'`
+  matched inside compound attribute names — baldaila.lt's
+  `Porankių Spalva: Ąžuolo` (ARMREST color) became the product's main color.
+  The label must now start a field (`^`, `\n`, `; `, or `Attributes: `).
+  Verskis keeps its pattern (its docs always list main `Spalva` first).
+- **Photo-derived colors** (`aiColorEnrich`, `lib/products/enrich.ts`): many
+  furniture products carry NO color in store data — only fabric codes
+  (`Medžiaga: Jaffray 01`) while the whiteness lives in the photo. At sync
+  time, changed products lacking a main color attribute get their image
+  classified by gpt-4o-mini (low detail, batches of 6) and a `Color: …`
+  attribute appended in the CATALOG's language — feeding both the RPC color
+  field and the model's verification. Already-indexed rows never re-enrich
+  (raw hash unchanged), so
+  `scripts/backfill-product-colors.mjs --bot <id> [--dry]` does the one-time
+  pass per bot (run on Baldaila 2026-08-02; other Woo/Shopify bots only if
+  color search matters there). ⚠️ The script's vision prompt mirrors
+  `aiColorEnrich` — keep them in sync.
 - **Hard attribute constraints (color/material/size) are a prompt-level
   protocol** (chat `lib/ai/prompt.ts` PRODUCT SEARCH step 4; voice
   `lib/ai/elevenlabs-agent.ts`, hash `v31-color-constraints`): verify each
