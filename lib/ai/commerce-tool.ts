@@ -139,8 +139,10 @@ export function makeProductTools(
         'NAMED product or tightly constrained comparison, a focused handful is enough. When the ' +
         'shopper constrained an attribute (e.g. color), pass ONLY ids whose attributes verify it — ' +
         'an attribute listing the requested value among several options counts (the shopper can ' +
-        'order that option); if none match exactly, pass only the closest alternatives (for a color: ' +
-        'the nearest light/neutral shades) and say so in your reply. Pass up to ' +
+        'order that option); when exact matches are fewer than the set you want to show, fill the ' +
+        'rest with the closest neighbouring shades (searched separately with simple color words), ' +
+        'exact matches FIRST, and say in your reply which are exact and which are close ' +
+        'alternatives. Pass up to ' +
         '20 ids. ' +
         (displayGuidance ? displayGuidance : ''),
       inputSchema: z.object({

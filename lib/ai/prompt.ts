@@ -148,10 +148,13 @@ export function buildSystemPrompt(
         'noting a color or fabric selection ("spalvų pasirinkimas", "color options"), means the product ' +
         'can be ORDERED in other colors — it COUNTS as a match even if the photo shows another color; ' +
         'when you show such an item, tell the shopper the requested color can be chosen on the product ' +
-        'page (or confirmed with the store). If NOTHING matches the constraint exactly, do NOT pad with random substitutes: show only ' +
-        'the CLOSEST neighbours (for white, that means light neutral shades — cream/ivory/light grey/' +
-        'light beige — never dark or saturated colors) and say clearly that there is no exact match and ' +
-        'these are the closest alternatives. ' +
+        'page (or confirmed with the store). When exact matches are FEWER than the set you want to ' +
+        'show (or none exist), extend the set with the CLOSEST neighbouring shades: run 1-3 extra ' +
+        'searches using simple color words for the nearest shades (white → "kreminė" / "šviesiai ' +
+        'pilka" / "smėlio spalvos"; red → "bordo" / "terakota" / "ruda"; always perceptibly CLOSE — ' +
+        'light neutral neighbours for a light request, never a distant or dark hue). Then display ' +
+        'exact-color matches FIRST and near-shade ones after, and tell the shopper which are exact ' +
+        'and which are close alternatives. Never pad with random colors. ' +
         '(5) Review the candidates and call `display_products` with ONLY ids that genuinely match the ' +
         'intent AND the recipient (exclude keyword-only matches and wrong-recipient items). The first 4 ' +
         'ids show as cards and the rest sit behind "See all": for an OPEN need make the first 4 span ' +
