@@ -46,7 +46,9 @@ components. Shipped 2026-07-27 (spec:
   one card per assigned VARIANT, add-drawer lists unassigned variants
   (`FolderComponentsView.tsx`).
 - Per bot: client `/app/bots/[botId]/components` + owner twin
-  `/owner/clients/[orgId]/bots/[botId]/components` (tab in OwnerBotTabs), both
+  `/owner/clients/[orgId]/bots/[botId]/components` (tab in OwnerBotTabs) + demo
+  twin `/owner/demos/[botId]/components` (added 2026-08-02 — the tab 404'd on
+  demo bots before), all
   rendering `BotComponentsView` → variant drawer →
   `setComponentVariant` (`lib/actions/component-variants.ts`; RLS for clients,
   service for owner, validates availability).
