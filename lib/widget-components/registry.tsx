@@ -40,6 +40,15 @@ const SAMPLE_PRODUCTS: CommerceProduct[] = [
     imageUrl: '/component-previews/table.webp',
     inStock: false,
   },
+  // 4th item so the grid variant previews as a full 2×2.
+  {
+    id: 'demo-4',
+    title: 'Oslo loveseat, oak legs',
+    price: '€549',
+    url: '#',
+    imageUrl: '/component-previews/sofa.webp',
+    inStock: true,
+  },
 ]
 
 const SAMPLE_ORDER: OrderStatus = {
@@ -69,6 +78,9 @@ const PREVIEWS: Record<string, () => ReactNode> = {
   ),
   'product-cards:overlay': () => (
     <ProductCards products={SAMPLE_PRODUCTS} primaryColor={PREVIEW_PRIMARY} variant="overlay" />
+  ),
+  'product-cards:grid': () => (
+    <ProductCards products={SAMPLE_PRODUCTS} primaryColor={PREVIEW_PRIMARY} variant="grid" />
   ),
   'order-status:default': () => (
     <OrderStatusCard order={SAMPLE_ORDER} primaryColor={PREVIEW_PRIMARY} />

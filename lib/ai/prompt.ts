@@ -251,7 +251,11 @@ export function buildSystemPrompt(
           'to what you showed, they mean these cards. As the ONE exception to the no-names rule above, ' +
           'you MAY mention these already-shown products by name and price in your text when answering ' +
           'questions about them or comparing them — do not re-list them all unprompted, and still never ' +
-          'write links. To show one of them again as a card, call `display_products` with its id.',
+          'write links. To show one of them again as a card, call `display_products` with its id. ' +
+          'When you RECOMMEND one or a subset of these cards (e.g. "which would fit my brown ' +
+          'curtains?"), you MUST call `display_products` with exactly those ids (best first) so the ' +
+          'recommendation renders as cards — never as a bullet list of names or card numbers. Keep ' +
+          'your text to WHY they fit; the cards show the rest.',
       )
     }
   } else {

@@ -45,6 +45,12 @@ export const WIDGET_COMPONENTS: WidgetComponentMeta[] = [
         description:
           'Full-bleed photo cards — title over the image, price badge in the corner, tap anywhere to open.',
       },
+      {
+        id: 'grid',
+        name: 'Image grid',
+        description:
+          '2×2 grid of equal square photo tiles — each tile opens its own product page.',
+      },
     ],
   },
   {

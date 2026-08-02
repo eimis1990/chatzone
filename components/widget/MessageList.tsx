@@ -11,8 +11,8 @@ import type { CommerceProduct, OrderStatus } from '@/lib/commerce/types'
 import type { RoomSelect } from './RoomVisualizer'
 
 /** Narrow a config-supplied variant id to what ProductCards implements. */
-function productCardsVariant(id: string | undefined): 'default' | 'compact' | 'overlay' {
-  return id === 'compact' || id === 'overlay' ? id : 'default'
+function productCardsVariant(id: string | undefined): 'default' | 'compact' | 'overlay' | 'grid' {
+  return id === 'compact' || id === 'overlay' || id === 'grid' ? id : 'default'
 }
 
 export interface ChatMessage {

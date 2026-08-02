@@ -13,8 +13,9 @@ interface ProductCardsProps {
   language?: 'en' | 'lt'
   /** Component-library variant: 'default' = swipeable image cards, 'compact' =
    *  stacked rows, 'overlay' = full-bleed image cards (title on a bottom scrim,
-   *  price badge top-right, the whole card links out — no button). */
-  variant?: 'default' | 'compact' | 'overlay'
+   *  price badge top-right, the whole card links out — no button), 'grid' =
+   *  2×2 square photo tiles, each tile links out. */
+  variant?: 'default' | 'compact' | 'overlay' | 'grid'
   /** Open the full-height list overlay for this message's products. */
   onSeeAll?: (products: CommerceProduct[]) => void
   /** Analytics: the visitor followed a product link out of the chat. */
@@ -88,6 +89,19 @@ export function ProductCards({
         <div className="space-y-2" role="list">
           {products.slice(0, CARD_LIMIT).map((product) => (
             <CompactProductCard
+              key={product.id}
+              product={product}
+              bubbleRadius={bubbleRadius}
+              primaryColor={primaryColor}
+              outOfStockLabel={labels.outOfStock}
+              onProductClick={onProductClick}
+            />
+          ))}
+        </div>
+      ) : variant === 'grid' ? (
+        <div className="grid grid-cols-2 gap-2" role="list">
+          {products.slice(0, CARD_LIMIT).map((product) => (
+            <GridProductTile
               key={product.id}
               product={product}
               bubbleRadius={bubbleRadius}
@@ -450,6 +464,73 @@ function OverlayProductCard({
           }}
           title={product.title}
         >
+          {product.title}
+        </p>
+      </div>
+    </a>
+  )
+}
+
+/** Grid variant — 2×2 equal square photo tiles filling the chat width; each
+ *  tile links out on its own. Title on a soft bottom scrim, price badge in the
+ *  corner. No visualizer toggle (tiles have no room for a second action). */
+function GridProductTile({
+  product,
+  bubbleRadius,
+  primaryColor,
+  outOfStockLabel,
+  onProductClick,
+}: {
+  product: CommerceProduct
+  bubbleRadius: number
+  primaryColor: string
+  outOfStockLabel: string
+  onProductClick?: (product: CommerceProduct) => void
+}) {
+  return (
+    <a
+      href={product.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      onClick={() => onProductClick?.(product)}
+      aria-label={`${product.title} — ${product.price}`}
+      className="relative block aspect-square overflow-hidden border bg-white transition-transform active:scale-[0.97] outline-none focus-visible:ring-2"
+      style={{ borderRadius: `${Math.min(bubbleRadius, 14)}px` }}
+      role="listitem"
+    >
+      {product.imageUrl ? (
+        <img
+          src={product.imageUrl}
+          alt=""
+          loading="lazy"
+          className={`h-full w-full object-cover ${product.inStock ? '' : 'opacity-60 grayscale'}`}
+        />
+      ) : (
+        <div className="flex h-full w-full items-center justify-center bg-gray-50" aria-hidden="true">
+          <PlaceholderIcon />
+        </div>
+      )}
+
+      {/* Price badge — top right */}
+      {product.price && (
+        <span
+          className="absolute top-1.5 right-1.5 rounded-full px-2 py-0.5 text-[11px] font-bold shadow-sm"
+          style={{ backgroundColor: primaryColor, color: readableTextColor(primaryColor) }}
+        >
+          {product.price}
+        </span>
+      )}
+
+      {/* Out of stock — top left */}
+      {!product.inStock && (
+        <span className="absolute top-1.5 left-1.5 rounded-full border bg-white/85 px-1.5 py-0.5 text-[9px] font-medium text-gray-700 backdrop-blur-sm">
+          {outOfStockLabel}
+        </span>
+      )}
+
+      {/* Bottom scrim + one-line title */}
+      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/65 via-black/30 to-transparent px-2 pt-6 pb-1.5">
+        <p className="truncate text-[11px] font-medium leading-tight text-white" title={product.title}>
           {product.title}
         </p>
       </div>

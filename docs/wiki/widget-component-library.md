@@ -9,7 +9,7 @@ components. Shipped 2026-07-27 (spec:
 1. **Registry (code)** — `lib/widget-components/meta.ts` (server-safe metadata)
    + `lib/widget-components/registry.tsx` (`'use client'` rendered previews,
    keyed `${componentKey}:${variantId}` — the two files MUST stay in sync).
-   Components: product-cards (default + compact + overlay), quick-actions (tiles/pills/list), order-status, lead-form,
+   Components: product-cards (default + compact + overlay + grid), quick-actions (tiles/pills/list), order-status, lead-form,
    room-visualizer. Variants are parallel alternatives, not a timeline.
 2. **Provider folders (DB)** — `provider_components (provider, component_key,
    variant_id)`, unique triple (migrations `20260727150000` +
