@@ -192,9 +192,11 @@ Three sharp edges found via the "slim lady" incident (2026-07-12), all live-debu
   candidate's attributes before displaying; a multi-value attribute
   (`Spalva: balta, pilka`) or a "spalvų pasirinkimas" / color-options note
   counts as *orderable* in the requested color (tell the shopper to pick it on
-  the product page); when nothing matches exactly, show only the closest
-  neighbours (white → cream/ivory/light grey/light beige) and say explicitly
-  there's no exact match — never pad with random colors.
+  the product page); when exact matches are fewer than the intended set, the
+  agent runs 1-3 extra searches for the closest shades (white → kreminė/
+  šviesiai pilka/smėlio) and fills the set — exact first, near-shades after,
+  labeled as close alternatives — never with random colors. Color adjacency
+  is LLM knowledge, not vector-index behavior.
 
 The chat route logs every model search (`[agent] search_products query=...`,
 `app/api/chat/route.ts`) — check it first when ranking looks wrong; the model's
