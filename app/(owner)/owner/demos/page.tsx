@@ -144,9 +144,12 @@ export default async function OwnerDemosPage() {
                 />
                 <ArrowUpRightIcon
                   aria-hidden="true"
-                  className="pointer-events-none absolute right-4 top-4 z-10 size-4 -translate-x-1 translate-y-1 text-gray-700 opacity-0 transition-all duration-200 group-hover:translate-x-0 group-hover:translate-y-0 group-hover:opacity-100"
+                  className="pointer-events-none absolute right-5 top-11 z-10 size-4 -translate-x-1 translate-y-1 text-gray-700 opacity-0 transition-all duration-200 group-hover:translate-x-0 group-hover:translate-y-0 group-hover:opacity-100"
                 />
-                <div className="pointer-events-none relative z-10 flex items-start gap-3">
+                <span className="pointer-events-none absolute right-5 top-5 z-10 text-xs text-muted-foreground">
+                  Created {created}
+                </span>
+                <div className="pointer-events-none relative z-10 flex items-start gap-3 pr-28">
                   {avatar ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
@@ -204,9 +207,6 @@ export default async function OwnerDemosPage() {
                     usesVoice={Boolean(cfg?.voice?.enabled)}
                     orgs={transferTargets}
                   />
-                  <span className="ml-auto pb-0.5 text-xs text-muted-foreground">
-                    Created {created}
-                  </span>
                 </div>
               </div>
             )

@@ -173,12 +173,16 @@ export function VoiceSection({
     <CollapsibleSection
       header={
         <div className="relative z-10 flex items-center gap-2.5">
-          <span className="flex size-7 shrink-0 items-center justify-center text-primary">
+          <span className="flex size-7 shrink-0 items-center justify-center text-primary group-data-[expanded=true]/config-section:text-white">
             <MicIcon className="size-5" aria-hidden="true" />
           </span>
           <div>
-            <CardTitle className="text-sm font-semibold leading-tight">Voice</CardTitle>
-            <CardDescription className="text-xs leading-tight">Live voice calls with your assistant — pick a voice per language.</CardDescription>
+            <CardTitle className="text-sm font-semibold leading-tight group-data-[expanded=true]/config-section:text-white">
+              Voice
+            </CardTitle>
+            <CardDescription className="text-xs leading-tight group-data-[expanded=true]/config-section:text-white/70">
+              Live voice calls with your assistant — pick a voice per language.
+            </CardDescription>
           </div>
         </div>
       }

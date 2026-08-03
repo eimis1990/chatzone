@@ -65,12 +65,14 @@ export function VisualizerSection({
     <CollapsibleSection
       header={
         <div className="relative z-10 flex items-center gap-2.5">
-          <span className="flex size-7 shrink-0 items-center justify-center text-primary">
+          <span className="flex size-7 shrink-0 items-center justify-center text-primary group-data-[expanded=true]/config-section:text-white">
             <SofaIcon className="size-5" aria-hidden="true" />
           </span>
           <div>
-            <CardTitle className="text-sm font-semibold leading-tight">Product visualizer</CardTitle>
-            <CardDescription className="text-xs leading-tight">
+            <CardTitle className="text-sm font-semibold leading-tight group-data-[expanded=true]/config-section:text-white">
+              Product visualizer
+            </CardTitle>
+            <CardDescription className="text-xs leading-tight group-data-[expanded=true]/config-section:text-white/70">
               Let visitors see your products placed in a photo of their own room.
             </CardDescription>
           </div>

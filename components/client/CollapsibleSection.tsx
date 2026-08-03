@@ -43,8 +43,8 @@ export function CollapsibleSection({
     <Card className="gap-0 overflow-visible rounded-none py-0 shadow-none ring-0">
       <CardHeader
         data-expanded={open}
-        className={`section-header-gradient relative sticky top-16 z-[5] cursor-pointer select-none overflow-hidden rounded-none bg-card py-3 pr-12 ${
-          open ? 'border-b-2 border-primary' : 'border-b'
+        className={`group/config-section relative sticky top-16 z-[5] cursor-pointer select-none overflow-hidden rounded-none py-3 pr-12 transition-colors duration-200 ${
+          open ? 'border-b-4 border-white bg-primary text-primary-foreground' : 'border-b bg-card'
         }`}
         onClick={() => setOpen((o) => !o)}
       >
@@ -57,7 +57,11 @@ export function CollapsibleSection({
             e.stopPropagation()
             setOpen((o) => !o)
           }}
-          className="absolute right-3 top-1/2 flex size-7 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          className={`absolute right-3 top-1/2 flex size-7 -translate-y-1/2 items-center justify-center rounded-md transition-colors ${
+            open
+              ? 'text-white hover:bg-white/10 hover:text-white'
+              : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+          }`}
         >
           <ChevronDownIcon
             className={`size-5 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
@@ -66,8 +70,7 @@ export function CollapsibleSection({
         </button>
       </CardHeader>
       {/* reducedMotion="user" strips the transform-based descend for users who
-          ask for it, while opacity still fades — matches the header gradient's
-          reduced-motion behavior. */}
+          ask for it, while opacity still fades. */}
       <MotionConfig reducedMotion="user">
         {/* No `exit` on purpose: an animated collapse shrinks the scroll
             content over time, which makes the scroll container clamp scrollTop

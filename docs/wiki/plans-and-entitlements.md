@@ -33,4 +33,14 @@ plan (falls back to `free`). Fields: `maxBots`, `maxLanguages`, `leadCapture`,
   generalizes. `maxBots`/`maxLanguages` use `Infinity` for unlimited.
 - Assertions live in `tests/unit/entitlements.test.ts`.
 
-_Last verified: 2026-07-08 (66f6bb8)._
+## Billing reconciliation
+
+- Stripe customer IDs are cached on `organizations`, but Stripe remains the
+  source of truth. A deleted customer or an ID from a different Stripe account
+  returns `resource_missing`. Subscription reads narrow that error to “No such
+  customer”, conditionally clear only the matching cached ID, reset the billing
+  mirror to Free/Inactive, and allow the next checkout to create a replacement
+  (`lib/stripe/errors.ts:1-17`, `lib/stripe/customer.ts:7-76`,
+  `lib/stripe/manage.ts:10-75`). Other Stripe failures still propagate.
+
+_Last verified: 2026-08-03 (89ac480)._

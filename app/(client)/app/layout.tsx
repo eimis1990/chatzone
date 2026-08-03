@@ -19,14 +19,23 @@ export default async function ClientLayout({
   const orgIds = await getUserOrgIds()
   const orgId = orgIds[0] ?? null
   let bots: BotLite[] = []
+  let organizationName = 'Client'
   if (orgId) {
     const supabase = await createServerClient()
-    const { data } = await supabase
-      .from('bots')
-      .select('id, name, status')
-      .eq('org_id', orgId)
-      .order('created_at', { ascending: false })
-    bots = (data ?? []) as BotLite[]
+    const [{ data: botsData }, { data: organization }] = await Promise.all([
+      supabase
+        .from('bots')
+        .select('id, name, status')
+        .eq('org_id', orgId)
+        .order('created_at', { ascending: false }),
+      supabase
+        .from('organizations')
+        .select('name')
+        .eq('id', orgId)
+        .maybeSingle<{ name: string | null }>(),
+    ])
+    bots = (botsData ?? []) as BotLite[]
+    organizationName = organization?.name?.trim() || organizationName
 
     // Per-bot count of conversations awaiting / in human handoff (sidebar badge).
     const botIds = bots.map((b) => b.id)
@@ -48,19 +57,26 @@ export default async function ClientLayout({
   // Total across bots — drives the mobile Inbox tab badge.
   const inboxTotal = bots.reduce((sum, b) => sum + (b.inboxCount ?? 0), 0)
 
-  // The whole shell carries the green mesh; the content is a white rounded card
-  // floating on top, with the mesh showing through the gutter around it.
+  // The whole shell carries the mesh; on desktop the content surface meets the
+  // sidebar directly while retaining its outer top, right, and bottom gutter.
   // Below md: the sidebar becomes a bottom tab bar + top bar (mobile portal).
   return (
     <>
       <div className="relative isolate flex h-svh flex-col overflow-hidden bg-sidebar-mesh md:flex-row">
         {/* Decorative grid fading up from the bottom of the dark shell */}
-        <div className="shell-grid pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-[42vh]" aria-hidden="true" />
+        <div
+          className="shell-grid pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-[42vh]"
+          aria-hidden="true"
+        />
         <div className="hidden md:flex">
-          <AppSidebar bots={bots} userEmail={user.email ?? ''} />
+          <AppSidebar
+            bots={bots}
+            userEmail={user.email ?? ''}
+            organizationName={organizationName}
+          />
         </div>
         <MobileTopBar />
-        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto bg-background pb-20 md:m-3 md:rounded-2xl md:pb-0 md:shadow-sm">
+        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto bg-background pb-20 md:my-3 md:mr-3 md:rounded-r-2xl md:pb-0 md:shadow-sm">
           {children}
         </main>
         <MobileTabBar inboxCount={inboxTotal} />

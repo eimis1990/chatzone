@@ -82,12 +82,14 @@
   Compact scrubbers intentionally match default selects at 40px height and the
   shared `--radius-md` corner radius (`components/ui/scrubber.tsx:151`).
 - Config sections form one continuous stack: the shared section card removes
-  inherited card spacing, headers are white with a primary-tinted left-edge
-  gradient, and expanded bodies remain muted behind the inner cards
-  (`components/client/CollapsibleSection.tsx:22`, `app/globals.css:180`).
-  Each header owns the stack's only 1px divider. The gradient is an expanded-
-  state cue: it fades and slides in on open, remains hidden while collapsed,
-  and disables its transition for reduced-motion users.
+  inherited card spacing, collapsed headers are white, and expanded headers use
+  a solid primary background with white icon/title/chevron, muted-white
+  description, and a 4px white bottom rule. Expanded bodies remain muted behind
+  the inner cards (`components/client/CollapsibleSection.tsx:43`,
+  `components/client/ConfigForm.tsx:188`). Voice and Product visualizer keep
+  local header markup but participate in the same expanded-state group styling
+  (`components/client/VoiceSection.tsx:175`,
+  `components/client/VisualizerSection.tsx:67`). Each header owns the stack's divider.
 - **Save & Publish** is disabled until either React Hook Form reports a dirty
   config field or the separately-managed bot name differs from its last saved
   value. A successful save resets both dirty baselines

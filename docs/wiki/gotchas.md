@@ -178,7 +178,9 @@ declaration block to `::before` ONLY — `::after` silently ends up with
 `content: none` (Tailwind v4's Lightning CSS drops it). Symptom: one pseudo-glow
 renders, the mirror doesn't. Fix: write two standalone rules, one per pseudo.
 Verified via `getComputedStyle(el, '::after').content` returning `"none"`. See
-the `.section-header-gradient` two-sided header glow in globals.css.
+git history for the former `.section-header-gradient` two-sided header glow;
+that visual treatment was removed on 2026-08-03, but the compiler behavior is
+still relevant to future pseudo-element styles.
 
 ## Browser-only preferences must not change the first hydrated tree
 

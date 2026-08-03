@@ -188,13 +188,17 @@ export function SectionHeader({
 }) {
   return (
     <div className="relative z-10 flex items-center gap-2.5">
-      <span className="flex size-7 shrink-0 items-center justify-center text-primary">
+      <span className="flex size-7 shrink-0 items-center justify-center text-primary group-data-[expanded=true]/config-section:text-white">
         <Icon className="size-5" aria-hidden="true" />
       </span>
       <div>
-        <CardTitle className="text-sm font-semibold leading-tight">{title}</CardTitle>
+        <CardTitle className="text-sm font-semibold leading-tight group-data-[expanded=true]/config-section:text-white">
+          {title}
+        </CardTitle>
         {description && (
-          <CardDescription className="text-xs leading-tight">{description}</CardDescription>
+          <CardDescription className="text-xs leading-tight group-data-[expanded=true]/config-section:text-white/70">
+            {description}
+          </CardDescription>
         )}
       </div>
     </div>
@@ -604,7 +608,14 @@ export function ConfigForm({
   return (
     <div className="flex h-full min-h-0 overflow-hidden">
       {/* ── Config panel — fixed ~half width, scrolls internally ── */}
-      <ResizablePanel defaultFraction={0.5} defaultWidth={480} min={380} max={1100} resizable={false}>
+      <ResizablePanel
+        defaultFraction={0.5}
+        defaultWidth={480}
+        min={380}
+        max={1100}
+        resizable={false}
+        className="bg-white"
+      >
         <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="pb-10">
 
         {topSlot}

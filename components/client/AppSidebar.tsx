@@ -45,13 +45,27 @@ export interface BotLite {
   inboxCount?: number
 }
 
-export function AppSidebar({ bots, userEmail }: { bots: BotLite[]; userEmail: string }) {
+export function AppSidebar({
+  bots,
+  userEmail,
+  organizationName = 'Client',
+}: {
+  bots: BotLite[]
+  userEmail: string
+  organizationName?: string
+}) {
   const pathname = usePathname()
   const activeBotId = pathname.match(/^\/app\/bots\/([^/]+)/)?.[1] ?? null
   const [botsOpen, setBotsOpen] = useState(true)
+  const companyLabel = organizationName.trim().toUpperCase() || 'CLIENT'
+  const companyCharacters = Array.from(companyLabel)
+  const companyFontSize = Math.max(
+    4,
+    Math.min(9.6, 10.4 - Math.max(0, companyCharacters.length - 8) * 0.32),
+  )
 
   const itemBase =
-    'flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm transition-colors'
+    'flex items-center gap-2.5 px-4 py-2.5 text-sm transition-colors'
   // Top-level active item (Home, Settings, or My Bots when a bot is open) —
   // solid brand-accent pill with contrasting text.
   const solidGreen = 'bg-primary font-medium text-primary-foreground shadow-sm'
@@ -68,9 +82,26 @@ export function AppSidebar({ bots, userEmail }: { bots: BotLite[]; userEmail: st
         href="/app"
         className="flex items-center gap-2 px-4 py-4 text-white"
       >
-        <img src="/loqara-logo-colorful.webp" alt="" aria-hidden="true" className="size-11 shrink-0" />
-        <span className="text-2xl font-bold">
-          Loqara<span className="text-primary">.</span>
+        <img
+          src="/loqara-logo-colorful.webp"
+          alt=""
+          aria-hidden="true"
+          className="size-11 shrink-0"
+        />
+        <span className="inline-flex w-20 flex-col">
+          <span className="text-2xl font-bold leading-none">Loqara</span>
+          <span
+            className="mt-1 flex w-full items-center justify-between font-light leading-none text-primary"
+            style={{ fontSize: `${companyFontSize}px` }}
+            aria-label={companyLabel}
+            title={organizationName}
+          >
+            {companyCharacters.map((character, index) => (
+              <span key={`${character}-${index}`} aria-hidden="true">
+                {character === ' ' ? '\u00a0' : character}
+              </span>
+            ))}
+          </span>
         </span>
       </Link>
 
@@ -78,12 +109,16 @@ export function AppSidebar({ bots, userEmail }: { bots: BotLite[]; userEmail: st
         My Panel
       </p>
 
-      <nav className="flex-1 overflow-y-auto px-2 pb-2">
+      <nav className="flex-1 overflow-y-auto pb-2">
         {/* Home */}
         <Link
           href="/app"
           aria-current={pathname === '/app' ? 'page' : undefined}
-          className={cn(itemBase, 'mb-0.5', pathname === '/app' ? solidGreen : idle)}
+          className={cn(
+            itemBase,
+            'mb-0.5',
+            pathname === '/app' ? solidGreen : idle,
+          )}
         >
           <HomeIcon className="size-4 flex-shrink-0" aria-hidden="true" />
           <span className="flex-1">Home</span>
@@ -93,7 +128,11 @@ export function AppSidebar({ bots, userEmail }: { bots: BotLite[]; userEmail: st
         <Link
           href="/app/analytics"
           aria-current={pathname === '/app/analytics' ? 'page' : undefined}
-          className={cn(itemBase, 'mb-0.5', pathname === '/app/analytics' ? solidGreen : idle)}
+          className={cn(
+            itemBase,
+            'mb-0.5',
+            pathname === '/app/analytics' ? solidGreen : idle,
+          )}
         >
           <BarChart3Icon className="size-4 flex-shrink-0" aria-hidden="true" />
           <span className="flex-1">Analytics</span>
@@ -107,7 +146,14 @@ export function AppSidebar({ bots, userEmail }: { bots: BotLite[]; userEmail: st
           className={cn(itemBase, 'w-full', activeBotId ? solidGreen : idle)}
         >
           <BotIcon className="size-4 flex-shrink-0" aria-hidden="true" />
-          <span className={cn('flex-1 text-left font-medium', !activeBotId && 'text-white')}>My Bots</span>
+          <span
+            className={cn(
+              'flex-1 text-left font-medium',
+              !activeBotId && 'text-white',
+            )}
+          >
+            My Bots
+          </span>
           {botsOpen ? (
             <ChevronDownIcon className="size-4" aria-hidden="true" />
           ) : (
@@ -116,9 +162,11 @@ export function AppSidebar({ bots, userEmail }: { bots: BotLite[]; userEmail: st
         </button>
 
         {botsOpen && (
-          <div className="mt-0.5 ml-3 space-y-0.5">
+          <div className="mt-0.5 ml-3 flex flex-col gap-0.5">
             {bots.length === 0 && (
-              <p className="px-3 py-1.5 text-xs text-muted-foreground">No bots yet</p>
+              <p className="px-3 py-1.5 text-xs text-muted-foreground">
+                No bots yet
+              </p>
             )}
             {bots.map((bot) => {
               const active = bot.id === activeBotId
@@ -131,7 +179,9 @@ export function AppSidebar({ bots, userEmail }: { bots: BotLite[]; userEmail: st
                     <span
                       className={cn(
                         'size-1.5 flex-shrink-0 rounded-full',
-                        bot.status === 'active' ? 'bg-primary' : 'bg-muted-foreground/40',
+                        bot.status === 'active'
+                          ? 'bg-primary'
+                          : 'bg-muted-foreground/40',
                       )}
                       aria-hidden="true"
                     />
@@ -148,10 +198,11 @@ export function AppSidebar({ bots, userEmail }: { bots: BotLite[]; userEmail: st
 
                   {/* Selected bot expands to its sections */}
                   {active && (
-                    <div className="mt-0.5 mb-1 ml-4 space-y-0.5 border-l border-sidebar-border pl-2">
+                    <div className="mt-0.5 mb-1 ml-4 flex flex-col gap-0.5 border-l border-sidebar-border pl-2">
                       {SECTIONS.map((s) => {
                         const href = `/app/bots/${bot.id}/${s.href}`
-                        const isActive = pathname === href || pathname.startsWith(`${href}/`)
+                        const isActive =
+                          pathname === href || pathname.startsWith(`${href}/`)
                         const Icon = s.icon
                         return (
                           <Link
@@ -164,7 +215,10 @@ export function AppSidebar({ bots, userEmail }: { bots: BotLite[]; userEmail: st
                               isActive ? textOnly : idle,
                             )}
                           >
-                            <Icon className="size-4 flex-shrink-0" aria-hidden="true" />
+                            <Icon
+                              className="size-4 flex-shrink-0"
+                              aria-hidden="true"
+                            />
                             <span className="flex-1">{s.label}</span>
                             {s.href === 'inbox' && bot.inboxCount ? (
                               <span className="inline-flex min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold leading-4 text-primary-foreground">
@@ -186,7 +240,11 @@ export function AppSidebar({ bots, userEmail }: { bots: BotLite[]; userEmail: st
         <Link
           href="/app/team"
           aria-current={pathname === '/app/team' ? 'page' : undefined}
-          className={cn(itemBase, 'mt-1', pathname === '/app/team' ? solidGreen : idle)}
+          className={cn(
+            itemBase,
+            'mt-1',
+            pathname === '/app/team' ? solidGreen : idle,
+          )}
         >
           <UsersIcon className="size-4 flex-shrink-0" aria-hidden="true" />
           Team
@@ -220,7 +278,10 @@ export function AppSidebar({ bots, userEmail }: { bots: BotLite[]; userEmail: st
       {/* Footer — report a bug + user + sign out, as a solid dark card */}
       <div className="m-3 rounded-xl bg-[#1b1d1f] p-3 ring-1 ring-white/10">
         <ReportBugButton />
-        <p className="truncate px-1 pb-1.5 text-xs text-white/55" title={userEmail}>
+        <p
+          className="truncate px-1 pb-1.5 text-xs text-white/55"
+          title={userEmail}
+        >
           {userEmail}
         </p>
         <SignOutButton />

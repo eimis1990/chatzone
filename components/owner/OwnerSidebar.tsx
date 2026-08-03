@@ -77,7 +77,7 @@ export function OwnerSidebar({
 }) {
   const pathname = usePathname()
 
-  const itemBase = 'flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm transition-colors'
+  const itemBase = 'flex items-center gap-2.5 px-4 py-2 text-sm transition-colors'
   const solidGreen = 'bg-primary font-medium text-primary-foreground shadow-sm'
   const idle = 'text-sidebar-foreground/70 hover:bg-white/10 hover:text-white'
   // Active sub-item — accent text, no pill (matches the client app's sections).
@@ -91,14 +91,24 @@ export function OwnerSidebar({
       {/* Logo */}
       <Link href="/owner" className="flex items-center gap-2 px-4 py-4 text-white">
         <img src="/loqara-logo-colorful.webp" alt="" aria-hidden="true" className="size-11 shrink-0" />
-        <span className="text-2xl font-bold">
-          Loqara<span className="font-[family-name:var(--font-lora)] text-[1.6rem] font-medium italic text-primary">.owner</span>
+        <span className="inline-flex w-fit flex-col">
+          <span className="text-2xl font-bold leading-none">Loqara</span>
+          <span
+            className="mt-1 flex w-full justify-between text-[0.6rem] font-light leading-none text-primary"
+            aria-label="OWNER"
+          >
+            {[...'OWNER'].map((character, index) => (
+              <span key={`${character}-${index}`} aria-hidden="true">
+                {character}
+              </span>
+            ))}
+          </span>
         </span>
       </Link>
 
       <p className="px-4 pb-1 text-xs font-medium tracking-wide text-white/45">Operator panel</p>
 
-      <nav className="flex-1 overflow-y-auto px-2 pb-2">
+      <nav className="flex-1 overflow-y-auto pb-2">
         {NAV.map(({ label, href, icon: Icon, exact, children }) => {
           // A section is active on its own route OR any child's (children can
           // live outside the parent's path, e.g. Versioning → Components).

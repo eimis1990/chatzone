@@ -5,7 +5,8 @@ import { BillingPanel } from '@/components/client/BillingPanel'
 import { isStripeConfigured, getStripe, checkoutTaxParams } from '@/lib/stripe/client'
 import { getPriceId, getVoicePriceId, getVisualizerPriceId, getSetupPriceId, PLANS, DISPLAY_PLANS, VOICE_ADDON, VISUALIZER_ADDON } from '@/lib/stripe/plans'
 import { SETUP_PACKAGES } from '@/lib/setup-packages'
-import { ensureStripeCustomer } from '@/lib/stripe/customer'
+import { ensureStripeCustomer, resetMissingStripeCustomer } from '@/lib/stripe/customer'
+import { isMissingStripeCustomerError } from '@/lib/stripe/errors'
 import {
   changeBasePlan,
   setVoiceAddon,
@@ -281,6 +282,10 @@ export default async function SubscriptionPage({
       })
       return { url: session.url }
     } catch (err) {
+      if (isMissingStripeCustomerError(err)) {
+        await resetMissingStripeCustomer(oid, data.stripe_customer_id)
+        return { error: 'Billing account was disconnected. Choose a plan to reconnect it.' }
+      }
       return { error: err instanceof Error ? err.message : 'Could not open billing portal.' }
     }
   }

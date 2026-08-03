@@ -258,22 +258,24 @@ export function KnowledgeManager({ botId, initialSources }: KnowledgeManagerProp
           </button>
         </div>
 
-        <div className="min-h-0 flex-1 overflow-y-auto p-5">
-          <Tabs defaultValue={defaultTab}>
-            {/* HeroUI-style segmented control: muted track, white active pill w/ soft shadow. */}
-            <TabsList className="mb-5 w-full rounded-xl bg-muted p-1 group-data-horizontal/tabs:h-11">
-              {tabs.map(({ value, label, icon: Icon }) => (
-                <TabsTrigger
-                  key={value}
-                  value={value}
-                  className="gap-1.5 rounded-lg data-active:bg-background data-active:font-semibold data-active:text-foreground data-active:shadow-sm"
-                >
-                  <Icon className="size-4" aria-hidden="true" />
-                  {label}
-                </TabsTrigger>
-              ))}
-            </TabsList>
+        <Tabs defaultValue={defaultTab} className="min-h-0 flex-1 gap-0">
+          <TabsList
+            variant="line"
+            className="grid w-full shrink-0 grid-cols-4 gap-0 border-b bg-background p-0 group-data-horizontal/tabs:h-14"
+          >
+            {tabs.map(({ value, label, icon: Icon }) => (
+              <TabsTrigger
+                key={value}
+                value={value}
+                className="h-full rounded-none border-0 px-2 after:bg-primary group-data-horizontal/tabs:after:bottom-0 group-data-horizontal/tabs:after:h-1 data-active:bg-transparent data-active:font-semibold data-active:text-foreground"
+              >
+                <Icon className="size-4" aria-hidden="true" />
+                {label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
 
+          <div className="min-h-0 flex-1 overflow-y-auto p-5">
             <TabsContent value="url">
               <UrlSource botId={botId} onSourceAdded={handleSourceAdded} />
             </TabsContent>
@@ -286,8 +288,8 @@ export function KnowledgeManager({ botId, initialSources }: KnowledgeManagerProp
             <TabsContent value="file">
               <FileUpload botId={botId} onSourceAdded={handleSourceAdded} />
             </TabsContent>
-          </Tabs>
-        </div>
+          </div>
+        </Tabs>
       </aside>
 
       {resolving && (

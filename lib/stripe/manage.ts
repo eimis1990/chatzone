@@ -1,10 +1,42 @@
 import 'server-only'
+import type Stripe from 'stripe'
 import { requireStripe, getStripe } from './client'
+import { resetMissingStripeCustomer } from './customer'
+import { isMissingStripeCustomerError } from './errors'
 import { getVoicePriceId, getVisualizerPriceId, planFromPriceId } from './plans'
 import { syncSubscriptionToOrg } from './sync'
 import { createServiceClient } from '@/lib/supabase/service'
 
 const PAYING_STATUSES = ['active', 'trialing', 'past_due']
+
+async function subscriptionsForOrg(
+  orgId: string,
+  limit: number,
+): Promise<Stripe.Subscription[]> {
+  const stripe = getStripe()
+  if (!stripe) return []
+  const svc = createServiceClient()
+  const { data } = await svc
+    .from('organizations')
+    .select('stripe_customer_id')
+    .eq('id', orgId)
+    .single<{ stripe_customer_id: string | null }>()
+  const customerId = data?.stripe_customer_id
+  if (!customerId) return []
+
+  try {
+    const subscriptions = await stripe.subscriptions.list({
+      customer: customerId,
+      status: 'all',
+      limit,
+    })
+    return subscriptions.data
+  } catch (error) {
+    if (!isMissingStripeCustomerError(error)) throw error
+    await resetMissingStripeCustomer(orgId, customerId)
+    return []
+  }
+}
 
 /**
  * The org's current live Stripe subscription id, read straight from Stripe (the
@@ -13,21 +45,10 @@ const PAYING_STATUSES = ['active', 'trialing', 'past_due']
  * never create a duplicate subscription.
  */
 export async function activeSubscriptionId(orgId: string): Promise<string | null> {
-  const stripe = getStripe()
-  if (!stripe) return null
-  const svc = createServiceClient()
-  const { data } = await svc
-    .from('organizations')
-    .select('stripe_customer_id')
-    .eq('id', orgId)
-    .single<{ stripe_customer_id: string | null }>()
-  if (!data?.stripe_customer_id) return null
-  const subs = await stripe.subscriptions.list({
-    customer: data.stripe_customer_id,
-    status: 'all',
-    limit: 10,
-  })
-  const active = subs.data.find((s) => PAYING_STATUSES.includes(s.status))
+  const subscriptions = await subscriptionsForOrg(orgId, 10)
+  const active = subscriptions.find((subscription) =>
+    PAYING_STATUSES.includes(subscription.status),
+  )
   return active?.id ?? null
 }
 
@@ -37,22 +58,10 @@ export async function activeSubscriptionId(orgId: string): Promise<string | null
  * webhook (the webhook still handles renewals / out-of-band changes). Idempotent.
  */
 export async function reconcileOrgFromStripe(orgId: string): Promise<void> {
-  const stripe = getStripe()
-  if (!stripe) return
-  const svc = createServiceClient()
-  const { data } = await svc
-    .from('organizations')
-    .select('stripe_customer_id')
-    .eq('id', orgId)
-    .single<{ stripe_customer_id: string | null }>()
-  if (!data?.stripe_customer_id) return
-
-  const subs = await stripe.subscriptions.list({
-    customer: data.stripe_customer_id,
-    status: 'all',
-    limit: 5,
-  })
-  const sub = subs.data.find((s) => PAYING_STATUSES.includes(s.status)) ?? subs.data[0]
+  const subscriptions = await subscriptionsForOrg(orgId, 5)
+  const sub =
+    subscriptions.find((subscription) => PAYING_STATUSES.includes(subscription.status)) ??
+    subscriptions[0]
   if (sub) await syncSubscriptionToOrg(sub)
 }
 

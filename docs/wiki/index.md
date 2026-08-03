@@ -34,6 +34,8 @@ Add a line here. How the wiki works: [README.md](README.md).
   invisible-in-preview gotcha.
 - [access-model](access-model.md) — owner/client roles, invites, owner
   done-for-you, RLS/security invariants.
+- [client-portal](client-portal.md) — client shell/sidebar branding and the
+  organization-wide analytics rollup versus per-bot deep dives.
 - [blog-and-seo](blog-and-seo.md) — markdown blog, FAQ schema, AEO conventions,
   image pipeline.
 - [seo-geo-playbook](seo-geo-playbook.md) — mandatory intent, evidence,
