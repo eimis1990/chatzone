@@ -43,4 +43,13 @@ plan (falls back to `free`). Fields: `maxBots`, `maxLanguages`, `leadCapture`,
   (`lib/stripe/errors.ts:1-17`, `lib/stripe/customer.ts:7-76`,
   `lib/stripe/manage.ts:10-75`). Other Stripe failures still propagate.
 
+## Subscription add-on cards
+
+- The client subscription page uses one shared card anatomy for active,
+  available, and coming-soon add-ons: status/header, price and three benefit
+  rows, then a pinned footer with a 44px action and persistent availability
+  note. Keeping all action controls in `CardFooter` prevents copy length from
+  shifting buttons between cards (`components/client/BillingPanel.tsx:88-184`,
+  `:497-681`).
+
 _Last verified: 2026-08-03 (89ac480)._

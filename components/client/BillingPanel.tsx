@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, type ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import {
@@ -10,9 +10,23 @@ import {
   PhoneCallIcon,
   MessageSquareIcon,
   ArrowUpRightIcon,
+  Clock3Icon,
+  MinusIcon,
+  PlusIcon,
   SofaIcon,
+  type LucideIcon,
 } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import {
   Dialog,
   DialogContent,
@@ -21,6 +35,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog'
+import { cn } from '@/lib/utils'
 import type { Plan, BillingInterval, SubscriptionStatus } from '@/lib/types'
 
 export interface BillingPlanOption {
@@ -84,6 +99,102 @@ const STATUS_LABEL: Record<SubscriptionStatus, string> = {
 }
 
 const ORDER: Plan[] = ['free', 'starter', 'growth', 'scale', 'enterprise']
+
+type AddOnStatus = 'active' | 'available' | 'coming'
+
+function AddOnCard({
+  icon: Icon,
+  title,
+  description,
+  price,
+  priceSuffix,
+  priceNote,
+  features,
+  status,
+  action,
+  helper,
+}: {
+  icon: LucideIcon
+  title: string
+  description: string
+  price: string
+  priceSuffix: string
+  priceNote?: string
+  features: readonly string[]
+  status: AddOnStatus
+  action: ReactNode
+  helper: string
+}) {
+  const coming = status === 'coming'
+  const active = status === 'active'
+
+  return (
+    <Card
+      className={cn(
+        'relative h-full shadow-sm [--card-spacing:--spacing(5)]',
+        coming && 'bg-muted/20 shadow-none',
+      )}
+    >
+      <span
+        className={cn(
+          'absolute inset-x-0 top-0 h-1 bg-primary',
+          coming && 'bg-muted-foreground/20',
+        )}
+        aria-hidden="true"
+      />
+      <CardHeader>
+        <CardTitle className="flex items-center gap-3">
+          <span
+            className={cn(
+              'flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary',
+              coming && 'bg-muted text-muted-foreground',
+            )}
+          >
+            <Icon className="size-5" aria-hidden="true" />
+          </span>
+          <h3>{title}</h3>
+        </CardTitle>
+        <CardDescription className="pt-2 leading-relaxed">{description}</CardDescription>
+        <CardAction>
+          <Badge variant={active ? 'default' : coming ? 'secondary' : 'outline'}>
+            {active && <CheckIcon data-icon="inline-start" aria-hidden="true" />}
+            {active ? 'Active' : coming ? 'Coming soon' : 'Available'}
+          </Badge>
+        </CardAction>
+      </CardHeader>
+
+      <CardContent className="flex flex-1 flex-col gap-5">
+        <div>
+          <p className="flex flex-wrap items-baseline gap-x-1 tabular-nums">
+            <span className="text-3xl font-bold tracking-tight">{price}</span>
+            <span className="text-sm text-muted-foreground">{priceSuffix}</span>
+          </p>
+          {priceNote && <p className="mt-1 text-xs text-muted-foreground">{priceNote}</p>}
+        </div>
+
+        <ul className="flex flex-col gap-2.5 text-sm text-foreground/80">
+          {features.map((feature) => (
+            <li key={feature} className="flex items-start gap-2.5">
+              <CheckIcon
+                className={cn(
+                  'mt-0.5 size-4 shrink-0 text-primary',
+                  coming && 'text-muted-foreground',
+                )}
+                aria-hidden="true"
+              />
+              <span>{feature}</span>
+            </li>
+          ))}
+        </ul>
+      </CardContent>
+
+      <CardFooter className="mt-auto flex-col items-stretch gap-2">
+        {action}
+        <p className="min-h-4 text-center text-xs text-muted-foreground">{helper}</p>
+      </CardFooter>
+    </Card>
+  )
+}
 
 export function BillingPanel({
   billingEnabled,
@@ -393,7 +504,7 @@ export function BillingPanel({
           </div>
 
           {/* Add-ons */}
-          <div className="space-y-4">
+          <div className="flex flex-col gap-4">
             <div>
               <h2 className="text-base font-semibold">Add-ons</h2>
               <p className="text-sm text-muted-foreground">
@@ -403,156 +514,189 @@ export function BillingPanel({
 
             <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
               {/* Voice agent — interactive */}
-              <div className="flex flex-col rounded-2xl border bg-card p-6 shadow-sm">
-                <div className="flex items-center justify-between">
-                  <span className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                    <PhoneCallIcon className="size-5" />
-                  </span>
-                  {voiceActive ? (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
-                      <CheckIcon className="size-3" /> Active
-                    </span>
+              <AddOnCard
+                icon={PhoneCallIcon}
+                title={voice.name}
+                description={voice.blurb}
+                price={`€${voice.monthly}`}
+                priceSuffix="/ month"
+                priceNote="Then €0.20 per additional minute"
+                features={voice.features}
+                status={voiceConfigured ? (voiceActive ? 'active' : 'available') : 'coming'}
+                helper={
+                  voiceConfigured
+                    ? voiceActive
+                      ? 'Active on your current subscription'
+                      : isPaying
+                        ? 'Added instantly and prorated'
+                        : 'Available with any paid plan'
+                    : 'Planned for a future release'
+                }
+                action={
+                  voiceConfigured ? (
+                    voiceActive ? (
+                      <Button
+                        className="h-11 w-full"
+                        size="lg"
+                        variant="outline"
+                        disabled={anyBusy}
+                        aria-busy={busy === 'voice'}
+                        onClick={() => runVoice(false)}
+                      >
+                        {busy === 'voice' ? (
+                          <Loader2Icon
+                            className="animate-spin"
+                            data-icon="inline-start"
+                            aria-hidden="true"
+                          />
+                        ) : (
+                          <MinusIcon data-icon="inline-start" aria-hidden="true" />
+                        )}
+                        Remove add-on
+                      </Button>
+                    ) : (
+                      <Button
+                        className="h-11 w-full"
+                        size="lg"
+                        disabled={anyBusy || !isPaying}
+                        aria-busy={busy === 'voice'}
+                        onClick={() => setConfirmVoice(true)}
+                      >
+                        {busy === 'voice' ? (
+                          <Loader2Icon
+                            className="animate-spin"
+                            data-icon="inline-start"
+                            aria-hidden="true"
+                          />
+                        ) : (
+                          <PlusIcon data-icon="inline-start" aria-hidden="true" />
+                        )}
+                        Add voice agent
+                      </Button>
+                    )
                   ) : (
-                    <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
-                      Add-on
-                    </span>
-                  )}
-                </div>
-                <h3 className="mt-3 font-semibold">{voice.name}</h3>
-                <p className="mt-1 text-lg font-bold">
-                  €{voice.monthly}
-                  <span className="text-sm font-normal text-muted-foreground"> /mo + €0.20/min</span>
-                </p>
-                <p className="mt-1 text-sm text-muted-foreground">{voice.blurb}</p>
-
-                {voiceConfigured ? (
-                  voiceActive ? (
-                    <Button
-                      className="mt-4"
-                      variant="outline"
-                      disabled={anyBusy}
-                      onClick={() => runVoice(false)}
-                    >
-                      {busy === 'voice' && <Loader2Icon className="size-4 animate-spin" />}
-                      Remove
-                    </Button>
-                  ) : (
-                    <Button
-                      className="mt-4"
-                      disabled={anyBusy || !isPaying}
-                      onClick={() => setConfirmVoice(true)}
-                    >
-                      {busy === 'voice' && <Loader2Icon className="size-4 animate-spin" />}
-                      Add voice agent
+                    <Button className="h-11 w-full" size="lg" variant="outline" disabled>
+                      <Clock3Icon data-icon="inline-start" aria-hidden="true" />
+                      Coming soon
                     </Button>
                   )
-                ) : (
-                  <Button className="mt-4" variant="outline" disabled>
-                    Coming soon
-                  </Button>
-                )}
-                {voiceConfigured && !isPaying && !voiceActive && (
-                  <p className="mt-1.5 text-xs text-muted-foreground">Available with any paid plan</p>
-                )}
-              </div>
+                }
+              />
 
               {/* Product visualizer — interactive */}
-              <div className="flex flex-col rounded-2xl border bg-card p-6 shadow-sm">
-                <div className="flex items-center justify-between">
-                  <span className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                    <SofaIcon className="size-5" />
-                  </span>
-                  {visualizerActive ? (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
-                      <CheckIcon className="size-3" /> Active
-                    </span>
+              <AddOnCard
+                icon={SofaIcon}
+                title={visualizer.name}
+                description={visualizer.blurb}
+                price={`€${visualizer.monthly}`}
+                priceSuffix="/ month"
+                features={visualizer.features}
+                status={
+                  visualizerConfigured ? (visualizerActive ? 'active' : 'available') : 'coming'
+                }
+                helper={
+                  visualizerConfigured
+                    ? visualizerActive
+                      ? 'Active on your current subscription'
+                      : isPaying
+                        ? 'Added instantly and prorated'
+                        : 'Available with any paid plan'
+                    : 'Planned for a future release'
+                }
+                action={
+                  visualizerConfigured ? (
+                    visualizerActive ? (
+                      <Button
+                        className="h-11 w-full"
+                        size="lg"
+                        variant="outline"
+                        disabled={anyBusy}
+                        aria-busy={busy === 'visualizer'}
+                        onClick={() => runVisualizer(false)}
+                      >
+                        {busy === 'visualizer' ? (
+                          <Loader2Icon
+                            className="animate-spin"
+                            data-icon="inline-start"
+                            aria-hidden="true"
+                          />
+                        ) : (
+                          <MinusIcon data-icon="inline-start" aria-hidden="true" />
+                        )}
+                        Remove add-on
+                      </Button>
+                    ) : (
+                      <Button
+                        className="h-11 w-full"
+                        size="lg"
+                        disabled={anyBusy || !isPaying}
+                        aria-busy={busy === 'visualizer'}
+                        onClick={() => setConfirmVisualizer(true)}
+                      >
+                        {busy === 'visualizer' ? (
+                          <Loader2Icon
+                            className="animate-spin"
+                            data-icon="inline-start"
+                            aria-hidden="true"
+                          />
+                        ) : (
+                          <PlusIcon data-icon="inline-start" aria-hidden="true" />
+                        )}
+                        Add room visualizer
+                      </Button>
+                    )
                   ) : (
-                    <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
-                      Add-on
-                    </span>
-                  )}
-                </div>
-                <h3 className="mt-3 font-semibold">{visualizer.name}</h3>
-                <p className="mt-1 text-lg font-bold">
-                  €{visualizer.monthly}
-                  <span className="text-sm font-normal text-muted-foreground"> /mo</span>
-                </p>
-                <p className="mt-1 text-sm text-muted-foreground">{visualizer.blurb}</p>
-
-                {visualizerConfigured ? (
-                  visualizerActive ? (
-                    <Button
-                      className="mt-4"
-                      variant="outline"
-                      disabled={anyBusy}
-                      onClick={() => runVisualizer(false)}
-                    >
-                      {busy === 'visualizer' && <Loader2Icon className="size-4 animate-spin" />}
-                      Remove
-                    </Button>
-                  ) : (
-                    <Button
-                      className="mt-4"
-                      disabled={anyBusy || !isPaying}
-                      onClick={() => setConfirmVisualizer(true)}
-                    >
-                      {busy === 'visualizer' && <Loader2Icon className="size-4 animate-spin" />}
-                      Add room visualizer
+                    <Button className="h-11 w-full" size="lg" variant="outline" disabled>
+                      <Clock3Icon data-icon="inline-start" aria-hidden="true" />
+                      Coming soon
                     </Button>
                   )
-                ) : (
-                  <Button className="mt-4" variant="outline" disabled>
-                    Coming soon
-                  </Button>
-                )}
-                {visualizerConfigured && !isPaying && !visualizerActive && (
-                  <p className="mt-1.5 text-xs text-muted-foreground">Available with any paid plan</p>
-                )}
-              </div>
+                }
+              />
 
               {/* Channels — coming soon */}
-              <div className="flex flex-col rounded-2xl border border-dashed bg-card/60 p-6">
-                <div className="flex items-center justify-between">
-                  <span className="flex size-9 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-                    <MessageSquareIcon className="size-5" />
-                  </span>
-                  <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+              <AddOnCard
+                icon={MessageSquareIcon}
+                title="Channels"
+                description="Meet customers in the messaging apps they already use."
+                price="€19"
+                priceSuffix="/ month, per channel"
+                features={[
+                  'WhatsApp, Instagram & Messenger',
+                  'Choose only the channels you need',
+                  'No setup fee',
+                ]}
+                status="coming"
+                helper="Planned for a future release"
+                action={
+                  <Button className="h-11 w-full" size="lg" variant="outline" disabled>
+                    <Clock3Icon data-icon="inline-start" aria-hidden="true" />
                     Coming soon
-                  </span>
-                </div>
-                <h3 className="mt-3 font-semibold">Channels</h3>
-                <p className="mt-1 text-lg font-bold">
-                  €19<span className="text-sm font-normal text-muted-foreground"> /mo each</span>
-                </p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  WhatsApp, Instagram &amp; Messenger — connect any channel with no setup fee.
-                </p>
-                <Button className="mt-4" variant="outline" disabled>
-                  Coming soon
-                </Button>
-              </div>
+                  </Button>
+                }
+              />
 
               {/* Extra conversations — coming soon */}
-              <div className="flex flex-col rounded-2xl border border-dashed bg-card/60 p-6">
-                <div className="flex items-center justify-between">
-                  <span className="flex size-9 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-                    <ArrowUpRightIcon className="size-5" />
-                  </span>
-                  <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+              <AddOnCard
+                icon={ArrowUpRightIcon}
+                title="Extra conversations"
+                description="Handle a busy month without moving to a higher plan."
+                price="~€15"
+                priceSuffix="/ 1,000 conversations"
+                features={[
+                  '1,000-conversation top-up',
+                  'No plan tier change required',
+                  'Use only when volume spikes',
+                ]}
+                status="coming"
+                helper="Planned for a future release"
+                action={
+                  <Button className="h-11 w-full" size="lg" variant="outline" disabled>
+                    <Clock3Icon data-icon="inline-start" aria-hidden="true" />
                     Coming soon
-                  </span>
-                </div>
-                <h3 className="mt-3 font-semibold">Extra conversations</h3>
-                <p className="mt-1 text-lg font-bold">
-                  ~€15<span className="text-sm font-normal text-muted-foreground"> / 1,000</span>
-                </p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Busy month? Top up any plan instead of jumping a tier.
-                </p>
-                <Button className="mt-4" variant="outline" disabled>
-                  Coming soon
-                </Button>
-              </div>
+                  </Button>
+                }
+              />
             </div>
           </div>
 
