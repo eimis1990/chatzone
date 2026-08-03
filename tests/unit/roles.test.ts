@@ -12,6 +12,7 @@ describe('routeDecision', () => {
     expect(routeDecision({ pathname: '/embed/abc123', role: null }).type).toBe('allow')
     expect(routeDecision({ pathname: '/widget.js', role: null }).type).toBe('allow')
     expect(routeDecision({ pathname: '/api/chat', role: null }).type).toBe('allow')
+    expect(routeDecision({ pathname: '/present/share/token', role: null }).type).toBe('allow')
   })
 
   it('redirects unauthenticated users away from protected areas to /login', () => {

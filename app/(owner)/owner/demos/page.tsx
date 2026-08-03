@@ -18,6 +18,7 @@ import { entitlementsFor } from '@/lib/entitlements'
 import { buttonVariants } from '@/components/ui/button'
 import { CreateBotDialog } from '@/components/client/CreateBotDialog'
 import { TransferDemoDialog, type TransferTargetOrg } from '@/components/owner/TransferDemoDialog'
+import { DemoShareDialog } from '@/components/owner/DemoShareDialog'
 import { createDemoBot } from './actions'
 import type { BotConfig, Plan } from '@/lib/types'
 
@@ -59,7 +60,8 @@ export default async function OwnerDemosPage() {
 
   // Transfer targets: every real client org, with the flags the dialog warns
   // about (bot limit, voice add-on) precomputed — Infinity doesn't serialize.
-  const [{ data: clientOrgs }, { data: allBots }, { data: transfers }] = await Promise.all([
+  const now = new Date().toISOString()
+  const [{ data: clientOrgs }, { data: allBots }, { data: transfers }, { data: shares }] = await Promise.all([
     svc
       .from('organizations')
       .select('id, name, plan, voice_addon')
@@ -72,6 +74,12 @@ export default async function OwnerDemosPage() {
       .from('demo_transfers')
       .select('bot_id, name, to_org_id, transferred_at, organizations(name)')
       .order('transferred_at', { ascending: false }),
+    svc
+      .from('demo_presentation_shares')
+      .select('bot_id, expires_at')
+      .is('revoked_at', null)
+      .gt('expires_at', now)
+      .order('expires_at', { ascending: false }),
   ])
   const botCountByOrg = new Map<string, number>()
   for (const b of allBots ?? []) {
@@ -85,6 +93,12 @@ export default async function OwnerDemosPage() {
       (botCountByOrg.get(o.id) ?? 0) >= entitlementsFor((o.plan ?? 'free') as Plan).maxBots,
     voiceAddon: Boolean(o.voice_addon),
   }))
+  const activeShareByBot = new Map<string, string>()
+  for (const share of shares ?? []) {
+    if (!activeShareByBot.has(share.bot_id)) {
+      activeShareByBot.set(share.bot_id, share.expires_at)
+    }
+  }
 
   return (
     <div className="space-y-6 p-6">
@@ -185,7 +199,7 @@ export default async function OwnerDemosPage() {
                   </span>
                 </div>
 
-                <div className="relative z-10 mt-4 flex items-end gap-2">
+                <div className="relative z-10 mt-4 flex flex-wrap items-end gap-2">
                   <Link
                     href={`/owner/demos/${bot.id}/configure`}
                     className={buttonVariants({ variant: 'outline', size: 'lg' })}
@@ -201,6 +215,11 @@ export default async function OwnerDemosPage() {
                     <PresentationIcon data-icon="inline-start" />
                     Present
                   </Link>
+                  <DemoShareDialog
+                    botId={bot.id}
+                    botName={bot.name}
+                    activeExpiresAt={activeShareByBot.get(bot.id)}
+                  />
                   <TransferDemoDialog
                     botId={bot.id}
                     botName={bot.name}

@@ -6,7 +6,28 @@ import { createServiceClient } from '@/lib/supabase/service'
 import { getOrCreateDemoOrg } from '@/lib/demo-org'
 import { defaultBotConfig } from '@/lib/validation/schemas'
 import { entitlementsFor } from '@/lib/entitlements'
+import {
+  demoShareExpiresAt,
+  generateDemoShareToken,
+  hashDemoShareToken,
+} from '@/lib/demo-share-token'
+import { SITE_URL } from '@/lib/site'
 import type { Bot, Plan } from '@/lib/types'
+
+type ShareActionResult =
+  | { ok: true; url: string; expiresAt: string }
+  | { ok: false; error: string }
+
+async function isDemoBot(botId: string): Promise<boolean> {
+  const svc = createServiceClient()
+  const { data } = await svc
+    .from('bots')
+    .select('id, organizations!inner(is_demo)')
+    .eq('id', botId)
+    .eq('organizations.is_demo', true)
+    .maybeSingle<{ id: string }>()
+  return Boolean(data)
+}
 
 /**
  * Create a prospect demo bot in the Loqara Demos org. Returns the id so the
@@ -26,6 +47,65 @@ export async function createDemoBot(name: string): Promise<{ id?: string; error?
     .single<{ id: string }>()
   if (error || !bot) return { error: error?.message ?? 'Failed to create the demo bot.' }
   return { id: bot.id }
+}
+
+/**
+ * Create a fresh 24-hour bearer link. The raw 256-bit token is returned once;
+ * only its SHA-256 digest is persisted. Replacing a link revokes every prior
+ * active link for this bot before the new one is inserted.
+ */
+export async function createDemoPresentationShare(botId: string): Promise<ShareActionResult> {
+  const owner = await requireRole('owner')
+  if (!(await isDemoBot(botId))) {
+    return { ok: false, error: 'Only bots in the Demos org can be shared.' }
+  }
+
+  const svc = createServiceClient()
+  const now = new Date().toISOString()
+  const { error: revokeError } = await svc
+    .from('demo_presentation_shares')
+    .update({ revoked_at: now })
+    .eq('bot_id', botId)
+    .is('revoked_at', null)
+  if (revokeError) return { ok: false, error: 'Could not replace the previous share link.' }
+
+  const token = generateDemoShareToken()
+  const expiresAt = demoShareExpiresAt()
+  const { error } = await svc.from('demo_presentation_shares').insert({
+    bot_id: botId,
+    token_hash: hashDemoShareToken(token),
+    created_by: owner.id,
+    expires_at: expiresAt.toISOString(),
+  })
+  if (error) return { ok: false, error: 'Could not create the share link.' }
+
+  revalidatePath('/owner/demos')
+  return {
+    ok: true,
+    url: `${SITE_URL}/present/share/${token}`,
+    expiresAt: expiresAt.toISOString(),
+  }
+}
+
+/** Revoke every currently valid public presentation link for one demo bot. */
+export async function revokeDemoPresentationShares(
+  botId: string,
+): Promise<{ ok: boolean; error?: string }> {
+  await requireRole('owner')
+  if (!(await isDemoBot(botId))) {
+    return { ok: false, error: 'Only bots in the Demos org can be managed here.' }
+  }
+
+  const svc = createServiceClient()
+  const { error } = await svc
+    .from('demo_presentation_shares')
+    .update({ revoked_at: new Date().toISOString() })
+    .eq('bot_id', botId)
+    .is('revoked_at', null)
+  if (error) return { ok: false, error: 'Could not revoke the share link.' }
+
+  revalidatePath('/owner/demos')
+  return { ok: true }
 }
 
 /**
@@ -82,6 +162,17 @@ export async function transferDemoBot(
       const { error } = await svc.from(table).delete().eq('bot_id', botId)
       if (error) return { success: false, error: `Purging ${table} failed: ${error.message}` }
     }
+  }
+
+  // Defense in depth: the public route also requires current demo membership,
+  // but explicitly revoke stale links as the bot crosses into a client org.
+  const { error: revokeShareError } = await svc
+    .from('demo_presentation_shares')
+    .update({ revoked_at: new Date().toISOString() })
+    .eq('bot_id', botId)
+    .is('revoked_at', null)
+  if (revokeShareError) {
+    console.error('[demos] share-link revocation failed:', revokeShareError.message)
   }
 
   const { error: moveError } = await svc.from('bots').update({ org_id: toOrgId }).eq('id', botId)

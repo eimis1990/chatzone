@@ -39,6 +39,26 @@ A tombstone row (`demo_transfers`, migration `20260803090000`) keeps a
 `/owner/clients/[orgId]/bots/[botId]/configure`. After transfer the bot counts
 in owner stats automatically (it left the `is_demo` org).
 
+## Demo presentation sharing
+
+`Present` remains an owner-authenticated preview at `/present/[botId]`. `Share`
+on a demo card manages a separate public `/present/share/[token]` link:
+
+- `createDemoPresentationShare` generates 32 random bytes, stores only the
+  SHA-256 digest in `demo_presentation_shares`, expires it after exactly 24
+  hours, and revokes any previous active link (`app/(owner)/owner/demos/actions.ts`).
+- The owner can revoke the active link explicitly. Creating a replacement also
+  revokes the prior link; the raw bearer token cannot be recovered after the
+  dialog closes (`components/owner/DemoShareDialog.tsx`).
+- Every public request checks the hash, `revoked_at`, and `expires_at`, then
+  independently joins the bot's **current** organization with
+  `organizations.is_demo = true`. Moving the bot to a client invalidates the
+  link even if link cleanup fails (`app/present/share/[token]/page.tsx`).
+- The share table has RLS enabled and explicitly revokes both browser roles;
+  only `service_role` has table grants. Resolution happens server-side after
+  the token checks; only the presentation's minimal bot fields reach the renderer
+  (`supabase/migrations/20260803152521_demo_presentation_shares.sql`).
+
 ## Earnings / MRR card
 
 `MrrCard` (`components/owner/MrrCard.tsx`) renders current monthly recurring
@@ -57,4 +77,4 @@ chart needs a monthly `mrr_snapshots` table + cron (not built yet). Also, euro
 amounts are code constants, so DB-derived MRR drifts if Stripe prices ever diverge
 from `lib/plans-catalog.ts` (the declared source of truth).
 
-_Last verified: 2026-07-11 (working tree)._
+_Last verified: 2026-08-03 (working tree)._
