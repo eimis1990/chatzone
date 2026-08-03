@@ -983,7 +983,14 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
   const darkBody = !isLightColor(bgColor)
 
   if (checkingVisitorBlock) {
-    return <div className="h-full w-full bg-white" aria-busy="true" aria-label="Loading" />
+    return (
+      <div
+        className="h-full w-full"
+        style={{ backgroundColor: bgColor }}
+        aria-busy="true"
+        aria-label="Loading"
+      />
+    )
   }
 
   if (blockedUntil) {

@@ -111,6 +111,27 @@ describe('widget.js loader', () => {
     expect(iframe!.src).toMatch(/^https:\/\/app\.chatbotzone\.com\/embed\/ACME_KEY/)
   })
 
+  it('paints the lazy iframe with the configured background from its first frame', async () => {
+    const { document } = setupDOM('DARK_BOT', 'bottom-right', {
+      theme: {
+        primaryColor: '#f2762e',
+        launcherColor: '#d95d18',
+        backgroundColor: '#0f2420',
+      },
+    })
+    await flushPromises()
+
+    document.querySelector<HTMLElement>('[data-cbz-launcher]')!.click()
+
+    const iframe = document.querySelector<HTMLIFrameElement>('[data-cbz-iframe]')!
+    const frameUrl = new URL(iframe.src)
+    const container = iframe.parentElement as HTMLElement
+    expect(frameUrl.searchParams.get('c')).toBe('d95d18')
+    expect(frameUrl.searchParams.get('bg')).toBe('0f2420')
+    expect(iframe.style.backgroundColor).toBe('rgb(15, 36, 32)')
+    expect(container.style.backgroundColor).toBe('rgb(15, 36, 32)')
+  })
+
   it('toggles the widget open/closed on repeated clicks', () => {
     vi.useFakeTimers()
     try {

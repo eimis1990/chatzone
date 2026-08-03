@@ -17,9 +17,34 @@ export const metadata: Metadata = {
 
 export default async function EmbedPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ publicKey: string }>
+  searchParams: Promise<{ c?: string | string[]; bg?: string | string[] }>
 }) {
   const { publicKey } = await params
-  return <EmbedShell publicKey={publicKey} />
+  const query = await searchParams
+  const accent = normalizeHexColor(query.c)
+  const background = normalizeHexColor(query.bg)
+
+  return (
+    <EmbedShell
+      publicKey={publicKey}
+      initialLoaderColor={accent}
+      initialBackgroundColor={background}
+    />
+  )
+}
+
+function normalizeHexColor(value: string | string[] | undefined) {
+  const candidate = Array.isArray(value) ? value[0] : value
+  if (
+    !candidate ||
+    !/^#?(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/.test(
+      candidate,
+    )
+  ) {
+    return undefined
+  }
+  return candidate.startsWith('#') ? candidate : `#${candidate}`
 }

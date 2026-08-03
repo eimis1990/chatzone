@@ -490,11 +490,14 @@
 
   // ── Iframe container ──────────────────────────────────────────────────────
   var iframeContainer = document.createElement('div')
+  var initialFrameBackground =
+    (config && config.theme && config.theme.backgroundColor) || '#ffffff'
   css(iframeContainer, {
     width: '100%',
     borderRadius: '16px', // updated from config.theme.cornerRadius once loaded
     boxShadow: '0 8px 40px rgba(0,0,0,0.18)',
     overflow: 'hidden',
+    backgroundColor: initialFrameBackground,
   })
 
   // Responsive sizing: a floating card on desktop, a near-full-screen sheet on
@@ -694,22 +697,29 @@
       iframe.setAttribute('data-cbz-iframe', '')
       iframe.setAttribute('title', 'Chat')
       iframe.setAttribute('allow', 'clipboard-write; microphone; autoplay')
-      // Pass the accent color (if config already loaded) so the embed's loading
-      // indicator is themed from the first frame, before it fetches config itself.
+      // Pass paint-only theme values that widget.js already fetched so the
+      // server-rendered embed loader matches the final widget from frame one.
       var loaderTheme = (config && config.theme) || {}
       var loaderColor = loaderTheme.launcherColor || loaderTheme.primaryColor
+      var loaderBackground = loaderTheme.backgroundColor
+      var loaderParams = []
+      if (loaderColor) loaderParams.push('c=' + encodeURIComponent(loaderColor.replace('#', '')))
+      if (loaderBackground) {
+        loaderParams.push('bg=' + encodeURIComponent(loaderBackground.replace('#', '')))
+      }
       iframe.setAttribute(
         'src',
         appUrl +
           '/embed/' +
           encodeURIComponent(botKey) +
-          (loaderColor ? '?c=' + encodeURIComponent(loaderColor.replace('#', '')) : '')
+          (loaderParams.length ? '?' + loaderParams.join('&') : '')
       )
       css(iframe, {
         width: '100%',
         height: '100%',
         border: 'none',
         display: 'block',
+        backgroundColor: loaderBackground || '#ffffff',
       })
       iframe.addEventListener('load', sendViewport)
       iframeContainer.appendChild(iframe)
@@ -914,6 +924,10 @@
           // Match the chat window's configured corner radius.
           if (c.theme && typeof c.theme.cornerRadius === 'number') {
             iframeContainer.style.borderRadius = c.theme.cornerRadius + 'px'
+          }
+          if (c.theme && c.theme.backgroundColor) {
+            iframeContainer.style.backgroundColor = c.theme.backgroundColor
+            if (iframe) iframe.style.backgroundColor = c.theme.backgroundColor
           }
           renderLauncher()
           scheduleProactiveGreeting()

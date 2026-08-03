@@ -7,9 +7,15 @@ import type { PublicBotConfig } from '@/lib/widget-config'
 
 interface EmbedShellProps {
   publicKey: string
+  initialLoaderColor?: string
+  initialBackgroundColor?: string
 }
 
-export function EmbedShell({ publicKey }: EmbedShellProps) {
+export function EmbedShell({
+  publicKey,
+  initialLoaderColor = '#e2650f',
+  initialBackgroundColor = '#ffffff',
+}: EmbedShellProps) {
   const [config, setConfig] = useState<PublicBotConfig | null>(null)
   const [error, setError] = useState<string | null>(null)
   // The parent (widget.js) knows the real outer viewport; it tells us whether
@@ -18,16 +24,9 @@ export function EmbedShell({ publicKey }: EmbedShellProps) {
   const [parentMobile, setParentMobile] = useState<boolean | undefined>(undefined)
   const transport = useMemo(() => createWidgetTransport(publicKey), [publicKey])
 
-  // The loading indicator shows before config arrives, so it can't read the
-  // theme yet. widget.js passes the accent color as ?c= so the loader is tinted
-  // correctly; the bot's real color takes over once loaded. Read it in an effect
-  // (not during render) so SSR and the first client render agree — no hydration
-  // mismatch — then update to the real color a frame later.
-  const [loaderColor, setLoaderColor] = useState('#e2650f')
-  useEffect(() => {
-    const c = new URLSearchParams(window.location.search).get('c')
-    if (c && /^#?[0-9a-fA-F]{3,8}$/.test(c)) setLoaderColor(c.startsWith('#') ? c : `#${c}`)
-  }, [])
+  // widget.js passes the already-fetched accent/background colors in the embed
+  // URL. The server page validates them and supplies them here, so the very
+  // first HTML paint matches the configured theme (including on hard reloads).
 
   useEffect(() => {
     const onMessage = (e: MessageEvent) => {
@@ -62,7 +61,10 @@ export function EmbedShell({ publicKey }: EmbedShellProps) {
 
   if (error) {
     return (
-      <div className="h-full flex items-center justify-center p-6 text-center text-sm text-gray-500">
+      <div
+        className="h-full flex items-center justify-center p-6 text-center text-sm text-gray-500"
+        style={{ backgroundColor: initialBackgroundColor }}
+      >
         {error}
       </div>
     )
@@ -70,10 +72,13 @@ export function EmbedShell({ publicKey }: EmbedShellProps) {
 
   if (!config) {
     return (
-      <div className="h-full flex items-center justify-center">
+      <div
+        className="h-full flex items-center justify-center"
+        style={{ backgroundColor: initialBackgroundColor }}
+      >
         <div
           className="cbz-grid-loader"
-          style={{ ['--cbz-loader-color' as string]: loaderColor }}
+          style={{ ['--cbz-loader-color' as string]: initialLoaderColor }}
           role="status"
           aria-label="Loading"
         >

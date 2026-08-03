@@ -71,6 +71,18 @@ for the active language rather than randomizing on each form render
   (+ `SnippetCopy.tsx`), rendered by the client's Embed page **and** the owner's
   Embed tab ([access-model](access-model.md)).
 
+## First-paint theme continuity
+
+The host loader already has the public theme before a normal launcher click. It
+passes the accent (`c`) and chat background (`bg`) as paint-only query values on
+the lazy `/embed/[publicKey]` URL and applies the background behind the iframe
+itself (`public/widget.js:693`). The server page validates those values and
+server-renders `EmbedShell`'s loading/error surface with them, so initial opens
+and hard iframe reloads do not flash the app's white root background
+(`app/embed/[publicKey]/page.tsx:24`, `app/embed/[publicKey]/EmbedShell.tsx:62`).
+After config loads, `ChatWindow` also uses the configured chat background while
+the visitor-block check is pending (`components/widget/ChatWindow.tsx:985`).
+
 ## Temporary visitor blocks
 
 The live iframe checks its browser-local visitor id before rendering interactive
@@ -79,4 +91,4 @@ screen; chat responses can trigger the same state through an exposed expiry
 header. Preview transport stays unblocked. See
 [visitor-abuse-protection](visitor-abuse-protection.md).
 
-_Last verified: 2026-07-23 (02fbe04)._
+_Last verified: 2026-08-03._
