@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import {
   LayoutDashboardIcon,
   UsersIcon,
@@ -19,20 +20,31 @@ import {
   MessagesSquareIcon,
   BarChart3Icon,
   TargetIcon,
+  PanelLeftCloseIcon,
+  PanelLeftOpenIcon,
   type LucideIcon,
   PresentationIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { SignOutButton } from '@/components/client/SignOutButton'
 import { ReportBugButton } from '@/components/ReportBugButton'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 
-interface NavItem {
+interface ChildNavItem {
   label: string
   href: string
   icon: LucideIcon
   exact?: boolean
-  /** Sub-items, shown indented (with a vertical line) when the section is active. */
-  children?: { label: string; href: string; icon: LucideIcon; exact?: boolean }[]
+}
+
+interface NavItem extends ChildNavItem {
+  /** Sub-items, shown while their parent section is active. */
+  children?: ChildNavItem[]
 }
 
 const NAV: NavItem[] = [
@@ -68,6 +80,77 @@ const NAV: NavItem[] = [
   { label: 'Bug reports', href: '/owner/bugs', icon: BugIcon },
 ]
 
+const SOLID_ACTIVE = 'bg-primary font-medium text-primary-foreground shadow-sm'
+const SUBMENU_ACTIVE = 'bg-primary/10 font-medium text-primary'
+const IDLE = 'text-sidebar-foreground/70 hover:bg-white/10 hover:text-white'
+
+function OwnerNavLink({
+  href,
+  label,
+  icon: Icon,
+  active,
+  collapsed,
+  showTooltip,
+  className,
+  activeClassName = SOLID_ACTIVE,
+  trailing,
+}: {
+  href: string
+  label: string
+  icon: LucideIcon
+  active: boolean
+  collapsed: boolean
+  showTooltip: boolean
+  className?: string
+  activeClassName?: string
+  trailing?: ReactNode
+}) {
+  const link = (
+    <Link
+      href={href}
+      aria-current={active ? 'page' : undefined}
+      aria-label={collapsed ? label : undefined}
+      className={cn(
+        'relative mx-auto flex shrink-0 items-center overflow-hidden text-sm outline-none transition-[width,height,padding,gap,border-radius,background-color,color] duration-300 ease-in-out motion-reduce:transition-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset',
+        collapsed
+          ? 'size-11 justify-center gap-0 rounded-xl p-0'
+          : 'h-10 w-full gap-2.5 px-4',
+        active ? activeClassName : IDLE,
+        className,
+      )}
+    >
+      <Icon
+        className={cn(
+          'shrink-0 transition-[width,height] duration-300 ease-in-out motion-reduce:transition-none',
+          collapsed ? 'size-5' : 'size-4',
+        )}
+        aria-hidden="true"
+      />
+      <span
+        aria-hidden={collapsed || undefined}
+        className={cn(
+          'min-w-0 flex-1 overflow-hidden whitespace-nowrap transition-[max-width,opacity,transform] duration-200 ease-out motion-reduce:transition-none',
+          collapsed ? 'max-w-0 -translate-x-1 opacity-0' : 'max-w-48 translate-x-0 opacity-100',
+        )}
+      >
+        {label}
+      </span>
+      {trailing}
+    </Link>
+  )
+
+  return (
+    <Tooltip key={showTooltip ? 'tooltip-ready' : 'tooltip-disabled'}>
+      <TooltipTrigger render={link} />
+      {showTooltip && (
+        <TooltipContent side="right" sideOffset={10}>
+          {label}
+        </TooltipContent>
+      )}
+    </Tooltip>
+  )
+}
+
 export function OwnerSidebar({
   userEmail,
   openBugs = 0,
@@ -76,96 +159,218 @@ export function OwnerSidebar({
   openBugs?: number
 }) {
   const pathname = usePathname()
+  const [collapsed, setCollapsed] = useState(false)
+  const [railTooltipsReady, setRailTooltipsReady] = useState(false)
+  const tooltipTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const itemBase = 'flex items-center gap-2.5 px-4 py-2 text-sm transition-colors'
-  const solidGreen = 'bg-primary font-medium text-primary-foreground shadow-sm'
-  const idle = 'text-sidebar-foreground/70 hover:bg-white/10 hover:text-white'
-  // Active sub-item — accent text, no pill (matches the client app's sections).
-  const textOnly = 'font-medium text-primary'
+  useEffect(() => {
+    return () => {
+      if (tooltipTimerRef.current) clearTimeout(tooltipTimerRef.current)
+    }
+  }, [])
+
+  function toggleSidebar() {
+    const nextCollapsed = !collapsed
+    if (tooltipTimerRef.current) clearTimeout(tooltipTimerRef.current)
+    setRailTooltipsReady(false)
+    setCollapsed(nextCollapsed)
+
+    if (nextCollapsed) {
+      const reduceMotion =
+        typeof window.matchMedia === 'function' &&
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      tooltipTimerRef.current = setTimeout(() => {
+        setRailTooltipsReady(true)
+        tooltipTimerRef.current = null
+      }, reduceMotion ? 0 : 350)
+    }
+  }
 
   const isActive = (href: string, exact?: boolean) =>
     exact ? pathname === href : pathname === href || pathname.startsWith(`${href}/`)
 
   return (
-    <aside className="flex h-full w-64 flex-shrink-0 flex-col bg-transparent text-sidebar-foreground">
-      {/* Logo */}
-      <Link href="/owner" className="flex items-center gap-2 px-4 py-4 text-white">
-        <img src="/loqara-logo-colorful.webp" alt="" aria-hidden="true" className="size-11 shrink-0" />
-        <span className="inline-flex w-fit flex-col">
-          <span className="text-2xl font-bold leading-none">Loqara</span>
-          <span
-            className="mt-1 flex w-full justify-between text-[0.6rem] font-light leading-none text-primary"
-            aria-label="OWNER"
+    <TooltipProvider delay={150}>
+      <aside
+        data-testid="owner-sidebar"
+        data-tooltips-ready={railTooltipsReady}
+        aria-label="Owner navigation"
+        className={cn(
+          'flex h-full shrink-0 flex-col overflow-hidden bg-transparent text-sidebar-foreground transition-[width] duration-300 ease-in-out motion-reduce:transition-none',
+          collapsed ? 'w-20' : 'w-64',
+        )}
+      >
+        <div
+          className={cn(
+            'relative shrink-0 transition-[height] duration-300 ease-in-out motion-reduce:transition-none',
+            collapsed ? 'h-32' : 'h-[76px]',
+          )}
+        >
+          <Link
+            href="/owner"
+            aria-label="Loqara owner dashboard"
+            className={cn(
+              'absolute top-4 flex h-11 items-center overflow-hidden text-white outline-none transition-[left,width,gap] duration-300 ease-in-out motion-reduce:transition-none focus-visible:ring-2 focus-visible:ring-primary',
+              collapsed ? 'left-[18px] w-11 justify-center gap-0 rounded-xl' : 'left-4 w-36 gap-2',
+            )}
           >
-            {[...'OWNER'].map((character, index) => (
-              <span key={`${character}-${index}`} aria-hidden="true">
-                {character}
-              </span>
-            ))}
-          </span>
-        </span>
-      </Link>
-
-      <p className="px-4 pb-1 text-xs font-medium tracking-wide text-white/45">Operator panel</p>
-
-      <nav className="flex-1 overflow-y-auto pb-2">
-        {NAV.map(({ label, href, icon: Icon, exact, children }) => {
-          // A section is active on its own route OR any child's (children can
-          // live outside the parent's path, e.g. Versioning → Components).
-          const active =
-            isActive(href, exact) || (children?.some((c) => isActive(c.href, c.exact)) ?? false)
-          return (
-            <div key={href}>
-              <Link
-                href={href}
-                aria-current={active ? 'page' : undefined}
-                className={cn(itemBase, 'mb-0.5', active ? solidGreen : idle)}
-              >
-                <Icon className="size-4 flex-shrink-0" aria-hidden="true" />
-                <span className="flex-1">{label}</span>
-                {href === '/owner/bugs' && openBugs > 0 && (
-                  <span
-                    className="inline-flex min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-[10px] font-semibold leading-5 text-white"
-                    aria-label={`${openBugs} new bug ${openBugs === 1 ? 'report' : 'reports'}`}
-                  >
-                    {openBugs > 99 ? '99+' : openBugs}
-                  </span>
-                )}
-              </Link>
-
-              {/* Sub-items — revealed while the section is active, with a vertical line. */}
-              {children && active && (
-                <div className="mt-0.5 mb-1 ml-4 space-y-0.5 border-l border-sidebar-border pl-2">
-                  {children.map((c) => {
-                    const cActive = isActive(c.href, c.exact)
-                    const CIcon = c.icon
-                    return (
-                      <Link
-                        key={c.label}
-                        href={c.href}
-                        aria-current={cActive ? 'page' : undefined}
-                        className={cn(itemBase, 'py-1.5', cActive ? textOnly : idle)}
-                      >
-                        <CIcon className="size-4 flex-shrink-0" aria-hidden="true" />
-                        <span className="flex-1">{c.label}</span>
-                      </Link>
-                    )
-                  })}
-                </div>
+            <img
+              src="/loqara-logo-colorful.webp"
+              alt=""
+              aria-hidden="true"
+              className="size-11 shrink-0"
+            />
+            <span
+              aria-hidden={collapsed || undefined}
+              className={cn(
+                'inline-flex shrink-0 flex-col overflow-hidden transition-[width,opacity,transform] duration-200 ease-out motion-reduce:transition-none',
+                collapsed
+                  ? 'w-0 -translate-x-1 opacity-0'
+                  : 'w-20 translate-x-0 opacity-100',
               )}
-            </div>
-          )
-        })}
-      </nav>
+            >
+              <span className="text-2xl font-bold leading-none">Loqara</span>
+              <span
+                className="mt-1 flex w-full justify-between text-[0.6rem] font-light leading-none text-primary"
+                aria-label="OWNER"
+              >
+                {[...'OWNER'].map((character, index) => (
+                  <span key={`${character}-${index}`} aria-hidden="true">
+                    {character}
+                  </span>
+                ))}
+              </span>
+            </span>
+          </Link>
 
-      {/* Footer — report a bug + user + sign out */}
-      <div className="m-3 rounded-xl bg-[#1b1d1f] p-3 ring-1 ring-white/10">
-        <ReportBugButton />
-        <p className="truncate px-1 pb-1.5 text-xs text-white/55" title={userEmail}>
-          {userEmail}
+          <Tooltip key={`${collapsed}-${railTooltipsReady}`}>
+            <TooltipTrigger
+              render={
+                <button
+                  type="button"
+                  onClick={toggleSidebar}
+                  aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+                  aria-expanded={!collapsed}
+                  aria-controls="owner-sidebar-navigation"
+                  className={cn(
+                    'absolute flex size-11 items-center justify-center rounded-xl text-white/60 outline-none transition-[top,right,background-color,color] duration-300 ease-in-out motion-reduce:transition-none hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-primary',
+                    collapsed ? 'right-[18px] top-[68px]' : 'right-4 top-4',
+                  )}
+                />
+              }
+            >
+              {collapsed ? (
+                <PanelLeftOpenIcon className="size-5" aria-hidden="true" />
+              ) : (
+                <PanelLeftCloseIcon className="size-5" aria-hidden="true" />
+              )}
+            </TooltipTrigger>
+            {(!collapsed || railTooltipsReady) && (
+              <TooltipContent side="right" sideOffset={10}>
+                {collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+              </TooltipContent>
+            )}
+          </Tooltip>
+        </div>
+
+        <p
+          aria-hidden={collapsed || undefined}
+          className={cn(
+            'overflow-hidden px-4 text-xs font-medium tracking-wide text-white/45 transition-[max-height,opacity,transform,padding] duration-200 ease-out motion-reduce:transition-none',
+            collapsed
+              ? 'max-h-0 -translate-y-1 pb-0 opacity-0'
+              : 'max-h-6 translate-y-0 pb-1 opacity-100',
+          )}
+        >
+          Operator panel
         </p>
-        <SignOutButton />
-      </div>
-    </aside>
+
+        <nav
+          id="owner-sidebar-navigation"
+          className={cn('flex min-h-0 flex-1 flex-col overflow-y-auto pb-2', collapsed && 'gap-1')}
+        >
+          {NAV.map(({ label, href, icon, exact, children }) => {
+            const active =
+              isActive(href, exact) || (children?.some((child) => isActive(child.href, child.exact)) ?? false)
+            const bugBadge = href === '/owner/bugs' && openBugs > 0 ? (
+              <span
+                className={cn(
+                  'inline-flex items-center justify-center rounded-full bg-red-500 font-semibold text-white',
+                  collapsed
+                    ? 'absolute right-0.5 top-0.5 min-w-4 px-1 text-[9px] leading-4 ring-2 ring-[#0d1111]'
+                    : 'min-w-5 px-1.5 text-[10px] leading-5',
+                )}
+                aria-label={`${openBugs} new bug ${openBugs === 1 ? 'report' : 'reports'}`}
+              >
+                {openBugs > 99 ? '99+' : openBugs}
+              </span>
+            ) : null
+
+            return (
+              <div key={href} className="shrink-0">
+                <OwnerNavLink
+                  href={href}
+                  label={label}
+                  icon={icon}
+                  active={active}
+                  collapsed={collapsed}
+                  showTooltip={collapsed && railTooltipsReady}
+                  className={collapsed ? undefined : 'mb-0.5'}
+                  trailing={bugBadge}
+                />
+
+                {children && active && (
+                  <div
+                    data-testid="owner-active-submenu"
+                    className={cn(
+                      'relative flex flex-col gap-0.5 transition-[margin,padding,border-color] duration-300 ease-in-out motion-reduce:transition-none',
+                      collapsed
+                        ? 'my-1 border-y border-white/10 bg-white/[0.04] py-2'
+                        : 'mt-0.5 mb-1',
+                    )}
+                  >
+                    {!collapsed && (
+                      <span
+                        data-testid="owner-submenu-guide"
+                        aria-hidden="true"
+                        className="pointer-events-none absolute inset-y-0 left-4 z-10 w-px bg-sidebar-border"
+                      />
+                    )}
+                    {children.map((child) => (
+                      <OwnerNavLink
+                        key={child.href}
+                        href={child.href}
+                        label={child.label}
+                        icon={child.icon}
+                        active={isActive(child.href, child.exact)}
+                        collapsed={collapsed}
+                        showTooltip={collapsed && railTooltipsReady}
+                        activeClassName={SUBMENU_ACTIVE}
+                        className={collapsed ? undefined : 'py-1.5 pl-10'}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </nav>
+
+        {collapsed ? (
+          <div className="flex flex-col items-center gap-1 border-t border-white/10 px-3 py-3">
+            <ReportBugButton compact />
+            <SignOutButton compact />
+          </div>
+        ) : (
+          <div className="m-3 rounded-xl bg-[#1b1d1f] p-3 ring-1 ring-white/10">
+            <ReportBugButton />
+            <p className="truncate px-1 pb-1.5 text-xs text-white/55" title={userEmail}>
+              {userEmail}
+            </p>
+            <SignOutButton />
+          </div>
+        )}
+      </aside>
+    </TooltipProvider>
   )
 }

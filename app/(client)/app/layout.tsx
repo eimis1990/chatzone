@@ -63,11 +63,6 @@ export default async function ClientLayout({
   return (
     <>
       <div className="relative isolate flex h-svh flex-col overflow-hidden bg-sidebar-mesh md:flex-row">
-        {/* Decorative grid fading up from the bottom of the dark shell */}
-        <div
-          className="shell-grid pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-[42vh]"
-          aria-hidden="true"
-        />
         <div className="hidden md:flex">
           <AppSidebar
             bots={bots}
@@ -76,7 +71,7 @@ export default async function ClientLayout({
           />
         </div>
         <MobileTopBar />
-        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto bg-background pb-20 md:my-3 md:mr-3 md:rounded-r-2xl md:pb-0 md:shadow-sm">
+        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto bg-background pb-20 md:my-3 md:mr-3 md:rounded-2xl md:pb-0 md:shadow-sm">
           {children}
         </main>
         <MobileTabBar inboxCount={inboxTotal} />

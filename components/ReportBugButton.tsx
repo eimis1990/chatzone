@@ -22,7 +22,7 @@ import {
  * posts to /api/bug-reports, and auto-captures the current page + user agent so
  * the owner has context. Styled to sit in the dark footer card next to Sign out.
  */
-export function ReportBugButton() {
+export function ReportBugButton({ compact = false }: { compact?: boolean }) {
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
   const [title, setTitle] = useState('')
@@ -68,10 +68,14 @@ export function ReportBugButton() {
         variant="ghost"
         size="sm"
         onClick={() => setOpen(true)}
-        className="mb-1 w-full justify-start text-white/80 hover:bg-white/10 hover:text-white"
+        aria-label="Report a bug"
+        title={compact ? 'Report a bug' : undefined}
+        className={compact
+          ? 'size-11 justify-center rounded-xl p-0 text-white/70 hover:bg-white/10 hover:text-white'
+          : 'mb-1 w-full justify-start text-white/80 hover:bg-white/10 hover:text-white'}
       >
         <BugIcon />
-        Report a bug
+        <span className={compact ? 'sr-only' : undefined}>Report a bug</span>
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-lg">

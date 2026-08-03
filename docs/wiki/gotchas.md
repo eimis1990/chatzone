@@ -2,6 +2,15 @@
 
 Sharp edges that have bitten us. Read before debugging something weird.
 
+## Fixed-height rows still shrink inside a flex-column scroller
+
+`overflow-y-auto` does not by itself force a vertical flex container's children
+to retain their height. With enough client sidebar destinations, `h-10`/`size-11`
+rows compressed instead of overflowing: square rail buttons became pills and
+expanded labels overlapped. Navigation rows, bot wrappers, and nested groups
+must use `shrink-0`, and the flexing scroll region needs `min-h-0`
+(`components/client/AppSidebar.tsx:52-107`, `:286-502`).
+
 ## `npm run lint` has ~51 warnings by design
 
 The React Compiler lint rules (`eslint-plugin-react-hooks` v6, shipped by this

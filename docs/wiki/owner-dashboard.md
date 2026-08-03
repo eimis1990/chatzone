@@ -4,6 +4,27 @@ Platform-wide overview for the owner role: `app/(owner)/owner/page.tsx`. It's an
 async server component with direct Supabase queries (no API route/action), gated
 by `requireRole('owner')`.
 
+## Owner shell and sidebar
+
+- The owner content surface meets the sidebar directly while retaining a full
+  corner radius and the outer top, right, and bottom gutter. Expanded active
+  and hover rows therefore reach the content edge without a permanent dark gap;
+  only the rounded corner cutouts expose the shell
+  (`app/(owner)/owner/layout.tsx:24-35`, `components/owner/OwnerSidebar.tsx:90-139`).
+- The sidebar collapses from 256px to an 80px icon rail. It retains 44px square
+  destinations, visible active/focus states, right-side labels, open-bug count,
+  and compact report/sign-out actions. Width, header controls, wordmark, labels,
+  and nested indentation transition together with reduced-motion fallbacks. Rail
+  tooltips are remounted only after the transition settles so moving triggers
+  cannot leave stale popups. When a nested owner section is active, its child
+  destination backgrounds span the full expanded sidebar width, while their
+  icon/label content is indented past an overlaid vertical hierarchy guide. They
+  remain accessible in a dark grouped region when collapsed; the current child
+  uses a 10% accent tint and full-accent icon/text rather than competing with
+  the solid parent (`components/owner/OwnerSidebar.tsx:157-373`).
+- The owner shell deliberately omits the decorative bottom grid used by the
+  client portal (`app/(owner)/owner/layout.tsx:27-33`).
+
 ## Stat sources
 
 The six stat cards and the earnings card load in one `Promise.all`

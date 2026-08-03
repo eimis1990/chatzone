@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import {
   BotIcon,
   HomeIcon,
@@ -19,11 +19,19 @@ import {
   Code2Icon,
   SettingsIcon,
   CreditCardIcon,
+  PanelLeftCloseIcon,
+  PanelLeftOpenIcon,
   type LucideIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { SignOutButton } from '@/components/client/SignOutButton'
 import { ReportBugButton } from '@/components/ReportBugButton'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 
 const SECTIONS: { label: string; href: string; icon: LucideIcon }[] = [
   { label: 'Configure', href: 'configure', icon: SlidersHorizontalIcon },
@@ -36,6 +44,77 @@ const SECTIONS: { label: string; href: string; icon: LucideIcon }[] = [
   { label: 'Demand Radar', href: 'demand-radar', icon: RadarIcon },
   { label: 'Embed', href: 'embed', icon: Code2Icon },
 ]
+
+const SOLID_ACTIVE = 'bg-primary font-medium text-primary-foreground shadow-sm'
+const SUBMENU_ACTIVE = 'font-medium text-primary'
+const IDLE = 'text-sidebar-foreground/70 hover:bg-white/10 hover:text-white'
+
+function SidebarNavLink({
+  href,
+  label,
+  icon: Icon,
+  active,
+  collapsed,
+  showTooltip = false,
+  className,
+  activeClassName = SOLID_ACTIVE,
+  trailing,
+}: {
+  href: string
+  label: string
+  icon: LucideIcon
+  active: boolean
+  collapsed: boolean
+  showTooltip?: boolean
+  className?: string
+  activeClassName?: string
+  trailing?: ReactNode
+}) {
+  const link = (
+    <Link
+      href={href}
+      aria-current={active ? 'page' : undefined}
+      aria-label={collapsed ? label : undefined}
+      className={cn(
+        'relative mx-auto flex shrink-0 items-center overflow-hidden text-sm outline-none transition-[width,height,padding,gap,border-radius,background-color,color] duration-300 ease-in-out motion-reduce:transition-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset',
+        collapsed
+          ? 'size-11 justify-center gap-0 rounded-xl p-0'
+          : 'h-10 w-full gap-2.5 px-4',
+        active ? activeClassName : IDLE,
+        className,
+      )}
+    >
+      <Icon
+        className={cn(
+          'shrink-0 transition-[width,height] duration-300 ease-in-out motion-reduce:transition-none',
+          collapsed ? 'size-5' : 'size-4',
+        )}
+        aria-hidden="true"
+      />
+      <span
+        aria-hidden={collapsed || undefined}
+        className={cn(
+          'min-w-0 flex-1 overflow-hidden whitespace-nowrap transition-[max-width,opacity,transform] duration-200 ease-out motion-reduce:transition-none',
+          collapsed ? 'max-w-0 -translate-x-1 opacity-0' : 'max-w-48 translate-x-0 opacity-100',
+        )}
+      >
+        {label}
+      </span>
+      {trailing}
+    </Link>
+  )
+
+  return (
+    <Tooltip key={showTooltip ? 'tooltip-ready' : 'tooltip-disabled'}>
+      <TooltipTrigger render={link} />
+      {showTooltip && (
+        <TooltipContent side="right" sideOffset={10}>
+          {label}
+        </TooltipContent>
+      )}
+    </Tooltip>
+  )
+}
 
 export interface BotLite {
   id: string
@@ -56,7 +135,11 @@ export function AppSidebar({
 }) {
   const pathname = usePathname()
   const activeBotId = pathname.match(/^\/app\/bots\/([^/]+)/)?.[1] ?? null
+  const activeBot = bots.find((bot) => bot.id === activeBotId) ?? null
   const [botsOpen, setBotsOpen] = useState(true)
+  const [collapsed, setCollapsed] = useState(false)
+  const [railTooltipsReady, setRailTooltipsReady] = useState(false)
+  const tooltipTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const companyLabel = organizationName.trim().toUpperCase() || 'CLIENT'
   const companyCharacters = Array.from(companyLabel)
   const companyFontSize = Math.max(
@@ -64,228 +147,369 @@ export function AppSidebar({
     Math.min(9.6, 10.4 - Math.max(0, companyCharacters.length - 8) * 0.32),
   )
 
-  const itemBase =
-    'flex items-center gap-2.5 px-4 py-2.5 text-sm transition-colors'
-  // Top-level active item (Home, Settings, or My Bots when a bot is open) —
-  // solid brand-accent pill with contrasting text.
-  const solidGreen = 'bg-primary font-medium text-primary-foreground shadow-sm'
-  // The selected bot row — a faint accent tint with accent text.
-  const tintPill = 'bg-primary/10 font-medium text-primary'
-  // The active section (Configure, etc.) — accent text + icon, no background.
-  const textOnly = 'font-medium text-primary'
-  const idle = 'text-sidebar-foreground/70 hover:bg-white/10 hover:text-white'
+  const expandedItem =
+    'flex h-10 w-full shrink-0 items-center gap-2.5 px-4 text-sm outline-none transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset'
+  const selectedBot = 'bg-primary/10 font-medium text-primary'
+  const selectedSection = SUBMENU_ACTIVE
+
+  useEffect(() => {
+    return () => {
+      if (tooltipTimerRef.current) clearTimeout(tooltipTimerRef.current)
+    }
+  }, [])
+
+  function changeCollapsed(nextCollapsed: boolean) {
+    if (tooltipTimerRef.current) clearTimeout(tooltipTimerRef.current)
+    setRailTooltipsReady(false)
+    setCollapsed(nextCollapsed)
+
+    if (nextCollapsed) {
+      const reduceMotion =
+        typeof window.matchMedia === 'function' &&
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      tooltipTimerRef.current = setTimeout(() => {
+        setRailTooltipsReady(true)
+        tooltipTimerRef.current = null
+      }, reduceMotion ? 0 : 350)
+    }
+  }
+
+  function toggleSidebar() {
+    changeCollapsed(!collapsed)
+  }
+
+  function handleBotsToggle() {
+    if (collapsed) {
+      changeCollapsed(false)
+      setBotsOpen(true)
+      return
+    }
+    setBotsOpen((value) => !value)
+  }
 
   return (
-    <aside className="flex h-full w-72 flex-shrink-0 flex-col bg-transparent text-sidebar-foreground">
-      {/* Logo */}
-      <Link
-        href="/app"
-        className="flex items-center gap-2 px-4 py-4 text-white"
+    <TooltipProvider delay={150}>
+      <aside
+        data-testid="client-sidebar"
+        data-tooltips-ready={railTooltipsReady}
+        aria-label="Client navigation"
+        className={cn(
+          'flex h-full shrink-0 flex-col overflow-hidden bg-transparent text-sidebar-foreground transition-[width] duration-300 ease-in-out motion-reduce:transition-none',
+          collapsed ? 'w-20' : 'w-72',
+        )}
       >
-        <img
-          src="/loqara-logo-colorful.webp"
-          alt=""
-          aria-hidden="true"
-          className="size-11 shrink-0"
-        />
-        <span className="inline-flex w-20 flex-col">
-          <span className="text-2xl font-bold leading-none">Loqara</span>
-          <span
-            className="mt-1 flex w-full items-center justify-between font-light leading-none text-primary"
-            style={{ fontSize: `${companyFontSize}px` }}
-            aria-label={companyLabel}
-            title={organizationName}
-          >
-            {companyCharacters.map((character, index) => (
-              <span key={`${character}-${index}`} aria-hidden="true">
-                {character === ' ' ? '\u00a0' : character}
-              </span>
-            ))}
-          </span>
-        </span>
-      </Link>
-
-      <p className="px-4 pb-1 text-xs font-medium tracking-wide text-white/45">
-        My Panel
-      </p>
-
-      <nav className="flex-1 overflow-y-auto pb-2">
-        {/* Home */}
-        <Link
-          href="/app"
-          aria-current={pathname === '/app' ? 'page' : undefined}
+        <div
           className={cn(
-            itemBase,
-            'mb-0.5',
-            pathname === '/app' ? solidGreen : idle,
+            'relative shrink-0 transition-[height] duration-300 ease-in-out motion-reduce:transition-none',
+            collapsed ? 'h-32' : 'h-[76px]',
           )}
         >
-          <HomeIcon className="size-4 flex-shrink-0" aria-hidden="true" />
-          <span className="flex-1">Home</span>
-        </Link>
-
-        {/* Org-wide analytics — every bot side by side */}
-        <Link
-          href="/app/analytics"
-          aria-current={pathname === '/app/analytics' ? 'page' : undefined}
-          className={cn(
-            itemBase,
-            'mb-0.5',
-            pathname === '/app/analytics' ? solidGreen : idle,
-          )}
-        >
-          <BarChart3Icon className="size-4 flex-shrink-0" aria-hidden="true" />
-          <span className="flex-1">Analytics</span>
-        </Link>
-
-        {/* My Bots — collapsible group; turns green while a bot is selected */}
-        <button
-          type="button"
-          onClick={() => setBotsOpen((v) => !v)}
-          aria-expanded={botsOpen}
-          className={cn(itemBase, 'w-full', activeBotId ? solidGreen : idle)}
-        >
-          <BotIcon className="size-4 flex-shrink-0" aria-hidden="true" />
-          <span
+          <Link
+            href="/app"
+            aria-label="Loqara home"
             className={cn(
-              'flex-1 text-left font-medium',
-              !activeBotId && 'text-white',
+              'absolute top-4 flex h-11 items-center overflow-hidden text-white outline-none transition-[left,width,gap] duration-300 ease-in-out motion-reduce:transition-none focus-visible:ring-2 focus-visible:ring-primary',
+              collapsed ? 'left-[18px] w-11 justify-center gap-0 rounded-xl' : 'left-4 w-36 gap-2',
             )}
           >
-            My Bots
-          </span>
-          {botsOpen ? (
-            <ChevronDownIcon className="size-4" aria-hidden="true" />
-          ) : (
-            <ChevronRightIcon className="size-4" aria-hidden="true" />
-          )}
-        </button>
+            <img
+              src="/loqara-logo-colorful.webp"
+              alt=""
+              aria-hidden="true"
+              className="size-11 shrink-0"
+            />
+            <span
+              aria-hidden={collapsed || undefined}
+              className={cn(
+                'inline-flex shrink-0 flex-col overflow-hidden transition-[width,opacity,transform] duration-200 ease-out motion-reduce:transition-none',
+                collapsed
+                  ? 'w-0 -translate-x-1 opacity-0'
+                  : 'w-20 translate-x-0 opacity-100',
+              )}
+            >
+              <span className="text-2xl font-bold leading-none">Loqara</span>
+              <span
+                className="mt-1 flex w-full items-center justify-between font-light leading-none text-primary"
+                style={{ fontSize: `${companyFontSize}px` }}
+                aria-label={companyLabel}
+                title={organizationName}
+              >
+                {companyCharacters.map((character, index) => (
+                  <span key={`${character}-${index}`} aria-hidden="true">
+                    {character === ' ' ? '\u00a0' : character}
+                  </span>
+                ))}
+              </span>
+            </span>
+          </Link>
 
-        {botsOpen && (
-          <div className="mt-0.5 ml-3 flex flex-col gap-0.5">
-            {bots.length === 0 && (
-              <p className="px-3 py-1.5 text-xs text-muted-foreground">
-                No bots yet
-              </p>
+          <Tooltip key={`${collapsed}-${railTooltipsReady}`}>
+            <TooltipTrigger
+              render={
+                <button
+                  type="button"
+                  onClick={toggleSidebar}
+                  aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+                  aria-expanded={!collapsed}
+                  aria-controls="client-sidebar-navigation"
+                  className={cn(
+                    'absolute flex size-11 items-center justify-center rounded-xl text-white/60 outline-none transition-[top,right,background-color,color] duration-300 ease-in-out motion-reduce:transition-none hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-primary',
+                    collapsed ? 'right-[18px] top-[68px]' : 'right-4 top-4',
+                  )}
+                />
+              }
+            >
+              {collapsed ? (
+                <PanelLeftOpenIcon className="size-5" aria-hidden="true" />
+              ) : (
+                <PanelLeftCloseIcon className="size-5" aria-hidden="true" />
+              )}
+            </TooltipTrigger>
+            {(!collapsed || railTooltipsReady) && (
+              <TooltipContent side="right" sideOffset={10}>
+                {collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+              </TooltipContent>
             )}
-            {bots.map((bot) => {
-              const active = bot.id === activeBotId
-              return (
-                <div key={bot.id}>
-                  <Link
-                    href={`/app/bots/${bot.id}/configure`}
-                    className={cn(itemBase, 'pl-3', active ? tintPill : idle)}
-                  >
-                    <span
-                      className={cn(
-                        'size-1.5 flex-shrink-0 rounded-full',
-                        bot.status === 'active'
-                          ? 'bg-primary'
-                          : 'bg-muted-foreground/40',
-                      )}
-                      aria-hidden="true"
-                    />
-                    <span className="flex-1 truncate">{bot.name}</span>
-                    {bot.inboxCount ? (
+          </Tooltip>
+        </div>
+
+        <p
+          aria-hidden={collapsed || undefined}
+          className={cn(
+            'overflow-hidden px-4 text-xs font-medium tracking-wide text-white/45 transition-[max-height,opacity,transform,padding] duration-200 ease-out motion-reduce:transition-none',
+            collapsed
+              ? 'max-h-0 -translate-y-1 pb-0 opacity-0'
+              : 'max-h-6 translate-y-0 pb-1 opacity-100',
+          )}
+        >
+          My Panel
+        </p>
+
+        <nav
+          id="client-sidebar-navigation"
+          className={cn('flex min-h-0 flex-1 flex-col overflow-y-auto pb-2', collapsed && 'gap-1')}
+        >
+          <SidebarNavLink
+            href="/app"
+            label="Home"
+            icon={HomeIcon}
+            active={pathname === '/app'}
+            collapsed={collapsed}
+            showTooltip={collapsed && railTooltipsReady}
+            className={collapsed ? undefined : 'mb-0.5'}
+          />
+          <SidebarNavLink
+            href="/app/analytics"
+            label="Analytics"
+            icon={BarChart3Icon}
+            active={pathname === '/app/analytics'}
+            collapsed={collapsed}
+            showTooltip={collapsed && railTooltipsReady}
+            className={collapsed ? undefined : 'mb-0.5'}
+          />
+
+          <Tooltip key={`${collapsed}-${railTooltipsReady}`}>
+            <TooltipTrigger
+              render={
+                <button
+                  type="button"
+                  onClick={handleBotsToggle}
+                  aria-expanded={collapsed ? undefined : botsOpen}
+                  aria-label={collapsed ? 'My Bots' : undefined}
+                  className={cn(
+                    'relative mx-auto flex shrink-0 items-center overflow-hidden text-sm outline-none transition-[width,height,padding,gap,border-radius,background-color,color] duration-300 ease-in-out motion-reduce:transition-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset',
+                    collapsed
+                      ? 'size-11 justify-center gap-0 rounded-xl p-0'
+                      : 'h-10 w-full gap-2.5 px-4',
+                    activeBotId
+                      ? SOLID_ACTIVE
+                      : IDLE,
+                  )}
+                />
+              }
+            >
+              <BotIcon
+                className={cn(
+                  'shrink-0 transition-[width,height] duration-300 ease-in-out motion-reduce:transition-none',
+                  collapsed ? 'size-5' : 'size-4',
+                )}
+                aria-hidden="true"
+              />
+              <span
+                aria-hidden={collapsed || undefined}
+                className={cn(
+                  'min-w-0 flex-1 overflow-hidden whitespace-nowrap text-left font-medium transition-[max-width,opacity,transform] duration-200 ease-out motion-reduce:transition-none',
+                  collapsed
+                    ? 'max-w-0 -translate-x-1 opacity-0'
+                    : 'max-w-48 translate-x-0 opacity-100',
+                  !activeBotId && !collapsed && 'text-white',
+                )}
+              >
+                My Bots
+              </span>
+              {!collapsed && (botsOpen ? (
+                <ChevronDownIcon className="size-4" aria-hidden="true" />
+              ) : (
+                <ChevronRightIcon className="size-4" aria-hidden="true" />
+              ))}
+              {collapsed && activeBot?.inboxCount ? (
+                <span
+                  className="absolute right-1 top-1 size-2 rounded-full bg-primary ring-2 ring-[#0d1111]"
+                  aria-label={`${activeBot.inboxCount} awaiting a human`}
+                />
+              ) : null}
+            </TooltipTrigger>
+            {collapsed && railTooltipsReady && (
+              <TooltipContent side="right" sideOffset={10}>
+                My Bots
+              </TooltipContent>
+            )}
+          </Tooltip>
+
+          {!collapsed && botsOpen && (
+            <div
+              data-testid="client-bot-list"
+              className="mt-0.5 flex shrink-0 flex-col gap-0.5"
+            >
+              {bots.length === 0 && (
+                <p className="px-3 py-1.5 text-xs text-muted-foreground">
+                  No bots yet
+                </p>
+              )}
+              {bots.map((bot) => {
+                const active = bot.id === activeBotId
+                return (
+                  <div key={bot.id} className="shrink-0">
+                    <Link
+                      href={`/app/bots/${bot.id}/configure`}
+                      className={cn(expandedItem, 'pl-3', active ? selectedBot : IDLE)}
+                    >
                       <span
-                        className="ml-1 inline-flex min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold leading-4 text-primary-foreground"
-                        title={`${bot.inboxCount} awaiting a human`}
+                        className={cn(
+                          'size-1.5 shrink-0 rounded-full',
+                          bot.status === 'active' ? 'bg-primary' : 'bg-muted-foreground/40',
+                        )}
+                        aria-hidden="true"
+                      />
+                      <span className="flex-1 truncate">{bot.name}</span>
+                      {bot.inboxCount ? (
+                        <span
+                          className="ml-1 inline-flex min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold leading-4 text-primary-foreground"
+                          title={`${bot.inboxCount} awaiting a human`}
+                        >
+                          {bot.inboxCount}
+                        </span>
+                      ) : null}
+                    </Link>
+
+                    {active && (
+                      <div className="mt-0.5 mb-1 ml-4 flex flex-col gap-0.5 border-l border-sidebar-border pl-2">
+                        {SECTIONS.map((section) => {
+                          const href = `/app/bots/${bot.id}/${section.href}`
+                          const isActive = pathname === href || pathname.startsWith(`${href}/`)
+                          return (
+                            <SidebarNavLink
+                              key={section.href}
+                              href={href}
+                              label={section.label}
+                              icon={section.icon}
+                              active={isActive}
+                              collapsed={false}
+                              showTooltip={false}
+                              activeClassName={selectedSection}
+                              className="py-1.5"
+                              trailing={section.href === 'inbox' && bot.inboxCount ? (
+                                <span className="inline-flex min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold leading-4 text-primary-foreground">
+                                  {bot.inboxCount}
+                                </span>
+                              ) : null}
+                            />
+                          )
+                        })}
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          )}
+
+          {collapsed && activeBot && (
+            <div
+              data-testid="client-active-submenu"
+              className="my-1 flex shrink-0 flex-col gap-1 border-y border-white/10 bg-white/[0.04] py-2"
+            >
+              {SECTIONS.map((section) => {
+                const href = `/app/bots/${activeBot.id}/${section.href}`
+                const isActive = pathname === href || pathname.startsWith(`${href}/`)
+                return (
+                  <SidebarNavLink
+                    key={section.href}
+                    href={href}
+                    label={section.label}
+                    icon={section.icon}
+                    active={isActive}
+                    collapsed
+                    showTooltip={railTooltipsReady}
+                    activeClassName={selectedSection}
+                    trailing={section.href === 'inbox' && activeBot.inboxCount ? (
+                      <span
+                        className="absolute right-1 top-1 flex min-w-3.5 items-center justify-center rounded-full bg-primary px-1 text-[9px] font-semibold leading-3.5 text-primary-foreground ring-2 ring-[#0d1111]"
+                        aria-label={`${activeBot.inboxCount} awaiting a human`}
                       >
-                        {bot.inboxCount}
+                        {activeBot.inboxCount}
                       </span>
                     ) : null}
-                  </Link>
+                  />
+                )
+              })}
+            </div>
+          )}
 
-                  {/* Selected bot expands to its sections */}
-                  {active && (
-                    <div className="mt-0.5 mb-1 ml-4 flex flex-col gap-0.5 border-l border-sidebar-border pl-2">
-                      {SECTIONS.map((s) => {
-                        const href = `/app/bots/${bot.id}/${s.href}`
-                        const isActive =
-                          pathname === href || pathname.startsWith(`${href}/`)
-                        const Icon = s.icon
-                        return (
-                          <Link
-                            key={s.href}
-                            href={href}
-                            aria-current={isActive ? 'page' : undefined}
-                            className={cn(
-                              itemBase,
-                              'py-1.5',
-                              isActive ? textOnly : idle,
-                            )}
-                          >
-                            <Icon
-                              className="size-4 flex-shrink-0"
-                              aria-hidden="true"
-                            />
-                            <span className="flex-1">{s.label}</span>
-                            {s.href === 'inbox' && bot.inboxCount ? (
-                              <span className="inline-flex min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold leading-4 text-primary-foreground">
-                                {bot.inboxCount}
-                              </span>
-                            ) : null}
-                          </Link>
-                        )
-                      })}
-                    </div>
-                  )}
-                </div>
-              )
-            })}
+          <SidebarNavLink
+            href="/app/team"
+            label="Team"
+            icon={UsersIcon}
+            active={pathname === '/app/team'}
+            collapsed={collapsed}
+            showTooltip={collapsed && railTooltipsReady}
+            className={collapsed ? undefined : 'mt-1'}
+          />
+          <SidebarNavLink
+            href="/app/subscription"
+            label="Subscription"
+            icon={CreditCardIcon}
+            active={pathname === '/app/subscription'}
+            collapsed={collapsed}
+            showTooltip={collapsed && railTooltipsReady}
+            className={collapsed ? undefined : 'mt-0.5'}
+          />
+          <SidebarNavLink
+            href="/app/settings"
+            label="Settings"
+            icon={SettingsIcon}
+            active={pathname === '/app/settings'}
+            collapsed={collapsed}
+            showTooltip={collapsed && railTooltipsReady}
+            className={collapsed ? undefined : 'mt-0.5'}
+          />
+        </nav>
+
+        {collapsed ? (
+          <div className="flex flex-col items-center gap-1 border-t border-white/10 px-3 py-3">
+            <ReportBugButton compact />
+            <SignOutButton compact />
+          </div>
+        ) : (
+          <div className="m-3 rounded-xl bg-[#1b1d1f] p-3 ring-1 ring-white/10">
+            <ReportBugButton />
+            <p className="truncate px-1 pb-1.5 text-xs text-white/55" title={userEmail}>
+              {userEmail}
+            </p>
+            <SignOutButton />
           </div>
         )}
-
-        {/* Org-level: team + subscription + settings */}
-        <Link
-          href="/app/team"
-          aria-current={pathname === '/app/team' ? 'page' : undefined}
-          className={cn(
-            itemBase,
-            'mt-1',
-            pathname === '/app/team' ? solidGreen : idle,
-          )}
-        >
-          <UsersIcon className="size-4 flex-shrink-0" aria-hidden="true" />
-          Team
-        </Link>
-        <Link
-          href="/app/subscription"
-          aria-current={pathname === '/app/subscription' ? 'page' : undefined}
-          className={cn(
-            itemBase,
-            'mt-0.5',
-            pathname === '/app/subscription' ? solidGreen : idle,
-          )}
-        >
-          <CreditCardIcon className="size-4 flex-shrink-0" aria-hidden="true" />
-          Subscription
-        </Link>
-        <Link
-          href="/app/settings"
-          aria-current={pathname === '/app/settings' ? 'page' : undefined}
-          className={cn(
-            itemBase,
-            'mt-0.5',
-            pathname === '/app/settings' ? solidGreen : idle,
-          )}
-        >
-          <SettingsIcon className="size-4 flex-shrink-0" aria-hidden="true" />
-          Settings
-        </Link>
-      </nav>
-
-      {/* Footer — report a bug + user + sign out, as a solid dark card */}
-      <div className="m-3 rounded-xl bg-[#1b1d1f] p-3 ring-1 ring-white/10">
-        <ReportBugButton />
-        <p
-          className="truncate px-1 pb-1.5 text-xs text-white/55"
-          title={userEmail}
-        >
-          {userEmail}
-        </p>
-        <SignOutButton />
-      </div>
-    </aside>
+      </aside>
+    </TooltipProvider>
   )
 }
