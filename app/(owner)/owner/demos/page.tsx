@@ -8,15 +8,18 @@ import {
   ShieldAlertIcon,
   ChevronDownIcon,
   ArrowUpRightIcon,
+  ArrowRightLeftIcon,
 } from 'lucide-react'
 import { requireRole } from '@/lib/auth/guards'
 import { createServiceClient } from '@/lib/supabase/service'
 import { getOrCreateDemoOrg } from '@/lib/demo-org'
 import { readableTextColor } from '@/lib/utils'
+import { entitlementsFor } from '@/lib/entitlements'
 import { buttonVariants } from '@/components/ui/button'
 import { CreateBotDialog } from '@/components/client/CreateBotDialog'
+import { TransferDemoDialog, type TransferTargetOrg } from '@/components/owner/TransferDemoDialog'
 import { createDemoBot } from './actions'
-import type { BotConfig } from '@/lib/types'
+import type { BotConfig, Plan } from '@/lib/types'
 
 function host(url?: string): string | null {
   if (!url) return null
@@ -53,6 +56,35 @@ export default async function OwnerDemosPage() {
       counts.set(b.id, count ?? 0)
     }),
   )
+
+  // Transfer targets: every real client org, with the flags the dialog warns
+  // about (bot limit, voice add-on) precomputed — Infinity doesn't serialize.
+  const [{ data: clientOrgs }, { data: allBots }, { data: transfers }] = await Promise.all([
+    svc
+      .from('organizations')
+      .select('id, name, plan, voice_addon')
+      .eq('is_demo', false)
+      .eq('is_platform', false)
+      .eq('status', 'active')
+      .order('name'),
+    svc.from('bots').select('org_id'),
+    svc
+      .from('demo_transfers')
+      .select('bot_id, name, to_org_id, transferred_at, organizations(name)')
+      .order('transferred_at', { ascending: false }),
+  ])
+  const botCountByOrg = new Map<string, number>()
+  for (const b of allBots ?? []) {
+    botCountByOrg.set(b.org_id, (botCountByOrg.get(b.org_id) ?? 0) + 1)
+  }
+  const transferTargets: TransferTargetOrg[] = (clientOrgs ?? []).map((o) => ({
+    id: o.id,
+    name: o.name,
+    plan: (o.plan ?? 'free') as string,
+    botsFull:
+      (botCountByOrg.get(o.id) ?? 0) >= entitlementsFor((o.plan ?? 'free') as Plan).maxBots,
+    voiceAddon: Boolean(o.voice_addon),
+  }))
 
   return (
     <div className="space-y-6 p-6">
@@ -166,6 +198,12 @@ export default async function OwnerDemosPage() {
                     <PresentationIcon data-icon="inline-start" />
                     Present
                   </Link>
+                  <TransferDemoDialog
+                    botId={bot.id}
+                    botName={bot.name}
+                    usesVoice={Boolean(cfg?.voice?.enabled)}
+                    orgs={transferTargets}
+                  />
                   <span className="ml-auto pb-0.5 text-xs text-muted-foreground">
                     Created {created}
                   </span>
@@ -173,6 +211,43 @@ export default async function OwnerDemosPage() {
               </div>
             )
           })}
+
+        {/* Transferred demos — tombstones linking into the client's org. */}
+        {(transfers ?? []).map((t) => {
+          const when = new Date(t.transferred_at as string).toLocaleDateString('en-GB', {
+            day: 'numeric',
+            month: 'short',
+          })
+          const orgName =
+            (t.organizations as unknown as { name?: string } | null)?.name ?? 'a client'
+          return (
+            <div
+              key={`transfer-${t.bot_id}`}
+              className="relative overflow-hidden rounded-2xl border border-dashed bg-card/50 p-5"
+            >
+              <div className="flex items-start gap-3">
+                <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">
+                  <ArrowRightLeftIcon className="size-5" aria-hidden="true" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate font-semibold text-muted-foreground">{t.name}</p>
+                  <p className="truncate text-xs text-muted-foreground">
+                    Transferred to <span className="font-medium">{orgName}</span> · {when}
+                  </p>
+                </div>
+              </div>
+              <div className="mt-4 flex items-end gap-2">
+                <Link
+                  href={`/owner/clients/${t.to_org_id}/bots/${t.bot_id}/configure`}
+                  className={buttonVariants({ variant: 'outline', size: 'lg' })}
+                >
+                  <ArrowUpRightIcon data-icon="inline-start" />
+                  View bot
+                </Link>
+              </div>
+            </div>
+          )
+        })}
       </div>
 
       {/* Field reference: stores that block our servers (keep — pitch-call material). */}

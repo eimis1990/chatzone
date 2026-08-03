@@ -23,6 +23,22 @@ On 2026-07-11 the Leads card read 5 purely from seeded Aurora demo leads (identi
 timestamps, fake names); they were deleted so real leads count from 0. If demo data
 reappears in totals, that's the cause — not a code bug.
 
+## Demo bot transfers
+
+A demo bot becomes the client's real bot in one action: **Transfer** on the
+Demos card (`TransferDemoDialog` → `transferDemoBot`,
+`app/(owner)/owner/demos/actions.ts`). The bot ROW moves org — every child
+table (product index, knowledge, sync status, synonyms, voice agent) hangs off
+`bot_id`, so the prepared demo follows the `org_id` update and RLS grants the
+client access immediately; the `public_key`/embed snippet keeps working.
+Demo conversations/widget events/leads are purged by default (checkbox to
+keep). Bot-limit enforced like creation (`entitlementsFor(plan).maxBots`);
+the dialog warns when the demo uses voice but the target lacks the add-on.
+A tombstone row (`demo_transfers`, migration `20260803090000`) keeps a
+"Transferred to X" card on the Demos screen with a **View bot** link into
+`/owner/clients/[orgId]/bots/[botId]/configure`. After transfer the bot counts
+in owner stats automatically (it left the `is_demo` org).
+
 ## Earnings / MRR card
 
 `MrrCard` (`components/owner/MrrCard.tsx`) renders current monthly recurring
