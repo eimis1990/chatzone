@@ -81,7 +81,10 @@ server-renders `EmbedShell`'s loading/error surface with them, so initial opens
 and hard iframe reloads do not flash the app's white root background
 (`app/embed/[publicKey]/page.tsx:24`, `app/embed/[publicKey]/EmbedShell.tsx:62`).
 After config loads, `ChatWindow` also uses the configured chat background while
-the visitor-block check is pending (`components/widget/ChatWindow.tsx:985`).
+the visitor-block check is pending (`components/widget/ChatWindow.tsx:985`). The
+restart confirmation sheet uses that same background, with theme-aware copy and
+secondary-button contrast instead of a hard-coded white surface
+(`components/widget/ChatWindow.tsx:1501`).
 
 ## Temporary visitor blocks
 

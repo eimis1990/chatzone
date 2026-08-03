@@ -1502,19 +1502,33 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
               key="restart-sheet"
               role="dialog"
               aria-modal="true"
-              className="absolute inset-x-0 bottom-0 z-30 bg-white px-5 pb-5 pt-5 shadow-[0_-8px_24px_rgba(0,0,0,0.1)]"
-              style={{ borderRadius: `${bubbleRadius + 4}px ${bubbleRadius + 4}px 0 0` }}
+              className="absolute inset-x-0 bottom-0 z-30 px-5 pb-5 pt-5 shadow-[0_-8px_24px_rgba(0,0,0,0.1)]"
+              style={{
+                borderRadius: `${bubbleRadius + 4}px ${bubbleRadius + 4}px 0 0`,
+                backgroundColor: bgColor,
+                borderTop: `1px solid ${darkBody ? 'rgba(255,255,255,0.14)' : 'rgba(17,24,39,0.1)'}`,
+              }}
               initial={{ y: '100%' }}
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: 'spring', stiffness: 360, damping: 34 }}
             >
-              <p className="text-center text-sm text-gray-600">{RESTART_CONFIRM[activeLang].title}</p>
+              <p
+                className="text-center text-sm"
+                style={{ color: darkBody ? 'rgba(255,255,255,0.76)' : '#4b5563' }}
+              >
+                {RESTART_CONFIRM[activeLang].title}
+              </p>
               <div className="mt-4 flex items-center justify-center gap-3">
                 <button
                   type="button"
                   onClick={() => setConfirmRestart(false)}
-                  className="rounded-full border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50"
+                  className="rounded-full border px-4 py-2 text-sm font-semibold transition-[filter] hover:brightness-110"
+                  style={{
+                    borderColor: darkBody ? 'rgba(255,255,255,0.22)' : 'rgba(17,24,39,0.12)',
+                    backgroundColor: darkBody ? 'rgba(255,255,255,0.06)' : 'rgba(17,24,39,0.035)',
+                    color: darkBody ? 'rgba(255,255,255,0.9)' : '#374151',
+                  }}
                 >
                   {RESTART_CONFIRM[activeLang].cancel}
                 </button>
