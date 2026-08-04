@@ -190,4 +190,22 @@ optimized mobile runs measured median Performance 91, LCP 3.46 seconds, 0.41 MB,
 36 requests, 13 image requests, and zero CLS. Homepage remained at Performance 85,
 LCP 4.35 seconds, and 0.93 MB in the post-change smoke audit.
 
-_Last verified: 2026-07-25 (working tree)._
+The 2026-08-04 landing refresh replaced the homepage's full-bleed hero-video
+presentation with a server-rendered, white character/conversation composition.
+`Hero` now owns two optimized Higgsfield WebPs (fox and fictional customer avatar),
+a CSS-only reduced-motion-safe three-message entrance on a plain white stage, and
+the existing dark platform marquee (`components/landing/Hero.tsx:8-130`,
+`app/globals.css:335-383`). `HeroVideo` and the older responsive video derivatives remain in the tree as
+legacy assets but are no longer imported by the public homepage.
+
+The hero is a `100svh` composition rather than a stack of fixed-height blocks:
+its copy remains shrink-wrapped, the conversation stage takes the remaining
+height, and the platform marquee is a fixed bottom sibling. Display type, copy,
+stage spacing, and fox scale respond to `svh`; compact phone heights get a tighter
+override. The fox canvas is offset 8px on mobile / 12px on desktop because the
+opaque character centroid sits left of the transparent image canvas center, so
+the visible character—not the file bounds—lands on the viewport midpoint
+(`components/landing/Hero.tsx:8-92`, `app/globals.css:335-390`). The fox is
+eager-loaded because it is now the hero's above-the-fold LCP image.
+
+_Last verified: 2026-08-04 (working tree)._

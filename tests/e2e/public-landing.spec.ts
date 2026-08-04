@@ -9,6 +9,10 @@ test('critical landing content is visible before hydration', async ({ browser })
   await expect(page.getByRole('heading', { level: 1 })).toContainText('Let your customers')
   await expect(page.getByText('Loqara gives your store a real voice agent')).toBeVisible()
   await expect(page.getByRole('button', { name: 'Get started' }).first()).toBeVisible()
+  await expect(page.getByText('AI voice + chat · always on')).toHaveCount(0)
+  await expect(page.getByText('Easiest chat view customization on the market!')).toHaveCount(0)
+  await expect(page.getByText("Free to start · add voice when you're ready")).toHaveCount(0)
+  await expect(page.locator('img[src*="hero-lines-higgsfield"]')).toHaveCount(0)
   await expect(page.getByRole('heading', { name: 'A widget that fits your brand' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'One agent. Every part of support.' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Live in an afternoon' })).toBeVisible()
@@ -45,7 +49,7 @@ test('native landing anchors and signup hash remain functional', async ({ browse
   await context.close()
 })
 
-test('reduced motion keeps a hydration-safe static hero', async ({ browser }) => {
+test('reduced motion keeps every static hero message visible', async ({ browser }) => {
   const context = await browser.newContext({ reducedMotion: 'reduce' })
   const page = await context.newPage()
   const pageErrors: string[] = []
@@ -59,7 +63,14 @@ test('reduced motion keeps a hydration-safe static hero', async ({ browser }) =>
 
   await page.goto('/')
   await expect(page.locator('video')).toHaveCount(0)
-  await expect(page.locator('img[src="/loqara-hero-poster-desktop.webp"]')).toBeVisible()
+  await expect(
+    page.getByRole('img', { name: "Loqara's fox support agent standing ready to help" }),
+  ).toBeVisible()
+  await expect(page.locator('.hero-message')).toHaveCount(3)
+  await expect(page.locator('.hero-message-one')).toHaveCSS('opacity', '1')
+  await expect(page.locator('.hero-message-two')).toHaveCSS('opacity', '1')
+  await expect(page.locator('.hero-message-three')).toHaveCSS('opacity', '1')
+  await expect(page.locator('.hero-message-one')).toHaveCSS('animation-name', 'none')
   await expect(page.locator('.landing-brand-marquee')).toHaveCSS('animation-name', 'none')
   expect(heroVideoRequests).toEqual([])
   expect(pageErrors).toEqual([])
@@ -67,7 +78,7 @@ test('reduced motion keeps a hydration-safe static hero', async ({ browser }) =>
   await context.close()
 })
 
-test('save-data keeps the hero poster-only', async ({ browser }) => {
+test('save-data keeps the landing hero video-free', async ({ browser }) => {
   const context = await browser.newContext()
   await context.addInitScript(() => {
     Object.defineProperty(navigator, 'connection', {
@@ -90,7 +101,9 @@ test('save-data keeps the hero poster-only', async ({ browser }) => {
 
   await page.goto('/')
   await expect(page.locator('video')).toHaveCount(0)
-  await expect(page.locator('img[src="/loqara-hero-poster-desktop.webp"]')).toBeVisible()
+  await expect(
+    page.getByRole('img', { name: "Loqara's fox support agent standing ready to help" }),
+  ).toBeVisible()
   expect(heroVideoRequests).toEqual([])
 
   await context.close()
@@ -123,43 +136,39 @@ test('landing widget defers network and opens on the first proxy click', async (
   expect(widgetRequests.some((url) => url.includes('/embed/'))).toBe(true)
 })
 
-test('mobile hero downloads the intro before assigning the loop', async ({ browser }) => {
+test('mobile hero stays video-free and reveals the full conversation', async ({ browser }) => {
   const context = await browser.newContext({ viewport: { width: 390, height: 844 } })
   const page = await context.newPage()
   const requestedVideos: string[] = []
   const pageErrors: string[] = []
-  let activeVideoRequests = 0
-  let maxActiveVideoRequests = 0
-
   page.on('pageerror', (error) => pageErrors.push(error.message))
 
   page.on('request', (request) => {
     if (request.url().includes('loqara-hero-') && request.url().endsWith('.mp4')) {
       requestedVideos.push(new URL(request.url()).pathname)
-      activeVideoRequests += 1
-      maxActiveVideoRequests = Math.max(maxActiveVideoRequests, activeVideoRequests)
     }
   })
-  const finishVideoRequest = (request: { url(): string }) => {
-    if (request.url().includes('loqara-hero-') && request.url().endsWith('.mp4')) {
-      activeVideoRequests -= 1
-    }
-  }
-  page.on('requestfinished', finishVideoRequest)
-  page.on('requestfailed', finishVideoRequest)
 
   await page.goto('/')
-  await expect(page.locator('video[src="/loqara-hero-intro-mobile.mp4"]')).toHaveCount(1)
-  expect(requestedVideos).toEqual(['/loqara-hero-intro-mobile.mp4'])
-
-  await expect(page.locator('video[src="/loqara-hero-loop-mobile.mp4"]')).toHaveCount(1, {
-    timeout: 10_000,
-  })
-  expect(requestedVideos).toEqual([
-    '/loqara-hero-intro-mobile.mp4',
-    '/loqara-hero-loop-mobile.mp4',
-  ])
-  expect(maxActiveVideoRequests).toBeLessThanOrEqual(1)
+  await expect(page.locator('video')).toHaveCount(0)
+  await expect(
+    page.getByRole('img', { name: "Loqara's fox support agent standing ready to help" }),
+  ).toBeVisible()
+  await expect(page.locator('.hero-message-one')).toHaveCSS('opacity', '1')
+  await expect(page.locator('.hero-message-two')).toHaveCSS('opacity', '1')
+  await expect(page.locator('.hero-message-three')).toHaveCSS('opacity', '1')
+  const heroBox = await page.locator('.landing-hero').boundingBox()
+  const foxBox = await page.locator('.landing-hero-fox').boundingBox()
+  const marqueeBox = await page.getByTestId('hero-platform-marquee').boundingBox()
+  expect((heroBox?.y ?? 0) + (heroBox?.height ?? 0)).toBeCloseTo(844, 0)
+  expect((marqueeBox?.y ?? 0) + (marqueeBox?.height ?? 0)).toBeCloseTo(844, 0)
+  expect(Math.abs((foxBox?.x ?? 0) + (foxBox?.width ?? 0) / 2 - 195)).toBeLessThanOrEqual(12)
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth === document.documentElement.clientWidth,
+    ),
+  ).toBe(true)
+  expect(requestedVideos).toEqual([])
 
   await page.goto('/blog')
   await expect(page.locator('video')).toHaveCount(0)

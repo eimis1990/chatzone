@@ -104,7 +104,7 @@ export default async function Home() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <LandingNav />
+      <LandingNav solid />
       <main>
         <Hero />
         <Showcase />
