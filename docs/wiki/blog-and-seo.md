@@ -191,12 +191,16 @@ optimized mobile runs measured median Performance 91, LCP 3.46 seconds, 0.41 MB,
 LCP 4.35 seconds, and 0.93 MB in the post-change smoke audit.
 
 The 2026-08-04 landing refresh replaced the homepage's full-bleed hero-video
-presentation with a server-rendered, white character/conversation composition.
-`Hero` now owns two optimized Higgsfield WebPs (fox and fictional customer avatar),
-a CSS-only reduced-motion-safe three-message entrance on a plain white stage, and
-the existing dark platform marquee (`components/landing/Hero.tsx:8-130`,
-`app/globals.css:335-383`). `HeroVideo` and the older responsive video derivatives remain in the tree as
-legacy assets but are no longer imported by the public homepage.
+presentation with a white character/conversation composition. `Hero` owns two
+optimized Higgsfield WebPs (fox and fictional customer avatar), a CSS-only
+reduced-motion-safe three-message entrance on a plain white stage, and the
+existing dark platform marquee (`components/landing/Hero.tsx`,
+`app/globals.css`). `HeroFoxMedia` progressively covers the SSR/LCP fox still
+with a 611 KB, silent, eight-second Seedance idle loop after hydration. The fox
+stays planted while blinking, looking aside, and returning to the supplied
+neutral pose. Reduced-motion, Save-Data, 2G, failed-playback, and pre-hydration
+states keep the still image (`components/landing/HeroFoxMedia.tsx`). The older
+full-stage `HeroVideo` and its responsive derivatives remain unused legacy code.
 
 The hero is a `100svh` composition rather than a stack of fixed-height blocks:
 its copy remains shrink-wrapped, the conversation stage takes the remaining
@@ -205,7 +209,27 @@ stage spacing, and fox scale respond to `svh`; compact phone heights get a tight
 override. The fox canvas is offset 8px on mobile / 12px on desktop because the
 opaque character centroid sits left of the transparent image canvas center, so
 the visible character—not the file bounds—lands on the viewport midpoint
-(`components/landing/Hero.tsx:8-92`, `app/globals.css:335-390`). The fox is
-eager-loaded because it is now the hero's above-the-fold LCP image.
+(`components/landing/Hero.tsx`, `app/globals.css`). The fox still is eagerly
+loaded because it remains the hero's above-the-fold LCP image; the video begins
+only after the browser media policy permits it.
+
+The final hero rhythm gives the two headline lines a 1.04 line-height, moves the
+copy block modestly away from the header, and lowers the fox within the remaining
+stage without displacing the bottom marquee. Supporting copy is deliberately one
+benefit-led sentence: instant voice/chat answers grounded in products, policies,
+and live order data (`components/landing/Hero.tsx`, `app/globals.css`).
+
+`HeroConversation` rotates through three 11.5-second commerce examples: chair
+recommendations rendered as production compact `ProductCards`, a sofa search
+rendered as responsive production `ProductCards`, and shipment tracking rendered
+by the production timeline `OrderStatusCard`. Shared demo records live in
+`lib/widget-components/sample-data.ts`, so the homepage and component-library
+previews cannot silently drift. Tall desktop stages use the image-card carousel;
+short desktop and mobile stages use the same component's compact variant to keep
+the entire answer above the platform marquee. The chair scene shows three rows on
+tall desktop and two rows at shorter heights for the same reason. Distinct local
+chair product shots keep those compact results credible. `prefers-reduced-motion`
+disables rotation and leaves the chair conversation visible
+(`components/landing/HeroConversation.tsx`).
 
 _Last verified: 2026-08-04 (working tree)._

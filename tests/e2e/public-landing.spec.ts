@@ -1,5 +1,9 @@
 import { expect, test } from '@playwright/test'
 
+function isHeroVideo(url: string) {
+  return url.endsWith('.mp4') && (url.includes('loqara-hero-') || url.includes('hero-fox-idle'))
+}
+
 test('critical landing content is visible before hydration', async ({ browser }) => {
   const context = await browser.newContext({ javaScriptEnabled: false })
   const page = await context.newPage()
@@ -7,7 +11,7 @@ test('critical landing content is visible before hydration', async ({ browser })
   await page.goto('/')
 
   await expect(page.getByRole('heading', { level: 1 })).toContainText('Let your customers')
-  await expect(page.getByText('Loqara gives your store a real voice agent')).toBeVisible()
+  await expect(page.getByText('Loqara gives every shopper instant answers')).toBeVisible()
   await expect(page.getByRole('button', { name: 'Get started' }).first()).toBeVisible()
   await expect(page.getByText('AI voice + chat · always on')).toHaveCount(0)
   await expect(page.getByText('Easiest chat view customization on the market!')).toHaveCount(0)
@@ -56,7 +60,7 @@ test('reduced motion keeps every static hero message visible', async ({ browser 
   const heroVideoRequests: string[] = []
   page.on('pageerror', (error) => pageErrors.push(error.message))
   page.on('request', (request) => {
-    if (request.url().includes('loqara-hero-') && request.url().endsWith('.mp4')) {
+    if (isHeroVideo(request.url())) {
       heroVideoRequests.push(request.url())
     }
   })
@@ -94,7 +98,7 @@ test('save-data keeps the landing hero video-free', async ({ browser }) => {
   const page = await context.newPage()
   const heroVideoRequests: string[] = []
   page.on('request', (request) => {
-    if (request.url().includes('loqara-hero-') && request.url().endsWith('.mp4')) {
+    if (isHeroVideo(request.url())) {
       heroVideoRequests.push(request.url())
     }
   })
@@ -136,7 +140,7 @@ test('landing widget defers network and opens on the first proxy click', async (
   expect(widgetRequests.some((url) => url.includes('/embed/'))).toBe(true)
 })
 
-test('mobile hero stays video-free and reveals the full conversation', async ({ browser }) => {
+test('mobile hero animates the fox and reveals the full conversation', async ({ browser }) => {
   const context = await browser.newContext({ viewport: { width: 390, height: 844 } })
   const page = await context.newPage()
   const requestedVideos: string[] = []
@@ -144,13 +148,15 @@ test('mobile hero stays video-free and reveals the full conversation', async ({ 
   page.on('pageerror', (error) => pageErrors.push(error.message))
 
   page.on('request', (request) => {
-    if (request.url().includes('loqara-hero-') && request.url().endsWith('.mp4')) {
+    if (isHeroVideo(request.url())) {
       requestedVideos.push(new URL(request.url()).pathname)
     }
   })
 
   await page.goto('/')
-  await expect(page.locator('video')).toHaveCount(0)
+  const foxVideo = page.locator('.landing-hero-fox video')
+  await expect(foxVideo).toHaveCount(1)
+  await expect.poll(() => foxVideo.evaluate((video: HTMLVideoElement) => video.paused)).toBe(false)
   await expect(
     page.getByRole('img', { name: "Loqara's fox support agent standing ready to help" }),
   ).toBeVisible()
@@ -168,7 +174,7 @@ test('mobile hero stays video-free and reveals the full conversation', async ({ 
       () => document.documentElement.scrollWidth === document.documentElement.clientWidth,
     ),
   ).toBe(true)
-  expect(requestedVideos).toEqual([])
+  expect(requestedVideos).toEqual(['/landing/hero-fox-idle.mp4'])
 
   await page.goto('/blog')
   await expect(page.locator('video')).toHaveCount(0)

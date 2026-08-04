@@ -61,5 +61,10 @@ components. Shipped 2026-07-27 (spec:
   per-component, not generic.
 - Previews render real widget components with sample data
   (`pointer-events-none` wrappers); LeadForm/RoomTray need noop handlers.
+- Furniture and shipped-order demo records are centralized in
+  `lib/widget-components/sample-data.ts`. The component library and the public
+  hero both import these fixtures and render the production `ProductCards` and
+  `OrderStatusCard` implementations; do not fork presentation-only copies for
+  marketing surfaces.
 
-_Last verified: 2026-07-27._
+_Last verified: 2026-08-04._

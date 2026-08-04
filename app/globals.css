@@ -335,7 +335,7 @@
 /* The landing hero is a viewport composition: copy + character scene + platform
    strip share the available height instead of accumulating fixed-height blocks. */
 .landing-hero-copy {
-  padding-top: clamp(4.5rem, 9svh, 6.5rem);
+  padding-top: clamp(5rem, 10svh, 7.25rem);
 }
 .landing-hero-title {
   font-size: clamp(2.05rem, min(10.5vw, 8svh), 5.35rem);
@@ -351,17 +351,25 @@
   margin-top: clamp(1rem, 2.6svh, 2rem);
 }
 .landing-hero-fox {
-  bottom: -2%;
-  left: calc(50% + 0.5rem);
+  bottom: -5%;
+  left: 0;
   height: 84%;
+  width: 100%;
+}
+.landing-hero-fox > img,
+.landing-hero-fox > video {
+  object-position: calc(50% + 0.5rem) center;
 }
 
 @media (min-width: 1024px) {
   .landing-hero-fox {
-    top: 0;
+    top: clamp(0.5rem, 1.25svh, 1rem);
     bottom: auto;
-    left: calc(50% + 0.75rem);
     height: clamp(36rem, 72svh, 47rem);
+  }
+  .landing-hero-fox > img,
+  .landing-hero-fox > video {
+    object-position: calc(50% + 0.75rem) center;
   }
 }
 
@@ -390,6 +398,17 @@
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
+  }
+}
+.hero-conversation-scene {
+  animation: hero-scene-in 360ms ease-out both;
+}
+@keyframes hero-scene-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 .hero-message {
@@ -424,6 +443,7 @@
 @media (prefers-reduced-motion: reduce) {
   .landing-brand-marquee,
   .landing-button-shimmer,
+  .hero-conversation-scene,
   .hero-message {
     animation: none;
   }

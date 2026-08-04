@@ -209,6 +209,15 @@ hydration mismatch. Render the same nodes and disable animation with a CSS media
 query (`components/landing/Shimmer.tsx:1-15`). Apply this pattern to color scheme,
 viewport, storage, and any browser-only state that changes element structure.
 
+## Absolutely positioned media wrappers need an explicit width
+
+Do not rely on `aspect-ratio` to infer the width of an absolutely positioned,
+non-replaced wrapper whose children are also absolutely positioned. Some browser
+layouts resolve that shrink-to-fit width to zero, hiding both the hero poster and
+video. The fox media wrapper spans the stage explicitly; `object-contain` and
+`object-position` size and optically center the actual media inside it
+(`app/globals.css:353`, `components/landing/HeroFoxMedia.tsx:63`).
+
 ## Deferred third-party launchers must replay the first interaction
 
 Simply delaying `widget.js` removes the real launcher, so an early visitor click

@@ -1,6 +1,7 @@
 import { Plus_Jakarta_Sans } from 'next/font/google'
-import Image from 'next/image'
 import { GetStartedDialog } from './GetStartedDialog'
+import { HeroConversation } from './HeroConversation'
+import { HeroFoxMedia } from './HeroFoxMedia'
 import { BRAND_MARKS, type BrandMark } from './brand-marks'
 
 const heroFont = Plus_Jakarta_Sans({ subsets: ['latin'], display: 'swap' })
@@ -10,16 +11,15 @@ export function Hero() {
     <section className="landing-hero relative flex h-svh min-h-[40rem] flex-col overflow-hidden bg-[#fbfbfa] text-[#101213]">
       <div className="landing-hero-copy relative z-10 mx-auto flex w-full max-w-7xl shrink-0 flex-col items-center px-5 text-center">
         <div className="flex max-w-5xl flex-col items-center">
-          <h1 className={`${heroFont.className} landing-hero-title text-balance font-extrabold leading-[0.98] tracking-[-0.055em]`}>
+          <h1 className={`${heroFont.className} landing-hero-title text-balance font-extrabold leading-[1.04] tracking-[-0.055em]`}>
             Let your customers
             <br />
             <span className="text-primary">talk to your store.</span>
           </h1>
 
           <p className="landing-hero-subtitle max-w-4xl leading-relaxed text-[#595c5e]">
-            Loqara gives your store a real voice agent — shoppers ask out loud and hear answers
-            from your products, policies, and live order status. Prefer to type? The same AI handles
-            chat.
+            Loqara gives every shopper instant answers by voice or chat — grounded in your
+            products, policies, and live order data.
           </p>
 
           <div className="landing-hero-cta">
@@ -44,67 +44,9 @@ function ConversationStage() {
       data-testid="hero-conversation-stage"
       className="landing-hero-stage relative mx-auto min-h-0 w-full max-w-[112rem] flex-1 overflow-hidden lg:overflow-visible"
     >
-      <Image
-        src="/landing/hero-fox-higgsfield.webp"
-        alt="Loqara's fox support agent standing ready to help"
-        width={1038}
-        height={2296}
-        loading="eager"
-        sizes="(max-width: 640px) 66vw, (max-width: 1024px) 42vw, 34vw"
-        className="landing-hero-fox pointer-events-none absolute z-[2] w-auto max-w-none -translate-x-1/2 select-none drop-shadow-[0_24px_32px_rgba(16,18,19,0.12)]"
-      />
-
-      <div className="hero-message hero-message-one absolute top-[5%] right-[2%] z-[3] flex items-center gap-2 sm:right-[7%] lg:top-[3%] lg:right-[11%]">
-        <div className="max-w-[12.5rem] rounded-[1.25rem] bg-white px-3.5 py-2.5 text-left text-[0.7rem] font-medium leading-relaxed text-[#343638] shadow-[0_14px_45px_rgba(16,18,19,0.12)] ring-1 ring-black/[0.04] sm:max-w-[16rem] sm:px-4 sm:py-3 sm:text-sm">
-          Do you have this chair in walnut?
-        </div>
-        <CustomerAvatar />
-      </div>
-
-      <div className="hero-message hero-message-two absolute top-[36%] left-[1%] z-[3] flex items-center gap-2 sm:left-[7%] lg:top-[30%] lg:left-[11%]">
-        <FoxAvatar />
-        <div className="max-w-[13.5rem] rounded-[1.25rem] bg-primary px-3.5 py-2.5 text-left text-[0.7rem] font-medium leading-relaxed text-white shadow-[0_16px_42px_rgba(233,118,52,0.3)] sm:max-w-[18rem] sm:px-4 sm:py-3 sm:text-sm">
-          Yes — it&apos;s in stock. I can show you two matching tables, too.
-        </div>
-      </div>
-
-      <div className="hero-message hero-message-three absolute top-[68%] left-[8%] z-[3] flex items-center gap-2 sm:right-[8%] sm:left-auto lg:top-[62%] lg:right-[12%]">
-        <div className="max-w-[11.75rem] rounded-[1.25rem] bg-white px-3.5 py-2.5 text-left text-[0.7rem] font-medium leading-relaxed text-[#343638] shadow-[0_14px_45px_rgba(16,18,19,0.12)] ring-1 ring-black/[0.04] sm:max-w-[15rem] sm:px-4 sm:py-3 sm:text-sm">
-          Perfect. Show me the best match.
-        </div>
-        <CustomerAvatar />
-      </div>
+      <HeroFoxMedia />
+      <HeroConversation />
     </div>
-  )
-}
-
-function CustomerAvatar() {
-  return (
-    <span className="relative size-8 shrink-0 overflow-hidden rounded-full bg-[#eeeae5] ring-[3px] ring-white sm:size-10">
-      <Image
-        src="/landing/hero-customer-higgsfield.webp"
-        alt=""
-        fill
-        sizes="44px"
-        aria-hidden="true"
-        className="object-cover"
-      />
-    </span>
-  )
-}
-
-function FoxAvatar() {
-  return (
-    <span className="relative flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white shadow-sm ring-[3px] ring-white sm:size-10">
-      <Image
-        src="/loqara-logo-colorful.webp"
-        alt=""
-        fill
-        sizes="44px"
-        aria-hidden="true"
-        className="object-contain p-1"
-      />
-    </span>
   )
 }
 
