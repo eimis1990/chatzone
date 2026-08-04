@@ -15,6 +15,11 @@ const PRIMARY = '#e97634'
 const SCENE_DURATION_MS = 11_500
 const SCENE_COUNT = 3
 const IMAGE_CARD_QUERY = '(min-width: 768px) and (min-height: 821px)'
+const CUSTOMER_AVATARS = {
+  chair: '/landing/hero-customer-higgsfield.webp',
+  furniture: '/landing/hero-customer-man.webp',
+  order: '/landing/hero-customer-curly-woman.webp',
+} as const
 
 function subscribeToImageCardLayout(onChange: () => void) {
   const query = window.matchMedia(IMAGE_CARD_QUERY)
@@ -66,8 +71,10 @@ function StockConversation({ showThreeProducts }: { showThreeProducts: boolean }
   return (
     <>
       <div className="hero-message hero-message-one absolute top-[5%] right-[2%] flex items-center gap-2 sm:right-[7%] lg:top-[3%] lg:right-[11%]">
-        <CustomerBubble>Do you have this chair in walnut?</CustomerBubble>
-        <CustomerAvatar />
+        <CustomerBubble>
+          I love this chair — do you have it in walnut or another dark wood finish?
+        </CustomerBubble>
+        <CustomerAvatar src={CUSTOMER_AVATARS.chair} />
       </div>
 
       <div className="hero-message hero-message-two absolute top-[25%] left-[1%] flex items-start gap-2 sm:left-[5%] lg:top-[14%] lg:left-[7%]">
@@ -91,7 +98,7 @@ function StockConversation({ showThreeProducts }: { showThreeProducts: boolean }
 
       <div className="hero-message hero-message-three absolute top-[70%] left-[8%] hidden items-center gap-2 md:flex sm:right-[8%] sm:left-auto lg:top-[66%] lg:right-[12%]">
         <CustomerBubble compact>The Arlow looks perfect.</CustomerBubble>
-        <CustomerAvatar />
+        <CustomerAvatar src={CUSTOMER_AVATARS.chair} />
       </div>
     </>
   )
@@ -103,8 +110,10 @@ function FurnitureConversation({ useImageCards }: { useImageCards: boolean }) {
   return (
     <>
       <div className="hero-message hero-message-one absolute top-[4%] right-[2%] flex items-center gap-2 sm:right-[6%] lg:right-[10%]">
-        <CustomerBubble>Can you find a compact sofa under €800?</CustomerBubble>
-        <CustomerAvatar />
+        <CustomerBubble>
+          Can you help me find a compact sofa for a small living room under €800?
+        </CustomerBubble>
+        <CustomerAvatar src={CUSTOMER_AVATARS.furniture} />
       </div>
 
       <div className="hero-message hero-message-two absolute top-[20%] left-[1%] flex items-start gap-2 sm:left-[5%] lg:top-[4%] lg:left-[7%]">
@@ -126,7 +135,7 @@ function FurnitureConversation({ useImageCards }: { useImageCards: boolean }) {
 
       <div className="hero-message hero-message-three absolute top-[70%] right-[7%] hidden items-center gap-2 md:flex lg:right-[11%]">
         <CustomerBubble compact>The Oslo looks perfect.</CustomerBubble>
-        <CustomerAvatar />
+        <CustomerAvatar src={CUSTOMER_AVATARS.furniture} />
       </div>
     </>
   )
@@ -136,8 +145,10 @@ function OrderConversation() {
   return (
     <>
       <div className="hero-message hero-message-one absolute top-[4%] right-[2%] flex items-center gap-2 sm:right-[6%] lg:right-[10%]">
-        <CustomerBubble>Where is order #10482?</CustomerBubble>
-        <CustomerAvatar />
+        <CustomerBubble>
+          Could you check where order #10482 is and when it should arrive?
+        </CustomerBubble>
+        <CustomerAvatar src={CUSTOMER_AVATARS.order} />
       </div>
 
       <div className="hero-message hero-message-two absolute top-[27%] left-[1%] flex items-start gap-2 sm:left-[5%] lg:top-[22%] lg:left-[7%]">
@@ -159,7 +170,7 @@ function OrderConversation() {
 
       <div className="hero-message hero-message-three absolute top-[70%] right-[7%] hidden items-center gap-2 md:flex lg:right-[11%]">
         <CustomerBubble compact>Perfect — thanks!</CustomerBubble>
-        <CustomerAvatar />
+        <CustomerAvatar src={CUSTOMER_AVATARS.order} />
       </div>
     </>
   )
@@ -183,11 +194,11 @@ function FoxBubble({ children }: { children: React.ReactNode }) {
   )
 }
 
-function CustomerAvatar() {
+function CustomerAvatar({ src }: { src: string }) {
   return (
     <span className="relative size-8 shrink-0 overflow-hidden rounded-full bg-[#eeeae5] ring-[3px] ring-white sm:size-10">
       <Image
-        src="/landing/hero-customer-higgsfield.webp"
+        src={src}
         alt=""
         fill
         sizes="44px"

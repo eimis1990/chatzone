@@ -228,8 +228,11 @@ previews cannot silently drift. Tall desktop stages use the image-card carousel;
 short desktop and mobile stages use the same component's compact variant to keep
 the entire answer above the platform marquee. The chair scene shows three rows on
 tall desktop and two rows at shorter heights for the same reason. Distinct local
-chair product shots keep those compact results credible. `prefers-reduced-motion`
-disables rotation and leaves the chair conversation visible
+chair product shots keep those compact results credible. Each scene also owns a
+distinct local customer portrait (original woman, male furniture shopper, and
+curly-haired Black order-tracking shopper), and the opening questions are long
+enough to preserve the intended multi-line customer-bubble silhouette.
+`prefers-reduced-motion` disables rotation and leaves the chair conversation visible
 (`components/landing/HeroConversation.tsx`).
 
 _Last verified: 2026-08-04 (working tree)._
