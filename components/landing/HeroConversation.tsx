@@ -13,6 +13,7 @@ import { useReduce } from './use-reduce'
 
 const PRIMARY = '#e97634'
 const SCENE_DURATION_MS = 11_500
+const SCENE_EXIT_DURATION_MS = 1_850
 const SCENE_COUNT = 3
 const IMAGE_CARD_QUERY = '(min-width: 768px) and (min-height: 821px)'
 const CUSTOMER_AVATARS = {
@@ -39,23 +40,36 @@ export function HeroConversation() {
   const reduce = useReduce()
   const useImageCards = useImageCardLayout()
   const [scene, setScene] = useState(0)
+  const [isExiting, setIsExiting] = useState(false)
 
   useEffect(() => {
-    if (reduce) return
+    if (reduce) {
+      const resetTimeout = window.setTimeout(() => setIsExiting(false), 0)
+      return () => window.clearTimeout(resetTimeout)
+    }
 
-    const interval = window.setInterval(() => {
+    const exitTimeout = window.setTimeout(() => {
+      setIsExiting(true)
+    }, SCENE_DURATION_MS - SCENE_EXIT_DURATION_MS)
+
+    const sceneTimeout = window.setTimeout(() => {
+      setIsExiting(false)
       setScene((current) => (current + 1) % SCENE_COUNT)
     }, SCENE_DURATION_MS)
 
-    return () => window.clearInterval(interval)
-  }, [reduce])
+    return () => {
+      window.clearTimeout(exitTimeout)
+      window.clearTimeout(sceneTimeout)
+    }
+  }, [reduce, scene])
 
   return (
     <div
       key={scene}
       data-testid="hero-conversation-scene"
       data-scene={scene}
-      className="hero-conversation-scene absolute inset-0 z-[3]"
+      data-phase={isExiting ? 'exiting' : 'visible'}
+      className={`hero-conversation-scene absolute inset-0 z-[3] ${isExiting ? 'is-exiting' : ''}`}
       aria-label="Examples of Loqara helping shoppers"
     >
       {scene === 0 ? <StockConversation showThreeProducts={useImageCards} /> : null}
@@ -70,7 +84,7 @@ function StockConversation({ showThreeProducts }: { showThreeProducts: boolean }
 
   return (
     <>
-      <div className="hero-message hero-message-one absolute top-[5%] right-[2%] flex items-center gap-2 sm:right-[7%] lg:top-[3%] lg:right-[11%]">
+      <div className="hero-message hero-message-one absolute top-[5%] right-[1%] flex items-center gap-2 sm:right-[5%] lg:top-[3%] lg:right-[7%]">
         <CustomerBubble>
           I love this chair — do you have it in walnut or another dark wood finish?
         </CustomerBubble>
@@ -96,7 +110,7 @@ function StockConversation({ showThreeProducts }: { showThreeProducts: boolean }
         </div>
       </div>
 
-      <div className="hero-message hero-message-three absolute top-[70%] left-[8%] hidden items-center gap-2 md:flex sm:right-[8%] sm:left-auto lg:top-[66%] lg:right-[12%]">
+      <div className="hero-message hero-message-three absolute top-[70%] right-[10%] hidden items-center gap-2 md:flex lg:top-[66%] lg:right-[14%] xl:right-[22%]">
         <CustomerBubble compact>The Arlow looks perfect.</CustomerBubble>
         <CustomerAvatar src={CUSTOMER_AVATARS.chair} />
       </div>
@@ -109,7 +123,7 @@ function FurnitureConversation({ useImageCards }: { useImageCards: boolean }) {
 
   return (
     <>
-      <div className="hero-message hero-message-one absolute top-[4%] right-[2%] flex items-center gap-2 sm:right-[6%] lg:right-[10%]">
+      <div className="hero-message hero-message-one absolute top-[4%] right-[1%] flex items-center gap-2 sm:right-[5%] lg:right-[7%]">
         <CustomerBubble>
           Can you help me find a compact sofa for a small living room under €800?
         </CustomerBubble>
@@ -133,7 +147,7 @@ function FurnitureConversation({ useImageCards }: { useImageCards: boolean }) {
         </div>
       </div>
 
-      <div className="hero-message hero-message-three absolute top-[70%] right-[7%] hidden items-center gap-2 md:flex lg:right-[11%]">
+      <div className="hero-message hero-message-three absolute top-[70%] right-[10%] hidden items-center gap-2 md:flex lg:right-[14%] xl:right-[22%]">
         <CustomerBubble compact>The Oslo looks perfect.</CustomerBubble>
         <CustomerAvatar src={CUSTOMER_AVATARS.furniture} />
       </div>
@@ -144,7 +158,7 @@ function FurnitureConversation({ useImageCards }: { useImageCards: boolean }) {
 function OrderConversation() {
   return (
     <>
-      <div className="hero-message hero-message-one absolute top-[4%] right-[2%] flex items-center gap-2 sm:right-[6%] lg:right-[10%]">
+      <div className="hero-message hero-message-one absolute top-[4%] right-[1%] flex items-center gap-2 sm:right-[5%] lg:right-[7%]">
         <CustomerBubble>
           Could you check where order #10482 is and when it should arrive?
         </CustomerBubble>
@@ -168,7 +182,7 @@ function OrderConversation() {
         </div>
       </div>
 
-      <div className="hero-message hero-message-three absolute top-[70%] right-[7%] hidden items-center gap-2 md:flex lg:right-[11%]">
+      <div className="hero-message hero-message-three absolute top-[70%] right-[10%] hidden items-center gap-2 md:flex lg:right-[14%] xl:right-[22%]">
         <CustomerBubble compact>Perfect — thanks!</CustomerBubble>
         <CustomerAvatar src={CUSTOMER_AVATARS.order} />
       </div>

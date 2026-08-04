@@ -232,7 +232,13 @@ chair product shots keep those compact results credible. Each scene also owns a
 distinct local customer portrait (original woman, male furniture shopper, and
 curly-haired Black order-tracking shopper), and the opening questions are long
 enough to preserve the intended multi-line customer-bubble silhouette.
-`prefers-reduced-motion` disables rotation and leaves the chair conversation visible
+Each scene now closes with the entrance motion reversed and reverse-staggered:
+the closing customer bubble exits first, followed by the rich fox response and
+then the opening question. React starts the 1.85-second exit phase before the
+11.5-second scene swap, while CSS owns the three reverse delays and mirrored easing.
+The opening customer question mirrors the rich answer's outer page margin, while
+the compact closing reply sits farther inward near the fox to balance the larger
+cards on the left. `prefers-reduced-motion` disables rotation and leaves the chair conversation visible
 (`components/landing/HeroConversation.tsx`).
 
 _Last verified: 2026-08-04 (working tree)._

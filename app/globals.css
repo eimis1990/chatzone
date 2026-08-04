@@ -400,6 +400,16 @@
     transform: translateY(0) scale(1);
   }
 }
+@keyframes hero-message-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(16px) scale(0.96);
+  }
+}
 .hero-conversation-scene {
   animation: hero-scene-in 360ms ease-out both;
 }
@@ -425,6 +435,18 @@
 .hero-message-three {
   animation-delay: 2.82s;
 }
+.hero-conversation-scene.is-exiting .hero-message {
+  animation: hero-message-out 520ms cubic-bezier(0.64, 0, 0.78, 0) both;
+}
+.hero-conversation-scene.is-exiting .hero-message-one {
+  animation-delay: 1s;
+}
+.hero-conversation-scene.is-exiting .hero-message-two {
+  animation-delay: 500ms;
+}
+.hero-conversation-scene.is-exiting .hero-message-three {
+  animation-delay: 0ms;
+}
 
 @keyframes landing-button-shimmer {
   0% {
@@ -444,7 +466,8 @@
   .landing-brand-marquee,
   .landing-button-shimmer,
   .hero-conversation-scene,
-  .hero-message {
+  .hero-message,
+  .hero-conversation-scene.is-exiting .hero-message {
     animation: none;
   }
   .hero-message {
