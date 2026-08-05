@@ -62,6 +62,8 @@ OpenAI invites merchants to apply for direct product-feed access, but access and
 
 **Prepare a reliable feed.** Keep stable product IDs, titles, canonical URLs, images, price, currency, availability, variants, brand, identifiers, and useful attributes. The same discipline helps Google Merchant Center and other shopping channels, so it is not wasted effort while direct-feed access develops.
 
+Use the [OpenAI product-feed checklist](/blog/openai-product-feed-ecommerce) to separate required fields from recommended enrichment and to test a sample before you automate the export.
+
 OpenAI maintains [merchant information and feed access](https://openai.com/chatgpt/search-product-discovery/) for businesses that want their products discovered in ChatGPT. Treat its published requirements as the source of truth; this channel is changing too quickly for a one-time checklist to remain permanent.
 
 <div class="callout">
@@ -99,6 +101,8 @@ It is not a magic ranking tag. It should describe information that shoppers can 
 
 Validate the rendered page, not just the template. Check several real products and variants. Make sure canonical URLs are correct, sale prices expire properly, and variant availability is not collapsed into a misleading parent value.
 
+If one product comes in several sizes, colours, or materials, follow the [AI-shopping product-variant guide](/blog/product-variants-ai-shopping) so every sellable item remains distinct without losing its parent-product relationship.
+
 Google’s commerce documentation is still useful here because its [product structured-data guidance](https://developers.google.com/search/docs/appearance/structured-data/product) explains the core vocabulary and validation patterns used across the open web.
 
 ## How do you write product pages for GEO and AEO?
@@ -114,7 +118,7 @@ Use headings that reflect real decisions:
 - What is included in the box?
 - How does it compare with the next model?
 
-Add an FAQ only when the answers are genuinely product-specific. Boilerplate copied across 1,000 items creates noise. Original fit guidance, measurements, comparison tables, care instructions, testing notes, and customer questions are far more useful.
+Publish product Q&A only when the answers are genuinely specific and verifiable. Boilerplate copied across 1,000 items creates noise. Google stopped showing FAQ rich results in May 2026, so treat Q&A as useful shopper content and machine-readable evidence—not a rich-result trick. The [product Q&A workflow for AI shopping](/blog/product-qa-ai-shopping) explains how to turn recurring questions into approved answers without inventing claims.
 
 Then connect those pages to a [product recommendation chatbot on your store](/blog/ai-product-recommendation-chatbot). External AI can introduce the product; an onsite agent can search the live catalog, answer brand-specific follow-ups, and keep the shopper moving without another search.
 

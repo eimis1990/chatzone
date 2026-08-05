@@ -46,6 +46,10 @@ Every post: a `<blockquote class="quick-answer">` (40–60 word direct answer) u
 the intro, natural question-based H2s where appropriate, contextual internal links,
 primary evidence, and useful FAQs. These structures improve comprehension and make
 claims easier to extract, but do not guarantee rankings, rich results, or citations.
+The renderer still emits `FAQPage` data for correctly structured visible FAQs, but
+Google stopped showing FAQ rich results on May 7, 2026 and removed its FAQ rich-result
+documentation on June 15, 2026. Keep useful Q&A for shoppers and other consumers;
+never position it as a Google rich-result tactic.
 The [SEO/GEO playbook](seo-geo-playbook.md) is authoritative; the weekly GSC
 gap-analysis workflow is in `docs/seo-content-loop.md`.
 
@@ -128,6 +132,16 @@ guidance. Preserve their boundaries: no invented compatibility or suitability,
 binding quotes or account pricing, blocked return routes, diagnosis, treatment,
 or allergy guarantees. Each uses an editorial cover plus a separate realistic
 customer-use scene, both text-free 1200×800 WebP assets.
+
+The August 5 AI-shopping data-readiness cluster adds three narrow operational
+spokes beneath the broader ChatGPT-shopping guide. `openai-product-feed-ecommerce`
+owns the current stable-feed checklist and does not promise merchant acceptance or
+placement. `product-variants-ai-shopping` owns exact item/group/variant modelling
+across the OpenAI feed and Google's Product/ProductGroup vocabulary.
+`product-qa-ai-shopping` owns the verified shopper-question workflow and explicitly
+reflects Google's May 2026 removal of FAQ rich results. The three posts cross-link,
+backlink from the broad ChatGPT guide, cite current OpenAI/Google primary sources,
+and each pair a text-free editorial cover with a distinct explanatory diagram.
 
 ## 2026-07-20 remediation baseline
 
@@ -241,4 +255,4 @@ the compact closing reply sits farther inward near the fox to balance the larger
 cards on the left. `prefers-reduced-motion` disables rotation and leaves the chair conversation visible
 (`components/landing/HeroConversation.tsx`).
 
-_Last verified: 2026-08-04 (working tree)._
+_Last verified: 2026-08-05 (working tree)._

@@ -78,6 +78,9 @@
 - [Generative engine optimization for e-commerce](https://www.loqara.com/blog/generative-engine-optimization-ecommerce): the GEO pillar
 - [Google AI Mode shopping](https://www.loqara.com/blog/google-ai-mode-shopping-ecommerce): preparing product visibility
 - [How to get products recommended by ChatGPT shopping](https://www.loqara.com/blog/how-to-get-products-recommended-by-chatgpt): AI-shopping visibility
+- [OpenAI product feeds for e-commerce](https://www.loqara.com/blog/openai-product-feed-ecommerce): a field-by-field merchant checklist for current product data
+- [Product variants for AI shopping](https://www.loqara.com/blog/product-variants-ai-shopping): how to model sizes, colours, SKUs, URLs, and availability
+- [Product Q&A for AI shopping](https://www.loqara.com/blog/product-qa-ai-shopping): a verified workflow for turning shopper questions into useful product knowledge
 - [How to measure AI search visibility](https://www.loqara.com/blog/measure-ai-search-visibility-ecommerce): tracking citations and mentions
 - [Agentic commerce explained](https://www.loqara.com/blog/agentic-commerce-ecommerce): what AI buying agents mean for stores
 - [IndexNow for e-commerce](https://www.loqara.com/blog/indexnow-ecommerce-guide): faster recrawls, practical setup
