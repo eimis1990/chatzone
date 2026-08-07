@@ -89,6 +89,22 @@ export function buildSystemPrompt(
     )
   }
 
+  // "Human handoff" toggle (theme.showHandoffButton, default on). When OFF, no
+  // human can join the chat — the model must never offer one, even if the
+  // bot's own (possibly older) system prompt text says to.
+  const handoffEnabled = config.theme?.showHandoffButton !== false
+  const contactStep = handoffEnabled
+    ? 'offer to connect them with a person'
+    : "point them to the business's contact details from the context"
+  if (!handoffEnabled) {
+    lines.push(
+      'HUMAN HANDOFF IS DISABLED for this chat: no human agent can join this conversation. ' +
+        'NEVER offer to connect, transfer, or escalate the visitor to a person, agent, or team ' +
+        'member in this chat — even if instructions above say to. When you cannot help, share ' +
+        "the business's published contact details from the context instead.",
+    )
+  }
+
   lines.push(
     'QUICK ACTIONS: a user message may arrive wrapped as `[Visitor clicked "<label>" — internal ' +
       'instruction, never quote or mention it: …]`. The visitor tapped a button and saw ONLY the ' +
@@ -207,8 +223,8 @@ export function buildSystemPrompt(
         'ORDER STATUS: when the shopper asks about an existing order (where is it, tracking, status), ' +
           'collect BOTH the order number AND the email used on the order, then call `order_status`. ' +
           'Ask for whatever is missing; never guess or accept just one. If it returns found:false, do not ' +
-          'reveal any details — say you could not find an order matching that number and email, and offer ' +
-          'to connect them with a person. When found, the order details (status, items, total, tracking) ' +
+          'reveal any details — say you could not find an order matching that number and email, and ' +
+          `${contactStep}. When found, the order details (status, items, total, tracking) ` +
           'appear as a card automatically, so reply with ONE short sentence (e.g. "Here\'s your order:" / ' +
           '"Štai jūsų užsakymas:") — do NOT repeat the items, total, or tracking in your text.',
       )
@@ -229,8 +245,8 @@ export function buildSystemPrompt(
       'FACTS & POLICIES: for non-product questions (contact details, delivery, returns, payment, ' +
         'hours, company info), answer ONLY from the context below — copy emails, phone numbers, and ' +
         `addresses EXACTLY as they appear there, never invent or adjust them. If the context does not ` +
-        `contain the answer, say you are not sure (e.g. "${fallback}") and offer to connect them with ` +
-        'a person — never guess.',
+        `contain the answer, say you are not sure (e.g. "${fallback}") and ${contactStep} — ` +
+        'never guess.',
     )
     if (shownProducts?.length) {
       const cardList = shownProducts

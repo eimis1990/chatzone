@@ -67,6 +67,30 @@ describe('detectHandoffIntent (lt)', () => {
   })
 })
 
+describe('detectHandoffIntent: mentioning staff is NOT requesting one', () => {
+  it('reported speech about an employee does not escalate (the Baldaila bug)', () => {
+    // Verbatim from the bug report — the shopper QUOTES an employee.
+    expect(
+      detectHandoffIntent('„Bet jūsų darbuotoja man sakė, kad galima grąžinti bet kada.“', 'lt'),
+    ).toBe(false)
+    expect(detectHandoffIntent('jusu konsultantas vakar minejo kita kaina', 'lt')).toBe(false)
+  })
+
+  it('mentioning customer service in English does not escalate', () => {
+    expect(detectHandoffIntent('your customer service told me I could return it anytime')).toBe(
+      false,
+    )
+    expect(detectHandoffIntent('the representative I met in the store was very nice')).toBe(false)
+  })
+
+  it('still escalates when the same nouns come with a request', () => {
+    expect(detectHandoffIntent('noriu pakalbėti su darbuotoju', 'lt')).toBe(true)
+    expect(detectHandoffIntent('gal galiu su konsultantu?', 'lt')).toBe(true)
+    expect(detectHandoffIntent('I want to talk to customer service')).toBe(true)
+    expect(detectHandoffIntent('can I chat with a representative?')).toBe(true)
+  })
+})
+
 describe('widget request phrases are self-detecting', () => {
   // The widget escalation button sends these; the chat route must recognize them.
   it('English canned phrase escalates', () => {

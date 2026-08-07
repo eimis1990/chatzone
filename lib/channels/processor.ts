@@ -30,9 +30,11 @@ export async function processChannelMessage(
   const lang = defaultLanguage(bot.config)
 
   // Visitor explicitly asks for a human → escalate + acknowledge (no LLM).
-  // Checked in every enabled language, mirroring app/api/chat/route.ts.
+  // Checked in every enabled language, mirroring app/api/chat/route.ts —
+  // including the "Human handoff" toggle gate: off means nothing escalates.
+  const handoffEnabled = bot.config.theme?.showHandoffButton !== false
   const handoffLangs = bot.config.languages?.length ? bot.config.languages : [lang]
-  if (handoffLangs.some((l) => detectHandoffIntent(message, l))) {
+  if (handoffEnabled && handoffLangs.some((l) => detectHandoffIntent(message, l))) {
     await svc
       .from('conversations')
       .update({ handoff_status: 'requested', handoff_requested_at: new Date().toISOString() })
