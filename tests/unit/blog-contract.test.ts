@@ -21,6 +21,21 @@ describe('blog content contract', () => {
     expect(parsed.body.trim()).toBe('## Quick answer\n\nThe answer.')
   })
 
+  it('cannot inject frontmatter keys through embedded newlines', () => {
+    const raw = serializeBlogPost({
+      title: 'Split\ntitle',
+      description: 'Sneaky\nimage: /evil.webp',
+      date: '2026-08-07',
+      topic: 'ecommerce-ai',
+      author: 'Eimantas Kudarauskas',
+    }, 'Body.')
+    const parsed = parseBlogFrontmatter(raw)
+
+    expect(parsed.data.title).toBe('Split title')
+    expect(parsed.data.description).toBe('Sneaky image: /evil.webp')
+    expect(parsed.data.image).toBeUndefined()
+  })
+
   it('uses the public renderer for anchored headings, tables, and FAQ extraction', () => {
     const markdown = '## Results\n\n| Item | Value |\n| --- | --- |\n| A | B |\n\n## Frequently asked questions\n\n### Does it work?\n\nYes.'
     const rendered = renderBlogMarkdown(markdown)

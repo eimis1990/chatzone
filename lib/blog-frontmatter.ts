@@ -43,7 +43,8 @@ export function parseBlogFrontmatter(raw: string): {
 }
 
 function quote(value: string): string {
-  return `"${value.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`
+  // The parser is line-based, so an embedded newline would inject frontmatter keys.
+  return `"${value.replace(/[\r\n]+/g, ' ').replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`
 }
 
 /** Serialize a studio draft into the exact file shape consumed by the public blog. */

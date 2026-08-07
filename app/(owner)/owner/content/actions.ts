@@ -108,15 +108,20 @@ export async function updateContentDraft(
   const service = createServiceClient()
   const { data: current, error: currentError } = await service
     .from('content_items')
-    .select('status, revision')
+    .select('status, revision, mode, slug')
     .eq('id', id)
     .eq('created_by', user.id)
-    .maybeSingle<{ status: ContentStatus; revision: number }>()
+    .maybeSingle<{ status: ContentStatus; revision: number; mode: 'new' | 'refresh'; slug: string }>()
   if (currentError) throw new Error(`Failed to load draft: ${currentError.message}`)
   if (!current) throw new Error('Content item not found')
   if (current.revision !== expectedRevision) throw new Error('This draft changed in another session. Reload before saving again.')
   if (current.status === 'pr_open' || current.status === 'published') {
     throw new Error('This article is locked while its publishing pull request or live version is active')
+  }
+  // A refresh must keep targeting its source article: publishing to an edited
+  // slug would overwrite whatever different article lives at that path.
+  if (current.mode === 'refresh' && draft.slug !== current.slug) {
+    throw new Error('A refresh keeps its original slug. Start a new article to publish under a different slug.')
   }
 
   const { data, error } = await service
@@ -142,7 +147,7 @@ export async function updateContentDraft(
 }
 
 export async function updateContentStatus(id: string, next: ContentStatus): Promise<ContentItem> {
-  await requireRole('owner')
+  const user = await requireRole('owner')
   const parsedStatus = contentStatusSchema.safeParse(next)
   if (!parsedStatus.success) throw new Error('Unknown content status')
 
@@ -151,6 +156,7 @@ export async function updateContentStatus(id: string, next: ContentStatus): Prom
     .from('content_items')
     .select('status, revision')
     .eq('id', id)
+    .eq('created_by', user.id)
     .maybeSingle<{ status: ContentStatus; revision: number }>()
 
   if (readError) throw new Error(`Failed to read content status: ${readError.message}`)
@@ -167,6 +173,7 @@ export async function updateContentStatus(id: string, next: ContentStatus): Prom
       published_at: parsedStatus.data === 'published' ? now : undefined,
     })
     .eq('id', id)
+    .eq('created_by', user.id)
     .eq('revision', current.revision)
     .select('*')
     .maybeSingle<ContentItem>()
@@ -392,12 +399,15 @@ export async function generateContentCover(
   const service = createServiceClient()
   const { data: item, error: itemError } = await service
     .from('content_items')
-    .select('id, created_by, revision, cover_image_prompt')
+    .select('id, created_by, status, revision, cover_image_prompt')
     .eq('id', parsed.data.id)
     .eq('created_by', user.id)
-    .maybeSingle<{ id: string; created_by: string; revision: number; cover_image_prompt: string }>()
+    .maybeSingle<{ id: string; created_by: string; status: ContentStatus; revision: number; cover_image_prompt: string }>()
   if (itemError) throw new Error(`Failed to load the article cover brief: ${itemError.message}`)
   if (!item) throw new Error('Content item not found')
+  if (item.status === 'published' || item.status === 'pr_open' || item.status === 'archived') {
+    throw new Error(`A ${item.status.replace('_', ' ')} article cannot receive a new cover`)
+  }
   if (item.revision !== parsed.data.expectedRevision) {
     throw new Error('This draft changed before its cover was generated. Retry the cover from the current draft.')
   }

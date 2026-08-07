@@ -5,6 +5,7 @@ date: 2026-08-07
 topic: ai-customer-support
 author: Eimantas Kudarauskas
 image: /blog/conversational-ai-shopping-assistant.webp
+related: conversational-ai-vs-chatbot, test-ai-chatbot-before-launch, prevent-ai-chatbot-hallucinations
 ---
 
 A shopper looking for “a washable rug that works with underfloor heating and a robot vacuum” is not making a simple keyword search. They are describing a problem, adding constraints, and expecting useful follow-up questions. That is where a conversational AI assistant can be more valuable than another search box—or more damaging than one if it invents product details.
