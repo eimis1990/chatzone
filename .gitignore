@@ -14,4 +14,10 @@ next-env.d.ts
 cycle*.png
 .vercel
 
+# design QA scratch (root-level captures) and generated drafts/images
+/*-comparison.png
+/*-desktop.png
+/*-mobile.png
+/output/
+
 .impeccable/live/
