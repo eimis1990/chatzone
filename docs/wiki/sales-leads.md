@@ -85,13 +85,27 @@ emails, and manual status progression.
   The separate mail-app action is allowed to include recipient, subject, and
   body (`:560`). Do not reintroduce a `Tema:` prefix into clipboard copy.
 - Manual name/URL/email signature lines do not belong in stored bodies. Webmail
-  adds the configured signature, but API sends must append the same branded
-  signature explicitly.
+  adds the configured signature. API sends must provide an HTML body plus the
+  plain-text fallback and append the same branded signature: the inline fox at
+  `public/loqara-email-logo.jpg` via `cid:loqara-logo`, bold founder name,
+  founder title, muted product tagline, and orange linked `loqara.com`. A
+  plain-text-only API send is invalid; stop before sending if the inline asset
+  or HTML signature cannot be constructed.
 
 ## Operational sending
 
 - "Next Ready lead" follows the screen order: `status = 'ready'`, highest score
   first, then company name (`app/(owner)/owner/leads/page.tsx:15`).
+- The Codex weekday outreach worker runs at 10:15 Europe/Vilnius. Keep its
+  recurrence as a direct weekday/hour/minute rule; an anchored `DTSTART` rule
+  was active while the app and Mac were awake on 2026-08-06 but created no run.
+  A missed batch must be checked against both Hostinger Sent and today's
+  `status_updated_at` rows before any manual catch-up, preventing duplicates.
+- Hostinger's send endpoint reports success as a structured top-level numeric
+  HTTP status. Treat `204` as definitive success regardless of serialized JSON
+  whitespace or an empty body, then proceed to Sent-folder verification. A
+  whitespace-sensitive raw-response check stopped the 2026-08-07 worker after
+  one valid send; the worker prompt now explicitly forbids that comparison.
 - Send the live row's `email_subject` and `email_body` snapshots unchanged from
   `hello@loqara.com` with the Loqara sender name and branded signature. Validate
   recipient, subject, and body before sending.
