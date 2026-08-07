@@ -1991,8 +1991,15 @@ export function ConfigForm({
 /** Sentinel for the preview dropdown's "no override" option (Select values are strings). */
 const PREVIEW_SAME_AS_LIVE = '__live__'
 
+// Just "v2 · 7 Aug 2026" — publish notes are owner-facing changelog material
+// and made the dropdown unreadable.
 function versionLabel(v: { version: number; note: string | null; published_at: string }) {
-  return `v${v.version}${v.note ? ` — ${v.note}` : ''} · ${formatDistanceToNow(v.published_at)}`
+  const date = new Date(v.published_at).toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  })
+  return `v${v.version} · ${date}`
 }
 
 /**
@@ -2097,8 +2104,7 @@ function AssistantVersionSection({
         </div>
         {updateAvailable && (
           <p className="text-xs text-amber-600">
-            v{latest.version}
-            {latest.note ? ` (${latest.note})` : ''} is available. Set it as the preview version,
+            v{latest.version} is available. Set it as the preview version,
             save, test it in the chat preview — then switch Live when you&apos;re happy.
           </p>
         )}
