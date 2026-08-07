@@ -24,6 +24,7 @@ import {
   PanelLeftOpenIcon,
   type LucideIcon,
   PresentationIcon,
+  NewspaperIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { SignOutButton } from '@/components/client/SignOutButton'
@@ -76,6 +77,7 @@ const NAV: NavItem[] = [
   { label: 'Voices', href: '/owner/voices', icon: MicVocalIcon },
   { label: 'Signups', href: '/owner/signups', icon: MailIcon },
   { label: 'Sales leads', href: '/owner/leads', icon: TargetIcon },
+  { label: 'Content', href: '/owner/content', icon: NewspaperIcon },
   { label: 'LinkedIn', href: '/owner/linkedin', icon: MegaphoneIcon },
   { label: 'Bug reports', href: '/owner/bugs', icon: BugIcon },
 ]
@@ -164,7 +166,14 @@ export function OwnerSidebar({
   const tooltipTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
+    const mobileCollapseTimer = typeof window.matchMedia === 'function'
+      ? window.setTimeout(() => {
+          if (window.matchMedia('(max-width: 767px)').matches) setCollapsed(true)
+        }, 0)
+      : null
+
     return () => {
+      if (mobileCollapseTimer !== null) window.clearTimeout(mobileCollapseTimer)
       if (tooltipTimerRef.current) clearTimeout(tooltipTimerRef.current)
     }
   }, [])

@@ -41,6 +41,7 @@ describe('OwnerSidebar', () => {
       'false',
     )
     expect(screen.getByRole('link', { name: 'Dashboard' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Content' })).toHaveAttribute('href', '/owner/content')
     const activeChild = screen.getByRole('link', { name: 'Knowledge' })
     expect(activeChild).toHaveAttribute(
       'aria-current',

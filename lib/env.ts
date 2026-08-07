@@ -43,6 +43,12 @@ const envSchema = z.object({
   // ponytail: spike-only single Page token; replaced by per-connection
   // encrypted tokens in channel_connections when the OAuth flow lands.
   META_PAGE_ACCESS_TOKEN: z.string().min(1).optional(),
+  // Optional: enables Content Studio's review-only GitHub publishing handoff.
+  // The token stays server-side and should be fine-grained to one repository
+  // with Contents + Pull requests write permissions only.
+  GITHUB_CONTENT_TOKEN: z.string().min(1).optional(),
+  GITHUB_CONTENT_REPOSITORY: z.string().regex(/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/).optional(),
+  GITHUB_CONTENT_BASE_BRANCH: z.string().regex(/^[A-Za-z0-9._/-]+$/).optional(),
   // Optional: Jina Reader API key for higher crawl limits. URL ingestion works
   // keyless (IP rate-limited) and falls back to a direct fetch if unavailable.
   JINA_API_KEY: z.string().min(1).optional(),

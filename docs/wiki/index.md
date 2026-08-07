@@ -49,6 +49,9 @@ Add a line here. How the wiki works: [README.md](README.md).
   chatbot-aware positioning, and UI behavior.
 - [linkedin-content](linkedin-content.md) — draggable owner content board,
   ordering persistence, editorial drafts, and branded post visuals.
+- [content-studio](content-studio.md) — owner-only Loqara blog pipeline, durable
+  drafts, proactive next actions, per-destination approval policy, and the
+  review-only GitHub draft-PR publishing boundary.
 - [owner-dashboard](owner-dashboard.md) — platform stat sources, the MRR/earnings
   card (`computeMrr`), and the demo-data-in-totals gotcha. Demo bots live in the
   `is_demo` "Loqara Demos" org (`/owner/demos`, presented at `/present/[botId]`)

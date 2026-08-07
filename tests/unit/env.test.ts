@@ -27,4 +27,15 @@ describe('parseEnv', () => {
       /NEXT_PUBLIC_SUPABASE_URL/,
     )
   })
+
+  it('keeps GitHub publishing credentials server-only and validates the repository shape', () => {
+    const env = parseEnv({
+      ...valid,
+      GITHUB_CONTENT_TOKEN: 'github_pat_test',
+      GITHUB_CONTENT_REPOSITORY: 'eimis1990/chatzone',
+      GITHUB_CONTENT_BASE_BRANCH: 'main',
+    })
+    expect(env.GITHUB_CONTENT_REPOSITORY).toBe('eimis1990/chatzone')
+    expect(() => parseEnv({ ...valid, GITHUB_CONTENT_REPOSITORY: 'not-a-repository' })).toThrow(/GITHUB_CONTENT_REPOSITORY/)
+  })
 })
