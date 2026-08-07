@@ -10,7 +10,7 @@ import {
 import { toast } from 'sonner'
 import { saveContentStudioSettings } from '@/app/(owner)/owner/content/actions'
 import { ContentStudioGuide, ContentStudioHeader } from '@/components/owner/content/ContentStudioChrome'
-import { DestinationLogo } from '@/components/owner/content/DestinationLogo'
+import { DestinationLogo, getDestinationAccent } from '@/components/owner/content/DestinationLogo'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -192,9 +192,17 @@ export function ContentSettingsForm({
           {targets.map((target) => {
             const definition = PUBLICATION_PROVIDERS.find((candidate) => candidate.provider === target.provider)!
             const connected = target.connector_status === 'connected'
+            const accent = getDestinationAccent(target.provider)
             return (
-              <Card key={`${target.provider}-${target.slot_key}`} className="min-w-0 gap-0 py-0">
-                <CardHeader className="border-b p-5">
+              <Card
+                key={`${target.provider}-${target.slot_key}`}
+                className="min-w-0 gap-0 overflow-hidden border-t-4 py-0"
+                style={{ borderTopColor: accent }}
+              >
+                <CardHeader
+                  className="border-b p-5"
+                  style={{ backgroundImage: `linear-gradient(to bottom, color-mix(in oklab, ${accent} 7%, transparent), transparent)` }}
+                >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex min-w-0 items-start gap-3">
                       <DestinationLogo provider={target.provider} />

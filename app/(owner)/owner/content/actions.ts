@@ -45,6 +45,9 @@ import {
 import { createServiceClient } from '@/lib/supabase/service'
 
 const CONTENT_PATH = '/owner/content'
+// Runs older than this are presumed crashed: the workspace route caps
+// execution at 300 s, so anything past 6 minutes can no longer be alive.
+const STALE_RUN_MS = 6 * 60 * 1000
 
 function validationMessage(error: { issues: { message: string }[] }): string {
   return error.issues[0]?.message ?? 'The content data is invalid'
@@ -154,14 +157,39 @@ export async function updateContentStatus(id: string, next: ContentStatus): Prom
   const service = createServiceClient()
   const { data: current, error: readError } = await service
     .from('content_items')
-    .select('status, revision')
+    .select('*')
     .eq('id', id)
     .eq('created_by', user.id)
-    .maybeSingle<{ status: ContentStatus; revision: number }>()
+    .maybeSingle<ContentItem>()
 
   if (readError) throw new Error(`Failed to read content status: ${readError.message}`)
   if (!current) throw new Error('Content item not found')
   assertContentStatusTransition(current.status, parsedStatus.data)
+
+  // The UI disables these moves until required checks pass; enforce the same
+  // gate here so a direct action call cannot skip it. Moving backward
+  // (ready -> review) stays ungated so a flawed article can always be pulled.
+  const entersGatedStage = parsedStatus.data === 'ready'
+    || (parsedStatus.data === 'review' && current.status === 'drafting')
+  if (entersGatedStage) {
+    const { data: sourceRows, error: sourcesError } = await service
+      .from('content_sources')
+      .select('url')
+      .eq('content_item_id', id)
+    if (sourcesError) throw new Error(`Failed to load article sources: ${sourcesError.message}`)
+    const failedRequired = getArticleQualityChecks({
+      title: current.title,
+      description: current.description,
+      markdown: current.markdown,
+      relatedSlugs: current.related_slugs,
+      coverImageAlt: current.cover_image_alt,
+      coverImagePrompt: current.cover_image_prompt,
+      researchSourceUrls: (sourceRows ?? []).map((row: { url: string }) => row.url),
+    }).filter((check) => check.severity === 'required' && !check.passed)
+    if (failedRequired.length) {
+      throw new Error(`Required quality checks failed: ${failedRequired.map((check) => check.label).join(', ')}`)
+    }
+  }
 
   const now = new Date().toISOString()
   const { data, error } = await service
@@ -273,7 +301,7 @@ export async function generateContentPackage(
     throw new Error(`A ${item.status.replace('_', ' ')} article cannot be regenerated`)
   }
 
-  const staleCutoff = new Date(Date.now() - 20 * 60 * 1000).toISOString()
+  const staleCutoff = new Date(Date.now() - STALE_RUN_MS).toISOString()
   await service
     .from('content_generation_runs')
     .update({
@@ -413,7 +441,7 @@ export async function generateContentCover(
   }
   if (!item.cover_image_prompt.trim()) throw new Error('Generate or add a cover image brief first')
 
-  const staleCutoff = new Date(Date.now() - 20 * 60 * 1000).toISOString()
+  const staleCutoff = new Date(Date.now() - STALE_RUN_MS).toISOString()
   await service
     .from('content_generation_runs')
     .update({
@@ -552,7 +580,7 @@ export async function publishContentToDraftPullRequest(
     throw new Error('The approved cover does not belong to this article. Generate or approve it again.')
   }
 
-  const staleCutoff = new Date(Date.now() - 20 * 60 * 1000).toISOString()
+  const staleCutoff = new Date(Date.now() - STALE_RUN_MS).toISOString()
   await service
     .from('content_generation_runs')
     .update({
