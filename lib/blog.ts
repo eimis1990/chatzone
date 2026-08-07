@@ -1,7 +1,8 @@
 import 'server-only'
 import { readFileSync, readdirSync } from 'fs'
 import { join } from 'path'
-import { marked } from 'marked'
+import { parseBlogFrontmatter } from '@/lib/blog-frontmatter'
+import { extractBlogFaq, renderBlogMarkdown } from '@/lib/blog-render'
 
 export interface BlogPost {
   slug: string
@@ -54,130 +55,10 @@ export interface BlogPage {
   totalPosts: number
 }
 
-/** URL-safe slug for a heading anchor (unicode letters/numbers kept). */
-function slugify(s: string): string {
-  return s
-    .toLowerCase()
-    .trim()
-    .replace(/[^\p{L}\p{N}\s-]/gu, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '')
-}
-
 /** Rough reading time at ~200 words/min, floored at 1. */
 function readingTime(markdown: string): number {
   const words = markdown.trim().split(/\s+/).filter(Boolean).length
   return Math.max(1, Math.round(words / 200))
-}
-
-function tableLabel(inner: string, index: number): string {
-  const text = inner.replace(/<[^>]+>/g, '').trim() || (index === 0 ? 'Item' : `Column ${index + 1}`)
-  return text.replace(/"/g, '&quot;')
-}
-
-/** Add responsive metadata while preserving the table's semantic HTML. */
-function enhanceTables(html: string): string {
-  return html.replace(/<table>([\s\S]*?)<\/table>/g, (_table, inner: string) => {
-    const headerRow = inner.match(/<thead>[\s\S]*?<tr>([\s\S]*?)<\/tr>[\s\S]*?<\/thead>/)
-    const headers = headerRow
-      ? [...headerRow[1].matchAll(/<th>([\s\S]*?)<\/th>/g)].map((match, index) => tableLabel(match[1], index))
-      : []
-    const columnCount = headers.length
-    const layout = columnCount >= 4 ? 'wide' : 'compact'
-
-    const labelled = headers.length
-      ? inner.replace(/<tbody>([\s\S]*?)<\/tbody>/, (_body, rows: string) => {
-          const labelledRows = rows.replace(/<tr>([\s\S]*?)<\/tr>/g, (_row, cells: string) => {
-            let column = 0
-            return `<tr>${cells.replace(/<td>/g, () => {
-              const label = headers[column] ?? `Column ${column + 1}`
-              column += 1
-              return `<td data-label="${label}">`
-            })}</tr>`
-          })
-          return `<tbody>${labelledRows}</tbody>`
-        })
-      : inner
-
-    return `<div class="table-wrap table-wrap--${layout}" data-columns="${columnCount}"><table>${labelled}</table></div>`
-  })
-}
-
-/**
- * Render Markdown to HTML: inject anchor ids on H2/H3 (collecting H2s for the
- * table of contents) and annotate tables for responsive presentation.
- */
-function renderBody(body: string): { html: string; headings: Heading[] } {
-  let html = marked.parse(body, { async: false }) as string
-  const headings: Heading[] = []
-  const seen = new Map<string, number>()
-  // marked emits bare <h2>/<h3> (no attributes) — add ids for anchor links.
-  html = html.replace(/<h([23])>([\s\S]*?)<\/h\1>/g, (_m, depth: string, inner: string) => {
-    const label = inner.replace(/<[^>]+>/g, '').trim()
-    let id = slugify(label) || 'section'
-    const n = seen.get(id) ?? 0
-    seen.set(id, n + 1)
-    if (n) id = `${id}-${n}`
-    if (depth === '2') headings.push({ id, text: label, level: 2 })
-    return `<h${depth} id="${id}">${inner}</h${depth}>`
-  })
-  html = enhanceTables(html)
-  return { html, headings }
-}
-
-/** Strip light inline Markdown so an FAQ answer reads as clean text in schema. */
-function stripInlineMd(s: string): string {
-  return s
-    .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1') // links → label
-    .replace(/[*_`]/g, '')
-    .replace(/\s+/g, ' ')
-    .trim()
-}
-
-/**
- * Pull Q&A pairs from a post's "Frequently asked questions" H2 section: each H3
- * is a question, the prose beneath it the answer. Single source of truth — the
- * page renders this section for humans and reuses these pairs for FAQ schema.
- */
-function extractFaq(body: string): FaqItem[] {
-  const tokens = marked.lexer(body)
-  const faqs: FaqItem[] = []
-  let inFaq = false
-  let current: { q: string; a: string[] } | null = null
-  const flush = () => {
-    if (current && current.q && current.a.length) {
-      faqs.push({ question: current.q, answer: current.a.join(' ').trim() })
-    }
-    current = null
-  }
-  for (const t of tokens) {
-    if (t.type === 'heading') {
-      const depth = (t as { depth: number }).depth
-      const text = (t as { text: string }).text
-      if (depth === 2) {
-        flush()
-        inFaq = /frequently asked questions|^faqs?$/i.test(text.trim())
-        continue
-      }
-      if (inFaq && depth === 3) {
-        flush()
-        current = { q: stripInlineMd(text), a: [] }
-        continue
-      }
-    }
-    if (!inFaq || !current) continue
-    if (t.type === 'paragraph' || t.type === 'text') {
-      current.a.push(stripInlineMd((t as { text: string }).text))
-    } else if (t.type === 'list') {
-      const items = ((t as { items?: { text: string }[] }).items ?? [])
-        .map((it) => stripInlineMd(it.text))
-        .join('. ')
-      if (items) current.a.push(items)
-    }
-  }
-  flush()
-  return faqs
 }
 
 // The site owner writes the posts; show their headshot unless a post overrides it.
@@ -187,26 +68,30 @@ const OWNER_LINKEDIN = 'https://www.linkedin.com/in/ekudarauskas/'
 
 const BLOG_DIR = join(process.cwd(), 'content', 'blog')
 
-/** Minimal `key: value` frontmatter parser for our own trusted .md files. */
-function parseFrontmatter(raw: string): { data: Record<string, string>; body: string } {
-  const m = raw.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/)
-  if (!m) return { data: {}, body: raw }
-  const data: Record<string, string> = {}
-  for (const line of m[1].split(/\r?\n/)) {
-    const idx = line.indexOf(':')
-    if (idx === -1) continue
-    const key = line.slice(0, idx).trim()
-    const val = line.slice(idx + 1).trim().replace(/^["']|["']$/g, '')
-    if (key) data[key] = val
+export interface BlogSource {
+  slug: string
+  data: Record<string, string>
+  body: string
+}
+
+/** Raw, editable source for a known blog slug. Rejects path-like input. */
+export function getBlogSourceBySlug(slug: string): BlogSource | null {
+  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) return null
+  let raw: string
+  try {
+    raw = readFileSync(join(BLOG_DIR, `${slug}.md`), 'utf8')
+  } catch {
+    return null
   }
-  return { data, body: m[2] }
+  const { data, body } = parseBlogFrontmatter(raw)
+  return { slug, data, body }
 }
 
 function fileToPost(filename: string): BlogPost {
   const raw = readFileSync(join(BLOG_DIR, filename), 'utf8')
-  const { data, body } = parseFrontmatter(raw)
+  const { data, body } = parseBlogFrontmatter(raw)
   const author = data.author ?? 'Loqara'
-  const { html, headings } = renderBody(body)
+  const { html, headings } = renderBlogMarkdown(body)
   return {
     slug: filename.replace(/\.mdx?$/, ''),
     title: data.title ?? 'Untitled',
@@ -224,7 +109,7 @@ function fileToPost(filename: string): BlogPost {
     related: data.related
       ? data.related.split(',').map((s) => s.trim()).filter(Boolean)
       : undefined,
-    faq: extractFaq(body),
+    faq: extractBlogFaq(body),
     topic: data.topic ?? '',
   }
 }
