@@ -49,7 +49,8 @@ describe('AppSidebar', () => {
     expect(screen.getByText('Loqara').parentElement).toHaveClass('w-0')
     expect(screen.getByRole('button', { name: 'Report a bug' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Sign out' })).toBeInTheDocument()
-    expect(screen.getByText('My Panel')).toHaveAttribute('aria-hidden', 'true')
+    expect(screen.queryByText('Main')).not.toBeInTheDocument()
+    expect(screen.queryByText('Account')).not.toBeInTheDocument()
 
     await waitFor(() => {
       expect(sidebar).toHaveAttribute('data-tooltips-ready', 'true')
@@ -59,7 +60,8 @@ describe('AppSidebar', () => {
 
     expect(sidebar).toHaveClass('w-72')
     expect(sidebar).toHaveAttribute('data-tooltips-ready', 'false')
-    expect(screen.getByText('My Panel')).not.toHaveAttribute('aria-hidden')
+    expect(screen.getByText('Main')).toBeInTheDocument()
+    expect(screen.getByText('Account')).toBeInTheDocument()
     expect(screen.getByTestId('client-bot-list')).not.toHaveClass('ml-3')
     expect(screen.getByRole('link', { name: /^ConusAI/ })).toHaveClass(
       'h-10',

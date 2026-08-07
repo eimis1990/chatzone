@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect, useMemo, useRef, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
+import { AuroraBackground } from '@/components/ui/aurora-background'
 import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import {
@@ -1965,8 +1966,8 @@ export function ConfigForm({
 
       {/* ── Live Preview canvas. The widget itself is portaled to <body> so it
           can sit between a color dialog's backdrop and content layers. ── */}
-      <div
-        className="relative flex-1 min-w-0 overflow-hidden bg-dots"
+      <AuroraBackground
+        className="min-w-0 flex-1 overflow-hidden"
         aria-hidden="true"
       />
       {previewMounted

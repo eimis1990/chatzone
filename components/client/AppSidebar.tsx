@@ -19,8 +19,7 @@ import {
   Code2Icon,
   SettingsIcon,
   CreditCardIcon,
-  PanelLeftCloseIcon,
-  PanelLeftOpenIcon,
+  ChevronLeftIcon,
   type LucideIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -45,7 +44,7 @@ const SECTIONS: { label: string; href: string; icon: LucideIcon }[] = [
   { label: 'Embed', href: 'embed', icon: Code2Icon },
 ]
 
-const SOLID_ACTIVE = 'bg-primary font-medium text-primary-foreground shadow-sm'
+const SOLID_ACTIVE = 'bg-white font-medium text-neutral-900 shadow-sm'
 const SUBMENU_ACTIVE = 'font-medium text-primary'
 const IDLE = 'text-sidebar-foreground/70 hover:bg-white/10 hover:text-white'
 
@@ -78,8 +77,8 @@ function SidebarNavLink({
       className={cn(
         'relative mx-auto flex shrink-0 items-center overflow-hidden text-sm outline-none transition-[width,height,padding,gap,border-radius,background-color,color] duration-300 ease-in-out motion-reduce:transition-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset',
         collapsed
-          ? 'size-11 justify-center gap-0 rounded-xl p-0'
-          : 'h-10 w-full gap-2.5 px-4',
+          ? 'size-11 justify-center gap-0 rounded-[12px] p-0'
+          : 'h-10 w-full gap-2.5 rounded-[12px] px-3',
         active ? activeClassName : IDLE,
         className,
       )}
@@ -148,8 +147,8 @@ export function AppSidebar({
   )
 
   const expandedItem =
-    'flex h-10 w-full shrink-0 items-center gap-2.5 px-4 text-sm outline-none transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset'
-  const selectedBot = 'bg-primary/10 font-medium text-primary'
+    'flex h-10 w-full shrink-0 items-center gap-2.5 rounded-[12px] px-3 text-sm outline-none transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset'
+  const selectedBot = 'font-medium text-primary'
   const selectedSection = SUBMENU_ACTIVE
 
   useEffect(() => {
@@ -253,16 +252,16 @@ export function AppSidebar({
                   aria-expanded={!collapsed}
                   aria-controls="client-sidebar-navigation"
                   className={cn(
-                    'absolute flex size-11 items-center justify-center rounded-xl text-white/60 outline-none transition-[top,right,background-color,color] duration-300 ease-in-out motion-reduce:transition-none hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-primary',
-                    collapsed ? 'right-[18px] top-[68px]' : 'right-4 top-4',
+                    'absolute flex size-9 items-center justify-center rounded-full border border-white/15 text-white/60 outline-none transition-[top,right,background-color,color] duration-300 ease-in-out motion-reduce:transition-none hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-primary',
+                    collapsed ? 'right-[22px] top-[72px]' : 'right-4 top-5',
                   )}
                 />
               }
             >
               {collapsed ? (
-                <PanelLeftOpenIcon className="size-5" aria-hidden="true" />
+                <ChevronRightIcon className="size-4" aria-hidden="true" />
               ) : (
-                <PanelLeftCloseIcon className="size-5" aria-hidden="true" />
+                <ChevronLeftIcon className="size-4" aria-hidden="true" />
               )}
             </TooltipTrigger>
             {(!collapsed || railTooltipsReady) && (
@@ -273,22 +272,15 @@ export function AppSidebar({
           </Tooltip>
         </div>
 
-        <p
-          aria-hidden={collapsed || undefined}
-          className={cn(
-            'overflow-hidden px-4 text-xs font-medium tracking-wide text-white/45 transition-[max-height,opacity,transform,padding] duration-200 ease-out motion-reduce:transition-none',
-            collapsed
-              ? 'max-h-0 -translate-y-1 pb-0 opacity-0'
-              : 'max-h-6 translate-y-0 pb-1 opacity-100',
-          )}
-        >
-          My Panel
-        </p>
-
         <nav
           id="client-sidebar-navigation"
-          className={cn('flex min-h-0 flex-1 flex-col overflow-y-auto pb-2', collapsed && 'gap-1')}
+          className={cn('no-scrollbar flex min-h-0 flex-1 flex-col overflow-y-auto pb-2', collapsed ? 'gap-1' : 'px-3')}
         >
+          {!collapsed && (
+            <p className="shrink-0 px-3 pt-1 pb-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/40">
+              Main
+            </p>
+          )}
           <SidebarNavLink
             href="/app"
             label="Home"
@@ -319,8 +311,8 @@ export function AppSidebar({
                   className={cn(
                     'relative mx-auto flex shrink-0 items-center overflow-hidden text-sm outline-none transition-[width,height,padding,gap,border-radius,background-color,color] duration-300 ease-in-out motion-reduce:transition-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset',
                     collapsed
-                      ? 'size-11 justify-center gap-0 rounded-xl p-0'
-                      : 'h-10 w-full gap-2.5 px-4',
+                      ? 'size-11 justify-center gap-0 rounded-[12px] p-0'
+                      : 'h-10 w-full gap-2.5 rounded-[12px] px-3',
                     activeBotId
                       ? SOLID_ACTIVE
                       : IDLE,
@@ -466,6 +458,13 @@ export function AppSidebar({
             </div>
           )}
 
+          {collapsed ? (
+            <span aria-hidden="true" className="mx-auto my-1 block h-px w-9 shrink-0 bg-white/10" />
+          ) : (
+            <p className="shrink-0 px-3 pt-4 pb-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/40">
+              Account
+            </p>
+          )}
           <SidebarNavLink
             href="/app/team"
             label="Team"
@@ -473,7 +472,6 @@ export function AppSidebar({
             active={pathname === '/app/team'}
             collapsed={collapsed}
             showTooltip={collapsed && railTooltipsReady}
-            className={collapsed ? undefined : 'mt-1'}
           />
           <SidebarNavLink
             href="/app/subscription"
@@ -497,16 +495,37 @@ export function AppSidebar({
 
         {collapsed ? (
           <div className="flex flex-col items-center gap-1 border-t border-white/10 px-3 py-3">
+            <span
+              aria-hidden="true"
+              className="mb-1 grid size-8 place-items-center rounded-full bg-primary/20 text-sm font-semibold uppercase text-primary"
+            >
+              {userEmail[0]}
+            </span>
             <ReportBugButton compact />
             <SignOutButton compact />
           </div>
         ) : (
-          <div className="m-3 rounded-xl bg-[#1b1d1f] p-3 ring-1 ring-white/10">
-            <ReportBugButton />
-            <p className="truncate px-1 pb-1.5 text-xs text-white/55" title={userEmail}>
-              {userEmail}
-            </p>
-            <SignOutButton />
+          <div className="m-3 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04]">
+            <div className="flex items-center gap-2.5 border-b border-white/10 bg-white/[0.03] px-3 py-2.5">
+              <span
+                aria-hidden="true"
+                className="grid size-8 shrink-0 place-items-center rounded-full bg-primary/20 text-sm font-semibold uppercase text-primary"
+              >
+                {userEmail[0]}
+              </span>
+              <div className="min-w-0">
+                <p className="truncate text-xs font-medium text-white/90" title={userEmail}>
+                  {userEmail}
+                </p>
+                <p className="truncate text-[10px] uppercase tracking-[0.14em] text-white/45" title={organizationName}>
+                  {organizationName}
+                </p>
+              </div>
+            </div>
+            <div className="p-1.5">
+              <ReportBugButton />
+              <SignOutButton />
+            </div>
           </div>
         )}
       </aside>
