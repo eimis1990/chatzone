@@ -15,7 +15,7 @@ import {
 } from 'lucide-react'
 import { createServerClient } from '@/lib/supabase/server'
 import { toDateString } from '@/lib/date-utils'
-import { StatCard } from '@/components/client/charts/StatCard'
+import { StatTileGrid, type StatTileData } from '@/components/client/charts/StatCard'
 import { AnalyticsRangeSelector } from '@/components/client/charts/AnalyticsRangeSelector'
 import { ExportReportButton } from '@/components/client/charts/ExportReportButton'
 import { ConversationsChart } from '@/components/client/charts/ConversationsChart'
@@ -323,105 +323,104 @@ export async function AnalyticsSection({
         </div>
       </div>
 
-      {/* Scalar stat cards */}
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
-        <StatCard
-          label="Conversations"
-          value={typedConvs.length}
-          icon={MessagesSquareIcon}
-          accent="green"
-          trend={convTrend}
-          sub="vs. previous period"
-        />
-        <StatCard label="Messages" value={typedMsgs.length} icon={MessageSquareIcon} accent="blue" sub="this period" />
-        <StatCard
-          label="Leads"
-          value={typedLeads.length}
-          icon={UserPlusIcon}
-          accent="violet"
-          trend={leadTrend}
-          sub="vs. previous period"
-        />
-        {/* AI Success in the top-right corner */}
-        <StatCard
-          label="AI Success"
-          value={avgScore === null ? '—' : `${avgScore.toFixed(1)}/5`}
-          icon={GaugeIcon}
-          accent="green"
-          highlight
-          sub={scoredConvs.length > 0 ? `${scoredConvs.length} evaluated` : 'none evaluated yet'}
-        />
-        {showProducts && (
-          <StatCard
-            label="Product Suggestions"
-            value={totalSuggestions}
-            icon={ShoppingBagIcon}
-            accent="amber"
-            sub={repliesWithProducts > 0 ? `across ${repliesWithProducts} replies` : 'none yet'}
-          />
-        )}
-        {showProducts && (
-          <StatCard
-            label="Product Clicks"
-            value={productClicks}
-            icon={MousePointerClickIcon}
-            accent="amber"
-            sub={productCtr === null ? 'no cards shown yet' : `${productCtr}% of shown products`}
-          />
-        )}
-        {showProducts && (
-          <StatCard
-            label="Assisted Value"
-            value={assistedCents > 0 ? formatCentsEur(assistedCents) : '—'}
-            icon={EuroIcon}
-            accent="green"
-            highlight
-            sub="clicked products, estimate"
-          />
-        )}
-        <StatCard
-          label="Link Clicks"
-          value={linkClicks}
-          icon={LinkIcon}
-          accent="blue"
-          sub={sqClicks > 0 ? `+ ${sqClicks} suggested questions used` : 'links followed from answers'}
-        />
-        <StatCard
-          label="Widget Opens"
-          value={widgetOpens}
-          icon={PanelTopOpenIcon}
-          accent="violet"
-          sub={openToConvPct === null ? 'no opens tracked yet' : `${openToConvPct}% started chatting`}
-        />
-        <StatCard
-          label="After Hours"
-          value={`${afterHoursPct}%`}
-          icon={MoonIcon}
-          accent="slate"
-          sub={`${afterHoursConvs} of ${typedConvs.length} conversations`}
-        />
-        <StatCard
-          label="Human Handoffs"
-          value={handoffConvs}
-          icon={HeadsetIcon}
-          accent="blue"
-          sub={typedConvs.length > 0 ? `of ${typedConvs.length} chats` : 'no chats yet'}
-        />
-        <StatCard
-          label="CSAT"
-          value={csat === null ? '—' : `${csat}%`}
-          icon={ThumbsUpIcon}
-          accent="rose"
-          sub={ratedTotal > 0 ? `${thumbsUp}👍 / ${thumbsDown}👎` : 'no ratings yet'}
-        />
-        <StatCard
-          label="Fallback Rate"
-          value={`${fallbackRate}%`}
-          icon={LifeBuoyIcon}
-          accent="slate"
-          sub={`${fallbackCount} of ${assistantMsgs.length} replies`}
-        />
-      </div>
+      {/* Scalar stats: one white panel, hairline grid, filler cells keep rows even */}
+      <StatTileGrid
+        stats={[
+          {
+            label: 'Conversations',
+            value: typedConvs.length,
+            icon: MessagesSquareIcon,
+            accent: 'green',
+            trend: convTrend,
+            sub: 'vs. previous period',
+          },
+          { label: 'Messages', value: typedMsgs.length, icon: MessageSquareIcon, accent: 'blue', sub: 'this period' },
+          {
+            label: 'Leads',
+            value: typedLeads.length,
+            icon: UserPlusIcon,
+            accent: 'violet',
+            trend: leadTrend,
+            sub: 'vs. previous period',
+          },
+          {
+            label: 'AI Success',
+            value: avgScore === null ? '—' : `${avgScore.toFixed(1)}/5`,
+            icon: GaugeIcon,
+            accent: 'green',
+            highlight: true,
+            sub: scoredConvs.length > 0 ? `${scoredConvs.length} evaluated` : 'none evaluated yet',
+          },
+          ...(showProducts
+            ? ([
+                {
+                  label: 'Product Suggestions',
+                  value: totalSuggestions,
+                  icon: ShoppingBagIcon,
+                  accent: 'amber',
+                  sub: repliesWithProducts > 0 ? `across ${repliesWithProducts} replies` : 'none yet',
+                },
+                {
+                  label: 'Product Clicks',
+                  value: productClicks,
+                  icon: MousePointerClickIcon,
+                  accent: 'amber',
+                  sub: productCtr === null ? 'no cards shown yet' : `${productCtr}% of shown products`,
+                },
+                {
+                  label: 'Assisted Value',
+                  value: assistedCents > 0 ? formatCentsEur(assistedCents) : '—',
+                  icon: EuroIcon,
+                  accent: 'green',
+                  highlight: true,
+                  sub: 'clicked products, estimate',
+                },
+              ] satisfies StatTileData[])
+            : []),
+          {
+            label: 'Link Clicks',
+            value: linkClicks,
+            icon: LinkIcon,
+            accent: 'blue',
+            sub: sqClicks > 0 ? `+ ${sqClicks} suggested questions used` : 'links followed from answers',
+          },
+          {
+            label: 'Widget Opens',
+            value: widgetOpens,
+            icon: PanelTopOpenIcon,
+            accent: 'violet',
+            sub: openToConvPct === null ? 'no opens tracked yet' : `${openToConvPct}% started chatting`,
+          },
+          {
+            label: 'After Hours',
+            value: `${afterHoursPct}%`,
+            icon: MoonIcon,
+            accent: 'slate',
+            sub: `${afterHoursConvs} of ${typedConvs.length} conversations`,
+          },
+          {
+            label: 'Human Handoffs',
+            value: handoffConvs,
+            icon: HeadsetIcon,
+            accent: 'blue',
+            sub: typedConvs.length > 0 ? `of ${typedConvs.length} chats` : 'no chats yet',
+          },
+          {
+            label: 'CSAT',
+            value: csat === null ? '—' : `${csat}%`,
+            icon: ThumbsUpIcon,
+            accent: 'rose',
+            sub: ratedTotal > 0 ? `${thumbsUp}👍 / ${thumbsDown}👎` : 'no ratings yet',
+          },
+          {
+            label: 'Fallback Rate',
+            value: `${fallbackRate}%`,
+            icon: LifeBuoyIcon,
+            accent: 'slate',
+            sub: `${fallbackCount} of ${assistantMsgs.length} replies`,
+          },
+        ]}
+      />
 
       {/* Charts row 1 */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">

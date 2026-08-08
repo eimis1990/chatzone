@@ -26,6 +26,96 @@ interface StatCardProps {
   highlight?: boolean
 }
 
+// Icon chip tints for the panel tiles (quiet by default, solid when highlighted).
+const TILE_ACCENTS: Record<StatAccent, { icon: string; chip: string; solid: string }> = {
+  green: { icon: 'text-primary', chip: 'bg-primary/10', solid: 'bg-primary text-primary-foreground' },
+  blue: { icon: 'text-blue-500', chip: 'bg-blue-500/10', solid: 'bg-blue-500 text-white' },
+  violet: { icon: 'text-violet-500', chip: 'bg-violet-500/10', solid: 'bg-violet-500 text-white' },
+  amber: { icon: 'text-amber-500', chip: 'bg-amber-500/10', solid: 'bg-amber-500 text-white' },
+  rose: { icon: 'text-rose-500', chip: 'bg-rose-500/10', solid: 'bg-rose-500 text-white' },
+  slate: { icon: 'text-slate-500', chip: 'bg-slate-500/10', solid: 'bg-slate-500 text-white' },
+}
+
+export interface StatTileData {
+  label: string
+  value: string | number
+  sub?: string
+  icon?: LucideIcon
+  accent?: StatAccent
+  trend?: { value: number; direction: 'up' | 'down' } | null
+  highlight?: boolean
+}
+
+function StatTile({ label, value, sub, icon: Icon, accent = 'green', trend, highlight }: StatTileData) {
+  const a = TILE_ACCENTS[accent]
+  return (
+    <div className="bg-card p-5">
+      <div className="flex items-start justify-between gap-2">
+        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</p>
+        {Icon && (
+          <span
+            className={cn(
+              'grid size-8 shrink-0 place-items-center rounded-lg',
+              highlight ? a.solid : cn(a.chip, a.icon),
+            )}
+          >
+            <Icon className="size-4" aria-hidden="true" />
+          </span>
+        )}
+      </div>
+      <p className="mt-2.5 text-3xl font-bold tabular-nums">{value}</p>
+      <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1">
+        {trend && (
+          <span
+            className={cn(
+              'inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-xs font-semibold',
+              trend.direction === 'up' ? 'bg-green-100 text-green-700' : 'bg-rose-100 text-rose-700',
+            )}
+          >
+            {trend.direction === 'up' ? (
+              <ArrowUpRightIcon className="size-3" />
+            ) : (
+              <ArrowDownRightIcon className="size-3" />
+            )}
+            {Math.abs(trend.value)}%
+          </span>
+        )}
+        {sub && <span className="text-xs text-muted-foreground">{sub}</span>}
+      </div>
+    </div>
+  )
+}
+
+/**
+ * One white panel holding every stat in a hairline-divided grid. Invisible
+ * filler cells complete the last row per breakpoint, so an uneven stat count
+ * never leaves a ragged edge.
+ */
+export function StatTileGrid({ stats }: { stats: StatTileData[] }) {
+  const [fill2, fill3, fill4] = [2, 3, 4].map((cols) => (cols - (stats.length % cols)) % cols)
+  return (
+    <div className="overflow-hidden rounded-2xl border bg-card shadow-sm">
+      <div className="grid grid-cols-2 gap-px bg-border md:grid-cols-3 xl:grid-cols-4">
+        {stats.map((stat) => (
+          <StatTile key={stat.label} {...stat} />
+        ))}
+        {Array.from({ length: Math.max(fill2, fill3, fill4) }, (_, index) => (
+          <div
+            key={index}
+            aria-hidden="true"
+            className={cn(
+              'bg-card',
+              index < fill2 ? 'block' : 'hidden',
+              index < fill3 ? 'md:block' : 'md:hidden',
+              index < fill4 ? 'xl:block' : 'xl:hidden',
+            )}
+          />
+        ))}
+      </div>
+    </div>
+  )
+}
+
 export function StatCard({ label, value, sub, icon: Icon, accent = 'green', trend, highlight }: StatCardProps) {
   const a = ACCENTS[accent]
   return (
