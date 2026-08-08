@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { PartyPopperIcon, RadarIcon } from 'lucide-react'
+import { PartyPopperIcon, RadarIcon, SettingsIcon, TriangleAlertIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { createBrowserClient } from '@/lib/supabase/browser'
 import { buildEmbedSnippet } from '@/lib/embed-snippet'
@@ -13,7 +13,11 @@ interface StepInstallProps {
   botId: string
   publicKey: string
   appUrl: string
+  /** Non-fatal automation notes ("store not connected yet", …). */
+  warnings?: string[]
   onFinish: () => void
+  /** Open the finished bot's configurator. */
+  onViewBot: () => void
 }
 
 /**
@@ -21,7 +25,7 @@ interface StepInstallProps {
  * and polls bots.last_seen_at: the widget stamps it when it loads the bot's
  * config on a real page, so a non-null value means "installed & live".
  */
-export function StepInstall({ botId, publicKey, appUrl, onFinish }: StepInstallProps) {
+export function StepInstall({ botId, publicKey, appUrl, warnings = [], onFinish, onViewBot }: StepInstallProps) {
   const snippet = buildEmbedSnippet(appUrl, publicKey)
   const [installed, setInstalled] = useState(false)
   const celebratedRef = useRef(false)
@@ -64,14 +68,37 @@ export function StepInstall({ botId, publicKey, appUrl, onFinish }: StepInstallP
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-lg font-semibold">Install your bot</h1>
-        <p className="text-sm text-muted-foreground">
-          Paste this snippet before the closing{' '}
-          <code className="rounded bg-muted px-1 py-0.5 text-xs">&lt;/body&gt;</code> tag of your
-          website — the chat bubble appears on every page that includes it.
-        </p>
+      <div className="flex items-start justify-between gap-6">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Your bot is ready 🎉</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Paste this snippet before the closing{' '}
+            <code className="rounded bg-muted px-1 py-0.5 text-xs">&lt;/body&gt;</code> tag of your
+            website — the chat bubble appears on every page that includes it.
+          </p>
+        </div>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/onboarding/fox-install.webp"
+          alt=""
+          aria-hidden="true"
+          className="pointer-events-none hidden h-28 w-auto shrink-0 select-none mix-blend-multiply md:block"
+        />
       </div>
+
+      {warnings.length > 0 && (
+        <div className="space-y-2 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm dark:border-amber-800 dark:bg-amber-950/20">
+          <p className="flex items-center gap-2 font-medium text-amber-800 dark:text-amber-200">
+            <TriangleAlertIcon className="size-4 shrink-0" aria-hidden="true" />
+            A couple of things need a second look
+          </p>
+          <ul className="list-disc space-y-1 pl-6 text-amber-700 dark:text-amber-300">
+            {warnings.map((w) => (
+              <li key={w}>{w}</li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       <SnippetCopy snippet={snippet} botId={botId} />
 
@@ -101,13 +128,12 @@ export function StepInstall({ botId, publicKey, appUrl, onFinish }: StepInstallP
       )}
 
       <div className="flex items-center justify-end gap-3">
-        {!installed && (
-          <Button type="button" variant="ghost" onClick={onFinish}>
-            I&apos;ll install it later
-          </Button>
-        )}
-        <Button onClick={onFinish} className="h-10 px-6">
-          {installed ? 'Finish — go to my bot' : 'Finish'}
+        <Button type="button" variant="ghost" onClick={onFinish}>
+          I&apos;ll install it later
+        </Button>
+        <Button onClick={onViewBot} className="h-11 rounded-xl px-7 font-semibold">
+          <SettingsIcon data-icon="inline-start" />
+          View my bot
         </Button>
       </div>
     </div>

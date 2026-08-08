@@ -121,6 +121,116 @@ describe('extractSiteTheme', () => {
   })
 })
 
+describe('smarter extraction (v3)', () => {
+  it('resolves var() references to custom-property colors', () => {
+    const css = `
+      :root { --cta-bg: #16a34a; }
+      .btn { background: var(--cta-bg); }
+      p { color: #336699; } span { color: #336699; }
+    `
+    expect(extractSiteTheme('', css).primary).toBe('#16a34a')
+  })
+
+  it('prefers a saturated brand color over a more frequent washed-out grey', () => {
+    const css = `
+      .a { color: #d8d8e0; } .b { color: #d8d8e0; } .c { color: #d8d8e0; }
+      .d { color: #d8d8e0; } .e { color: #d8d8e0; }
+      .btn { background: #e11d48; }
+    `
+    expect(extractSiteTheme('', css).primary).toBe('#e11d48')
+  })
+
+  it('reads the median button radius and maps it onto widget corners', () => {
+    const round = extractSiteTheme('', `.btn { border-radius: 12px; } button { border-radius: 14px; } .btn-alt { border-radius: 12px; }`)
+    expect(round.buttonRadius).toBe(12)
+    const roundTheme = paletteToTheme(round)
+    expect(roundTheme.cornerRadius).toBe(20)
+    expect(roundTheme.headerStyle).toBe('curved')
+
+    const sharp = paletteToTheme(extractSiteTheme('', `.btn { border-radius: 2px; }`))
+    expect(sharp.cornerRadius).toBe(6)
+    expect(sharp.headerStyle).toBe('classic')
+  })
+
+  it('treats pill buttons as maximally round', () => {
+    const p = extractSiteTheme('', `.btn { border-radius: 9999px; }`)
+    expect(p.pillButtons).toBe(true)
+    expect(paletteToTheme(p).headerStyle).toBe('curved')
+  })
+
+  it('darkens a too-pale primary until it can carry light text', async () => {
+    const { luminance } = await import('@/lib/theme-extract')
+    const theme = paletteToTheme({ primary: '#ffee55', colors: ['#ffee55'] })
+    expect(theme.primaryColor).not.toBe('#ffee55')
+    expect(luminance(theme.primaryColor!)).toBeLessThanOrEqual(0.73)
+  })
+
+  it('finds a JSON-LD logo and a header image before falling back to icons', () => {
+    const jsonLd = `<script type="application/ld+json">{"logo":"https://acme.com/logo.png"}</script>`
+    expect(extractSiteTheme(jsonLd).logo).toBe('https://acme.com/logo.png')
+
+    const headerImg = `<header class="top"><img src="/brand-mark.png" alt="Acme"></header>`
+    expect(extractSiteTheme(headerImg).logo).toBe('/brand-mark.png')
+  })
+
+  it('reads lazy-loaded logo images (data-src / srcset)', () => {
+    const html = `<img class="logo" data-src="/lazy-logo.svg">`
+    expect(extractSiteTheme(html).logo).toBe('/lazy-logo.svg')
+  })
+})
+
+describe('real-world hardening (v4, from the vibinter.com debug)', () => {
+  it('reads shadcn HSL channel tokens: --primary wins, --background sets the canvas', () => {
+    const css = `
+      :root { --primary: 240 5.9% 10%; --background: 0 0% 100%; }
+      body { background-color: hsl(var(--background)); }
+      .noise { color: #c0392b; } .noise2 { color: #c0392b; } .noise3 { color: #c0392b; }
+    `
+    const p = extractSiteTheme('', css)
+    expect(p.primary).toBe('#18181b')
+    expect(p.pageBackground).toBe('#ffffff')
+  })
+
+  it('ignores vendor-library custom props (react-day-picker blues)', () => {
+    const css = `
+      .rdp { --rdp-accent-color: #00f; --rdp-accent-color-dark: #3003e1; }
+      .btn { background: #16a34a; }
+    `
+    const p = extractSiteTheme('', css)
+    expect(p.primary).toBe('#16a34a')
+  })
+
+  it('drops prefers-color-scheme:dark blocks so a stock dark fallback cannot win', () => {
+    const html = `<style>
+      body { background: #ffffff; }
+      @media (prefers-color-scheme: dark) { body { color: #fff; background: #000000; } }
+    </style>`
+    expect(extractSiteTheme(html).pageBackground).toBe('#ffffff')
+  })
+
+  it('never mistakes a saturated accent for a card surface', () => {
+    const css = `
+      body { background: #ffffff; }
+      .card { background: #f59e0b; }
+    `
+    expect(extractSiteTheme('', css).surface).toBeUndefined()
+  })
+
+  it('only trusts a LIGHT fallback page background on frequency alone', () => {
+    // No body/html rule; dark section surfaces dominate — must not go black.
+    const css = `
+      .hero { background: #0f0f0f; } .panel { background: #0f0f0f; }
+      .strip { background: #0f0f0f; } .light { background: #fafafa; }
+    `
+    expect(extractSiteTheme('', css).pageBackground).toBe('#fafafa')
+  })
+
+  it('skips Next.js font-loader hash names', () => {
+    const css = `body { font-family: __Inter_f367f3, Poppins, sans-serif; }`
+    expect(extractSiteTheme('', css).font).toBe('Poppins')
+  })
+})
+
 describe('matchFontOption', () => {
   it('matches configurator fonts case-insensitively', () => {
     expect(matchFontOption('Inter')).toBe('inter')

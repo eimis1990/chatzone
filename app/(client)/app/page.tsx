@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { PlusIcon, SettingsIcon, SparklesIcon, ArrowRightIcon, ZapIcon, BarChart3Icon, MonitorIcon } from 'lucide-react'
+import { PlusIcon, SettingsIcon, ArrowRightIcon, ZapIcon, BarChart3Icon, MonitorIcon, GlobeIcon, PaletteIcon, Code2Icon } from 'lucide-react'
 import { requireRole, getUserOrgIds } from '@/lib/auth/guards'
 import { createServerClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
@@ -48,7 +48,7 @@ export default async function BotsPage() {
   }
 
   return (
-    <div className="max-w-6xl space-y-6 p-4 md:p-6">
+    <div className="space-y-6 p-4 md:p-6">
       <div>
         <h1 className="text-lg font-semibold">Home</h1>
         <p className="text-sm text-muted-foreground">Create and manage your AI chatbots.</p>
@@ -71,37 +71,60 @@ export default async function BotsPage() {
 
       {/* First-run: guided onboarding front and center (desktop only). */}
       {orgId && bots.length === 0 && (
-        <div className="relative hidden overflow-hidden rounded-2xl border bg-gradient-to-br from-primary/10 via-background to-background p-8 md:block">
-          <div className="max-w-xl">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
-              <SparklesIcon className="size-3.5" />
-              Guided setup
-            </span>
-            <h2 className="mt-4 text-2xl font-semibold tracking-tight">Set up your first bot</h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Tell us about your business, we&apos;ll teach the bot from your website, match your
-              brand, and hand you the install snippet — all in about five minutes.
-            </p>
-            <div className="mt-6 flex flex-wrap items-center gap-3">
-              <Link
-                href="/app/onboarding"
-                className="inline-flex h-10 items-center gap-2 rounded-md bg-primary px-6 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                Start guided setup
-                <ArrowRightIcon className="size-4" />
-              </Link>
-              <CreateBotDialog
-                orgId={orgId}
-                trigger={
-                  <button
-                    type="button"
-                    className="text-sm font-medium text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline"
-                  >
-                    or create a blank bot
-                  </button>
-                }
-              />
+        <div className="relative hidden overflow-hidden rounded-2xl border bg-gradient-to-br from-primary/10 via-background to-background md:block">
+          <div className="grid items-center gap-4 lg:grid-cols-[minmax(0,1fr)_auto]">
+            <div className="max-w-2xl p-8 lg:p-10">
+              <h2 className="text-4xl font-bold tracking-tight text-balance xl:text-5xl">
+                Meet your new teammate —{' '}
+                <span className="text-primary">live in five minutes</span>
+              </h2>
+              <p className="mt-3 max-w-lg text-base text-muted-foreground">
+                Tell us about your business and we&apos;ll do the busywork — you just review and go
+                live.
+              </p>
+              <ul className="mt-5 flex flex-wrap gap-x-6 gap-y-2.5 text-sm">
+                <li className="flex items-center gap-2">
+                  <GlobeIcon className="size-4 text-primary" aria-hidden="true" />
+                  Learns from your website
+                </li>
+                <li className="flex items-center gap-2">
+                  <PaletteIcon className="size-4 text-primary" aria-hidden="true" />
+                  Matches your brand
+                </li>
+                <li className="flex items-center gap-2">
+                  <Code2Icon className="size-4 text-primary" aria-hidden="true" />
+                  Install snippet ready
+                </li>
+              </ul>
+              <div className="mt-7 flex flex-wrap items-center gap-4">
+                <Link
+                  href="/app/onboarding"
+                  className="inline-flex h-11 items-center gap-2 rounded-xl bg-primary px-7 text-sm font-semibold text-primary-foreground shadow-sm transition-all hover:bg-primary/85 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  Start guided setup
+                  <ArrowRightIcon className="size-4" />
+                </Link>
+                <CreateBotDialog
+                  orgId={orgId}
+                  trigger={
+                    <button
+                      type="button"
+                      className="text-sm font-medium text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline"
+                    >
+                      or create a blank bot
+                    </button>
+                  }
+                />
+              </div>
             </div>
+            {/* Doodle fox mascot; multiply blend melts its white canvas into the card gradient. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/onboarding-fox-doodle.webp"
+              alt=""
+              aria-hidden="true"
+              className="pointer-events-none hidden h-72 w-auto select-none justify-self-end pr-8 mix-blend-multiply lg:block xl:h-80"
+            />
           </div>
         </div>
       )}

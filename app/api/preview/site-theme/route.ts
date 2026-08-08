@@ -44,9 +44,10 @@ async function fetchText(
   }
 }
 
-/** First same-origin <link rel="stylesheet"> href, resolved absolute. */
-function firstSameOriginStylesheet(html: string, pageUrl: string): string | null {
+/** Same-origin <link rel="stylesheet"> hrefs, resolved absolute, in order. */
+function sameOriginStylesheets(html: string, pageUrl: string, max: number): string[] {
   const origin = new URL(pageUrl).origin
+  const found: string[] = []
   for (const m of html.matchAll(/<link\b[^>]*>/gi)) {
     const tag = m[0]
     const rel = tag.match(/rel\s*=\s*["']([^"']*)["']/i)?.[1] ?? ''
@@ -55,12 +56,15 @@ function firstSameOriginStylesheet(html: string, pageUrl: string): string | null
     if (!href) continue
     try {
       const resolved = new URL(href, pageUrl)
-      if (resolved.origin === origin) return resolved.toString()
+      if (resolved.origin === origin && !found.includes(resolved.toString())) {
+        found.push(resolved.toString())
+        if (found.length >= max) break
+      }
     } catch {
       // unparseable href — skip
     }
   }
-  return null
+  return found
 }
 
 export async function POST(req: Request) {
@@ -98,17 +102,19 @@ export async function POST(req: Request) {
     )
   }
 
-  // First same-origin stylesheet — enough for most sites' brand tokens.
-  let css = ''
-  const cssUrl = firstSameOriginStylesheet(page.text, page.finalUrl)
-  if (cssUrl) {
+  // Up to three same-origin stylesheets — one is rarely enough on real sites,
+  // where the brand tokens often live in a second theme/framework bundle.
+  const cssParts: string[] = []
+  for (const cssUrl of sameOriginStylesheets(page.text, page.finalUrl, 3)) {
     try {
       await assertPublicUrl(cssUrl)
-      css = (await fetchText(cssUrl, 8_000))?.text ?? ''
+      const part = (await fetchText(cssUrl, 8_000))?.text
+      if (part) cssParts.push(part)
     } catch {
       // stylesheet blocked/unreachable — the HTML alone often suffices
     }
   }
+  const css = cssParts.join('\n')
 
   const palette = extractSiteTheme(page.text, css)
   const theme = paletteToTheme(palette)

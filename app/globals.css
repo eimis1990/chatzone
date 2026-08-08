@@ -190,6 +190,16 @@
     background-position: -9px -9px;
   }
 
+  /* Scanning bar on the automated onboarding scenes (AutoStepScene). */
+  @keyframes onboarding-scan {
+    from {
+      transform: translateX(-150%);
+    }
+    to {
+      transform: translateX(350%);
+    }
+  }
+
   /* Aurora wash for the config live-preview canvas (components/ui/aurora-background.tsx). */
   @keyframes aurora {
     from {

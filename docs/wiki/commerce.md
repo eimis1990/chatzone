@@ -36,7 +36,7 @@ Store connectors + product search. Separate from [RAG chunks](rag-and-knowledge.
   configurator default, `/api/commerce/validate` retries failed Woo validation as Verskis and tells
   both configurators to persist `provider: 'verskis'`; this is why pasting `mobel.lt` works without
   knowing its platform first (`app/api/commerce/validate/route.ts:48-82`,
-  `components/client/ConfigForm.tsx:2200-2250`, `components/client/onboarding/StepStore.tsx:61-91`).
+  `components/client/ConfigForm.tsx:2200-2250`, `components/client/onboarding/OnboardingWizard.tsx:132-176`).
 - All outbound requests to a tenant's `storeUrl`/`feedUrl`/`shopifyDomain` are SSRF-guarded via
   `assertPublicUrl` before the real network call (`lib/commerce/index.ts:32-44`).
 - **Testing notes:** crocs.lt & open24.lt block public Magento APIs — test Magento against

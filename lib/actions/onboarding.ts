@@ -200,14 +200,27 @@ export async function saveOnboardingCommerce(
 export async function saveOnboardingTheme(
   botId: string,
   theme: Record<string, unknown>,
+  options?: { logoUrl?: string | null },
 ): Promise<OnboardingSaveResult> {
   await requireRole('client')
   const { supabase, bot } = await loadOwnBot(botId)
   if (!bot) return { success: false, error: 'Bot not found.' }
 
-  const merged = {
-    ...bot.config,
-    theme: mergeVisualTheme(bot.config.theme as unknown as Record<string, unknown>, theme),
+  const mergedTheme = mergeVisualTheme(
+    bot.config.theme as unknown as Record<string, unknown>,
+    theme,
+  )
+  // headerStyle is a preserved key (presets must not clobber a user's layout),
+  // but onboarding themes a brand-new bot — nothing to preserve, so the
+  // extractor's suggestion is applied explicitly here.
+  if (theme.headerStyle === 'classic' || theme.headerStyle === 'floating' || theme.headerStyle === 'curved') {
+    mergedTheme.headerStyle = theme.headerStyle
+  }
+
+  const merged: Record<string, unknown> = { ...bot.config, theme: mergedTheme }
+  // Site logo → company avatar, only when the bot doesn't have one yet.
+  if (options?.logoUrl && !bot.config.avatarUrl) {
+    merged.avatarUrl = options.logoUrl
   }
   return saveMergedConfig(supabase, botId, merged)
 }
