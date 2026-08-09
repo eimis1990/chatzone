@@ -22,6 +22,7 @@ import { conversationsThisMonth } from '@/lib/usage'
 import { getOrgAnalyticsRollup, type OrgAnalyticsRollup } from '@/lib/analytics/org-rollup'
 import type { Plan } from '@/lib/types'
 import { CreateBotDialog } from '@/components/client/CreateBotDialog'
+import { Reveal } from '@/components/client/Reveal'
 import { DeleteBotButton } from '@/components/client/DeleteBotButton'
 import { StatTileGrid, type StatTileData } from '@/components/client/charts/StatCard'
 import { OrgBotComparisonChart } from '@/components/client/charts/OrgBotComparisonChart'
@@ -90,10 +91,10 @@ export default async function BotsPage() {
 
   return (
     <div className="space-y-6 p-4 md:p-6">
-      <div>
+      <Reveal>
         <h1 className="text-lg font-semibold">Home</h1>
         <p className="text-sm text-muted-foreground">Create and manage your AI chatbots.</p>
-      </div>
+      </Reveal>
 
       {/* Zero-bots on mobile: bot creation is a desktop job, so point them there. */}
       {orgId && bots.length === 0 && (
@@ -175,7 +176,7 @@ export default async function BotsPage() {
       {/* Left column: the bot list (rows — most orgs have 1-2 bots) + analytics. */}
       <div className="min-w-0 space-y-6">
         <div className="flex flex-col gap-4">
-          {bots.map((bot) => {
+          {bots.map((bot, index) => {
             const lang = bot.config.defaultLanguage ?? 'en'
             const greeting =
               bot.config.content?.[lang]?.greeting ?? bot.config.content?.en?.greeting ?? ''
@@ -242,18 +243,19 @@ export default async function BotsPage() {
               </Card>
             )
             return (
-              <div key={bot.id}>
+              <Reveal key={bot.id} delay={Math.min(0.06 + index * 0.06, 0.3)}>
                 <Link href={`/app/bots/${bot.id}/configure`} className="group hidden focus:outline-none md:block">
                   {card(SettingsIcon, 'Configure')}
                 </Link>
                 <Link href={`/app/bots/${bot.id}/analytics`} className="group block focus:outline-none md:hidden">
                   {card(BarChart3Icon, 'View analytics')}
                 </Link>
-              </div>
+              </Reveal>
             )
           })}
           {orgId && (
             // Creating a bot is a desktop (build) task — slim row under the list.
+            <Reveal delay={Math.min(0.12 + bots.length * 0.06, 0.36)}>
             <CreateBotDialog
               orgId={orgId}
               trigger={
@@ -266,17 +268,19 @@ export default async function BotsPage() {
                 </button>
               }
             />
+            </Reveal>
           )}
         </div>
 
         {/* ── Org analytics (30-day window) — fills the column beside the rail ── */}
         {rollup && rollup.rows.length > 0 && (
           <section aria-label="Analytics across all bots" className="space-y-4 pt-2">
-            <div className="border-b pb-3">
+            <Reveal delay={0.22} className="border-b pb-3">
               <h2 className="text-xl font-semibold">Analytics</h2>
               <p className="text-sm text-muted-foreground">All bots side by side, last 30 days.</p>
-            </div>
+            </Reveal>
 
+            <Reveal delay={0.28}>
             <StatTileGrid
               stats={[
                 {
@@ -309,9 +313,10 @@ export default async function BotsPage() {
                 },
               ]}
             />
+            </Reveal>
 
             {/* Bot activity — full width of the column. */}
-            <div className="overflow-hidden rounded-2xl border bg-card shadow-sm">
+            <Reveal delay={0.36} className="overflow-hidden rounded-2xl border bg-card shadow-sm">
               <div className="flex items-center justify-between gap-3 border-b px-5 py-4">
                 <div>
                   <h3 className="text-sm font-semibold">Bot activity</h3>
@@ -332,10 +337,10 @@ export default async function BotsPage() {
                   </div>
                 )}
               </div>
-            </div>
+            </Reveal>
 
             {/* Conversion snapshot — compact hairline grid. */}
-            <div className="overflow-hidden rounded-2xl border bg-card shadow-sm">
+            <Reveal delay={0.44} className="overflow-hidden rounded-2xl border bg-card shadow-sm">
               <div className="border-b px-5 py-4">
                 <h3 className="text-sm font-semibold">Conversion snapshot</h3>
                 <p className="text-xs text-muted-foreground">
@@ -370,14 +375,15 @@ export default async function BotsPage() {
                   </div>
                 </div>
               </div>
-            </div>
+            </Reveal>
           </section>
         )}
       </div>
 
-      {/* Free plan: vertical upgrade rail with the leveling-up mascot. */}
+      {/* Free plan: the rail arrives last, sliding in from the right. */}
       {freeTier && (
-        <aside className="overflow-hidden rounded-3xl border bg-card xl:sticky xl:top-6">
+        <Reveal from="right" delay={0.55} duration={0.65} className="xl:sticky xl:top-6">
+        <aside className="overflow-hidden rounded-3xl border bg-card">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/onboarding/fox-upgrade.webp"
@@ -415,6 +421,7 @@ export default async function BotsPage() {
             </Link>
           </div>
         </aside>
+        </Reveal>
       )}
       </div>
       )}
