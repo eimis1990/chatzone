@@ -7,14 +7,9 @@ import {
   CheckIcon,
   ExternalLinkIcon,
   Loader2Icon,
-  PhoneCallIcon,
-  MessageSquareIcon,
-  ArrowUpRightIcon,
   Clock3Icon,
   MinusIcon,
   PlusIcon,
-  SofaIcon,
-  type LucideIcon,
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -111,7 +106,7 @@ const PLAN_ART: Partial<Record<Plan, string>> = {
 type AddOnStatus = 'active' | 'available' | 'coming'
 
 function AddOnCard({
-  icon: Icon,
+  image,
   title,
   description,
   price,
@@ -122,7 +117,8 @@ function AddOnCard({
   action,
   helper,
 }: {
-  icon: LucideIcon
+  /** Doodle-fox illustration shown at the top of the card. */
+  image: string
   title: string
   description: string
   price: string
@@ -136,33 +132,22 @@ function AddOnCard({
   const coming = status === 'coming'
   const active = status === 'active'
 
+  // Coming-soon cards look exactly like the rest — only the badge and the
+  // disabled button differ.
   return (
-    <Card
-      className={cn(
-        'relative h-full shadow-sm [--card-spacing:--spacing(5)]',
-        coming && 'bg-muted/20 shadow-none',
-      )}
-    >
-      <span
-        className={cn(
-          'absolute inset-x-0 top-0 h-1 bg-primary',
-          coming && 'bg-muted-foreground/20',
-        )}
+    <Card className="relative h-full rounded-3xl border ring-0 [--card-spacing:--spacing(5)]">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={image}
+        alt=""
         aria-hidden="true"
+        className="pointer-events-none mx-auto h-32 w-auto select-none pt-3"
       />
       <CardHeader>
-        <CardTitle className="flex items-center gap-3">
-          <span
-            className={cn(
-              'flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary',
-              coming && 'bg-muted text-muted-foreground',
-            )}
-          >
-            <Icon className="size-5" aria-hidden="true" />
-          </span>
+        <CardTitle>
           <h3>{title}</h3>
         </CardTitle>
-        <CardDescription className="pt-2 leading-relaxed">{description}</CardDescription>
+        <CardDescription className="pt-1.5 leading-relaxed">{description}</CardDescription>
         <CardAction>
           <Badge variant={active ? 'default' : coming ? 'secondary' : 'outline'}>
             {active && <CheckIcon data-icon="inline-start" aria-hidden="true" />}
@@ -183,13 +168,7 @@ function AddOnCard({
         <ul className="flex flex-col gap-2.5 text-sm text-foreground/80">
           {features.map((feature) => (
             <li key={feature} className="flex items-start gap-2.5">
-              <CheckIcon
-                className={cn(
-                  'mt-0.5 size-4 shrink-0 text-primary',
-                  coming && 'text-muted-foreground',
-                )}
-                aria-hidden="true"
-              />
+              <CheckIcon className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
               <span>{feature}</span>
             </li>
           ))}
@@ -340,7 +319,7 @@ export function BillingPanel({
   return (
     <div className="space-y-8">
       {/* Plan + usage — plan panel left, usage rows middle, the tier's fox right */}
-      <section className="w-full rounded-[28px] border bg-card p-6 shadow-sm sm:p-7">
+      <section className="w-full rounded-3xl border bg-card p-6 sm:p-7">
         <div className="grid gap-7 lg:grid-cols-[320px_minmax(0,1fr)] lg:gap-8">
           {/* Plan — the tier's own fox (same art as its card below) in the corner */}
           <aside className="flex flex-col rounded-3xl border bg-card p-6">
@@ -494,7 +473,7 @@ export function BillingPanel({
       </section>
 
       {!billingEnabled ? (
-        <p className="rounded-lg border border-dashed bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
+        <p className="rounded-3xl border border-dashed bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
           Billing isn&apos;t switched on yet — plans will be purchasable here shortly.
         </p>
       ) : (
@@ -548,7 +527,7 @@ export function BillingPanel({
               return (
                 <div
                   key={p.plan}
-                  className={`relative flex flex-col rounded-2xl border bg-card p-6 shadow-sm ${p.popular ? 'border-primary ring-1 ring-primary' : ''}`}
+                  className={`relative flex flex-col rounded-3xl border bg-card p-6 ${p.popular ? 'border-primary ring-1 ring-primary' : ''}`}
                 >
                   {p.popular && (
                     <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground">
@@ -614,7 +593,7 @@ export function BillingPanel({
             <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
               {/* Voice agent — interactive */}
               <AddOnCard
-                icon={PhoneCallIcon}
+                image="/addons/fox-addon-voice.webp"
                 title={voice.name}
                 description={voice.blurb}
                 price={`€${voice.monthly}`}
@@ -684,7 +663,7 @@ export function BillingPanel({
 
               {/* Product visualizer — interactive */}
               <AddOnCard
-                icon={SofaIcon}
+                image="/addons/fox-addon-visualizer.webp"
                 title={visualizer.name}
                 description={visualizer.blurb}
                 price={`€${visualizer.monthly}`}
@@ -755,7 +734,7 @@ export function BillingPanel({
 
               {/* Channels — coming soon */}
               <AddOnCard
-                icon={MessageSquareIcon}
+                image="/addons/fox-addon-messenger.webp"
                 title="Channels"
                 description="Meet customers in the messaging apps they already use."
                 price="€19"
@@ -777,7 +756,7 @@ export function BillingPanel({
 
               {/* Extra conversations — coming soon */}
               <AddOnCard
-                icon={ArrowUpRightIcon}
+                image="/addons/fox-addon-extra.webp"
                 title="Extra conversations"
                 description="Handle a busy month without moving to a higher plan."
                 price="~€15"
@@ -813,7 +792,7 @@ export function BillingPanel({
                   const owned = purchasedSetups.includes(s.id)
                   const thisBusy = busy === `setup-${s.id}`
                   return (
-                    <div key={s.id} className="relative flex flex-col rounded-2xl border bg-card p-6 shadow-sm">
+                    <div key={s.id} className="relative flex flex-col rounded-3xl border bg-card p-6">
                       {owned && (
                         <span className="absolute right-4 top-4 inline-flex items-center gap-1 rounded-full bg-green-100 px-2.5 py-1 text-xs font-semibold text-green-700">
                           <CheckIcon className="size-3.5" /> Paid

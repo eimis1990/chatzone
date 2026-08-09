@@ -94,7 +94,7 @@ function StatTile({ label, value, sub, icon: Icon, accent = 'green', trend, high
 export function StatTileGrid({ stats }: { stats: StatTileData[] }) {
   const [fill2, fill3, fill4] = [2, 3, 4].map((cols) => (cols - (stats.length % cols)) % cols)
   return (
-    <div className="overflow-hidden rounded-2xl border bg-card shadow-sm">
+    <div className="overflow-hidden rounded-3xl border bg-card">
       <div className="grid grid-cols-2 gap-px bg-border md:grid-cols-3 xl:grid-cols-4">
         {stats.map((stat) => (
           <StatTile key={stat.label} {...stat} />

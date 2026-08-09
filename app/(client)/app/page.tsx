@@ -249,7 +249,7 @@ export default async function BotsPage() {
             // Same card, two tap targets: Configure on desktop (build), Analytics
             // on mobile (monitor). Only one link is visible per breakpoint.
             const card = (Icon: typeof SettingsIcon, label: string) => (
-              <Card className="relative flex h-full flex-col overflow-hidden transition-all group-hover:-translate-y-0.5 group-hover:shadow-md group-focus-visible:ring-2 group-focus-visible:ring-ring">
+              <Card className="relative flex h-full flex-col overflow-hidden rounded-3xl border ring-0 transition-all group-hover:-translate-y-0.5 group-hover:shadow-md group-focus-visible:ring-2 group-focus-visible:ring-ring">
                 {/* Brand-colored glow in the top-right corner (matches demo cards). */}
                 <div
                   aria-hidden="true"
@@ -322,7 +322,7 @@ export default async function BotsPage() {
               trigger={
                 <button
                   type="button"
-                  className="group hidden h-12 w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border bg-card/40 text-sm font-medium text-muted-foreground transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-ring md:flex"
+                  className="group hidden h-12 w-full items-center justify-center gap-2 rounded-3xl border-2 border-dashed border-border bg-card/40 text-sm font-medium text-muted-foreground transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-ring md:flex"
                 >
                   <PlusIcon className="size-4" />
                   Create bot
@@ -377,7 +377,7 @@ export default async function BotsPage() {
             </Reveal>
 
             {/* Bot activity — full width of the column. */}
-            <Reveal delay={0.36} className="overflow-hidden rounded-2xl border bg-card shadow-sm">
+            <Reveal delay={0.36} className="overflow-hidden rounded-3xl border bg-card">
               <div className="flex items-center justify-between gap-3 border-b px-5 py-4">
                 <div>
                   <h3 className="text-sm font-semibold">Bot activity</h3>
@@ -401,7 +401,7 @@ export default async function BotsPage() {
             </Reveal>
 
             {/* Conversion snapshot — compact hairline grid. */}
-            <Reveal delay={0.44} className="overflow-hidden rounded-2xl border bg-card shadow-sm">
+            <Reveal delay={0.44} className="overflow-hidden rounded-3xl border bg-card">
               <div className="border-b px-5 py-4">
                 <h3 className="text-sm font-semibold">Conversion snapshot</h3>
                 <p className="text-xs text-muted-foreground">
