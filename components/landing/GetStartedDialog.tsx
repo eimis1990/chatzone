@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useId, useRef, useState } from 'react'
-import { LoaderCircleIcon } from 'lucide-react'
+import { ArrowRightIcon, LoaderCircleIcon } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -209,7 +209,7 @@ export function GetStartedDialog({
           label
         )}
       </DialogTrigger>
-      <DialogContent className="gap-0 p-6 sm:max-w-md sm:p-8">
+      <DialogContent className="gap-0 rounded-3xl p-6 sm:max-w-md sm:p-8">
         {step === 'form' ? (
           <>
             <img
@@ -233,7 +233,7 @@ export function GetStartedDialog({
                   required
                   autoComplete="organization"
                   maxLength={80}
-                  placeholder="e.g. Saulės grožio studija"
+                  placeholder="e.g. Northside Coffee Roasters"
                   value={company}
                   onChange={(e) => setCompany(e.target.value)}
                   className="h-11"
@@ -291,19 +291,25 @@ export function GetStartedDialog({
                   {error}
                 </p>
               )}
+              {/* Same sliding-tray treatment as the sign-in button. */}
               <button
                 ref={submitRef}
                 type="submit"
                 disabled={loading}
-                className="relative mt-1 inline-flex h-11 w-full items-center justify-center overflow-hidden rounded-full bg-primary text-sm font-semibold text-white shadow-lg shadow-primary/20 transition-colors hover:bg-primary-hover disabled:opacity-70"
+                className="group relative mt-1 inline-flex h-12 w-full items-center justify-center overflow-hidden rounded-xl bg-[#101213] px-4 text-sm font-semibold text-white transition-colors hover:bg-[#101213]/90 disabled:opacity-70"
               >
-                <span className="relative z-10 inline-flex items-center gap-2">
+                <span className="mr-9 inline-flex items-center gap-2 transition-opacity duration-500 group-hover:opacity-0">
                   {loading && (
                     <LoaderCircleIcon className="size-4 animate-spin" aria-hidden="true" />
                   )}
-                  {loading ? 'Sending…' : 'Continue'}
+                  {loading ? 'Sending…' : 'Request access'}
                 </span>
-                <Shimmer />
+                <i
+                  aria-hidden="true"
+                  className="absolute bottom-1 right-1 top-1 z-10 grid w-10 place-items-center rounded-lg bg-white/15 transition-all duration-500 group-hover:w-[calc(100%-0.5rem)] group-active:scale-95"
+                >
+                  <ArrowRightIcon className="size-4" strokeWidth={2} />
+                </i>
               </button>
             </form>
           </>
