@@ -32,6 +32,68 @@ import { LiveIndicator } from '@/components/LiveIndicator'
 import { readableTextColor } from '@/lib/utils'
 import type { Bot } from '@/lib/types'
 
+/** Right-rail content per plan: its fox, the next-tier pitch, and the CTA. */
+const PLAN_RAILS: Record<Plan, { image: string; title: string; pitch: string; cta: string }> = {
+  free: {
+    image: '/onboarding/fox-upgrade.webp',
+    title: "You're on the Free plan",
+    pitch: 'Starter unlocks 1,500 conversations, 2 bots, all languages, and lead capture.',
+    cta: 'See plans',
+  },
+  starter: {
+    image: '/plans/fox-plan-starter.webp',
+    title: "You're on Starter",
+    pitch: 'Growth unlocks 4,000 conversations, up to 5 bots, priority support, and advanced analytics.',
+    cta: 'See plans',
+  },
+  growth: {
+    image: '/plans/fox-plan-growth.webp',
+    title: "You're on Growth",
+    pitch: 'Scale unlocks 12,000 conversations, unlimited bots, teams & roles, and a priority SLA.',
+    cta: 'See plans',
+  },
+  scale: {
+    image: '/plans/fox-plan-scale.webp',
+    title: "You're on Scale",
+    pitch: 'The top self-serve tier — manage seats, billing, and add-ons any time.',
+    cta: 'Manage subscription',
+  },
+  enterprise: {
+    image: '/plans/fox-plan-scale.webp',
+    title: "You're on Enterprise",
+    pitch: 'Custom limits and dedicated support — reach out any time for adjustments.',
+    cta: 'Manage subscription',
+  },
+}
+
+/** One add-on gets the spotlight per page load — light marketing, rotating. */
+const ADDON_SPOTLIGHTS = [
+  {
+    id: 'voice',
+    image: '/addons/fox-addon-voice.webp',
+    title: 'Voice agent',
+    copy: 'Let visitors talk to your assistant — live voice calls, answered from your knowledge base.',
+  },
+  {
+    id: 'visualizer',
+    image: '/addons/fox-addon-visualizer.webp',
+    title: 'Product visualizer',
+    copy: 'Visitors upload a room photo and see your products placed right in it.',
+  },
+  {
+    id: 'messenger',
+    image: '/addons/fox-addon-messenger.webp',
+    title: 'Messenger channel',
+    copy: 'Answer Facebook Messenger with the same bot — same knowledge, same tone.',
+  },
+  {
+    id: 'instagram',
+    image: '/addons/fox-addon-instagram.webp',
+    title: 'Instagram channel',
+    copy: 'Turn Instagram DMs into answered questions and captured leads.',
+  },
+]
+
 /** One cell of the conversion snapshot's hairline grid. */
 function RateTile({ label, value, detail }: { label: string; value: number; detail: string }) {
   const pct = Math.max(0, value)
@@ -56,7 +118,7 @@ export default async function BotsPage() {
   const orgId = orgIds[0] ?? null
 
   let bots: Bot[] = []
-  let freeTier: { used: number; limit: number } | null = null
+  let planInfo: { plan: Plan; used: number; limit: number } | null = null
   let rollup: OrgAnalyticsRollup | null = null
 
   if (orgId) {
@@ -68,26 +130,25 @@ export default async function BotsPage() {
       .order('created_at', { ascending: false })
     bots = (data ?? []) as Bot[]
 
-    // Free-tier nudge: live usage + what upgrading unlocks (only once a bot exists).
-    const { data: org } = await supabase
-      .from('organizations')
-      .select('plan')
-      .eq('id', orgId)
-      .single<{ plan: Plan | null }>()
-    if ((org?.plan ?? 'free') === 'free' && bots.length > 0) {
-      const limit = entitlementsFor('free').conversations
-      if (Number.isFinite(limit)) {
-        const used = await conversationsThisMonth(createServiceClient(), orgId)
-        freeTier = { used, limit }
-      }
-    }
-
-    // Org analytics live on Home now (30-day window; /app/analytics keeps the
-    // range selector and per-bot deep links).
     if (bots.length > 0) {
+      // Plan rail: current tier + live usage (every tier gets its own pitch).
+      const { data: org } = await supabase
+        .from('organizations')
+        .select('plan')
+        .eq('id', orgId)
+        .single<{ plan: Plan | null }>()
+      const plan = (org?.plan ?? 'free') as Plan
+      const used = await conversationsThisMonth(createServiceClient(), orgId)
+      planInfo = { plan, used, limit: entitlementsFor(plan).conversations }
+
+      // Org analytics live on Home now (30-day window).
       rollup = await getOrgAnalyticsRollup(supabase, orgId, 30)
     }
   }
+
+  const rail = planInfo ? PLAN_RAILS[planInfo.plan] : null
+  // Server component: a fresh pick per request (the page is auth-dynamic).
+  const spotlight = ADDON_SPOTLIGHTS[Math.floor(Math.random() * ADDON_SPOTLIGHTS.length)]
 
   return (
     <div className="space-y-6 p-4 md:p-6">
@@ -380,48 +441,77 @@ export default async function BotsPage() {
         )}
       </div>
 
-      {/* Free plan: the rail arrives last, sliding in from the right. */}
-      {freeTier && (
-        <Reveal from="right" delay={0.55} duration={0.65} className="xl:sticky xl:top-6">
-        <aside className="overflow-hidden rounded-3xl border bg-card">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/onboarding/fox-upgrade.webp"
-            alt=""
-            aria-hidden="true"
-            className="pointer-events-none w-full select-none"
-          />
-          <div className="space-y-4 px-6 pb-6 pt-4">
-            <div>
-              <p className="text-sm font-semibold">You&apos;re on the Free plan</p>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Starter unlocks 1,500 conversations, all languages, and lead capture.
-              </p>
-            </div>
-            <div>
-              <div className="flex items-baseline justify-between text-xs">
-                <span className="text-muted-foreground">Conversations this month</span>
-                <span className="font-medium tabular-nums">
-                  {freeTier.used.toLocaleString()} / {freeTier.limit.toLocaleString()}
+      {/* Plan rail + add-on spotlight: arrive last, sliding in from the right. */}
+      {planInfo && rail && (
+        <div className="space-y-4 xl:sticky xl:top-6">
+          <Reveal from="right" delay={0.55} duration={0.65}>
+            <aside className="overflow-hidden rounded-3xl border bg-card">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={rail.image}
+                alt=""
+                aria-hidden="true"
+                className="pointer-events-none mx-auto h-48 w-auto select-none pt-3"
+              />
+              <div className="space-y-4 px-6 pb-6 pt-3">
+                <div>
+                  <p className="text-sm font-semibold">{rail.title}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">{rail.pitch}</p>
+                </div>
+                {Number.isFinite(planInfo.limit) && (
+                  <div>
+                    <div className="flex items-baseline justify-between text-xs">
+                      <span className="text-muted-foreground">Conversations this month</span>
+                      <span className="font-medium tabular-nums">
+                        {planInfo.used.toLocaleString()} / {planInfo.limit.toLocaleString()}
+                      </span>
+                    </div>
+                    <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-muted">
+                      <div
+                        className="h-full rounded-full bg-primary"
+                        style={{ width: `${Math.min(100, Math.round((100 * planInfo.used) / planInfo.limit))}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
+                <Link
+                  href="/app/subscription"
+                  className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary text-sm font-semibold text-primary-foreground shadow-sm transition-all hover:bg-primary/85 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  {rail.cta}
+                  <ArrowRightIcon className="size-4" />
+                </Link>
+              </div>
+            </aside>
+          </Reveal>
+
+          {/* Rotating add-on spotlight — a different one each visit. */}
+          <Reveal from="right" delay={0.72} duration={0.65}>
+            <aside className="overflow-hidden rounded-3xl border bg-card">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={spotlight.image}
+                alt=""
+                aria-hidden="true"
+                className="pointer-events-none mx-auto h-48 w-auto select-none pt-3"
+              />
+              <div className="space-y-2 px-6 pb-5 pt-1">
+                <span className="inline-flex rounded-full bg-primary/10 px-2.5 py-0.5 text-[11px] font-semibold text-primary">
+                  Add-on
                 </span>
+                <p className="text-sm font-semibold">{spotlight.title}</p>
+                <p className="text-xs text-muted-foreground">{spotlight.copy}</p>
+                <Link
+                  href="/app/subscription"
+                  className="inline-flex items-center gap-1 pt-1 text-sm font-medium text-primary hover:underline"
+                >
+                  Explore add-ons
+                  <ArrowRightIcon className="size-3.5" aria-hidden="true" />
+                </Link>
               </div>
-              <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-muted">
-                <div
-                  className="h-full rounded-full bg-primary"
-                  style={{ width: `${Math.min(100, Math.round((100 * freeTier.used) / freeTier.limit))}%` }}
-                />
-              </div>
-            </div>
-            <Link
-              href="/app/subscription"
-              className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary text-sm font-semibold text-primary-foreground shadow-sm transition-all hover:bg-primary/85 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              See plans
-              <ArrowRightIcon className="size-4" />
-            </Link>
-          </div>
-        </aside>
-        </Reveal>
+            </aside>
+          </Reveal>
+        </div>
       )}
       </div>
       )}

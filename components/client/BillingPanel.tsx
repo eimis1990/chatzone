@@ -100,6 +100,14 @@ const STATUS_LABEL: Record<SubscriptionStatus, string> = {
 
 const ORDER: Plan[] = ['free', 'starter', 'growth', 'scale', 'enterprise']
 
+/** Doodle-fox art per plan tier (same set as Home's plan rail). */
+const PLAN_ART: Partial<Record<Plan, string>> = {
+  free: '/onboarding-fox-doodle.webp',
+  starter: '/plans/fox-plan-starter.webp',
+  growth: '/plans/fox-plan-growth.webp',
+  scale: '/plans/fox-plan-scale.webp',
+}
+
 type AddOnStatus = 'active' | 'available' | 'coming'
 
 function AddOnCard({
@@ -310,38 +318,15 @@ export function BillingPanel({
     })
   }
 
-  const Meter = ({ label, used, limit }: { label: string; used: number; limit: number }) => {
-    const unlimited = !isFinite(limit)
-    const pct = unlimited || limit <= 0 ? 0 : Math.min(100, Math.round((used / limit) * 100))
-    const over = !unlimited && used >= limit
-    const near = !unlimited && !over && pct >= 90
-    const barColor = over ? 'bg-red-500' : near ? 'bg-amber-500' : 'bg-primary'
-    return (
-      <div>
-        <div className="flex items-baseline justify-between text-sm">
-          <span className="font-medium">{label}</span>
-          <span className="text-muted-foreground">
-            {used.toLocaleString()}
-            {unlimited ? ' · Unlimited' : ` / ${limit.toLocaleString()}`}
-          </span>
-        </div>
-        {!unlimited && (
-          <div className="mt-1.5 h-2 w-full overflow-hidden rounded-full bg-muted">
-            <div
-              className={`h-full rounded-full ${barColor} transition-all`}
-              style={{ width: `${pct}%` }}
-            />
-          </div>
-        )}
-        {over && <p className="mt-1 text-xs text-red-600">Limit reached — upgrade to add more.</p>}
-        {near && (
-          <p className="mt-1 text-xs text-amber-600">
-            {(limit - used).toLocaleString()} left this month.
-          </p>
-        )}
-      </div>
-    )
-  }
+  /** Thin usage progress bar — dark fill, calm even at 100%. */
+  const UsageProgress = ({ used, limit }: { used: number; limit: number }) => (
+    <div className="h-2 overflow-hidden rounded-full bg-muted">
+      <div
+        className="h-full rounded-full bg-[#101213] transition-all duration-300"
+        style={{ width: `${limit > 0 ? Math.min(100, Math.round((used / limit) * 100)) : 0}%` }}
+      />
+    </div>
+  )
 
   const anyBusy = busy !== null
   const periodLabel = currentPeriodEnd
@@ -354,54 +339,159 @@ export function BillingPanel({
 
   return (
     <div className="space-y-8">
-      {/* Plan + usage — one compact card (they belong together) */}
-      <div className="rounded-xl border bg-card p-5">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <p className="text-sm text-muted-foreground">Current plan</p>
-            <p className="text-xl font-semibold capitalize">
-              {plan}
-              {isPaying && (
-                <span className="ml-2 align-middle text-sm font-normal text-muted-foreground">
-                  {STATUS_LABEL[status]}
-                  {interval ? ` · billed ${interval === 'year' ? 'annually' : 'monthly'}` : ''}
-                  {voiceActive ? ' · Voice add-on' : ''}
-                </span>
-              )}
-            </p>
-            {periodLabel && (status === 'active' || status === 'trialing') && (
-              <p className="mt-1 text-xs text-muted-foreground">
-                {cancelAtPeriodEnd ? `Cancels on ${periodLabel}.` : `Renews ${periodLabel}.`}
+      {/* Plan + usage — plan panel left, usage rows middle, the tier's fox right */}
+      <section className="w-full rounded-[28px] border bg-card p-6 shadow-sm sm:p-7">
+        <div className="grid gap-7 lg:grid-cols-[320px_minmax(0,1fr)] lg:gap-8">
+          {/* Plan — the tier's own fox (same art as its card below) in the corner */}
+          <aside className="flex flex-col rounded-3xl border bg-card p-6">
+            <div>
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Your plan</p>
+                  <div className="mt-1 flex items-center gap-2">
+                    <h2 className="text-3xl font-semibold capitalize tracking-tight">{plan}</h2>
+                    {isPaying && (
+                      <span className="rounded-full border bg-card px-2.5 py-1 text-xs font-semibold text-muted-foreground">
+                        {STATUS_LABEL[status]}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={PLAN_ART[plan] ?? PLAN_ART.scale}
+                  alt=""
+                  aria-hidden="true"
+                  className="pointer-events-none -mr-3 -mt-3 h-24 w-auto shrink-0 select-none"
+                />
+              </div>
+              <p className="mt-4 text-sm leading-6 text-muted-foreground">
+                {plans.find((p) => p.plan === plan)?.blurb ?? 'Your current Loqara plan.'}
               </p>
-            )}
-          </div>
-          {hasCustomer && (
-            <Button variant="outline" onClick={() => runPortal('portal')} disabled={anyBusy}>
-              {busy === 'portal' ? (
-                <Loader2Icon className="size-4 animate-spin" />
-              ) : (
-                <ExternalLinkIcon className="size-4" />
+              {isPaying && (interval || voiceActive) && (
+                <p className="mt-2 text-xs text-muted-foreground">
+                  {interval ? `Billed ${interval === 'year' ? 'annually' : 'monthly'}` : ''}
+                  {voiceActive ? `${interval ? ' · ' : ''}Voice add-on` : ''}
+                </p>
               )}
-              Manage billing
-            </Button>
-          )}
-        </div>
+            </div>
 
-        <div className="mt-5 border-t pt-5">
-          <div className="flex items-baseline justify-between">
-            <h2 className="text-base font-semibold">Usage this month</h2>
-            <span className="text-xs text-muted-foreground">Resets on the 1st</span>
+            <div className="mt-8 lg:mt-auto">
+              {hasCustomer ? (
+                <Button
+                  className="h-11 w-full rounded-xl bg-[#101213] font-semibold text-white hover:bg-[#101213]/90"
+                  onClick={() => runPortal('portal')}
+                  disabled={anyBusy}
+                >
+                  {busy === 'portal' ? (
+                    <Loader2Icon className="size-4 animate-spin" />
+                  ) : (
+                    <ExternalLinkIcon className="size-4" />
+                  )}
+                  Manage billing
+                </Button>
+              ) : (
+                // scrollIntoView, not a hash link — the app shell scrolls a nested
+                // container, where plain anchor jumps silently do nothing.
+                <button
+                  type="button"
+                  onClick={() =>
+                    document.getElementById('plans')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                  }
+                  className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-[#101213] text-sm font-semibold text-white transition-colors hover:bg-[#101213]/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  Upgrade plan
+                </button>
+              )}
+              <p className="mt-4 text-center text-xs text-muted-foreground">
+                {periodLabel && (status === 'active' || status === 'trialing')
+                  ? cancelAtPeriodEnd
+                    ? `Cancels on ${periodLabel}`
+                    : `Renews ${periodLabel}`
+                  : 'Usage resets on the 1st'}
+              </p>
+            </div>
+          </aside>
+
+          {/* Usage */}
+          <div className="min-w-0">
+            <div>
+              <h3 className="text-base font-semibold">Usage this month</h3>
+              <p className="mt-1 text-sm text-muted-foreground">
+                A quick overview of the resources included in your current plan.
+              </p>
+            </div>
+
+            <div className="mt-6 overflow-hidden rounded-3xl bg-muted/50">
+              {/* Conversations */}
+              <div className="flex flex-col gap-6 p-5 sm:p-6 md:flex-row md:items-center md:justify-between">
+                <div>
+                  <p className="font-medium">Conversations</p>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Customer chat sessions used during this billing period.
+                  </p>
+                </div>
+                <div className="w-full md:max-w-[300px]">
+                  <div className="mb-2 flex items-center justify-between gap-4 text-sm">
+                    <span className="font-semibold tabular-nums">
+                      {usage.conversationsUsed.toLocaleString()} used
+                    </span>
+                    <span className="text-muted-foreground">
+                      {isFinite(usage.conversationsLimit)
+                        ? `${usage.conversationsLimit.toLocaleString()} included`
+                        : 'Unlimited'}
+                    </span>
+                  </div>
+                  {isFinite(usage.conversationsLimit) && (
+                    <UsageProgress
+                      used={usage.conversationsUsed}
+                      limit={usage.conversationsLimit}
+                    />
+                  )}
+                </div>
+              </div>
+
+              <div className="h-px bg-border" />
+
+              {/* Bots */}
+              <div className="flex flex-col gap-6 p-5 sm:p-6 md:flex-row md:items-center md:justify-between">
+                <div className="flex items-center gap-4">
+                  <span className="grid size-12 shrink-0 place-items-center rounded-2xl border border-primary/25 bg-primary/5">
+                    <svg viewBox="0 0 64 64" className="h-9 w-9" fill="none" aria-hidden="true">
+                      <rect x="13" y="16" width="38" height="31" rx="13" fill="white" stroke="#18181B" strokeWidth="2" />
+                      <rect x="20" y="23" width="24" height="15" rx="7.5" fill="#DFF4F6" stroke="#18181B" strokeWidth="2" />
+                      <circle cx="27" cy="31" r="1.8" fill="#18181B" />
+                      <circle cx="37" cy="31" r="1.8" fill="#18181B" />
+                      <path d="M28 36c2 1.5 6 1.5 8 0" stroke="#18181B" strokeWidth="2" strokeLinecap="round" />
+                      <path d="M32 11v5" stroke="#18181B" strokeWidth="2" strokeLinecap="round" />
+                      <circle cx="32" cy="9" r="2.5" fill="#E97634" stroke="#18181B" strokeWidth="1.6" />
+                    </svg>
+                  </span>
+                  <div>
+                    <p className="font-medium">Bot slots</p>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      Assistants you can keep active at the same time.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 md:justify-end">
+                  <span className="text-sm font-semibold tabular-nums">
+                    {isFinite(usage.botsLimit)
+                      ? `${usage.botsUsed} of ${usage.botsLimit} used`
+                      : `${usage.botsUsed} active · Unlimited`}
+                  </span>
+                  {isFinite(usage.botsLimit) && usage.botsUsed >= usage.botsLimit && (
+                    <span className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">
+                      At limit
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
-          <div className="mt-4 space-y-4">
-            <Meter
-              label="Conversations"
-              used={usage.conversationsUsed}
-              limit={usage.conversationsLimit}
-            />
-            <Meter label="Bots" used={usage.botsUsed} limit={usage.botsLimit} />
-          </div>
+
         </div>
-      </div>
+      </section>
 
       {!billingEnabled ? (
         <p className="rounded-lg border border-dashed bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
@@ -415,14 +505,14 @@ export function BillingPanel({
               <button
                 type="button"
                 onClick={() => setAnnual(false)}
-                className={`rounded-full px-4 py-1.5 font-medium transition-colors ${!annual ? 'bg-muted shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                className={`rounded-full px-4 py-1.5 font-medium transition-colors ${!annual ? 'bg-[#101213] text-white shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
               >
                 Monthly
               </button>
               <button
                 type="button"
                 onClick={() => setAnnual(true)}
-                className={`rounded-full px-4 py-1.5 font-medium transition-colors ${annual ? 'bg-muted shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                className={`rounded-full px-4 py-1.5 font-medium transition-colors ${annual ? 'bg-[#101213] text-white shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
               >
                 Annual <span className="text-primary">· 2 months free</span>
               </button>
@@ -430,7 +520,7 @@ export function BillingPanel({
           </div>
 
           {/* Plan cards */}
-          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+          <div id="plans" className="grid scroll-mt-6 gap-5 md:grid-cols-2 lg:grid-cols-4">
             {plans.map((p) => {
               const samePlan = p.plan === plan
               const isFree = p.plan === 'free'
@@ -464,6 +554,15 @@ export function BillingPanel({
                     <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground">
                       Most popular
                     </span>
+                  )}
+                  {PLAN_ART[p.plan] && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={PLAN_ART[p.plan]}
+                      alt=""
+                      aria-hidden="true"
+                      className="pointer-events-none mx-auto -mt-1 mb-2 h-28 w-auto select-none"
+                    />
                   )}
                   <h3 className="text-lg font-semibold">{p.name}</h3>
                   <p className="mt-1 text-sm text-muted-foreground">{p.blurb}</p>
