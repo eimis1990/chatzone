@@ -290,15 +290,6 @@ export function AppSidebar({
             showTooltip={collapsed && railTooltipsReady}
             className={collapsed ? undefined : 'mb-0.5'}
           />
-          <SidebarNavLink
-            href="/app/analytics"
-            label="Analytics"
-            icon={BarChart3Icon}
-            active={pathname === '/app/analytics'}
-            collapsed={collapsed}
-            showTooltip={collapsed && railTooltipsReady}
-            className={collapsed ? undefined : 'mb-0.5'}
-          />
 
           <Tooltip key={`${collapsed}-${railTooltipsReady}`}>
             <TooltipTrigger

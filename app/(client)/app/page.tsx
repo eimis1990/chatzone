@@ -1,18 +1,52 @@
 import Link from 'next/link'
-import { PlusIcon, SettingsIcon, ArrowRightIcon, ZapIcon, BarChart3Icon, MonitorIcon, GlobeIcon, PaletteIcon, Code2Icon } from 'lucide-react'
+import {
+  PlusIcon,
+  SettingsIcon,
+  ArrowRightIcon,
+  BarChart3Icon,
+  BotIcon,
+  LinkIcon,
+  MessagesSquareIcon,
+  MonitorIcon,
+  PanelTopOpenIcon,
+  UserPlusIcon,
+  GlobeIcon,
+  PaletteIcon,
+  Code2Icon,
+} from 'lucide-react'
 import { requireRole, getUserOrgIds } from '@/lib/auth/guards'
 import { createServerClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { entitlementsFor } from '@/lib/entitlements'
 import { conversationsThisMonth } from '@/lib/usage'
+import { getOrgAnalyticsRollup, type OrgAnalyticsRollup } from '@/lib/analytics/org-rollup'
 import type { Plan } from '@/lib/types'
 import { CreateBotDialog } from '@/components/client/CreateBotDialog'
 import { DeleteBotButton } from '@/components/client/DeleteBotButton'
+import { StatTileGrid, type StatTileData } from '@/components/client/charts/StatCard'
+import { OrgBotComparisonChart } from '@/components/client/charts/OrgBotComparisonChart'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { LiveIndicator } from '@/components/LiveIndicator'
 import { readableTextColor } from '@/lib/utils'
 import type { Bot } from '@/lib/types'
+
+/** One cell of the conversion snapshot's hairline grid. */
+function RateTile({ label, value, detail }: { label: string; value: number; detail: string }) {
+  const pct = Math.max(0, value)
+  return (
+    <div className="bg-card p-5">
+      <div className="flex items-baseline justify-between gap-3">
+        <p className="text-sm font-medium">{label}</p>
+        <span className="text-xl font-semibold tabular-nums">{pct}%</span>
+      </div>
+      <div className="mt-2.5 h-1.5 overflow-hidden rounded-full bg-muted" aria-hidden="true">
+        <div className="h-full rounded-full bg-primary" style={{ width: `${Math.min(100, pct)}%` }} />
+      </div>
+      <p className="mt-2 text-xs text-muted-foreground">{detail}</p>
+    </div>
+  )
+}
 
 export default async function BotsPage() {
   await requireRole('client')
@@ -22,6 +56,7 @@ export default async function BotsPage() {
 
   let bots: Bot[] = []
   let freeTier: { used: number; limit: number } | null = null
+  let rollup: OrgAnalyticsRollup | null = null
 
   if (orgId) {
     const supabase = await createServerClient()
@@ -44,6 +79,12 @@ export default async function BotsPage() {
         const used = await conversationsThisMonth(createServiceClient(), orgId)
         freeTier = { used, limit }
       }
+    }
+
+    // Org analytics live on Home now (30-day window; /app/analytics keeps the
+    // range selector and per-bot deep links).
+    if (bots.length > 0) {
+      rollup = await getOrgAnalyticsRollup(supabase, orgId, 30)
     }
   }
 
@@ -129,56 +170,11 @@ export default async function BotsPage() {
         </div>
       )}
 
-      {/* Free-tier reminder: live usage + one-line pitch, never blocking. */}
-      {freeTier && (
-        <div className="flex flex-wrap items-center gap-4 rounded-xl border bg-gradient-to-r from-primary/10 via-card to-card p-4">
-          <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary">
-            <ZapIcon className="size-4" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-medium">
-              You&apos;re on the Free plan — {freeTier.used.toLocaleString()} of{' '}
-              {freeTier.limit.toLocaleString()} conversations used this month
-            </p>
-            <p className="text-xs text-muted-foreground">
-              Starter unlocks 1,500 conversations, all languages, and lead capture.
-            </p>
-            <div className="mt-2 h-1.5 w-full max-w-xs overflow-hidden rounded-full bg-muted">
-              <div
-                className="h-full rounded-full bg-primary"
-                style={{ width: `${Math.min(100, Math.round((100 * freeTier.used) / freeTier.limit))}%` }}
-              />
-            </div>
-          </div>
-          <Link
-            href="/app/subscription"
-            className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/80"
-          >
-            See plans
-            <ArrowRightIcon className="size-3.5" />
-          </Link>
-        </div>
-      )}
-
       {bots.length > 0 && (
-      <div className="grid gap-4 sm:grid-cols-2 md:gap-5 xl:grid-cols-3">
-        {orgId && (
-          // Creating a bot is a desktop (build) task — hide the tile on mobile.
-          <CreateBotDialog
-            orgId={orgId}
-            trigger={
-              <button
-                type="button"
-                className="group hidden h-full min-h-[152px] w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border bg-card/40 text-muted-foreground transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-ring md:flex"
-              >
-                <span className="flex size-11 items-center justify-center rounded-lg border border-dashed border-current">
-                  <PlusIcon className="size-5" />
-                </span>
-                <span className="text-sm font-medium">Create bot</span>
-              </button>
-            }
-          />
-        )}
+      <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_20rem]">
+      {/* Left column: the bot list (rows — most orgs have 1-2 bots) + analytics. */}
+      <div className="min-w-0 space-y-6">
+        <div className="flex flex-col gap-4">
           {bots.map((bot) => {
             const lang = bot.config.defaultLanguage ?? 'en'
             const greeting =
@@ -256,8 +252,173 @@ export default async function BotsPage() {
               </div>
             )
           })}
+          {orgId && (
+            // Creating a bot is a desktop (build) task — slim row under the list.
+            <CreateBotDialog
+              orgId={orgId}
+              trigger={
+                <button
+                  type="button"
+                  className="group hidden h-12 w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border bg-card/40 text-sm font-medium text-muted-foreground transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-ring md:flex"
+                >
+                  <PlusIcon className="size-4" />
+                  Create bot
+                </button>
+              }
+            />
+          )}
+        </div>
+
+        {/* ── Org analytics (30-day window) — fills the column beside the rail ── */}
+        {rollup && rollup.rows.length > 0 && (
+          <section aria-label="Analytics across all bots" className="space-y-4 pt-2">
+            <div className="border-b pb-3">
+              <h2 className="text-xl font-semibold">Analytics</h2>
+              <p className="text-sm text-muted-foreground">All bots side by side, last 30 days.</p>
+            </div>
+
+            <StatTileGrid
+              stats={[
+                {
+                  label: 'Widget opens',
+                  value: rollup.totals.widgetOpens,
+                  icon: PanelTopOpenIcon,
+                  accent: 'violet',
+                  sub: `${rollup.activeBots} of ${rollup.rows.length} ${rollup.rows.length === 1 ? 'bot' : 'bots'} had activity`,
+                } satisfies StatTileData,
+                {
+                  label: 'Conversations',
+                  value: rollup.totals.conversations,
+                  icon: MessagesSquareIcon,
+                  accent: 'green',
+                  sub: `${rollup.chatStartRate}% of opens started a chat`,
+                },
+                {
+                  label: 'Leads captured',
+                  value: rollup.totals.leads,
+                  icon: UserPlusIcon,
+                  accent: 'blue',
+                  sub: `${rollup.leadCaptureRate}% of conversations became leads`,
+                },
+                {
+                  label: 'Link clicks',
+                  value: rollup.totals.linkClicks,
+                  icon: LinkIcon,
+                  accent: 'amber',
+                  sub: 'links followed from bot replies',
+                },
+              ]}
+            />
+
+            {/* Bot activity — full width of the column. */}
+            <div className="overflow-hidden rounded-2xl border bg-card shadow-sm">
+              <div className="flex items-center justify-between gap-3 border-b px-5 py-4">
+                <div>
+                  <h3 className="text-sm font-semibold">Bot activity</h3>
+                  <p className="text-xs text-muted-foreground">
+                    Engagement signals each bot generated during this period.
+                  </p>
+                </div>
+                <Badge variant="secondary">
+                  {rollup.rows.length} {rollup.rows.length === 1 ? 'bot' : 'bots'}
+                </Badge>
+              </div>
+              <div className="min-w-0 p-5">
+                {rollup.activeBots > 0 ? (
+                  <OrgBotComparisonChart data={rollup.comparisonData} />
+                ) : (
+                  <div className="flex min-h-48 items-center justify-center rounded-lg bg-muted/40 px-6 text-center text-sm text-muted-foreground">
+                    No tracked activity in this period yet.
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Conversion snapshot — compact hairline grid. */}
+            <div className="overflow-hidden rounded-2xl border bg-card shadow-sm">
+              <div className="border-b px-5 py-4">
+                <h3 className="text-sm font-semibold">Conversion snapshot</h3>
+                <p className="text-xs text-muted-foreground">
+                  How activity moved through the key outcomes.
+                </p>
+              </div>
+              <div className="grid gap-px bg-border sm:grid-cols-2 xl:grid-cols-4">
+                <RateTile
+                  label="Chat start rate"
+                  value={rollup.chatStartRate}
+                  detail={`${rollup.totals.conversations} of ${rollup.totals.widgetOpens} opens`}
+                />
+                <RateTile
+                  label="Lead capture rate"
+                  value={rollup.leadCaptureRate}
+                  detail={`${rollup.totals.leads} of ${rollup.totals.conversations} conversations`}
+                />
+                <RateTile
+                  label="After-hours share"
+                  value={rollup.afterHoursRate}
+                  detail={`${rollup.totals.afterHours} conversations outside working hours`}
+                />
+                <div className="flex items-center gap-3 bg-card p-5">
+                  <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    <BotIcon className="size-4" aria-hidden="true" />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-xs text-muted-foreground">Most activity this period</p>
+                    <p className="truncate text-sm font-medium">
+                      {rollup.mostActiveBot?.bot.name ?? 'No activity yet'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+      </div>
+
+      {/* Free plan: vertical upgrade rail with the leveling-up mascot. */}
+      {freeTier && (
+        <aside className="overflow-hidden rounded-3xl border bg-card xl:sticky xl:top-6">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/onboarding/fox-upgrade.webp"
+            alt=""
+            aria-hidden="true"
+            className="pointer-events-none w-full select-none"
+          />
+          <div className="space-y-4 px-6 pb-6 pt-4">
+            <div>
+              <p className="text-sm font-semibold">You&apos;re on the Free plan</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Starter unlocks 1,500 conversations, all languages, and lead capture.
+              </p>
+            </div>
+            <div>
+              <div className="flex items-baseline justify-between text-xs">
+                <span className="text-muted-foreground">Conversations this month</span>
+                <span className="font-medium tabular-nums">
+                  {freeTier.used.toLocaleString()} / {freeTier.limit.toLocaleString()}
+                </span>
+              </div>
+              <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-muted">
+                <div
+                  className="h-full rounded-full bg-primary"
+                  style={{ width: `${Math.min(100, Math.round((100 * freeTier.used) / freeTier.limit))}%` }}
+                />
+              </div>
+            </div>
+            <Link
+              href="/app/subscription"
+              className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary text-sm font-semibold text-primary-foreground shadow-sm transition-all hover:bg-primary/85 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              See plans
+              <ArrowRightIcon className="size-4" />
+            </Link>
+          </div>
+        </aside>
+      )}
       </div>
       )}
+
     </div>
   )
 }
