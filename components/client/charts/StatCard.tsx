@@ -46,7 +46,16 @@ export interface StatTileData {
   highlight?: boolean
 }
 
-function StatTile({ label, value, sub, icon: Icon, accent = 'green', trend, highlight }: StatTileData) {
+function StatTile({
+  label,
+  value,
+  sub,
+  icon: Icon,
+  accent = 'green',
+  trend,
+  highlight,
+  tone = 'accent',
+}: StatTileData & { tone?: 'accent' | 'dark' }) {
   const a = TILE_ACCENTS[accent]
   return (
     <div className="bg-card p-5">
@@ -56,7 +65,11 @@ function StatTile({ label, value, sub, icon: Icon, accent = 'green', trend, high
           <span
             className={cn(
               'grid size-8 shrink-0 place-items-center rounded-lg',
-              highlight ? a.solid : cn(a.chip, a.icon),
+              tone === 'dark'
+                ? 'bg-[#101213] text-white'
+                : highlight
+                  ? a.solid
+                  : cn(a.chip, a.icon),
             )}
           >
             <Icon className="size-4" aria-hidden="true" />
@@ -86,28 +99,48 @@ function StatTile({ label, value, sub, icon: Icon, accent = 'green', trend, high
   )
 }
 
+// Breakpoint column presets (literal classes — Tailwind can't see computed ones).
+const GRID_LAYOUTS = {
+  default: { classes: 'grid-cols-2 md:grid-cols-3 xl:grid-cols-4', counts: [2, 3, 4] },
+  /** Compact: everything on one line from xl up. */
+  six: { classes: 'grid-cols-2 md:grid-cols-3 xl:grid-cols-6', counts: [2, 3, 6] },
+} as const
+
 /**
  * One white panel holding every stat in a hairline-divided grid. Invisible
  * filler cells complete the last row per breakpoint, so an uneven stat count
- * never leaves a ragged edge.
+ * never leaves a ragged edge. `className` lets a parent flatten the chrome to
+ * embed the grid inside a larger panel.
  */
-export function StatTileGrid({ stats }: { stats: StatTileData[] }) {
-  const [fill2, fill3, fill4] = [2, 3, 4].map((cols) => (cols - (stats.length % cols)) % cols)
+export function StatTileGrid({
+  stats,
+  layout = 'default',
+  tone = 'accent',
+  className,
+}: {
+  stats: StatTileData[]
+  layout?: keyof typeof GRID_LAYOUTS
+  /** 'dark' renders every icon chip as white-on-dark instead of accent tints. */
+  tone?: 'accent' | 'dark'
+  className?: string
+}) {
+  const { classes, counts } = GRID_LAYOUTS[layout]
+  const [fillSm, fillMd, fillXl] = counts.map((cols) => (cols - (stats.length % cols)) % cols)
   return (
-    <div className="overflow-hidden rounded-3xl border bg-card">
-      <div className="grid grid-cols-2 gap-px bg-border md:grid-cols-3 xl:grid-cols-4">
+    <div className={cn('overflow-hidden rounded-3xl border bg-card', className)}>
+      <div className={cn('grid gap-px bg-border', classes)}>
         {stats.map((stat) => (
-          <StatTile key={stat.label} {...stat} />
+          <StatTile key={stat.label} {...stat} tone={tone} />
         ))}
-        {Array.from({ length: Math.max(fill2, fill3, fill4) }, (_, index) => (
+        {Array.from({ length: Math.max(fillSm, fillMd, fillXl) }, (_, index) => (
           <div
             key={index}
             aria-hidden="true"
             className={cn(
               'bg-card',
-              index < fill2 ? 'block' : 'hidden',
-              index < fill3 ? 'md:block' : 'md:hidden',
-              index < fill4 ? 'xl:block' : 'xl:hidden',
+              index < fillSm ? 'block' : 'hidden',
+              index < fillMd ? 'md:block' : 'md:hidden',
+              index < fillXl ? 'xl:block' : 'xl:hidden',
             )}
           />
         ))}

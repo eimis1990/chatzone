@@ -4,7 +4,6 @@ import {
   SettingsIcon,
   ArrowRightIcon,
   BarChart3Icon,
-  BotIcon,
   LinkIcon,
   MessagesSquareIcon,
   MonitorIcon,
@@ -408,7 +407,7 @@ export default async function BotsPage() {
                   How activity moved through the key outcomes.
                 </p>
               </div>
-              <div className="grid gap-px bg-border sm:grid-cols-2 xl:grid-cols-4">
+              <div className="grid gap-px bg-border sm:grid-cols-3">
                 <RateTile
                   label="Chat start rate"
                   value={rollup.chatStartRate}
@@ -424,17 +423,6 @@ export default async function BotsPage() {
                   value={rollup.afterHoursRate}
                   detail={`${rollup.totals.afterHours} conversations outside working hours`}
                 />
-                <div className="flex items-center gap-3 bg-card p-5">
-                  <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                    <BotIcon className="size-4" aria-hidden="true" />
-                  </span>
-                  <div className="min-w-0">
-                    <p className="text-xs text-muted-foreground">Most activity this period</p>
-                    <p className="truncate text-sm font-medium">
-                      {rollup.mostActiveBot?.bot.name ?? 'No activity yet'}
-                    </p>
-                  </div>
-                </div>
               </div>
             </Reveal>
           </section>

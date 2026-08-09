@@ -7,6 +7,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
+import { cn } from '@/lib/utils'
 import { formatDistanceToNow } from '@/lib/date-utils'
 
 export interface ClientCardOrg {
@@ -23,16 +24,38 @@ export interface ClientCardOrg {
  * A client organisation card — shown on the owner Clients list and Dashboard.
  * `accent` is the client's own brand color (their first bot's launcher/primary
  * color): it tints the corner glow and the monogram so each card carries the
- * client's identity. Falls back to the app primary.
+ * client's identity. Falls back to the app primary. `tile` renders it as a
+ * borderless cell for hairline-grid panels (the Dashboard's Recent activity).
  */
-export function ClientCard({ org, accent }: { org: ClientCardOrg; accent?: string }) {
+export function ClientCard({
+  org,
+  accent,
+  logos = [],
+  tile = false,
+}: {
+  org: ClientCardOrg
+  accent?: string
+  /** Bot avatar URLs for this org — the first replaces the monogram. */
+  logos?: string[]
+  tile?: boolean
+}) {
+  const logo = logos[0]
   return (
     <Link href={`/owner/clients/${org.org_id}`} className="group block h-full focus:outline-none">
-      <div className="relative h-full overflow-hidden rounded-2xl border bg-card p-5 transition-all group-hover:-translate-y-0.5 group-hover:shadow-md group-focus-visible:ring-2 group-focus-visible:ring-ring">
-        {/* Brand-colored glow bleeding from the top-right corner. */}
+      <div
+        className={cn(
+          'relative h-full overflow-hidden bg-card p-5 transition-all group-focus-visible:ring-2 group-focus-visible:ring-ring',
+          !tile && 'rounded-3xl border group-hover:-translate-y-0.5 group-hover:shadow-md',
+        )}
+      >
+        {/* Brand-colored glow bleeding from the top-right corner. Grid tiles
+            keep it as their only hover affordance — hidden until then. */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -right-10 -top-10 size-28 rounded-full opacity-20 blur-2xl transition-opacity group-hover:opacity-35"
+          className={cn(
+            'pointer-events-none absolute -right-10 -top-10 size-28 rounded-full blur-2xl transition-opacity',
+            tile ? 'opacity-0 group-hover:opacity-30' : 'opacity-20 group-hover:opacity-35',
+          )}
           style={{ backgroundColor: accent ?? 'var(--primary)' }}
         />
         <ArrowUpRightIcon
@@ -41,19 +64,29 @@ export function ClientCard({ org, accent }: { org: ClientCardOrg; accent?: strin
         />
 
         <div className="relative flex items-start gap-3">
-          <div
-            className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-lg font-bold text-primary"
-            style={
-              accent
-                ? {
-                    backgroundColor: `color-mix(in srgb, ${accent} 12%, transparent)`,
-                    color: accent,
-                  }
-                : undefined
-            }
-          >
-            {org.org_name.charAt(0).toUpperCase()}
-          </div>
+          {logo ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={logo}
+              alt=""
+              aria-hidden="true"
+              className="size-11 shrink-0 rounded-xl object-cover ring-1 ring-black/5"
+            />
+          ) : (
+            <div
+              className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-lg font-bold text-primary"
+              style={
+                accent
+                  ? {
+                      backgroundColor: `color-mix(in srgb, ${accent} 12%, transparent)`,
+                      color: accent,
+                    }
+                  : undefined
+              }
+            >
+              {org.org_name.charAt(0).toUpperCase()}
+            </div>
+          )}
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2 pr-5">
               <p className="truncate font-semibold">{org.org_name}</p>
