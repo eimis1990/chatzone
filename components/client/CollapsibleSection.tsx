@@ -1,9 +1,42 @@
 'use client'
 
 import { useState, type ReactNode } from 'react'
-import { ChevronDownIcon } from 'lucide-react'
+import { ChevronDownIcon, type LucideIcon } from 'lucide-react'
 import { AnimatePresence, MotionConfig, motion } from 'framer-motion'
-import { Card, CardHeader } from '@/components/ui/card'
+import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+
+/**
+ * Standard header for a CollapsibleSection: dark icon tile + title/description.
+ * One component so every configurator section (including Voice and the Product
+ * visualizer, which live in their own files) stays visually identical.
+ */
+export function SectionHeader({
+  icon: Icon,
+  title,
+  description,
+}: {
+  icon: LucideIcon
+  title: string
+  description?: string
+}) {
+  return (
+    <div className="relative z-10 flex items-center gap-3">
+      <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[#101213] text-white group-data-[expanded=true]/config-section:bg-white/10">
+        <Icon className="size-4.5" aria-hidden="true" />
+      </span>
+      <div>
+        <CardTitle className="text-sm font-semibold leading-tight group-data-[expanded=true]/config-section:text-white">
+          {title}
+        </CardTitle>
+        {description && (
+          <CardDescription className="text-xs leading-tight group-data-[expanded=true]/config-section:text-white/70">
+            {description}
+          </CardDescription>
+        )}
+      </div>
+    </div>
+  )
+}
 
 const EASE = [0.4, 0, 0.2, 1] as const
 
@@ -44,7 +77,7 @@ export function CollapsibleSection({
       <CardHeader
         data-expanded={open}
         className={`group/config-section relative sticky top-16 z-[5] cursor-pointer select-none overflow-hidden rounded-none py-3 pr-12 transition-colors duration-200 ${
-          open ? 'border-b-4 border-white bg-primary text-primary-foreground' : 'border-b bg-card'
+          open ? 'bg-[#101213] text-white' : 'border-b bg-card'
         }`}
         onClick={() => setOpen((o) => !o)}
       >

@@ -20,7 +20,7 @@ import { Label } from '@/components/ui/label'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog'
-import { CollapsibleSection } from '@/components/client/CollapsibleSection'
+import { CollapsibleSection, SectionHeader } from '@/components/client/CollapsibleSection'
 import {
   Select,
   SelectContent,
@@ -172,22 +172,14 @@ export function VoiceSection({
   return (
     <CollapsibleSection
       header={
-        <div className="relative z-10 flex items-center gap-2.5">
-          <span className="flex size-7 shrink-0 items-center justify-center text-primary group-data-[expanded=true]/config-section:text-white">
-            <MicIcon className="size-5" aria-hidden="true" />
-          </span>
-          <div>
-            <CardTitle className="text-sm font-semibold leading-tight group-data-[expanded=true]/config-section:text-white">
-              Voice
-            </CardTitle>
-            <CardDescription className="text-xs leading-tight group-data-[expanded=true]/config-section:text-white/70">
-              Live voice calls with your assistant — pick a voice per language.
-            </CardDescription>
-          </div>
-        </div>
+        <SectionHeader
+          icon={MicIcon}
+          title="Voice"
+          description="Live voice calls with your assistant — pick a voice per language."
+        />
       }
     >
-      <CardContent className="flex flex-col gap-3 bg-muted/70 py-3">
+      <CardContent className="flex flex-col gap-3 bg-black/[0.055] py-3">
         {/* Master toggle. On the Free plan enabling opens the upgrade dialog
             instead — voice is a paid-tier feature (+ the Voice add-on). */}
         <VoiceSettingsGroup title="Voice status" description="Let visitors start a live voice conversation from the widget.">

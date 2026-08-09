@@ -17,8 +17,8 @@ import { Controller, type Control, type UseFormWatch } from 'react-hook-form'
 import { SofaIcon } from 'lucide-react'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
-import { CardContent, CardTitle, CardDescription } from '@/components/ui/card'
-import { CollapsibleSection } from '@/components/client/CollapsibleSection'
+import { CardContent } from '@/components/ui/card'
+import { CollapsibleSection, SectionHeader } from '@/components/client/CollapsibleSection'
 import {
   Select,
   SelectContent,
@@ -64,22 +64,14 @@ export function VisualizerSection({
   return (
     <CollapsibleSection
       header={
-        <div className="relative z-10 flex items-center gap-2.5">
-          <span className="flex size-7 shrink-0 items-center justify-center text-primary group-data-[expanded=true]/config-section:text-white">
-            <SofaIcon className="size-5" aria-hidden="true" />
-          </span>
-          <div>
-            <CardTitle className="text-sm font-semibold leading-tight group-data-[expanded=true]/config-section:text-white">
-              Product visualizer
-            </CardTitle>
-            <CardDescription className="text-xs leading-tight group-data-[expanded=true]/config-section:text-white/70">
-              Let visitors see your products placed in a photo of their own room.
-            </CardDescription>
-          </div>
-        </div>
+        <SectionHeader
+          icon={SofaIcon}
+          title="Product visualizer"
+          description="Let visitors see your products placed in a photo of their own room."
+        />
       }
     >
-      <CardContent className="flex flex-col gap-3 bg-muted/70 py-3">
+      <CardContent className="flex flex-col gap-3 bg-black/[0.055] py-3">
         <div className="flex items-center justify-between gap-3 rounded-lg border bg-card p-3">
           <div>
             <p className="text-sm font-medium">Enable product visualizer</p>

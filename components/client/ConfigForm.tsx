@@ -69,7 +69,7 @@ import {
   CardTitle,
   CardDescription,
 } from '@/components/ui/card'
-import { CollapsibleSection } from '@/components/client/CollapsibleSection'
+import { CollapsibleSection, SectionHeader } from '@/components/client/CollapsibleSection'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import {
@@ -177,34 +177,6 @@ function qaSummary(f: {
   return 'Sends the title'
 }
 
-/** Consistent section header: an accent icon chip beside the title + description. */
-export function SectionHeader({
-  icon: Icon,
-  title,
-  description,
-}: {
-  icon: LucideIcon
-  title: string
-  description?: string
-}) {
-  return (
-    <div className="relative z-10 flex items-center gap-2.5">
-      <span className="flex size-7 shrink-0 items-center justify-center text-primary group-data-[expanded=true]/config-section:text-white">
-        <Icon className="size-5" aria-hidden="true" />
-      </span>
-      <div>
-        <CardTitle className="text-sm font-semibold leading-tight group-data-[expanded=true]/config-section:text-white">
-          {title}
-        </CardTitle>
-        {description && (
-          <CardDescription className="text-xs leading-tight group-data-[expanded=true]/config-section:text-white/70">
-            {description}
-          </CardDescription>
-        )}
-      </div>
-    </div>
-  )
-}
 
 // Friendly names for surfacing validation errors (a save that fails client-side
 // validation must never be silent — see onInvalid below).
@@ -634,9 +606,21 @@ export function ConfigForm({
                 {headerAction}
               </span>
             )}
-            <Button type="submit" size="lg" disabled={isSubmitting || !hasChanges} className="px-4">
-              <SaveIcon data-icon="inline-start" />
-              {isSubmitting ? 'Publishing…' : 'Save & Publish'}
+            <Button
+              type="submit"
+              size="lg"
+              disabled={isSubmitting || !hasChanges}
+              className="group relative h-11 overflow-hidden rounded-xl bg-[#101213] px-4 text-white hover:bg-[#101213]/90"
+            >
+              <span className="mr-9 transition-opacity duration-500 group-hover:opacity-0">
+                {isSubmitting ? 'Publishing…' : 'Save & Publish'}
+              </span>
+              <i
+                aria-hidden="true"
+                className="absolute bottom-1 right-1 top-1 z-10 grid w-9 place-items-center rounded-lg bg-white/15 transition-all duration-500 group-hover:w-[calc(100%-0.5rem)] group-active:scale-95"
+              >
+                <SaveIcon className="size-4" strokeWidth={2} />
+              </i>
             </Button>
           </div>
         </div>
@@ -647,7 +631,7 @@ export function ConfigForm({
               title="Display"
               description="Bot name and avatar shown to visitors."
             />}>
-          <CardContent className="flex flex-col gap-3 bg-muted/70 py-3">
+          <CardContent className="flex flex-col gap-3 bg-black/[0.055] py-3">
             <SettingsGroup title="Names and introduction" description="How this bot is identified in the dashboard and widget.">
               <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-1.5 sm:col-span-2">
@@ -759,7 +743,7 @@ export function ConfigForm({
               title="Language & content"
               description="Greeting, suggested questions, and fallback message — per language."
             />}>
-          <CardContent className="flex flex-col gap-3 bg-muted/70 py-3">
+          <CardContent className="flex flex-col gap-3 bg-black/[0.055] py-3">
             <SettingsGroup title="Language setup" description="Choose available languages and the visitor’s default experience.">
             {/* Available languages — which languages visitors can use. */}
             <div className="space-y-1.5">
@@ -1189,7 +1173,7 @@ export function ConfigForm({
               title="Appearance"
               description="Make the widget feel at home on your website."
             />}>
-          <CardContent className="flex flex-col gap-3 bg-muted/70 py-3">
+          <CardContent className="flex flex-col gap-3 bg-black/[0.055] py-3">
             <SettingsGroup
               title="Choose a style"
               description="How the header sits in the chat window."
@@ -1611,7 +1595,7 @@ export function ConfigForm({
               title="AI behaviour"
               description="System prompt and persona."
             />}>
-          <CardContent className="flex flex-col gap-3 bg-muted/70 py-3">
+          <CardContent className="flex flex-col gap-3 bg-black/[0.055] py-3">
             <SettingsGroup title="Core instructions" description="Define the assistant’s role, knowledge boundaries, and priorities.">
               <SystemPromptSelect watch={watch} setValue={setValue} errors={errors} />
             </SettingsGroup>
@@ -1712,7 +1696,7 @@ export function ConfigForm({
               title="Lead capture"
               description="Collect visitor contact information during the conversation."
             />}>
-          <CardContent className="flex flex-col gap-3 bg-muted/70 py-3">
+          <CardContent className="flex flex-col gap-3 bg-black/[0.055] py-3">
             <SettingsGroup title="Capture status" description="Invite visitors to leave contact details when the conversation needs a follow-up.">
             <div className="flex items-center gap-3">
               <Controller
@@ -1914,7 +1898,7 @@ export function ConfigForm({
               title="Allowed domains"
               description="Choose which websites can embed this widget."
             />}>
-          <CardContent className="flex flex-col gap-3 bg-muted/70 py-3">
+          <CardContent className="flex flex-col gap-3 bg-black/[0.055] py-3">
             <SettingsGroup title="Embedding access" description="Allow the widget everywhere, or limit it to trusted websites.">
             <div className="space-y-3">
             {allowedDomainsField.fields.length === 0 && (
@@ -2051,7 +2035,7 @@ function AssistantVersionSection({
         />
       }
     >
-      <CardContent className="flex flex-col gap-3 bg-muted/70 py-3">
+      <CardContent className="flex flex-col gap-3 bg-black/[0.055] py-3">
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="space-y-1">
             <Label className="text-xs">Live version</Label>
@@ -2508,7 +2492,7 @@ function CommerceSection({ control, watch, setValue, botId }: CommerceSectionPro
           title="Store / products"
           description="Connect your store so the bot can recommend products."
         />}>
-      <CardContent className="flex flex-col gap-3 bg-muted/70 py-3">
+      <CardContent className="flex flex-col gap-3 bg-black/[0.055] py-3">
         <SettingsGroup title="Integration status" description="Connect a catalog when you want the assistant to recommend live products.">
         <div className="flex items-center gap-3">
           <Controller
