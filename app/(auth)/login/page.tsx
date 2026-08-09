@@ -1,8 +1,10 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useReducedMotion } from 'framer-motion'
+import { ArrowRightIcon } from 'lucide-react'
 import { createBrowserClient } from '@/lib/supabase/browser'
 import { resolveHome } from '@/lib/auth/roles'
 import type { UserRole } from '@/lib/types'
@@ -10,7 +12,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Shimmer } from '@/components/landing/Shimmer'
+import { Particles } from '@/components/ui/particles'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -58,39 +60,40 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="relative flex min-h-svh items-center justify-center overflow-hidden px-4">
-      {/* Looping hero behind the card — lightly blurred, scaled so soft edges
-          stay off-screen. Reduced-motion users get the static poster. */}
-      {reduce ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src="/loqara-hero-poster.webp"
-          alt=""
-          aria-hidden="true"
-          className="absolute inset-0 -z-10 size-full scale-105 object-cover blur-md"
-        />
-      ) : (
-        <video
-          src="/loqara-hero-loop.mp4"
-          poster="/loqara-hero-poster.webp"
-          autoPlay
-          muted
-          loop
-          playsInline
-          aria-hidden="true"
-          className="absolute inset-0 -z-10 size-full scale-105 object-cover blur-md"
+    <main className="relative flex min-h-svh items-center justify-center overflow-hidden bg-background px-4">
+      {/* Ambient drifting particles behind the card. Reduced-motion users get
+          the plain canvas instead. */}
+      {!reduce && (
+        <Particles
+          className="pointer-events-none absolute inset-0"
+          quantity={120}
+          ease={70}
+          color="#101213"
         />
       )}
-      <div aria-hidden="true" className="absolute inset-0 -z-10 bg-black/10" />
 
-      <Card className="w-full max-w-md border border-white/50 bg-white/40 shadow-2xl ring-1 ring-white/25 backdrop-blur-2xl">
-        <CardHeader className="space-y-1">
+      {/* Brand lockup — same black fox + wordmark as the landing nav. */}
+      <Link
+        href="/"
+        prefetch={false}
+        className="absolute left-6 top-6 z-10 flex items-center gap-2 text-2xl font-bold text-gray-900"
+      >
+        <span
+          aria-hidden="true"
+          className="inline-block size-11 shrink-0 bg-contain bg-center bg-no-repeat"
+          style={{ backgroundImage: 'url(/loqara-fox-black.webp)' }}
+        />
+        <span>
+          Loqara<span className="text-primary">.</span>
+        </span>
+      </Link>
+
+      <Card className="relative z-10 w-full max-w-md rounded-3xl border bg-card px-2 py-6 shadow-xs ring-0">
+        <CardHeader className="space-y-1.5 pb-2">
           <CardTitle className="text-2xl font-bold">Sign in</CardTitle>
-          <CardDescription className="text-foreground/60">
-            Enter your email and password to access Loqara.
-          </CardDescription>
+          <CardDescription>Enter your email and password to access Loqara.</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pb-2">
           <form onSubmit={handleSubmit} className="space-y-4" noValidate>
             <div className="space-y-1.5">
               <Label htmlFor="email">Email</Label>
@@ -103,7 +106,7 @@ export default function LoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
                 disabled={loading}
-                className="bg-white/70"
+                className="bg-white"
               />
             </div>
 
@@ -126,7 +129,7 @@ export default function LoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 disabled={loading}
-                className="bg-white/70"
+                className="bg-white"
               />
             </div>
 
@@ -136,13 +139,22 @@ export default function LoginPage() {
               </p>
             )}
 
+            {/* Same sliding-tray treatment as the configurator's Save & Publish. */}
             <Button
               type="submit"
+              size="lg"
               disabled={!canSubmit}
-              className="relative h-12 w-full overflow-hidden text-base shadow-lg shadow-primary/20"
+              className="group relative h-12 w-full overflow-hidden rounded-xl bg-[#101213] px-4 text-base text-white hover:bg-[#101213]/90"
             >
-              <span className="relative z-10">{loading ? 'Signing in…' : 'Sign in'}</span>
-              {canSubmit && <Shimmer />}
+              <span className="mr-9 transition-opacity duration-500 group-hover:opacity-0">
+                {loading ? 'Signing in…' : 'Sign in'}
+              </span>
+              <i
+                aria-hidden="true"
+                className="absolute bottom-1 right-1 top-1 z-10 grid w-10 place-items-center rounded-lg bg-white/15 transition-all duration-500 group-hover:w-[calc(100%-0.5rem)] group-active:scale-95"
+              >
+                <ArrowRightIcon className="size-4" strokeWidth={2} />
+              </i>
             </Button>
           </form>
         </CardContent>
