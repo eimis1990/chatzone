@@ -69,11 +69,9 @@ function BrandMarquee() {
   return (
     <div
       data-testid="hero-platform-marquee"
-      className="relative z-10 w-full shrink-0 overflow-hidden border-t border-white/10 bg-[#101213] py-4 shadow-[0_-12px_40px_rgba(16,18,19,0.12)]"
+      className="relative z-10 w-full shrink-0 overflow-hidden border-t border-white/10 bg-[#101213] py-3 shadow-[0_-12px_40px_rgba(16,18,19,0.12)]"
+      aria-label="Platforms Loqara works with"
     >
-      <p className="mb-3 text-center text-xs font-semibold uppercase tracking-[0.2em] text-white/40">
-        Works wherever your store runs
-      </p>
       {/* Fade the logos into the dark glass at both edges (dark, not the bright image). */}
       <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-24 bg-gradient-to-r from-[#101213] via-[#101213]/85 to-transparent sm:w-40" />
       <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-24 bg-gradient-to-l from-[#101213] via-[#101213]/85 to-transparent sm:w-40" />
@@ -83,7 +81,7 @@ function BrandMarquee() {
             {LOOP.map((b, i) => (
               <li
                 key={`${b.name}-${i}`}
-                className="flex items-center gap-3 whitespace-nowrap text-2xl font-semibold tracking-tight text-white/60 transition-colors hover:text-white"
+                className="flex items-center gap-2.5 whitespace-nowrap text-xl font-semibold tracking-tight text-white/60 transition-colors hover:text-white"
               >
                 {b.wordmark ? (
                   // The mark IS the brand's lettering — no text label next to it.
@@ -91,7 +89,7 @@ function BrandMarquee() {
                     viewBox={b.viewBox}
                     role="img"
                     aria-label={b.name}
-                    className="h-6 w-auto shrink-0 fill-current"
+                    className="h-5 w-auto shrink-0 fill-current"
                   >
                     <path d={b.path} />
                   </svg>
@@ -99,7 +97,7 @@ function BrandMarquee() {
                   <>
                     <svg
                       viewBox={b.viewBox ?? '0 0 24 24'}
-                      className="size-7 shrink-0 fill-current"
+                      className="size-6 shrink-0 fill-current"
                       aria-hidden="true"
                     >
                       <path d={b.path} />

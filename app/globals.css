@@ -356,7 +356,7 @@
 /* The landing hero is a viewport composition: copy + character scene + platform
    strip share the available height instead of accumulating fixed-height blocks. */
 .landing-hero-copy {
-  padding-top: clamp(5rem, 10svh, 7.25rem);
+  padding-top: clamp(6.5rem, 13svh, 9.75rem);
 }
 .landing-hero-title {
   font-size: clamp(2.05rem, min(10.5vw, 8svh), 5.35rem);
@@ -369,7 +369,7 @@
   margin-top: clamp(1rem, 2.2svh, 1.5rem);
 }
 .landing-hero-stage {
-  margin-top: clamp(1rem, 2.6svh, 2rem);
+  margin-top: clamp(2rem, 5.5svh, 4.5rem);
 }
 .landing-hero-fox {
   bottom: -5%;
@@ -386,7 +386,7 @@
   .landing-hero-fox {
     top: clamp(0.5rem, 1.25svh, 1rem);
     bottom: auto;
-    height: clamp(36rem, 72svh, 47rem);
+    height: clamp(28rem, 56svh, 37rem);
   }
   .landing-hero-fox > img,
   .landing-hero-fox > video {

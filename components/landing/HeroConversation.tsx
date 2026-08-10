@@ -15,7 +15,9 @@ const PRIMARY = '#e97634'
 const SCENE_DURATION_MS = 11_500
 const SCENE_EXIT_DURATION_MS = 1_850
 const SCENE_COUNT = 3
-const IMAGE_CARD_QUERY = '(min-width: 768px) and (min-height: 821px)'
+// 821px fit the pre-2026-08 layout; the stage now sits ~50px lower, so the
+// third card / image-card variant needs the extra viewport height.
+const IMAGE_CARD_QUERY = '(min-width: 768px) and (min-height: 880px)'
 const CUSTOMER_AVATARS = {
   chair: '/landing/hero-customer-higgsfield.webp',
   furniture: '/landing/hero-customer-man.webp',

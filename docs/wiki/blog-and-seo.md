@@ -233,6 +233,21 @@ stage without displacing the bottom marquee. Supporting copy is deliberately one
 benefit-led sentence: instant voice/chat answers grounded in products, policies,
 and live order data (`components/landing/Hero.tsx`, `app/globals.css`).
 
+The 2026-08-10 pass loosened that rhythm further: hero copy padding rose to
+`clamp(6.5rem, 13svh, 9.75rem)`, stage margin to `clamp(2rem, 5.5svh, 4.5rem)`,
+and the desktop fox shrank to `clamp(28rem, 56svh, 37rem)` so most of the
+character reads (~129px of him hides behind the strip, down from ~307px at the
+original `72svh`)
+(`app/globals.css:359`, `:372`, `:389`). The marquee's
+"Works wherever your store runs" label was dropped and the band tightened to
+`py-3` with `text-xl`/`size-6` marks, taking it from ~93px to 53px — that
+reclaimed height is what buys the extra breathing room while keeping the strip
+inside the viewport (`components/landing/Hero.tsx:70`). The band keeps an
+`aria-label` in place of the deleted visible heading. Because the scene sits lower, the
+image-card breakpoint moved from 821px to 880px of viewport height
+(`components/landing/HeroConversation.tsx:18`); shorter screens fall back to two
+compact rows instead of clipping the third behind the marquee.
+
 `HeroConversation` rotates through three 11.5-second commerce examples: chair
 recommendations rendered as production compact `ProductCards`, a sofa search
 rendered as responsive production `ProductCards`, and shipment tracking rendered
