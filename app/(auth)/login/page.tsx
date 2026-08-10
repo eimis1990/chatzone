@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useReducedMotion } from 'framer-motion'
 import { ArrowRightIcon } from 'lucide-react'
 import { createBrowserClient } from '@/lib/supabase/browser'
 import { resolveHome } from '@/lib/auth/roles'
@@ -12,11 +11,10 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Particles } from '@/components/ui/particles'
+import { DotPattern } from '@/components/ui/dot-pattern'
 
 export default function LoginPage() {
   const router = useRouter()
-  const reduce = useReducedMotion()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -61,16 +59,8 @@ export default function LoginPage() {
 
   return (
     <main className="relative flex min-h-svh items-center justify-center overflow-hidden bg-background px-4">
-      {/* Ambient drifting particles behind the card. Reduced-motion users get
-          the plain canvas instead. */}
-      {!reduce && (
-        <Particles
-          className="pointer-events-none absolute inset-0"
-          quantity={120}
-          ease={70}
-          color="#101213"
-        />
-      )}
+      {/* Ambient dot grid behind the card, faded out toward the edges. */}
+      <DotPattern className="[mask-image:radial-gradient(ellipse_at_center,black_35%,transparent_80%)]" />
 
       {/* Brand lockup — same black fox + wordmark as the landing nav. */}
       <Link

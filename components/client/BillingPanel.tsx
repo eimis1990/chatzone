@@ -559,8 +559,10 @@ export function BillingPanel({
                   </p>
 
                   <Button
-                    className="mt-5"
-                    variant={isCurrent || action === 'portal' || rank < currentRank ? 'outline' : 'default'}
+                    className="mt-5 h-11 w-full rounded-xl"
+                    // Downgrades (and the free tier) stay quiet — accent is for
+                    // the upgrade path only.
+                    variant={action === 'portal' || rank < currentRank ? 'outline' : 'default'}
                     disabled={anyBusy || action === null}
                     onClick={() => (action === 'portal' ? runPortal(p.plan) : runPlan(p, label))}
                   >
@@ -614,7 +616,7 @@ export function BillingPanel({
                   voiceConfigured ? (
                     voiceActive ? (
                       <Button
-                        className="h-11 w-full"
+                        className="h-11 w-full rounded-xl"
                         size="lg"
                         variant="outline"
                         disabled={anyBusy}
@@ -634,7 +636,7 @@ export function BillingPanel({
                       </Button>
                     ) : (
                       <Button
-                        className="h-11 w-full"
+                        className="h-11 w-full rounded-xl"
                         size="lg"
                         disabled={anyBusy || !isPaying}
                         aria-busy={busy === 'voice'}
@@ -653,7 +655,7 @@ export function BillingPanel({
                       </Button>
                     )
                   ) : (
-                    <Button className="h-11 w-full" size="lg" variant="outline" disabled>
+                    <Button className="h-11 w-full rounded-xl" size="lg" variant="outline" disabled>
                       <Clock3Icon data-icon="inline-start" aria-hidden="true" />
                       Coming soon
                     </Button>
@@ -685,7 +687,7 @@ export function BillingPanel({
                   visualizerConfigured ? (
                     visualizerActive ? (
                       <Button
-                        className="h-11 w-full"
+                        className="h-11 w-full rounded-xl"
                         size="lg"
                         variant="outline"
                         disabled={anyBusy}
@@ -705,7 +707,7 @@ export function BillingPanel({
                       </Button>
                     ) : (
                       <Button
-                        className="h-11 w-full"
+                        className="h-11 w-full rounded-xl"
                         size="lg"
                         disabled={anyBusy || !isPaying}
                         aria-busy={busy === 'visualizer'}
@@ -724,7 +726,7 @@ export function BillingPanel({
                       </Button>
                     )
                   ) : (
-                    <Button className="h-11 w-full" size="lg" variant="outline" disabled>
+                    <Button className="h-11 w-full rounded-xl" size="lg" variant="outline" disabled>
                       <Clock3Icon data-icon="inline-start" aria-hidden="true" />
                       Coming soon
                     </Button>
@@ -747,7 +749,7 @@ export function BillingPanel({
                 status="coming"
                 helper="Planned for a future release"
                 action={
-                  <Button className="h-11 w-full" size="lg" variant="outline" disabled>
+                  <Button className="h-11 w-full rounded-xl" size="lg" variant="outline" disabled>
                     <Clock3Icon data-icon="inline-start" aria-hidden="true" />
                     Coming soon
                   </Button>
@@ -769,7 +771,7 @@ export function BillingPanel({
                 status="coming"
                 helper="Planned for a future release"
                 action={
-                  <Button className="h-11 w-full" size="lg" variant="outline" disabled>
+                  <Button className="h-11 w-full rounded-xl" size="lg" variant="outline" disabled>
                     <Clock3Icon data-icon="inline-start" aria-hidden="true" />
                     Coming soon
                   </Button>
@@ -813,8 +815,7 @@ export function BillingPanel({
                         ))}
                       </ul>
                       <Button
-                        className="mt-5"
-                        variant={owned ? 'outline' : 'default'}
+                        className="mt-5 h-11 w-full rounded-xl bg-[#101213] text-white hover:bg-[#101213]/90"
                         disabled={anyBusy || owned || !buySetup}
                         onClick={() => runSetup(s.id)}
                       >
@@ -850,10 +851,11 @@ export function BillingPanel({
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setConfirmVisualizer(false)} disabled={anyBusy}>
+            <Button variant="outline" className="h-11 rounded-xl" onClick={() => setConfirmVisualizer(false)} disabled={anyBusy}>
               Cancel
             </Button>
             <Button
+              className="h-11 rounded-xl"
               onClick={() => {
                 setConfirmVisualizer(false)
                 runVisualizer(true)
@@ -878,10 +880,11 @@ export function BillingPanel({
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setConfirmVoice(false)} disabled={anyBusy}>
+            <Button variant="outline" className="h-11 rounded-xl" onClick={() => setConfirmVoice(false)} disabled={anyBusy}>
               Cancel
             </Button>
             <Button
+              className="h-11 rounded-xl"
               onClick={() => {
                 setConfirmVoice(false)
                 runVoice(true)

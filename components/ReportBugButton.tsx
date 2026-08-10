@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { usePathname } from 'next/navigation'
-import { BugIcon } from 'lucide-react'
+import { BugIcon, SendIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -78,10 +78,10 @@ export function ReportBugButton({ compact = false }: { compact?: boolean }) {
         <span className={compact ? 'sr-only' : undefined}>Report a bug</span>
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-lg">
+        <DialogContent className="rounded-3xl sm:max-w-lg">
           <DialogHeader>
             <div className="flex items-center gap-3">
-              <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+              <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-[#101213] text-white">
                 <BugIcon className="size-5" aria-hidden="true" />
               </span>
               <div className="space-y-1">
@@ -118,12 +118,30 @@ export function ReportBugButton({ compact = false }: { compact?: boolean }) {
                 Describe the issue, steps to reproduce, and browser/device.
               </p>
             </div>
-            <DialogFooter className="sm:justify-between">
-              <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+            <DialogFooter className="rounded-b-3xl sm:justify-between">
+              <Button
+                type="button"
+                variant="outline"
+                className="h-11 rounded-xl"
+                onClick={() => setOpen(false)}
+              >
                 Cancel
               </Button>
-              <Button type="submit" disabled={submitting || tooShort}>
-                {submitting ? 'Sending…' : 'Send bug report'}
+              {/* Same sliding-tray treatment as the sign-in / signup buttons. */}
+              <Button
+                type="submit"
+                disabled={submitting || tooShort}
+                className="group relative h-11 overflow-hidden rounded-xl bg-[#101213] px-4 text-white hover:bg-[#101213]/90"
+              >
+                <span className="mr-9 transition-opacity duration-500 group-hover:opacity-0">
+                  {submitting ? 'Sending…' : 'Send bug report'}
+                </span>
+                <i
+                  aria-hidden="true"
+                  className="absolute bottom-1 right-1 top-1 z-10 grid w-9 place-items-center rounded-lg bg-white/15 transition-all duration-500 group-hover:w-[calc(100%-0.5rem)] group-active:scale-95"
+                >
+                  <SendIcon className="size-4" strokeWidth={2} />
+                </i>
               </Button>
             </DialogFooter>
           </form>
