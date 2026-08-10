@@ -29,8 +29,8 @@ interface ShopifyResponse {
   errors?: unknown
 }
 
-const SEARCH_QUERY = `query Search($q: String!, $first: Int!) {
-  products(first: $first, query: $q) {
+const SEARCH_QUERY = `query Search($q: String!, $first: Int!, $sortKey: ProductSortKeys, $reverse: Boolean) {
+  products(first: $first, query: $q, sortKey: $sortKey, reverse: $reverse) {
     edges {
       node {
         id
@@ -111,7 +111,19 @@ export async function searchShopifyProducts(
   deps: CommerceDeps = {},
 ): Promise<CommerceProduct[]> {
   const first = Math.min(params.limit ?? 10, 20)
-  const json = await storefront(domain, token, SEARCH_QUERY, { q: params.query, first }, deps)
+  const json = await storefront(
+    domain,
+    token,
+    SEARCH_QUERY,
+    {
+      q: params.query,
+      first,
+      // Superlative price asks ("cheapest product") — null keeps RELEVANCE.
+      sortKey: params.sort ? 'PRICE' : null,
+      reverse: params.sort === 'price_desc',
+    },
+    deps,
+  )
   const edges = json.data?.products?.edges ?? []
   return edges.map((e) => normalizeShopifyProduct(e.node, domain))
 }
@@ -239,7 +251,8 @@ export async function fetchShopifyProductDetails(
       return {
         id: n.id,
         title: n.title,
-        description: truncate(n.description, 1500),
+        // 6000 like WooCommerce: specs often sit past char 1500 (HomeByNB lesson).
+      description: truncate(n.description, 6000),
         ...(attributes.length ? { attributes } : {}),
       }
     })

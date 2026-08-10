@@ -276,7 +276,8 @@ export function parseVerskisProductDetails(html: string, id: string): ProductDet
   return {
     id,
     title: product.title,
-    description: description ? description.slice(0, 1500) : undefined,
+    // 6000 like WooCommerce: specs often sit past char 1500 (HomeByNB lesson).
+    description: description ? description.slice(0, 6000) : undefined,
     attributes: product.attributes.length ? product.attributes : undefined,
   }
 }

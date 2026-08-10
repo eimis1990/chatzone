@@ -125,11 +125,23 @@ Store connectors + product search. Separate from [RAG chunks](rag-and-knowledge.
   checkout" answer AND hallucinated carriers (the bot once offered LP Express, which the
   store doesn't have). `fetchWooShippingOptions` (`lib/commerce/woocommerce.ts`); rates are
   for a minimal 1-item cart, the tool result says the checkout confirms the final price.
+  Upgrade paths for other providers when a client needs it (both untested — no live store to
+  verify against yet): **Magento** has an unauthenticated guest-cart flow
+  (`POST /rest/V1/guest-carts` → add item → `estimate-shipping-methods`); **Shopify** needs
+  the Cart API with unauthenticated cart scopes on the Storefront token
+  (`cartDeliveryGroups`). Verskis/feed have no rates API — their bots answer delivery
+  questions from the KB only (the FACTS carrier guard in `lib/ai/prompt.ts` still blocks
+  invented carriers for every provider).
 - **`sort: price_asc|price_desc` on `search_products`** for superlative price asks
   ("cheapest product" used to answer with a 10.90 € hand cream while a 0.20 € item existed —
-  pure vector noise, the index stores no prices). Empty query + sort → live Woo
-  `orderby=price` over the whole catalog; query + sort → the semantic path runs as usual and
-  results are price-ordered afterwards (`sortByPrice`, `lib/products/search.ts`).
+  pure vector noise, the index stores no prices). Empty query + sort → native store price
+  ordering over the whole catalog — supported by **woocommerce** (`orderby=price`),
+  **shopify** (`sortKey: PRICE` + `reverse`), **magento** (`sort: { price }`), and **feed**
+  (in-memory sort of the full match set before slicing). **Verskis has no sort** (storefront
+  HTML search) — whole-catalog superlatives return whatever the empty search yields (usually
+  nothing → the model retries with a term). Query + sort → the semantic path runs as usual
+  for every provider and results are price-ordered afterwards (`sortByPrice`,
+  `lib/products/search.ts`).
   ⚠️ gpt-4.1 **over-volunteers `sort` on ordinary searches** (same pathology as
   `audience: 'unisex'`) — that's why a volunteered sort must NOT reroute a non-empty query
   to keyword search: Woo's `search=` can't match LT inflections ("keptuvė" finds nothing

@@ -45,8 +45,8 @@ interface MagentoGraphQLResponse {
   errors?: unknown
 }
 
-const SEARCH_QUERY = `query Search($q: String!, $n: Int!) {
-  products(search: $q, pageSize: $n) {
+const SEARCH_QUERY = `query Search($q: String!, $n: Int!, $sort: ProductAttributeSortInput) {
+  products(search: $q, pageSize: $n, sort: $sort) {
     items {
       uid
       sku
@@ -138,7 +138,17 @@ export async function searchMagentoProducts(
 ): Promise<CommerceProduct[]> {
   const base = magentoBase(storeUrl)
   const n = Math.min(params.limit ?? 10, 20)
-  const json = await graphql(base, SEARCH_QUERY, { q: params.query, n }, deps)
+  const json = await graphql(
+    base,
+    SEARCH_QUERY,
+    {
+      q: params.query,
+      n,
+      // Superlative price asks ("cheapest product") — null keeps relevance order.
+      sort: params.sort ? { price: params.sort === 'price_desc' ? 'DESC' : 'ASC' } : null,
+    },
+    deps,
+  )
   const items = json.data?.products?.items ?? []
   return items.map((it) => normalizeMagentoProduct(it, base))
 }

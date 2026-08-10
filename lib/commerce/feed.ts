@@ -272,6 +272,16 @@ export async function searchFeed(
       return tokens.some((t) => hay.includes(t)) && matches(p, [], params.minPrice, params.maxPrice)
     })
   }
+  // Superlative price asks ("cheapest product") — sort the FULL match set
+  // before slicing, so the returned page really is the cheapest/dearest N.
+  if (params.sort) {
+    const dir = params.sort === 'price_desc' ? -1 : 1
+    const num = (p: { price: string }) => {
+      const m = p.price.replace(',', '.').match(/\d+(?:\.\d+)?/)
+      return m ? Number(m[0]) : Number.POSITIVE_INFINITY
+    }
+    out = [...out].sort((a, b) => (num(a) - num(b)) * dir)
+  }
   return out.slice(0, limit)
 }
 
