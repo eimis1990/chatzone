@@ -89,8 +89,21 @@ function buildPrompt(topic: CanonicalTopic, excerpts: string): string {
     'numbers, prices, emails, phone numbers, and dates EXACTLY as written. Do NOT invent, assume, or ' +
     'generalise anything that is not in the excerpts.\n\n' +
     'If the excerpts contain no relevant information about this topic, reply with exactly: NONE\n\n' +
-    'Write in the SAME language as the excerpts. Use short paragraphs and bullet points where helpful. ' +
-    'Do not add a heading or title.\n\n' +
+    // Both platform languages, each under its own heading: the heading-aware
+    // chunker then indexes each section separately, so a Lithuanian question
+    // lexically matches the Lithuanian section (an English-only summary used to
+    // lose the FTS channel entirely for LT visitors, and vice versa).
+    'Write the summary TWICE — the same facts in both languages:\n' +
+    'first a Lithuanian section starting with the exact heading line "## Santrauka (LT)",\n' +
+    'then an English section starting with the exact heading line "## Summary (EN)".\n' +
+    'Translate faithfully; numbers, prices, emails, phone numbers, and addresses stay identical in ' +
+    'both sections. Use short paragraphs and bullet points where helpful. No other title.\n\n' +
+    // Chunk-retrieval cares about what leads the section: visitors ask "kada
+    // dirbate?", not "koks įmonės kodas?" — a rekvizitai-first contact page once
+    // pushed the working hours out of the retrieved window.
+    'Within each section, order the facts by how often customers ask for them — the everyday ' +
+    'answers first (working hours, address, contact channels, prices, timeframes, steps), and ' +
+    'legal/company-registration details (company code, VAT, legal entity) LAST.\n\n' +
     `Excerpts:\n${excerpts}`
   )
 }

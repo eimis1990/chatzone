@@ -30,11 +30,22 @@ How a bot's answers stay grounded in the client's own content.
 
 ## Canonical pages (`lib/ingestion/canonical.ts`)
 
-- `generateCanonicalPages` synthesizes 6 bilingual (EN/LT) "answer summary"
-  pages per bot — returns, shipping, payment, contact, warranty, ordering
-  (`canonical.ts:32`) — from the bot's own retrieved chunks, via `gpt-4o-mini`
-  (`canonical.ts:104`). Strictly grounded: yields `NONE` (skipped, not
-  invented) if the KB has nothing on a topic.
+- `generateCanonicalPages` synthesizes 6 "answer summary" pages per bot —
+  returns, shipping, payment, contact, warranty, ordering (`canonical.ts`) —
+  from the bot's own retrieved chunks, via `gpt-4o-mini`. Strictly grounded:
+  yields `NONE` (skipped, not invented) if the KB has nothing on a topic.
+- **Pages are truly bilingual since 2026-08-10**: every page carries a
+  `## Santrauka (LT)` section and a `## Summary (EN)` section with identical
+  facts. The heading-aware chunker indexes each section separately, so LT
+  questions lexically match the LT chunk and vice versa. Before this only the
+  retrieval QUERIES were bilingual — the page came out in whatever language
+  the source excerpts were (HomeByNB's shipping summary was English-only,
+  invisible to Lithuanian FTS).
+- **Facts are ordered customer-first within each section** (working hours,
+  address, contacts, prices first; company code/VAT last) — a rekvizitai-first
+  contact page pushed the working hours out of retrieval reach for
+  "kada dirbate?"-style phrasings. Changing this prompt requires
+  re-running canonical generation per bot (crawl does it automatically).
 - Stored as a normal `knowledge_sources` row with `metadata.kind ===
   'canonical'`; idempotent regeneration preserves a manual
   `contentOverride`. Runs automatically after every crawl
