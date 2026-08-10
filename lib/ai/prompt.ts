@@ -4,6 +4,7 @@ import {
   storeConfigured,
   orderLookupEnabled,
   productDetailsSupported,
+  shippingInfoSupported,
 } from '@/lib/commerce/capabilities'
 import {
   providerDisplayGuidance,
@@ -187,7 +188,23 @@ export function buildSystemPrompt(
         'acknowledges the request (e.g. "Oh, lovely idea — here are a few he might like: 🎁" / ' +
         '"Žinoma! 😊 Štai keletas variantų:"). NEVER list products, brands, prices, links, or per-category ' +
         'bullets in your text — the cards already show all of that. For non-product questions, use the ' +
-        'context below.',
+        'context below. ' +
+        '(6) RELEVANCE OVER QUANTITY: display ONLY products that genuinely fit the request. When just ' +
+        '1-3 genuinely fit, show only those — NEVER pad the set with unrelated or different-category ' +
+        'items to look fuller (a hair straightener is never an "alternative" to a frying pan, even if ' +
+        'their names share a word like "PRO"). A set/bundle that INCLUDES the requested item DOES ' +
+        'count (a pots-and-pans set for "keptuvė" — display it and mention it is part of a set). If ' +
+        'NOTHING genuinely fits, do not call ' +
+        '`display_products` at all — say so honestly and offer to search for something else. ' +
+        '(7) SUPERLATIVE PRICE ASKS: for "the cheapest / most expensive product" (overall or within a ' +
+        'category), call `search_products` with `sort` set (`price_asc` / `price_desc`) — with an ' +
+        'empty-string query for the whole catalog, or the category term to rank within it. Only claim ' +
+        'something is the cheapest/most expensive based on a SORTED result, never on an unsorted ' +
+        'search. ' +
+        '(8) SEARCH ONLY FOR PRODUCT NEEDS: call `search_products` when the shopper wants products ' +
+        'found, recommended, checked, or compared. A question about a discount, delivery, opening ' +
+        'hours, returns, or other store matters is NOT a product search — answer it from the tools/' +
+        'context without searching or displaying products the shopper never asked for.',
     )
 
     if (productDetailsSupported(config.commerce)) {
@@ -230,6 +247,21 @@ export function buildSystemPrompt(
       )
     }
 
+    if (shippingInfoSupported(config.commerce)) {
+      lines.push(
+        'SHIPPING & DELIVERY: when the shopper asks ANYTHING about delivery — cost, shipping methods, ' +
+          'couriers, parcel lockers (paštomatai), store pickup, or even a simple yes/no availability ' +
+          'question ("do you deliver to parcel lockers?") — you MUST call `shipping_info` BEFORE ' +
+          'answering, and answer from ' +
+          'what it returns — the store\'s LIVE checkout options with current prices. List ONLY the ' +
+          'options it returns, with their exact names and prices; NEVER mention a carrier or delivery ' +
+          'service it does not list, even a locally common one. Add that the final price for their ' +
+          'specific order is confirmed at checkout. Combine with any delivery conditions from the ' +
+          'context (e.g. a free-shipping threshold). If the tool reports it is unavailable, answer from ' +
+          'the context only — never guess carriers or prices.',
+      )
+    }
+
     const discount = config.commerce?.discount
     if (discount?.enabled && discount.code) {
       lines.push(
@@ -244,7 +276,11 @@ export function buildSystemPrompt(
     lines.push(
       'FACTS & POLICIES: for non-product questions (contact details, delivery, returns, payment, ' +
         'hours, company info), answer ONLY from the context below — copy emails, phone numbers, and ' +
-        `addresses EXACTLY as they appear there, never invent or adjust them. If the context does not ` +
+        `addresses EXACTLY as they appear there, never invent or adjust them. When you list the ` +
+        'services or providers the store works with (couriers, parcel-locker networks, payment ' +
+        'methods), name ONLY those present in the context or a tool result — NEVER add locally ' +
+        'typical ones the store did not name (do not say "Omniva, LP Express ar DPD" when the ' +
+        'context only mentions parcel lockers). If the context does not ' +
         `contain the answer, say you are not sure (e.g. "${fallback}") and ${contactStep} — ` +
         'never guess.',
     )

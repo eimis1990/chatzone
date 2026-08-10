@@ -6,6 +6,7 @@ import type {
   OrderStatus,
   OrderLookupParams,
   OrderItem,
+  ShippingOption,
 } from '@/lib/commerce/types'
 
 /** Shape of a product from the public WooCommerce Store API (subset we use). */
@@ -124,6 +125,13 @@ export async function searchWooProducts(
   if (params.query) qs.set('search', params.query)
   if (params.minPrice != null) qs.set('min_price', String(Math.round(params.minPrice * 100)))
   if (params.maxPrice != null) qs.set('max_price', String(Math.round(params.maxPrice * 100)))
+  // Superlative asks ("cheapest product") need a real price sort — the semantic
+  // index stores no prices, so this only exists on the live keyword path.
+  if (params.sort) {
+    qs.set('orderby', 'price')
+    qs.set('order', params.sort === 'price_desc' ? 'desc' : 'asc')
+    qs.set('stock_status', 'instock')
+  }
   qs.set('per_page', String(Math.min(params.limit ?? 6, 12)))
 
   const run = async (search: string): Promise<WooProduct[]> => {
@@ -309,10 +317,108 @@ export async function fetchWooProductDetails(
     return {
       id: String(p.id),
       title: decodeEntities(p.name),
-      description: full ? truncateWords(full, 1500) : undefined,
+      // 6000, not 1500: HomeByNB's vacuum listed its nozzles + HEPA filter past
+      // char 1500, so the model answered "the description doesn't say" while the
+      // shopper could see it on the page. Max 3 products per call keeps this cheap.
+      description: full ? truncateWords(full, 6000) : undefined,
       ...(attributes.length ? { attributes } : {}),
     }
   })
+}
+
+// ---------------------------------------------------------------------------
+// Live shipping options — public Store API cart flow.
+// The concrete carrier names + prices (e.g. "DPD Paštomatai 2,23 €") only exist
+// at checkout, so bots either answered vaguely or hallucinated carriers the
+// store doesn't offer (LP Express). We reproduce checkout: an ephemeral cart
+// session (Cart-Token) + the cheapest in-stock item + the store's home country
+// → the exact shipping_rates the shopper would see.
+// ---------------------------------------------------------------------------
+
+/** Subset of a Store API cart shipping rate we read. */
+interface WooCartShippingRate {
+  name?: string
+  price?: string
+  currency_minor_unit?: number
+  currency_symbol?: string
+  currency_prefix?: string
+  currency_suffix?: string
+}
+
+/** Country for shipping-rate quotes: the store's ccTLD (homebynb.lt → LT). */
+function storeCountryFromUrl(storeUrl: string): string | null {
+  try {
+    const tld = new URL(storeUrl).hostname.split('.').pop() ?? ''
+    return /^[a-z]{2}$/i.test(tld) && tld.toLowerCase() !== 'co' ? tld.toUpperCase() : null
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Fetch the store's live shipping options (name + price) as the checkout shows
+ * them. Returns [] when the store blocks the cart API or no rates resolve —
+ * callers should then answer from the knowledge base instead.
+ */
+// ponytail: quotes rates for a minimal 1-item cart in the store's ccTLD country;
+// weight/size-dependent carriers may differ per order — the tool result says so.
+export async function fetchWooShippingOptions(
+  storeUrl: string,
+  deps: CommerceDeps = {},
+): Promise<ShippingOption[]> {
+  const fetchImpl = deps.fetchImpl ?? fetch
+  const base = storeOrigin(storeUrl)
+
+  const cartRes = await fetchImpl(`${base}/wp-json/wc/store/v1/cart`, { headers: STOREFRONT_HEADERS })
+  if (!cartRes.ok) return []
+  const cartToken = cartRes.headers.get('cart-token')
+  const nonce = cartRes.headers.get('nonce')
+  if (!cartToken || !nonce) return []
+  const authed: Record<string, string> = {
+    ...STOREFRONT_HEADERS,
+    'Content-Type': 'application/json',
+    'Cart-Token': cartToken,
+    Nonce: nonce,
+  }
+
+  // Cheapest in-stock product = a representative small parcel.
+  const prodRes = await fetchImpl(
+    `${base}/wp-json/wc/store/v1/products?per_page=1&orderby=price&order=asc&stock_status=instock`,
+    { headers: STOREFRONT_HEADERS },
+  )
+  if (!prodRes.ok) return []
+  const [item] = (await prodRes.json()) as WooProduct[]
+  if (!item) return []
+
+  const addRes = await fetchImpl(`${base}/wp-json/wc/store/v1/cart/add-item`, {
+    method: 'POST',
+    headers: authed,
+    body: JSON.stringify({ id: item.id, quantity: 1 }),
+  })
+  if (!addRes.ok) return []
+  let cart = (await addRes.json()) as { shipping_rates?: Array<{ shipping_rates?: WooCartShippingRate[] }> }
+
+  const country = storeCountryFromUrl(storeUrl)
+  if (country) {
+    const updRes = await fetchImpl(`${base}/wp-json/wc/store/v1/cart/update-customer`, {
+      method: 'POST',
+      headers: authed,
+      body: JSON.stringify({ shipping_address: { country } }),
+    })
+    if (updRes.ok) cart = await updRes.json()
+  }
+
+  const options: ShippingOption[] = []
+  for (const pkg of cart.shipping_rates ?? []) {
+    for (const rate of pkg.shipping_rates ?? []) {
+      if (!rate.name) continue
+      options.push({
+        name: decodeEntities(rate.name),
+        price: rate.price === '0' ? 'free' : formatWooPrice(rate),
+      })
+    }
+  }
+  return options
 }
 
 // ---------------------------------------------------------------------------

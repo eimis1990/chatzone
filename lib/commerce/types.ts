@@ -22,6 +22,8 @@ export interface ProductSearchParams {
   minPrice?: number
   maxPrice?: number
   limit?: number
+  /** Price ordering for superlative asks ("cheapest") — live keyword path only. */
+  sort?: 'price_asc' | 'price_desc'
 }
 
 export interface CommerceDeps {
@@ -32,10 +34,16 @@ export interface CommerceDeps {
 export interface ProductDetails {
   id: string
   title: string
-  /** Full description, HTML-stripped, capped at ~1500 chars. */
+  /** Full description, HTML-stripped, capped at ~6000 chars. */
   description?: string
   /** Store attribute lines, e.g. "Spalva: mėlyna, žalia". */
   attributes?: string[]
+}
+
+/** A live shipping option from the store's checkout (name + display price). */
+export interface ShippingOption {
+  name: string
+  price: string
 }
 
 // ---------------------------------------------------------------------------

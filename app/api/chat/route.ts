@@ -235,11 +235,11 @@ export async function POST(req: Request) {
   // query (visitors write elliptical follow-ups like "o kiek kainuoja?" that
   // embed poorly on their own).
   let retrieval = await retrieveContext(bot.id, message, {}, serviceRetrievalDeps(svc))
-  if (retrieval.isWeak) {
+  if (retrieval.isLowConfidence) {
     const rewritten = await rewriteQuery(message, history)
     if (rewritten) {
       const retry = await retrieveContext(bot.id, rewritten, {}, serviceRetrievalDeps(svc))
-      if (!retry.isWeak) retrieval = retry
+      if (!retry.isLowConfidence) retrieval = retry
     }
   }
 
@@ -314,8 +314,10 @@ export async function POST(req: Request) {
           orderSink,
           (p) => {
             // Log the model's actual query — invaluable when ranking looks wrong.
-            console.log(`[agent] search_products query="${p.query}" audience=${p.audience ?? '-'}`)
-            return searchCatalog(bot, p.query, svc, p.limit ?? 24, { audience: p.audience })
+            console.log(
+              `[agent] search_products query="${p.query}" audience=${p.audience ?? '-'} sort=${p.sort ?? '-'}`,
+            )
+            return searchCatalog(bot, p.query, svc, p.limit ?? 24, { audience: p.audience, sort: p.sort })
           },
           candidates,
           shownMap,

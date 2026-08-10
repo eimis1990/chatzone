@@ -60,6 +60,11 @@ export function productDetailsSupported(config: CommerceConfig | undefined | nul
   )
 }
 
+/** Providers with a live checkout shipping-rates API — gates the shipping_info tool. */
+export function shippingInfoSupported(config: CommerceConfig | undefined | null): boolean {
+  return Boolean(config && storeConfigured(config) && config.provider === 'woocommerce')
+}
+
 /** Whether order lookups are usable (enabled + store + provider credentials). */
 export function orderLookupEnabled(config: CommerceConfig | undefined | null): boolean {
   if (!config?.enabled || !config.storeUrl) return false

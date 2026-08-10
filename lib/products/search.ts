@@ -13,6 +13,9 @@ import {
 export interface SearchOptions {
   /** Restrict to this recipient (plus unisex) — e.g. 'men' for "gifts for men". */
   audience?: Audience
+  /** Price ordering for superlative asks ("cheapest product"). The semantic
+   *  index stores no prices, so a sort always routes to the live keyword path. */
+  sort?: 'price_asc' | 'price_desc'
 }
 
 /**
@@ -96,6 +99,15 @@ export async function searchCatalog(
 
   query = await applyProductSearchSynonyms(db, bot.id, query)
 
+  // Whole-catalog superlatives ("cheapest product", empty query) need the
+  // store's own price ordering — the semantic index stores no prices ("cheapest
+  // product" once answered with a 10.90 € hand cream while a 0.20 € item
+  // existed). With a QUERY present we keep the semantic path and price-order
+  // its results below: the model volunteers `sort` on ordinary searches (like
+  // it does `audience`), and the live keyword path can't match Lithuanian
+  // inflections ("keptuvė" finds nothing though "keptuvių rinkinys" exists).
+  if (opts.sort && !query) return searchStore(c, { query, limit, sort: opts.sort })
+
   try {
     const semantic = commerceProviderProfile(c).semantic
     if (semantic?.configured(c) && (await hasIndex(bot.id, db))) {
@@ -132,7 +144,7 @@ export async function searchCatalog(
               return p ? { ...p, details: docToDetails(m.doc) } : undefined
             })
             .filter((p): p is CommerceProduct => Boolean(p) && p!.inStock)
-          if (products.length) return products.slice(0, limit)
+          if (products.length) return sortByPrice(products.slice(0, limit), opts.sort)
         }
       }
     }
@@ -142,5 +154,24 @@ export async function searchCatalog(
     console.error('[agent] semantic product search failed, falling back to keyword:', err)
   }
 
-  return searchStore(c, { query, limit })
+  return sortByPrice(await searchStore(c, { query, limit }), opts.sort)
+}
+
+/** Numeric value of a display price ("99.00 €", "3,99 €"); NaN when unparseable. */
+function parsePrice(price: string): number {
+  const m = price.replace(',', '.').match(/\d+(?:\.\d+)?/)
+  return m ? Number(m[0]) : NaN
+}
+
+/** Price-order hydrated results (unparseable prices last); no sort → unchanged. */
+function sortByPrice(products: CommerceProduct[], sort?: 'price_asc' | 'price_desc'): CommerceProduct[] {
+  if (!sort) return products
+  const dir = sort === 'price_desc' ? -1 : 1
+  return [...products].sort((a, b) => {
+    const pa = parsePrice(a.price)
+    const pb = parsePrice(b.price)
+    if (Number.isNaN(pa)) return 1
+    if (Number.isNaN(pb)) return -1
+    return (pa - pb) * dir
+  })
 }

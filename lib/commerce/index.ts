@@ -7,10 +7,12 @@ import type {
   OrderStatus,
   OrderLookupParams,
   DiscountInfo,
+  ShippingOption,
 } from '@/lib/commerce/types'
 import {
   searchWooProducts,
   fetchWooProductDetails,
+  fetchWooShippingOptions,
   validateWooStore,
   getWooOrderStatus,
   validateWooOrderAccess,
@@ -47,6 +49,7 @@ import type { CommerceConfig } from '@/lib/commerce/capabilities'
 export {
   orderLookupEnabled,
   productDetailsSupported,
+  shippingInfoSupported,
   storeConfigured,
 } from '@/lib/commerce/capabilities'
 export type { CommerceConfig } from '@/lib/commerce/capabilities'
@@ -144,6 +147,24 @@ export async function getProductDetails(
       return fetchVerskisProductDetails(config.storeUrl, ids, deps)
     case 'travelline':
       return fetchTravellineRoomDetails(config, ids, deps)
+    default:
+      return []
+  }
+}
+
+/**
+ * Live shipping options as the store's checkout shows them (WooCommerce only —
+ * see shippingInfoSupported). Returns [] when the cart API is unavailable.
+ */
+export async function getShippingOptions(
+  config: CommerceConfig,
+  deps: CommerceDeps = {},
+): Promise<ShippingOption[]> {
+  if (!storeConfigured(config)) return []
+  await guardStoreEgress(config, deps)
+  switch (config.provider) {
+    case 'woocommerce':
+      return fetchWooShippingOptions(config.storeUrl, deps)
     default:
       return []
   }

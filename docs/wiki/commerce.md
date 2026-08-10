@@ -116,8 +116,33 @@ Store connectors + product search. Separate from [RAG chunks](rag-and-knowledge.
 - `lib/ai/commerce-tool.ts` (`makeProductTools`) builds the agent's tools when
   `commerceEnabled` (any provider `storeConfigured`): `search_products` (candidates only) →
   `display_products` (agent picks which to actually show, rendered as cards), plus
-  `order_status` (only if `orderLookupEnabled`) and `discount_code` (only if a discount is
-  configured) — `lib/ai/commerce-tool.ts:33-152`.
+  `shipping_info` (WooCommerce only, `shippingInfoSupported`), `order_status` (only if
+  `orderLookupEnabled`) and `discount_code` (only if a discount is configured).
+- **`shipping_info`** (2026-08-10, HomeByNB feedback): live checkout shipping rates via the
+  public Store API cart flow — ephemeral Cart-Token + cheapest in-stock item + the store's
+  ccTLD country → the exact `shipping_rates` the shopper would see ("DPD Paštomatai 2,23 €",
+  free-pickup label even carries the store hours). Kills both the vague "calculated at
+  checkout" answer AND hallucinated carriers (the bot once offered LP Express, which the
+  store doesn't have). `fetchWooShippingOptions` (`lib/commerce/woocommerce.ts`); rates are
+  for a minimal 1-item cart, the tool result says the checkout confirms the final price.
+- **`sort: price_asc|price_desc` on `search_products`** for superlative price asks
+  ("cheapest product" used to answer with a 10.90 € hand cream while a 0.20 € item existed —
+  pure vector noise, the index stores no prices). Empty query + sort → live Woo
+  `orderby=price` over the whole catalog; query + sort → the semantic path runs as usual and
+  results are price-ordered afterwards (`sortByPrice`, `lib/products/search.ts`).
+  ⚠️ gpt-4.1 **over-volunteers `sort` on ordinary searches** (same pathology as
+  `audience: 'unisex'`) — that's why a volunteered sort must NOT reroute a non-empty query
+  to keyword search: Woo's `search=` can't match LT inflections ("keptuvė" finds nothing
+  though "keptuvių rinkinys" exists), so rerouting made the bot deny products it has.
+- **The card safety net is mention-gated** (`textMentionsTitle`, `lib/ai/commerce-tool.ts`):
+  when the model searches but never calls `display_products`, only candidates whose title
+  the reply text actually names (≥2 folded title tokens) render as cards. The old
+  dump-all-candidates net was the single worst client-reported bug: a "no discount found"
+  reply rendered 12 unrelated conditioner cards, and a "no Samsung pan" reply rendered hair
+  straighteners (title-boost on the shared word "PRO").
+- **`get_product_details` description cap is 6000 chars** (was 1500): HomeByNB's NÁTA vacuum
+  lists its nozzles at ~1900 chars and "H13 HEPA" at ~1600, so the model kept answering "the
+  description doesn't say" about facts visible on the product page.
 - Wired into the text chat route at `app/api/chat/route.ts:209-214`, with `searchImpl` bound to
   `searchCatalog` (the semantic+live path) rather than the raw keyword `searchStore`.
 - The `app/api/widget/{order,search,discount}` routes are **not** used by the text chat tools
@@ -295,4 +320,6 @@ attaches `products` to assistant turns (`previewChatSchema` allows them); the
   `searchCatalog` too, so a synced semantic index behaves the same in preview and
   the live widget; without an index, both still fall back to live keyword search.
 
-_Last verified: 2026-07-17 (working tree + full 1,951-product mobel.lt live crawl)._
+_Last verified: 2026-08-10 (working tree, HomeByNB feedback round — e2e battery on the
+3IMIS test bot: discount/hours/delivery/paštomatai/cheapest/vacuum-specs/absent-brand all
+pass; eval-answers 10/10, eval-products 16/17)._

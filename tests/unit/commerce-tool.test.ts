@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { makeProductTools } from '@/lib/ai/commerce-tool'
+import { makeProductTools, textMentionsTitle } from '@/lib/ai/commerce-tool'
 import type { BotConfig } from '@/lib/types'
 import type { CommerceProduct } from '@/lib/commerce/types'
 
@@ -178,5 +178,34 @@ describe('display_products with previously shown cards', () => {
 
     expect(result).toEqual({ shown: 1 })
     expect(sink).toEqual([freshCard])
+  })
+})
+
+describe('safety-net card gating (textMentionsTitle)', () => {
+  it('renders only candidates the reply text actually names', () => {
+    const text = 'Radau NARD Treatment Signature kondicionierių — puikus pasirinkimas! 😊'
+    expect(textMentionsTitle(text, 'NARD Treatment Signature plaukų kondicionierius, 500ml')).toBe(true)
+    expect(textMentionsTitle(text, 'UPGRADE plaukų tiesintuvas su infraraudonaisiais spinduliais')).toBe(false)
+  })
+
+  it('a single shared generic word is not a mention (refusal texts)', () => {
+    const refusal = 'Deja, tiesintuvų šiuo metu neturime.'
+    expect(textMentionsTitle(refusal, 'Diav Pro Stayling tiesintuvas Precious Metals')).toBe(false)
+  })
+
+  it('matches across case and Lithuanian diacritics', () => {
+    expect(textMentionsTitle('rekomenduoju kvapnią žvakę WoodWick Vanilla', 'WoodWick VANILLA kvapni žvakė')).toBe(true)
+  })
+})
+
+describe('shipping_info registration', () => {
+  it('registers for woocommerce and not for feed', () => {
+    const wooTools = makeProductTools(config, [], undefined, async () => [])
+    expect(wooTools.shipping_info).toBeDefined()
+    const feedConfig = {
+      commerce: { enabled: true, provider: 'feed', feedUrl: 'https://x.lt/feed.xml' },
+    } as unknown as BotConfig
+    const feedTools = makeProductTools(feedConfig, [], undefined, async () => [])
+    expect(feedTools.shipping_info).toBeUndefined()
   })
 })

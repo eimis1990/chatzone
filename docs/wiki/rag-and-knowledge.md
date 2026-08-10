@@ -44,10 +44,22 @@ How a bot's answers stay grounded in the client's own content.
 
 - **Hybrid search**: vector (cosine) + full-text, fused with Reciprocal Rank
   Fusion, via the `match_chunks_hybrid` RPC
-  (`retrieval.ts:63`). Defaults: `k=5`, min similarity `0.2`
-  (`retrieval.ts:6-12`) — a floor deliberately kept low because reworded
+  (`retrieval.ts`). Defaults: `k=5`, min similarity `0.2` — a floor
+  deliberately kept low because reworded
   questions often score 0.2–0.3; the grounding prompt is what stops weak
   matches from being used, not the threshold.
+- **FTS is OR-semantics, diacritic-folded, prefix-tolerant** (migration
+  `20260810190000_hybrid_or_fts_dedup.sql`, from HomeByNB's real-visitor
+  feedback): the old `websearch_to_tsquery` ANDed every token, so "Koks jūsų
+  darbo laikas?" never matched the chunk containing "Darbo laikas:". Now an OR
+  tsquery over `fold_lt()`-folded tokens (≥7-char tokens also as 6-char
+  prefixes, covering LT inflections like paštomatus↔paštomatą) ranked by
+  `ts_rank_cd` — multi-token dense hits still rank first. Folded FTS has its
+  own GIN expression index (`document_chunks_fold_fts_idx`).
+- **Identical-content dedup** (same migration): crawled pages share
+  header/footer boilerplate — HomeByNB's index held ~12 copies of one footer
+  chunk that filled 3 of the top-5 slots. Only the best-scoring chunk per
+  `md5(content)` survives.
 - FTS uses the **`simple`** tsvector config, not `english` — migration
   `0028_fts_simple.sql` fixed Lithuanian queries losing the lexical channel
   entirely under English stemming.
@@ -56,8 +68,13 @@ How a bot's answers stay grounded in the client's own content.
   summary page outranks incidental noise (e.g. a privacy-policy page burying
   the real "Contact & business details" answer).
 - A chunk survives the filter if it hit full-text OR its cosine similarity
-  clears the floor (`0030_canonical_boost.sql:70-71`) — weak-vector +
-  no-FTS-hit chunks are dropped as noise.
+  clears the floor — weak-vector + no-FTS-hit chunks are dropped as noise.
+- **Two weakness tiers** (`retrieval.ts`): `isWeak` (zero matches) still
+  triggers the fallback message; `isLowConfidence` (empty OR top similarity
+  < 0.28) triggers the one-shot `rewriteQuery` retry in BOTH `/api/chat` and
+  `/api/preview/chat`. Before this, "o kur ji yra?" pulled 5 privacy-policy
+  noise chunks (top sim 0.276), so the old zero-match rewrite never fired —
+  and preview had no rewrite at all (preview/live parity gap).
 
 ## Eval harnesses (`scripts/`)
 
@@ -70,9 +87,10 @@ How a bot's answers stay grounded in the client's own content.
   synthesis and other light tasks stay on `gpt-4o-mini` for cost
   (`lib/ai/chat-models.ts:3-5`).
 
-> ⚠️ verify: the "10/10" pass rate from the 2026-07 quality sprint is a
-> point-in-time eval run, not something re-derivable from the code — rerun
-> `eval-answers.mjs` against a live bot to reconfirm current accuracy.
+- Last reconfirmed 2026-08-10 (post OR-FTS/dedup retrieval rework):
+  `eval-answers.mjs` 10/10 on the 3IMIS HomeByNB test bot;
+  `eval-products.mjs` 16/17 (unchanged — the 1 fail is the stale "pledas"
+  case, store no longer sells blankets).
 
 ## Knowledge check (lint) + resolution (`lib/ingestion/lint.ts`)
 
@@ -105,4 +123,4 @@ How a bot's answers stay grounded in the client's own content.
 Product search is a **separate** index — see [commerce](commerce.md). RAG
 chunks are for policy/FAQ/general content only.
 
-_Last verified: 2026-07-08 (66f6bb8)._
+_Last verified: 2026-08-10 (working tree, HomeByNB feedback round)._

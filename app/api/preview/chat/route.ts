@@ -10,6 +10,7 @@ import type { BotConfig } from '@/lib/types'
 import type { CommerceProduct, OrderStatus } from '@/lib/commerce/types'
 import { createRateLimiter } from '@/lib/ratelimit'
 import { DEFAULT_CHAT_MODEL, DEFAULT_TEMPERATURE } from '@/lib/ai/chat-models'
+import { rewriteQuery } from '@/lib/ai/query-rewrite'
 import { searchCatalog } from '@/lib/products/search'
 import { assignedComponents } from '@/lib/widget-components/availability'
 
@@ -64,7 +65,17 @@ export async function POST(req: Request) {
     }
   }
   const commerce = commerceEnabled(config)
-  const retrieval = await retrieveContext(botId, message, {}, serviceRetrievalDeps(svc))
+  // Same weak-retrieval recovery as the live chat route: elliptical follow-ups
+  // ("o kur ji yra?") embed poorly on their own — retry once with a condensed
+  // standalone query. The client tests in preview; it must behave like live.
+  let retrieval = await retrieveContext(botId, message, {}, serviceRetrievalDeps(svc))
+  if (retrieval.isLowConfidence) {
+    const rewritten = await rewriteQuery(message, history as ChatMessage[])
+    if (rewritten) {
+      const retry = await retrieveContext(botId, rewritten, {}, serviceRetrievalDeps(svc))
+      if (!retry.isLowConfidence) retrieval = retry
+    }
+  }
 
   if (retrieval.isWeak && !commerce) {
     return ndjsonText(contentFor(config, lang).fallbackMessage, { 'x-weak': '1' })
@@ -103,7 +114,7 @@ export async function POST(req: Request) {
               params.query,
               svc,
               params.limit ?? 24,
-              { audience: params.audience },
+              { audience: params.audience, sort: params.sort },
             ),
           candidates,
           shownMap,

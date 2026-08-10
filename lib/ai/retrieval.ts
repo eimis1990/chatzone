@@ -27,10 +27,19 @@ export interface RetrievalDeps {
   ) => Promise<MatchedChunk[]>
 }
 
+// Below this top-similarity, matches are usually incidental noise (an elliptical
+// follow-up like "o kur ji yra?" pulling privacy-policy chunks) — worth one
+// rewritten-query retry. Distinct from isWeak: 0.28 is a RETRY trigger, not a
+// fallback trigger; genuinely-relevant reworded questions score ~0.3+.
+export const LOW_CONFIDENCE_SIMILARITY = 0.28
+
 export interface RetrievalResult {
   chunks: ContextChunk[]
   matched: MatchedChunk[]
+  /** No matches at all — the fallback-message trigger. */
   isWeak: boolean
+  /** Empty OR nothing scored convincingly — the query-rewrite-retry trigger. */
+  isLowConfidence: boolean
 }
 
 /** Embeds the query and fetches the most similar chunks for a bot. */
@@ -46,10 +55,12 @@ export async function retrieveContext(
   const embedding = await deps.embedQuery(query)
   const matched = await deps.matchChunks(botId, embedding, query, k, minSimilarity)
 
+  const topSimilarity = matched.reduce((max, m) => Math.max(max, m.similarity ?? 0), 0)
   return {
     matched,
     chunks: matched.map((m) => ({ content: m.content, source_id: m.source_id })),
     isWeak: matched.length === 0,
+    isLowConfidence: matched.length === 0 || topSimilarity < LOW_CONFIDENCE_SIMILARITY,
   }
 }
 

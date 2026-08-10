@@ -13,7 +13,9 @@ import {
 import {
   searchStore,
   getProductDetails,
+  getShippingOptions,
   productDetailsSupported,
+  shippingInfoSupported,
   getOrderStatus,
   getDiscount,
   orderLookupEnabled,
@@ -41,6 +43,7 @@ export function makeProductTools(
     maxPrice?: number
     limit?: number
     audience?: 'women' | 'men' | 'kids' | 'unisex'
+    sort?: 'price_asc' | 'price_desc'
   }) => Promise<CommerceProduct[]>,
   /** Shared candidate store — lets the response layer auto-render a lone found
    *  product if the model forgets to call display_products. */
@@ -85,12 +88,19 @@ export function makeProductTools(
           .enum(['women', 'men', 'kids', 'unisex'])
           .optional()
           .describe('Set ONLY when the shopper specifies who the product/gift is for.'),
+        sort: z
+          .enum(['price_asc', 'price_desc'])
+          .optional()
+          .describe(
+            'Sort by live price — set for superlative price asks ("cheapest / most expensive ' +
+              'product"). With sort set, query may be an empty string to rank the whole catalog.',
+          ),
       }),
-      execute: async ({ query, minPrice, maxPrice, audience }) => {
+      execute: async ({ query, minPrice, maxPrice, audience, sort }) => {
         try {
           const products = searchImpl
-            ? await searchImpl({ query, minPrice, maxPrice, limit: 24, audience })
-            : await searchStore(config.commerce, { query, minPrice, maxPrice, limit: 24 })
+            ? await searchImpl({ query, minPrice, maxPrice, limit: 24, audience, sort })
+            : await searchStore(config.commerce, { query, minPrice, maxPrice, limit: 24, sort })
           latestSearchQuery = query
           latestSearchProducts = products
           products.forEach((p) => candidates.set(p.id, p))
@@ -244,6 +254,49 @@ export function makeProductTools(
     })
   }
 
+  // Live shipping options straight from the store's checkout (WooCommerce
+  // only). Kills two failure modes seen with real clients: vague "calculated at
+  // checkout" answers when the KB lacks concrete prices, and hallucinated
+  // carriers the store never offered (LP Express).
+  if (shippingInfoSupported(config.commerce)) {
+    tools.shipping_info = tool({
+      description:
+        'Fetch the store\'s LIVE delivery/shipping options with their current prices, exactly as ' +
+        'the checkout shows them (couriers, parcel lockers, pickup). Call this WHENEVER the ' +
+        'shopper asks about delivery cost, delivery/shipping methods, couriers, parcel lockers ' +
+        '(paštomatai), or pickup. Present ONLY the options it returns — never name a carrier or ' +
+        'service it does not list. Mention that the final price for a specific order is confirmed ' +
+        'at checkout (rates can vary with cart size/weight).',
+      inputSchema: z.object({}),
+      execute: async () => {
+        try {
+          const options = await getShippingOptions(config.commerce!)
+          if (!options.length) {
+            return {
+              unavailable: true,
+              nextAction:
+                'Live rates could not be fetched. Answer from the context if it covers delivery; ' +
+                'otherwise say the exact options and prices are shown at checkout — do NOT guess ' +
+                'or list carriers from memory.',
+            }
+          }
+          return {
+            options,
+            note: 'Quoted for a typical small order — the checkout confirms the final price.',
+          }
+        } catch (err) {
+          console.error('[agent] shipping_info failed:', err)
+          return {
+            unavailable: true,
+            nextAction:
+              'Live rates could not be fetched. Answer from the context if it covers delivery; ' +
+              'otherwise say the exact options and prices are shown at checkout — do NOT guess.',
+          }
+        }
+      },
+    })
+  }
+
   // Full live details — only where the provider has a live details path
   // (WooCommerce Store API, Shopify Storefront, Verskis product HTML). Not registered otherwise, so
   // the model never sees a tool it can't use.
@@ -367,6 +420,24 @@ export function ndjsonText(text: string, headers: Record<string, string>): Respo
   })
 }
 
+/** Case/diacritic-folded (žąčę → zace) for fuzzy title-in-text matching. */
+function fold(s: string): string {
+  return s.toLowerCase().normalize('NFD').replace(/\p{M}/gu, '')
+}
+
+/**
+ * Does the reply text actually reference this product? True when at least two
+ * significant title tokens (or all of them for one-token titles) appear in the
+ * text — one shared word ("tiesintuvas" in a refusal) must not count.
+ */
+export function textMentionsTitle(text: string, title: string): boolean {
+  const t = fold(text)
+  const tokens = fold(title).match(/[a-z0-9]{4,}/g) ?? []
+  if (!tokens.length) return false
+  const hit = tokens.filter((tok) => t.includes(tok)).length
+  return hit >= Math.min(2, tokens.length)
+}
+
 interface NdjsonOptions {
   headers: Record<string, string>
   /** Called once with the full assistant text when generation finishes (persistence). */
@@ -436,12 +507,18 @@ export function ndjsonChatResponse(
           emitProductsIfChanged()
         }
         const products = opts.productSink ?? []
-        // Safety net: the model frequently lists found products in text (even
+        // Safety net: the model sometimes lists found products in text (even
         // "tap the card") without calling display_products, so no cards render.
-        // If it searched up candidates but displayed nothing, show them as cards
-        // (best-first order preserved, capped) rather than leaving text-only.
+        // But dumping ALL candidates re-created the worst client-reported bug:
+        // a "no discount found" reply rendered 12 unrelated conditioner cards,
+        // and a pans answer got padded with hair straighteners (raw vector
+        // noise). So render only candidates the model actually NAMED in its
+        // text — if it deliberately showed nothing, show nothing.
         if (products.length === 0 && opts.candidates && opts.candidates.size >= 1) {
-          products.push(...Array.from(opts.candidates.values()).slice(0, 12))
+          const named = Array.from(opts.candidates.values()).filter((p) =>
+            textMentionsTitle(fullText, p.title),
+          )
+          products.push(...named.slice(0, 12))
         }
         emitProductsIfChanged()
         const order = opts.orderSink ?? []
