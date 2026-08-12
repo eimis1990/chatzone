@@ -180,6 +180,15 @@ fetch; direct also challenged → the source errors with a clear message instead
 of indexing garbage. When auditing old bots, grep chunks for "Performing
 security verification".
 
+## A curl 403 does not mean the site blocks our ingestion
+
+Hostinger's CDN (`server: hcdn`) 403s curl's TLS fingerprint even with a full
+Chrome User-Agent — homepage, robots.txt, sitemaps, everything. The same URLs
+return 200 to Node's `fetch` (what `discoverPages`/`parseUrl` actually use) and
+to Jina Reader (taujenudvaras.lt, 2026-08-12). When qualifying a prospect or
+debugging a crawl, test with `node -e 'fetch(...)'` or the real pipeline, not
+curl. The reverse trap also exists — see "Anti-bot interstitials" above.
+
 ## Grouped `::before, ::after` selectors drop the shared block (Lightning CSS)
 
 A single rule `.x::before, .x::after { ... }` in `app/globals.css` applies the

@@ -94,11 +94,13 @@ export function chunkText(text: string, opts: ChunkOptions = {}): Chunk[] {
 
   let current: string[] = []
   let currentTokens = 0
+  let currentHasBody = false
   const flush = () => {
     if (current.length) {
       push(current.join('\n\n'))
       current = []
       currentTokens = 0
+      currentHasBody = false
     }
   }
 
@@ -106,7 +108,10 @@ export function chunkText(text: string, opts: ChunkOptions = {}): Chunk[] {
     const t = estimateTokens(block.text)
 
     // A heading begins a new section — don't let it trail the previous chunk.
-    if (block.isHeading) flush()
+    // But a stack of headings with no body between them stays together: pages
+    // that render "# Hall name" + "### capacity" + specs otherwise split into a
+    // useless name-only chunk and a spec chunk that never mentions the name.
+    if (block.isHeading && currentHasBody) flush()
 
     // A block larger than the budget is sentence-split into its own chunks.
     if (t > maxTokens) {
@@ -118,6 +123,9 @@ export function chunkText(text: string, opts: ChunkOptions = {}): Chunk[] {
     if (currentTokens + t > maxTokens && current.length > 0) flush()
     current.push(block.text)
     currentTokens += t
+    // Body = anything beyond a bare heading line (a heading block can carry
+    // body lines when no blank line separates them).
+    if (!/^#{1,6}\s[^\n]*$/.test(block.text)) currentHasBody = true
   }
   flush()
 

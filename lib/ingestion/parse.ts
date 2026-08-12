@@ -5,6 +5,19 @@
  * "…kasdienybei.Mums svarbu…"). Readability strips nav/boilerplate; Turndown
  * converts the cleaned HTML to Markdown, falling back to the whole body.
  */
+/**
+ * Drops image markdown (and links left empty by it) — images carry no text to
+ * embed, and an image-only block between a heading and its body splits them
+ * into separate chunks (see chunk.ts heading handling).
+ */
+export function stripMarkdownImages(md: string): string {
+  return md
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, '')
+    .replace(/\[\s*\]\([^)]*\)/g, '')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim()
+}
+
 export async function extractReadableText(html: string, url: string): Promise<string> {
   // Dynamic imports keep jsdom (ESM-only in recent versions) out of the
   // module graph at build time, avoiding the require()-of-ESM error.
@@ -29,7 +42,7 @@ export async function extractReadableText(html: string, url: string): Promise<st
   const title = article?.title?.trim()
   let md = td.turndown(bodyHtml)
   if (title && !md.startsWith('#')) md = `# ${title}\n\n${md}`
-  return md.replace(/\n{3,}/g, '\n\n').trim()
+  return stripMarkdownImages(md)
 }
 
 /**
@@ -94,7 +107,7 @@ export async function parseUrl(url: string, fetchImpl: typeof fetch = fetch): Pr
     // server may still pass).
     const { readerMarkdown } = await import('@/lib/ingestion/jina-reader')
     const md = await readerMarkdown(url)
-    if (md && !looksLikeBotChallenge(md)) return md
+    if (md && !looksLikeBotChallenge(md)) return stripMarkdownImages(md)
   }
   const res = await fetchImpl(url)
   if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`)

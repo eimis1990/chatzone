@@ -58,6 +58,14 @@ describe('discoverPages', () => {
     expect(pages.some((u) => u.includes('.css'))).toBe(false)
   })
 
+  it('keeps the base page even when the sitemap alone fills maxPages', async () => {
+    const locs = Array.from({ length: 50 }, (_, i) => `<url><loc>https://acme.com/p${i}</loc></url>`).join('')
+    const fetchImpl = vi.fn(async () => res(`<urlset>${locs}</urlset>`, { contentType: 'application/xml' })) as unknown as typeof fetch
+    const pages = await discoverPages('https://acme.com', 10, fetchImpl)
+    expect(pages).toContain('https://acme.com/')
+    expect(pages).toHaveLength(10)
+  })
+
   it('caps at maxPages', async () => {
     const locs = Array.from({ length: 50 }, (_, i) => `<url><loc>https://acme.com/p${i}</loc></url>`).join('')
     const fetchImpl = vi.fn(async () => res(`<urlset>${locs}</urlset>`, { contentType: 'application/xml' })) as unknown as typeof fetch

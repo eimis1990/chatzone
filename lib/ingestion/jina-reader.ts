@@ -16,6 +16,11 @@ export async function readerMarkdown(
   const headers: Record<string, string> = {
     Accept: 'text/markdown',
     'X-Return-Format': 'markdown',
+    // Strip page chrome, matching the Readability fallback (parse.ts). Without
+    // this every page ingests its nav/language-switcher/footer link lists as
+    // chunks, which crowd real content out of retrieval (seen: taujenudvaras.lt
+    // "kontaktai" queries returning five nav-menu chunks).
+    'X-Remove-Selector': 'header, footer, nav, aside',
   }
   const key = process.env.JINA_API_KEY
   if (key) headers.Authorization = `Bearer ${key}`

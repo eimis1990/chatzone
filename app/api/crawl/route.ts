@@ -14,29 +14,37 @@ import type { KnowledgeSource } from '@/lib/types'
 export const maxDuration = 300
 
 // Discover broadly, but only ingest a batch per crawl (bounds the request time;
-// re-crawling picks up the next batch of fresh pages).
-const DISCOVER_CAP = 60
+// re-crawling picks up the next batch of fresh pages). Discovery is a handful
+// of sitemap fetches, so the cap can comfortably cover a whole site — a low cap
+// truncated BEFORE the priority sort, so sites whose sitemap index leads with
+// blog/event posts (WordPress post-sitemap first) never surfaced their core
+// pages (seen with taujenudvaras.lt: 60/60 slots went to old event posts).
+const DISCOVER_CAP = 1000
 const INGEST_CAP = 15
 
 // Crawling is expensive — a couple per minute per user.
 const crawlLimiter = createRateLimiter({ capacity: 2, refillPerSec: 0.05 })
 
 // Pages most support questions hit — contact, returns/refunds, terms, privacy,
-// shipping/delivery, payment, warranty, about, FAQ (Lithuanian + English). These
+// shipping/delivery, payment, warranty, about, FAQ, plus service-business core
+// pages: rentals/pricing/accommodation/services (Lithuanian + English). These
 // are ingested first so a single crawl front-loads the highest-value info.
 const PRIORITY_RE =
-  /(kontakt|contact|susisiek|gr[aą]žin|grazin|return|refund|atsisak|taisykl|s[aą]lyg|salyg|terms|conditions|privatum|privacy|gdpr|slapuk|cookie|pristatym|siunt|delivery|shipping|apmok|mok[eė]jim|payment|garantij|warranty|apie|about|duk|faq|klausim)/i
-const BLOG_RE = /\/(patarimai|blog|straipsn|news|tinklarast|article)\//i
+  /(kontakt|contact|susisiek|gr[aą]žin|grazin|return|refund|atsisak|taisykl|s[aą]lyg|salyg|terms|conditions|privatum|privacy|gdpr|slapuk|cookie|pristatym|siunt|delivery|shipping|apmok|mok[eė]jim|payment|garantij|warranty|apie|about|duk|faq|klausim|nuoma|rent|kain|pric|paslaug|service|apgyvendin|accommodation|pramog|edukacij|menu|meniu)/i
+// Dated/low-value posts go last: blogs, news, and event announcements (event
+// calendars churn; a crawl full of expired events answers nothing).
+const BLOG_RE =
+  /\/(patarimai|blog|straipsn|news|tinklarast|article|renginiai|renginys|events?|wydarzenia|veranstaltungen|notikumi|kategorija|category|author)\//i
 
 /** Rank a page for ingestion priority: policy/contact pages first, blogs last. */
 function priorityScore(u: string): number {
   try {
     const path = new URL(u).pathname.toLowerCase()
     if (path === '/' || path === '') return 3 // homepage: general store info
-    let score = 0
-    if (PRIORITY_RE.test(path)) score += 5
-    if (BLOG_RE.test(path)) score -= 1 // let policy pages win ties over articles
-    return score
+    // A dated/low-value section always ranks last, even when its slug happens
+    // to contain a priority word (e.g. /renginiai/vasaros-pramogos-…/).
+    if (BLOG_RE.test(path)) return -1
+    return PRIORITY_RE.test(path) ? 5 : 0
   } catch {
     return 0
   }

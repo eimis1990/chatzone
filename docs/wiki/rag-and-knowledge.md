@@ -7,15 +7,34 @@ How a bot's answers stay grounded in the client's own content.
 - **Crawl** (`crawl.ts:99` `discoverPages`) prefers the site's sitemap
   (robots.txt-declared + common paths, one level of sitemap-index expansion);
   falls back to following same-origin links from the base page if no sitemap
-  yields anything.
+  yields anything. The base page is seeded first — adding it after the sitemap
+  loop used to drop it silently whenever the sitemap filled `maxPages`.
+- **Discovery must out-scale the sitemap**: the route's `DISCOVER_CAP`
+  (`app/api/crawl/route.ts:22`) is 1000 because the priority sort runs AFTER
+  discovery. A low cap truncated the sitemap in child-sitemap order, and
+  WordPress sitemap indexes list `post-sitemap` first — taujenudvaras.lt's
+  first crawl (2026-08-12) filled all 60 slots with stale event posts and never
+  saw `page-sitemap`'s core pages. `priorityScore` ranks contact/policy/service
+  pages first and dated sections (blogs, news, `renginiai`/events in five
+  languages, category/author archives) last — a low-value section always ranks
+  last even when its slug contains a priority word.
 - **Fetch** (`parse.ts:71` `parseUrl`): SSRF-guarded (`assertPublicUrl`, see
   [access-model](access-model.md)), then **Jina Reader** (`jina-reader.ts`,
   renders JS → Markdown) with fallback to direct `fetch` +
   Readability/Turndown (`parse.ts:8` `extractReadableText`) if Jina fails.
+  Jina requests send `X-Remove-Selector: header, footer, nav, aside` to match
+  the Readability path — without it every page ingests its nav/language-picker
+  link lists, which crowd real content out of top-k (taujenudvaras.lt
+  "kontaktai" queries returned five nav chunks). Both paths then strip image
+  markdown (`stripMarkdownImages`): images embed nothing, and an image-only
+  block between a heading and its body used to split them into separate chunks.
 - **Chunk** (`chunk.ts:81` `chunkText`): heading-aware — splits on blank
-  lines, a Markdown heading always starts a new chunk, blocks are packed to
+  lines, a Markdown heading starts a new chunk, blocks are packed to
   ~300 tokens (`maxTokens` default), oversized blocks fall back to
-  sentence-splitting with ~15% overlap.
+  sentence-splitting with ~15% overlap. Exception: a stack of consecutive
+  bare headings stays together ("# Didžioji salė" + "### ≤ 300" + specs is one
+  chunk — a name-only chunk retrieves nothing and the spec chunk loses its
+  name).
 - **Embed + store**: `pipeline.ts:58` `ingestSource` — parse → chunk → embed
   → replace the source's `document_chunks` rows, updating `status` on
   `knowledge_sources` as it goes (never throws; failures land in

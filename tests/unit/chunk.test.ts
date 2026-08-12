@@ -61,6 +61,16 @@ describe('chunkText', () => {
     expect(contact!.content).not.toContain('Shopify')
   })
 
+  it('keeps a bare heading with the sub-heading section that follows it', () => {
+    // "# Hall name" + "### capacity" + specs must land in ONE chunk — a
+    // name-only chunk retrieves nothing and the specs chunk loses its name.
+    const md = ['# Didžioji salė', '', '### ≤ 300', '', '- Kaina: 2000€'].join('\n')
+    const out = chunkText(md, { maxTokens: 600 })
+    expect(out).toHaveLength(1)
+    expect(out[0].content).toContain('Didžioji salė')
+    expect(out[0].content).toContain('2000€')
+  })
+
   it('splits a section larger than the budget into multiple chunks', () => {
     const out = chunkText(`## Big section\n${sentences(60)}`, { maxTokens: 40, overlap: 0 })
     expect(out.length).toBeGreaterThan(1)

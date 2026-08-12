@@ -126,6 +126,10 @@ export async function discoverPages(
     pages.push(key)
   }
 
+  // The base page is seeded FIRST: adding it after the sitemap loop silently
+  // dropped it whenever the sitemap alone filled maxPages.
+  add(base.toString())
+
   // 1) Sitemaps (preferred) — from robots.txt + common locations.
   for (const sitemapUrl of await sitemapCandidates(origin, fetchImpl)) {
     for (const u of await collectFromSitemap(sitemapUrl, origin, fetchImpl)) {
@@ -135,9 +139,9 @@ export async function discoverPages(
     if (pages.length >= maxPages) break
   }
 
-  // 2) Fallback: follow same-origin links from the base page.
-  if (pages.length === 0) {
-    add(base.toString())
+  // 2) Fallback: follow same-origin links from the base page (only the seeded
+  // base present means no sitemap yielded anything).
+  if (pages.length <= 1) {
     try {
       const res = await fetchImpl(base.toString())
       const ctype = res.headers.get('content-type') ?? ''
@@ -151,9 +155,6 @@ export async function discoverPages(
       // ignore — we'll at least return the base page
     }
   }
-
-  // Always include the base page itself.
-  add(base.toString())
 
   return pages.slice(0, maxPages)
 }
