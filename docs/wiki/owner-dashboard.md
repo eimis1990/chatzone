@@ -79,6 +79,11 @@ on a demo card manages a separate public `/present/share/[token]` link:
   only `service_role` has table grants. Resolution happens server-side after
   the token checks; only the presentation's minimal bot fields reach the renderer
   (`supabase/migrations/20260803152521_demo_presentation_shares.sql`).
+- The stage backdrop URL is `config.websiteUrl || config.commerce.storeUrl`
+  (both present pages + the demos-card host label). `websiteUrl` is a top-level
+  config field edited in the configurator's "Names and introduction" group —
+  non-commerce demo bots (e.g. hospitality) have no `storeUrl`, which used to
+  leave the stage on the dotted fallback.
 
 ## Earnings / MRR card
 

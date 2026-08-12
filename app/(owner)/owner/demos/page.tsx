@@ -133,7 +133,7 @@ export default async function OwnerDemosPage() {
             const cfg = bot.config as BotConfig
             const brand = cfg?.theme?.launcherColor || cfg?.theme?.primaryColor || '#4f46e5'
             const avatar = cfg?.avatarUrl
-            const store = host(cfg?.commerce?.storeUrl)
+            const store = host(cfg?.websiteUrl || cfg?.commerce?.storeUrl)
             const indexed = counts.get(bot.id) ?? 0
             const created = new Date(bot.created_at as string).toLocaleDateString('en-GB', {
               day: 'numeric',

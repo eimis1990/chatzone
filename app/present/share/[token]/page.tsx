@@ -44,7 +44,7 @@ export default async function SharedDemoPresentationPage({
     <DemoPresentationStage
       name={bot.name}
       publicKey={bot.public_key}
-      storeUrl={bot.config.commerce?.storeUrl}
+      storeUrl={bot.config.websiteUrl || bot.config.commerce?.storeUrl}
     />
   )
 }

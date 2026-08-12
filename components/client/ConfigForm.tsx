@@ -186,6 +186,7 @@ const FIELD_LABELS: Record<string, string> = {
   avatarUrl: 'Company logo',
   botAvatarUrl: 'Bot avatar',
   privacyUrl: 'Privacy policy URL',
+  websiteUrl: 'Website URL',
   businessHours: 'Working hours',
   start: 'Working hours start',
   end: 'Working hours end',
@@ -667,6 +668,22 @@ export function ConfigForm({
                 {...register('tagline')}
                 placeholder="Virtual assistant"
               />
+            </div>
+
+            <div className="space-y-1.5 sm:col-span-2">
+              <Label htmlFor="websiteUrl">Website URL (optional)</Label>
+              <Input
+                id="websiteUrl"
+                {...register('websiteUrl')}
+                placeholder="https://www.example.com"
+                inputMode="url"
+              />
+              {errors.websiteUrl && (
+                <p className="text-xs text-destructive">{errors.websiteUrl.message}</p>
+              )}
+              <p className="text-xs text-muted-foreground">
+                The business&apos;s website — used as the presentation backdrop for non-store bots.
+              </p>
             </div>
               </div>
             </SettingsGroup>

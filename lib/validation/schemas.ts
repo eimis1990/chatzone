@@ -121,6 +121,7 @@ export const botConfigFormSchema = z.object({
   avatarUrl: z.string().url().optional().or(z.literal('')),
   botAvatarUrl: z.string().url().optional().or(z.literal('')),
   privacyUrl: z.string().url().optional().or(z.literal('')),
+  websiteUrl: z.string().url().optional().or(z.literal('')),
   // Working hours (Mon–Fri) — used by analytics to split after-hours activity.
   businessHours: z
     .object({

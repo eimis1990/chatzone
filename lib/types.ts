@@ -174,6 +174,9 @@ export interface BotConfig {
   botAvatarUrl?: string
   /** Optional privacy-policy URL; shows a consent line in the widget when set. */
   privacyUrl?: string
+  /** The business's website. Backdrop for the presentation stage (with commerce
+   * storeUrl as fallback) and available wherever the client's site is needed. */
+  websiteUrl?: string
   /** Business working hours (Mon–Fri, "HH:MM"); drives the after-hours analytics. */
   businessHours?: { start: string; end: string }
   theme: {
