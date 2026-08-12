@@ -106,6 +106,17 @@ emails, and manual status progression.
   whitespace or an empty body, then proceed to Sent-folder verification. A
   whitespace-sensitive raw-response check stopped the 2026-08-07 worker after
   one valid send; the worker prompt now explicitly forbids that comparison.
+- A transient Supabase lifecycle-update failure after a verified Sent copy must
+  never trigger another email. Read the lead by id: continue if it is already
+  `email_sent`; if it remains `ready`, retry the same conditional update once
+  and verify it. Continue the batch after successful reconciliation, and stop
+  only when the status remains unresolved. This prevents both duplicates and
+  needless partial batches.
+- Hostinger may accept a send with HTTP 204 before the new copy is searchable
+  in `INBOX.Sent`. Verification therefore uses up to four searches across about
+  20 seconds (initial, then short 3/5/10-second waits), without resending. Stop
+  only when every bounded check fails; an immediate empty search is an indexing
+  delay, not proof that delivery failed.
 - Send the live row's `email_subject` and `email_body` snapshots unchanged from
   `hello@loqara.com` with the Loqara sender name and branded signature. Validate
   recipient, subject, and body before sending.
