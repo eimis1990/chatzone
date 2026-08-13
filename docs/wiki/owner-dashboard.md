@@ -79,11 +79,62 @@ on a demo card manages a separate public `/present/share/[token]` link:
   only `service_role` has table grants. Resolution happens server-side after
   the token checks; only the presentation's minimal bot fields reach the renderer
   (`supabase/migrations/20260803152521_demo_presentation_shares.sql`).
-- The stage backdrop URL is `config.websiteUrl || config.commerce.storeUrl`
-  (both present pages + the demos-card host label). `websiteUrl` is a top-level
-  config field edited in the configurator's "Names and introduction" group —
-  non-commerce demo bots (e.g. hospitality) have no `storeUrl`, which used to
-  leave the stage on the dotted fallback.
+- The stage backdrop URL is `config.websiteUrl || config.commerce.storeUrl`,
+  resolved by `presentSiteUrl` (`lib/demo/present-bot.ts`), which also holds the
+  shared "must be a demo-org bot" lookups both present pages and the backdrop
+  proxy use. `websiteUrl` is a top-level config field edited in the
+  configurator's "Names and introduction" group — non-commerce demo bots (e.g.
+  hospitality) have no `storeUrl`, which used to leave the stage on the dots.
+
+### Backdrop proxy (`/api/present/site`)
+
+Client sites almost always send `X-Frame-Options`, so the stage cannot iframe
+them directly and used to fall back to a flat mShots screenshot — a single
+viewport-sized `<img>` with nothing to scroll. The backdrop is now the live
+page, re-served from our origin without the framing headers
+(`app/api/present/site/route.ts`, rewriting in `lib/demo/present-proxy.ts`).
+
+- **Not an open proxy.** The caller passes `?bot=` (owner session required) or
+  `?token=`, never a URL; the target comes from the bot's own config, so only
+  owner-configured pages are reachable. `path` must start with a single `/`
+  (`//evil.com` would resolve to another origin) and stay on the base origin.
+- **Framed with `sandbox="allow-scripts"` and never `allow-same-origin`.** The
+  page runs on our origin, so this opaque-origin boundary is the only thing
+  keeping a client site's scripts away from our cookies. Do not relax it.
+- **In-frame links navigate via postMessage, never by the frame navigating
+  itself.** A navigation initiated by the opaque-origin document is cross-site
+  to the browser, so SameSite=Lax auth cookies are stripped, the `?bot=`
+  owner-session check 404s, and the stage goes blank after the first click
+  (verified in Chromium: parent-initiated src load = cookie sent, frame
+  self-navigation = cookie missing). The injected handler posts
+  `{__loqaraPresentNav: path}` to the app origin and
+  `PresentBackdropFrame` (`components/demo/PresentBackdropFrame.tsx`) sets
+  `iframe.src` — parent-initiated loads carry cookies like the first one. The
+  listener authenticates the message by `event.source`, not `event.origin`
+  (an opaque origin reports `'null'`).
+- That boundary breaks two things, both fixed by injection, both verified
+  against karakara.lt:
+  - `document.cookie` and Web Storage throw `SecurityError` on an opaque
+    origin. WooCommerce themes read them while initialising, the exception
+    aborts their bootstrap, and the page renders as a broken half-header.
+    A shim installs memory-backed stand-ins *before* the page's own scripts.
+  - External `<use xlink:href="….svg#id">` must be same-origin as the document,
+    which an opaque origin never is — all 207 of karakara's icons vanished.
+    The route fetches up to 3 sprite files and inlines them so the refs become
+    origin-free `#id` fragments.
+- ⚠️ **Known gap:** `<script type="module">` is always CORS-fetched, and client
+  sites don't send `Access-Control-Allow-Origin`, so a Vite-built theme's entry
+  bundle cannot execute in the backdrop. Layout, CSS, images, and scrolling are
+  unaffected; JS-driven nav/dropdowns/add-to-cart are inert. Fixing it means
+  proxying assets under path-shaped URLs (so relative imports resolve) with
+  `ACAO: *` — deliberately not done.
+- A site our server cannot fetch at all (CDNs that block datacenter IPs, e.g.
+  Hostinger's — see [gotchas](gotchas.md)) still falls back to the mShots
+  screenshot, which the *visitor's* browser loads from wp.com. The probe in
+  `DemoPresentationStage` must keep using the same UA as the route, or probe
+  and proxy can disagree.
+- The app's CSP is still report-only. If it is ever enforced, `base-uri 'self'`
+  will break the injected `<base>` — scope any promotion per-route.
 
 ## Earnings / MRR card
 

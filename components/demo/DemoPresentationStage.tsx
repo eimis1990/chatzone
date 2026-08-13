@@ -1,28 +1,34 @@
 import { ArrowRightIcon } from 'lucide-react'
 import { assertPublicUrl } from '@/lib/net/ssrf'
+import { PRESENT_FETCH_USER_AGENT } from '@/lib/demo/present-proxy'
+import { PresentBackdropFrame } from '@/components/demo/PresentBackdropFrame'
 import { WidgetEmbed } from '@/components/landing/WidgetEmbed'
 
 export interface DemoPresentationStageProps {
   name: string
   publicKey: string
   storeUrl?: string
+  /** Same-origin proxy URL for the backdrop — see `lib/demo/present-proxy.ts`. */
+  siteProxyUrl?: string
 }
 
 /**
- * Whether the store page may be shown in an iframe: reachable, and neither
- * X-Frame-Options nor CSP frame-ancestors forbids cross-origin embedding.
- * Any failure means "no" — the stage falls back to a screenshot or the dots.
+ * Whether our server can fetch the page at all. Framing headers are no longer
+ * part of the decision — the proxy strips them — but a site behind a CDN that
+ * blocks datacenter IPs still can't be proxied, and that falls to the
+ * screenshot, which the *visitor's* browser loads from wp.com instead.
  */
-async function storeEmbeddable(storeUrl: string): Promise<boolean> {
+async function siteFetchable(storeUrl: string): Promise<boolean> {
   try {
     const url = await assertPublicUrl(storeUrl)
-    const res = await fetch(url, { redirect: 'follow', signal: AbortSignal.timeout(4000) })
-    if (!res.ok) return false
-    if (/deny|sameorigin/i.test(res.headers.get('x-frame-options') ?? '')) return false
-    const ancestors = (res.headers.get('content-security-policy') ?? '')
-      .match(/frame-ancestors\s+([^;]+)/i)?.[1]
-    if (ancestors && !ancestors.includes('*')) return false
-    return true
+    const res = await fetch(url, {
+      headers: { 'user-agent': PRESENT_FETCH_USER_AGENT },
+      redirect: 'follow',
+      signal: AbortSignal.timeout(6000),
+    })
+    // Headers are all we need; don't pull a megabyte of HTML we won't parse.
+    void res.body?.cancel()
+    return res.ok && /text\/html/i.test(res.headers.get('content-type') ?? '')
   } catch {
     return false
   }
@@ -33,8 +39,9 @@ export async function DemoPresentationStage({
   name,
   publicKey,
   storeUrl,
+  siteProxyUrl,
 }: DemoPresentationStageProps) {
-  const canFrame = storeUrl ? await storeEmbeddable(storeUrl) : false
+  const canFrame = storeUrl && siteProxyUrl ? await siteFetchable(storeUrl) : false
   // Free WordPress mShots screenshots. The first request can briefly show its
   // generation placeholder; reloading once replaces it with the store capture.
   const screenshotUrl = storeUrl && !canFrame
@@ -44,12 +51,8 @@ export async function DemoPresentationStage({
 
   return (
     <div className={`relative min-h-svh ${hasBackdrop ? 'bg-white' : 'bg-dots'}`}>
-      {canFrame && storeUrl ? (
-        <iframe
-          src={storeUrl}
-          title={`${name} store`}
-          className="absolute inset-0 h-full w-full border-0"
-        />
+      {canFrame && siteProxyUrl ? (
+        <PresentBackdropFrame src={siteProxyUrl} title={`${name} store`} />
       ) : screenshotUrl ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
