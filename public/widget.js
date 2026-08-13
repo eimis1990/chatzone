@@ -135,17 +135,33 @@
     launcher.style.left = OFFSET + 'px'
   }
 
-  // ── Pulse rings ─────────────────────────────────────────────────────────
-  // Two expanding, fading circles behind the launcher (circle style only).
-  // Injected once; shown/hidden + colored by renderLauncher().
-  var pulseStyleInjected = false
-  function ensurePulseKeyframes() {
-    if (pulseStyleInjected) return
-    pulseStyleInjected = true
+  // ── Shared stylesheet (pulse keyframes + hover effects) ──────────────────
+  // Injected once at mount. Hover rules live here because inline styles can't
+  // express :hover; keep the scale values in sync with the configurator
+  // preview (TestChat.tsx: hover:scale-105 / active:scale-95).
+  var sharedStyleInjected = false
+  function ensureSharedStyles() {
+    if (sharedStyleInjected) return
+    sharedStyleInjected = true
     var st = document.createElement('style')
     st.textContent =
       '@keyframes cbz-pulse{0%{transform:scale(1);opacity:0}82.9%{transform:scale(1);opacity:0}83%{transform:scale(1);opacity:.5}100%{transform:scale(2.2);opacity:0}}' +
-      '@keyframes cbz-breathe{0%{transform:scale(1)}83%{transform:scale(.9)}88%{transform:scale(1.03)}93%{transform:scale(1)}100%{transform:scale(1)}}'
+      '@keyframes cbz-breathe{0%{transform:scale(1)}83%{transform:scale(.9)}88%{transform:scale(1.03)}93%{transform:scale(1)}100%{transform:scale(1)}}' +
+      // Two quick downward nudges — "you can tuck the chat away down there".
+      '@keyframes cbz-nudge{0%,50%,100%{transform:translateY(0)}25%,75%{transform:translateY(4px)}}' +
+      '@media (hover:hover){' +
+      '[data-cbz-launcher]:hover{transform:scale(1.05)}' +
+      '[data-cbz-launcher]:active{transform:scale(.95)}' +
+      // Phone outline fills in on hover (the svg ships with fill="none";
+      // a stylesheet rule outranks the presentation attribute).
+      '[data-cbz-call] svg{transition:fill .15s ease}' +
+      '[data-cbz-call]:hover svg{fill:currentColor}' +
+      '[data-cbz-close="x"]{transition:transform .15s ease}' +
+      '[data-cbz-launcher]:hover [data-cbz-close="x"]{transform:scale(.82)}' +
+      '}' +
+      '@media (hover:hover) and (prefers-reduced-motion:no-preference){' +
+      '[data-cbz-launcher]:hover [data-cbz-close="chevron"]{animation:cbz-nudge .8s ease-in-out}' +
+      '}'
     document.head.appendChild(st)
   }
   function makeRing(delay) {
@@ -678,6 +694,16 @@
     )
   })
 
+  // Hover zoom to match the launcher. Done in JS, not the stylesheet: the
+  // show/hide animation drives `transform` inline, and an inline value always
+  // beats a :hover rule. Guarded on opacity so a pill mid-exit stays put.
+  callBtn.addEventListener('mouseenter', function () {
+    if (callBtn.style.opacity === '1') callBtn.style.transform = 'translateY(0) scale(1.05)'
+  })
+  callBtn.addEventListener('mouseleave', function () {
+    if (callBtn.style.opacity === '1') callBtn.style.transform = 'translateY(0)'
+  })
+
   // Tell the iframe whether we're a full-screen mobile sheet, so its header can
   // show a ✕ instead of the avatar. The iframe can't tell on its own — its own
   // width is always narrow regardless of the outer viewport.
@@ -783,11 +809,19 @@
     proactiveGreeting.style[isRight ? 'right' : 'left'] = sideOffset() + 'px'
 
     var openIcon = LAUNCHER_ICONS[theme.launcherIcon] || CHAT_ICON
-    var closeIcon = CLOSE_ICONS[theme.launcherCloseIcon] || CLOSE_ICONS.x
+    // Wrapped so the hover rules can tell the icons apart: X shrinks a touch,
+    // the chevron nudges down twice (see ensureSharedStyles).
+    var closeKey = CLOSE_ICONS[theme.launcherCloseIcon] ? theme.launcherCloseIcon : 'x'
+    var closeIcon =
+      '<span data-cbz-close="' +
+      (closeKey === 'chevron-down' ? 'chevron' : 'x') +
+      '" style="display:flex">' +
+      CLOSE_ICONS[closeKey] +
+      '</span>'
 
     // Pulse rings + button breathing: circle style only, never while chat is open.
     var doPulse = !!theme.launcherPulse && theme.launcherStyle !== 'pill' && !isOpen
-    if (doPulse) ensurePulseKeyframes()
+    if (doPulse) ensureSharedStyles()
     for (var ri = 0; ri < pulseRings.length; ri++) {
       pulseRings[ri].style.backgroundColor = pc
       pulseRings[ri].style.display = doPulse ? 'block' : 'none'
@@ -891,6 +925,7 @@
   })
 
   // ── Mount ─────────────────────────────────────────────────────────────────
+  ensureSharedStyles()
   renderLauncher()
   document.body.appendChild(wrapper)
   document.body.appendChild(pulseRings[0])

@@ -146,9 +146,8 @@ export function TestChat({ botId, config, activeLang, dictationEnabled = false }
   const launcherStyleCfg = config.theme?.launcherStyle ?? 'circle'
   const launcherIconSvg =
     LAUNCHER_ICONS[(config.theme?.launcherIcon as keyof typeof LAUNCHER_ICONS) ?? 'chat'] ?? LAUNCHER_ICONS.chat
-  const closeIconSvg =
-    LAUNCHER_CLOSE_ICONS[(config.theme?.launcherCloseIcon as keyof typeof LAUNCHER_CLOSE_ICONS) ?? 'x'] ??
-    LAUNCHER_CLOSE_ICONS.x
+  const closeIconKey = (config.theme?.launcherCloseIcon as keyof typeof LAUNCHER_CLOSE_ICONS) ?? 'x'
+  const closeIconSvg = LAUNCHER_CLOSE_ICONS[closeIconKey] ?? LAUNCHER_CLOSE_ICONS.x
   // Visualize the configured spacing as a shift away from the pane corner
   // (the live widget offsets from the viewport edges the same way).
   const spacingShift = {
@@ -321,7 +320,9 @@ export function TestChat({ botId, config, activeLang, dictationEnabled = false }
                   '*',
                 )
               }
-              className={`pointer-events-auto absolute bottom-0 right-[66px] flex h-14 items-center justify-center gap-2 whitespace-nowrap rounded-full text-[15px] font-semibold shadow-lg transition-colors ${
+              whileHover={prefersReducedMotion ? undefined : { scale: 1.05 }}
+              whileTap={prefersReducedMotion ? undefined : { scale: 0.95 }}
+              className={`group pointer-events-auto absolute bottom-0 right-[66px] flex h-14 items-center justify-center gap-2 whitespace-nowrap rounded-full text-[15px] font-semibold shadow-lg transition-colors ${
                 config.theme?.compactCallButton ? 'w-14' : 'px-5'
               }`}
               style={{
@@ -336,7 +337,11 @@ export function TestChat({ botId, config, activeLang, dictationEnabled = false }
                 ),
               }}
             >
-              <PhoneIcon className="size-5" aria-hidden="true" />
+              {/* fill-none → fill-current on hover: the outline "fills in". */}
+              <PhoneIcon
+                className="size-5 transition-[fill] duration-150 group-hover:fill-current"
+                aria-hidden="true"
+              />
               {!(config.theme?.compactCallButton ?? false) && (
                 <span>
                   {previewCallState === 'active'
@@ -373,7 +378,7 @@ export function TestChat({ botId, config, activeLang, dictationEnabled = false }
           type="button"
           onClick={() => setIsOpen((v) => !v)}
           aria-label={isOpen ? 'Close chat preview' : 'Open chat preview'}
-          className={`relative flex h-14 items-center justify-center gap-2 shadow-lg transition-transform hover:scale-105 active:scale-95 ${
+          className={`group relative flex h-14 items-center justify-center gap-2 shadow-lg transition-transform hover:scale-105 active:scale-95 ${
             asPill ? 'rounded-full px-5' : 'w-14 overflow-hidden rounded-full'
           } ${pulseDemo ? 'motion-safe:animate-[cbzBreatheOnce_0.9s_ease-in-out_1_both]' : ''}`}
           style={{
@@ -382,8 +387,14 @@ export function TestChat({ botId, config, activeLang, dictationEnabled = false }
           }}
         >
           {isOpen ? (
+            // Mirrors widget.js hover: chevron nudges down twice ("tuck it away
+            // down there"), X shrinks a touch.
             <span
-              className="flex items-center justify-center [&_svg]:size-6"
+              className={`flex items-center justify-center [&_svg]:size-6 ${
+                closeIconKey === 'chevron-down'
+                  ? 'motion-safe:group-hover:animate-[cbzNudgeDown_0.8s_ease-in-out]'
+                  : 'transition-transform duration-150 group-hover:scale-[0.82]'
+              }`}
               dangerouslySetInnerHTML={{ __html: closeIconSvg }}
             />
           ) : (

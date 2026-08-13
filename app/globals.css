@@ -567,6 +567,19 @@
     transform: scale(1);
   }
 }
+/* Launcher chevron close-icon hover: two quick downward nudges.
+   Mirrors widget.js `cbz-nudge` — update both together. */
+@keyframes cbzNudgeDown {
+  0%,
+  50%,
+  100% {
+    transform: translateY(0);
+  }
+  25%,
+  75% {
+    transform: translateY(4px);
+  }
+}
 
 /* Widget loading indicator — a 3×3 grid of scaling cubes, tinted with the bot's
    accent color via --cbz-loader-color. Adapted from Uiverse.io (PriyanshuGupta28). */
