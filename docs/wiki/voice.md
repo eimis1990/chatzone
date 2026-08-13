@@ -36,7 +36,7 @@ on **ElevenLabs Conversational AI**.
   "Žinoma"/"Of course" — that repetition was a real complaint, fixed 2026-07-08).
   ⚠️ **gotcha:** `agentConfigHash` hashes `cfg.systemPrompt` but NOT the hardcoded
   voice-block text, so when you change `buildAgentPrompt` you must bump its version
-  marker (`agentConfigHash`, currently `v29-voice-candidate-review`) or live agents
+  marker (`agentConfigHash`, currently `v32-type-relevance`) or live agents
   won't re-sync.
 - **Language lock:** `buildAgentPrompt` injects the bot's available language names
   (from `languages[]`) and forbids replying in anything outside that set — added
@@ -52,7 +52,17 @@ on **ElevenLabs Conversational AI**.
   (`lib/ai/voice-product-search.ts`, `components/voice/VoiceCallButton.tsx:137-166`).
   This closes the old gap where all 20 semantic candidates appeared immediately,
   even if only one dimension matched. Provider query/display guidance and candidate
-  detail budgets come from the same provider profiles as text chat. Voice still
+  detail budgets come from the same provider profiles as text chat.
+  **Type check (2026-08-13):** constraint review alone was not enough — a bare
+  category query ("kvepalai") has no attribute constraints, so semantic nearest
+  neighbours (teas, body mist) sailed through and the agent presented them as
+  "perfume options" while text chat answered honestly (its prompt has the
+  RELEVANCE OVER QUANTITY section, `lib/ai/prompt.ts` step 6). The voice prompt,
+  `display_products` tool description, and the runtime candidate summary
+  (`voiceProductCandidateSummary`) now all demand a product-TYPE check first,
+  forbid announcing results before reviewing candidates (the spoken "tuoj
+  pateiksiu variantų" pre-commits the model to a found-it story), and require an
+  honest "not in the catalog, here's what I did find" when nothing passes. Voice still
   runs one search per request unless it must retry a miss, avoiding stacked lists.
   ElevenLabs rejected the first `display_products` schema because its client-tool
   parameter was an array. Keep client-tool inputs scalar: selected ids now travel
@@ -66,6 +76,10 @@ on **ElevenLabs Conversational AI**.
   `200 cm × 180 cm` to match indexed furniture attributes
   (`lib/voice/transcript.ts`). The voice prompt separately requires generated
   response text to use digits/compact units while TTS pronounces them naturally.
+  With v3 expressive mode the LLM also writes audio tags ("[Warmly]") that the
+  TTS performs but never speaks — `stripAudioTags` (same file) removes them from
+  both the live widget bubbles (`VoiceCallButton.onMessage`) and the persisted
+  post-call transcript (`lib/voice-webhook.ts`), sparing markdown links.
 - The agent answers knowledge questions via a `search_knowledge` **client
   tool** (`buildKnowledgeToolConfig`, `lib/ai/elevenlabs-agent.ts:211-236`),
   implemented browser-side in `components/voice/VoiceCallButton.tsx:142`

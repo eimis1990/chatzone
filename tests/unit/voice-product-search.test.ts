@@ -34,6 +34,18 @@ describe('voiceProductCandidateSummary', () => {
     expect(summary).not.toContain('Showing 2 matching products')
   })
 
+  // The karakara.lt demo bug: "kvepalai" (perfume) returned teas and body
+  // mists — semantic nearest neighbours — and the voice LLM presented them as
+  // "perfume options". The summary must demand a type check and an honest miss.
+  it('warns about nearest-neighbour candidates and demands an honest no-match', () => {
+    const summary = voiceProductCandidateSummary([product('a', 'facts')], 1)
+
+    expect(summary).toContain('DIFFERENT product type')
+    expect(summary).toContain('ARE the requested product type')
+    expect(summary).toContain('do NOT call display_products')
+    expect(summary).toContain('honestly')
+  })
+
   it('honors the provider-specific details budget', () => {
     const summary = voiceProductCandidateSummary(
       [product('first', 'first facts'), product('second', 'second facts')],

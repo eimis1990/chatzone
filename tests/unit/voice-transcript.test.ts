@@ -1,5 +1,25 @@
 import { describe, expect, it } from 'vitest'
-import { normalizeVoiceSearchQuery, normalizeVoiceTranscript } from '@/lib/voice/transcript'
+import {
+  normalizeVoiceSearchQuery,
+  normalizeVoiceTranscript,
+  stripAudioTags,
+} from '@/lib/voice/transcript'
+
+describe('stripAudioTags', () => {
+  it('removes v3 audio tags but keeps the sentence intact', () => {
+    expect(
+      stripAudioTags('[Warmly] Tai padėtų man pasiūlyti dovanas. [Enthusiastically] Pažiūrėkite!'),
+    ).toBe('Tai padėtų man pasiūlyti dovanas. Pažiūrėkite!')
+    expect(stripAudioTags('Štai variantai [laughs] jums.')).toBe('Štai variantai jums.')
+  })
+
+  it('leaves markdown links and non-tag brackets alone', () => {
+    expect(stripAudioTags('See [our store](https://x.lt) for more')).toBe(
+      'See [our store](https://x.lt) for more',
+    )
+    expect(stripAudioTags('Kaina [2024-01] buvo kita')).toBe('Kaina [2024-01] buvo kita')
+  })
+})
 
 describe('voice transcript number normalization', () => {
   it('renders spoken Lithuanian furniture dimensions as digits', () => {

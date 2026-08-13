@@ -182,6 +182,20 @@ function normalizeEnglishMeasurements(text: string): string {
   )
 }
 
+/**
+ * ElevenLabs v3 expressive mode makes the LLM write audio tags — "[Warmly]",
+ * "[laughs]", "[Enthusiastically]" — that the TTS performs but never speaks.
+ * They are delivery directions, not content, so transcripts (widget bubbles
+ * and the persisted conversation) must drop them. Only letter/space brackets
+ * are stripped, and never a markdown link's "[label](…)".
+ */
+export function stripAudioTags(text: string): string {
+  return text
+    .replace(/\[[a-zA-Z][a-zA-Z ]{1,28}\](?!\()/g, '')
+    .replace(/ {2,}/g, ' ')
+    .replace(/^[ \t]+|[ \t]+$/gm, '')
+}
+
 /** Convert spoken measurements to compact digits for the visible transcript. */
 export function normalizeVoiceTranscript(text: string, language: BotLanguage): string {
   return language === 'lt'

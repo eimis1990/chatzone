@@ -1,4 +1,5 @@
 import { createHmac, timingSafeEqual } from 'node:crypto'
+import { stripAudioTags } from '@/lib/voice/transcript'
 
 /**
  * Pure helpers for the ElevenLabs post-call webhook (see
@@ -75,7 +76,8 @@ export function transcriptToRows(
   const rows: VoiceMessageRow[] = turns
     .map((t) => ({
       role: (t.role === 'user' ? 'user' : 'assistant') as 'user' | 'assistant',
-      content: (t.message ?? '').trim(),
+      // v3 audio tags ("[Warmly]") are TTS delivery directions, not content.
+      content: stripAudioTags(t.message ?? '').trim(),
       created_at: new Date(startMs + (t.time_in_call_secs ?? 0) * 1000).toISOString(),
     }))
     .filter((m) => m.content.length > 0)

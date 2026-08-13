@@ -18,7 +18,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { ConversationProvider, useConversation } from '@elevenlabs/react'
 import { PhoneIcon, PhoneOffIcon, LoaderCircleIcon } from 'lucide-react'
 import { readableTextColor } from '@/lib/utils'
-import { normalizeVoiceSearchQuery } from '@/lib/voice/transcript'
+import { normalizeVoiceSearchQuery, stripAudioTags } from '@/lib/voice/transcript'
 import { parseVoiceProductIds, selectVoiceProductCandidates } from '@/lib/ai/voice-product-search'
 import type { CommerceProduct } from '@/lib/commerce/types'
 
@@ -129,7 +129,9 @@ function VoiceCallInner({
       console.error('[VoiceCallButton] conversation error:', msg)
     },
     onMessage: (m: { message?: string; source?: string }) => {
-      const text = m?.message?.trim()
+      // Agent text carries v3 audio tags ("[Warmly]") — performed by the TTS,
+      // never meant to be read; the visible bubble must not show them.
+      const text = stripAudioTags(m?.message ?? '').trim()
       if (!text) return
       onTranscript?.(m.source === 'user' ? 'user' : 'assistant', text)
     },
