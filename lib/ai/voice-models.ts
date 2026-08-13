@@ -10,10 +10,13 @@ export interface VoiceLlmOption {
 }
 
 // Values are exact ElevenLabs agent LLM ids (validated against the API's
-// accepted enum — invalid ids cause the agent PATCH to 400).
+// accepted enum — invalid ids cause the agent PATCH to 400). Verified against
+// the agents/create schema before adding — never guess an id.
 export const VOICE_LLM_OPTIONS: VoiceLlmOption[] = [
   { value: 'gpt-4o', label: 'GPT-4o — best quality (default)' },
+  { value: 'gpt-4.1', label: 'GPT-4.1 — same model as text chat' },
   { value: 'gpt-4o-mini', label: 'GPT-4o mini — fastest' },
+  { value: 'gpt-4.1-mini', label: 'GPT-4.1 mini — fast' },
   { value: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash' },
   { value: 'gemini-2.5-flash-lite', label: 'Gemini 2.5 Flash Lite' },
   { value: 'qwen35-397b-a17b', label: 'Qwen 3.5 397B' },

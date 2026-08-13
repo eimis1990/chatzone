@@ -56,6 +56,13 @@ describe('buildAgentConfig', () => {
 
   it('uses the configured built-in LLM model', () => {
     const base = defaultBotConfig('Bot')
+    // gpt-4.1 / gpt-4.1-mini were verified against the ElevenLabs agents/create
+    // enum before being offered — an invalid id 400s the agent PATCH.
+    for (const llm of ['gpt-4.1', 'gpt-4.1-mini']) {
+      const withNewLlm = makeBot({ ...base, voice: { ...base.voice, llmModel: llm } })
+      expect(buildAgentConfig(withNewLlm).conversation_config.agent.prompt.llm).toBe(llm)
+    }
+
     const bot = makeBot({ ...base, voice: { ...base.voice, llmModel: 'gemini-2.5-flash' } })
     expect(buildAgentConfig(bot).conversation_config.agent.prompt.llm).toBe('gemini-2.5-flash')
   })
