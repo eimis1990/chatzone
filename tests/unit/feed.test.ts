@@ -64,6 +64,35 @@ describe('parseFeed (JSON)', () => {
     expect(products).toHaveLength(1)
     expect(products[0].title).toBe('Foo Mug')
   })
+
+  // Shopify's PUBLIC /products.json (works without a Storefront token): price
+  // and availability live per-variant, and products link by handle only.
+  it('maps Shopify products.json variants and handle links', () => {
+    const shopify = JSON.stringify({
+      products: [
+        {
+          id: 5031859912749,
+          title: 'The BOTANIST Islay Dry 0,7L (46%)',
+          handle: 'the-botanist-islay-dry-0-7-l-46',
+          body_html: '<p>Islay salos <b>džinas</b></p>',
+          images: [{ src: 'https://cdn.shopify.com/x.jpg' }],
+          variants: [{ id: 1, price: '37.99', available: false }],
+        },
+      ],
+    })
+    const [p] = parseFeed(shopify, 'https://gerimas.lt/products.json?limit=250')
+
+    expect(p.price).toBe('37.99 €')
+    expect(p.inStock).toBe(false)
+    expect(p.url).toBe('https://gerimas.lt/products/the-botanist-islay-dry-0-7-l-46')
+    expect(p.imageUrl).toBe('https://cdn.shopify.com/x.jpg')
+    expect(p.shortDescription).toBe('Islay salos džinas')
+  })
+
+  it('leaves non-Shopify feeds unchanged without a base URL', () => {
+    const [p] = parseFeed(JSON_FEED)
+    expect(p.title).toBe('Foo Mug')
+  })
 })
 
 describe('searchFeed', () => {
@@ -80,6 +109,49 @@ describe('searchFeed', () => {
 
   it('returns [] without a feed URL', async () => {
     expect(await searchFeed('', { query: 'x' })).toEqual([])
+  })
+
+  // A single fetch of Shopify's /products.json sees at most one 250-product
+  // page — the bot would deny stocking items further down the catalog.
+  it('follows Shopify products.json pages until a short page', async () => {
+    const shopifyPage = (n: number, count: number) =>
+      JSON.stringify({
+        products: Array.from({ length: count }, (_, i) => ({
+          id: n * 1000 + i,
+          title: `Gin p${n}-${i}`,
+          handle: `gin-p${n}-${i}`,
+          variants: [{ price: '10.00', available: true }],
+        })),
+      })
+    const calls: string[] = []
+    const fetchImpl = vi.fn(async (url: string | URL | Request) => {
+      const u = new URL(String(url))
+      calls.push(`limit=${u.searchParams.get('limit')} page=${u.searchParams.get('page') ?? '1'}`)
+      const page = Number(u.searchParams.get('page') ?? '1')
+      return new Response(shopifyPage(page, page < 3 ? 2 : 1))
+    }) as unknown as typeof fetch
+
+    // Page size is learned from page 1 (2 items here); page 3 is short → stop.
+    const out = await searchFeed(
+      'https://gerimas.test/products.json?limit=2',
+      { query: 'gin', limit: 24 },
+      { fetchImpl },
+    )
+    expect(calls).toEqual(['limit=2 page=1', 'limit=2 page=2', 'limit=2 page=3'])
+    expect(out).toHaveLength(5)
+  })
+
+  it('forces limit=250 on a bare products.json URL and keeps other feeds single-fetch', async () => {
+    const fetchImpl = vi.fn(async (url: string | URL | Request) => {
+      expect(String(url)).toContain('limit=250')
+      return new Response(JSON.stringify({ products: [] }))
+    }) as unknown as typeof fetch
+    await searchFeed('https://gerimas.test/products.json', { query: 'x' }, { fetchImpl })
+    expect(fetchImpl).toHaveBeenCalledTimes(1)
+
+    const single = vi.fn(async () => new Response(XML)) as unknown as typeof fetch
+    await searchFeed('https://shop.test/feed.xml', { query: '' }, { fetchImpl: single })
+    expect(single).toHaveBeenCalledTimes(1)
   })
 })
 

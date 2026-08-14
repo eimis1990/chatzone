@@ -25,7 +25,7 @@ const KEYS = {
   image: ['imageurl', 'image', 'image_link', 'featured_image', 'thumbnail', 'img', 'image_url', 'picture', 'images'],
   id: ['id', 'sku', 'handle', 'productid', 'product_id', 'variant_id'],
   inStock: ['instock', 'in_stock', 'availability', 'available'],
-  desc: ['shortdescription', 'short_description', 'description', 'summary', 'subtitle'],
+  desc: ['shortdescription', 'short_description', 'description', 'summary', 'subtitle', 'body_html'],
 }
 
 function pick(obj: Raw, keys: string[]): unknown {
@@ -87,18 +87,34 @@ function stripTags(html: string): string {
     .trim()
 }
 
-function mapProduct(raw: Raw, i: number): CommerceProduct | null {
+/** Shopify /products.json nests price/availability per variant, not top-level. */
+function firstVariant(raw: Raw): Raw | undefined {
+  const v = Array.isArray(raw.variants) ? raw.variants[0] : undefined
+  return v && typeof v === 'object' ? (v as Raw) : undefined
+}
+
+function mapProduct(raw: Raw, i: number, baseUrl?: string): CommerceProduct | null {
   const title = pick(raw, KEYS.title)
   if (!title || typeof title !== 'string') return null
   const desc = pick(raw, KEYS.desc)
   const descStr = typeof desc === 'string' ? stripTags(desc) : ''
+  const variant = firstVariant(raw)
+  // Shopify's public /products.json (no token needed) links by handle only.
+  let url = String(pick(raw, KEYS.url) ?? '')
+  if (!url && baseUrl && typeof raw.handle === 'string' && raw.handle) {
+    try {
+      url = new URL(`/products/${raw.handle}`, baseUrl).toString()
+    } catch {
+      // unusable base URL — the card just has no link
+    }
+  }
   return {
     id: String(pick(raw, KEYS.id) ?? `feed-${i}`),
     title: title.trim(),
-    price: asPrice(pick(raw, KEYS.price)),
-    url: String(pick(raw, KEYS.url) ?? ''),
+    price: asPrice(pick(raw, KEYS.price) ?? (variant && pick(variant, KEYS.price))),
+    url,
     imageUrl: asImageUrl(pick(raw, KEYS.image)),
-    inStock: asInStock(pick(raw, KEYS.inStock)),
+    inStock: asInStock(pick(raw, KEYS.inStock) ?? (variant && pick(variant, KEYS.inStock))),
     shortDescription: descStr ? descStr.slice(0, 280) : undefined,
   }
 }
@@ -196,8 +212,9 @@ function csvToRaw(csv: string): Raw[] {
   })
 }
 
-/** Detect format by first non-whitespace char and parse into product cards. */
-export function parseFeed(text: string): CommerceProduct[] {
+/** Detect format by first non-whitespace char and parse into product cards.
+ *  `baseUrl` (the feed's own URL) resolves handle-only links (Shopify). */
+export function parseFeed(text: string, baseUrl?: string): CommerceProduct[] {
   const trimmed = text.replace(/^﻿/, '').trimStart()
   let rows: Raw[] = []
   if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
@@ -211,8 +228,29 @@ export function parseFeed(text: string): CommerceProduct[] {
   } else {
     rows = csvToRaw(trimmed)
   }
-  return rows.map((raw, i) => mapProduct(raw, i)).filter((p): p is CommerceProduct => p !== null)
+  return rows.map((raw, i) => mapProduct(raw, i, baseUrl)).filter((p): p is CommerceProduct => p !== null)
 }
+
+async function fetchFeedText(
+  url: string,
+  deps: CommerceDeps,
+  maxBytes: number,
+): Promise<string> {
+  const fetchImpl = deps.fetchImpl ?? fetch
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS)
+  try {
+    const res = await fetchImpl(url, { signal: controller.signal })
+    if (!res.ok) throw new Error(`Feed responded ${res.status}`)
+    return (await res.text()).slice(0, maxBytes)
+  } finally {
+    clearTimeout(timer)
+  }
+}
+
+// Shopify's public catalog endpoint pages at 250 products; how many pages we
+// follow before stopping (the byte cap below can stop us earlier).
+const SHOPIFY_MAX_PAGES = 8
 
 async function loadFeed(url: string, deps: CommerceDeps, maxBytes: number): Promise<CommerceProduct[]> {
   let parsed: URL
@@ -224,17 +262,40 @@ async function loadFeed(url: string, deps: CommerceDeps, maxBytes: number): Prom
   if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
     throw new Error('Only http(s) URLs are allowed')
   }
-  const fetchImpl = deps.fetchImpl ?? fetch
-  const controller = new AbortController()
-  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS)
-  try {
-    const res = await fetchImpl(url, { signal: controller.signal })
-    if (!res.ok) throw new Error(`Feed responded ${res.status}`)
-    const text = (await res.text()).slice(0, maxBytes)
-    return parseFeed(text)
-  } finally {
-    clearTimeout(timer)
+
+  // Shopify's PUBLIC /products.json (no token) defaults to 30 per page and
+  // caps at 250 — a single fetch would silently search a slice of the catalog
+  // and the bot would deny stocking products the store visibly sells. Force
+  // the max page size and follow ?page=N; every other feed is one document.
+  const isShopifyCatalog = /\/products\.json$/i.test(parsed.pathname)
+  if (isShopifyCatalog && !parsed.searchParams.has('limit')) {
+    parsed.searchParams.set('limit', '250')
   }
+
+  const firstText = await fetchFeedText(parsed.toString(), deps, maxBytes)
+  const products = parseFeed(firstText, url)
+  if (!isShopifyCatalog || products.length === 0) return products
+
+  let bytes = firstText.length
+  const pageSize = products.length
+  const firstPage = Number(parsed.searchParams.get('page') ?? '1') || 1
+  let lastCount = products.length
+  for (let page = firstPage + 1; page < firstPage + SHOPIFY_MAX_PAGES; page++) {
+    // A short page was the last one; the byte cap bounds a huge catalog.
+    if (lastCount < pageSize || bytes >= maxBytes) break
+    parsed.searchParams.set('page', String(page))
+    let text: string
+    try {
+      text = await fetchFeedText(parsed.toString(), deps, maxBytes - bytes)
+    } catch {
+      break // partial catalog beats failing the whole search
+    }
+    bytes += text.length
+    const next = parseFeed(text, url)
+    lastCount = next.length
+    products.push(...next)
+  }
+  return products
 }
 
 /** Whether a product matches the query (all terms) and price bounds. */

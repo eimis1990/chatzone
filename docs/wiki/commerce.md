@@ -39,6 +39,19 @@ Store connectors + product search. Separate from [RAG chunks](rag-and-knowledge.
   `components/client/ConfigForm.tsx:2200-2250`, `components/client/onboarding/OnboardingWizard.tsx:132-176`).
 - All outbound requests to a tenant's `storeUrl`/`feedUrl`/`shopifyDomain` are SSRF-guarded via
   `assertPublicUrl` before the real network call (`lib/commerce/index.ts:32-44`).
+- **Shopify stores are demoable WITHOUT a Storefront token** via the feed provider:
+  most Shopify shops publicly expose `/products.json` (250/page). `parseFeed` understands
+  its shape (price/availability from `variants[0]`, product URL built from `handle` + the
+  feed's origin, `body_html` as description) and `loadFeed` forces `limit=250` and follows
+  `?page=N` up to 8 pages / 4MB (`lib/commerce/feed.ts`). Verified live against gerimas.lt
+  (2026-08-14): 2000 products searchable with price sort, keyword-only (feed has no semantic
+  index or live hydration). Caveats: catalogs beyond ~2000 products are truncated, and
+  Shopify rate-limits anonymous `products.json` polling — every search re-fetches up to 8
+  pages, so this is a demo/sales path. A real client should supply `shopifyDomain` +
+  `shopifyToken` (Storefront API, read-only, ~5 min in Shopify admin → Apps → Develop apps),
+  which unlocks the full WooCommerce-style experience: semantic catalog sync, live
+  price/stock hydration, native `sortKey: PRICE`, and `get_product_details`. Order lookup
+  and `shipping_info` stay unavailable on Shopify either way (see above).
 - **Testing notes:** crocs.lt & open24.lt block public Magento APIs — test Magento against
   `venia.magento.com` ([gotchas](gotchas.md)).
 - ⚠️ **Some stores block datacenter egress entirely**: dropslietuva.com (Woo behind
