@@ -270,3 +270,19 @@ the teardown rejection fails the test with the mock's error and a stack that
 points at the `new Error(...)` line, nowhere near the real cause. Always brace
 hook bodies: `beforeEach(() => { mock.mockReset() })`.
 (Discovered 2026-07-27 testing `lib/ai/abuse-intel.ts`.)
+
+## A serial full-fleet cron silently starves the tail
+
+`/api/cron/catalog-sync` re-syncs every indexed bot's catalog in ONE serverless
+invocation (`maxDuration: 300`). The platform kill at 300s produces no error and
+no log — each night the same first ~2 bots synced (one big WooCommerce store
+alone takes ~3 min) and every bot after them just… never ran. Karakara.lt's
+product index sat 16 days stale while the cron "ran successfully" nightly; the
+symptom surfaced as the bot denying a product that was visibly in the store.
+The per-bot `try/catch` cannot catch a platform kill, and `synced_at` only
+moves on a COMPLETED sync — so `max(synced_at)` per bot is the honest health
+signal (`… 04:02`, `… 04:05`, then two-week-old stamps = killed at 04:05).
+Fix: stalest-first ordering + don't start a new bot after 240s elapsed
+(`START_BUDGET_MS`), so skipped bots are first in line the next night.
+(Discovered 2026-08-14 debugging "skalbimo lapeliai" missing on the karakara
+demo bot the morning of the demo.)
