@@ -75,6 +75,8 @@ Shopify’s product-content guidance treats specifications, compatibility, varia
 
 A free-text line such as “works with most modern laptops” may help marketing, but it is weak decision data. “Verified for models A and B; requires a USB-C host with DisplayPort Alt Mode; not supported on model C” is actionable.
 
+Vehicle parts make the same evidence problem more demanding because model year, engine, build date, trim, axle, and modifications can all change the answer. See the separate [auto-parts fitment assistant guide](/blog/ai-chatbot-for-auto-parts-stores) for that workflow and its safety boundaries.
+
 <figure>
 <img src="/blog/electronics-compatibility-assistant-realistic.webp" alt="A shopper compares a laptop port and adapter while using a conversational product assistant on a phone" width="1200" height="800" loading="lazy" />
 <figcaption>The useful moment is not finding an adapter category. It is checking the shopper’s exact device and requirement against published compatibility evidence.</figcaption>

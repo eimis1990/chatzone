@@ -89,6 +89,9 @@
 - [AI chatbots for furniture stores](https://www.loqara.com/blog/ai-chatbot-for-furniture-stores): dimension-aware product guidance without guessing
 - [AI chatbots for electronics stores](https://www.loqara.com/blog/ai-chatbot-for-electronics-stores): exact model and specification checks that prevent compatibility mistakes
 - [AI chatbots for B2B e-commerce](https://www.loqara.com/blog/ai-chatbot-for-b2b-ecommerce): technical-buyer qualification before a sales or engineering handoff
+- [AI chatbots for fashion stores](https://www.loqara.com/blog/ai-chatbot-for-fashion-stores): size and fit guidance grounded in exact garment and body measurements
+- [AI chatbots for auto-parts stores](https://www.loqara.com/blog/ai-chatbot-for-auto-parts-stores): vehicle-fitment verification without guessing from a model name
+- [AI chatbots for hardware stores](https://www.loqara.com/blog/ai-chatbot-for-hardware-stores): project questions turned into transparent, compatible product lists
 - [Prevent avoidable returns with AI](https://www.loqara.com/blog/ai-chatbot-prevent-avoidable-returns): optional pre-return troubleshooting without blocking legitimate returns
 - [AI chatbots for beauty and skincare stores](https://www.loqara.com/blog/ai-chatbot-for-beauty-skincare-stores): ingredient and product guidance without medical claims
 - [AI personalization in e-commerce](https://www.loqara.com/blog/ai-personalization-ecommerce): practical rollout without creepiness

@@ -43,6 +43,8 @@ Common variant dimensions include:
 
 A bundle, accessory, replacement part, and merely similar product are not automatically variants. They may instead be a related product, required part, substitute, or independent listing.
 
+Fashion stores also need to separate published size data from subjective fit. The [fashion-store AI chatbot guide](/blog/ai-chatbot-for-fashion-stores) shows how a conversation can use exact garment and body measurements without pretending that one size label fits every shopper.
+
 Google defines variants as similar products that differ by details such as colour and size, or electronics specifications such as memory and processor. Its current Merchant Center guidance says each variant should be submitted as a separate product with a unique ID, while all variants in the family share one `item_group_id` ([Google Merchant Center, Item group ID](https://support.google.com/merchants/answer/6324507)).
 
 ## Why do variants matter for AI recommendations?

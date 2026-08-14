@@ -55,9 +55,12 @@ gap-analysis workflow is in `docs/seo-content-loop.md`.
 
 ## Images
 
-`scripts/gen-blog-image.mjs <slug> "<prompt>"` → `public/blog/<slug>.webp`
-(OpenAI gpt-image-1, converted to light WebP via `cwebp`). Prompts must be
-illustrative/abstract — no text in the image (data lives in CSS blocks).
+New blog raster assets use the built-in OpenAI Image 2 workflow and are saved as
+optimized 1200×800 WebP files in `public/blog/`. Higgsfield is no longer a blog
+image dependency because its subscription was cancelled. The older
+`scripts/gen-blog-image.mjs <slug> "<prompt>"` path remains available for legacy
+gpt-image-1 generation. Prompts must be text-free; data labels belong in HTML/CSS,
+not in generated pixels.
 
 When a post needs a second explanatory visual, use a distinct text-free process
 diagram or concept map rather than repeating the hero. Reference it in a semantic
@@ -142,6 +145,16 @@ across the OpenAI feed and Google's Product/ProductGroup vocabulary.
 reflects Google's May 2026 removal of FAQ rich results. The three posts cross-link,
 backlink from the broad ChatGPT guide, cite current OpenAI/Google primary sources,
 and each pair a text-free editorial cover with a distinct explanatory diagram.
+
+The August 14 vertical acquisition cluster owns three specific commercial-intent
+jobs without reopening the broad e-commerce AI query. `ai-chatbot-for-fashion-stores`
+owns size and subjective-fit guidance while preserving the no-guarantee and
+privacy boundaries. `ai-chatbot-for-auto-parts-stores` owns exact vehicle-fitment
+verification and states that Loqara is not a VIN decoder or fitment database by
+default. `ai-chatbot-for-hardware-stores` owns project quantities and product-system
+compatibility, with a professional handoff for safety-sensitive work. Each post
+has one text-free editorial cover and one physically plausible realistic use-case
+scene generated with OpenAI Image 2, both optimized to 1200×800 WebP.
 
 ## 2026-07-20 remediation baseline
 
@@ -270,4 +283,4 @@ the compact closing reply sits farther inward near the fox to balance the larger
 cards on the left. `prefers-reduced-motion` disables rotation and leaves the chair conversation visible
 (`components/landing/HeroConversation.tsx`).
 
-_Last verified: 2026-08-05 (working tree)._
+_Last verified: 2026-08-14 (working tree)._

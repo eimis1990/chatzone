@@ -147,6 +147,8 @@ Those capabilities require the relevant system integration, business rules, auth
 
 Start with replacement parts, specification-led product discovery, sample requests, repeat-order help, or quote qualification. Avoid a single flow that tries to cover every department.
 
+For consumer-facing merchants, a similarly narrow workflow can turn a measured job into a transparent materials list. The [hardware-store project assistant guide](/blog/ai-chatbot-for-hardware-stores) covers quantity calculations, compatible product systems, and the point where safety questions need a professional.
+
 ### 2. Interview the people who qualify requests today
 
 Ask sales engineers and customer-service staff which missing facts force another email. Their real checklist is more useful than a generic lead-scoring template.
