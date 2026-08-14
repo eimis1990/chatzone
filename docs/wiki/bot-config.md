@@ -110,6 +110,15 @@ it as an immutable row in `system_prompt_versions` (unique `(prompt_id,
 version)`, migration `20260727130000`). **Editing/publishing never touches
 bots** — the old re-push loop is gone.
 
+The owner picker (`SystemPromptSelect` in `ConfigForm`) has a **"Suggest for
+this website"** action when the bot has a `websiteUrl`/`commerce.storeUrl`:
+`POST /api/owner/prompt-recommendation` fetches the site (SSRF-guarded),
+classifies its visible text against the library with gpt-4o-mini, and returns
+the best-fitting prompt + a one-line reason; "Use it" applies the normal
+`pick()` flow (pins the latest published version). Verified 3/3 on gerimas.lt
+(E-Commerce), mobel.lt (Furniture — not generic e-commerce), taujenudvaras.lt
+(Service Business).
+
 A bot pins `config.systemPromptId` (family) + `config.systemPromptVersionId`
 (live) + optional `config.previewSystemPromptVersionId` (test chat only). The
 runtime still reads only the `config.systemPrompt` snapshot; both save actions

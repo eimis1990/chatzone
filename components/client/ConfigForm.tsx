@@ -2128,10 +2128,16 @@ function SystemPromptSelect({
     Pick<SystemPromptVersion, 'id' | 'prompt_id' | 'version' | 'content' | 'note' | 'published_at'>[]
   >([])
   const [loaded, setLoaded] = useState(false)
+  const [suggesting, setSuggesting] = useState(false)
+  const [suggestion, setSuggestion] = useState<
+    { promptId: string; name: string; reason: string } | { error: string } | null
+  >(null)
   const selectedId = watch('systemPromptId')
   const liveVersionId = watch('systemPromptVersionId')
   const previewVersionId = watch('previewSystemPromptVersionId')
   const currentContent = watch('systemPrompt') ?? ''
+  // The site the bot is for — what the suggestion classifies.
+  const siteUrl = watch('websiteUrl') || watch('commerce.storeUrl') || ''
 
   useEffect(() => {
     let cancelled = false
@@ -2182,19 +2188,74 @@ function SystemPromptSelect({
     })
   }
 
+  // "Which prompt fits this site?" — classifies the bot's website against the
+  // library server-side, so nobody has to guess from prompt names.
+  const suggest = async () => {
+    setSuggesting(true)
+    setSuggestion(null)
+    try {
+      const res = await fetch('/api/owner/prompt-recommendation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: siteUrl }),
+      })
+      const data = await res.json()
+      setSuggestion(res.ok ? data : { error: data.error ?? 'Could not analyse that site' })
+    } catch {
+      setSuggestion({ error: 'Could not analyse that site right now' })
+    } finally {
+      setSuggesting(false)
+    }
+  }
+
   return (
     <div className="space-y-1.5">
       <div className="flex items-center justify-between">
         <Label>System prompt</Label>
-        <a
-          href="/owner/prompts"
-          target="_blank"
-          rel="noreferrer"
-          className="text-xs text-primary hover:underline"
-        >
-          Manage prompts →
-        </a>
+        <div className="flex items-center gap-3">
+          {siteUrl && prompts.length > 0 && (
+            <button
+              type="button"
+              onClick={suggest}
+              disabled={suggesting}
+              className="text-xs text-primary hover:underline disabled:opacity-50"
+            >
+              {suggesting ? 'Analysing site…' : 'Suggest for this website'}
+            </button>
+          )}
+          <a
+            href="/owner/prompts"
+            target="_blank"
+            rel="noreferrer"
+            className="text-xs text-primary hover:underline"
+          >
+            Manage prompts →
+          </a>
+        </div>
       </div>
+
+      {suggestion && 'error' in suggestion && (
+        <p className="text-xs text-amber-600">{suggestion.error}</p>
+      )}
+      {suggestion && 'promptId' in suggestion && (
+        <div className="flex items-start justify-between gap-3 rounded-md border border-primary/30 bg-primary/5 px-3 py-2">
+          <p className="text-xs">
+            <span className="font-semibold">{suggestion.name}</span>
+            <span className="text-muted-foreground"> — {suggestion.reason}</span>
+          </p>
+          {selectedId === suggestion.promptId ? (
+            <span className="shrink-0 text-xs text-muted-foreground">Selected</span>
+          ) : (
+            <button
+              type="button"
+              onClick={() => pick(suggestion.promptId)}
+              className="shrink-0 text-xs font-semibold text-primary hover:underline"
+            >
+              Use it
+            </button>
+          )}
+        </div>
+      )}
 
       {/* `null` (never `undefined`) keeps the Select controlled for its lifetime. */}
       <Select value={selectedId ?? null} onValueChange={pick}>
