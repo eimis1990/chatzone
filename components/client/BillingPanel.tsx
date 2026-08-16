@@ -58,6 +58,13 @@ interface BillingPanelProps {
     conversationsLimit: number
     botsUsed: number
     botsLimit: number
+    /** Voice add-on metering (rows render only while the add-on is active). */
+    voiceMinutesUsed?: number
+    voiceMinutesIncluded?: number
+    /** € per extra minute beyond the included pool. */
+    voiceOverageRate?: number
+    previewMinutesUsed?: number
+    previewMinutesIncluded?: number
   }
   voiceActive: boolean
   voiceConfigured: boolean
@@ -466,6 +473,71 @@ export function BillingPanel({
                   )}
                 </div>
               </div>
+
+              {/* Voice minutes — only while the Voice add-on is active */}
+              {voiceActive && usage.voiceMinutesIncluded != null && (
+                <>
+                  <div className="h-px bg-border" />
+                  <div className="flex flex-col gap-6 p-5 sm:p-6 md:flex-row md:items-center md:justify-between">
+                    <div>
+                      <p className="font-medium">Voice minutes</p>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {(usage.voiceMinutesUsed ?? 0) > usage.voiceMinutesIncluded ? (
+                          <>
+                            +{(usage.voiceMinutesUsed ?? 0) - usage.voiceMinutesIncluded} extra min ·{' '}
+                            €
+                            {(
+                              ((usage.voiceMinutesUsed ?? 0) - usage.voiceMinutesIncluded) *
+                              (usage.voiceOverageRate ?? 0.2)
+                            ).toFixed(2)}{' '}
+                            so far this month
+                          </>
+                        ) : (
+                          <>Live customer calls this month — extra minutes are €0.20 / min.</>
+                        )}
+                      </p>
+                    </div>
+                    <div className="w-full md:max-w-[300px]">
+                      <div className="mb-2 flex items-center justify-between gap-4 text-sm">
+                        <span className="font-semibold tabular-nums">
+                          {(usage.voiceMinutesUsed ?? 0).toLocaleString()} used
+                        </span>
+                        <span className="text-muted-foreground">
+                          {usage.voiceMinutesIncluded.toLocaleString()} included
+                        </span>
+                      </div>
+                      <UsageProgress
+                        used={usage.voiceMinutesUsed ?? 0}
+                        limit={usage.voiceMinutesIncluded}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="h-px bg-border" />
+                  <div className="flex flex-col gap-6 p-5 sm:p-6 md:flex-row md:items-center md:justify-between">
+                    <div>
+                      <p className="font-medium">Test call minutes</p>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        Free preview calls in the bot configurator.
+                      </p>
+                    </div>
+                    <div className="w-full md:max-w-[300px]">
+                      <div className="mb-2 flex items-center justify-between gap-4 text-sm">
+                        <span className="font-semibold tabular-nums">
+                          {(usage.previewMinutesUsed ?? 0).toLocaleString()} used
+                        </span>
+                        <span className="text-muted-foreground">
+                          {(usage.previewMinutesIncluded ?? 0).toLocaleString()} included
+                        </span>
+                      </div>
+                      <UsageProgress
+                        used={usage.previewMinutesUsed ?? 0}
+                        limit={usage.previewMinutesIncluded ?? 0}
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           </div>
 

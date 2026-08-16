@@ -112,8 +112,15 @@ export const VOICE_ADDON = {
   monthly: 49,
   minutesIncluded: 200,
   perMinute: 0.2,
+  /** Free configurator-preview call minutes per month (testing allowance). */
+  previewMinutes: 30,
   blurb: 'Let customers talk to your bot by voice. Real-time speech in and out.',
-  features: ['~200 minutes included', 'Then €0.20 / min', 'Works with any paid plan'],
+  features: [
+    '~200 minutes included',
+    'Then €0.20 / min',
+    '30 test minutes in the configurator preview',
+    'Works with any paid plan',
+  ],
 } as const
 
 /**

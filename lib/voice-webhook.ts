@@ -53,6 +53,32 @@ export interface TranscriptTurn {
   time_in_call_secs?: number
 }
 
+/**
+ * Call length in whole seconds: metadata.call_duration_secs, falling back to
+ * the last transcript turn's offset. Defensive — webhook payloads are external.
+ */
+export function callDurationSecs(
+  data: { metadata?: { call_duration_secs?: unknown } },
+  turns: TranscriptTurn[],
+): number {
+  const meta = Number(data.metadata?.call_duration_secs)
+  const fallback = turns.length ? (turns[turns.length - 1].time_in_call_secs ?? 0) : 0
+  const secs = Number.isFinite(meta) && meta > 0 ? meta : fallback
+  return Math.max(0, Math.round(secs))
+}
+
+/**
+ * 'preview' only when the call carried our server-issued call_source dynamic
+ * variable (set by /api/preview/voice-token); everything else is a live call.
+ */
+export function callSource(data: {
+  conversation_initiation_client_data?: { dynamic_variables?: Record<string, unknown> }
+}): 'widget' | 'preview' {
+  return data.conversation_initiation_client_data?.dynamic_variables?.call_source === 'preview'
+    ? 'preview'
+    : 'widget'
+}
+
 export interface VoiceMessageRow {
   role: 'user' | 'assistant'
   content: string

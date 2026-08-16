@@ -493,8 +493,14 @@ function createPreviewTransport(botId: string, getConfig: () => BotConfig): Chat
           res.status === 503 ? 'Voice calling unavailable' : (data.error ?? 'Token request failed'),
         )
       }
-      const data = (await res.json()) as { token: string; voiceId?: string }
-      return { token: data.token, voiceId: data.voiceId }
+      const data = (await res.json()) as {
+        token: string
+        voiceId?: string
+        dynamicVariables?: Record<string, string>
+      }
+      // dynamicVariables carries the server's call_source=preview tag so the
+      // post-call webhook meters this call against the free preview pool.
+      return { token: data.token, voiceId: data.voiceId, dynamicVariables: data.dynamicVariables }
     },
 
     // Preview is ephemeral — no persisted ids, so feedback is a no-op.

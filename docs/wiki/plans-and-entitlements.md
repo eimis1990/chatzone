@@ -24,6 +24,9 @@ plan (falls back to `free`). Fields: `maxBots`, `maxLanguages`, `leadCapture`,
 - **maxLanguages** → `publicBotConfig` clamps served languages
   ([widget-and-embed](widget-and-embed.md)); the ConfigForm UI gates selection.
 - **leadCapture / removeBadge / voice-call** → `publicBotConfig`.
+- **Voice minutes** (200/mo included, €0.20/min overage, 30 preview min/mo) →
+  metered from the post-call webhook into `voice_usage`; preview gated at
+  `/api/preview/voice-token`. Full picture in [voice](voice.md) § Billing.
 - The `ConfigForm` gets the numbers via props (`maxLanguages`, `canUseLeadCapture`,
   `canUseVoice`) from the configure pages; these are UX gates only.
 

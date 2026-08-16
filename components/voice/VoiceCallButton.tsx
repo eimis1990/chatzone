@@ -28,8 +28,10 @@ import type { CommerceProduct } from '@/lib/commerce/types'
 export type CallState = 'idle' | 'connecting' | 'listening' | 'speaking'
 
 interface VoiceCallButtonProps {
-  /** Mints a conversation token + the voice id to use for the active language. */
-  getToken: () => Promise<{ token: string; voiceId?: string }>
+  /** Mints a conversation token + the voice id to use for the active language.
+   *  `dynamicVariables` (server-issued, e.g. call_source for preview metering)
+   *  are forwarded to the ElevenLabs session verbatim. */
+  getToken: () => Promise<{ token: string; voiceId?: string; dynamicVariables?: Record<string, string> }>
   primaryColor?: string
   /** Background color for the idle "start call" button; text auto-contrasts. */
   callColor?: string
@@ -75,7 +77,7 @@ interface VoiceCallButtonProps {
 // ─── Inner component — must live inside <ConversationProvider> ────────────────
 
 interface InnerProps {
-  getToken: () => Promise<{ token: string; voiceId?: string }>
+  getToken: () => Promise<{ token: string; voiceId?: string; dynamicVariables?: Record<string, string> }>
   primaryColor: string
   callColor: string
   appearance: 'full' | 'compact' | 'none'
@@ -246,10 +248,12 @@ function VoiceCallInner({
 
     let token: string
     let voiceId: string | undefined
+    let dynamicVariables: Record<string, string> | undefined
     try {
       const res = await getToken()
       token = res.token
       voiceId = res.voiceId
+      dynamicVariables = res.dynamicVariables
     } catch (err: unknown) {
       const isUnavailable =
         err instanceof Error &&
@@ -274,6 +278,7 @@ function VoiceCallInner({
       await startSession({
         conversationToken: token,
         ...(overrides ? { overrides } : {}),
+        ...(dynamicVariables ? { dynamicVariables } : {}),
       })
     } catch (err: unknown) {
       const isUnavailable =

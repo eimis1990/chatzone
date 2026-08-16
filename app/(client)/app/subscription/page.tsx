@@ -15,6 +15,7 @@ import {
   activeSubscriptionId,
 } from '@/lib/stripe/manage'
 import { entitlementsFor } from '@/lib/entitlements'
+import { voiceUsageThisMonth } from '@/lib/voice-usage'
 import type { Plan, BillingInterval, SubscriptionStatus } from '@/lib/types'
 
 const PAYING: SubscriptionStatus[] = ['active', 'trialing', 'past_due']
@@ -63,20 +64,25 @@ export default async function SubscriptionPage({
     }
   }
 
-  // Usage this calendar month: conversations started + bots in use vs the plan.
+  // Usage this calendar month: conversations started + bots in use vs the plan,
+  // plus voice minutes (live + preview) from the voice_usage counters.
   async function loadUsage(oid: string) {
     const sb = await createServerClient()
+    // voice_usage is service-role only (no client RLS policy) — org access is
+    // already guarded by requireRole + getUserOrgIds above.
+    const voice = await voiceUsageThisMonth(createServiceClient(), oid)
     const { data: bots } = await sb.from('bots').select('id').eq('org_id', oid)
     const botIds = (bots ?? []).map((b) => (b as { id: string }).id)
-    if (!botIds.length) return { conversationsUsed: 0, botsUsed: 0 }
+    if (!botIds.length) return { conversationsUsed: 0, botsUsed: 0, ...voice }
     const now = new Date()
     const monthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString()
     const { count } = await sb
       .from('conversations')
       .select('id', { count: 'exact', head: true })
       .in('bot_id', botIds)
+      .neq('source', 'preview') // configurator test calls never consume the pool
       .gte('started_at', monthStart)
-    return { conversationsUsed: count ?? 0, botsUsed: botIds.length }
+    return { conversationsUsed: count ?? 0, botsUsed: botIds.length, ...voice }
   }
 
   // Which one-time setup packages this org has already paid for.
@@ -93,7 +99,7 @@ export default async function SubscriptionPage({
   // These three reads are independent — fetch them in one round-trip batch
   // instead of three sequential awaits.
   let billing
-  let usage: { conversationsUsed: number; botsUsed: number }
+  let usage: { conversationsUsed: number; botsUsed: number; widgetSecs: number; previewSecs: number }
   let purchasedSetups: string[]
   if (orgId) {
     ;[billing, usage, purchasedSetups] = await Promise.all([
@@ -113,7 +119,7 @@ export default async function SubscriptionPage({
       visualizerActive: false,
       subscriptionId: null as string | null,
     }
-    usage = { conversationsUsed: 0, botsUsed: 0 }
+    usage = { conversationsUsed: 0, botsUsed: 0, widgetSecs: 0, previewSecs: 0 }
     purchasedSetups = []
   }
 
@@ -313,6 +319,11 @@ export default async function SubscriptionPage({
           conversationsLimit: ent.conversations,
           botsUsed: usage.botsUsed,
           botsLimit: ent.maxBots,
+          voiceMinutesUsed: Math.floor(usage.widgetSecs / 60),
+          voiceMinutesIncluded: VOICE_ADDON.minutesIncluded,
+          voiceOverageRate: VOICE_ADDON.perMinute,
+          previewMinutesUsed: Math.floor(usage.previewSecs / 60),
+          previewMinutesIncluded: VOICE_ADDON.previewMinutes,
         }}
         voiceActive={billing.voiceActive}
         voiceConfigured={Boolean(getVoicePriceId())}

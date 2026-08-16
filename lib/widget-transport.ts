@@ -54,8 +54,12 @@ export interface ChatTransport {
   getBlockStatus?(visitorId: string): Promise<VisitorBlockStatus>
   /** Voice `get_product_details` tool: full details for one product by spoken name. */
   getProductDetailsByName(productName: string): Promise<{ summary: string }>
-  /** Short-lived ElevenLabs token for a live voice call. */
-  getVoiceToken(language: BotLanguage, visitorId: string): Promise<{ token: string; voiceId?: string }>
+  /** Short-lived ElevenLabs token for a live voice call. `dynamicVariables`
+   *  (server-issued, e.g. preview-call tagging) pass through to the session. */
+  getVoiceToken(
+    language: BotLanguage,
+    visitorId: string,
+  ): Promise<{ token: string; voiceId?: string; dynamicVariables?: Record<string, string> }>
   /** Real persisted message ids (so feedback can target them). */
   fetchMessages(conversationId: string): Promise<{ id: string; role: string; content: string }[]>
   /** Visitor thumbs feedback on a bot reply. */

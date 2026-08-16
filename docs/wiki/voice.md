@@ -106,18 +106,50 @@ on **ElevenLabs Conversational AI**.
   (`lib/ai/elevenlabs-agent.ts:408-431`,
   `app/api/widget/voice-token/route.ts:62-68`).
 
-## Billing
+## Billing & minute metering (2026-08-16)
 
 `organizations.voice_addon` is a boolean set by Stripe sync
-(`lib/stripe/sync.ts:72`) based on a dedicated voice price id
-(`lib/stripe/manage.ts:67-92`); no minute-tracking or per-minute metering
-exists in the codebase itself. The €49/mo + €0.20/min, ~200-minutes-included
-figure is marketing copy in `components/landing/Pricing.tsx:13-14`, not
-enforced or read anywhere server-side — actual usage limits are whatever the
-Stripe price/product is configured to be.
+(`lib/stripe/sync.ts:72`) based on the flat €49/mo voice price id. Minutes are
+now **really metered**:
 
-> ⚠️ verify: whether ElevenLabs usage is metered/capped anywhere beyond the
-> conversation-count limit in `isOverConversationLimit` (`app/api/widget/voice-token/route.ts:48`) — no per-minute cutoff was found in this codebase.
+- **Capture:** the post-call webhook reads `metadata.call_duration_secs`
+  (fallback: last transcript offset) and the call's source via
+  `callDurationSecs`/`callSource` (`lib/voice-webhook.ts`), stores them on the
+  conversation (`duration_secs`, `source`), and atomically increments the
+  org's monthly counter through the `increment_voice_usage` RPC
+  (`voice_usage` table, migration `20260816120000`). If usage recording fails
+  the conversation is rolled back and the webhook 500s so ElevenLabs retries —
+  `external_id` dedupe makes usage exactly-once
+  (`app/api/widget/voice-webhook/route.ts`).
+- **Overage billing:** 200 min/mo included (calendar month UTC, like the
+  conversation pool). Whole minutes beyond that are pushed as Stripe Billing
+  Meter events (`voice_overage_minutes`) against a metered €0.20/min price —
+  `lib/stripe/voice-overage.ts`, price in `STRIPE_PRICE_VOICE_OVERAGE`,
+  created by `scripts/setup-stripe-voice-overage.mjs`. `setVoiceAddon`
+  attaches/detaches the metered item alongside the flat one
+  (`lib/stripe/manage.ts`). The race-safe overage delta comes from the RPC's
+  before/after counters (`overageMinutesDelta`, `lib/voice-usage.ts`).
+- **Preview cap:** the configurator playground gets 30 free min/org/month
+  (`VOICE_ADDON.previewMinutes`). `/api/preview/voice-token` requires the
+  voice add-on (internal orgs bypass), rate-limits, checks the preview pool,
+  and returns `dynamicVariables: { call_source: 'preview' }`, which
+  VoiceCallButton forwards to `startSession` and the webhook reads back.
+  Preview conversations (`source='preview'`) are excluded from the
+  conversation pool (`lib/usage.ts`), org analytics
+  (`lib/analytics/org-rollup.ts`), and the subscription usage count.
+- **80% warning:** `maybeSendVoiceUsageWarning` (`lib/voice-usage.ts`) emails
+  admins once per month via `organizations.voice_usage_warned_at` — same
+  claim-stamp pattern as the conversation warning.
+- **UI:** subscription screen shows "Voice minutes" (with overage € so far)
+  and "Test call minutes" rows while the add-on is active
+  (`components/client/BillingPanel.tsx`).
+
+Known limitations: gating is mint-time only (one call can overrun the
+remaining preview budget); the `call_source` tag is client-sent at session
+start, so a tampered embed could mis-tag live calls as preview — bounded to
+30 min/mo and detectable by comparing preview-tagged calls against
+authenticated preview mints; annual-interval subscriptions can't carry the
+monthly metered item (voice add-on is monthly-only today anyway).
 
 See also [plans-and-entitlements](plans-and-entitlements.md) for how
 `voice_addon` fits into the broader entitlements model.

@@ -29,6 +29,7 @@ export async function conversationsThisMonth(
     .from('conversations')
     .select('id', { count: 'exact', head: true })
     .in('bot_id', botIds)
+    .neq('source', 'preview') // configurator test calls never consume the pool
     .gte('started_at', monthStartISO())
   return count ?? 0
 }

@@ -926,7 +926,7 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
   )
 
   const getVoiceToken = useCallback(
-    async (): Promise<{ token: string; voiceId?: string }> => {
+    async (): Promise<{ token: string; voiceId?: string; dynamicVariables?: Record<string, string> }> => {
       try {
         return await transport.getVoiceToken(activeLang, visitorIdRef.current)
       } catch (error) {

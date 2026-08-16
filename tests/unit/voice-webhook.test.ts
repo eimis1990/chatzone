@@ -3,6 +3,8 @@ import {
   verifyElevenLabsSignature,
   signElevenLabsBody,
   transcriptToRows,
+  callDurationSecs,
+  callSource,
 } from '@/lib/voice-webhook'
 
 const SECRET = 'whsec_test_shared_secret'
@@ -79,5 +81,39 @@ describe('transcriptToRows', () => {
     const { rows, startedAt, lastAt } = transcriptToRows([], eventTs)
     expect(rows).toEqual([])
     expect(startedAt).toBe(lastAt)
+  })
+})
+
+describe('callDurationSecs', () => {
+  it('prefers metadata.call_duration_secs', () => {
+    expect(callDurationSecs({ metadata: { call_duration_secs: 73 } }, [])).toBe(73)
+  })
+
+  it('falls back to the last transcript offset', () => {
+    expect(callDurationSecs({}, [{ role: 'agent', message: 'x', time_in_call_secs: 41 }])).toBe(41)
+  })
+
+  it('never negative, rounds, tolerates garbage', () => {
+    expect(callDurationSecs({ metadata: { call_duration_secs: -5 } }, [])).toBe(0)
+    expect(callDurationSecs({ metadata: { call_duration_secs: 12.6 } }, [])).toBe(13)
+    expect(callDurationSecs({ metadata: { call_duration_secs: 'zzz' } }, [])).toBe(0)
+    expect(callDurationSecs({}, [])).toBe(0)
+  })
+})
+
+describe('callSource', () => {
+  it('reads the server-issued call_source dynamic variable', () => {
+    expect(
+      callSource({
+        conversation_initiation_client_data: { dynamic_variables: { call_source: 'preview' } },
+      }),
+    ).toBe('preview')
+  })
+
+  it('defaults to widget for anything else', () => {
+    expect(callSource({})).toBe('widget')
+    expect(
+      callSource({ conversation_initiation_client_data: { dynamic_variables: { call_source: 'x' } } }),
+    ).toBe('widget')
   })
 })

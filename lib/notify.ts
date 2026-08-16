@@ -160,6 +160,23 @@ export function usageWarningEmail(
   }
 }
 
+export function voiceUsageWarningEmail(
+  usedMinutes: number,
+  includedMinutes: number,
+  link: string,
+): { subject: string; html: string } {
+  const pct = Math.round((100 * usedMinutes) / includedMinutes)
+  return {
+    subject: `You've used ${pct}% of this month's voice minutes`,
+    html: shell(
+      `${usedMinutes.toLocaleString()} of ${includedMinutes.toLocaleString()} voice minutes used`,
+      `<p style="font-size:14px;margin:0">Your workspace has used <strong>${pct}%</strong> of the voice minutes included in the Voice add-on. Calls keep working past the limit — extra minutes are billed at €0.20 / min on your next invoice.</p>`,
+      'View usage',
+      link,
+    ),
+  }
+}
+
 export function signupNotificationEmail(
   email: string,
   website: string | null,
@@ -258,6 +275,30 @@ export async function notifyUsageWarning(
     await sendEmail({ to, ...usageWarningEmail(used, limit, link) })
   } catch (err) {
     console.error('[notify] usage warning failed:', err)
+  }
+}
+
+/**
+ * Warn an org's admins once per calendar month when they cross 80% of the
+ * Voice add-on's included minutes. The caller checks + stamps
+ * `voice_usage_warned_at` (see maybeSendVoiceUsageWarning) — this just builds
+ * and sends.
+ */
+export async function notifyVoiceUsageWarning(
+  svc: SupabaseClient,
+  orgId: string,
+  usedMinutes: number,
+  includedMinutes: number,
+): Promise<void> {
+  try {
+    if (!emailEnabled()) return
+    if (!prefEnabled(await orgPrefs(svc, orgId), 'usageEmails')) return
+    const to = await adminEmails(svc, orgId)
+    if (!to.length) return
+    const link = `${getEnv().NEXT_PUBLIC_APP_URL}/app/subscription`
+    await sendEmail({ to, ...voiceUsageWarningEmail(usedMinutes, includedMinutes, link) })
+  } catch (err) {
+    console.error('[notify] voice usage warning failed:', err)
   }
 }
 

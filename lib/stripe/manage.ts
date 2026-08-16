@@ -3,7 +3,7 @@ import type Stripe from 'stripe'
 import { requireStripe, getStripe } from './client'
 import { resetMissingStripeCustomer } from './customer'
 import { isMissingStripeCustomerError } from './errors'
-import { getVoicePriceId, getVisualizerPriceId, planFromPriceId } from './plans'
+import { getVoicePriceId, getVoiceOveragePriceId, getVisualizerPriceId, planFromPriceId } from './plans'
 import { syncSubscriptionToOrg } from './sync'
 import { createServiceClient } from '@/lib/supabase/service'
 
@@ -75,7 +75,9 @@ export async function changeBasePlan(subscriptionId: string, newPriceId: string)
   const stripe = requireStripe()
   // Exclude every add-on price when locating the base item — otherwise the
   // fallback could mistake an add-on for the plan and "upgrade" it away.
-  const addonPriceIds = new Set([getVoicePriceId(), getVisualizerPriceId()].filter(Boolean))
+  const addonPriceIds = new Set(
+    [getVoicePriceId(), getVoiceOveragePriceId(), getVisualizerPriceId()].filter(Boolean),
+  )
   const sub = await stripe.subscriptions.retrieve(subscriptionId)
   const notAddon = (i: { price?: { id?: string } | null }) => !addonPriceIds.has(i.price?.id ?? '')
   const baseItem =
@@ -116,6 +118,11 @@ export async function setVoiceAddon(subscriptionId: string, enabled: boolean): P
   const priceId = getVoicePriceId()
   if (!priceId) throw new Error('Voice add-on price is not configured.')
   await setAddonItem(subscriptionId, priceId, enabled)
+  // The metered overage item (€0.20/min beyond the included pool) rides along
+  // with the flat fee. Optional so a missing env degrades to flat-fee-only
+  // rather than blocking the add-on toggle.
+  const overageId = getVoiceOveragePriceId()
+  if (overageId) await setAddonItem(subscriptionId, overageId, enabled)
 }
 
 /** Add or remove the Product visualizer add-on item on an existing subscription. */

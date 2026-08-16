@@ -71,6 +71,7 @@ export async function getOrgAnalyticsRollup(
           .from('conversations')
           .select('bot_id, started_at')
           .in('bot_id', botIds)
+          .neq('source', 'preview') // configurator test calls aren't customer traffic
           .gte('started_at', sinceIso),
         supabase
           .from('leads')

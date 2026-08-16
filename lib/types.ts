@@ -435,6 +435,10 @@ export interface Conversation {
   last_message_at: string
   /** How the conversation happened: text chat (default) or a voice call. */
   channel?: ConversationChannel
+  /** Voice calls: ElevenLabs call length in seconds (null for chat). */
+  duration_secs?: number | null
+  /** 'preview' = configurator test-playground call; excluded from pools/inbox. */
+  source?: 'widget' | 'preview'
   // Conversation intelligence (Phase 1)
   summary?: string | null
   topics?: string[] | null

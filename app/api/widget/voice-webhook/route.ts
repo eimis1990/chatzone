@@ -1,7 +1,15 @@
 import { NextResponse } from 'next/server'
 import { getEnv } from '@/lib/env'
 import { createServiceClient } from '@/lib/supabase/service'
-import { verifyElevenLabsSignature, transcriptToRows, type TranscriptTurn } from '@/lib/voice-webhook'
+import {
+  verifyElevenLabsSignature,
+  transcriptToRows,
+  callDurationSecs,
+  callSource,
+  type TranscriptTurn,
+} from '@/lib/voice-webhook'
+import { recordVoiceUsage, overageMinutesDelta, maybeSendVoiceUsageWarning, VOICE_INCLUDED_SECS } from '@/lib/voice-usage'
+import { reportVoiceOverage } from '@/lib/stripe/voice-overage'
 import type { Bot } from '@/lib/types'
 
 // ElevenLabs post-call webhook: persists a voice call as a conversation +
@@ -48,9 +56,9 @@ export async function POST(req: Request) {
   // Map the ElevenLabs agent back to our bot.
   const { data: bot } = await svc
     .from('bots')
-    .select('id')
+    .select('id, org_id')
     .eq('elevenlabs_agent_id', agentId)
-    .single<Pick<Bot, 'id'>>()
+    .single<Pick<Bot, 'id' | 'org_id'>>()
   if (!bot) return NextResponse.json({ received: true }) // unknown agent — ack, don't retry
 
   // Idempotent: a retry with the same conversation_id is a no-op.
@@ -62,6 +70,10 @@ export async function POST(req: Request) {
   if (existing) return NextResponse.json({ received: true, deduped: true })
 
   const { rows, startedAt, lastAt } = transcriptToRows(turns, evt.event_timestamp)
+  // Metering inputs: call length + whether this was a configurator preview
+  // call (server-issued tag from /api/preview/voice-token) or a live one.
+  const source = callSource(data as Parameters<typeof callSource>[0])
+  const durationSecs = callDurationSecs(data as Parameters<typeof callDurationSecs>[0], turns)
 
   const { data: conv, error: convErr } = await svc
     .from('conversations')
@@ -69,6 +81,8 @@ export async function POST(req: Request) {
       bot_id: bot.id,
       visitor_id: `voice-${externalId.slice(0, 8)}`,
       channel: 'voice',
+      source,
+      duration_secs: durationSecs,
       external_id: externalId,
       started_at: startedAt,
       last_message_at: lastAt,
@@ -97,6 +111,32 @@ export async function POST(req: Request) {
       await svc.from('conversations').delete().eq('id', conv.id)
       return NextResponse.json({ error: 'Failed to store transcript' }, { status: 500 })
     }
+  }
+
+  // Metering: atomically add this call's seconds to the org's monthly counter.
+  // If this fails we roll back the conversation and 500 — the ElevenLabs retry
+  // recreates everything (external_id dedupe guarantees exactly-once usage).
+  let usage: { beforeSecs: number; afterSecs: number }
+  try {
+    usage = await recordVoiceUsage(svc, bot.org_id, source, durationSecs)
+  } catch (err) {
+    console.error('[voice-webhook] usage recording failed:', err)
+    await svc.from('messages').delete().eq('conversation_id', conv.id)
+    await svc.from('conversations').delete().eq('id', conv.id)
+    return NextResponse.json({ error: 'Failed to record usage' }, { status: 500 })
+  }
+
+  if (source === 'widget') {
+    // Billing report is best-effort: usage is safely in voice_usage, so a
+    // Stripe hiccup must not trigger a webhook retry (which would dedupe and
+    // skip billing anyway). Reconcile from voice_usage if an event is lost.
+    const overageMinutes = overageMinutesDelta(usage.beforeSecs, usage.afterSecs, VOICE_INCLUDED_SECS)
+    if (overageMinutes > 0) {
+      await reportVoiceOverage(bot.org_id, overageMinutes).catch((err) =>
+        console.error('[voice-webhook] overage report failed:', err),
+      )
+    }
+    await maybeSendVoiceUsageWarning(svc, bot.org_id, usage.afterSecs)
   }
 
   return NextResponse.json({ received: true, conversationId: conv.id })
