@@ -286,3 +286,36 @@ Fix: stalest-first ordering + don't start a new bot after 240s elapsed
 (`START_BUDGET_MS`), so skipped bots are first in line the next night.
 (Discovered 2026-08-14 debugging "skalbimo lapeliai" missing on the karakara
 demo bot the morning of the demo.)
+
+## MetaMask extension failures can masquerade as Next.js runtime errors
+
+Chrome extensions execute code in the page context, so MetaMask can emit an
+unhandled `Failed to connect to MetaMask` rejection whose stack begins at
+`chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/...`. Next 16's dev
+overlay sees that rejection even though Loqara has no wallet integration and
+labels it as an app runtime issue. The root layout's explicit `<head>` installs a
+development-only `beforeInteractive` capture listener before Next's client modules. It suppresses
+only the exact MetaMask message when the stack or filename also contains the
+official extension id; ordinary application errors and other extension errors
+still reach the overlay (`lib/browser-extension-errors.ts:1-38`;
+`app/layout.tsx:290-299`). A `beforeInteractive` `<Script>` cannot be a direct
+child of `<html>` in Next 16.2.9 even though the component docs say it will be
+injected into `<head>` regardless of placement; React reports an invalid nested
+script and an ordering error. Do not replace this with a broad global error
+filter.
+
+_Last verified: 2026-08-17 (MetaMask dev-overlay guard)._
+
+## `DialogContent` carries a responsive `sm:max-w-sm` default
+
+The shared dialog popup includes both `max-w-[calc(100%-2rem)]` and
+`sm:max-w-sm`. Adding only an unprefixed `max-w-none` does not override the
+responsive rule at desktop widths. The sales-email preview therefore stayed a
+384px-wide panel even after receiving `w-screen`; combined with `inset-0`, it
+looked like another left drawer. Override the matching breakpoint explicitly
+(`sm:max-w-none`) and keep the shared centered `top-1/2`, `left-1/2`, and
+translate utilities when building a large centered dialog
+(`components/ui/dialog.tsx:46-49`;
+`components/owner/LeadEmailTemplates.tsx:190-194`).
+
+_Last verified: 2026-08-17 (centered sales-email preview)._

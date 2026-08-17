@@ -521,6 +521,10 @@ export interface SalesLead {
   score_why: string | null
   email_subject: string | null
   email_body: string | null
+  /** Direct-send audit fields; null for leads not sent through the owner UI. */
+  initial_email_sent_at: string | null
+  initial_email_template: string | null
+  initial_email_message_id: string | null
   /** Whether the prospect already runs a chatbot (null = unknown). */
   has_chatbot: boolean | null
   status: SalesLeadStatus

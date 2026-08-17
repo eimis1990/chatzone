@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { Analytics } from "@vercel/analytics/next";
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SITE_URL, SITE_NAME } from "@/lib/site";
+import { METAMASK_DEV_OVERLAY_GUARD_SCRIPT } from "@/lib/browser-extension-errors";
 import {
   Geist,
   Geist_Mono,
@@ -285,6 +287,15 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} ${fontVariables} h-full antialiased`}
     >
+      <head>
+        {process.env.NODE_ENV === "development" && (
+          <Script
+            id="loqara-metamask-dev-overlay-guard"
+            strategy="beforeInteractive"
+            dangerouslySetInnerHTML={{ __html: METAMASK_DEV_OVERLAY_GUARD_SCRIPT }}
+          />
+        )}
+      </head>
       <body className="min-h-full flex flex-col">
         <TooltipProvider>{children}</TooltipProvider>
         <Analytics />

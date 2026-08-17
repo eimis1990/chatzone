@@ -44,6 +44,25 @@ emails, and manual status progression.
   non-shrinking content cards; otherwise flex sizing collapses research and
   email content instead of scrolling it (`components/owner/SalesLeadsTable.tsx:587`).
   The website metadata value is a real external link (`:597`).
+- The drawer separates research from presentation with `Client details` and
+  `Email body` tabs. Email body shows the single `Clean update` design and opens
+  it in a centered, near-full-height rendered-email dialog without replacing
+  the lead drawer. The preview dialog is
+  deliberately mounted as the drawer dialog's sibling, not its descendant, so
+  it cannot inherit the drawer's narrow positioning or stacking context
+  (`components/owner/SalesLeadsTable.tsx:1150-1158`;
+  `components/owner/LeadEmailTemplates.tsx:242-314`).
+- The `Clean update` card also has `Send email`. It opens a separate confirmation
+  dialog showing the immutable sender, live recipient, live subject, and format;
+  no client message leaves the app until the owner presses the second Send
+  button. A successful UI send disables the client-send action for that lead
+  while keeping Preview available
+  (`components/owner/LeadEmailTemplates.tsx:81-235`).
+- The utility row beneath the tabs is a responsive two-by-two/four-column grid:
+  copy body, repeatable self-test send, website, and pipeline status. The former
+  `Open mail app` action was removed. `Send demo` always delivers the current
+  Clean update HTML to `e.kudarauskas@gmail.com`
+  (`components/owner/SalesLeadsTable.tsx:1001-1043`).
 
 ## Prepared-email conventions
 
@@ -81,9 +100,8 @@ emails, and manual status progression.
   coverage, duplicate ids, unsupported behavior claims, incumbent-chatbot
   acknowledgement, vertical vocabulary, and stale-row timestamps before writes.
 - **Copy means body only.** Both detail-panel copy actions pass exactly
-  `openLead.email_body` (`components/owner/SalesLeadsTable.tsx:559`, `:644`).
-  The separate mail-app action is allowed to include recipient, subject, and
-  body (`:560`). Do not reintroduce a `Tema:` prefix into clipboard copy.
+  `openLead.email_body` (`components/owner/SalesLeadsTable.tsx:1003`, `:1110`).
+  Do not reintroduce a `Tema:` prefix into clipboard copy.
 - Manual name/URL/email signature lines do not belong in stored bodies. Webmail
   adds the configured signature. API sends must provide an HTML body plus the
   plain-text fallback and append the same branded signature: the inline fox at
@@ -91,13 +109,82 @@ emails, and manual status progression.
   founder title, muted product tagline, and orange linked `loqara.com`. A
   plain-text-only API send is invalid; stop before sending if the inline asset
   or HTML signature cannot be constructed.
+- The single Clean update renderer splits the stored body at the first
+  `Esu Eimantas` paragraph:
+  the client-specific opening remains plain and unchanged, while the shared
+  pitch, question, opt-out, and signature receive one inline-styled, table-safe
+  treatment (`lib/sales-email-templates.ts:27-46`, `:81-138`). The
+  preview dialog's `Copy styled email` writes both `text/html` and the exact
+  stored body as `text/plain` (`components/owner/LeadEmailTemplates.tsx:67-79`,
+  `:257-265`).
+- `Clean update` is the only outbound design: a compact logo lockup, generous
+  white space, and neutral bordered pitch rows. Its orange top rule is the
+  outer card's border (not a wider inner row), so it stays inside the rounded
+  card at narrow widths. Every shared pitch paragraph, including the
+  `Esu Eimantas...` introduction, lives under one `Trumpai apie Loqara` heading
+  (`lib/sales-email-templates.ts:81-128`).
+- Do not add `mailto:` response buttons to the Clean update question. A mailto
+  URL can open a new draft with a matching `Re:` subject, but email HTML cannot
+  supply the original message's `In-Reply-To`/`References` headers, so it cannot
+  guarantee a real reply in the existing conversation. The template therefore
+  keeps the question as text and relies on the recipient's normal Reply action
+  (`lib/sales-email-templates.ts:107-108`). A hosted response endpoint would be
+  required for reliable one-click responses or tracking. The renderer remains
+  table-only and inline-styled, with the shared signature built in.
 
 ## Operational sending
 
+- The unattended weekday outreach automation was paused on 2026-08-17 at the
+  owner's request. New cold-email batches are manual until explicitly
+  re-enabled; do not infer permission to resume the worker from a request to
+  send one manual batch.
+- Owner-triggered sends use the real `hello@loqara.com` Hostinger mailbox, not
+  the app's separate Resend notification helper. Hostinger Email's official
+  client settings are SMTP `smtp.hostinger.com:465` and IMAP
+  `imap.hostinger.com:993`, both SSL/TLS. The username is fixed in code and
+  `HOSTINGER_EMAIL_PASSWORD` is the only new server secret
+  (`lib/hostinger-mail.ts:30-131`; `lib/env.ts:61-63`; `.env.example:31`).
+- The server action re-reads the live lead and validates recipient, subject,
+  greeting/blank line, and exact opt-out. It always builds the single Clean
+  update design as one RFC822
+  message containing styled HTML, a branded plain-text fallback, and the fox as
+  inline `cid:loqara-logo`; that same raw message is sent over SMTP and appended
+  to Hostinger's special-use Sent folder over IMAP, preserving one Message-ID
+  (`app/(owner)/owner/leads/actions.ts:61-205`;
+  `lib/sales-email-send.ts:6-40`; `lib/hostinger-mail.ts:71-131`).
+- Migration `20260817182240_sales_email_sends.sql` adds the owner-only
+  `sales_email_sends` audit table and lead-level sent markers. A partial unique
+  index permits only one `sending`/`sent` initial-email record per lead, so
+  double clicks, concurrent actions, and browser retries fail closed rather
+  than duplicating outreach. Failed SMTP attempts release the claim by becoming
+  `failed`. After SMTP acceptance, never retry automatically—even if Sent-folder
+  archiving or the final database update fails, because the recipient may
+  already have the message. The table enables RLS and grants only the server's
+  `service_role` the direct Data API privileges used by the action
+  (`supabase/migrations/20260817182240_sales_email_sends.sql:20-51`).
+- `Send demo` is a separate owner-only action. It re-reads and validates the
+  selected lead, sends the same Clean update HTML and exact subject to
+  `e.kudarauskas@gmail.com`, and archives the raw message in Hostinger Sent. It
+  is intentionally repeatable and never inserts a client-send audit row, marks
+  an initial email as sent, or changes pipeline status
+  (`app/(owner)/owner/leads/actions.ts:208-274`).
+- A successful send moves `ready` to `email_sent`. Leads already farther along
+  the demo pipeline keep their current stage while receiving the durable sent
+  timestamp/template/Message-ID. This lets a prepared demo email be sent from
+  `demo_ready` without incorrectly moving the lead backward.
+- Email-client HTML must encode body structure explicitly. Do not wrap escaped
+  plain text in a `white-space: pre-wrap` container and assume blank lines will
+  survive: Gmail collapsed all ten 2026-08-17 messages into one continuous
+  paragraph. Split the normalized body on blank lines and render each escaped
+  block as its own `<p>` (or use explicit `<br><br>`). Before sending, require
+  multiple body paragraph tags ahead of the signature and inspect the rendered
+  Sent copy. Merely confirming `text/html`, the CID logo, and signature markers
+  does not validate readability.
 - "Next Ready lead" follows the screen order: `status = 'ready'`, highest score
   first, then company name (`app/(owner)/owner/leads/page.tsx:15`).
-- The Codex weekday outreach worker runs at 10:15 Europe/Vilnius. Keep its
-  recurrence as a direct weekday/hour/minute rule; an anchored `DTSTART` rule
+- Before it was paused, the Codex weekday outreach worker ran at 10:15
+  Europe/Vilnius. If the owner explicitly re-enables it, keep its recurrence as
+  a direct weekday/hour/minute rule; an anchored `DTSTART` rule
   was active while the app and Mac were awake on 2026-08-06 but created no run.
   A missed batch must be checked against both Hostinger Sent and today's
   `status_updated_at` rows before any manual catch-up, preventing duplicates.
@@ -159,5 +246,4 @@ emails, and manual status progression.
   research and keep status `ready` until outreach or a buyer response occurs
   (`supabase/migrations/20260720130000_add_mobel_sales_lead.sql:1`).
 
-_Last verified: 2026-07-30 (live schema; 300 leads total, including the repaired
-59-lead researched batch)._
+_Last verified: 2026-08-17 (email-template UI, confirmation-gated Hostinger sender, and renderer)._

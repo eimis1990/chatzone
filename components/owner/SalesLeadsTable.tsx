@@ -11,6 +11,7 @@ import {
   ExternalLinkIcon,
   FilterXIcon,
   Globe2Icon,
+  LoaderCircleIcon,
   MailIcon,
   MapPinIcon,
   MessageSquareTextIcon,
@@ -24,6 +25,10 @@ import {
   XIcon,
 } from 'lucide-react'
 import { toast } from 'sonner'
+import {
+  LeadEmailPreviewDialog,
+  LeadEmailTemplates,
+} from '@/components/owner/LeadEmailTemplates'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -60,7 +65,11 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { setLeadStatus } from '@/app/(owner)/owner/leads/actions'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import {
+  sendSalesLeadDemoEmail,
+  setLeadStatus,
+} from '@/app/(owner)/owner/leads/actions'
 import {
   FOLLOW_UP_AFTER_DAYS,
   formatStatusAge,
@@ -68,6 +77,8 @@ import {
   needsFollowUp,
 } from '@/lib/sales-leads'
 import type { SalesLead, SalesLeadStatus } from '@/lib/types'
+import { SALES_EMAIL_DEMO_RECIPIENT } from '@/lib/sales-email-send'
+import { SALES_EMAIL_TEMPLATE, type SalesEmailTemplateId } from '@/lib/sales-email-templates'
 
 /** Pipeline stages, each with its own hue so progress is readable at a glance:
  *  grey (untouched) → amber/sky (waiting on them) → violet/blue/teal (demo
@@ -216,11 +227,13 @@ function CopyButton({
   text,
   label,
   compact = false,
+  tile = false,
   onAccent = false,
 }: {
   text: string
   label: string
   compact?: boolean
+  tile?: boolean
   onAccent?: boolean
 }) {
   const [copied, setCopied] = useState(false)
@@ -239,8 +252,11 @@ function CopyButton({
     <Button
       type="button"
       variant={compact ? 'ghost' : 'outline'}
-      size={compact ? 'icon-xs' : 'sm'}
-      className={onAccent ? 'text-primary-foreground hover:bg-white/15 hover:text-primary-foreground' : undefined}
+      size={tile ? 'default' : compact ? 'icon-xs' : 'sm'}
+      className={cn(
+        tile && 'h-auto min-h-20 w-full flex-col items-start justify-between gap-2 rounded-xl bg-card p-3 text-left',
+        onAccent && 'text-primary-foreground hover:bg-white/15 hover:text-primary-foreground',
+      )}
       aria-label={label}
       title={label}
       onClick={(event) => {
@@ -248,8 +264,20 @@ function CopyButton({
         void copy()
       }}
     >
-      {copied ? <CheckIcon data-icon={compact ? undefined : 'inline-start'} /> : <CopyIcon data-icon={compact ? undefined : 'inline-start'} />}
-      {!compact && (copied ? 'Copied' : label)}
+      {tile ? (
+        <>
+          <span className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+            {copied ? <CheckIcon className="size-4" /> : <CopyIcon className="size-4" />}
+          </span>
+          <span className="text-sm font-medium">{copied ? 'Copied' : label}</span>
+          <span className="text-[11px] font-normal text-muted-foreground">Plain text</span>
+        </>
+      ) : (
+        <>
+          {copied ? <CheckIcon data-icon={compact ? undefined : 'inline-start'} /> : <CopyIcon data-icon={compact ? undefined : 'inline-start'} />}
+          {!compact && (copied ? 'Copied' : label)}
+        </>
+      )}
     </Button>
   )
 }
@@ -258,19 +286,22 @@ function StatusSelect({
   lead,
   onChange,
   onAccent = false,
+  fullWidth = false,
 }: {
   lead: SalesLead
   onChange: (id: string, status: SalesLeadStatus) => void
   onAccent?: boolean
+  fullWidth?: boolean
 }) {
   return (
-    <span onClick={(event) => event.stopPropagation()}>
+    <span className={fullWidth ? 'w-full' : undefined} onClick={(event) => event.stopPropagation()}>
       <Select value={lead.status} onValueChange={(value) => onChange(lead.id, value as SalesLeadStatus)}>
         <SelectTrigger
           size="sm"
           aria-label={`Status for ${lead.name}`}
           className={cn(
-            'h-8 min-w-36 rounded-lg font-medium',
+            'h-8 rounded-lg font-medium',
+            fullWidth ? 'w-full min-w-0' : 'min-w-36',
             onAccent
               ? 'border-white/40 bg-white/15 text-primary-foreground hover:bg-white/25'
               : STATUS_META[lead.status].classes,
@@ -420,6 +451,9 @@ export function SalesLeadsTable({
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
   const [openLead, setOpenLead] = useState<SalesLead | null>(null)
   const [isDetailOpen, setIsDetailOpen] = useState(false)
+  const [detailTab, setDetailTab] = useState<'details' | 'email'>('details')
+  const [isEmailPreviewOpen, setIsEmailPreviewOpen] = useState(false)
+  const [sendingDemoLeadId, setSendingDemoLeadId] = useState<string | null>(null)
   const [, startTransition] = useTransition()
 
   const verticals = useMemo(
@@ -483,6 +517,49 @@ export function SalesLeadsTable({
     })
   }
 
+  const markEmailSentLocally = (
+    id: string,
+    result: {
+      sentAt: string
+      template: SalesEmailTemplateId
+      messageId: string
+      status: SalesLeadStatus
+    },
+  ) => {
+    const update = (lead: SalesLead): SalesLead => lead.id === id
+      ? {
+          ...lead,
+          status: result.status,
+          status_updated_at: result.status !== lead.status ? result.sentAt : lead.status_updated_at,
+          updated_at: result.sentAt,
+          initial_email_sent_at: result.sentAt,
+          initial_email_template: result.template,
+          initial_email_message_id: result.messageId,
+        }
+      : lead
+
+    setLeads((current) => current.map(update))
+    setOpenLead((current) => current ? update(current) : current)
+  }
+
+  const sendDemoEmail = async (leadId: string) => {
+    if (sendingDemoLeadId) return
+    setSendingDemoLeadId(leadId)
+    try {
+      const result = await sendSalesLeadDemoEmail(leadId)
+      if (!result.ok) {
+        toast.error(result.message)
+        return
+      }
+      if (result.archived) toast.success(result.message)
+      else toast.warning(result.message)
+    } catch {
+      toast.error('Could not send the demo email')
+    } finally {
+      setSendingDemoLeadId(null)
+    }
+  }
+
   const filtered = useMemo(() => {
     let list = leads
     if (vertical) list = list.filter((lead) => lead.vertical === vertical)
@@ -508,6 +585,8 @@ export function SalesLeadsTable({
 
   const openDetails = (lead: SalesLead) => {
     setOpenLead(lead)
+    setDetailTab('details')
+    setIsEmailPreviewOpen(false)
     setIsDetailOpen(true)
   }
 
@@ -904,114 +983,180 @@ export function SalesLeadsTable({
               <XIcon />
             </Button>
 
-            <div className="flex shrink-0 flex-wrap items-center gap-2 border-b bg-muted/30 px-5 py-3">
-              {openLead.email_body && <CopyButton text={openLead.email_body} label="Copy email body" />}
-              {openLead.email && openLead.email_body && (
+            <Tabs
+              value={detailTab}
+              onValueChange={(value) => setDetailTab(value as 'details' | 'email')}
+              className="min-h-0 flex-1 gap-0 overflow-hidden"
+            >
+              <div className="shrink-0 border-b bg-card px-5 pt-2">
+                <TabsList variant="line" className="h-10 w-full justify-start gap-5">
+                  <TabsTrigger value="details" className="flex-none px-0">Client details</TabsTrigger>
+                  <TabsTrigger value="email" className="flex-none px-0">
+                    Email body
+                    {openLead.email_body && <Badge variant="secondary" className="ml-1 text-[10px]">{SALES_EMAIL_TEMPLATE.name}</Badge>}
+                  </TabsTrigger>
+                </TabsList>
+              </div>
+
+              <div className="grid shrink-0 grid-cols-2 gap-2 border-b bg-muted/30 p-4 sm:grid-cols-4">
+                {openLead.email_body && (
+                  <CopyButton text={openLead.email_body} label="Copy email body" tile />
+                )}
                 <Button
                   variant="outline"
-                  size="sm"
-                  nativeButton={false}
-                  render={
-                    <a
-                      href={`mailto:${encodeURIComponent(openLead.email)}?subject=${encodeURIComponent(openLead.email_subject ?? '')}&body=${encodeURIComponent(openLead.email_body)}`}
-                    />
-                  }
+                  className="h-auto min-h-20 w-full flex-col items-start justify-between gap-2 rounded-xl bg-card p-3 text-left"
+                  disabled={!openLead.email_subject || !openLead.email_body || sendingDemoLeadId !== null}
+                  title={`Send the Clean update email to ${SALES_EMAIL_DEMO_RECIPIENT}`}
+                  onClick={() => void sendDemoEmail(openLead.id)}
                 >
-                  <MailIcon data-icon="inline-start" />
-                  Open mail app
+                  <span className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    {sendingDemoLeadId === openLead.id
+                      ? <LoaderCircleIcon className="size-4 animate-spin" />
+                      : <SendIcon className="size-4" />}
+                  </span>
+                  <span className="text-sm font-medium">
+                    {sendingDemoLeadId === openLead.id ? 'Sending…' : 'Send demo'}
+                  </span>
+                  <span className="max-w-full truncate text-[11px] font-normal text-muted-foreground">
+                    {SALES_EMAIL_DEMO_RECIPIENT}
+                  </span>
                 </Button>
-              )}
-              <Button
-                variant="ghost"
-                size="sm"
-                nativeButton={false}
-                render={<a href={openLead.website} target="_blank" rel="noopener noreferrer" />}
+                <Button
+                  variant="outline"
+                  className="h-auto min-h-20 w-full flex-col items-start justify-between gap-2 rounded-xl bg-card p-3 text-left"
+                  nativeButton={false}
+                  render={<a href={openLead.website} target="_blank" rel="noopener noreferrer" />}
+                >
+                  <span className="flex size-8 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                    <ExternalLinkIcon className="size-4" />
+                  </span>
+                  <span className="text-sm font-medium">Visit website</span>
+                  <span className="max-w-full truncate text-[11px] font-normal text-muted-foreground">
+                    {host(openLead.website)}
+                  </span>
+                </Button>
+                <div className="flex min-h-20 flex-col justify-between gap-2 rounded-xl border bg-card p-3">
+                  <span className="text-[11px] font-medium text-muted-foreground">Pipeline status</span>
+                  <StatusSelect lead={openLead} onChange={changeStatus} fullWidth />
+                  <StatusAge lead={openLead} asOf={asOf} />
+                </div>
+              </div>
+
+              <TabsContent
+                value="details"
+                className="min-h-0 overflow-y-auto overscroll-contain p-5 [scrollbar-gutter:stable]"
               >
-                <ExternalLinkIcon data-icon="inline-start" />
-                Visit website
-              </Button>
-              <div className="ml-auto flex flex-col items-end gap-1">
-                <StatusSelect lead={openLead} onChange={changeStatus} />
-                <StatusAge lead={openLead} asOf={asOf} />
-              </div>
-            </div>
+                <div className="flex min-h-full flex-col gap-5">
+                  <dl className="grid shrink-0 gap-3 sm:grid-cols-2">
+                    <DetailItem label="Company" value={openLead.legal_name} icon={Building2Icon} />
+                    <DetailItem label="City" value={openLead.city} icon={MapPinIcon} />
+                    <DetailItem label="Decision-maker" value={openLead.ceo} icon={UserRoundIcon} />
+                    <DetailItem label="Platform" value={openLead.platform} icon={StoreIcon} />
+                    <DetailItem label="Email" value={openLead.email} icon={MailIcon} copyable />
+                    <DetailItem label="Phone" value={openLead.phone} icon={MessageSquareTextIcon} copyable />
+                    <DetailItem label="Company size" value={openLead.size_info} icon={UsersIcon} />
+                    <DetailItem
+                      label="Website"
+                      value={host(openLead.website)}
+                      icon={Globe2Icon}
+                      href={openLead.website}
+                    />
+                  </dl>
 
-            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-5 [scrollbar-gutter:stable]">
-              <div className="flex min-h-full flex-col gap-5">
-                <dl className="grid shrink-0 gap-3 sm:grid-cols-2">
-                  <DetailItem label="Company" value={openLead.legal_name} icon={Building2Icon} />
-                  <DetailItem label="City" value={openLead.city} icon={MapPinIcon} />
-                  <DetailItem label="Decision-maker" value={openLead.ceo} icon={UserRoundIcon} />
-                  <DetailItem label="Platform" value={openLead.platform} icon={StoreIcon} />
-                  <DetailItem label="Email" value={openLead.email} icon={MailIcon} copyable />
-                  <DetailItem label="Phone" value={openLead.phone} icon={MessageSquareTextIcon} copyable />
-                  <DetailItem label="Company size" value={openLead.size_info} icon={UsersIcon} />
-                  <DetailItem
-                    label="Website"
-                    value={host(openLead.website)}
-                    icon={Globe2Icon}
-                    href={openLead.website}
+                  {openLead.fit_note && (
+                    <Card size="sm" className="shrink-0 overflow-visible bg-primary/5 ring-primary/15">
+                      <CardHeader>
+                        <CardTitle className="text-base">Why Loqara fits</CardTitle>
+                        <CardDescription>What makes this company a relevant prospect.</CardDescription>
+                        <CardAction className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                          <SparklesIcon className="size-4" aria-hidden="true" />
+                        </CardAction>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-sm leading-6 text-foreground/90">{openLead.fit_note}</p>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {openLead.score_why && (
+                    <Card size="sm" className="shrink-0 overflow-visible">
+                      <CardHeader>
+                        <CardTitle className="text-base">Priority reasoning</CardTitle>
+                        <CardDescription>Why this lead ranks at {openLead.score}%.</CardDescription>
+                        <CardAction className="flex size-8 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                          <TargetIcon className="size-4" aria-hidden="true" />
+                        </CardAction>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-sm leading-6 text-foreground/90">{openLead.score_why}</p>
+                      </CardContent>
+                      {openLead.source && <CardFooter className="text-xs text-muted-foreground">Sources: {openLead.source}</CardFooter>}
+                    </Card>
+                  )}
+
+                  {openLead.email_body && (
+                    <Card className="shrink-0 overflow-visible ring-primary/20">
+                      <CardHeader className="border-b bg-primary/5">
+                        <CardTitle className="flex items-center gap-2">
+                          <MailIcon className="size-4 text-primary" aria-hidden="true" />
+                          Prepared email
+                        </CardTitle>
+                        <CardDescription className="flex items-center gap-1.5">
+                          <span className="min-w-0 truncate">{openLead.email_subject || 'No subject prepared'}</span>
+                          {openLead.email_subject && (
+                            <CopyButton text={openLead.email_subject} label="Copy subject" compact />
+                          )}
+                        </CardDescription>
+                        <CardAction><CopyButton text={openLead.email_body} label="Copy email body" /></CardAction>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="min-h-64 whitespace-pre-wrap rounded-lg bg-muted/30 p-5 text-[15px] leading-7 sm:p-6">
+                          {openLead.email_body}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
+              </TabsContent>
+
+              <TabsContent
+                value="email"
+                className="min-h-0 overflow-y-auto overscroll-contain p-5 [scrollbar-gutter:stable]"
+              >
+                {openLead.email_body ? (
+                  <LeadEmailTemplates
+                    leadId={openLead.id}
+                    leadName={openLead.name}
+                    recipient={openLead.email}
+                    subject={openLead.email_subject}
+                    body={openLead.email_body}
+                    alreadySentAt={openLead.initial_email_sent_at}
+                    onPreview={() => setIsEmailPreviewOpen(true)}
+                    onSent={(result) => markEmailSentLocally(openLead.id, result)}
                   />
-                </dl>
-
-                {openLead.fit_note && (
-                  <Card size="sm" className="shrink-0 overflow-visible bg-primary/5 ring-primary/15">
-                    <CardHeader>
-                      <CardTitle className="text-base">Why Loqara fits</CardTitle>
-                      <CardDescription>What makes this company a relevant prospect.</CardDescription>
-                      <CardAction className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                        <SparklesIcon className="size-4" aria-hidden="true" />
-                      </CardAction>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-sm leading-6 text-foreground/90">{openLead.fit_note}</p>
-                    </CardContent>
-                  </Card>
+                ) : (
+                  <div className="flex min-h-64 flex-col items-center justify-center gap-2 rounded-2xl border border-dashed p-8 text-center">
+                    <MailIcon className="size-6 text-muted-foreground" aria-hidden="true" />
+                    <p className="font-medium">No prepared email yet</p>
+                    <p className="text-sm text-muted-foreground">Add a body before previewing the email design.</p>
+                  </div>
                 )}
-
-                {openLead.score_why && (
-                  <Card size="sm" className="shrink-0 overflow-visible">
-                    <CardHeader>
-                      <CardTitle className="text-base">Priority reasoning</CardTitle>
-                      <CardDescription>Why this lead ranks at {openLead.score}%.</CardDescription>
-                      <CardAction className="flex size-8 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-                        <TargetIcon className="size-4" aria-hidden="true" />
-                      </CardAction>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-sm leading-6 text-foreground/90">{openLead.score_why}</p>
-                    </CardContent>
-                    {openLead.source && <CardFooter className="text-xs text-muted-foreground">Sources: {openLead.source}</CardFooter>}
-                  </Card>
-                )}
-
-                {openLead.email_body && (
-                  <Card className="shrink-0 overflow-visible ring-primary/20">
-                    <CardHeader className="border-b bg-primary/5">
-                      <CardTitle className="flex items-center gap-2">
-                        <MailIcon className="size-4 text-primary" aria-hidden="true" />
-                        Prepared email
-                      </CardTitle>
-                      <CardDescription className="flex items-center gap-1.5">
-                        <span className="min-w-0 truncate">{openLead.email_subject || 'No subject prepared'}</span>
-                        {openLead.email_subject && (
-                          <CopyButton text={openLead.email_subject} label="Copy subject" compact />
-                        )}
-                      </CardDescription>
-                      <CardAction><CopyButton text={openLead.email_body} label="Copy email body" /></CardAction>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="min-h-64 whitespace-pre-wrap rounded-lg bg-muted/30 p-5 text-[15px] leading-7 sm:p-6">
-                        {openLead.email_body}
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
-              </div>
-            </div>
+              </TabsContent>
+            </Tabs>
           </DialogContent>
         )}
       </Dialog>
+
+      {openLead?.email_body && (
+        <LeadEmailPreviewDialog
+          open={isEmailPreviewOpen}
+          onOpenChange={setIsEmailPreviewOpen}
+          leadName={openLead.name}
+          recipient={openLead.email}
+          subject={openLead.email_subject}
+          body={openLead.email_body}
+        />
+      )}
     </div>
   )
 }
