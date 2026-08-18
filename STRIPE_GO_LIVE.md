@@ -1,33 +1,81 @@
-# Stripe — go live
+# Stripe — MB Lokara go live
 
-Everything is wired in code and works in **test mode** locally. To switch
-**production** to live billing, do the steps below. (These need your live Stripe
-secret key, so only you can run them — never share the key.)
+The complete catalog, Billing Meter, webhook, Customer Portal, and local env are
+configured in **MB Lokara sandbox** (`acct_1U5pvKBtWM4Edzrx`). The live account
+is **MB Lokara** (`acct_1U5pvCBPga6Qu0zH`); its 8-product catalog and Customer
+Portal are present. On 2026-08-18, the owner reported creating the live webhook
+and populating all 11 live price ids in Vercel Production; the next deployment
+and live smoke test still need to verify the configuration. Stripe previously
+showed a past-due business-verification document request with live payments and
+payouts paused, so confirm that restriction is cleared before the smoke test.
 
-## 1. Get your live secret key
-In the Stripe Dashboard, toggle to **Live mode** → Developers → API keys → copy
-the **Secret key** (`sk_live_…`).
+## 1. Activate the live legal account
 
-## 2. Create live products/prices + the webhook
-Run the provisioning script with your live key. It creates all products and
-prices (Starter/Growth/Scale × month/year, Voice €49/mo, Setup Essential €749,
-Setup E-commerce €995) **and** the webhook endpoint, then prints an env block.
-It's idempotent (safe to re-run).
+Complete Stripe's account onboarding using:
+
+- Legal name: **MB Lokara**
+- Company code: **308101926**
+- Registered address: **Perkūnkiemio g. 19, LT-12120 Vilnius, Lithuania**
+- Public brand: **Loqara**
+- Website: **https://www.loqara.com**
+- Business: B2B SaaS providing AI chat and voice assistants
+- VAT: not registered (confirm invoice wording and the future registration
+  trigger with the accountant)
+
+Add an EUR payout bank account/IBAN held by the business, or otherwise accepted
+by Stripe for the legal entity. A business payment card is **not** required for
+standard payouts. Also add a support email, enable 2FA, and confirm the statement
+descriptor customers will recognize.
+
+## 2. Get the live runtime key
+
+After Stripe enables live mode, create a restricted live key (`rk_live_…`) with
+only the permissions the runtime needs. A live secret key (`sk_live_…`) can be
+used temporarily if necessary. Never commit or paste either key into a ticket.
+
+## 3. Verify the live catalog and create the webhook
+
+The live catalog has already been copied. Verify every live price id before
+putting it into Vercel; do not infer that a sandbox price id is valid in live
+mode even when the products have matching names.
+
+If the catalog ever needs to be repaired, the provisioning script is
+idempotent:
 
 ```bash
 STRIPE_SECRET_KEY=sk_live_xxx node scripts/stripe-setup.mjs --live --url https://www.loqara.com
 ```
 
-Copy the printed block — it includes `STRIPE_WEBHOOK_SECRET` (shown once) and all
-`STRIPE_PRICE_*` IDs.
+Create the live voice-overage meter and copy its price id too:
 
-## 3. Add the env vars to Vercel (Production)
+```bash
+STRIPE_SECRET_KEY=sk_live_xxx node scripts/setup-stripe-voice-overage.mjs
+```
+
+Create a live webhook destination for
+`https://www.loqara.com/api/stripe/webhook` with these four events:
+
+- `checkout.session.completed`
+- `customer.subscription.created`
+- `customer.subscription.updated`
+- `customer.subscription.deleted`
+
+Copy the new live `whsec_…` signing secret when Stripe shows it. The sandbox
+webhook and its signing secret do not carry over to live mode.
+
+In **Live mode → Settings → Billing → Customer portal**, enable payment-method
+updates, invoice history, customer details, cancellation at period end, and
+cancellation reasons. Keep subscription switching disabled because the Loqara
+app already changes base plans while preserving add-ons.
+
+## 4. Add the live env vars to Vercel
+
 Vercel → the project → **Settings → Environment Variables**, scope **Production**:
 
 | Variable | Value |
 |---|---|
-| `STRIPE_SECRET_KEY` | your `sk_live_…` |
-| `STRIPE_WEBHOOK_SECRET` | from the script output (`whsec_…`) |
+| `STRIPE_SECRET_KEY` | live restricted `rk_live_…` key, or `sk_live_…` temporarily |
+| `STRIPE_WEBHOOK_SECRET` | live endpoint `whsec_…` |
 | `STRIPE_PRICE_STARTER_MONTH` | from output |
 | `STRIPE_PRICE_STARTER_YEAR` | from output |
 | `STRIPE_PRICE_GROWTH_MONTH` | from output |
@@ -35,75 +83,61 @@ Vercel → the project → **Settings → Environment Variables**, scope **Produ
 | `STRIPE_PRICE_SCALE_MONTH` | from output |
 | `STRIPE_PRICE_SCALE_YEAR` | from output |
 | `STRIPE_PRICE_VOICE_MONTH` | from output |
+| `STRIPE_PRICE_VOICE_OVERAGE` | from the meter script |
+| `STRIPE_PRICE_VISUALIZER_MONTH` | from output |
 | `STRIPE_PRICE_SETUP_ESSENTIAL` | from output |
 | `STRIPE_PRICE_SETUP_ECOMMERCE` | from output |
-| `NEXT_PUBLIC_APP_URL` | `https://www.loqara.com` (checkout return URLs use it) |
+| `NEXT_PUBLIC_APP_URL` | `https://www.loqara.com` |
 
-## 4. Redeploy
-Env changes need a fresh deploy:
+Use the canonical `STRIPE_*` names for both environments: sandbox values in
+local/preview environments and live values in Vercel Production.
 
-```bash
-vercel --prod --yes
-```
+On 2026-08-18, the owner reported populating all 11 live price ids and creating
+the live webhook. Before redeploying, confirm that `STRIPE_SECRET_KEY` and the
+new live `STRIPE_WEBHOOK_SECRET` are populated too. Production will not consume
+the new environment values until a fresh deployment is created.
 
-## 5. Verify
-Log in → **/app/subscription**. Billing should now be enabled (plans
-purchasable, voice add-on available). Do a real purchase to confirm, or rehearse
-in test first.
+Redeploy after changing environment variables.
 
----
+## 5. Verify before inviting clients
 
-## Rehearse in test first (recommended)
-You're already configured in test locally. Run the app, open `/app/subscription`,
-and use Stripe test card `4242 4242 4242 4242` (any future expiry / any CVC). To
-receive webhooks locally:
+1. In sandbox, buy Starter monthly with a Stripe test card and confirm the org
+   becomes Starter.
+2. Open **Manage billing** and confirm invoice history/payment-method update.
+3. Enable and disable Voice; confirm the flat and metered items stay together.
+4. Buy a setup package; confirm an invoice PDF and a `setup_orders` row exist.
+5. Inspect webhook deliveries for HTTP 200 responses.
+6. In live mode, make one low-value real purchase/refund and give the invoice,
+   itemized Balance summary CSV, and payout reconciliation export to the
+   accountant for approval.
+
+For local webhook testing:
 
 ```bash
 stripe listen --forward-to localhost:3000/api/stripe/webhook
 ```
 
+Use Stripe test card `4242 4242 4242 4242` with any future expiry and CVC.
+
 ## Notes
-- Creating products/prices/webhooks moves **no money** — it's configuration.
-- The webhook the script creates points to `https://www.loqara.com/api/stripe/webhook`
-  with events: `checkout.session.completed`, `customer.subscription.created`,
-  `customer.subscription.updated`, `customer.subscription.deleted`.
-- Test and live price IDs differ — production uses the live ones from Vercel.
 
----
+- Creating products, prices, meters, portals, and webhooks moves no money.
+- A publishable key is not used by this integration because Checkout and the
+  Customer Portal are Stripe-hosted and their sessions are created server-side.
+- Test and live keys, customers, products, price ids, webhook secrets, and
+  portal configurations are separate.
 
-## Tax / VAT (money hygiene)
+## Tax / VAT
 
-The code is ready but OFF by default. Checkout only starts collecting tax after
-you set `STRIPE_TAX_ENABLED=true` — and that must come LAST, because enabling
-it before the dashboard setup makes Checkout session creation fail.
+`STRIPE_TAX_ENABLED` remains off. Do not turn it on until Stripe Tax has a head
+office address, the correct product classification, and every legally required
+registration; otherwise Checkout can fail or calculate zero because the account
+is not registered to collect.
 
-Do these in order, in the **live** Stripe dashboard:
+The sandbox SaaS and add-on products use **Software as a Service (SaaS) —
+Business Use**. The two implementation-service products are left unclassified
+for the accountant to confirm. Add VAT/OSS registrations only after MB Lokara is
+actually registered—do not enter a placeholder VAT number.
 
-1. **Enable Stripe Tax** — Settings → Tax. Confirm your origin address
-   (Lithuania) and activate. Pricing: 0.5% only on transactions where tax is
-   calculated; monitoring is free.
-2. **Add your registration** — Settings → Tax → Registrations. Add Lithuania
-   with your VAT code (if you're VAT-registered). Selling B2C into other EU
-   countries later? Register for OSS (One-Stop Shop) via VMI and add the "EU
-   OSS" registration here. If you're not VAT-registered yet, Stripe Tax still
-   monitors thresholds and tells you when registration becomes required.
-3. **Set the default tax category** — Settings → Tax → set the preset product
-   tax code to "Software as a service (SaaS) — business use". All our prices
-   inherit it; no per-product edits needed.
-4. **Prices stay tax-EXCLUSIVE** (current behavior): €49 + VAT on top. EU
-   businesses that enter a valid VAT ID in Checkout get reverse charge (0%)
-   automatically — that's what `tax_id_collection` enables.
-5. **Invoice emails** — Settings → Billing → Invoices: enable emailing
-   finalized invoices/receipts to customers. Also add your company details
-   (name, address, VAT code) under Settings → Business → Public details so
-   they appear on invoices.
-6. **Flip the switch** — add `STRIPE_TAX_ENABLED=true` in Vercel (Production)
-   and redeploy. From then on Checkout collects billing address + VAT ID and
-   itemizes tax; one-time setup packages also generate proper invoices.
-
-Existing subscriptions created BEFORE this (test purchases) won't have
-automatic tax — only new Checkouts do. Fine while you have no real subscribers;
-any that exist can be recreated.
-
-Talk to your accountant about: whether you must register for VAT now
-(Lithuania's threshold: €45,000/12mo), and OSS timing.
+Once the accountant approves the setup, enable invoice/receipt emails and then
+set `STRIPE_TAX_ENABLED=true` in production if Stripe Tax should calculate tax.

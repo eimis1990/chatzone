@@ -174,6 +174,7 @@ export default async function SubscriptionPage({
       const customerId = await ensureStripeCustomer(oid)
       const base = process.env.NEXT_PUBLIC_APP_URL ?? ''
       const session = await stripe.checkout.sessions.create({
+        integration_identifier: 'loqara_checkout_aqkvmztr',
         mode: 'subscription',
         customer: customerId,
         line_items: [{ price: priceId, quantity: 1 }],
@@ -203,6 +204,7 @@ export default async function SubscriptionPage({
       const customerId = await ensureStripeCustomer(oid)
       const base = process.env.NEXT_PUBLIC_APP_URL ?? ''
       const session = await stripe.checkout.sessions.create({
+        integration_identifier: 'loqara_checkout_aqkvmztr',
         mode: 'payment',
         customer: customerId,
         line_items: [{ price: priceId, quantity: 1 }],

@@ -21,6 +21,8 @@ Add a line here. How the wiki works: [README.md](README.md).
   chat components, per-bot variants, runtime enforcement.
 - [plans-and-entitlements](plans-and-entitlements.md) — per-plan limits and where
   each is enforced server-side.
+- [stripe-billing](stripe-billing.md) — Checkout, invoicing, catalog, webhooks,
+  Customer Portal, accounting exports, and account cutover.
 - [languages-i18n](languages-i18n.md) — language registry, per-bot selection,
   free-tier single language, content de-anchored from English.
 - [rag-and-knowledge](rag-and-knowledge.md) — ingestion pipeline + hybrid retrieval.
