@@ -3,18 +3,16 @@
 import { useState, useTransition, type ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import Link from 'next/link'
 import {
   CheckIcon,
   ExternalLinkIcon,
   Loader2Icon,
   Clock3Icon,
-  MessageCircleIcon,
   MinusIcon,
   PlusIcon,
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
-import { Button, buttonVariants } from '@/components/ui/button'
+import { Button } from '@/components/ui/button'
 import {
   Card,
   CardAction,
@@ -808,9 +806,10 @@ export function BillingPanel({
                 }
               />
 
-              {/* Messenger channel — live */}
+              {/* Messenger channel — built, but Meta must approve the app before
+                  clients outside our Meta app roles can complete the connect flow. */}
               <AddOnCard
-                image="/addons/fox-addon-messenger.webp"
+                image="/addons/fox-addon-messenger-v2.webp"
                 title="Messenger"
                 description="Let your bot answer your Facebook Page's messages."
                 price="€19"
@@ -820,22 +819,19 @@ export function BillingPanel({
                   'Human takeover from the Inbox',
                   'Connect in minutes — no setup fee',
                 ]}
-                status="available"
-                helper="Free during early access"
+                status="coming"
+                helper="Waiting on Facebook app approval"
                 action={
-                  <Link
-                    href="/app/channels/messenger/connect"
-                    className={cn(buttonVariants({ size: 'lg' }), 'h-11 w-full rounded-xl')}
-                  >
-                    <MessageCircleIcon data-icon="inline-start" aria-hidden="true" />
-                    Connect Messenger
-                  </Link>
+                  <Button className="h-11 w-full rounded-xl" size="lg" variant="outline" disabled>
+                    <Clock3Icon data-icon="inline-start" aria-hidden="true" />
+                    Coming soon
+                  </Button>
                 }
               />
 
               {/* Instagram channel — coming soon */}
               <AddOnCard
-                image="/addons/fox-addon-messenger.webp"
+                image="/addons/fox-addon-instagram-v2.webp"
                 title="Instagram"
                 description="Answer Instagram DMs with the same bot and Inbox."
                 price="€19"
@@ -857,7 +853,7 @@ export function BillingPanel({
 
               {/* WhatsApp channel — coming soon */}
               <AddOnCard
-                image="/addons/fox-addon-messenger.webp"
+                image="/addons/fox-addon-whatsapp.webp"
                 title="WhatsApp"
                 description="Meet customers on the world's busiest messaging app."
                 price="€19"

@@ -2,8 +2,16 @@
 
 ## Product state
 
-- The paid Channels card is still disabled and marked **Coming soon**
-  (`components/client/BillingPanel.tsx:513`).
+- Subscription shows one card per channel; all three read **Coming soon**.
+  Messenger is fully built but its card stays disabled because the Meta app is
+  `dev_mode`/`is_live: false` — Facebook Login only works for people holding a
+  role on the Meta app, so a real client clicking Connect would hit a Facebook
+  error. Helper copy says "Waiting on Facebook app approval". Flip that card to
+  `status="available"` + a Link to `/app/channels/messenger/connect` (plus the
+  billing entitlement) once the app is published. ⚠️ Never label a paid add-on
+  free — the €19/month price stands.
+- The connect page stays reachable by URL while the card is disabled:
+  `/app/channels/messenger/connect` (breadcrumb back to Subscription).
 - Messenger AI replies are LIVE in production (verified end-to-end
   2026-07-30): `app/api/channels/meta/webhook/route.ts` verifies signatures
   (`lib/channels/meta.ts`), dedupes by message id via
@@ -18,15 +26,26 @@
   rejected reply (24h window, dead token) surfaces as a toast + restored draft
   instead of a phantom sent message. Both inbox surfaces share
   `deliverAgentMessage`; Messenger badges in Inbox + Conversations views.
-- Still spike-grade: outbound uses the env `META_PAGE_ACCESS_TOKEN`
-  (per-connection `access_token_cipher` in schema, unused), no OAuth routes,
-  no abuse guard on the Messenger path, no billing entitlement checks.
-  Delivery order lives in
-  [`../CHANNELS_IMPLEMENTATION.md`](../CHANNELS_IMPLEMENTATION.md).
+- OAuth connect flow shipped 2026-08-20: signed HMAC state (org+user+bot+
+  nonce+10-min exp), code exchange → long-lived user token in an encrypted
+  httpOnly cookie, Page + bot selection, page tokens AES-256-GCM encrypted into
+  `access_token_cipher` (`CHANNEL_TOKEN_KEY`), auto page-subscribe, and a
+  one-Page-one-org guard (`lib/channels/oauth.ts`, `lib/channels/crypto.ts`).
+  Webhook and Inbox outbound resolve tokens per connection
+  (`connectionPageToken`), falling back to the env token for the legacy spike row.
+- Still missing: billing entitlement/quantity sync, connection health checks and
+  the paused/action-required UI, abuse guard on the Messenger path. Delivery
+  order lives in [`../CHANNELS_IMPLEMENTATION.md`](../CHANNELS_IMPLEMENTATION.md).
 - The shared v1 boundary is one external Page/account connected to one bot.
   Prove Messenger first, then reuse the adapter boundary for Instagram and
   WhatsApp (`docs/CHANNELS_IMPLEMENTATION.md:3-16`,
   `docs/CHANNELS_IMPLEMENTATION.md:124-126`).
+- The Subscription add-on grid gives every channel its own card illustration:
+  Messenger uses the blue lightning chat mark, Instagram the gradient camera
+  mark, and WhatsApp the green phone bubble (`components/client/BillingPanel.tsx:812-856`,
+  `public/addons/fox-addon-{messenger-v2,instagram-v2,whatsapp}.webp`). Keep new
+  channel art in the same 1000×1000 fox-doodle system rather than sharing a
+  generic messaging image.
 
 ## Meta app state (checked 2026-07-30)
 
