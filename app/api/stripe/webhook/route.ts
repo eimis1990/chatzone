@@ -4,6 +4,7 @@ import { getStripe } from '@/lib/stripe/client'
 import { getEnv } from '@/lib/env'
 import { syncSubscriptionToOrg } from '@/lib/stripe/sync'
 import { createServiceClient } from '@/lib/supabase/service'
+import { monthStartISO } from '@/lib/usage'
 
 // Signature verification needs the raw body + Node crypto.
 export const runtime = 'nodejs'
@@ -32,6 +33,21 @@ export async function POST(req: NextRequest) {
     switch (event.type) {
       case 'checkout.session.completed': {
         const session = event.data.object
+        // One-time Extra-conversations top-up — credit the current month.
+        // The unique session id makes redelivered webhooks a no-op.
+        if (session.metadata?.extra_conversations && session.metadata.org_id) {
+          const svc = createServiceClient()
+          const { error: creditErr } = await svc.from('conversation_credits').insert({
+            org_id: session.metadata.org_id,
+            month: monthStartISO().slice(0, 10),
+            conversations: Number(session.metadata.extra_conversations),
+            stripe_session_id: session.id,
+          })
+          if (creditErr && creditErr.code !== '23505') {
+            // Surface as 500 so Stripe retries — the credit MUST land.
+            throw new Error(`conversation credit insert failed: ${creditErr.message}`)
+          }
+        }
         // One-time "done-for-you" setup purchase — record it for the owner.
         if (session.metadata?.setup_package) {
           const svc = createServiceClient()

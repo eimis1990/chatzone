@@ -3,7 +3,8 @@ import { createServerClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { BillingPanel } from '@/components/client/BillingPanel'
 import { isStripeConfigured, getStripe, checkoutTaxParams } from '@/lib/stripe/client'
-import { getPriceId, getVoicePriceId, getVisualizerPriceId, getSetupPriceId, PLANS, DISPLAY_PLANS, VOICE_ADDON, VISUALIZER_ADDON } from '@/lib/stripe/plans'
+import { getPriceId, getVoicePriceId, getVisualizerPriceId, getSetupPriceId, getExtraConversationsPriceId, PLANS, DISPLAY_PLANS, VOICE_ADDON, VISUALIZER_ADDON } from '@/lib/stripe/plans'
+import { EXTRA_CONVERSATIONS_ADDON } from '@/lib/plans-catalog'
 import { SETUP_PACKAGES } from '@/lib/setup-packages'
 import { ensureStripeCustomer, resetMissingStripeCustomer } from '@/lib/stripe/customer'
 import { isMissingStripeCustomerError } from '@/lib/stripe/errors'
@@ -15,6 +16,7 @@ import {
   activeSubscriptionId,
 } from '@/lib/stripe/manage'
 import { entitlementsFor } from '@/lib/entitlements'
+import { extraConversationsThisMonth } from '@/lib/usage'
 import { voiceUsageThisMonth } from '@/lib/voice-usage'
 import type { Plan, BillingInterval, SubscriptionStatus } from '@/lib/types'
 
@@ -68,12 +70,15 @@ export default async function SubscriptionPage({
   // plus voice minutes (live + preview) from the voice_usage counters.
   async function loadUsage(oid: string) {
     const sb = await createServerClient()
-    // voice_usage is service-role only (no client RLS policy) — org access is
-    // already guarded by requireRole + getUserOrgIds above.
-    const voice = await voiceUsageThisMonth(createServiceClient(), oid)
+    // voice_usage / conversation_credits are service-role only (no client RLS
+    // policy) — org access is already guarded by requireRole + getUserOrgIds.
+    const [voice, extraConversations] = await Promise.all([
+      voiceUsageThisMonth(createServiceClient(), oid),
+      extraConversationsThisMonth(createServiceClient(), oid),
+    ])
     const { data: bots } = await sb.from('bots').select('id').eq('org_id', oid)
     const botIds = (bots ?? []).map((b) => (b as { id: string }).id)
-    if (!botIds.length) return { conversationsUsed: 0, botsUsed: 0, ...voice }
+    if (!botIds.length) return { conversationsUsed: 0, botsUsed: 0, extraConversations, ...voice }
     const now = new Date()
     const monthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString()
     const { count } = await sb
@@ -82,7 +87,7 @@ export default async function SubscriptionPage({
       .in('bot_id', botIds)
       .neq('source', 'preview') // configurator test calls never consume the pool
       .gte('started_at', monthStart)
-    return { conversationsUsed: count ?? 0, botsUsed: botIds.length, ...voice }
+    return { conversationsUsed: count ?? 0, botsUsed: botIds.length, extraConversations, ...voice }
   }
 
   // Which one-time setup packages this org has already paid for.
@@ -99,7 +104,13 @@ export default async function SubscriptionPage({
   // These three reads are independent — fetch them in one round-trip batch
   // instead of three sequential awaits.
   let billing
-  let usage: { conversationsUsed: number; botsUsed: number; widgetSecs: number; previewSecs: number }
+  let usage: {
+    conversationsUsed: number
+    botsUsed: number
+    extraConversations: number
+    widgetSecs: number
+    previewSecs: number
+  }
   let purchasedSetups: string[]
   if (orgId) {
     ;[billing, usage, purchasedSetups] = await Promise.all([
@@ -119,7 +130,7 @@ export default async function SubscriptionPage({
       visualizerActive: false,
       subscriptionId: null as string | null,
     }
-    usage = { conversationsUsed: 0, botsUsed: 0, widgetSecs: 0, previewSecs: 0 }
+    usage = { conversationsUsed: 0, botsUsed: 0, extraConversations: 0, widgetSecs: 0, previewSecs: 0 }
     purchasedSetups = []
   }
 
@@ -214,6 +225,43 @@ export default async function SubscriptionPage({
         payment_intent_data: { metadata: { org_id: oid, setup_package: pkg } },
         // One-time payments don't invoice by default — enable so setup
         // packages produce a proper (tax-itemized) invoice for the client.
+        invoice_creation: { enabled: true },
+        ...checkoutTaxParams(),
+      })
+      return { url: session.url ?? undefined }
+    } catch (err) {
+      return { error: err instanceof Error ? err.message : 'Could not start checkout.' }
+    }
+  }
+
+  /** Buy a one-time 1,000-conversation top-up for the current month. */
+  async function buyExtraConversations(): Promise<{ url?: string; error?: string }> {
+    'use server'
+    const ids = await getUserOrgIds()
+    const oid = ids[0]
+    if (!oid) return { error: 'No organization found.' }
+    const stripe = getStripe()
+    if (!stripe) return { error: 'Billing is not enabled yet.' }
+    const priceId = getExtraConversationsPriceId()
+    if (!priceId) return { error: 'Extra conversations aren’t configured yet.' }
+    // Top-ups extend a paid plan's pool — same gate as the other add-ons.
+    if (!(await activeSubscriptionId(oid))) {
+      return { error: 'Add a paid plan first, then you can top up conversations.' }
+    }
+    try {
+      const customerId = await ensureStripeCustomer(oid)
+      const base = process.env.NEXT_PUBLIC_APP_URL ?? ''
+      const session = await stripe.checkout.sessions.create({
+        integration_identifier: 'loqara_checkout_aqkvmztr',
+        mode: 'payment',
+        customer: customerId,
+        line_items: [{ price: priceId, quantity: 1 }],
+        success_url: `${base}/app/subscription?topup=success`,
+        cancel_url: `${base}/app/subscription?topup=cancelled`,
+        metadata: {
+          org_id: oid,
+          extra_conversations: String(EXTRA_CONVERSATIONS_ADDON.conversations),
+        },
         invoice_creation: { enabled: true },
         ...checkoutTaxParams(),
       })
@@ -318,7 +366,10 @@ export default async function SubscriptionPage({
         isPaying={isPaying}
         usage={{
           conversationsUsed: usage.conversationsUsed,
-          conversationsLimit: ent.conversations,
+          // Purchased top-ups extend this month's pool.
+          conversationsLimit: Number.isFinite(ent.conversations)
+            ? ent.conversations + usage.extraConversations
+            : ent.conversations,
           botsUsed: usage.botsUsed,
           botsLimit: ent.maxBots,
           voiceMinutesUsed: Math.floor(usage.widgetSecs / 60),
@@ -343,6 +394,16 @@ export default async function SubscriptionPage({
           blurb: VISUALIZER_ADDON.blurb,
           features: [...VISUALIZER_ADDON.features],
         }}
+        extraConversationsConfigured={Boolean(getExtraConversationsPriceId())}
+        extraConversationsCredits={usage.extraConversations}
+        extraConversations={{
+          name: EXTRA_CONVERSATIONS_ADDON.name,
+          price: EXTRA_CONVERSATIONS_ADDON.price,
+          conversations: EXTRA_CONVERSATIONS_ADDON.conversations,
+          blurb: EXTRA_CONVERSATIONS_ADDON.blurb,
+          features: [...EXTRA_CONVERSATIONS_ADDON.features],
+        }}
+        buyExtraConversations={buyExtraConversations}
         plans={planOptions}
         setupPackages={SETUP_PACKAGES.map((p) => ({
           id: p.id,

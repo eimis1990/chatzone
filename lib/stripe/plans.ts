@@ -28,6 +28,11 @@ export function getVisualizerPriceId(): string | null {
   return process.env.STRIPE_PRICE_VISUALIZER_MONTH ?? null
 }
 
+/** Stripe Price ID for the one-time Extra-conversations top-up, or null when not configured. */
+export function getExtraConversationsPriceId(): string | null {
+  return process.env.STRIPE_PRICE_EXTRA_CONVERSATIONS ?? null
+}
+
 /** Stripe Price ID for a one-time setup package, or null when not configured. */
 export function getSetupPriceId(id: 'essential' | 'ecommerce'): string | null {
   const key = id === 'essential' ? 'STRIPE_PRICE_SETUP_ESSENTIAL' : 'STRIPE_PRICE_SETUP_ECOMMERCE'

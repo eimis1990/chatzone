@@ -129,6 +129,24 @@ export const VOICE_ADDON = {
  * spent the feature quietly hides until the next cycle (no overage billing for
  * now — deliberately not advertised until we decide to meter it).
  */
+/**
+ * The Extra-conversations top-up — a ONE-TIME €15 purchase adding 1,000
+ * conversations to the current calendar month's pool (unused credits expire at
+ * month end). Not a subscription item: bought manually when a month runs hot.
+ */
+export const EXTRA_CONVERSATIONS_ADDON = {
+  key: 'extra_conversations',
+  name: 'Extra conversations',
+  price: 15,
+  conversations: 1000,
+  blurb: 'Handle a busy month without moving to a higher plan.',
+  features: [
+    '1,000 extra conversations for this month',
+    'Applies instantly after checkout',
+    'One-time payment — unused credits expire at month end',
+  ],
+} as const
+
 export const VISUALIZER_ADDON = {
   key: 'visualizer',
   name: 'Product visualizer',

@@ -72,6 +72,17 @@ interface BillingPanelProps {
   visualizerActive: boolean
   visualizerConfigured: boolean
   visualizer: { name: string; monthly: number; blurb: string; features: string[] }
+  extraConversationsConfigured?: boolean
+  /** Top-up conversations already purchased for the current month. */
+  extraConversationsCredits?: number
+  extraConversations?: {
+    name: string
+    price: number
+    conversations: number
+    blurb: string
+    features: string[]
+  }
+  buyExtraConversations?: () => Promise<{ url?: string; error?: string }>
   plans: BillingPlanOption[]
   selectPlan: (
     plan: Plan,
@@ -206,6 +217,10 @@ export function BillingPanel({
   visualizerActive,
   visualizerConfigured,
   visualizer,
+  extraConversationsConfigured = false,
+  extraConversationsCredits = 0,
+  extraConversations,
+  buyExtraConversations,
   plans,
   selectPlan,
   setVoice,
@@ -284,6 +299,20 @@ export function BillingPanel({
           await setVisualizer(enabled),
           enabled ? 'Product visualizer added.' : 'Product visualizer removed.',
         )
+      } finally {
+        setBusy(null)
+      }
+    })
+  }
+
+  const runTopup = () => {
+    if (!buyExtraConversations) return
+    setBusy('topup')
+    startTransition(async () => {
+      try {
+        const r = await buyExtraConversations()
+        if (r.url) window.location.href = r.url
+        else toast.error(r.error ?? 'Could not start checkout.')
       } finally {
         setBusy(null)
       }
@@ -873,25 +902,63 @@ export function BillingPanel({
                 }
               />
 
-              {/* Extra conversations — coming soon */}
+              {/* Extra conversations — one-time top-up for the current month */}
               <AddOnCard
                 image="/addons/fox-addon-extra.webp"
-                title="Extra conversations"
-                description="Handle a busy month without moving to a higher plan."
-                price="~€15"
-                priceSuffix="/ 1,000 conversations"
-                features={[
-                  '1,000-conversation top-up',
-                  'No plan tier change required',
-                  'Use only when volume spikes',
-                ]}
-                status="coming"
-                helper="Planned for a future release"
+                title={extraConversations?.name ?? 'Extra conversations'}
+                description={
+                  extraConversations?.blurb ??
+                  'Handle a busy month without moving to a higher plan.'
+                }
+                price={`€${extraConversations?.price ?? 15}`}
+                priceSuffix={`/ ${(extraConversations?.conversations ?? 1000).toLocaleString('en-US')} conversations`}
+                priceNote={
+                  extraConversationsCredits > 0
+                    ? `${extraConversationsCredits.toLocaleString('en-US')} extra conversations active this month`
+                    : undefined
+                }
+                features={
+                  extraConversations?.features ?? [
+                    '1,000-conversation top-up',
+                    'No plan tier change required',
+                    'Use only when volume spikes',
+                  ]
+                }
+                status={extraConversationsConfigured ? 'available' : 'coming'}
+                helper={
+                  extraConversationsConfigured
+                    ? isPaying
+                      ? 'One-time payment, applies to this month'
+                      : 'Available with any paid plan'
+                    : 'Planned for a future release'
+                }
                 action={
-                  <Button className="h-11 w-full rounded-xl" size="lg" variant="outline" disabled>
-                    <Clock3Icon data-icon="inline-start" aria-hidden="true" />
-                    Coming soon
-                  </Button>
+                  extraConversationsConfigured ? (
+                    <Button
+                      className="h-11 w-full rounded-xl"
+                      size="lg"
+                      disabled={anyBusy || !isPaying}
+                      aria-busy={busy === 'topup'}
+                      onClick={runTopup}
+                    >
+                      {busy === 'topup' ? (
+                        <Loader2Icon
+                          className="animate-spin"
+                          data-icon="inline-start"
+                          aria-hidden="true"
+                        />
+                      ) : (
+                        <PlusIcon data-icon="inline-start" aria-hidden="true" />
+                      )}
+                      Buy {(extraConversations?.conversations ?? 1000).toLocaleString('en-US')}{' '}
+                      conversations
+                    </Button>
+                  ) : (
+                    <Button className="h-11 w-full rounded-xl" size="lg" variant="outline" disabled>
+                      <Clock3Icon data-icon="inline-start" aria-hidden="true" />
+                      Coming soon
+                    </Button>
+                  )
                 }
               />
             </div>

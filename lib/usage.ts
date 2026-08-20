@@ -11,10 +11,27 @@ export function monthStartISO(now: Date = new Date()): string {
   return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString()
 }
 
-/** Pure: is the org over its plan's monthly conversation allowance? */
-export function overConversationLimit(used: number, plan: Plan | null | undefined): boolean {
+/** Pure: is the org over its plan's monthly allowance plus purchased top-ups? */
+export function overConversationLimit(
+  used: number,
+  plan: Plan | null | undefined,
+  extraCredits = 0,
+): boolean {
   const limit = entitlementsFor(plan).conversations
-  return Number.isFinite(limit) && used >= limit
+  return Number.isFinite(limit) && used >= limit + Math.max(0, extraCredits)
+}
+
+/** Purchased extra conversations applying to the current calendar month. */
+export async function extraConversationsThisMonth(
+  svc: SupabaseClient,
+  orgId: string,
+): Promise<number> {
+  const { data } = await svc
+    .from('conversation_credits')
+    .select('conversations')
+    .eq('org_id', orgId)
+    .eq('month', monthStartISO().slice(0, 10))
+  return ((data ?? []) as { conversations: number }[]).reduce((sum, r) => sum + r.conversations, 0)
 }
 
 /** Conversations started this calendar month across ALL of the org's bots. */
@@ -92,5 +109,9 @@ export async function isOverConversationLimit(
     .single<{ plan: Plan | null }>()
   const limit = entitlementsFor(org?.plan ?? 'free').conversations
   if (!Number.isFinite(limit)) return false
-  return (await conversationsThisMonth(svc, orgId)) >= limit
+  const [used, extra] = await Promise.all([
+    conversationsThisMonth(svc, orgId),
+    extraConversationsThisMonth(svc, orgId),
+  ])
+  return overConversationLimit(used, org?.plan ?? 'free', extra)
 }
