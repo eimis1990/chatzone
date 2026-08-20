@@ -135,6 +135,6 @@ export const VISUALIZER_ADDON = {
   monthly: 29,
   rendersIncluded: 100,
   rendersPerConversation: 5,
-  blurb: 'Let shoppers visualize your furniture in their own home — AI renders right in the chat.',
+  blurb: 'Let shoppers see your furniture in their own room, rendered by AI.',
   features: ['100 renders / month included', 'Up to 5 renders per conversation', 'Works with any paid plan'],
 } as const
