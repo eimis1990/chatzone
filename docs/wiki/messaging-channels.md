@@ -36,6 +36,14 @@
 - Still missing: billing entitlement/quantity sync, connection health checks and
   the paused/action-required UI, abuse guard on the Messenger path. Delivery
   order lives in [`../CHANNELS_IMPLEMENTATION.md`](../CHANNELS_IMPLEMENTATION.md).
+- ⚠️ 2026-08-20 claims audit: the OAuth flow's FINAL step has never completed —
+  the sole `channel_connections` row is still the 2026-07-30 spike seed
+  (`access_token_cipher` null), so Messenger still sends via the env token. The
+  owner's connect attempt ran from the 3IMIS org, where clicking Connect Page
+  would hit the one-Page-one-org guard (`page_taken`) because the Loqara Page
+  is seeded to the Loqara org. Also: zero `from_human` messages on any
+  messenger conversation — Inbox human takeover is code-complete but has never
+  been exercised live.
 - The shared v1 boundary is one external Page/account connected to one bot.
   Prove Messenger first, then reuse the adapter boundary for Instagram and
   WhatsApp (`docs/CHANNELS_IMPLEMENTATION.md:3-16`,
