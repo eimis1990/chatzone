@@ -156,6 +156,30 @@ compatibility, with a professional handoff for safety-sensitive work. Each post
 has one text-free editorial cover and one physically plausible realistic use-case
 scene generated with OpenAI Image 2, both optimized to 1200×800 WebP.
 
+## Backlink acquisition baseline (2026-08-15)
+
+Search-index sampling (not a complete backlink export) found that Loqara's visible
+third-party footprint is still thin relative to its 65-post content base. Competitors'
+repeatable authority channels are distribution assets rather than generic guest-post
+volume: Shopify and software-review profiles, platform/integration partner pages,
+customer case studies that clients and partners also promote, original-data reports,
+podcast appearances, webinars, communities, and industry awards.
+
+The in-widget `Powered by Loqara` anchor is rendered inside Loqara's own embed iframe
+(`components/widget/ChatWindow.tsx:1420-1440`), so it does **not** create a normal
+host-page backlink from the merchant domain. Treat it as branding/referral traffic,
+not a backlink program. Seek optional, editorial host-site mentions through joint
+case studies and integration pages; never require keyword-rich links in customer
+contracts or add distributed hidden/footer links. Google explicitly classifies
+forced, paid, automated, and widely distributed template links as link spam.
+
+Priority acquisition order: (1) credible product/review profiles and genuine customer
+reviews; (2) Verskis and other platform/agency integration pages; (3) measured customer
+case studies with reusable charts and methodology; (4) a quarterly anonymized commerce
+conversation benchmark co-published with partners; (5) founder podcast/webinar pitches
+based on the benchmark and live evaluations. Exact referring-domain counts and a
+link-intersect export require a dedicated index such as Semrush or Ahrefs.
+
 ## 2026-07-20 remediation baseline
 
 The public-site audit found that technical SEO tags are broadly sound, but mobile

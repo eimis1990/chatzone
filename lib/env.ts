@@ -40,6 +40,14 @@ const envSchema = z.object({
   // verification handshake.
   META_APP_SECRET: z.string().min(1).optional(),
   META_WEBHOOK_VERIFY_TOKEN: z.string().min(1).optional(),
+  // Meta app id + optional Facebook Login for Business configuration id.
+  // Both are needed for the client "Connect with Facebook" OAuth flow.
+  META_APP_ID: z.string().min(1).optional(),
+  META_LOGIN_CONFIG_ID: z.string().min(1).optional(),
+  // Base64 32-byte key encrypting channel access tokens at rest
+  // (channel_connections.access_token_cipher). OAuth connect fails closed
+  // without it. Generate: openssl rand -base64 32
+  CHANNEL_TOKEN_KEY: z.string().min(1).optional(),
   // ponytail: spike-only single Page token; replaced by per-connection
   // encrypted tokens in channel_connections when the OAuth flow lands.
   META_PAGE_ACCESS_TOKEN: z.string().min(1).optional(),

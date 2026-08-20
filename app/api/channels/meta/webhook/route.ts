@@ -10,6 +10,7 @@ import {
   type InboundTextMessage,
 } from '@/lib/channels/meta'
 import { processChannelMessage } from '@/lib/channels/processor'
+import { connectionPageToken } from '@/lib/channels/outbound'
 import { isOverConversationLimit } from '@/lib/usage'
 import type { Bot, ChannelConnection, HandoffStatus } from '@/lib/types'
 
@@ -47,7 +48,7 @@ export async function POST(req: NextRequest) {
   const svc = createServiceClient()
   for (const msg of extractTextMessages(payload)) {
     try {
-      await handleInbound(svc, msg, env.META_PAGE_ACCESS_TOKEN)
+      await handleInbound(svc, msg)
     } catch (err) {
       // Ack Meta regardless — redelivery of the whole batch would double-work
       // the messages that DID succeed. The event row records the failure.
@@ -64,11 +65,7 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({ received: true })
 }
 
-async function handleInbound(
-  svc: SupabaseClient,
-  msg: InboundTextMessage,
-  pageAccessToken: string | undefined,
-) {
+async function handleInbound(svc: SupabaseClient, msg: InboundTextMessage) {
   // Idempotency: the message id is the event id; a duplicate delivery hits the
   // unique constraint and is skipped without reprocessing.
   const { error: insertErr } = await svc
@@ -172,9 +169,8 @@ async function handleInbound(
 
   const reply = await processChannelMessage(svc, bot, { conversationId: convId, message: msg.text })
 
-  // ponytail: spike-only env Page token — per-connection encrypted tokens
-  // arrive with the OAuth flow (access_token_cipher is already in the schema).
-  if (!pageAccessToken) throw new Error('META_PAGE_ACCESS_TOKEN not configured')
+  const pageAccessToken = await connectionPageToken(connection.id)
+  if (!pageAccessToken) throw new Error('No Page access token for connection')
   await sendTextMessage(msg.senderId, reply, pageAccessToken)
   await finish('processed', connection.id)
 }

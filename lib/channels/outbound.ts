@@ -1,6 +1,8 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { getEnv } from '@/lib/env'
+import { createServiceClient } from '@/lib/supabase/service'
 import { sendTextMessage } from '@/lib/channels/meta'
+import { decryptSecret } from '@/lib/channels/crypto'
 
 /**
  * Shared human-agent reply delivery for the Inbox. Persists the message and,
@@ -23,6 +25,33 @@ export function messengerSendErrorText(raw: string): string {
   return `Messenger delivery failed: ${raw}`
 }
 
+/**
+ * Page access token for a connection: the per-connection encrypted token from
+ * the OAuth flow, falling back to the env token for the legacy spike
+ * connection. Reads via the service client — channel_connections is
+ * service-role-only; callers must have already authorized the caller's access
+ * to the conversation/connection.
+ */
+export async function connectionPageToken(connectionId: string | null): Promise<string | null> {
+  if (connectionId) {
+    const svc = createServiceClient()
+    const { data } = await svc
+      .from('channel_connections')
+      .select('access_token_cipher')
+      .eq('id', connectionId)
+      .maybeSingle<{ access_token_cipher: string | null }>()
+    if (data?.access_token_cipher) {
+      try {
+        return decryptSecret(data.access_token_cipher)
+      } catch (err) {
+        console.error('[channels] token decrypt failed:', err instanceof Error ? err.message : err)
+        return null
+      }
+    }
+  }
+  return getEnv().META_PAGE_ACCESS_TOKEN ?? null
+}
+
 export async function deliverAgentMessage(
   sb: SupabaseClient,
   conversationId: string,
@@ -35,14 +64,18 @@ export async function deliverAgentMessage(
   // RLS-scoped read: only conversations in the agent's org resolve.
   const { data: conv } = await sb
     .from('conversations')
-    .select('id, channel, visitor_id')
+    .select('id, channel, visitor_id, channel_connection_id')
     .eq('id', conversationId)
-    .maybeSingle<{ id: string; channel: string; visitor_id: string }>()
+    .maybeSingle<{
+      id: string
+      channel: string
+      visitor_id: string
+      channel_connection_id: string | null
+    }>()
   if (!conv) return { ok: false, error: 'Conversation not found' }
 
   if (conv.channel === 'messenger') {
-    // ponytail: spike-only env Page token — per-connection tokens with OAuth.
-    const token = getEnv().META_PAGE_ACCESS_TOKEN
+    const token = await connectionPageToken(conv.channel_connection_id)
     if (!token) return { ok: false, error: 'Messenger sending is not configured' }
     try {
       await sendTextMessage(conv.visitor_id, trimmed, token)
