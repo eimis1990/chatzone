@@ -1,6 +1,14 @@
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import Image from 'next/image'
+import Link from 'next/link'
+import {
+  CheckCircle2Icon,
+  MessageCircleIcon,
+  ShieldCheckIcon,
+  InboxIcon,
+  ExternalLinkIcon,
+} from 'lucide-react'
 import { requireRole, getUserOrgIds } from '@/lib/auth/guards'
 import { createServerClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
@@ -8,7 +16,9 @@ import { getEnv } from '@/lib/env'
 import { decryptSecret, encryptSecret } from '@/lib/channels/crypto'
 import { fetchUserPages, subscribePageToApp } from '@/lib/channels/oauth'
 import { CONNECT_COOKIE } from '@/app/api/channels/meta/oauth/callback/route'
-import { Button, buttonVariants } from '@/components/ui/button'
+import { MessengerConnectForm } from '@/components/client/MessengerConnectForm'
+import { buttonVariants } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 
 export const metadata = { title: 'Connect Messenger | Loqara' }
@@ -108,11 +118,12 @@ export default async function ConnectMessengerPage({
     }
     const jar = await cookies()
     jar.delete(CONNECT_COOKIE)
-    redirect(`/app/channels/messenger/connect?connected=${encodeURIComponent(page.name)}`)
+    redirect('/app/channels/messenger/connect?connected=1')
   }
 
   const pending = await pendingSession()
-  const pages = pending && pending.orgId === orgId ? await fetchUserPages(pending.userToken).catch(() => []) : []
+  const pages =
+    pending && pending.orgId === orgId ? await fetchUserPages(pending.userToken).catch(() => []) : []
 
   const sb = await createServerClient()
   const { data: bots } = await sb
@@ -122,83 +133,150 @@ export default async function ConnectMessengerPage({
     .eq('status', 'active')
     .order('name')
 
+  // The freshly connected (or most recent) connection for the success state.
+  const connection = connected
+    ? ((
+        await createServiceClient()
+          .from('channel_connections')
+          .select('display_name, avatar_url, external_account_id, bot_id, status')
+          .eq('org_id', orgId)
+          .eq('provider', 'messenger')
+          .order('updated_at', { ascending: false })
+          .limit(1)
+          .maybeSingle<{
+            display_name: string | null
+            avatar_url: string | null
+            external_account_id: string
+            bot_id: string
+            status: string
+          }>()
+      ).data ?? null)
+    : null
+  const connectionBot = connection ? (bots ?? []).find((b) => b.id === connection.bot_id) : null
+
   const configured = Boolean(getEnv().META_APP_ID && getEnv().CHANNEL_TOKEN_KEY)
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 p-6">
-      <div>
-        <h1 className="text-lg font-semibold">Connect Facebook Messenger</h1>
-        <p className="text-sm text-muted-foreground">
-          Link a Facebook Page to one of your chatbots. Visitors who message the Page get AI
-          answers, and your team can take over from the Inbox.
-        </p>
+      <div className="flex items-start gap-3">
+        <span className="mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+          <MessageCircleIcon className="size-5" fill="currentColor" aria-hidden="true" />
+        </span>
+        <div>
+          <h1 className="text-lg font-semibold">Connect Facebook Messenger</h1>
+          <p className="text-sm text-muted-foreground">
+            Link a Facebook Page to one of your chatbots. Visitors who message the Page get AI
+            answers, and your team can take over from the Inbox.
+          </p>
+        </div>
       </div>
 
       {error && ERRORS[error] && (
-        <p className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
+        <p
+          role="alert"
+          className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive"
+        >
           {ERRORS[error]}
         </p>
       )}
 
-      {connected ? (
-        <div className="rounded-xl border bg-card p-5">
-          <p className="font-medium">“{connected}” is connected 🎉</p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Send the Page a message from your personal Messenger to see the bot answer. Human
-            takeover works from the Inbox — Messenger conversations show a blue badge.
-          </p>
+      {connection ? (
+        <div className="overflow-hidden rounded-xl border bg-card">
+          <div className="flex items-center gap-3 border-b bg-green-50/60 px-5 py-4">
+            <CheckCircle2Icon className="size-5 shrink-0 text-green-600" aria-hidden="true" />
+            <p className="text-sm font-medium text-green-900">
+              Messenger is connected and answering
+            </p>
+          </div>
+          <div className="flex flex-col gap-5 p-5">
+            <div className="flex items-center gap-3">
+              {connection.avatar_url ? (
+                <Image
+                  src={connection.avatar_url}
+                  alt=""
+                  width={44}
+                  height={44}
+                  className="size-11 rounded-full border"
+                  unoptimized
+                />
+              ) : (
+                <span className="flex size-11 items-center justify-center rounded-full bg-muted text-base font-semibold text-muted-foreground">
+                  {(connection.display_name ?? 'P').slice(0, 1)}
+                </span>
+              )}
+              <div className="min-w-0 flex-1">
+                <p className="truncate font-medium">{connection.display_name}</p>
+                <p className="text-sm text-muted-foreground">
+                  Answered by <span className="font-medium text-foreground">{connectionBot?.name ?? 'your chatbot'}</span>
+                </p>
+              </div>
+              <Badge className="bg-green-100 text-green-800 hover:bg-green-100">Active</Badge>
+            </div>
+            <div className="rounded-lg bg-muted/50 px-4 py-3 text-sm text-muted-foreground">
+              Try it: send your Page a message from your personal Messenger — the bot replies in
+              a few seconds. Conversations appear in your Inbox with a Messenger badge.
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Link href="/app/inbox" className={cn(buttonVariants(), 'h-10 px-5')}>
+                <InboxIcon className="size-4" aria-hidden="true" />
+                Open Inbox
+              </Link>
+              <a
+                href={`https://m.me/${connection.external_account_id}`}
+                target="_blank"
+                rel="noreferrer"
+                className={cn(buttonVariants({ variant: 'outline' }), 'h-10 px-5')}
+              >
+                <ExternalLinkIcon className="size-4" aria-hidden="true" />
+                Message the Page
+              </a>
+            </div>
+          </div>
         </div>
       ) : !configured ? (
-        <p className="text-sm text-muted-foreground">{ERRORS.not_configured}</p>
+        <p className="rounded-xl border bg-card p-5 text-sm text-muted-foreground">
+          {ERRORS.not_configured}
+        </p>
       ) : pages.length === 0 ? (
         <div className="rounded-xl border bg-card p-5">
-          <p className="text-sm text-muted-foreground">
-            You’ll be asked to sign in with Facebook and choose which Page Loqara may access.
-            We never see your Facebook password.
-          </p>
+          <ol className="flex flex-col gap-3 text-sm">
+            {[
+              'Sign in with Facebook and approve access',
+              'Pick the Facebook Page to connect',
+              'Choose which chatbot answers it',
+            ].map((step, i) => (
+              <li key={step} className="flex items-center gap-3">
+                <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold text-muted-foreground">
+                  {i + 1}
+                </span>
+                {step}
+              </li>
+            ))}
+          </ol>
           <a
             href={`/api/channels/meta/oauth/start${botId ? `?botId=${botId}` : ''}`}
-            className={cn(buttonVariants(), 'mt-4')}
+            className={cn(
+              buttonVariants(),
+              'mt-5 h-10 bg-[#1877F2] px-5 text-white hover:bg-[#166fe5]',
+            )}
           >
+            <svg viewBox="0 0 24 24" className="size-4" fill="currentColor" aria-hidden="true">
+              <path d="M24 12.07C24 5.4 18.63 0 12 0S0 5.4 0 12.07C0 18.1 4.39 23.09 10.13 24v-8.44H7.08v-3.49h3.05V9.41c0-3.02 1.79-4.7 4.53-4.7 1.31 0 2.68.24 2.68.24v2.97h-1.51c-1.49 0-1.96.93-1.96 1.89v2.26h3.33l-.53 3.49h-2.8V24C19.61 23.09 24 18.1 24 12.07Z" />
+            </svg>
             Continue with Facebook
           </a>
+          <p className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground">
+            <ShieldCheckIcon className="size-3.5 shrink-0" aria-hidden="true" />
+            You choose which Page Loqara may access. We never see your Facebook password.
+          </p>
         </div>
       ) : (
-        <form action={connectPage} className="flex flex-col gap-4 rounded-xl border bg-card p-5">
-          <fieldset className="flex flex-col gap-2">
-            <legend className="mb-1 text-sm font-medium">Choose a Facebook Page</legend>
-            {pages.map((p, i) => (
-              <label
-                key={p.id}
-                className="flex cursor-pointer items-center gap-3 rounded-lg border p-3 has-[:checked]:border-primary has-[:checked]:bg-primary/5"
-              >
-                <input type="radio" name="pageId" value={p.id} defaultChecked={i === 0} required />
-                {p.picture && (
-                  <Image src={p.picture} alt="" width={28} height={28} className="rounded-full" unoptimized />
-                )}
-                <span className="text-sm font-medium">{p.name}</span>
-              </label>
-            ))}
-          </fieldset>
-          <label className="flex flex-col gap-1 text-sm font-medium">
-            Answering chatbot
-            <select
-              name="botId"
-              required
-              defaultValue={botId ?? (bots ?? [])[0]?.id}
-              className="rounded-lg border bg-background p-2 text-sm"
-            >
-              {(bots ?? []).map((b) => (
-                <option key={b.id} value={b.id}>
-                  {b.name}
-                </option>
-              ))}
-            </select>
-          </label>
-          <Button type="submit" className="self-start">
-            Connect Page
-          </Button>
-        </form>
+        <MessengerConnectForm
+          pages={pages.map((p) => ({ id: p.id, name: p.name, picture: p.picture }))}
+          bots={bots ?? []}
+          defaultBotId={botId}
+          action={connectPage}
+        />
       )}
     </div>
   )
