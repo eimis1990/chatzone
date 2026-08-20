@@ -666,7 +666,7 @@ export function BillingPanel({
               </p>
             </div>
 
-            <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+            <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3 min-[1920px]:grid-cols-4">
               {/* Voice agent — interactive */}
               <AddOnCard
                 image="/addons/fox-addon-voice.webp"
