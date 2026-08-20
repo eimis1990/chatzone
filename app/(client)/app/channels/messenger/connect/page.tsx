@@ -4,7 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import {
   CheckCircle2Icon,
-  MessageCircleIcon,
+  ChevronLeftIcon,
   ShieldCheckIcon,
   InboxIcon,
   ExternalLinkIcon,
@@ -157,18 +157,21 @@ export default async function ConnectMessengerPage({
   const configured = Boolean(getEnv().META_APP_ID && getEnv().CHANNEL_TOKEN_KEY)
 
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 p-6">
-      <div className="flex items-start gap-3">
-        <span className="mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-          <MessageCircleIcon className="size-5" fill="currentColor" aria-hidden="true" />
-        </span>
-        <div>
-          <h1 className="text-lg font-semibold">Connect Facebook Messenger</h1>
-          <p className="text-sm text-muted-foreground">
-            Link a Facebook Page to one of your chatbots. Visitors who message the Page get AI
-            answers, and your team can take over from the Inbox.
-          </p>
-        </div>
+    <div className="flex w-full max-w-2xl flex-col gap-6 p-6">
+      <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-sm text-muted-foreground">
+        <Link href="/app/subscription" className="flex items-center gap-1 hover:text-foreground">
+          <ChevronLeftIcon className="size-4" aria-hidden="true" />
+          Subscription
+        </Link>
+        <span aria-hidden="true">/</span>
+        <span className="text-foreground">Connect Messenger</span>
+      </nav>
+      <div>
+        <h1 className="text-lg font-semibold">Connect Facebook Messenger</h1>
+        <p className="text-sm text-muted-foreground">
+          Link a Facebook Page to one of your chatbots. Visitors who message the Page get AI
+          answers, and your team can take over from the Inbox.
+        </p>
       </div>
 
       {error && ERRORS[error] && (

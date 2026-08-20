@@ -3,16 +3,18 @@
 import { useState, useTransition, type ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
+import Link from 'next/link'
 import {
   CheckIcon,
   ExternalLinkIcon,
   Loader2Icon,
   Clock3Icon,
+  MessageCircleIcon,
   MinusIcon,
   PlusIcon,
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
 import {
   Card,
   CardAction,
@@ -806,16 +808,63 @@ export function BillingPanel({
                 }
               />
 
-              {/* Channels — coming soon */}
+              {/* Messenger channel — live */}
               <AddOnCard
                 image="/addons/fox-addon-messenger.webp"
-                title="Channels"
-                description="Meet customers in the messaging apps they already use."
+                title="Messenger"
+                description="Let your bot answer your Facebook Page's messages."
                 price="€19"
-                priceSuffix="/ month, per channel"
+                priceSuffix="/ month"
                 features={[
-                  'WhatsApp, Instagram & Messenger',
-                  'Choose only the channels you need',
+                  'AI answers on your Facebook Page',
+                  'Human takeover from the Inbox',
+                  'Connect in minutes — no setup fee',
+                ]}
+                status="available"
+                helper="Free during early access"
+                action={
+                  <Link
+                    href="/app/channels/messenger/connect"
+                    className={cn(buttonVariants({ size: 'lg' }), 'h-11 w-full rounded-xl')}
+                  >
+                    <MessageCircleIcon data-icon="inline-start" aria-hidden="true" />
+                    Connect Messenger
+                  </Link>
+                }
+              />
+
+              {/* Instagram channel — coming soon */}
+              <AddOnCard
+                image="/addons/fox-addon-messenger.webp"
+                title="Instagram"
+                description="Answer Instagram DMs with the same bot and Inbox."
+                price="€19"
+                priceSuffix="/ month"
+                features={[
+                  'AI answers in Instagram Direct',
+                  'Same bot, knowledge and Inbox',
+                  'No setup fee',
+                ]}
+                status="coming"
+                helper="Planned for a future release"
+                action={
+                  <Button className="h-11 w-full rounded-xl" size="lg" variant="outline" disabled>
+                    <Clock3Icon data-icon="inline-start" aria-hidden="true" />
+                    Coming soon
+                  </Button>
+                }
+              />
+
+              {/* WhatsApp channel — coming soon */}
+              <AddOnCard
+                image="/addons/fox-addon-messenger.webp"
+                title="WhatsApp"
+                description="Meet customers on the world's busiest messaging app."
+                price="€19"
+                priceSuffix="/ month"
+                features={[
+                  'AI answers on WhatsApp Business',
+                  'Same bot, knowledge and Inbox',
                   'No setup fee',
                 ]}
                 status="coming"
