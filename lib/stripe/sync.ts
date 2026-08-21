@@ -2,6 +2,7 @@ import 'server-only'
 import type Stripe from 'stripe'
 import { createServiceClient } from '@/lib/supabase/service'
 import { planFromPriceId, getVoicePriceId, getVisualizerPriceId } from './plans'
+import { enforceActiveBotLimit } from '@/lib/bots/enforce-limit'
 import type { Plan, BillingInterval, SubscriptionStatus } from '@/lib/types'
 
 /** Map Stripe's subscription status onto ours (unknowns → inactive). */
@@ -63,7 +64,7 @@ export async function syncSubscriptionToOrg(sub: Stripe.Subscription): Promise<v
   const plan: Plan = paying && match ? match.plan : 'free'
   const interval: BillingInterval | null = paying && match ? match.interval : null
 
-  await svc
+  const { data: updated } = await svc
     .from('organizations')
     .update({
       stripe_subscription_id: sub.id,
@@ -76,4 +77,12 @@ export async function syncSubscriptionToOrg(sub: Stripe.Subscription): Promise<v
       visualizer_addon: paying && hasVisualizer,
     })
     .eq('stripe_customer_id', customerId)
+    .select('id')
+
+  // A downgrade can leave more active bots than the new plan allows — pause
+  // the newest extras (never delete; the client can swap which stay active).
+  for (const org of updated ?? []) {
+    const paused = await enforceActiveBotLimit(svc, (org as { id: string }).id)
+    if (paused > 0) console.log(`[stripe-sync] paused ${paused} over-limit bot(s) for org ${(org as { id: string }).id}`)
+  }
 }

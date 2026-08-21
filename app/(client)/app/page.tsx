@@ -23,6 +23,7 @@ import type { Plan } from '@/lib/types'
 import { CreateBotDialog } from '@/components/client/CreateBotDialog'
 import { Reveal } from '@/components/client/Reveal'
 import { DeleteBotButton } from '@/components/client/DeleteBotButton'
+import { BotStatusButton } from '@/components/client/BotStatusButton'
 import { StatTileGrid, type StatTileData } from '@/components/client/charts/StatCard'
 import { OrgBotComparisonChart } from '@/components/client/charts/OrgBotComparisonChart'
 import { Badge } from '@/components/ui/badge'
@@ -297,7 +298,10 @@ export default async function BotsPage() {
                   <p className="line-clamp-1 text-sm text-muted-foreground">{greeting}</p>
                   <div className="mt-auto flex items-center justify-between">
                     <LiveIndicator lastSeenAt={bot.last_seen_at} />
-                    <DeleteBotButton botId={bot.id} botName={bot.name} />
+                    <div className="flex items-center gap-1">
+                      <BotStatusButton botId={bot.id} botName={bot.name} status={bot.status} />
+                      <DeleteBotButton botId={bot.id} botName={bot.name} />
+                    </div>
                   </div>
                 </CardContent>
               </Card>
