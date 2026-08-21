@@ -32,7 +32,7 @@ export function BotCards({
         grid ? (
           <button
             type="button"
-            className="group hidden aspect-square w-full flex-col items-center justify-center gap-2 rounded-3xl border-2 border-dashed border-border bg-card/40 text-sm font-medium text-muted-foreground transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-ring md:flex"
+            className="group hidden h-full min-h-36 w-full flex-col items-center justify-center gap-2 rounded-3xl border-2 border-dashed border-border bg-card/40 text-sm font-medium text-muted-foreground transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-ring md:flex"
           >
             <PlusIcon className="size-6" />
             Create bot
@@ -52,7 +52,11 @@ export function BotCards({
   )
 
   return (
-    <div className={grid ? 'grid gap-4 sm:grid-cols-2 xl:grid-cols-3' : 'flex flex-col gap-4'}>
+    <div
+      className={
+        grid ? 'grid gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4' : 'flex flex-col gap-4'
+      }
+    >
       {grid && createTile && <Reveal delay={0.06}>{createTile}</Reveal>}
       {bots.map((bot, index) => {
         const lang = bot.config.defaultLanguage ?? 'en'
@@ -68,8 +72,6 @@ export function BotCards({
         const card = (Icon: typeof SettingsIcon, label: string) => (
           <Card
             className={`relative flex h-full flex-col overflow-hidden rounded-3xl border ring-0 transition-all group-hover:-translate-y-0.5 group-hover:shadow-md group-focus-visible:ring-2 group-focus-visible:ring-ring ${
-              grid ? 'md:aspect-square' : ''
-            } ${
               // Paused bots read as switched off: page-grey surface, no glow.
               isActive ? '' : 'bg-muted'
             }`}

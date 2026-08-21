@@ -136,7 +136,9 @@ export function AppSidebar({
   const router = useRouter()
   const activeBotId = pathname.match(/^\/app\/bots\/([^/]+)/)?.[1] ?? null
   const activeBot = bots.find((bot) => bot.id === activeBotId) ?? null
-  const [botsOpen, setBotsOpen] = useState(true)
+  // The bot list is route-derived, not stateful: open only while on the
+  // My Bots screen or inside one of the bots, closed everywhere else.
+  const botsOpen = pathname.startsWith('/app/bots')
   const [collapsed, setCollapsed] = useState(false)
   const [railTooltipsReady, setRailTooltipsReady] = useState(false)
   const tooltipTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -179,19 +181,7 @@ export function AppSidebar({
   }
 
   function handleBotsToggle() {
-    if (collapsed) {
-      changeCollapsed(false)
-      setBotsOpen(true)
-      router.push('/app/bots')
-      return
-    }
-    // Navigate to the bot-management screen; the chevron list stays in sync
-    // (opens on navigate, toggles closed only when already on the page).
-    if (pathname === '/app/bots') {
-      setBotsOpen((value) => !value)
-      return
-    }
-    setBotsOpen(true)
+    if (collapsed) changeCollapsed(false)
     router.push('/app/bots')
   }
 
