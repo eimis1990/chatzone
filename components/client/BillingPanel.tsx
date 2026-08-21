@@ -153,13 +153,20 @@ function AddOnCard({
   // Coming-soon cards look exactly like the rest — only the badge and the
   // disabled button differ.
   return (
-    <Card className="relative h-full rounded-3xl border ring-0 [--card-spacing:--spacing(5)]">
+    <Card
+      className="group/addon relative h-full rounded-3xl border ring-0 [--card-spacing:--spacing(5)]"
+      // CSS can't randomize, so the tilt direction is picked per hover and
+      // read by the illustration below through --addon-tilt.
+      onMouseEnter={(e) =>
+        e.currentTarget.style.setProperty('--addon-tilt', Math.random() < 0.5 ? '6deg' : '-6deg')
+      }
+    >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={image}
         alt=""
         aria-hidden="true"
-        className="pointer-events-none mx-auto h-32 w-auto select-none pt-3"
+        className="pointer-events-none mx-auto h-32 w-auto select-none pt-3 transition-transform duration-300 ease-out motion-safe:group-hover/addon:scale-110 motion-safe:group-hover/addon:rotate-[var(--addon-tilt,6deg)]"
       />
       <CardHeader>
         <CardTitle>

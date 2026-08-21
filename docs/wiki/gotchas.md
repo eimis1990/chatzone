@@ -318,4 +318,22 @@ translate utilities when building a large centered dialog
 (`components/ui/dialog.tsx:46-49`;
 `components/owner/LeadEmailTemplates.tsx:190-194`).
 
-_Last verified: 2026-08-17 (centered sales-email preview)._
+## Tailwind v4 compiles scale/rotate as standalone properties
+
+`scale-110` and `rotate-6` emit the CSS `scale:`/`rotate:` properties, not a
+composed `transform:`. They still animate under `transition-transform`, whose
+v4 property list is `transform, translate, scale, rotate` — so do NOT "fix" a
+hover animation by switching to `transition-all`. To randomize a value CSS
+can't (e.g. the add-on illustration's tilt direction per hover), set a CSS var
+in an event handler and read it with an arbitrary value:
+`rotate-[var(--addon-tilt,6deg)]` (`components/client/BillingPanel.tsx:145-160`).
+Calling `Math.random()` in a handler is fine; the `react-hooks/purity` lint
+rule only rejects it during render.
+
+To confirm an arbitrary/dynamic class actually compiled (a dropped class ships
+a silent no-op), build the stylesheet and grep it — dev-server CSS chunks won't
+contain classes from routes that never rendered:
+`npx @tailwindcss/cli -i app/globals.css -o /tmp/check.css` (short flags only;
+npm mangles `--input`/`--output`).
+
+_Last verified: 2026-08-21 (add-on hover tilt)._
