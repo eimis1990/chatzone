@@ -313,7 +313,7 @@ export function AppSidebar({
                     collapsed
                       ? 'size-11 justify-center gap-0 rounded-[12px] p-0'
                       : 'h-10 w-full gap-2.5 rounded-[12px] px-3',
-                    activeBotId
+                    activeBotId || pathname === '/app/bots'
                       ? SOLID_ACTIVE
                       : IDLE,
                   )}
@@ -334,7 +334,7 @@ export function AppSidebar({
                   collapsed
                     ? 'max-w-0 -translate-x-1 opacity-0'
                     : 'max-w-48 translate-x-0 opacity-100',
-                  !activeBotId && !collapsed && 'text-white',
+                  !activeBotId && pathname !== '/app/bots' && !collapsed && 'text-white',
                 )}
               >
                 My Bots

@@ -11,13 +11,49 @@ import { readableTextColor } from '@/lib/utils'
 import type { Bot } from '@/lib/types'
 
 /**
- * The org's bot cards + "Create bot" tile. Shared by Home and /app/bots so
- * managing bots (pause/activate, delete, configure) has a dedicated screen
- * without Home losing its overview.
+ * The org's bot cards + "Create bot" tile. Shared by Home ('rows': full-width
+ * rows, create-last) and /app/bots ('grid': compact square cards, create-first)
+ * so managing bots has a dedicated screen without Home losing its overview.
  */
-export function BotCards({ bots, orgId }: { bots: Bot[]; orgId: string | null }) {
+export function BotCards({
+  bots,
+  orgId,
+  variant = 'rows',
+}: {
+  bots: Bot[]
+  orgId: string | null
+  variant?: 'rows' | 'grid'
+}) {
+  const grid = variant === 'grid'
+  const createTile = orgId && (
+    <CreateBotDialog
+      orgId={orgId}
+      trigger={
+        grid ? (
+          <button
+            type="button"
+            className="group hidden aspect-square w-full flex-col items-center justify-center gap-2 rounded-3xl border-2 border-dashed border-border bg-card/40 text-sm font-medium text-muted-foreground transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-ring md:flex"
+          >
+            <PlusIcon className="size-6" />
+            Create bot
+          </button>
+        ) : (
+          // Creating a bot is a desktop (build) task — slim row under the list.
+          <button
+            type="button"
+            className="group hidden h-12 w-full items-center justify-center gap-2 rounded-3xl border-2 border-dashed border-border bg-card/40 text-sm font-medium text-muted-foreground transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-ring md:flex"
+          >
+            <PlusIcon className="size-4" />
+            Create bot
+          </button>
+        )
+      }
+    />
+  )
+
   return (
-    <div className="flex flex-col gap-4">
+    <div className={grid ? 'grid gap-4 sm:grid-cols-2 xl:grid-cols-3' : 'flex flex-col gap-4'}>
+      {grid && createTile && <Reveal delay={0.06}>{createTile}</Reveal>}
       {bots.map((bot, index) => {
         const lang = bot.config.defaultLanguage ?? 'en'
         const greeting =
@@ -32,6 +68,8 @@ export function BotCards({ bots, orgId }: { bots: Bot[]; orgId: string | null })
         const card = (Icon: typeof SettingsIcon, label: string) => (
           <Card
             className={`relative flex h-full flex-col overflow-hidden rounded-3xl border ring-0 transition-all group-hover:-translate-y-0.5 group-hover:shadow-md group-focus-visible:ring-2 group-focus-visible:ring-ring ${
+              grid ? 'md:aspect-square' : ''
+            } ${
               // Paused bots read as switched off: page-grey surface, no glow.
               isActive ? '' : 'bg-muted'
             }`}
@@ -105,22 +143,8 @@ export function BotCards({ bots, orgId }: { bots: Bot[]; orgId: string | null })
           </Reveal>
         )
       })}
-      {orgId && (
-        // Creating a bot is a desktop (build) task — slim row under the list.
-        <Reveal delay={Math.min(0.12 + bots.length * 0.06, 0.36)}>
-        <CreateBotDialog
-          orgId={orgId}
-          trigger={
-            <button
-              type="button"
-              className="group hidden h-12 w-full items-center justify-center gap-2 rounded-3xl border-2 border-dashed border-border bg-card/40 text-sm font-medium text-muted-foreground transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-ring md:flex"
-            >
-              <PlusIcon className="size-4" />
-              Create bot
-            </button>
-          }
-        />
-        </Reveal>
+      {!grid && createTile && (
+        <Reveal delay={Math.min(0.12 + bots.length * 0.06, 0.36)}>{createTile}</Reveal>
       )}
     </div>
   )

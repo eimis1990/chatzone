@@ -47,4 +47,12 @@ House rules that aren't obvious from the code.
   server-side, never trusted from the browser — see
   [plans-and-entitlements](plans-and-entitlements.md).
 
+## App screen layout
+
+- Client-app screens are **left-aligned**, never horizontally centered: the
+  content column starts at the page's left padding like Home, Inbox, and
+  Subscription do. Constrain width with a `max-w-*` on the content, not
+  `mx-auto` (owner decision, 2026-08-21 — the centered My Bots draft was
+  explicitly corrected).
+
 _Last verified: 2026-07-08 (66f6bb8)._

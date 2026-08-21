@@ -23,7 +23,8 @@ export default async function MyBotsPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-3xl space-y-6 p-4 md:p-6">
+    // Content is left-aligned like every other app screen — never centered.
+    <div className="w-full space-y-6 p-4 md:p-6">
       <div>
         <h1 className="text-lg font-semibold">My Bots</h1>
         <p className="text-sm text-muted-foreground">
@@ -31,7 +32,9 @@ export default async function MyBotsPage() {
           you activate them again.
         </p>
       </div>
-      <BotCards bots={bots} orgId={orgId} />
+      <div className="max-w-5xl">
+        <BotCards bots={bots} orgId={orgId} variant="grid" />
+      </div>
     </div>
   )
 }
