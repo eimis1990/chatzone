@@ -628,10 +628,10 @@ export function BillingPanel({
               return (
                 <div
                   key={p.plan}
-                  className={`relative flex flex-col rounded-3xl border bg-card p-6 ${p.popular ? 'border-primary ring-1 ring-primary' : ''}`}
+                  className={`group/plan relative flex flex-col rounded-3xl border bg-card p-6 transition-colors duration-300 ${p.popular ? 'border-primary ring-1 ring-primary' : 'hover:border-primary'}`}
                 >
                   {p.popular && (
-                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground">
+                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground transition-transform duration-300 group-hover/plan:scale-110">
                       Most popular
                     </span>
                   )}

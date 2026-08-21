@@ -249,13 +249,20 @@ export default async function BotsPage() {
             // Same card, two tap targets: Configure on desktop (build), Analytics
             // on mobile (monitor). Only one link is visible per breakpoint.
             const card = (Icon: typeof SettingsIcon, label: string) => (
-              <Card className="relative flex h-full flex-col overflow-hidden rounded-3xl border ring-0 transition-all group-hover:-translate-y-0.5 group-hover:shadow-md group-focus-visible:ring-2 group-focus-visible:ring-ring">
-                {/* Brand-colored glow in the top-right corner (matches demo cards). */}
-                <div
-                  aria-hidden="true"
-                  className="pointer-events-none absolute -right-10 -top-10 size-28 rounded-full opacity-20 blur-2xl transition-opacity group-hover:opacity-35"
-                  style={{ backgroundColor: primaryColor }}
-                />
+              <Card
+                className={`relative flex h-full flex-col overflow-hidden rounded-3xl border ring-0 transition-all group-hover:-translate-y-0.5 group-hover:shadow-md group-focus-visible:ring-2 group-focus-visible:ring-ring ${
+                  // Paused bots read as switched off: page-grey surface, no glow.
+                  isActive ? '' : 'bg-muted'
+                }`}
+              >
+                {isActive && (
+                  /* Brand-colored glow in the top-right corner (matches demo cards). */
+                  <div
+                    aria-hidden="true"
+                    className="pointer-events-none absolute -right-10 -top-10 size-28 rounded-full opacity-20 blur-2xl transition-opacity group-hover:opacity-35"
+                    style={{ backgroundColor: primaryColor }}
+                  />
+                )}
                 <CardHeader className="relative z-10">
                   <div className="flex items-start gap-3">
                     {avatar ? (
