@@ -140,6 +140,13 @@ export default async function SubscriptionPage({
   if (orgId && isStripeConfigured() && (sp?.billing === 'success' || stale)) {
     await reconcileOrgFromStripe(orgId)
     billing = await loadBilling(orgId)
+    // Fresh from Checkout the subscription can still be settling in Stripe —
+    // one short retry so the page lands already showing the new plan.
+    if (sp?.billing === 'success' && !PAYING.includes(billing.status)) {
+      await new Promise((resolve) => setTimeout(resolve, 1500))
+      await reconcileOrgFromStripe(orgId)
+      billing = await loadBilling(orgId)
+    }
   }
 
   const isPaying = PAYING.includes(billing.status) && Boolean(billing.subscriptionId)

@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import {
   BotIcon,
@@ -133,6 +133,7 @@ export function AppSidebar({
   organizationName?: string
 }) {
   const pathname = usePathname()
+  const router = useRouter()
   const activeBotId = pathname.match(/^\/app\/bots\/([^/]+)/)?.[1] ?? null
   const activeBot = bots.find((bot) => bot.id === activeBotId) ?? null
   const [botsOpen, setBotsOpen] = useState(true)
@@ -181,9 +182,17 @@ export function AppSidebar({
     if (collapsed) {
       changeCollapsed(false)
       setBotsOpen(true)
+      router.push('/app/bots')
       return
     }
-    setBotsOpen((value) => !value)
+    // Navigate to the bot-management screen; the chevron list stays in sync
+    // (opens on navigate, toggles closed only when already on the page).
+    if (pathname === '/app/bots') {
+      setBotsOpen((value) => !value)
+      return
+    }
+    setBotsOpen(true)
+    router.push('/app/bots')
   }
 
   return (

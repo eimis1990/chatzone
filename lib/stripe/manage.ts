@@ -59,9 +59,16 @@ export async function activeSubscriptionId(orgId: string): Promise<string | null
  */
 export async function reconcileOrgFromStripe(orgId: string): Promise<void> {
   const subscriptions = await subscriptionsForOrg(orgId, 5)
+  // Never sync from an `incomplete` subscription: right after Checkout the new
+  // subscription can sit in that state for a few seconds, and syncing it would
+  // briefly write the org back to Free (the UI then shows the old plan until a
+  // manual refresh). Prefer a paying sub; otherwise the newest settled one.
   const sub =
     subscriptions.find((subscription) => PAYING_STATUSES.includes(subscription.status)) ??
-    subscriptions[0]
+    subscriptions.find(
+      (subscription) =>
+        subscription.status !== 'incomplete' && subscription.status !== 'incomplete_expired',
+    )
   if (sub) await syncSubscriptionToOrg(sub)
 }
 
