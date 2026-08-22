@@ -75,12 +75,13 @@ async function handleInbound(svc: SupabaseClient, msg: InboundTextMessage) {
     if (insertErr.code === '23505') return // duplicate delivery
     throw new Error(`event insert failed: ${insertErr.message}`)
   }
-  const finish = (status: 'processed' | 'skipped', connectionId?: string) =>
+  const finish = (status: 'processed' | 'skipped', connectionId?: string, note?: string) =>
     svc
       .from('channel_webhook_events')
       .update({
         status,
         channel_connection_id: connectionId ?? null,
+        error_summary: note ?? null,
         processed_at: new Date().toISOString(),
       })
       .eq('provider', msg.provider)
@@ -95,7 +96,9 @@ async function handleInbound(svc: SupabaseClient, msg: InboundTextMessage) {
     .eq('status', 'active')
     .maybeSingle<ChannelConnection>()
   if (!connection) {
-    await finish('skipped')
+    // Keep the unmatched account id — it's the diagnostic for "why didn't my
+    // channel answer" and the easiest way to learn a new account's id.
+    await finish('skipped', undefined, `no active connection for ${msg.provider}:${msg.accountId}`)
     return
   }
   const { data: bot } = await svc
