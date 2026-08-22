@@ -49,12 +49,21 @@ const STATUS_STYLE: Record<HandoffStatus, { label: string; cls: string }> = {
   resolved: { label: 'Resolved', cls: 'bg-muted text-muted-foreground' },
 }
 
-/** Blue pill marking a conversation from an external channel (Messenger). */
-function MessengerBadge() {
+/** Pill marking a conversation from an external channel. */
+function ExternalChannelBadge({ channel }: { channel: ConversationChannel }) {
+  const style =
+    channel === 'messenger'
+      ? { label: 'Messenger', cls: 'bg-blue-50 text-blue-700' }
+      : channel === 'instagram'
+        ? { label: 'Instagram', cls: 'bg-fuchsia-50 text-fuchsia-700' }
+        : null
+  if (!style) return null
   return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-1.5 py-0.5 text-[10px] font-semibold text-blue-700">
+    <span
+      className={`inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${style.cls}`}
+    >
       <SendIcon className="size-2.5" aria-hidden="true" />
-      Messenger
+      {style.label}
     </span>
   )
 }
@@ -293,7 +302,7 @@ export function InboxView({
                     <span className="truncate font-mono text-xs text-muted-foreground">
                       {c.visitor_id.slice(0, 8)}
                     </span>
-                    {c.channel === 'messenger' && <MessengerBadge />}
+                    {c.channel && <ExternalChannelBadge channel={c.channel} />}
                   </span>
                   <span className={cn('rounded px-1.5 py-0.5 text-[10px] font-medium', s.cls)}>{s.label}</span>
                 </div>
@@ -343,7 +352,7 @@ export function InboxView({
                   )}
                 />
                 <span className="font-mono text-sm">{selected.visitor_id.slice(0, 12)}</span>
-                {selected.channel === 'messenger' && <MessengerBadge />}
+                {selected.channel && <ExternalChannelBadge channel={selected.channel} />}
                 <span className={cn('rounded px-1.5 py-0.5 text-[10px] font-medium', STATUS_STYLE[selectedStatus].cls)}>
                   {STATUS_STYLE[selectedStatus].label}
                 </span>

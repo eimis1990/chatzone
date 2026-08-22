@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
       await svc
         .from('channel_webhook_events')
         .update({ status: 'failed', error_summary: summary, processed_at: new Date().toISOString() })
-        .eq('provider', 'messenger')
+        .eq('provider', msg.provider)
         .eq('event_id', msg.messageId)
     }
   }
@@ -70,7 +70,7 @@ async function handleInbound(svc: SupabaseClient, msg: InboundTextMessage) {
   // unique constraint and is skipped without reprocessing.
   const { error: insertErr } = await svc
     .from('channel_webhook_events')
-    .insert({ provider: 'messenger', event_id: msg.messageId })
+    .insert({ provider: msg.provider, event_id: msg.messageId })
   if (insertErr) {
     if (insertErr.code === '23505') return // duplicate delivery
     throw new Error(`event insert failed: ${insertErr.message}`)
@@ -83,15 +83,15 @@ async function handleInbound(svc: SupabaseClient, msg: InboundTextMessage) {
         channel_connection_id: connectionId ?? null,
         processed_at: new Date().toISOString(),
       })
-      .eq('provider', 'messenger')
+      .eq('provider', msg.provider)
       .eq('event_id', msg.messageId)
 
-  // Resolve the Page to an active connection + its bot.
+  // Resolve the Page / Instagram account to an active connection + its bot.
   const { data: connection } = await svc
     .from('channel_connections')
     .select('id, org_id, bot_id, provider, external_account_id, display_name, status')
-    .eq('provider', 'messenger')
-    .eq('external_account_id', msg.pageId)
+    .eq('provider', msg.provider)
+    .eq('external_account_id', msg.accountId)
     .eq('status', 'active')
     .maybeSingle<ChannelConnection>()
   if (!connection) {
@@ -140,7 +140,7 @@ async function handleInbound(svc: SupabaseClient, msg: InboundTextMessage) {
       .insert({
         bot_id: bot.id,
         visitor_id: msg.senderId,
-        channel: 'messenger',
+        channel: msg.provider,
         channel_connection_id: connection.id,
       })
       .select('id')

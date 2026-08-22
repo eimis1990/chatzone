@@ -74,9 +74,10 @@ export async function deliverAgentMessage(
     }>()
   if (!conv) return { ok: false, error: 'Conversation not found' }
 
-  if (conv.channel === 'messenger') {
+  // Instagram DMs send through the linked Page's token via the same API.
+  if (conv.channel === 'messenger' || conv.channel === 'instagram') {
     const token = await connectionPageToken(conv.channel_connection_id)
-    if (!token) return { ok: false, error: 'Messenger sending is not configured' }
+    if (!token) return { ok: false, error: 'Channel sending is not configured' }
     try {
       await sendTextMessage(conv.visitor_id, trimmed, token)
     } catch (err) {

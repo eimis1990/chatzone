@@ -34,6 +34,12 @@ function ChannelBadge({ channel }: { channel: ConversationChannel }) {
       cls: 'bg-blue-50 text-blue-700',
       title: 'Facebook Messenger',
     },
+    instagram: {
+      Icon: MessageCircleIcon,
+      label: 'Instagram',
+      cls: 'bg-fuchsia-50 text-fuchsia-700',
+      title: 'Instagram Direct',
+    },
     chat: { Icon: MessageCircleIcon, label: 'Chat', cls: 'bg-teal-50 text-teal-700', title: 'Text chat' },
   }[channel]
   return (

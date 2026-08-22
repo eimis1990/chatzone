@@ -45,9 +45,13 @@ export function isValidSignature(
   return crypto.timingSafeEqual(Buffer.from(theirs, 'hex'), Buffer.from(ours, 'hex'))
 }
 
-/** The subset of a webhook messaging event the spike cares about. */
+export type ChannelProvider = 'messenger' | 'instagram'
+
+/** The subset of a webhook messaging event the pipeline cares about. */
 export type InboundTextMessage = {
-  pageId: string
+  provider: ChannelProvider
+  /** Facebook Page ID (messenger) or Instagram professional-account ID. */
+  accountId: string
   senderId: string
   messageId: string
   text: string
@@ -55,9 +59,10 @@ export type InboundTextMessage = {
 }
 
 /**
- * Extracts inbound visitor text messages from a parsed `page`-topic webhook
- * payload. Skips echoes (our own outbound messages redelivered), delivery and
- * read receipts, and non-text messages.
+ * Extracts inbound visitor text messages from a parsed `page`- or
+ * `instagram`-topic webhook payload (both share the messaging shape; the
+ * object name decides the provider). Skips echoes (our own outbound messages
+ * redelivered), delivery and read receipts, and non-text messages.
  */
 export function extractTextMessages(payload: unknown): InboundTextMessage[] {
   const out: InboundTextMessage[] = []
@@ -72,13 +77,15 @@ export function extractTextMessages(payload: unknown): InboundTextMessage[] {
       }>
     }>
   }
-  if (body?.object !== 'page') return out
+  if (body?.object !== 'page' && body?.object !== 'instagram') return out
+  const provider: ChannelProvider = body.object === 'page' ? 'messenger' : 'instagram'
   for (const entry of body.entry ?? []) {
     for (const event of entry.messaging ?? []) {
       const msg = event.message
       if (!msg?.text || msg.is_echo || !msg.mid || !event.sender?.id || !entry.id) continue
       out.push({
-        pageId: entry.id,
+        provider,
+        accountId: entry.id,
         senderId: event.sender.id,
         messageId: msg.mid,
         text: msg.text,

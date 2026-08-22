@@ -45,21 +45,42 @@ describe('isValidSignature', () => {
 })
 
 describe('extractTextMessages', () => {
-  const event = (message: Record<string, unknown>) => ({
-    object: 'page',
-    entry: [{ id: 'PAGE1', messaging: [{ sender: { id: 'USER1' }, timestamp: 42, message }] }],
+  const event = (message: Record<string, unknown>, object = 'page') => ({
+    object,
+    entry: [{ id: 'ACC1', messaging: [{ sender: { id: 'USER1' }, timestamp: 42, message }] }],
   })
 
-  it('extracts inbound text messages', () => {
+  it('extracts inbound Messenger text messages', () => {
     expect(extractTextMessages(event({ mid: 'm1', text: 'hello' }))).toEqual([
-      { pageId: 'PAGE1', senderId: 'USER1', messageId: 'm1', text: 'hello', timestamp: 42 },
+      {
+        provider: 'messenger',
+        accountId: 'ACC1',
+        senderId: 'USER1',
+        messageId: 'm1',
+        text: 'hello',
+        timestamp: 42,
+      },
     ])
   })
 
-  it('skips echoes, non-text messages, and non-page payloads', () => {
+  it('extracts inbound Instagram DMs with the instagram provider', () => {
+    expect(extractTextMessages(event({ mid: 'ig1', text: 'labas' }, 'instagram'))).toEqual([
+      {
+        provider: 'instagram',
+        accountId: 'ACC1',
+        senderId: 'USER1',
+        messageId: 'ig1',
+        text: 'labas',
+        timestamp: 42,
+      },
+    ])
+  })
+
+  it('skips echoes, non-text messages, and unknown payloads', () => {
     expect(extractTextMessages(event({ mid: 'm1', text: 'hi', is_echo: true }))).toEqual([])
+    expect(extractTextMessages(event({ mid: 'ig1', text: 'hi', is_echo: true }, 'instagram'))).toEqual([])
     expect(extractTextMessages(event({ mid: 'm1', attachments: [] }))).toEqual([])
-    expect(extractTextMessages({ object: 'instagram', entry: [] })).toEqual([])
+    expect(extractTextMessages({ object: 'whatsapp_business_account', entry: [] })).toEqual([])
     expect(extractTextMessages(null)).toEqual([])
   })
 })
