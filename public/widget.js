@@ -59,6 +59,11 @@
   try {
     var srcUrl = new URL(src)
     appUrl = srcUrl.origin
+    // Bare-apex embeds ("https://loqara.com/widget.js"): the apex 308-redirects
+    // to www WITHOUT CORS headers. Script/iframe loads follow that fine, but
+    // the config fetch dies on it — leaving a default purple launcher and a
+    // 16px white panel behind the themed chat. Canonicalize to www up front.
+    if (srcUrl.hostname === 'loqara.com') appUrl = 'https://www.loqara.com'
   } catch (_) {
     // Relative src — use current page origin as fallback
     appUrl = window.location.origin

@@ -63,6 +63,18 @@ for the active language rather than randomizing on each form render
 - Onboarding auto-adds the client's site to `allowedDomains`
   (`lib/actions/onboarding.ts`).
 
+## Bare-apex embeds (loqara.com vs www)
+
+A snippet typed with the apex domain (`https://loqara.com/widget.js`) loads the
+script and the iframe fine (redirects are followed for those), but the parent
+page's `fetch` of `/api/widget-config` dies: the apex→www 308 from Vercel's
+domain redirect layer carries **no CORS headers**, and a CORS fetch must pass
+the check on every hop. Symptoms: default purple launcher + 16px white panel
+peeking behind the fully-themed chat (the iframe fetches config same-origin, so
+it always themes). `widget.js` now canonicalizes `loqara.com` → `www.loqara.com`
+when deriving `appUrl` (public/widget.js, "Bare-apex embeds" comment); test in
+`tests/unit/widget-loader.test.ts`. Found live on homebynb.lt 2026-08-23.
+
 ## Embed snippet UI
 
 - `buildEmbedSnippet(appUrl, publicKey)` (`lib/embed-snippet.ts`) builds the

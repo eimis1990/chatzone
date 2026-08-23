@@ -238,6 +238,33 @@ describe('widget.js loader', () => {
     expect(document.querySelectorAll('[data-cbz-launcher]').length).toBe(1)
   })
 
+  it('canonicalizes a bare-apex loqara.com src to www (apex 308 has no CORS headers)', async () => {
+    const dom = new JSDOM('<!DOCTYPE html><html><body></body></html>', {
+      url: 'https://example.com',
+      runScripts: 'dangerously',
+      resources: 'usable',
+    })
+    const { window } = dom
+    const { document } = window
+    const script = document.createElement('script')
+    script.setAttribute('data-bot-key', 'APEX_KEY')
+    script.setAttribute('src', 'https://loqara.com/widget.js')
+    document.head.appendChild(script)
+    Object.defineProperty(document, 'currentScript', { get: () => script, configurable: true })
+    const fetchMock = vi.fn().mockResolvedValue({ ok: false })
+    window.fetch = fetchMock as unknown as typeof window.fetch
+
+    // eslint-disable-next-line no-new-func
+    const fn = new Function('window', 'document', 'fetch', widgetSrc)
+    fn(window, document, fetchMock)
+    await flushPromises()
+
+    expect(fetchMock.mock.calls[0][0]).toMatch(/^https:\/\/www\.loqara\.com\/api\/widget-config/)
+    document.querySelector<HTMLElement>('[data-cbz-launcher]')!.click()
+    const iframe = document.querySelector<HTMLIFrameElement>('[data-cbz-iframe]')!
+    expect(iframe.src).toMatch(/^https:\/\/www\.loqara\.com\/embed\/APEX_KEY/)
+  })
+
   it('paints the launcher from the cached theme immediately on repeat visits', () => {
     const dom = new JSDOM('<!DOCTYPE html><html><body></body></html>', {
       url: 'https://example.com',
