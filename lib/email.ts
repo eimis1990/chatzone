@@ -1,18 +1,17 @@
+import nodemailer from 'nodemailer'
 import { getEnv } from '@/lib/env'
+import { SALES_EMAIL_SENDER } from '@/lib/sales-email-send'
 
 /**
- * Transactional email via Resend's HTTP API (no SDK dependency).
+ * Transactional email via the real hello@loqara.com Hostinger mailbox — the
+ * same one the sales flow sends from, so all outbound mail lives in one place.
  *
  * Fail-safe by design: email is a side effect of chat/lead flows and must
- * NEVER break them — `sendEmail` catches everything and only logs. Until a
- * verified domain + EMAIL_FROM are configured, Resend's sandbox sender is
- * used (delivers only to the account owner's address — fine for testing).
+ * NEVER break them — `sendEmail` catches everything and only logs.
  */
 
-const SANDBOX_FROM = 'Loqara <onboarding@resend.dev>'
-
 export function emailEnabled(): boolean {
-  return Boolean(getEnv().RESEND_API_KEY)
+  return Boolean(getEnv().HOSTINGER_EMAIL_PASSWORD)
 }
 
 export interface EmailMessage {
@@ -21,26 +20,30 @@ export interface EmailMessage {
   html: string
 }
 
-/** Send an email. Returns true when Resend accepted it; never throws. */
+/** Send an email. Returns true when the SMTP server accepted it; never throws. */
 export async function sendEmail(msg: EmailMessage): Promise<boolean> {
-  const env = getEnv()
-  if (!env.RESEND_API_KEY || msg.to.length === 0) return false
+  const password = getEnv().HOSTINGER_EMAIL_PASSWORD
+  if (!password || msg.to.length === 0) return false
   try {
-    const res = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${env.RESEND_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        from: env.EMAIL_FROM || SANDBOX_FROM,
-        to: msg.to,
-        subject: msg.subject,
-        html: msg.html,
-      }),
+    const smtp = nodemailer.createTransport({
+      host: 'smtp.hostinger.com',
+      port: 465,
+      secure: true,
+      auth: { user: SALES_EMAIL_SENDER, pass: password },
+      connectionTimeout: 10_000,
+      greetingTimeout: 10_000,
+      socketTimeout: 20_000,
     })
-    if (!res.ok) {
-      console.error('[email] resend rejected:', res.status, (await res.text()).slice(0, 300))
+    const sent = await smtp.sendMail({
+      from: { name: 'Loqara', address: SALES_EMAIL_SENDER },
+      to: msg.to,
+      subject: msg.subject,
+      html: msg.html,
+      // Plain-text alternative helps spam filters; naive strip is enough here.
+      text: msg.html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim(),
+    })
+    if (sent.accepted.length === 0) {
+      console.error('[email] smtp accepted no recipients:', sent.rejected)
       return false
     }
     return true

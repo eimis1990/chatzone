@@ -60,14 +60,9 @@ const envSchema = z.object({
   // Optional: Jina Reader API key for higher crawl limits. URL ingestion works
   // keyless (IP rate-limited) and falls back to a direct fetch if unavailable.
   JINA_API_KEY: z.string().min(1).optional(),
-  // Optional: enables transactional email (lead + handoff notifications).
-  // Without a key, notifications are silently skipped.
-  RESEND_API_KEY: z.string().min(1).optional(),
-  // Verified sender, e.g. "Loqara <notifications@loqara.com>". Falls back to
-  // Resend's sandbox sender (delivers only to the account owner) when unset.
-  EMAIL_FROM: z.string().min(1).optional(),
-  // Optional: owner-triggered cold outreach through the real Hostinger mailbox.
-  // The username is fixed to hello@loqara.com; only its mailbox password is secret.
+  // Optional: all outbound email (transactional + sales outreach) through the
+  // real hello@loqara.com Hostinger mailbox. The username is fixed; only its
+  // mailbox password is secret. Unset → emails are silently skipped.
   HOSTINGER_EMAIL_PASSWORD: z.string().min(1).optional(),
   // Optional comma-separated override for platform-owner pings (new signups).
   // Unset → the owner account's login email is used.

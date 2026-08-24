@@ -337,3 +337,15 @@ contain classes from routes that never rendered:
 npm mangles `--input`/`--output`).
 
 _Last verified: 2026-08-21 (add-on hover tilt)._
+
+## Email deliverability: Microsoft 365 recipients silently quarantine new senders
+
+Invite emails to a client on M365 (MX `*.mail.protection.outlook.com`) were
+accepted by our provider but never reached the inbox — Exchange Online
+Protection quarantines first-contact mail from low-reputation domains without
+putting anything in the Junk folder. All email now goes out through the real
+`hello@loqara.com` Hostinger mailbox (`lib/email.ts`), which has normal mailbox
+reputation. If a client still reports a missing invite: verify the mailbox
+exists (SMTP RCPT check), then have them search Microsoft quarantine — and just
+copy the invite link from `/owner/clients/[orgId]` and send it by another
+channel. `emailEnabled()` keys on `HOSTINGER_EMAIL_PASSWORD`.
