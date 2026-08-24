@@ -1,6 +1,7 @@
 import nodemailer from 'nodemailer'
 import { getEnv } from '@/lib/env'
 import { SALES_EMAIL_SENDER } from '@/lib/sales-email-send'
+import { archiveInSent } from '@/lib/hostinger-mail'
 
 /**
  * Transactional email via the real hello@loqara.com Hostinger mailbox — the
@@ -25,6 +26,23 @@ export async function sendEmail(msg: EmailMessage): Promise<boolean> {
   const password = getEnv().HOSTINGER_EMAIL_PASSWORD
   if (!password || msg.to.length === 0) return false
   try {
+    // Build the raw RFC822 message first so the delivered copy and the Sent
+    // archive share one Message-ID (same pattern as lib/hostinger-mail.ts).
+    const builder = nodemailer.createTransport({
+      streamTransport: true,
+      buffer: true,
+      newline: 'windows',
+    })
+    const built = await builder.sendMail({
+      from: { name: 'Loqara', address: SALES_EMAIL_SENDER },
+      to: msg.to,
+      subject: msg.subject,
+      html: msg.html,
+      // Plain-text alternative helps spam filters; naive strip is enough here.
+      text: msg.html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim(),
+    })
+    const rawMessage = built.message as Buffer
+
     const smtp = nodemailer.createTransport({
       host: 'smtp.hostinger.com',
       port: 465,
@@ -35,17 +53,15 @@ export async function sendEmail(msg: EmailMessage): Promise<boolean> {
       socketTimeout: 20_000,
     })
     const sent = await smtp.sendMail({
-      from: { name: 'Loqara', address: SALES_EMAIL_SENDER },
-      to: msg.to,
-      subject: msg.subject,
-      html: msg.html,
-      // Plain-text alternative helps spam filters; naive strip is enough here.
-      text: msg.html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim(),
+      envelope: { from: SALES_EMAIL_SENDER, to: msg.to },
+      raw: rawMessage,
     })
     if (sent.accepted.length === 0) {
       console.error('[email] smtp accepted no recipients:', sent.rejected)
       return false
     }
+    // Best-effort copy into the mailbox's Sent folder (archiveInSent never throws).
+    await archiveInSent(rawMessage, password)
     return true
   } catch (err) {
     console.error('[email] send failed:', err)

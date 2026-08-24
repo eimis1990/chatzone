@@ -27,7 +27,8 @@ export interface HostingerMailResult {
 
 export class HostingerMailConfigurationError extends Error {}
 
-async function archiveInSent(rawMessage: Buffer, password: string): Promise<{
+/** Best-effort append of a raw RFC822 message to the mailbox's Sent folder. */
+export async function archiveInSent(rawMessage: Buffer, password: string): Promise<{
   archived: boolean
   path: string | null
   uid: number | null
