@@ -20,10 +20,11 @@ emails, and manual status progression.
   (`components/owner/SalesLeadsTable.tsx:421`, `:485`). City is intentionally
   detail-only (`:591`).
 - Score is represented by the same compact percentage tile in the table, mobile
-  list, and detail panel (`components/owner/SalesLeadsTable.tsx:98`). Status
-  colors are lifecycle semantics: neutral Ready, amber Email sent, blue
-  Follow-up email, red Rejected, green Accepted, and accent-orange Our client
-  (`:66`).
+  list, and detail panel (`components/owner/SalesLeadsTable.tsx:110`). Status
+  colors are lifecycle semantics: neutral Ready, amber Email sent, sky Follow-up
+  email, violet-to-emerald demo progress, rose Delivery failed, red Rejected,
+  and accent-orange Our client (`:67`). `Rejected` means an explicit prospect
+  refusal; `Delivery failed` means the address was not reached.
 - Desktop keeps Company compact, omits the redundant Chatbot column, and places
   a relative status age immediately after Status (`components/owner/SalesLeadsTable.tsx:467`).
   Chatbot qualification is still available in the summary/filter, mobile cards,
@@ -172,6 +173,19 @@ emails, and manual status progression.
   the demo pipeline keep their current stage while receiving the durable sent
   timestamp/template/Message-ID. This lets a prepared demo email be sent from
   `demo_ready` without incorrectly moving the lead backward.
+- Confirmed provider bounces use `delivery_failed`, with the provider timestamp
+  and a concise diagnostic in `delivery_failed_at` and
+  `delivery_failure_reason`. These leads are not counted as contacted and never
+  become follow-up-due (`lib/sales-leads.ts:23-39`). The detail drawer exposes
+  both failure fields so the bad address can be corrected without treating a
+  technical rejection as a prospect rejection
+  (`components/owner/SalesLeadsTable.tsx:752-775`). Migration
+  `20260825065654_sales_leads_delivery_failures.sql` introduced the fields and
+  backfilled the nine confirmed current-address bounces known on 2026-08-25.
+- The existing first-touch audit remains intentionally one-send-only. Correcting
+  an address does not silently enable a resend; a future retry workflow must
+  preserve the same explicit confirmation and concurrent-send safeguards
+  (`supabase/migrations/20260817182240_sales_email_sends.sql:32-37`).
 - Email-client HTML must encode body structure explicitly. Do not wrap escaped
   plain text in a `white-space: pre-wrap` container and assume blank lines will
   survive: Gmail collapsed all ten 2026-08-17 messages into one continuous
@@ -246,4 +260,4 @@ emails, and manual status progression.
   research and keep status `ready` until outreach or a buyer response occurs
   (`supabase/migrations/20260720130000_add_mobel_sales_lead.sql:1`).
 
-_Last verified: 2026-08-17 (email-template UI, confirmation-gated Hostinger sender, and renderer)._
+_Last verified: 2026-08-25 (delivery-failure lifecycle, live backfill, sender retry behavior, and full test suite)._

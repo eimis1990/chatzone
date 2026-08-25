@@ -498,6 +498,7 @@ export type SalesLeadStatus =
   | 'demo_ready'
   | 'demo_presented'
   | 'testing_bot'
+  | 'delivery_failed'
   | 'rejected'
   | 'client'
 
@@ -525,6 +526,9 @@ export interface SalesLead {
   initial_email_sent_at: string | null
   initial_email_template: string | null
   initial_email_message_id: string | null
+  /** Latest confirmed provider bounce, kept separate from an explicit rejection. */
+  delivery_failed_at: string | null
+  delivery_failure_reason: string | null
   /** Whether the prospect already runs a chatbot (null = unknown). */
   has_chatbot: boolean | null
   status: SalesLeadStatus

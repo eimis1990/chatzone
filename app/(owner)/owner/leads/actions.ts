@@ -25,6 +25,7 @@ const STATUSES: SalesLeadStatus[] = [
   'demo_ready',
   'demo_presented',
   'testing_bot',
+  'delivery_failed',
   'rejected',
   'client',
 ]

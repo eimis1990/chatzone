@@ -20,11 +20,11 @@ export function needsFollowUp(
 }
 
 /**
- * Whether the first email has already gone out. Every status past `ready` in
- * the pipeline implies contact was made.
+ * Whether the prospect was actually reached. A delivery failure records an
+ * attempted send, but it must not inflate contacted or awaiting-reply metrics.
  */
 export function isContacted(status: SalesLeadStatus): boolean {
-  return status !== 'ready'
+  return status !== 'ready' && status !== 'delivery_failed'
 }
 
 const RELATIVE_UNITS = [

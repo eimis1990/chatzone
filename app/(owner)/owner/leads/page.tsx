@@ -6,7 +6,8 @@ import type { SalesLead } from '@/lib/types'
 /**
  * Owner sales pipeline: researched Lithuanian prospects, ranked by a
  * chance-to-close score, each with a prepared cold email. Status moves through
- * ready → email sent → follow-up email → accepted/rejected → client.
+ * ready → email sent → follow-up email → demo/client, with separate technical
+ * delivery-failed and prospect-rejected outcomes.
  */
 export default async function SalesLeadsPage() {
   await requireRole('owner')

@@ -32,6 +32,7 @@ describe('needsFollowUp', () => {
       'demo_presented',
       'testing_bot',
       'client',
+      'delivery_failed',
       'rejected',
     ] as SalesLeadStatus[]) {
       expect(needsFollowUp(lead(status, 90), NOW)).toBe(false)
@@ -45,8 +46,9 @@ describe('needsFollowUp', () => {
 })
 
 describe('isContacted', () => {
-  it('treats every stage past ready as reached', () => {
+  it('excludes untouched and technically undeliverable leads', () => {
     expect(isContacted('ready')).toBe(false)
+    expect(isContacted('delivery_failed')).toBe(false)
     for (const status of [
       'email_sent',
       'follow_up_email',

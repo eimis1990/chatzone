@@ -6,6 +6,7 @@ import {
   BotIcon,
   Building2Icon,
   CheckIcon,
+  CircleXIcon,
   ClockAlertIcon,
   CopyIcon,
   ExternalLinkIcon,
@@ -109,6 +110,10 @@ const STATUS_META: Record<SalesLeadStatus, { label: string; classes: string }> =
     label: 'Testing bot',
     classes: 'border-emerald-200 bg-emerald-50 text-emerald-700',
   },
+  delivery_failed: {
+    label: 'Delivery failed',
+    classes: 'border-rose-200 bg-rose-50 text-rose-700',
+  },
   rejected: { label: 'Rejected', classes: 'border-red-200 bg-red-50 text-red-700' },
   client: { label: 'Our client', classes: 'border-primary bg-primary text-primary-foreground' },
 }
@@ -123,6 +128,7 @@ const STATUS_ORDER: SalesLeadStatus[] = [
   'demo_presented',
   'testing_bot',
   'client',
+  'delivery_failed',
   'rejected',
 ]
 
@@ -1062,6 +1068,30 @@ export function SalesLeadsTable({
                       href={openLead.website}
                     />
                   </dl>
+
+                  {openLead.status === 'delivery_failed' && (
+                    <Card size="sm" className="shrink-0 overflow-visible border-rose-200 bg-rose-50/60 ring-rose-200/60">
+                      <CardHeader>
+                        <CardTitle className="text-base text-rose-900">Delivery failed</CardTitle>
+                        <CardDescription className="text-rose-700">
+                          {openLead.delivery_failed_at
+                            ? `Reported ${new Date(openLead.delivery_failed_at).toLocaleString('en-GB', {
+                                dateStyle: 'medium',
+                                timeStyle: 'short',
+                              })}`
+                            : 'Provider failure recorded'}
+                        </CardDescription>
+                        <CardAction className="flex size-8 items-center justify-center rounded-lg bg-rose-100 text-rose-700">
+                          <CircleXIcon className="size-4" aria-hidden="true" />
+                        </CardAction>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-sm leading-6 text-rose-950">
+                          {openLead.delivery_failure_reason || 'No provider reason was recorded.'}
+                        </p>
+                      </CardContent>
+                    </Card>
+                  )}
 
                   {openLead.fit_note && (
                     <Card size="sm" className="shrink-0 overflow-visible bg-primary/5 ring-primary/15">
