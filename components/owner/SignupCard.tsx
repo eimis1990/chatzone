@@ -21,6 +21,13 @@ export interface SignupCardData {
   email: string
   website: string | null
   source: string | null
+  landing_path: string | null
+  referrer: string | null
+  acquisition_source: string | null
+  acquisition_medium: string | null
+  utm_campaign: string | null
+  utm_content: string | null
+  first_touch_at: string | null
   status: string | null
   invited_at: string | null
   created_at: string
@@ -147,6 +154,13 @@ export function SignupCard({ signup }: { signup: SignupCardData }) {
       <div className="flex items-center gap-2">
         <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
           <span className="rounded bg-muted px-1.5 py-0.5 font-medium">{signup.source ?? 'unknown'}</span>
+          {signup.acquisition_source && (
+            <span title={signup.referrer ?? undefined}>
+              · {signup.acquisition_source} / {signup.acquisition_medium ?? 'unknown'}
+            </span>
+          )}
+          {signup.landing_path && <span title="First landing page">· {signup.landing_path}</span>}
+          {signup.utm_campaign && <span title="UTM campaign">· campaign {signup.utm_campaign}</span>}
           <span>· signed up {formatDistanceToNow(signup.created_at)}</span>
           {signup.invited_at && <span>· invited {formatDistanceToNow(signup.invited_at)}</span>}
         </div>

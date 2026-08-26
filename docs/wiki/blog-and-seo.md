@@ -53,6 +53,22 @@ never position it as a Google rich-result tactic.
 The [SEO/GEO playbook](seo-geo-playbook.md) is authoritative; the weekly GSC
 gap-analysis workflow is in `docs/seo-content-loop.md`.
 
+### Capability-claim review
+
+Before publishing or refreshing product/comparison copy, check the public claim
+against the [commerce capability matrix](commerce.md#public-claim-capability-matrix)
+and current product code. In particular:
+
+- A Shopify connection enables product search, **not Loqara order lookup**.
+- Only WooCommerce and Magento currently support identity-checked order status.
+- Live shipping-rate lookup is WooCommerce-only.
+- Verskis and generic feeds do not support order lookup or live shipping rates.
+- A discount is a configured static code, not a coupon created in the store.
+
+Write “on supported WooCommerce and Magento stores” beside Loqara order-lookup
+claims instead of separating the limitation into a distant disclaimer. Re-run
+the capability audit whenever a provider action changes.
+
 ## Images
 
 New blog raster assets use the built-in OpenAI Image 2 workflow and are saved as
@@ -307,4 +323,4 @@ the compact closing reply sits farther inward near the fox to balance the larger
 cards on the left. `prefers-reduced-motion` disables rotation and leaves the chair conversation visible
 (`components/landing/HeroConversation.tsx`).
 
-_Last verified: 2026-08-14 (working tree)._
+_Last verified: 2026-08-25 (working tree; capability-claim and content-loop audit)._

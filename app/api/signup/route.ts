@@ -12,11 +12,30 @@ import { notifyNewSignup } from '@/lib/notify'
 
 const limiter = createRateLimiter({ capacity: 3, refillPerSec: 0.05 })
 
+const acquisitionSchema = z.object({
+  landingPath: z.string().max(160).regex(/^\/[^?#]*$/),
+  referrer: z.string().max(160).refine((value) => {
+    if (!value) return true
+    try {
+      const url = new URL(value)
+      return ['http:', 'https:'].includes(url.protocol) && !url.search && !url.hash
+    } catch {
+      return false
+    }
+  }),
+  acquisitionSource: z.string().max(160),
+  acquisitionMedium: z.string().max(160),
+  utmCampaign: z.string().max(160),
+  utmContent: z.string().max(160),
+  capturedAt: z.string().datetime(),
+})
+
 const bodySchema = z.object({
   email: z.string().email().max(200),
   company: z.string().max(80).optional(),
   website: z.string().max(200).optional(),
   source: z.string().max(40).optional(),
+  acquisition: acquisitionSchema.optional(),
   /** Honeypot — hidden field in the dialog; anything here means a bot. */
   confirm_url: z.string().max(500).optional(),
   /** Milliseconds the form was open before submit; instant = scripted. */
@@ -40,8 +59,10 @@ export async function POST(req: Request) {
   // form submitted faster than a human could read it) — a 4xx would only teach
   // the script what to fix. A letters-free company name gets a real error,
   // since a person may have typo'd into that state and can correct it.
-  if (parsed.data.confirm_url) return json({ ok: true })
-  if (typeof parsed.data.t === 'number' && parsed.data.t < 2500) return json({ ok: true })
+  if (parsed.data.confirm_url) return json({ ok: true, recorded: false })
+  if (typeof parsed.data.t === 'number' && parsed.data.t < 2500) {
+    return json({ ok: true, recorded: false })
+  }
   if (company && !HAS_LETTERS.test(company)) {
     return json({ error: 'Please enter your company name.' }, 400)
   }
@@ -49,17 +70,30 @@ export async function POST(req: Request) {
   if (!limiter.check(email)) return json({ error: 'Please try again shortly.' }, 429)
 
   const svc = createServiceClient()
+  const acquisition = parsed.data.acquisition
   const { error } = await svc
     .from('signups')
-    .insert({ email, company, website, source: parsed.data.source ?? null })
+    .insert({
+      email,
+      company,
+      website,
+      source: parsed.data.source ?? null,
+      landing_path: acquisition?.landingPath ?? null,
+      referrer: acquisition?.referrer || null,
+      acquisition_source: acquisition?.acquisitionSource ?? null,
+      acquisition_medium: acquisition?.acquisitionMedium ?? null,
+      utm_campaign: acquisition?.utmCampaign || null,
+      utm_content: acquisition?.utmContent || null,
+      first_touch_at: acquisition?.capturedAt ?? null,
+    })
 
   // 23505 = unique violation → already signed up; treat as success (but don't
   // re-notify the owner about a duplicate).
-  if (error && error.code === '23505') return json({ ok: true })
+  if (error && error.code === '23505') return json({ ok: true, recorded: false })
   if (error) {
     return json({ error: 'Something went wrong — please try again.' }, 500)
   }
 
   void notifyNewSignup(svc, email, website, company)
-  return json({ ok: true })
+  return json({ ok: true, recorded: true })
 }

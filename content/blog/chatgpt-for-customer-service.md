@@ -91,7 +91,7 @@ That's the whole difference: same excellent model, but constrained to the truth 
 
 <p style="font-size:0.8125rem;color:#6b7280;margin-top:-0.5rem"><em>"Raw ChatGPT" here means the model used as-is, without a grounding and integration layer built around it. Capabilities depend on how you deploy it and on your OpenAI plan; check OpenAI's current terms.</em></p>
 
-Loqara is one example of this pattern: grounded chat *and* voice in a single widget, built on top of leading language models, answering only from your store's own content with sources, with live product search and order lookup after an identity check — installed with one line and live the same day. See where it sits among the [best AI chatbots for e-commerce](/blog/best-ai-chatbot-for-ecommerce).
+Loqara is one example of this pattern: grounded chat *and* voice in a single widget, built on top of leading language models, answering from approved store content with sources and searching connected catalogs. WooCommerce and Magento stores can also enable identity-checked order lookup; Shopify, Verskis, and feed stores cannot today. Install is one line. See where it sits among the [best AI chatbots for e-commerce](/blog/best-ai-chatbot-for-ecommerce).
 
 ## Is it safe to put customer data into ChatGPT?
 

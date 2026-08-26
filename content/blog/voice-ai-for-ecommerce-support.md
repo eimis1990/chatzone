@@ -41,7 +41,7 @@ Underneath, three things happen in sequence — fast enough to feel like a conve
 2. **Grounded retrieval.** It pulls the answer from your real content and data, not from a model's imagination. That means [grounded answers with citations](/blog/ai-chatbot-for-online-store) under the hood, so it doesn't invent a returns window or a shipping date.
 3. **Spoken response.** It replies in a natural voice — and a good voice agent can also speak structured results aloud, like reading back the top product matches from a catalog search.
 
-The part most teams underestimate is that last point. It's one thing to answer "what's your return policy?" out loud. It's another to handle "I'm looking for a waterproof jacket under €100" — run a live product search, and read the best matches back. That's where voice stops being a novelty and starts doing real commerce work. Loqara does exactly this: its voice agent runs the same product search and order lookup as the text widget, then speaks the results aloud.
+The part most teams underestimate is that last point. It's one thing to answer "what's your return policy?" out loud. It's another to handle "I'm looking for a waterproof jacket under €100" — run a live product search, and read the best matches back. That's where voice stops being a novelty and starts doing real commerce work. Loqara's voice agent runs the same live product search as the text widget; on WooCommerce and Magento it can also perform identity-checked order lookup. Shopify, Verskis, and feed stores do not have Loqara order lookup today.
 
 <div class="stat-grid">
 <div class="stat"><div class="stat-num">24/7</div><div class="stat-label">Spoken coverage with no extra headcount</div></div>
@@ -96,11 +96,11 @@ Adding voice doesn't have to be a project. With a tool that ships chat and voice
 
 ### 1. Get chat grounded first
 
-Feed the agent your knowledge — policies, FAQs, product info — and connect your store so it can run live product search and order lookup. This is the foundation, and it's the same whether you ever turn on voice. If you're on WooCommerce, our guide to [adding an AI agent to WooCommerce](/blog/add-ai-agent-to-woocommerce) walks through it; for Shopify, see the [best AI chatbots for Shopify](/blog/best-ai-chatbot-for-shopify).
+Feed the agent your knowledge—policies, FAQs, product information—and connect your catalog for live product search. WooCommerce and Magento stores can also enable identity-checked order lookup; Shopify, Verskis, and feed stores cannot today. This is the foundation whether or not you turn on voice. If you're on WooCommerce, our guide to [adding an AI agent to WooCommerce](/blog/add-ai-agent-to-woocommerce) walks through it; for Shopify, see the [best AI chatbots for Shopify](/blog/best-ai-chatbot-for-shopify).
 
 ### 2. Turn voice on as an add-on
 
-In Loqara, voice is an optional paid add-on on top of the base plan — you don't rebuild anything. You pick the voice per language (English and Lithuanian are supported today), preview it exactly as customers will hear it, and enable it. Because it's the same grounded agent, the voice channel inherits your knowledge, your product search, and your order lookup automatically.
+In Loqara, voice is an optional paid add-on on top of the base plan—you don't rebuild anything. You pick the voice per language (English and Lithuanian are supported today), preview it exactly as customers will hear it, and enable it. Because it's the same grounded agent, voice inherits your knowledge and product search. It inherits order lookup only when the bot uses a configured WooCommerce or Magento order integration.
 
 ### 3. Embed once, choose where it appears
 
@@ -124,7 +124,7 @@ The intelligence is usually identical — what changes is the channel. Voice win
 
 ### Can a voice agent search products and look up orders by voice?
 
-Yes, if it's wired into your store data rather than just reading a help center. Loqara's voice agent runs the same live product search and order lookup as its text widget — after a quick identity check for order details — and can speak the results aloud. That's the difference between a voice FAQ and a voice agent that actually does commerce work.
+Yes, within the connected provider's capabilities. Loqara voice can search products across supported catalogs and speak the results aloud. Identity-checked order lookup currently works on WooCommerce and Magento only—not Shopify, Verskis, or feed stores. That provider boundary is the difference between a verified commerce action and a voice bot merely describing a tracking policy.
 
 ### What languages does Loqara's voice support?
 

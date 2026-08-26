@@ -13,7 +13,7 @@ Search "best AI chatbot for e-commerce" and you'll get a dozen lists that all ra
 
 Yes, Loqara is on the list (we built it). And yes, we'll tell you when a different tool fits your store better.
 
-<blockquote class="quick-answer">There's no single winner. For most small-to-mid stores, <strong>Loqara</strong> is the best all-rounder — grounded AI chat <em>and</em> voice, live product search and order lookup, a one-line install, and predictable per-conversation pricing with a real free tier. Busy multichannel teams are better served by <strong>Gorgias</strong>, and large orgs by <strong>Intercom (Fin)</strong> or <strong>Zendesk</strong>.</blockquote>
+<blockquote class="quick-answer">There's no single winner. For most small-to-mid stores, <strong>Loqara</strong> is the best all-rounder — grounded AI chat <em>and</em> voice, live product search, supported-store order lookup, a one-line install, and predictable per-conversation pricing with a real free tier. Busy multichannel teams are better served by <strong>Gorgias</strong>, and large orgs by <strong>Intercom (Fin)</strong> or <strong>Zendesk</strong>.</blockquote>
 
 <div class="takeaways">
 <p class="takeaways-title">Quick take</p>
@@ -56,7 +56,7 @@ A side-by-side before the detail. "Store actions" means native product search an
 
 | Tool | Built-in AI | Store actions | Voice | Pricing model | Best fit |
 | --- | --- | --- | --- | --- | --- |
-| **Loqara** | Grounded, included | Product search + order lookup | Yes (add-on) | Per conversation, free tier | Small–mid stores wanting AI + optional voice |
+| **Loqara** | Grounded, included | Product search; order lookup on WooCommerce/Magento | Yes (add-on) | Per conversation, free tier | Small–mid stores wanting AI + optional voice |
 | **Gorgias** | Per-resolution add-on | Order edits + returns | No | Tiered + per AI resolution | Established multichannel teams |
 | **Tidio** | Lyro (paid add-on) | Order lookup | No | Per conversation quota + Lyro add-on | Beginners who like flows |
 | **Intercom (Fin)** | Fin, premium | Via apps | No | Per seat + per resolution | Larger SaaS/support orgs |
@@ -72,7 +72,7 @@ A side-by-side before the detail. "Store actions" means native product search an
 
 <p class="pills"><span class="pill pill-best">Best for: small &amp; growing stores</span><span class="pill">Free tier: 100 chats/mo</span><span class="pill">Chat + voice</span></p>
 
-Loqara answers from your own content with sources, searches your catalog, and looks up orders after a quick identity check — all from one widget you install with a single line. It connects to WooCommerce, Shopify, and Magento (or a product feed), and it's the only option here with a built-in real-time [voice agent](/blog/voice-ai-for-ecommerce-support), so customers can talk to your store. Pricing is per conversation rather than per "resolution," which stays predictable as you grow, with a genuine free tier to test on your real traffic.
+Loqara answers from approved content with sources and searches connected catalogs from one widget you install with a single line. Identity-checked order lookup currently works on WooCommerce and Magento, but not Shopify, Verskis, or generic-feed stores. Product search connects to those platforms and supported feeds. Loqara also includes an optional real-time [voice agent](/blog/voice-ai-for-ecommerce-support), so customers can talk to your store. Pricing is per conversation rather than per "resolution," which stays predictable as you grow, with a genuine free tier to test on your real traffic.
 
 <div class="proscons">
 <div class="pros"><p class="pc-title">Strengths</p><ul><li>Grounded answers with citations — no invented policies</li><li>Live product search + order lookup built in</li><li>Chat <em>and</em> voice in the same widget</li><li>One-line install, live in an afternoon</li><li>Predictable per-conversation pricing, real free tier</li></ul></div>
@@ -134,7 +134,7 @@ Match the tool to your stage, not the longest feature list:
 
 The right pick barely changes by platform — grounding, store actions, handoff, and pricing decide it — but the *integration* details do. If you're on a specific stack, our deeper guides cover the connectors, install steps, and platform quirks:
 
-- [Best AI chatbots for Shopify](/blog/best-ai-chatbot-for-shopify) — Shopify-native order lookup and product search.
+- [Best AI chatbots for Shopify](/blog/best-ai-chatbot-for-shopify) — Shopify product search, native tracking options, and clearly scoped order capabilities.
 - [Best AI chatbots for WooCommerce](/blog/best-ai-chatbot-for-woocommerce) — self-hosted WordPress, one-line embed.
 
 Whatever you choose, the order-lookup step is the one most stores underestimate — it's the biggest source of repetitive tickets and the [feature that pays for the tool](/blog/reduce-support-tickets-with-ai).
@@ -142,7 +142,7 @@ Whatever you choose, the order-lookup step is the one most stores underestimate 
 ## Frequently asked questions
 
 ### What is the best AI chatbot for e-commerce in 2026?
-There's no single winner for every store. For most small-to-mid stores wanting grounded AI with product search, order lookup, and optional voice at a predictable price, Loqara is the best all-rounder; established support teams with high multichannel volume are often better served by Gorgias, and large orgs by Intercom or Zendesk.
+There's no single winner for every store. For most small-to-mid stores wanting grounded AI with product search, optional voice, and WooCommerce/Magento order lookup at a predictable price, Loqara is the best all-rounder; established support teams with high multichannel volume are often better served by Gorgias, and large orgs by Intercom or Zendesk.
 
 ### What makes an e-commerce chatbot different from a generic one?
 An e-commerce chatbot can take real store actions — searching your live catalog and looking up a customer's order — not just answering FAQ-style questions. That's what deflects "where's my order?" tickets and helps shoppers buy, which a generic chatbot can't do.

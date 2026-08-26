@@ -70,7 +70,7 @@ const FEATURES: Feature[] = [
   {
     eyebrow: 'COMMERCE SKILLS',
     title: 'Find products, check orders, share deals',
-    body: 'Connect WooCommerce or Shopify and the agent searches your catalog, looks up order status (verified by email), and offers discount codes.',
+    body: 'Connect your catalog for live product search. WooCommerce and Magento can also enable identity-checked order status; Shopify order lookup is not supported today.',
     bullets: ['Live product search with cards', 'Order status — identity-checked', 'Discount codes on request'],
     icon: ShoppingBagIcon,
     imageSrc: '/landing/feature-commerce.webp',

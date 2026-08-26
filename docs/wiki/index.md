@@ -44,6 +44,8 @@ Add a line here. How the wiki works: [README.md](README.md).
   crawlability, article-format, delivery-budget, and release rules for public content.
 - [seo-baselines](seo-baselines.md) — 2026-07-21 GSC baseline (indexing,
   clicks/impressions, refresh priorities), checkpoint dates, monthly GEO prompt sample.
+- [public-acquisition-analytics](public-acquisition-analytics.md) — public-route
+  boundary, privacy-bounded 90-day first touch, signup funnel events, and rollout gate.
 - [voice](voice.md) — ElevenLabs voice add-on.
 - [messaging-channels](messaging-channels.md) — Meta app status, production
   approval gates, and the Loqara channel-integration critical path.
@@ -66,6 +68,8 @@ Add a line here. How the wiki works: [README.md](README.md).
   merchant tools, and possible standalone services
 - `docs/CHANNELS_IMPLEMENTATION.md` — paid messaging-channel plan, starting with Messenger
 - `docs/seo-content-loop.md` — weekly GSC content loop + article format
+- `docs/superpowers/plans/2026-08-25-search-visibility-growth.md` — 90-day,
+  checkbox-driven Google/Bing visibility and organic-conversion program
 - `docs/superpowers/specs/2026-07-20-seo-geo-remediation-design.md` — public-site audit decisions, scope, and release budgets
 - `docs/superpowers/plans/2026-07-20-seo-geo-remediation.md` — phased implementation checklist; accessibility is last
 - `docs/loqara-vs-parnidia.md` — competitor comparison

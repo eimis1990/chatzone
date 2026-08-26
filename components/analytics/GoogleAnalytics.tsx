@@ -2,6 +2,7 @@
 
 import Script from 'next/script'
 import { usePathname } from 'next/navigation'
+import { isPublicMarketingPath } from '@/lib/acquisition'
 
 /**
  * Google Analytics 4 via the gtag.js snippet, loaded with `next/script`
@@ -26,10 +27,16 @@ const GA_ID = process.env.NEXT_PUBLIC_GA_ID
 export function GoogleAnalytics() {
   const pathname = usePathname()
 
-  if (!GA_ID || pathname?.startsWith('/embed')) return null
+  if (!GA_ID || !isPublicMarketingPath(pathname)) return null
 
   return (
     <>
+      <Script id="ga4-command-queue" strategy="afterInteractive">
+        {`
+          window.dataLayer = window.dataLayer || [];
+          window.gtag = window.gtag || function(){window.dataLayer.push(arguments);};
+        `}
+      </Script>
       <Script
         src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
         strategy="lazyOnload"
@@ -37,9 +44,9 @@ export function GoogleAnalytics() {
       <Script id="ga4-init" strategy="lazyOnload">
         {`
           window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', '${GA_ID}');
+          window.gtag = window.gtag || function(){window.dataLayer.push(arguments);};
+          window.gtag('js', new Date());
+          window.gtag('config', '${GA_ID}');
         `}
       </Script>
     </>

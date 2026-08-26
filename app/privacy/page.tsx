@@ -24,7 +24,8 @@ const SUBPROCESSORS = [
   { name: 'Supabase', purpose: 'Database, authentication, and file storage (data hosted in the EU region).' },
   { name: 'OpenAI', purpose: 'Language model responses, embeddings, and conversation analysis.' },
   { name: 'ElevenLabs', purpose: 'Real-time voice agent (speech-to-text, the conversation LLM, and text-to-speech).' },
-  { name: 'Vercel', purpose: 'Application hosting and content delivery.' },
+  { name: 'Vercel', purpose: 'Application hosting, content delivery, and privacy-focused public-site analytics.' },
+  { name: 'Google Analytics', purpose: 'Delayed public-site page and conversion measurement.' },
 ]
 
 export default function PrivacyPage() {
@@ -47,11 +48,30 @@ export default function PrivacyPage() {
       </section>
 
       <section className="mt-8 space-y-3">
+        <h2 className="text-lg font-semibold">Public website analytics and signup requests</h2>
+        <p className="text-sm text-foreground/80">
+          On Loqara&apos;s public website, Vercel Web Analytics and Google Analytics measure page
+          visits and actions such as opening or submitting the Get Started form. We keep these
+          analytics off authenticated, owner, embedded-widget, and demo screens.
+        </p>
+        <p className="text-sm text-foreground/80">
+          To understand which public page first led to a signup, the browser stores a first-touch
+          record in local storage for up to 90 days. It contains the landing pathname, the external
+          referrer with its query and fragment removed, and explicit UTM campaign fields. We do not
+          retain search-query text (including <code>utm_term</code>), arbitrary landing-page
+          parameters, or advertising click IDs in that record. If you submit the Get Started form,
+          the same bounded attribution fields are saved with your signup request.
+        </p>
+      </section>
+
+      <section className="mt-8 space-y-3">
         <h2 className="text-lg font-semibold">Data retention</h2>
         <p className="text-sm text-foreground/80">
           Bot owners choose a retention window in their settings. When set, conversations (and their
           messages) older than that window are automatically and permanently deleted by a daily job.
           Owners can also export or erase their data on demand at any time.
+          Public-site first-touch data expires from the browser after 90 days. Signup requests are
+          retained until they are converted into an account or deleted by Loqara.
         </p>
       </section>
 
@@ -81,7 +101,8 @@ export default function PrivacyPage() {
         <p className="text-sm text-foreground/80">
           Bot owners can export and delete their organization&apos;s data from the in-app Settings.
           For access, correction, or erasure requests relating to a specific conversation, contact
-          the operator of the website where you used the chat.
+          the operator of the website where you used the chat. For a Loqara website signup or
+          public-site analytics request, contact Loqara directly using the address below.
         </p>
       </section>
 

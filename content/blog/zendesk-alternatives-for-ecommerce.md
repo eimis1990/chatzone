@@ -13,12 +13,12 @@ Zendesk is the enterprise standard for customer support, and it earned that repu
 
 But that same depth is exactly why it's often the wrong tool for an online store. You inherit the complexity — and the cost — of a system designed for a 200-agent contact centre when you actually have a team of three, a Shopify or WooCommerce catalog, and a queue full of "where's my order?" messages. The AI that would deflect most of those tickets is included but usage-billed per automated resolution on top of agent seats, and the agent-facing Copilot is a separate $50/agent/month add-on ([Zendesk pricing](https://www.zendesk.com/pricing/)). For most stores, that's a lot of machinery to stand up before you answer a single customer. Below are the leaner alternatives worth considering, what each is genuinely good at, and how to choose.
 
-<blockquote class="quick-answer">For most stores, the best Zendesk alternative is a lean AI agent like <strong>Loqara</strong>: grounded AI chat <em>and</em> voice, live product search and order lookup, a one-line install, and predictable per-conversation pricing with a real free tier. If you specifically need a multichannel inbox, Gorgias is the more store-friendly helpdesk; stay on Zendesk only for large orgs with complex routing and SLAs.</blockquote>
+<blockquote class="quick-answer">For most stores, the best Zendesk alternative is a lean AI agent like <strong>Loqara</strong>: grounded AI chat <em>and</em> voice, live product search, supported-store order lookup, a one-line install, and predictable per-conversation pricing with a real free tier. If you need a multichannel inbox, Gorgias is the more store-friendly helpdesk; stay on Zendesk for large orgs with complex routing and SLAs.</blockquote>
 
 <div class="takeaways">
 <p class="takeaways-title">Quick take</p>
 <ul>
-<li><strong>Best lean AI agent for stores:</strong> Loqara — grounded AI chat <em>and</em> voice, live product search + order lookup, one-line install, predictable per-conversation pricing with a real free tier.</li>
+<li><strong>Best lean AI agent for stores:</strong> Loqara — grounded AI chat <em>and</em> voice, live product search, WooCommerce/Magento order lookup, one-line install, predictable per-conversation pricing with a real free tier.</li>
 <li><strong>Best e-commerce helpdesk:</strong> Gorgias — store-first multichannel inbox with deep order automation.</li>
 <li><strong>Best DIY/beginner option:</strong> Tidio — friendly visual builder, though its Lyro AI is metered separately.</li>
 <li><strong>Best premium AI agent at scale:</strong> Intercom (Fin) — superb, but priced for larger support orgs.</li>
@@ -59,7 +59,7 @@ A side-by-side before the detail. "Store actions" means native product search an
 
 | Tool | Built-in AI | Store actions | Voice | Pricing model | Best fit |
 | --- | --- | --- | --- | --- | --- |
-| **Loqara** | Grounded, included | Product search + order lookup | In chat widget (add-on) | Per conversation, free tier | Stores wanting lean AI + optional voice |
+| **Loqara** | Grounded, included | Product search; order lookup on WooCommerce/Magento | In chat widget (add-on) | Per conversation, free tier | Stores wanting lean AI + optional voice |
 | **Gorgias** | Per-resolution, every plan | Order edits + returns | Phone add-on | Tiered by ticket volume + per AI resolution | Established multichannel support teams |
 | **Tidio** | Lyro (metered) | Order lookup | No | Per conversation + metered Lyro | DIY beginners who like flows |
 | **Re:amaze** | Included, capped | Native order actions | No | Per user | Mid-size multichannel stores |
@@ -78,7 +78,7 @@ A side-by-side before the detail. "Store actions" means native product search an
 Loqara is the opposite of an enterprise suite: it's an AI agent plus live chat that you install with one line and have live the same afternoon. It answers strictly from your own content with citations — so it never invents a returns window or a shipping date — and it connects to your store to **search the live catalog** and **look up a customer's order** after a quick identity check. Connectors cover [WooCommerce](/blog/add-ai-agent-to-woocommerce), Shopify, and Magento, plus a generic product feed for everything else. It's also the only option here with an optional real-time **[voice agent](/blog/voice-ai-for-ecommerce-support)** built into the chat widget itself (English and Lithuanian today), so customers can literally talk to your store. Pricing is per conversation — not per vendor-defined "resolution" — with a genuine free tier of 100 conversations a month, so you can prove the value on real traffic before paying.
 
 <div class="proscons">
-<div class="pros"><p class="pc-title">Strengths</p><ul><li>Grounded answers with citations — no invented policies</li><li>Live product search + order lookup built in</li><li>WooCommerce, Shopify, Magento connectors (+ product feed)</li><li>Chat <em>and</em> voice in the same widget</li><li>One-line install, live in an afternoon</li><li>Shared-inbox live human handoff on every plan</li><li>Predictable per-conversation pricing, real free tier</li></ul></div>
+<div class="pros"><p class="pc-title">Strengths</p><ul><li>Grounded answers with citations — no invented policies</li><li>Live product search across connected catalogs</li><li>Identity-checked order lookup on WooCommerce and Magento</li><li>WooCommerce, Shopify, Magento connectors (+ product feed)</li><li>Chat <em>and</em> voice in the same widget</li><li>One-line install, live in an afternoon</li><li>Shared-inbox live human handoff on every plan</li><li>Predictable per-conversation pricing, real free tier</li></ul></div>
 <div class="cons"><p class="pc-title">Watch-outs</p><ul><li>Not a full email/social ticketing suite — it's an AI agent + live chat</li><li>Newer than the incumbents below</li><li>Voice is a paid add-on on top of the base plan</li></ul></div>
 </div>
 
@@ -114,7 +114,7 @@ Help Scout is the antidote to enterprise sprawl: a clean, email-style shared inb
 
 <div class="callout">
 <p class="callout-title">Enterprise suite weight vs. a lean AI agent</p>
-<p>The real decision isn't "which logo is biggest" — it's whether you're buying a <strong>support platform</strong> or an <strong>AI agent</strong>. Zendesk, Intercom, and Gorgias are platforms: powerful, multichannel, configurable, and priced for teams that live in an inbox. A lean AI agent like Loqara does fewer things on purpose — answer, search products, look up orders, hand off cleanly — and is live the same day. If most of your tickets are repetitive store questions, the agent deflects them without the platform overhead. Our <a href="/blog/how-to-choose-ai-support-agent">buyer's checklist</a> walks through the questions that actually decide it.</p>
+<p>The real decision isn't "which logo is biggest" — it's whether you're buying a <strong>support platform</strong> or an <strong>AI agent</strong>. Zendesk, Intercom, and Gorgias are platforms: powerful, multichannel, configurable, and priced for teams that live in an inbox. A lean AI agent like Loqara does fewer things on purpose — answer, search products, look up WooCommerce or Magento orders after identity verification, and hand off cleanly — and is live the same day. If most of your tickets are repetitive store questions, the agent deflects them without the platform overhead. Our <a href="/blog/how-to-choose-ai-support-agent">buyer's checklist</a> walks through the questions that actually decide it.</p>
 </div>
 
 ## How to choose your Zendesk alternative
@@ -134,7 +134,7 @@ The single most important variable is the **pricing model**, not the headline nu
 ## Frequently asked questions
 
 ### What is the best Zendesk alternative for a small e-commerce store?
-For most small stores, a lean AI agent like Loqara fits better than an enterprise helpdesk because it answers from your real content, searches your catalog, and looks up orders without the contact-centre setup. It installs with one line and is priced per conversation with a free tier, so costs stay predictable. If you specifically want a multichannel inbox instead, Gorgias is the more store-friendly helpdesk.
+For most small stores, a lean AI agent like Loqara fits better than an enterprise helpdesk because it answers from your real content and searches connected catalogs without the contact-centre setup. WooCommerce and Magento stores can also enable identity-checked order lookup; Shopify, Verskis, and feed stores cannot today. It installs with one line and is priced per conversation with a free tier. If you specifically want a multichannel inbox instead, Gorgias is the more store-friendly helpdesk.
 
 ### Is Zendesk too expensive for a small store?
 For many stores, yes — not because the base price is outrageous, but because the AI that deflects tickets is usage-billed per automated resolution on top of agent seats, with the agent-facing Copilot as a separate paid add-on. That stacks up before you've answered a customer. Leaner tools bundle grounded AI into a per-conversation or per-seat plan, which is easier to forecast at store scale.

@@ -4,6 +4,41 @@ Store connectors + product search. Separate from [RAG chunks](rag-and-knowledge.
 
 ## Connectors (`lib/commerce/`)
 
+### Public-claim capability matrix
+
+Use this table as the source of truth when writing landing-page or blog claims.
+“Connected” does not mean every commerce action is supported; name the provider
+when the action varies.
+
+| Provider | Live product search | Semantic index | Order-status lookup | Live shipping rates | Notes |
+| --- | --- | --- | --- | --- | --- |
+| WooCommerce | Yes | Yes | Yes, order number + billing email | Yes | Fullest current commerce integration |
+| Shopify | Yes | Yes with Storefront token; public feed is keyword-only | **No** | No | Never imply that Shopify connection enables Loqara order lookup |
+| Magento | Yes | Yes | Yes, order number + billing email | No | Order lookup requires configured integration token |
+| Verskis | Yes | Yes | **No** | No | Storefront HTML + sitemap integration |
+| Generic feed | Yes, keyword-only | No | **No** | No | Product discovery only |
+| TravelLine | Room types + dated availability tool | No | **No** | No | Hospitality availability, not ecommerce orders/shipping |
+
+Discount delivery is a configured static code for every provider, not a live
+coupon-creation API. Code authority: `lib/commerce/index.ts` dispatch,
+`lib/commerce/capabilities.ts` capability gates, and `lib/products/search.ts`
+semantic support. If code and this table differ, correct the table and public
+content in the same change.
+
+Cross-cutting public claims:
+
+| Capability | Current boundary | Code/catalog authority |
+| --- | --- | --- |
+| Chat languages | English and Lithuanian; Free enables one, paid plans may enable both | `lib/validation/schemas.ts:228`, `lib/entitlements.ts:27-72` |
+| Live voice calls | English and Lithuanian; paid Voice add-on required for client orgs | `lib/plans-catalog.ts:109-126`, `lib/widget-config.ts:185-214` |
+| Human handoff | Available on every displayed plan; merchant can enable/disable the visitor control | `lib/plans-catalog.ts:27-52`, `lib/validation/schemas.ts:173-175` |
+| Lead capture | Starter and above; not a Free entitlement | `lib/entitlements.ts:27-72` |
+
+“All languages” in plan copy means all languages Loqara currently supports
+(English and Lithuanian), not every world language. Voice inherits the active
+provider's commerce tools; it does not make an unsupported Shopify/Verskis/feed
+order lookup available.
+
 - Providers: **woocommerce, shopify, magento, verskis, feed** (`lib/commerce/types.ts:1`). Configured
   per-bot in `config.commerce` — `lib/validation/schemas.ts:256-275` (provider, storeUrl,
   restKey/restSecret, shopifyDomain/shopifyToken, magentoToken, feedUrl, discount).
@@ -345,6 +380,4 @@ attaches `products` to assistant turns (`previewChatSchema` allows them); the
   `searchCatalog` too, so a synced semantic index behaves the same in preview and
   the live widget; without an index, both still fall back to live keyword search.
 
-_Last verified: 2026-08-10 (working tree, HomeByNB feedback round — e2e battery on the
-3IMIS test bot: discount/hours/delivery/paštomatai/cheapest/vacuum-specs/absent-brand all
-pass; eval-answers 10/10, eval-products 16/17)._
+_Last verified: 2026-08-25 (working tree; public capability-claim audit)._

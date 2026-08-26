@@ -128,6 +128,6 @@ Because the sticker price doesn't tell you what the work costs once volume scale
 
 ---
 
-**The bottom line:** ignore the activity metrics and watch the outcomes — deflection and resolution prove the support savings, CSAT keeps them honest, conversion and lead capture show the upside, and a transparent cost per conversation turns it all into a number you can defend. Loqara surfaces these — conversation analytics, built-in CSAT, grounded answers, product search and order lookup, and per-conversation pricing — so you measure the payback, not the noise.
+**The bottom line:** ignore the activity metrics and watch the outcomes — deflection and resolution prove the support savings, CSAT keeps them honest, conversion and lead capture show the upside, and a transparent cost per conversation turns it all into a number you can defend. Loqara surfaces conversation analytics, built-in CSAT, grounded answers, product search, and per-conversation pricing; WooCommerce and Magento stores can also measure identity-checked order lookup. Measure the payback, not the noise.
 
 [Try Loqara on your store free](/#get-started) — one line, no credit card, live in an afternoon.

@@ -10,6 +10,13 @@ interface SignupRow {
   company: string | null
   website: string | null
   source: string | null
+  landing_path: string | null
+  referrer: string | null
+  acquisition_source: string | null
+  acquisition_medium: string | null
+  utm_campaign: string | null
+  utm_content: string | null
+  first_touch_at: string | null
   status: string | null
   invited_at: string | null
   created_at: string
@@ -22,7 +29,7 @@ export default async function SignupsPage() {
   const [{ data: signupData }, { data: inviteData }] = await Promise.all([
     supabase
       .from('signups')
-      .select('id, email, company, website, source, status, invited_at, created_at')
+      .select('id, email, company, website, source, landing_path, referrer, acquisition_source, acquisition_medium, utm_campaign, utm_content, first_touch_at, status, invited_at, created_at')
       .order('created_at', { ascending: false }),
     supabase.from('invites').select('email, status, created_at').order('created_at', { ascending: false }),
   ])

@@ -125,7 +125,7 @@ The trade-offs are control and cost accounting. Customisation of the AI's behavi
 <figcaption>Loqara (screenshot: loqara.com, July 2026)</figcaption>
 </figure>
 
-Full disclosure: Loqara is our product, so read this section with that in mind. What it does: a grounded AI agent that answers *only* from your store's own content and cites its sources, live product search, identity-checked order lookup on Shopify, WooCommerce, and Magento, lead capture, human handoff on every plan, and AI analytics (conversation summaries, topics, 1–5 quality scores, CSAT). The unusual part is voice: an add-on (€49/month including ~200 minutes, then €0.20/min) lets customers literally talk to your store in the same widget. Install is one line; pricing is per conversation — Free at €0 for 100 conversations/month, then €149/€249/€449 tiers, no setup fees.
+Full disclosure: Loqara is our product, so read this section with that in mind. What it does: a grounded AI agent that answers from approved store content and cites its sources, live product search across connected catalogs, identity-checked order lookup on WooCommerce and Magento (not Shopify), lead capture, human handoff on every plan, and AI analytics (conversation summaries, topics, 1–5 quality scores, CSAT). The unusual part is voice: an add-on (€49/month including ~200 minutes, then €0.20/min) lets customers literally talk to your store in the same widget. Install is one line; pricing is per conversation — Free at €0 for 100 conversations/month, then €149/€249/€449 tiers, no setup fees.
 
 Now the honest limits. Loqara is young — the incumbents above have years of edge-case hardening we don't. It speaks English and Lithuanian only today, so if you need French or German support, pick something else. And it's deliberately e-commerce-focused: if you're a SaaS company or a bank, tools higher up this list will fit better. What we'd claim without blushing: for a small-to-mid online store that wants grounded answers, real store actions, and optional voice — without adopting a full helpdesk — the per-conversation pricing and free tier make it the cheapest honest way to find out if AI support works on your traffic. More context in our [best AI chatbot for e-commerce](/blog/best-ai-chatbot-for-ecommerce) guide.
 
@@ -207,7 +207,7 @@ Drift was acquired by Salesloft in 2024, suffered a major OAuth token breach in 
 In 2026, AI-first is the default: grounded AI agents answer natural questions from your real content and hand off when unsure, while rule-based flows only handle the paths you predicted. Rules still make sense as a supplement — structured lead capture, menu-style navigation — but as the primary experience they frustrate more customers than they help.
 
 ### Which chatbot platform is best for e-commerce?
-Gorgias if you're an established brand needing a full multichannel helpdesk; Loqara if you're a small-to-mid store that wants grounded answers, product search, order lookup, and optional voice without helpdesk overhead. Our [e-commerce chatbot guide](/blog/best-ai-chatbot-for-ecommerce) compares the store-specific options in depth.
+Gorgias if you're an established brand needing a full multichannel helpdesk; Loqara if you're a small-to-mid store that wants grounded answers, product search, optional voice, and WooCommerce/Magento order lookup without helpdesk overhead. Our [e-commerce chatbot guide](/blog/best-ai-chatbot-for-ecommerce) compares the store-specific options in depth.
 
 ---
 

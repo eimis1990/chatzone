@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Script from "next/script";
-import { Analytics } from "@vercel/analytics/next";
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
+import { PublicWebAnalytics } from "@/components/analytics/PublicWebAnalytics";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SITE_URL, SITE_NAME } from "@/lib/site";
 import { METAMASK_DEV_OVERLAY_GUARD_SCRIPT } from "@/lib/browser-extension-errors";
@@ -217,7 +217,7 @@ const fontVariables = [
 
 const TITLE = "Loqara — AI chat & voice agent for any website";
 const DESCRIPTION =
-  "Answer every customer, day or night. An AI chat & voice agent that knows your products, captures leads, looks up orders — live in one line of code.";
+  "Answer every customer, day or night. Grounded AI chat and voice with product search, lead capture, and verified order lookup on supported stores.";
 
 // Bing Webmaster Tools site verification. Set NEXT_PUBLIC_BING_SITE_VERIFICATION
 // to emit <meta name="msvalidate.01" ...>. Left unset (e.g. if you verify Bing
@@ -254,7 +254,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: TITLE,
     description:
-      "AI chat & voice support for any website: grounded answers, product search, order lookups, live handoff, and analytics.",
+      "AI chat and voice support for any website: grounded answers, product search, lead capture, live handoff, and supported-store order lookup.",
     type: "website",
     url: "/",
     siteName: SITE_NAME,
@@ -272,7 +272,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: TITLE,
     description:
-      "AI chat & voice support for any website: grounded answers, product search, order lookups, live handoff, and analytics.",
+      "AI chat and voice support for any website: grounded answers, product search, lead capture, live handoff, and supported-store order lookup.",
     images: ["/landing/og.jpg?v=4"],
   },
 };
@@ -298,7 +298,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col">
         <TooltipProvider>{children}</TooltipProvider>
-        <Analytics />
+        <PublicWebAnalytics />
         <GoogleAnalytics />
       </body>
     </html>

@@ -165,4 +165,4 @@ No. AI shopping systems still need trustworthy, accessible information about pro
 
 **The honest bottom line:** agentic commerce is already a real discovery layer and an early transaction layer. The stores most likely to benefit are not the ones making the loudest AI claims. They are the ones with clean catalog data, clear policies, and a useful answer at every point of uncertainty.
 
-Want the conversational layer on your own storefront? [Try Loqara free](/#get-started) — grounded answers, live product search, order lookup, and human handoff in one widget.
+Want the conversational layer on your own storefront? [Try Loqara free](/#get-started) — grounded answers, live product search, human handoff, and supported WooCommerce/Magento order lookup in one widget.

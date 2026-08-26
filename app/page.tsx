@@ -42,7 +42,7 @@ const jsonLd = {
       slogan: 'The AI chat & voice agent for modern stores.',
       sameAs: ['https://www.linkedin.com/company/loqara/'],
       description:
-        'Loqara is an AI chat and voice agent for e-commerce stores: it answers customer questions from your own knowledge, searches your catalog, looks up orders, captures leads, and hands off to a human — embedded in one line of code.',
+        'Loqara is an AI chat and voice agent for e-commerce stores: it answers from approved knowledge, searches connected catalogs, captures leads, hands off to a human, and supports verified order lookup for WooCommerce and Magento — embedded in one line of code.',
     },
     {
       '@type': 'WebSite',
@@ -61,11 +61,11 @@ const jsonLd = {
       operatingSystem: 'Web',
       url: SITE_URL,
       description:
-        'AI chat & voice support for e-commerce: grounded answers from your knowledge, product search, identity-checked order lookups, live human handoff, and analytics — embedded in one line of code. Supports English and Lithuanian.',
+        'AI chat and voice support for e-commerce: grounded answers, product search, live human handoff, analytics, and identity-checked order lookup for WooCommerce and Magento — embedded in one line of code. Supports English and Lithuanian.',
       featureList: [
         'AI chat agent grounded in your knowledge base',
         'Real-time voice agent (add-on)',
-        'Product search and order lookup',
+        'Product search; verified order lookup for WooCommerce and Magento',
         'Lead capture',
         'Live human handoff from a shared inbox',
         'Conversation analytics and CSAT',

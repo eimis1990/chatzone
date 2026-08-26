@@ -122,4 +122,30 @@ page-filtered queries for the two impression magnets and the two page-one watch
 pages; judge lasting SEO progress after the current Jul 21 crawl/index/content
 state has had a full 28 days.
 
-_Last verified: 2026-07-26._
+## 2026-08-20 performance checkpoint
+
+The Aug 20 Bing and GSC exports are the baseline for the detailed
+[90-day search-visibility plan](../superpowers/plans/2026-08-25-search-visibility-growth.md).
+The byte-preserved files, hashes, filters, and calculation rules live in the
+[2026-08-20 baseline archive](../seo-data/2026-08-20/README.md).
+
+- Google property total: **29 clicks / 2,552 impressions / 1.14% CTR** at
+  impression-weighted position **54.11**. The latest complete 28 days contributed
+  11 clicks / 1,139 impressions / 0.97% CTR versus 18 / 1,413 / 1.27% in the
+  preceding 28 days.
+- Lithuania still supplies **20/29 clicks**. The US, UK, and Netherlands combine
+  for **1,640 impressions and zero clicks**, confirming that English-market rank
+  and authority—not discovery alone—are the primary constraint.
+- Bing Web Search remains small at **1 click / 70 impressions**. Bing AI is the
+  leading signal at **261 citation events**, but the overview cannot identify
+  cited URLs or grounding queries; those exports are a Phase 0 requirement.
+- Existing high-intent pages (WooCommerce setup, beauty/skincare, comparisons,
+  handoff, lead capture) produce clicks on small samples. Broad Zendesk and
+  conversational-AI pages still absorb most impressions at positions 51–83.
+
+Decision: run a 90-day refresh/evidence/distribution program with a 70/20/10
+effort allocation; measure organic signup behavior before increasing net-new
+publishing. Use GSC property totals for site KPIs and page-filtered query exports
+for URL decisions.
+
+_Last verified: 2026-08-25 (d3d115e)._

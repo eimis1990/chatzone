@@ -13,12 +13,12 @@ Tidio is one of the most popular live-chat tools for small businesses, and for g
 
 The friction shows up later. The moment you actually want **AI** answering customers — not scripted flows you maintain by hand, but an agent that reads a question and replies from your real policies and catalog — Tidio's economics shift. Its Lyro AI is a separate paid add-on rather than the heart of the product — starting at around $32.50/month for 50 AI conversations ([Tidio pricing](https://www.tidio.com/pricing/)) — and the tiers jump steeply as you grow. So stores outgrow Tidio not because it's bad, but because they came for chat and now need *grounded AI included*, not bolted on. Here's an honest look at the alternatives — including where staying on Tidio is the right call.
 
-<blockquote class="quick-answer">For most stores that came to Tidio for chat but now need real AI, the best alternative is <strong>Loqara</strong>: grounded AI chat <em>and</em> voice included from the start, live product search and order lookup, and predictable per-conversation pricing with a real monthly free tier. Stay on Tidio if you mainly want live chat with hand-built flows and don't yet need AI doing the heavy lifting.</blockquote>
+<blockquote class="quick-answer">For most stores that came to Tidio for chat but now need real AI, the best alternative is <strong>Loqara</strong>: grounded AI chat <em>and</em> voice included from the start, live product search, supported-store order lookup, and predictable per-conversation pricing with a real monthly free tier. Stay on Tidio if you mainly want live chat with hand-built flows and don't yet need AI doing the heavy lifting.</blockquote>
 
 <div class="takeaways">
 <p class="takeaways-title">Quick take</p>
 <ul>
-<li><strong>Best Tidio alternative for most stores:</strong> Loqara — grounded AI chat <em>and</em> voice included from the start, live product search and order lookup, a real monthly free tier, and predictable per-conversation pricing.</li>
+<li><strong>Best Tidio alternative for most stores:</strong> Loqara — grounded AI chat <em>and</em> voice included from the start, live product search, WooCommerce/Magento order lookup, a real monthly free tier, and predictable per-conversation pricing.</li>
 <li><strong>Best for established support teams:</strong> Gorgias — a mature e-commerce helpdesk, though its AI is billed per resolution.</li>
 <li><strong>Best classic multichannel inbox:</strong> Re:amaze — shared inbox with native order actions and lighter AI.</li>
 <li><strong>Best for larger orgs:</strong> Intercom (Fin) or Zendesk — premium suites priced per resolution or per agent.</li>
@@ -52,7 +52,7 @@ A side-by-side before the detail. "Store actions" means native product search an
 
 | Tool | Built-in AI | Store actions | Voice | Pricing model | Best fit |
 | --- | --- | --- | --- | --- | --- |
-| **Loqara** | Grounded, included | Product search + order lookup | Yes (add-on) | Per conversation, real free tier | Stores wanting AI (and maybe voice) included |
+| **Loqara** | Grounded, included | Product search; order lookup on WooCommerce/Magento | Yes (add-on) | Per conversation, real free tier | Stores wanting AI (and maybe voice) included |
 | **Tidio** | Lyro (paid add-on) | Order lookup | No | Per conversation + Lyro add-on | Beginners who love flow-building |
 | **Gorgias** | Billed per resolution | Order edits + returns | Add-on (phone) | Ticket tiers + per AI resolution | Established multichannel teams |
 | **Re:amaze** | Basic, included | Native order actions | No | Per seat | Mid-size multichannel stores |
@@ -68,10 +68,10 @@ A side-by-side before the detail. "Store actions" means native product search an
 
 <p class="pills"><span class="pill pill-best">Best for: stores that want AI included</span><span class="pill">Free tier: 100 chats/mo</span><span class="pill">Chat + voice</span></p>
 
-Where Tidio treats AI as an add-on, Loqara is AI-first. It answers from your own content with citations — so it never invents a returns window or a shipping date — searches your live catalog, and looks up a customer's order after a quick identity check, all inside one widget you install with a single line. It connects to [WooCommerce](/blog/add-ai-agent-to-woocommerce), [Shopify](/blog/best-ai-chatbot-for-shopify), and Magento (plus a product feed for anything else), and it's the only option here with a real-time [voice agent](/blog/voice-ai-for-ecommerce-support) built into the same chat widget — in English or Lithuanian. Pricing is per conversation rather than per "resolution," and the free tier of 100 conversations runs *every month*, not as a one-time bucket — so you prove the value on real traffic before paying.
+Where Tidio treats AI as an add-on, Loqara is AI-first. It answers from your own content with citations and searches connected catalogs inside one widget you install with a single line. Identity-checked order lookup currently works on WooCommerce and Magento, but not Shopify, Verskis, or generic-feed stores. Product search connects to [WooCommerce](/blog/add-ai-agent-to-woocommerce), [Shopify](/blog/best-ai-chatbot-for-shopify), Magento, Verskis, and supported feeds. Loqara also offers a real-time [voice agent](/blog/voice-ai-for-ecommerce-support) in the same chat widget—in English or Lithuanian. Pricing is per conversation rather than per "resolution," and the free tier of 100 conversations runs *every month*, not as a one-time bucket—so you prove the value on real traffic before paying.
 
 <div class="proscons">
-<div class="pros"><p class="pc-title">Strengths</p><ul><li>Grounded answers with citations — no invented policies</li><li>Live product search + order lookup built in</li><li>Chat <em>and</em> voice in the same widget</li><li>Connectors for WooCommerce, Shopify, Magento, plus product feed</li><li>One-line embed, live the same day</li><li>Shared-inbox <a href="/blog/ai-chatbot-human-handoff">live human handoff</a>, analytics, and CSAT included</li><li>Predictable per-conversation pricing, real 100/mo free tier</li></ul></div>
+<div class="pros"><p class="pc-title">Strengths</p><ul><li>Grounded answers with citations — no invented policies</li><li>Live product search across connected catalogs</li><li>Identity-checked order lookup on WooCommerce and Magento</li><li>Chat <em>and</em> voice in the same widget</li><li>Connectors for WooCommerce, Shopify, Magento, plus product feed</li><li>One-line embed, live the same day</li><li>Shared-inbox <a href="/blog/ai-chatbot-human-handoff">live human handoff</a>, analytics, and CSAT included</li><li>Predictable per-conversation pricing, real 100/mo free tier</li></ul></div>
 <div class="cons"><p class="pc-title">Watch-outs</p><ul><li>Not a full email/social ticketing suite — it's an AI agent + live chat</li><li>Newer than the incumbents below</li><li>Voice is a paid add-on on top of the base plan</li></ul></div>
 </div>
 
@@ -131,7 +131,7 @@ Not in the way most people expect. Tidio's free plan includes only a small, one-
 
 ### What is the best Tidio alternative for AI support?
 
-For most e-commerce stores, Loqara is the closest match because AI is included rather than sold as an add-on. It gives grounded answers with citations, searches your catalog, looks up orders, and adds an optional voice agent — with a real free tier of 100 conversations a month. Larger support teams may prefer Gorgias or Intercom, which are heavier but built for high-volume multichannel ticketing.
+For most e-commerce stores, Loqara is the closest match because AI is included rather than sold as an add-on. It gives grounded answers with citations, searches connected catalogs, supports identity-checked order lookup on WooCommerce and Magento, and adds an optional voice agent—with a real free tier of 100 conversations a month. Larger support teams may prefer Gorgias or Intercom, which are heavier but built for high-volume multichannel ticketing.
 
 ### Is there a Tidio alternative with a real free tier?
 
@@ -139,7 +139,7 @@ Yes. Loqara's free plan includes 100 conversations every month — a recurring a
 
 ### Do these chatbots connect to WooCommerce, Shopify, and Magento?
 
-It varies by tool, so check each one's app listing. Loqara connects to WooCommerce, Shopify, and Magento, plus a product feed for other platforms, so the agent can search live products and look up orders inside the chat. Helpdesk suites like Gorgias and Zendesk integrate with the major platforms too, though the depth of native store actions differs.
+It varies by tool, and “connects” does not imply every action. Loqara searches products on WooCommerce, Shopify, Magento, Verskis, and supported feeds. Its identity-checked order lookup currently works only on WooCommerce and Magento. Helpdesk suites like Gorgias and Zendesk integrate with major platforms too, but the depth of native store actions differs.
 
 ### Can a Tidio alternative answer by voice?
 

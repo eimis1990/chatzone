@@ -122,7 +122,7 @@ Some can. Loqara, for example, includes an optional real-time [voice agent](/blo
 
 ---
 
-**The bottom line:** the best AI support agent isn't the one with the longest feature list — it's the one whose pricing you can forecast, whose answers you can trust, that can take real store actions, and that you can install today. Work the checklist, run the math on your own volume, and test it on real traffic before you pay. Loqara was built for the lean-store end of that list: grounded chat and voice, real product search and order lookup, handoff on every plan, predictable per-conversation pricing, and one line to install.
+**The bottom line:** the best AI support agent isn't the one with the longest feature list — it's the one whose pricing you can forecast, whose answers you can trust, that can take verified store actions, and that you can install today. Work the checklist, run the math on your own volume, and test it on real traffic before you pay. Loqara was built for the lean-store end of that list: grounded chat and voice, product search across connected catalogs, order lookup on WooCommerce and Magento, handoff on every plan, predictable per-conversation pricing, and one line to install.
 
 [Try Loqara on your store free](/#get-started) — one line, no credit card, live in an afternoon.
 

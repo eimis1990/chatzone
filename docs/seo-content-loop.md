@@ -21,16 +21,36 @@ refresh and source existing posts, consolidate overlap, and add first-party
 evidence BEFORE writing net-new articles. New volume on top of an unsourced
 backlog compounds the problem.
 
+## Effort allocation and approval gate
+
+Until the 2026-08-25 visibility program says otherwise, allocate the weekly
+content budget as follows:
+
+- **70% refresh/consolidation:** improve pages search engines already test,
+  correct evidence, resolve overlap, and strengthen contextual links.
+- **20% original evidence/utility:** real product examples, methodology,
+  anonymized data, calculators, templates, and approved customer proof.
+- **10% net-new pages:** usually no more than one or two strong pages per month.
+
+A new page needs measured demand, a unique intent owner, a commercial path to
+Loqara, primary sources collected before drafting, a contribution competitors
+cannot reproduce cheaply, assigned internal links, and a 7/28-day review plan.
+If any item is missing, refresh an existing owner page instead.
+
 ## The ritual (Mondays)
 
 1. **Export Search Console data.** GSC → Performance → last 3 months → filter to
    Queries (and separately Pages). Export both as CSV.
-2. **Run the gap-analysis prompt below** — paste it into Claude with the two CSVs
-   attached. You get back 5–10 ranked opportunities + article briefs.
-3. **Write 3–5 articles** from the briefs, following the article format spec below.
-   Save them as `content/blog/<slug>.md` (copy an existing post's frontmatter).
-4. **Deploy** (push to `main` → Vercel auto-deploys) and **submit for indexing** in
-   both GSC *and* Bing Webmaster Tools (URL Inspection → Request indexing).
+2. **Run the gap-analysis prompt below** with both property-wide and page-filtered
+   query data. Rank refresh, consolidation, evidence, and new-page opportunities.
+3. **Choose one highest-value action** that passes the allocation and approval
+   gate above. Record the page, query, reader job, hypothesis, exact change, and
+   business outcome before editing.
+4. **Review and ship** using the article format and release checks below. Push to
+   `main`, smoke the production URL, then request indexing only for the changed URL.
+5. **Schedule reviews:** a 7-day technical/indexing check and a 28-day comparable
+   performance check. Record clicks, impressions, CTR, position, target-country
+   traffic, and organic conversion events; do not declare a result early.
 
 The loop compounds: each ranking article adds impressions for related queries, which
 feed next Monday's gap analysis.
@@ -60,7 +80,16 @@ Find me, ranked by opportunity (impressions × how winnable):
    EXISTING page could push us onto page one. Name the page and what to add.
 4. EMERGING QUERIES — new terms appearing recently we haven't targeted.
 
-Then output 3–5 ARTICLE BRIEFS for the best new-page opportunities. Each brief:
+Then output a ranked ACTION QUEUE. Prefer existing-page refreshes and
+consolidations. For each action include:
+- Action type: refresh, consolidate, add evidence/utility, or net-new page
+- Owner URL (or proposed URL only if no existing page owns the intent)
+- Target query, current impressions/position, reader job, and commercial path
+- What unique evidence or utility should be added
+- Exact internal links to add in both directions
+- One measurable hypothesis and its 7/28-day review fields
+
+Only for a net-new opportunity that passes the approval gate, add an ARTICLE BRIEF:
 - Working title (include the target query naturally)
 - Target query + 3–5 related queries to cover
 - Search intent + who it's for
@@ -77,21 +106,40 @@ rank well for or that's off-audience (developer-only queries).
 
 ## Article format spec
 
-Every new post follows this shape — it's what ranks on Google and what AI engines lift.
+Every new or materially refreshed post follows this shape because it helps people
+and makes scoped claims easier for search and answer systems to understand. The
+shape does not guarantee rankings, rich results, or AI citations.
 
 - **Opening paragraph**: real context, not fluff.
 - **Quick Answer**: a `<blockquote class="quick-answer">` with a direct 40–60 word answer
-  to the title's question, placed right after the intro. AI engines pull the first
-  concise, self-contained answer on the page — this is the single highest-leverage
-  AEO element. (See `best-ai-chatbot-for-shopify.md` for the reference implementation.)
+  to the title's question, placed right after the intro. Keep its subject, scope,
+  date, and caveat intact so the answer remains useful out of context. This aids
+  comprehension and extractability; it is not a citation guarantee. (See
+  `best-ai-chatbot-for-shopify.md` for the reference implementation.)
 - **Question-based H2s**: phrase headings the way people ask ("How do I choose a
   Shopify chatbot?"), not as noun labels ("The tools, in detail"). These map to real
   prompts and get pulled into AI answers. Don't force it — a strong keyword heading
   can stay.
 - **Internal links**: to relevant `/blog` posts and product/category pages.
-- **FAQ section**: an H2 titled exactly `Frequently asked questions` with 6+ `### question`
-  headings. `lib/blog.ts` parses this into FAQPage JSON-LD automatically — it's what
-  earns rich results and feeds AI citations. Keep answers self-contained (40–80 words).
+- **FAQ section**: use an H2 titled exactly `Frequently asked questions` with
+  genuine `### question` headings only when follow-up questions help the reader.
+  `lib/blog.ts` mirrors the visible Q&A into FAQPage JSON-LD. Google no longer
+  shows FAQ rich results for ordinary commercial sites, and the schema does not
+  guarantee rankings or AI citations. Keep useful answers self-contained.
+
+## Review record (required for every shipped action)
+
+```text
+Page:
+Primary query / reader job:
+Action and hypothesis:
+Deployed (date + SHA):
+7-day technical/indexing review:
+28-day clicks / impressions / CTR / position:
+Target-country traffic:
+CTA opens / signup starts / completed signups:
+Decision: keep / extend / revise / consolidate
+```
 
 ## What else moves AEO (off this loop)
 

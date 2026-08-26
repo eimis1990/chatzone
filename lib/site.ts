@@ -17,7 +17,7 @@ export const SITE_NAME = 'Loqara'
  * manually when the copy meaningfully changes; never derive from build time.
  */
 export const LEGAL_UPDATED = {
-  privacy: '2026-07-02',
+  privacy: '2026-08-26',
   terms: '2026-07-02',
 } as const
 

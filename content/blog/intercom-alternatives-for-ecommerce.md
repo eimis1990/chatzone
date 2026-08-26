@@ -13,12 +13,12 @@ Intercom is one of the most polished support platforms on the market, and its Fi
 
 Because Intercom is built for large SaaS and support organisations, and the price reflects that. You pay per seat *and* per resolution, on top of a platform that's designed around product tours, complex multi-step workflows, and big support teams living in the inbox all day. If you're a five-person store that mostly needs to answer "where's my order?" and "does this come in blue?", you're renting a cathedral to host a coffee morning. Below is an honest look at the lighter alternatives — what each does well, how the pricing models actually behave, and who each one genuinely fits.
 
-<blockquote class="quick-answer">For a store rather than a large SaaS, the best Intercom alternative is <strong>Loqara</strong>: a store-shaped agent built around your catalog and orders, with grounded AI chat <em>and</em> voice, a one-line install, and predictable per-conversation pricing plus a real free tier. Intercom and Fin stay excellent if you're a larger support org where the per-resolution math pays off.</blockquote>
+<blockquote class="quick-answer">For a store rather than a large SaaS, the best Intercom alternative is <strong>Loqara</strong>: a store-shaped agent with grounded AI chat <em>and</em> voice, live catalog search, supported-store order lookup, a one-line install, and predictable per-conversation pricing plus a real free tier. Intercom and Fin stay excellent for larger support teams where the per-resolution math pays off.</blockquote>
 
 <div class="takeaways">
 <p class="takeaways-title">Quick take</p>
 <ul>
-<li><strong>Best store-shaped alternative:</strong> Loqara — grounded AI chat <em>and</em> voice, live product search + order lookup, one-line install, predictable per-conversation pricing with a real free tier.</li>
+<li><strong>Best store-shaped alternative:</strong> Loqara — grounded AI chat <em>and</em> voice, live product search, WooCommerce/Magento order lookup, one-line install, predictable per-conversation pricing with a real free tier.</li>
 <li><strong>Best e-commerce helpdesk:</strong> Gorgias — purpose-built for stores, deep order/return automation, AI billed per resolution.</li>
 <li><strong>Best for DIY flow-builders:</strong> Tidio — friendly visual builder, though its Lyro AI is metered separately.</li>
 <li><strong>Lighter inbox, mid-size stores:</strong> Re:amaze or Crisp — multichannel without the enterprise weight.</li>
@@ -59,7 +59,7 @@ A side-by-side before the detail. "Store actions" means native product search an
 
 | Tool | Built-in AI | Store actions | Voice | Pricing model | Best fit |
 | --- | --- | --- | --- | --- | --- |
-| **Loqara** | Grounded, included | Product search + order lookup | Yes (add-on) | Per conversation, free tier | Small–mid stores wanting AI + optional voice |
+| **Loqara** | Grounded, included | Product search; order lookup on WooCommerce/Magento | Yes (add-on) | Per conversation, free tier | Small–mid stores wanting AI + optional voice |
 | **Tidio** | Lyro (metered add-on) | Order lookup | No | Per conversation + metered Lyro | Beginners who like building flows |
 | **Gorgias** | Per-resolution, every plan | Order edits + returns | No | Tiered by tickets + per AI resolution | Established multichannel support teams |
 | **Re:amaze** | Included, capped | Native order actions | No | Per user | Mid-size multichannel stores |
@@ -73,10 +73,10 @@ A side-by-side before the detail. "Store actions" means native product search an
 
 <p class="pills"><span class="pill pill-best">Best for: small &amp; growing stores</span><span class="pill">Free tier: 100 chats/mo</span><span class="pill">Chat + voice</span></p>
 
-Loqara answers from your own content with citations — so it never invents a policy — searches your live catalog, and looks up a customer's order after a quick identity check, all inside one widget you install with a single line. It connects to [WooCommerce](/blog/add-ai-agent-to-woocommerce), [Shopify](/blog/best-ai-chatbot-for-shopify), and Magento (plus a generic product feed), so the agent works against your real products and orders, not a static FAQ. It's also the only one here with a real-time **[voice agent](/blog/voice-ai-for-ecommerce-support)** built into the chat widget itself (English and Lithuanian today; Intercom's Fin Voice covers phone calls, priced separately), so customers can literally talk to your store. Pricing is per conversation rather than per "resolution," which keeps the bill predictable as you grow, and there's a genuine free tier (100 conversations a month) to prove it on your real traffic before paying anything.
+Loqara answers from your own content with citations and searches connected catalogs inside one widget you install with a single line. Identity-checked order lookup currently works on WooCommerce and Magento, but not Shopify, Verskis, or generic-feed stores. Product search connects to [WooCommerce](/blog/add-ai-agent-to-woocommerce), [Shopify](/blog/best-ai-chatbot-for-shopify), Magento, Verskis, and supported feeds. Loqara also has a real-time **[voice agent](/blog/voice-ai-for-ecommerce-support)** built into the chat widget itself (English and Lithuanian today; Intercom's Fin Voice covers phone calls, priced separately), so customers can literally talk to your store. Pricing is per conversation rather than per "resolution," which keeps the bill predictable as you grow, and there's a genuine free tier (100 conversations a month) to prove it on your real traffic before paying anything.
 
 <div class="proscons">
-<div class="pros"><p class="pc-title">Strengths</p><ul><li>Grounded answers with citations — no invented policies</li><li>Live product search + order lookup built in</li><li>Connectors for WooCommerce, Shopify, Magento, and product feeds</li><li>Chat <em>and</em> real-time voice in the same widget</li><li>Shared-inbox live human handoff, plus analytics and CSAT</li><li>One-line install, live the same day; predictable per-conversation pricing with a real free tier</li></ul></div>
+<div class="pros"><p class="pc-title">Strengths</p><ul><li>Grounded answers with citations — no invented policies</li><li>Live product search across connected catalogs</li><li>Identity-checked order lookup on WooCommerce and Magento</li><li>Connectors for WooCommerce, Shopify, Magento, and product feeds</li><li>Chat <em>and</em> real-time voice in the same widget</li><li>Shared-inbox live human handoff, plus analytics and CSAT</li><li>One-line install, live the same day; predictable per-conversation pricing with a real free tier</li></ul></div>
 <div class="cons"><p class="pc-title">Watch-outs</p><ul><li>Not a full email/social ticketing suite — it's an AI agent + live chat, not Intercom-grade workflow tooling</li><li>Newer than the incumbents below</li><li>Voice is a paid add-on on top of the base plan; voice languages are English and Lithuanian for now</li></ul></div>
 </div>
 
@@ -143,7 +143,7 @@ Fin is genuinely one of the strongest AI agents available — Intercom reports a
 A resolution is a vendor-defined outcome that can be counted more than once per customer, while a conversation is a single customer thread regardless of how it ends. The definition — and what gets counted — varies by vendor, so the same traffic can cost very differently under each model. Always model your real monthly volume against each unit before committing.
 
 ### Can an Intercom alternative look up orders and search my catalog?
-Yes — that's exactly what a store-shaped agent should do. Loqara connects to WooCommerce, Shopify, and Magento (plus a product feed) to search your live catalog and look up a customer's order after a quick identity check. That order-lookup ability is what actually [deflects the repetitive tickets](/blog/reduce-support-tickets-with-ai), which FAQ-only bots can't touch.
+The two capabilities must be checked separately. Loqara searches products on WooCommerce, Shopify, Magento, Verskis, and supported feeds. Identity-checked order lookup currently works only on WooCommerce and Magento—not Shopify, Verskis, or feed stores. That supported order access can [deflect repetitive tickets](/blog/reduce-support-tickets-with-ai), while other stores should retain their native tracking path.
 
 ### Do cheaper Intercom alternatives still hand off to a human?
 The good ones do, on every plan. Loqara includes a shared-inbox live handoff so a person can step in without the customer repeating themselves, and tools like Gorgias and Re:amaze are built around a human inbox by design. Be wary of any tool that gates handoff behind its top tier.

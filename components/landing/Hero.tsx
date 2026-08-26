@@ -19,7 +19,7 @@ export function Hero() {
 
           <p className="landing-hero-subtitle max-w-4xl leading-relaxed text-[#595c5e]">
             Loqara gives every shopper instant answers by voice or chat — grounded in your
-            products, policies, and live order data.
+            products and policies, with live catalog search on connected stores.
           </p>
 
           <div className="landing-hero-cta">

@@ -1,4 +1,11 @@
 import { track } from '@vercel/analytics'
+import type { FunnelProperties } from '@/lib/acquisition'
+
+declare global {
+  interface Window {
+    gtag?: (command: 'event', name: string, properties: Record<string, Primitive>) => void
+  }
+}
 
 /**
  * Centralised custom-event tracking for Vercel Web Analytics.
@@ -18,14 +25,18 @@ type Primitive = string | number | boolean | null
 
 export interface AnalyticsEvents {
   // ── Landing / acquisition ──────────────────────────────────────────────
+  /** A visible Get Started trigger was clicked. */
+  get_started_cta_clicked: FunnelProperties
+  /** The signup form received its first real interaction. */
+  signup_started: FunnelProperties
   /** Early-access email form submitted (fires on attempt). */
-  signup_submitted: { source: string }
+  signup_submitted: FunnelProperties
   /** Email accepted by the API. */
-  signup_succeeded: { source: string }
+  signup_succeeded: FunnelProperties
   /** Email rejected or network error. */
-  signup_failed: { source: string; reason: string }
+  signup_failed: FunnelProperties & { reason: string }
   /** The "Get started" signup dialog was opened (before any submit). */
-  get_started_opened: { source: string }
+  get_started_opened: FunnelProperties
   /** A top-nav anchor was clicked (Features / How it works / Pricing / FAQ). */
   nav_click: { target: string }
   /** The "Sign in" button was clicked. */
@@ -66,5 +77,15 @@ export function trackEvent<K extends keyof AnalyticsEvents>(
   name: K,
   props: AnalyticsEvents[K],
 ): void {
-  track(name as string, props as Record<string, Primitive>)
+  const properties = props as Record<string, Primitive>
+  try {
+    track(name as string, properties)
+  } catch {
+    // Analytics must never interrupt the action it observes.
+  }
+  try {
+    window.gtag?.('event', name as string, properties)
+  } catch {
+    // Ad blockers and delayed third-party scripts are expected failure modes.
+  }
 }

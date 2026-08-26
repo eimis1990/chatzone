@@ -13,12 +13,12 @@ Gorgias is one of the best-known helpdesks in e-commerce, and deservedly so — 
 
 The friction is usually weight and cost. Gorgias is a full multichannel helpdesk priced for teams, and its AI Agent bills **per resolution** on top of a ticket-based plan ([Gorgias pricing](https://www.gorgias.com/pricing)) — math that's hard to forecast when you're a lean store doing a few hundred conversations a month. So the real question is rarely "is Gorgias good?" It is. The question is "is it the right *weight* for my store right now?" Below is an honest look at the best alternatives in 2026, who each one actually suits, and how to choose.
 
-<blockquote class="quick-answer">For most lean and growing stores, the best Gorgias alternative is <strong>Loqara</strong>: grounded AI chat <em>and</em> voice, live product search and order lookup, a one-line install, and predictable per-conversation pricing with a real free tier. Stay on Gorgias if you run a busy multichannel team where its per-resolution AI math already pays off.</blockquote>
+<blockquote class="quick-answer">For most lean and growing stores, the best Gorgias alternative is <strong>Loqara</strong>: grounded AI chat <em>and</em> voice, live product search, supported-store order lookup, a one-line install, and predictable per-conversation pricing with a real free tier. Stay on Gorgias if you run a busy multichannel team where its per-resolution AI math already pays off.</blockquote>
 
 <div class="takeaways">
 <p class="takeaways-title">Quick take</p>
 <ul>
-<li><strong>Best for lean &amp; growing stores:</strong> <a href="/#get-started">Loqara</a> — grounded AI chat <em>and</em> voice, live product search + order lookup, one-line install, predictable per-conversation pricing with a real free tier.</li>
+<li><strong>Best for lean &amp; growing stores:</strong> <a href="/#get-started">Loqara</a> — grounded AI chat <em>and</em> voice, live product search, WooCommerce/Magento order lookup, one-line install, predictable per-conversation pricing with a real free tier.</li>
 <li><strong>Stay on Gorgias if:</strong> you run a busy multichannel team, lean on macros and automations, and the per-resolution math already works at your volume.</li>
 <li><strong>Best DIY flow-builder:</strong> Tidio — friendly, though its Lyro AI is a paid add-on.</li>
 <li><strong>Best classic mid-market inbox:</strong> Re:amaze or Help Scout — lighter helpdesk feel than Gorgias.</li>
@@ -56,7 +56,7 @@ A side-by-side before the detail. "Store actions" means native product search an
 
 | Tool | Built-in AI | Store actions | Voice | Pricing model | Best fit |
 | --- | --- | --- | --- | --- | --- |
-| **Loqara** | Grounded, included | Product search + order lookup | Yes (add-on) | Per conversation, free tier | Lean–mid stores wanting AI + optional voice |
+| **Loqara** | Grounded, included | Product search; order lookup on WooCommerce/Magento | Yes (add-on) | Per conversation, free tier | Lean–mid stores wanting AI + optional voice |
 | **Gorgias** | Per-resolution add-on | Order edits + returns | No | Tiered + per AI resolution | Established multichannel support teams |
 | **Tidio** | Lyro (metered add-on) | Order lookup | No | Per conversation + Lyro add-on | Beginners who like building flows |
 | **Re:amaze** | Included, resolution caps | Native order actions | No | Per seat | Mid-size multichannel stores |
@@ -70,10 +70,10 @@ A side-by-side before the detail. "Store actions" means native product search an
 
 <p class="pills"><span class="pill pill-best">Best for: lean &amp; growing stores</span><span class="pill">Free tier: 100 chats/mo</span><span class="pill">Chat + voice</span></p>
 
-Loqara answers from your own content with citations, searches your live catalog, and looks up a customer's order after a quick identity check — all inside one widget you install with a single line of code. It connects to WooCommerce, Shopify, and Magento (plus a product feed for anything else), so the agent works against your real products and orders, not a static FAQ. It's the only option here with a real-time **[voice agent](/blog/voice-ai-for-ecommerce-support)** built into the chat widget itself (English and Lithuanian), so customers can literally talk to your store. Pricing is per conversation rather than per "resolution," with a genuine free plan (100 conversations/month) and paid plans from €149 — so there's no per-resolution surprise as you grow. Best for small-to-mid stores that want capable AI support without a heavyweight helpdesk.
+Loqara answers from your own content with citations and searches connected catalogs inside one widget you install with a single line of code. Identity-checked order lookup is currently available for WooCommerce and Magento, but not Shopify, Verskis, or generic-feed stores. Product search connects to WooCommerce, Shopify, Magento, Verskis, and product feeds. It's the only option here with a real-time **[voice agent](/blog/voice-ai-for-ecommerce-support)** built into the chat widget itself (English and Lithuanian), so customers can literally talk to your store. Pricing is per conversation rather than per "resolution," with a genuine free plan (100 conversations/month) and paid plans from €149 — so there's no per-resolution surprise as you grow. Best for small-to-mid stores that want capable AI support without a heavyweight helpdesk.
 
 <div class="proscons">
-<div class="pros"><p class="pc-title">Strengths</p><ul><li>Grounded answers with citations — never invents a policy</li><li>Live product search + order lookup built in</li><li>Connectors for WooCommerce, Shopify, Magento (+ product feed)</li><li>Chat <em>and</em> voice in the same widget</li><li>One-line install, live the same day</li><li>Predictable per-conversation pricing, real free tier; shared-inbox handoff, analytics + CSAT</li></ul></div>
+<div class="pros"><p class="pc-title">Strengths</p><ul><li>Grounded answers with citations — never invents a policy</li><li>Live product search across connected catalogs</li><li>Identity-checked order lookup on WooCommerce and Magento</li><li>Connectors for WooCommerce, Shopify, Magento (+ product feed)</li><li>Chat <em>and</em> voice in the same widget</li><li>One-line install, live the same day</li><li>Predictable per-conversation pricing, real free tier; shared-inbox handoff, analytics + CSAT</li></ul></div>
 <div class="cons"><p class="pc-title">Watch-outs</p><ul><li>Not a full email/social helpdesk — it's an AI agent + live chat, not a ticketing suite</li><li>Newer than the incumbents below</li><li>Voice is a paid add-on on top of the base plan</li></ul></div>
 </div>
 
@@ -128,7 +128,7 @@ If you're switching mainly to deflect repetitive tickets, the win comes from the
 
 ### What is the best Gorgias alternative for a small store?
 
-For a small or growing store, the best alternative is usually a per-conversation AI agent rather than another full helpdesk. Loqara is built for exactly this — grounded answers, live product search and order lookup, and a flat plan with a free tier of 100 conversations a month — so you avoid the per-resolution pricing that makes Gorgias hard to forecast at low volume.
+For a small or growing store, the best alternative is usually a per-conversation AI agent rather than another full helpdesk. Loqara is built for exactly this — grounded answers, live product search, order lookup on supported WooCommerce and Magento stores, and a flat plan with a free tier of 100 conversations a month — so you avoid the per-resolution pricing that makes Gorgias hard to forecast at low volume.
 
 ### Why is Gorgias considered expensive?
 
@@ -140,7 +140,7 @@ A "conversation" is one customer thread, billed once. A "resolution" is defined 
 
 ### Will a Gorgias alternative still connect to my store's orders?
 
-Yes — the good ones do. Loqara connects to WooCommerce, Shopify, and Magento (plus a product feed for anything else) so the agent can search live products and look up a customer's order after a quick identity check. That order-lookup ability is what actually deflects the repetitive "where's my order?" tickets.
+Capabilities vary by platform. Loqara searches products on WooCommerce, Shopify, Magento, Verskis, and supported feeds. Its identity-checked order lookup currently works on WooCommerce and Magento; it does not look up Shopify, Verskis, or feed-store orders. Verify the exact provider action rather than treating “connects to my store” as proof of order access.
 
 ### Is there a free Gorgias alternative?
 

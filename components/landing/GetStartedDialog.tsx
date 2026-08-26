@@ -13,6 +13,11 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Shimmer } from './Shimmer'
 import { trackEvent } from '@/lib/analytics'
+import {
+  captureFirstTouch,
+  funnelProperties,
+  type AcquisitionContext,
+} from '@/lib/acquisition'
 
 /**
  * Celebratory burst on a successful signup — same canvas-confetti recipe the
@@ -95,15 +100,31 @@ export function GetStartedDialog({
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const submitRef = useRef<HTMLButtonElement>(null)
+  const acquisitionRef = useRef<AcquisitionContext | null>(null)
+  const signupStartedRef = useRef(false)
   // Bot filters: a hidden field real users never see, and the time the form
   // opened (instant submits are scripts, not people reading the dialog).
   const [honeypot, setHoneypot] = useState('')
   const openedAtRef = useRef(0)
 
+  const acquisition = () => {
+    acquisitionRef.current ??= captureFirstTouch()
+    return acquisitionRef.current
+  }
+
+  const eventProperties = () => funnelProperties(source, acquisition())
+
+  const markSignupStarted = () => {
+    if (signupStartedRef.current) return
+    signupStartedRef.current = true
+    trackEvent('signup_started', eventProperties())
+  }
+
   const handleOpenChange = (next: boolean) => {
     setOpen(next)
     if (!next) return
     openedAtRef.current = Date.now()
+    signupStartedRef.current = false
     // A fresh visit after a completed signup starts back at the form.
     if (step === 'done') {
       setStep('form')
@@ -112,7 +133,7 @@ export function GetStartedDialog({
       setEmail('')
     }
     setError('')
-    trackEvent('get_started_opened', { source })
+    trackEvent('get_started_opened', eventProperties())
     onOpen?.()
   }
 
@@ -150,7 +171,7 @@ export function GetStartedDialog({
     const site = normalizeWebsite(website)
     setLoading(true)
     setError('')
-    trackEvent('signup_submitted', { source })
+    trackEvent('signup_submitted', eventProperties())
     try {
       const res = await fetch('/api/signup', {
         method: 'POST',
@@ -160,13 +181,18 @@ export function GetStartedDialog({
           company: cleanCompany,
           ...(site ? { website: site } : {}),
           source,
+          acquisition: acquisition(),
           confirm_url: honeypot,
           t: openedAtRef.current ? Date.now() - openedAtRef.current : undefined,
         }),
       })
-      const data = (await res.json().catch(() => ({}))) as { ok?: boolean; error?: string }
+      const data = (await res.json().catch(() => ({}))) as {
+        ok?: boolean
+        recorded?: boolean
+        error?: string
+      }
       if (res.ok && data.ok) {
-        trackEvent('signup_succeeded', { source })
+        if (data.recorded) trackEvent('signup_succeeded', eventProperties())
         // Capture the button's screen position before the step swaps, then celebrate.
         const rect = submitRef.current?.getBoundingClientRect()
         const origin = rect
@@ -185,13 +211,13 @@ export function GetStartedDialog({
             : (data.error ?? 'Something went wrong — please try again.')
         setError(message)
         trackEvent('signup_failed', {
-          source,
+          ...eventProperties(),
           reason: res.status === 429 ? 'rate_limited' : (data.error ?? 'unknown'),
         })
       }
     } catch {
       setError('Network error — please try again.')
-      trackEvent('signup_failed', { source, reason: 'network' })
+      trackEvent('signup_failed', { ...eventProperties(), reason: 'network' })
     } finally {
       setLoading(false)
     }
@@ -199,7 +225,10 @@ export function GetStartedDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger className={triggerClassName}>
+      <DialogTrigger
+        className={triggerClassName}
+        onClick={() => trackEvent('get_started_cta_clicked', eventProperties())}
+      >
         {shimmer ? (
           <>
             <span className="relative z-10">{label}</span>
@@ -235,7 +264,10 @@ export function GetStartedDialog({
                   maxLength={80}
                   placeholder="e.g. Northside Coffee Roasters"
                   value={company}
-                  onChange={(e) => setCompany(e.target.value)}
+                  onChange={(e) => {
+                    markSignupStarted()
+                    setCompany(e.target.value)
+                  }}
                   className="h-11"
                 />
               </div>
@@ -263,7 +295,10 @@ export function GetStartedDialog({
                   maxLength={200}
                   placeholder="you@company.com"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => {
+                    markSignupStarted()
+                    setEmail(e.target.value)
+                  }}
                   aria-invalid={error ? true : undefined}
                   className="h-11"
                 />
@@ -281,7 +316,10 @@ export function GetStartedDialog({
                   maxLength={200}
                   placeholder="https://your-store.com"
                   value={website}
-                  onChange={(e) => setWebsite(e.target.value)}
+                  onChange={(e) => {
+                    markSignupStarted()
+                    setWebsite(e.target.value)
+                  }}
                   onBlur={() => setWebsite((w) => normalizeWebsite(w))}
                   className="h-11"
                 />
