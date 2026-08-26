@@ -37,6 +37,58 @@ export interface SignupCardData {
   suggestedName: string
 }
 
+/** Shared destructive action for both signup cards and accepted-signup rows. */
+export function SignupDeleteButton({ signup }: { signup: Pick<SignupCardData, 'id' | 'email'> }) {
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const [pending, startTransition] = useTransition()
+
+  const onDelete = () => {
+    startTransition(async () => {
+      const res = await deleteSignup(signup.id)
+      if (!res.ok) {
+        toast.error(res.error ?? 'Failed to remove signup')
+        return
+      }
+      setConfirmOpen(false)
+      toast.success(`Removed ${signup.email}`)
+    })
+  }
+
+  return (
+    <>
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        onClick={() => setConfirmOpen(true)}
+        aria-label={`Remove ${signup.email} from signups`}
+        title="Remove signup"
+        className="size-10"
+      >
+        <Trash2Icon />
+      </Button>
+
+      <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogTitle>Remove this signup?</DialogTitle>
+          <DialogDescription>
+            <span className="font-medium text-foreground">{signup.email}</span> will be removed
+            from the list permanently. Any client or invitation you already created stays intact.
+          </DialogDescription>
+          <div className="mt-2 flex justify-end gap-2">
+            <Button variant="ghost" onClick={() => setConfirmOpen(false)} disabled={pending}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={onDelete} disabled={pending}>
+              {pending ? 'Removing…' : 'Remove'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
+  )
+}
+
 /** A clean, colour-coded status pill per signup state. */
 function statusBadge(s: SignupCardData): { label: string; className: string } {
   if (s.inviteStatus === 'accepted') return { label: 'Accepted', className: 'bg-green-100 text-green-700' }
@@ -49,7 +101,6 @@ function statusBadge(s: SignupCardData): { label: string; className: string } {
 export function SignupCard({ signup }: { signup: SignupCardData }) {
   const [name, setName] = useState(signup.suggestedName)
   const [inviteUrl, setInviteUrl] = useState<string | null>(null)
-  const [confirmOpen, setConfirmOpen] = useState(false)
   const [pending, startTransition] = useTransition()
   const badge = statusBadge(signup)
   const accepted = signup.inviteStatus === 'accepted'
@@ -88,18 +139,6 @@ export function SignupCard({ signup }: { signup: SignupCardData }) {
       toast.success(
         res.emailed ? `Invitation re-sent to ${signup.email}` : 'New invite link ready — copy it below',
       )
-    })
-  }
-
-  const onDelete = () => {
-    startTransition(async () => {
-      const res = await deleteSignup(signup.id)
-      if (!res.ok) {
-        toast.error(res.error ?? 'Failed to remove signup')
-        return
-      }
-      setConfirmOpen(false)
-      toast.success(`Removed ${signup.email}`)
     })
   }
 
@@ -164,34 +203,8 @@ export function SignupCard({ signup }: { signup: SignupCardData }) {
           <span>· signed up {formatDistanceToNow(signup.created_at)}</span>
           {signup.invited_at && <span>· invited {formatDistanceToNow(signup.invited_at)}</span>}
         </div>
-        <button
-          type="button"
-          onClick={() => setConfirmOpen(true)}
-          aria-label={`Remove ${signup.email} from signups`}
-          title="Remove signup"
-          className="flex size-7 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
-        >
-          <Trash2Icon className="size-3.5" />
-        </button>
+        <SignupDeleteButton signup={signup} />
       </div>
-
-      <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
-        <DialogContent className="sm:max-w-sm">
-          <DialogTitle>Remove this signup?</DialogTitle>
-          <DialogDescription>
-            <span className="font-medium text-foreground">{signup.email}</span> will be removed
-            from the list permanently. Any client or invitation you already created stays intact.
-          </DialogDescription>
-          <div className="mt-2 flex justify-end gap-2">
-            <Button variant="ghost" onClick={() => setConfirmOpen(false)} disabled={pending}>
-              Cancel
-            </Button>
-            <Button variant="destructive" onClick={onDelete} disabled={pending}>
-              {pending ? 'Removing…' : 'Remove'}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
 
       {canInvite && !inviteUrl && (
         <div className="flex gap-2 border-t pt-3">

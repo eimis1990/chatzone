@@ -2,6 +2,7 @@ import { requireRole } from '@/lib/auth/guards'
 import { createServerClient } from '@/lib/supabase/server'
 import { companyNameFromWebsite } from '@/lib/invites'
 import { SignupsExport } from '@/components/owner/SignupsExport'
+import { AcceptedSignupsTable } from '@/components/owner/AcceptedSignupsTable'
 import { SignupCard, type SignupCardData } from '@/components/owner/SignupCard'
 
 interface SignupRow {
@@ -51,8 +52,8 @@ export default async function SignupsPage() {
     suggestedName: s.company?.trim() || companyNameFromWebsite(s.website),
   }))
 
-  // Group by lifecycle stage so each section's cards are uniform (New cards have
-  // an invite form, Invited have a resend, Accepted are done) — no ragged rows.
+  // Group by lifecycle stage: New cards have an invite form, Invited cards have
+  // a resend action, and completed Accepted signups use the compact table.
   const isAccepted = (c: SignupCardData) => c.inviteStatus === 'accepted'
   const isInvited = (c: SignupCardData) =>
     !isAccepted(c) &&
@@ -84,7 +85,7 @@ export default async function SignupsPage() {
         <div className="space-y-8">
           <SignupSection title="New" cards={newCards} />
           <SignupSection title="Invited" cards={invitedCards} />
-          <SignupSection title="Accepted" cards={acceptedCards} />
+          <AcceptedSignupsTable signups={acceptedCards} />
         </div>
       )}
     </div>

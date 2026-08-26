@@ -21,6 +21,17 @@ Two roles: **owner** (platform / us) and **client** (a store on the platform).
 - The owner reuses the client components (`ConfigForm`, `KnowledgeManager`,
   `EmbedSnippetPanel`) with an `audience="owner"` / service-backed save.
 
+## Owner signup triage
+
+- `/owner/signups` derives New, Invited, and Accepted groups from the signup row
+  plus the latest invite status (`app/(owner)/owner/signups/page.tsx:40-63`).
+- Preserve the lifecycle-specific UI: New/Invited remain action cards, while
+  Accepted is a compact responsive table that folds website/source/timeline
+  metadata into the client cell on narrow screens
+  (`app/(owner)/owner/signups/page.tsx:85-88`,
+  `components/owner/AcceptedSignupsTable.tsx:22-142`). The shared removal action
+  and confirmation live in `components/owner/SignupCard.tsx:40-90`.
+
 ## Security invariants (see `docs/SECURITY.md`)
 
 - `profiles.role` locked by trigger (no self-escalation).
@@ -28,4 +39,4 @@ Two roles: **owner** (platform / us) and **client** (a store on the platform).
 - Fail-closed cron jobs.
 - From the 2026-07-01 full audit.
 
-_Last verified: 2026-07-08 (seeded from notes + this session's owner work)._
+_Last verified: 2026-08-26 (94a9e4b)._
