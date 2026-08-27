@@ -3,16 +3,18 @@
 import { useState, useTransition, type ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
+import Link from 'next/link'
 import {
   CheckIcon,
   ExternalLinkIcon,
   Loader2Icon,
   Clock3Icon,
+  MessageCircleIcon,
   MinusIcon,
   PlusIcon,
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
 import {
   Card,
   CardAction,
@@ -72,6 +74,8 @@ interface BillingPanelProps {
   visualizerActive: boolean
   visualizerConfigured: boolean
   visualizer: { name: string; monthly: number; blurb: string; features: string[] }
+  /** Whether this org may reach the Messenger connect flow (see lib/channels/entitlement.ts). */
+  messengerEntitled?: boolean
   extraConversationsConfigured?: boolean
   /** Top-up conversations already purchased for the current month. */
   extraConversationsCredits?: number
@@ -224,6 +228,7 @@ export function BillingPanel({
   visualizerActive,
   visualizerConfigured,
   visualizer,
+  messengerEntitled = false,
   extraConversationsConfigured = false,
   extraConversationsCredits = 0,
   extraConversations,
@@ -855,13 +860,27 @@ export function BillingPanel({
                   'Human takeover from the Inbox',
                   'Connect in minutes — no setup fee',
                 ]}
-                status="coming"
-                helper="Waiting on Facebook app approval"
+                status={messengerEntitled ? 'available' : 'coming'}
+                helper={
+                  messengerEntitled
+                    ? 'Connect a Facebook Page to one of your bots'
+                    : 'Waiting on Facebook app approval'
+                }
                 action={
-                  <Button className="h-11 w-full rounded-xl" size="lg" variant="outline" disabled>
-                    <Clock3Icon data-icon="inline-start" aria-hidden="true" />
-                    Coming soon
-                  </Button>
+                  messengerEntitled ? (
+                    <Link
+                      href="/app/channels/messenger/connect"
+                      className={cn(buttonVariants({ size: 'lg' }), 'h-11 w-full rounded-xl')}
+                    >
+                      <MessageCircleIcon data-icon="inline-start" aria-hidden="true" />
+                      Connect Messenger
+                    </Link>
+                  ) : (
+                    <Button className="h-11 w-full rounded-xl" size="lg" variant="outline" disabled>
+                      <Clock3Icon data-icon="inline-start" aria-hidden="true" />
+                      Coming soon
+                    </Button>
+                  )
                 }
               />
 

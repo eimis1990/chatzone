@@ -17,6 +17,7 @@ import {
 } from '@/lib/stripe/manage'
 import { entitlementsFor } from '@/lib/entitlements'
 import { extraConversationsThisMonth } from '@/lib/usage'
+import { canConnectChannels, type ChannelOrg } from '@/lib/channels/entitlement'
 import { voiceUsageThisMonth } from '@/lib/voice-usage'
 import type { Plan, BillingInterval, SubscriptionStatus } from '@/lib/types'
 
@@ -148,6 +149,16 @@ export default async function SubscriptionPage({
       billing = await loadBilling(orgId)
     }
   }
+
+  // Who may reach the Messenger connect flow while the Meta app is unpublished.
+  const { data: channelOrg } = orgId
+    ? await createServiceClient()
+        .from('organizations')
+        .select('messenger_addon, is_demo, is_platform')
+        .eq('id', orgId)
+        .maybeSingle<ChannelOrg>()
+    : { data: null }
+  const messengerEntitled = canConnectChannels(channelOrg)
 
   const isPaying = PAYING.includes(billing.status) && Boolean(billing.subscriptionId)
   const ent = entitlementsFor(billing.plan)
@@ -393,6 +404,7 @@ export default async function SubscriptionPage({
           blurb: VOICE_ADDON.blurb,
           features: [...VOICE_ADDON.features],
         }}
+        messengerEntitled={messengerEntitled}
         visualizerActive={billing.visualizerActive}
         visualizerConfigured={Boolean(getVisualizerPriceId())}
         visualizer={{
