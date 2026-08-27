@@ -1,4 +1,5 @@
 import { requireRole, getUserOrgIds } from '@/lib/auth/guards'
+import { ChangePasswordCard } from '@/components/client/ChangePasswordCard'
 import { createServerClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { SettingsPanel, type NotificationPrefs } from '@/components/client/SettingsPanel'
@@ -7,7 +8,7 @@ import { prefEnabled } from '@/lib/notify'
 import type { Plan } from '@/lib/types'
 
 export default async function SettingsPage() {
-  await requireRole('client')
+  const session = await requireRole('client')
   const orgIds = await getUserOrgIds()
   const orgId = orgIds[0] ?? null
 
@@ -102,6 +103,8 @@ export default async function SettingsPage() {
         notifications={notifications}
         setNotifications={setNotifications}
       />
+
+      {session.email && <ChangePasswordCard email={session.email} />}
     </div>
   )
 }
