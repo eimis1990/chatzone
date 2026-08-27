@@ -2,7 +2,9 @@
 
 import { useTransition } from 'react'
 import { useRouter } from 'next/navigation'
+import { CirclePauseIcon, CirclePlayIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/spinner'
 import { toggleOrgStatus } from '@/app/(owner)/owner/clients/[orgId]/actions'
 
 interface SuspendToggleProps {
@@ -26,17 +28,24 @@ export function SuspendToggle({ orgId, currentStatus }: SuspendToggleProps) {
   return (
     <Button
       variant={isSuspended ? 'default' : 'destructive'}
-      size="sm"
+      className="h-11"
       onClick={handleToggle}
       disabled={isPending}
     >
+      {isPending ? (
+        <Spinner data-icon="inline-start" />
+      ) : isSuspended ? (
+        <CirclePlayIcon data-icon="inline-start" />
+      ) : (
+        <CirclePauseIcon data-icon="inline-start" />
+      )}
       {isPending
         ? isSuspended
           ? 'Activating…'
           : 'Suspending…'
         : isSuspended
-          ? 'Activate'
-          : 'Suspend'}
+          ? 'Activate client'
+          : 'Suspend client'}
     </Button>
   )
 }

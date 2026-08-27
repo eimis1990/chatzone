@@ -20,6 +20,13 @@ Two roles: **owner** (platform / us) and **client** (a store on the platform).
   client (`createBotForOrg` → `createBotInOrg`).
 - The owner reuses the client components (`ConfigForm`, `KnowledgeManager`,
   `EmbedSnippetPanel`) with an `audience="owner"` / service-backed save.
+- Keep `/owner/clients/[orgId]` action hierarchy deliberate: account status and
+  suspension belong in the header; blank bot creation is the primary Bots CTA;
+  prepared-demo duplication is a secondary footer workflow; per-bot Configure
+  actions stay aligned with live/status metadata. The bot rows collapse to a
+  stacked layout with full-width Configure actions on narrow screens
+  (`app/(owner)/owner/clients/[orgId]/page.tsx:178-314`,
+  `components/owner/DuplicateDemoBotForm.tsx:22-65`).
 
 ## Owner signup triage
 
@@ -39,4 +46,4 @@ Two roles: **owner** (platform / us) and **client** (a store on the platform).
 - Fail-closed cron jobs.
 - From the 2026-07-01 full audit.
 
-_Last verified: 2026-08-26 (94a9e4b)._
+_Last verified: 2026-08-27 (db6525d)._

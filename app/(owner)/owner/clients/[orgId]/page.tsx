@@ -1,20 +1,49 @@
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
-import { BotIcon, MailIcon, SparklesIcon } from 'lucide-react'
+import {
+  ArrowLeftIcon,
+  BotIcon,
+  Building2Icon,
+  CalendarDaysIcon,
+  KeyRoundIcon,
+  MailIcon,
+  MessageCircleIcon,
+  MessagesSquareIcon,
+  PlusIcon,
+  Settings2Icon,
+  SparklesIcon,
+  UserRoundCheckIcon,
+} from 'lucide-react'
 import { requireRole } from '@/lib/auth/guards'
 import { createServerClient } from '@/lib/supabase/server'
-import { StatCard } from '@/components/client/charts/StatCard'
+import { StatTileGrid, type StatTileData } from '@/components/client/charts/StatCard'
 import { LiveIndicator } from '@/components/LiveIndicator'
 import { Badge } from '@/components/ui/badge'
 import { buttonVariants } from '@/components/ui/button'
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '@/components/ui/empty'
 import { formatDistanceToNow, formatTimeUntil } from '@/lib/date-utils'
 import { SuspendToggle } from '@/components/owner/SuspendToggle'
 import { ResendInviteButton } from '@/components/owner/ResendInviteButton'
+import { DuplicateDemoBotForm } from '@/components/owner/DuplicateDemoBotForm'
 import { CreateBotDialog } from '@/components/client/CreateBotDialog'
-import { Button } from '@/components/ui/button'
-import { redirect } from 'next/navigation'
 import { createBotForOrg, createBotFromDemo } from './actions'
 import { SETUP_PACKAGES } from '@/lib/setup-packages'
+import { cn } from '@/lib/utils'
 import type { Bot, Invite } from '@/lib/types'
 
 interface SetupOrderRow {
@@ -59,12 +88,12 @@ export default async function ClientDetailPage({
 
   // "Create from demo": duplicate a prepared showcase bot (config + knowledge +
   // product index) into this client's org, then jump straight to its editor.
-  async function createFromDemo(formData: FormData) {
+  async function createFromDemo(demoBotId: string) {
     'use server'
-    const demoBotId = String(formData.get('demoBotId') ?? '')
-    if (!demoBotId) return
+    if (!demoBotId) return { error: 'Choose a demo bot first.' }
     const res = await createBotFromDemo(orgId, demoBotId)
     if (res.id) redirect(`/owner/clients/${orgId}/bots/${res.id}/configure`)
+    return res
   }
 
   const supabase = await createServerClient()
@@ -116,28 +145,56 @@ export default async function ClientDetailPage({
   >[]
   const inviteRows = (invites ?? []) as Pick<Invite, 'id' | 'email' | 'status' | 'expires_at' | 'created_at'>[]
   const setupRows = (setupOrders ?? []) as SetupOrderRow[]
+  const statTiles: StatTileData[] = [
+    { label: 'Bots', value: orgStat.bots, icon: BotIcon, accent: 'green' },
+    {
+      label: 'Conversations',
+      value: orgStat.conversations,
+      icon: MessageCircleIcon,
+      accent: 'blue',
+    },
+    {
+      label: 'Messages',
+      value: orgStat.messages,
+      icon: MessagesSquareIcon,
+      accent: 'violet',
+    },
+    { label: 'Leads', value: orgStat.leads, icon: UserRoundCheckIcon, accent: 'amber' },
+  ]
+  const demoOptions = (demoBots ?? []).map((bot) => ({ id: bot.id, name: bot.name }))
 
   return (
-    <div className="space-y-8 p-6">
+    <div className="flex max-w-7xl flex-col gap-6 p-6">
       {/* Breadcrumb */}
-      <nav className="text-sm text-muted-foreground flex items-center gap-1.5">
-        <Link href="/owner/clients" className="hover:text-foreground">
+      <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-sm text-muted-foreground">
+        <Link href="/owner/clients" className="inline-flex items-center gap-1.5 hover:text-foreground">
+          <ArrowLeftIcon className="size-4" aria-hidden="true" />
           Clients
         </Link>
-        <span>/</span>
-        <span className="text-foreground font-medium">{orgStat.org_name}</span>
+        <span aria-hidden="true">/</span>
+        <span className="font-medium text-foreground">{orgStat.org_name}</span>
       </nav>
 
       {/* Header */}
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-semibold">{orgStat.org_name}</h1>
-          <Badge
-            variant={orgStat.status === 'active' ? 'default' : 'secondary'}
-            className="capitalize"
-          >
-            {orgStat.status}
-          </Badge>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex min-w-0 items-center gap-3">
+          <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+            <Building2Icon className="size-6" aria-hidden="true" />
+          </span>
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <h1 className="truncate text-2xl font-semibold">{orgStat.org_name}</h1>
+              <Badge variant={orgStat.status === 'active' ? 'default' : 'secondary'}>
+                {orgStat.status === 'active' ? 'Active' : 'Suspended'}
+              </Badge>
+            </div>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Client workspace
+              {orgStat.last_activity_at
+                ? ` · Last activity ${formatDistanceToNow(orgStat.last_activity_at)}`
+                : ' · No activity yet'}
+            </p>
+          </div>
         </div>
         <SuspendToggle
           orgId={orgId}
@@ -145,185 +202,222 @@ export default async function ClientDetailPage({
         />
       </div>
 
-      {/* Stat cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <StatCard label="Bots" value={orgStat.bots} />
-        <StatCard label="Conversations" value={orgStat.conversations} />
-        <StatCard label="Messages" value={orgStat.messages} />
-        <StatCard label="Leads" value={orgStat.leads} />
-      </div>
+      {/* Compact account overview */}
+      <StatTileGrid stats={statTiles} />
 
       {/* Bots list */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between gap-4">
-          <h2 className="text-lg font-semibold">Bots</h2>
-          <div className="flex items-center gap-2">
-            {(demoBots ?? []).length > 0 && (
-              <form action={createFromDemo} className="flex items-center gap-2">
-                <select
-                  name="demoBotId"
-                  required
-                  defaultValue=""
-                  className="h-7 rounded-lg border border-input bg-background px-2 text-[0.8rem]"
-                  aria-label="Demo bot to duplicate"
-                >
-                  <option value="" disabled>
-                    Pick a demo…
-                  </option>
-                  {(demoBots ?? []).map((d) => (
-                    <option key={d.id} value={d.id}>
-                      {d.name}
-                    </option>
-                  ))}
-                </select>
-                <Button type="submit" size="sm" variant="outline">
-                  Create from demo
-                </Button>
-              </form>
-            )}
+      <Card>
+        <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center gap-2">
+              <CardTitle>Bots</CardTitle>
+              <Badge variant="secondary">{botRows.length}</Badge>
+            </div>
+            <CardDescription>Manage this client&apos;s assistants and installation status.</CardDescription>
+          </div>
+          <div className="shrink-0">
             <CreateBotDialog
               orgId={orgId}
               action={createBot}
               configureBase={`/owner/clients/${orgId}/bots`}
               trigger={
-                <Button size="sm" className="bg-primary text-white hover:bg-primary-hover">
+                <button
+                  type="button"
+                  className={cn(buttonVariants(), 'h-11')}
+                >
+                  <PlusIcon data-icon="inline-start" />
                   New bot
-                </Button>
+                </button>
               }
             />
           </div>
-        </div>
-        {botRows.length === 0 ? (
-          <div className="rounded-2xl border border-dashed bg-card p-8 text-center">
-            <span className="mx-auto mb-3 flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
-              <BotIcon className="size-5" />
-            </span>
-            <p className="text-sm text-muted-foreground">
-              No bots in this organisation yet. Use <span className="font-medium">New bot</span> to
-              create one for this client, then configure it.
-            </p>
-          </div>
-        ) : (
-          <div className="divide-y overflow-hidden rounded-2xl border bg-card shadow-sm">
-            {botRows.map((bot) => (
-              <div
-                key={bot.id}
-                className="flex items-center gap-4 px-5 py-4 transition-colors hover:bg-muted/40"
-              >
-                <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                  <BotIcon className="size-5" aria-hidden="true" />
-                </span>
-                <div className="min-w-0 flex-1 space-y-0.5">
-                  <p className="font-medium truncate">{bot.name}</p>
-                  <p className="text-xs text-muted-foreground font-mono truncate">
-                    {bot.public_key}
-                  </p>
-                </div>
-                <div className="flex items-center gap-3 shrink-0">
-                  <LiveIndicator lastSeenAt={bot.last_seen_at} />
-                  <Badge
-                    variant={bot.status === 'active' ? 'default' : 'secondary'}
-                    className="capitalize"
-                  >
-                    {bot.status}
-                  </Badge>
-                  <span className="text-xs text-muted-foreground hidden sm:block">
-                    {formatDistanceToNow(bot.created_at)}
-                  </span>
-                  <Link
-                    href={`/owner/clients/${orgId}/bots/${bot.id}/configure`}
-                    className={buttonVariants({ variant: 'outline', size: 'sm' })}
-                  >
-                    Configure
-                  </Link>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+        </CardHeader>
 
-      {/* Invites */}
-      {inviteRows.length > 0 && (
-        <div className="space-y-4">
-          <h2 className="text-lg font-semibold">Invites</h2>
-          <div className="divide-y overflow-hidden rounded-2xl border bg-card shadow-sm">
-            {inviteRows.map((invite) => {
-              const isExpired =
-                invite.status === 'expired' || new Date(invite.expires_at) <= new Date()
-              return (
+        {botRows.length === 0 ? (
+          <CardContent className="px-0">
+            <Empty className="border-y py-12">
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <BotIcon />
+                </EmptyMedia>
+                <EmptyTitle>No bots yet</EmptyTitle>
+                <EmptyDescription>
+                  Create a blank bot or duplicate a prepared demo for this client.
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
+          </CardContent>
+        ) : (
+          <CardContent className="px-0">
+            <div className="divide-y border-y">
+              {botRows.map((bot) => (
                 <div
-                  key={invite.id}
-                  className="flex items-center gap-4 px-5 py-4 transition-colors hover:bg-muted/40"
+                  key={bot.id}
+                  className="flex flex-col gap-4 px-4 py-4 transition-colors hover:bg-muted/40 sm:flex-row sm:items-center sm:px-6"
                 >
-                  <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-muted text-muted-foreground">
-                    <MailIcon className="size-5" aria-hidden="true" />
+                  <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                    <BotIcon className="size-5" aria-hidden="true" />
                   </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium">{invite.email}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {invite.status === 'accepted'
-                        ? 'Accepted'
-                        : isExpired
-                          ? 'Expired'
-                          : `Expires ${formatTimeUntil(invite.expires_at)}`}
-                    </p>
+                  <div className="flex min-w-0 flex-1 flex-col gap-1">
+                    <p className="truncate font-medium">{bot.name}</p>
+                    <div className="flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground">
+                      <KeyRoundIcon className="size-3.5 shrink-0" aria-hidden="true" />
+                      <span className="truncate font-mono" title={bot.public_key}>
+                        {bot.public_key}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex shrink-0 items-center gap-2">
-                    {invite.status !== 'accepted' && (
-                      <ResendInviteButton inviteId={invite.id} expired={isExpired} />
-                    )}
-                    <Badge
-                      variant={
-                        invite.status === 'accepted'
-                          ? 'default'
-                          : invite.status === 'expired'
-                            ? 'destructive'
-                            : 'secondary'
-                      }
-                      className="capitalize"
+                  <div className="flex w-full flex-wrap items-center gap-x-3 gap-y-2 sm:w-auto sm:justify-end">
+                    <div className="flex flex-wrap items-center gap-3">
+                      <LiveIndicator lastSeenAt={bot.last_seen_at} />
+                      <Badge variant={bot.status === 'active' ? 'default' : 'secondary'}>
+                        {bot.status === 'active' ? 'Active' : 'Paused'}
+                      </Badge>
+                      <span className="hidden items-center gap-1.5 text-xs text-muted-foreground md:inline-flex">
+                        <CalendarDaysIcon className="size-3.5" aria-hidden="true" />
+                        Created {formatDistanceToNow(bot.created_at)}
+                      </span>
+                    </div>
+                    <Link
+                      href={`/owner/clients/${orgId}/bots/${bot.id}/configure`}
+                      className={cn(
+                        buttonVariants({ variant: 'outline' }),
+                        'ml-auto h-10 w-full sm:ml-0 sm:w-auto',
+                      )}
                     >
-                      {invite.status}
+                      <Settings2Icon data-icon="inline-start" />
+                      Configure
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        )}
+
+        {demoOptions.length > 0 && (
+          <CardFooter className="flex flex-col items-stretch gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex min-w-0 items-center gap-3">
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <SparklesIcon className="size-4" aria-hidden="true" />
+              </span>
+              <div className="min-w-0">
+                <p className="font-medium">Start from a prepared demo</p>
+                <p className="text-xs text-muted-foreground">
+                  Copy its configuration and knowledge into this workspace.
+                </p>
+              </div>
+            </div>
+            <DuplicateDemoBotForm demos={demoOptions} action={createFromDemo} />
+          </CardFooter>
+        )}
+      </Card>
+
+      <div
+        className={cn(
+          'grid gap-6',
+          inviteRows.length > 0 && setupRows.length > 0 && 'lg:grid-cols-2',
+        )}
+      >
+        {/* Invites */}
+        {inviteRows.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Invites</CardTitle>
+              <CardDescription>Workspace access sent to this client&apos;s team.</CardDescription>
+              <CardAction>
+                <Badge variant="secondary">{inviteRows.length}</Badge>
+              </CardAction>
+            </CardHeader>
+            <CardContent className="px-0">
+              <div className="divide-y border-t">
+                {inviteRows.map((invite) => {
+                  const isExpired =
+                    invite.status === 'expired' || new Date(invite.expires_at) <= new Date()
+                  return (
+                    <div
+                      key={invite.id}
+                      className="flex flex-col gap-4 px-4 py-4 transition-colors hover:bg-muted/40 sm:flex-row sm:items-center sm:px-6"
+                    >
+                      <div className="flex min-w-0 flex-1 items-center gap-3">
+                        <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                          <MailIcon className="size-4" aria-hidden="true" />
+                        </span>
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-medium">{invite.email}</p>
+                          <p className="text-xs text-muted-foreground">
+                            Invited {formatDistanceToNow(invite.created_at)}
+                            {invite.status !== 'accepted' &&
+                              (isExpired
+                                ? ' · Invitation expired'
+                                : ` · Expires ${formatTimeUntil(invite.expires_at)}`)}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex shrink-0 items-center justify-between gap-2 sm:justify-end">
+                        <Badge
+                          variant={
+                            invite.status === 'accepted'
+                              ? 'default'
+                              : invite.status === 'expired'
+                                ? 'destructive'
+                                : 'secondary'
+                          }
+                        >
+                          {invite.status === 'accepted'
+                            ? 'Accepted'
+                            : isExpired
+                              ? 'Expired'
+                              : 'Pending'}
+                        </Badge>
+                        {invite.status !== 'accepted' && (
+                          <ResendInviteButton inviteId={invite.id} expired={isExpired} />
+                        )}
+                      </div>
+                    </div>
+                  )
+                })}
+                  </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Done-for-you setup purchases */}
+        {setupRows.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Setup purchases</CardTitle>
+              <CardDescription>Done-for-you services purchased by this workspace.</CardDescription>
+              <CardAction>
+                <Badge variant="secondary">{setupRows.length}</Badge>
+              </CardAction>
+            </CardHeader>
+            <CardContent className="px-0">
+              <div className="divide-y border-t">
+                {setupRows.map((o) => (
+                  <div key={o.id} className="flex items-center gap-3 px-4 py-4 sm:px-6">
+                    <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                      <SparklesIcon className="size-4" aria-hidden="true" />
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate font-medium">{setupName(o.package)} setup</p>
+                      <p className="text-xs text-muted-foreground">
+                        {money(o.amount_cents, o.currency)} · Purchased{' '}
+                        {formatDistanceToNow(o.created_at)}
+                      </p>
+                    </div>
+                    <Badge variant={o.status === 'paid' ? 'default' : 'secondary'}>
+                      {o.status === 'paid'
+                        ? 'Paid'
+                        : o.status.charAt(0).toUpperCase() + o.status.slice(1)}
                     </Badge>
                   </div>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Done-for-you setup purchases */}
-      {setupRows.length > 0 && (
-        <div className="space-y-4">
-          <h2 className="text-lg font-semibold">Setup</h2>
-          <div className="divide-y overflow-hidden rounded-2xl border bg-card shadow-sm">
-            {setupRows.map((o) => (
-              <div key={o.id} className="flex items-center gap-4 px-5 py-4">
-                <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-green-100 text-green-700">
-                  <SparklesIcon className="size-5" aria-hidden="true" />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className="font-medium truncate">{setupName(o.package)} setup</p>
-                  <p className="text-xs text-muted-foreground">
-                    {money(o.amount_cents, o.currency)} · {formatDistanceToNow(o.created_at)}
-                  </p>
-                </div>
-                <Badge
-                  className={
-                    o.status === 'paid'
-                      ? 'border-transparent bg-green-100 text-green-700 capitalize'
-                      : 'capitalize'
-                  }
-                  variant={o.status === 'paid' ? undefined : 'secondary'}
-                >
-                  {o.status === 'paid' ? 'Paid' : o.status}
-                </Badge>
+                ))}
               </div>
-            ))}
-          </div>
-        </div>
-      )}
+            </CardContent>
+          </Card>
+        )}
+      </div>
     </div>
   )
 }

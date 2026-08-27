@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { SendIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/spinner'
 import { resendClientInvite } from '@/app/(owner)/owner/clients/[orgId]/actions'
 
 /** Re-send (or renew) a client's invitation email from the client detail page. */
@@ -29,9 +30,9 @@ export function ResendInviteButton({ inviteId, expired }: { inviteId: string; ex
   }
 
   return (
-    <Button variant="outline" size="sm" onClick={handleClick} disabled={pending}>
-      <SendIcon className="size-3.5" />
-      {pending ? 'Sending…' : expired ? 'Renew & resend' : 'Resend'}
+    <Button variant="outline" onClick={handleClick} disabled={pending}>
+      {pending ? <Spinner data-icon="inline-start" /> : <SendIcon data-icon="inline-start" />}
+      {pending ? 'Sending…' : expired ? 'Renew invite' : 'Resend invite'}
     </Button>
   )
 }

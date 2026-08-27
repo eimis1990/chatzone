@@ -58,9 +58,11 @@ function StatTile({
 }: StatTileData & { tone?: 'accent' | 'dark' }) {
   const a = TILE_ACCENTS[accent]
   return (
-    <div className="bg-card p-5">
+    <div className="bg-card p-4 sm:p-5">
       <div className="flex items-start justify-between gap-2">
-        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</p>
+        <p className="text-[10px] font-medium uppercase tracking-normal text-muted-foreground sm:text-xs sm:tracking-wide">
+          {label}
+        </p>
         {Icon && (
           <span
             className={cn(
