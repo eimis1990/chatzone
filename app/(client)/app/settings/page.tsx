@@ -1,5 +1,4 @@
 import { requireRole, getUserOrgIds } from '@/lib/auth/guards'
-import { ChangePasswordCard } from '@/components/client/ChangePasswordCard'
 import { createServerClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { SettingsPanel, type NotificationPrefs } from '@/components/client/SettingsPanel'
@@ -36,9 +35,9 @@ export default async function SettingsPage() {
     'use server'
     const ids = await getUserOrgIds()
     const oid = ids[0]
-    if (!oid) return
+    if (!oid) throw new Error('No workspace available')
     const svc = createServiceClient()
-    await svc
+    const { error } = await svc
       .from('organizations')
       .update({
         notifications: {
@@ -48,6 +47,7 @@ export default async function SettingsPage() {
         },
       })
       .eq('id', oid)
+    if (error) throw new Error(error.message)
   }
 
   /** Set the org conversation-retention window (service client; org verified). */
@@ -55,7 +55,7 @@ export default async function SettingsPage() {
     'use server'
     const ids = await getUserOrgIds()
     const oid = ids[0]
-    if (!oid) return
+    if (!oid) throw new Error('No workspace available')
     const svc = createServiceClient()
     // Enforce the entitlement server-side — the UI control is also gated.
     const { data: org } = await svc
@@ -64,7 +64,8 @@ export default async function SettingsPage() {
       .eq('id', oid)
       .single<{ plan: Plan | null }>()
     if (!entitlementsFor(org?.plan ?? 'free').customRetention) return
-    await svc.from('organizations').update({ retention_days: days }).eq('id', oid)
+    const { error } = await svc.from('organizations').update({ retention_days: days }).eq('id', oid)
+    if (error) throw new Error(error.message)
   }
 
   /** Erase org data (conversations+messages and/or leads). Org verified first. */
@@ -78,20 +79,22 @@ export default async function SettingsPage() {
     const botIds = (bots ?? []).map((b) => (b as { id: string }).id)
     if (!botIds.length) return { ok: true }
     if (scope === 'conversations' || scope === 'all') {
-      await svc.from('conversations').delete().in('bot_id', botIds) // cascades messages
+      const { error } = await svc.from('conversations').delete().in('bot_id', botIds) // cascades messages
+      if (error) return { ok: false }
     }
     if (scope === 'leads' || scope === 'all') {
-      await svc.from('leads').delete().in('bot_id', botIds)
+      const { error } = await svc.from('leads').delete().in('bot_id', botIds)
+      if (error) return { ok: false }
     }
     return { ok: true }
   }
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="flex w-full flex-col gap-6 p-6">
       <div>
         <h1 className="text-lg font-semibold">Settings</h1>
         <p className="text-sm text-muted-foreground">
-          Data retention, export, and privacy controls for your organization.
+          Manage workspace notifications, data controls, and account security.
         </p>
       </div>
 
@@ -102,9 +105,8 @@ export default async function SettingsPage() {
         canCustomRetention={canCustomRetention}
         notifications={notifications}
         setNotifications={setNotifications}
+        email={session.email ?? undefined}
       />
-
-      {session.email && <ChangePasswordCard email={session.email} />}
     </div>
   )
 }

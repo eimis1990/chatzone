@@ -53,6 +53,25 @@
   a visible legend, and a text summary for assistive technology; the table is
   the exact-data fallback (`components/client/charts/OrgBotComparisonChart.tsx:22-112`).
 
+## Settings workspace
+
+- `/app/settings` is divided into Notifications, Data & privacy, and Security
+  tabs instead of one long stack. The tab bar uses a shared animated underline,
+  reduced-motion-safe panel transitions, and the same full content width for
+  every panel. Notification switches auto-save with visible saving/saved
+  feedback and roll back on failure; retention, export, policy, and destructive
+  data controls stay together in the data tab
+  (`app/(client)/app/settings/page.tsx:92-116`,
+  `components/client/SettingsPanel.tsx:207-466`,
+  `components/ui/tabs.tsx:82-95`).
+- Conversation and lead deletion use a destructive confirmation dialog and
+  surface server-side failures instead of reporting unconditional success
+  (`app/(client)/app/settings/page.tsx:72-90`,
+  `components/client/SettingsPanel.tsx:434-474`).
+- The password form lives in the Security tab, keeps current-password
+  verification, and exposes field-level validation and pending feedback
+  (`components/client/ChangePasswordCard.tsx:26-150`).
+
 Related: [access-model](access-model.md), [bot-config](bot-config.md).
 
-_Last verified: 2026-08-03._
+_Last verified: 2026-08-28._
