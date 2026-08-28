@@ -880,6 +880,22 @@
   // Fade the launcher in once its real theme color is known (or on fallback),
   // so the placeholder color never flashes on first paint / reload.
   var launcherRevealed = false
+  var botUnavailable = false
+
+  /** Remove every widget surface from the host page (paused/deleted bot). */
+  function removeWidget() {
+    try {
+      var nodes = [launcher, iframeContainer].concat(pulseRings)
+      for (var ri = 0; ri < nodes.length; ri++) {
+        var node = nodes[ri]
+        if (node && node.parentNode) node.parentNode.removeChild(node)
+      }
+      // Drop the cached paint so a later visit can't flash a launcher for a
+      // bot that is no longer available.
+      window.localStorage.removeItem(THEME_CACHE_KEY)
+    } catch (_) {}
+  }
+
   function revealLauncher() {
     if (launcherRevealed) return
     launcherRevealed = true
@@ -947,6 +963,11 @@
   try {
     fetch(appUrl + '/api/widget-config?key=' + encodeURIComponent(botKey))
       .then(function (r) {
+        // 404 = the bot is paused, deleted, or the key is wrong. Distinguish it
+        // from a transient network/5xx failure: only a definitive "not
+        // available" removes the widget, so a flaky connection still degrades
+        // to a cached-paint launcher instead of vanishing.
+        if (r.status === 404) botUnavailable = true
         return r.ok ? r.json() : null
       })
       .then(function (c) {
@@ -979,6 +1000,10 @@
       .catch(function () {})
       .then(function () {
         clearTimeout(revealTimer)
+        // A paused/removed bot must leave no trace on the host page — a
+        // launcher that opens into a dead chat looks broken to the store's
+        // customers.
+        if (botUnavailable) return removeWidget()
         revealLauncher()
       })
   } catch (_) {
