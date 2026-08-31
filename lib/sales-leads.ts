@@ -1,7 +1,19 @@
 import type { SalesLead, SalesLeadStatus } from '@/lib/types'
 
+export type SalesLeadCountryFilter = 'all' | 'lithuania' | 'other'
+
 /** Days an unanswered first email may sit before it needs a follow-up. */
 export const FOLLOW_UP_AFTER_DAYS = 14
+
+/** LinkedIn leads use a deliberately coarse Lithuania/rest-of-world switch. */
+export function matchesLeadCountry(
+  country: string,
+  filter: SalesLeadCountryFilter,
+): boolean {
+  if (filter === 'all') return true
+  const isLithuania = country.trim().toLocaleLowerCase('en') === 'lithuania'
+  return filter === 'lithuania' ? isLithuania : !isLithuania
+}
 
 /**
  * A first email that has gone unanswered long enough to warrant a follow-up —

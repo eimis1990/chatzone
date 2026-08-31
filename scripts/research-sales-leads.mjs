@@ -104,15 +104,23 @@ function extractContactLinks(html, baseUrl) {
 }
 
 function detectPlatform(html) {
+  const wooSignals = [
+    /wp-content\/plugins\/woocommerce|woocommerce\/assets|wc-blocks/i,
+    /wc-ajax|woocommerce_params|wc_cart_fragments|woocommerce-product-gallery/i,
+    /class=["'][^"']*\bwoocommerce(?:-|\s)/i,
+  ].filter((pattern) => pattern.test(html)).length;
+
   const checks = [
-    ["WooCommerce", /woocommerce|wc-block|wp-content\/plugins\/woocommerce/i],
     ["Shopify", /cdn\.shopify\.com|shopify-section|shopify\.theme|_shopify/i],
     ["Magento", /Magento_|mage-cache-storage|static\/version\d+|Magento\//i],
     ["Verskis", /verskis\.lt|verskis platform|sukurta.*verskis/i],
     ["PrestaShop", /prestashop|modules\/ps_/i],
     ["OpenCart", /index\.php\?route=|catalog\/view\/theme/i],
   ];
-  return checks.find(([, pattern]) => pattern.test(html))?.[0] ?? null;
+  return (
+    checks.find(([, pattern]) => pattern.test(html))?.[0] ??
+    (wooSignals >= 2 ? "WooCommerce" : null)
+  );
 }
 
 function detectChatbot(html) {

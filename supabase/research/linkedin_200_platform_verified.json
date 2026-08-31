@@ -1,0 +1,3546 @@
+{
+  "checked_at": "2026-08-31",
+  "scope": "All 200 existing LinkedIn-origin leads in public.sales_leads.",
+  "methodology": "First-party HTML, response headers/cookies, and bounded native endpoint probes. WooCommerce requires multiple active storefront signals or an active Store API plus a storefront signal; a WordPress/Woo asset alone is insufficient. Four fetch-blocked storefronts were verified through their rendered first-party assets.",
+  "platform_field_rule": "Use the detected commerce platform when strong storefront evidence exists; otherwise record the underlying CMS/framework or Custom/Other. WordPress is explicitly labeled non-WooCommerce unless multiple active WooCommerce signals are present.",
+  "supported_native": [
+    "WooCommerce",
+    "Shopify",
+    "Magento",
+    "Verskis"
+  ],
+  "summary": {
+    "checked": 200,
+    "updated_platforms": 200,
+    "by_country": {
+      "Estonia": 56,
+      "Latvia": 44,
+      "Lithuania": 100
+    },
+    "platform_distribution": {
+      "Custom (Laravel)": 5,
+      "Custom (Next.js)": 8,
+      "Custom (Nuxt)": 2,
+      "Custom/Other": 36,
+      "Drupal": 1,
+      "Joomla": 1,
+      "Magento": 3,
+      "OpenCart": 7,
+      "PrestaShop": 2,
+      "Shopify": 26,
+      "Shopware": 1,
+      "Verskis": 2,
+      "Webflow": 2,
+      "Wix": 12,
+      "WooCommerce": 41,
+      "WordPress (non-WooCommerce)": 51
+    },
+    "implementation_path": {
+      "native_supported": 72,
+      "custom_or_feed_required": 55,
+      "content_only": 73
+    }
+  },
+  "rows": [
+    {
+      "id": "89a6db81-b60f-4202-b314-1a127d781419",
+      "name": "Alpaka",
+      "website": "https://alpaka.ee",
+      "country": "Estonia",
+      "platform": "WooCommerce",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://alpaka-shop.com/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "woo-plugin-assets",
+        "woo-runtime",
+        "woo-body",
+        "wordpress",
+        "working Woo Store API",
+        "working WordPress REST API",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "cdeb7465-3702-4f6c-bd20-a375e9a64a54",
+      "name": "Amanjeda",
+      "website": "https://amanjeda.com",
+      "country": "Estonia",
+      "platform": "Shopify",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://www.amanjeda.com/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "shopify-cdn",
+        "shopify-runtime",
+        "myshopify-domain",
+        "working /products.json",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "d65b2d2c-ea2b-408e-ac0e-749c9eeb4a9a",
+      "name": "Anvol",
+      "website": "https://anvol.eu",
+      "country": "Estonia",
+      "platform": "WordPress (non-WooCommerce)",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://anvol.eu/",
+      "confidence": "high",
+      "commerce_fit": "content_only",
+      "evidence": [
+        "wordpress",
+        "working WordPress REST API"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "e2941b49-36a4-4828-bab7-47a30958e746",
+      "name": "Apollo Kauplused",
+      "website": "https://www.apollo.ee",
+      "country": "Estonia",
+      "platform": "Custom (Next.js)",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://www.apollo.ee/et",
+      "confidence": "high",
+      "commerce_fit": "custom_or_feed_required",
+      "evidence": [
+        "nextjs",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "9544a72a-4c9d-4da5-a248-5182a91851e1",
+      "name": "BEIGE | BROWN",
+      "website": "https://beigebrown.com",
+      "country": "Estonia",
+      "platform": "Shopify",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://beigebrown.com/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "rendered Shopify CDN/theme assets",
+        "beigebrown.myshopify.com"
+      ]
+    },
+    {
+      "id": "d5355863-ad92-4ce9-8ea7-92e15c33eef4",
+      "name": "CareMate",
+      "website": "https://caremate.ee",
+      "country": "Estonia",
+      "platform": "Custom/Other",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://caremate.ee/",
+      "confidence": "medium",
+      "commerce_fit": "content_only",
+      "evidence": [],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "5aefb024-ce6f-46d2-a70a-bfbcf8f6f0b7",
+      "name": "Chemi-Pharm",
+      "website": "https://chemi-pharm.com",
+      "country": "Estonia",
+      "platform": "WordPress (non-WooCommerce)",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://chemi-pharm.com/",
+      "confidence": "high",
+      "commerce_fit": "content_only",
+      "evidence": [
+        "wordpress",
+        "working WordPress REST API"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "6dd332e2-6487-489f-bcac-d968bf236198",
+      "name": "DecNord",
+      "website": "https://decnord.ee",
+      "country": "Estonia",
+      "platform": "WooCommerce",
+      "vertical": "Furniture and interiors",
+      "canonical_url": "https://decnord.ee/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "woo-plugin-assets",
+        "woo-runtime",
+        "woo-body",
+        "wordpress",
+        "working Woo Store API",
+        "working WordPress REST API",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "1da82816-d416-4c3c-b288-7d3eff4f3c75",
+      "name": "Dharma Resort",
+      "website": "https://dharmaresort.ee",
+      "country": "Estonia",
+      "platform": "WordPress (non-WooCommerce)",
+      "vertical": "Hospitality",
+      "canonical_url": "https://dharmaresort.ee/",
+      "confidence": "high",
+      "commerce_fit": "content_only",
+      "evidence": [
+        "wordpress",
+        "working WordPress REST API"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "7cff0b03-d313-404e-ab63-ea3ae1469679",
+      "name": "EcoPetBox",
+      "website": "https://ecopetbox.com",
+      "country": "Estonia",
+      "platform": "Custom/Other",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://ecopetbox.com/",
+      "confidence": "medium",
+      "commerce_fit": "content_only",
+      "evidence": [],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "17b455fa-5002-4409-aac8-5a3815136699",
+      "name": "Ergonomik",
+      "website": "https://ergonomik.ee",
+      "country": "Estonia",
+      "platform": "WooCommerce",
+      "vertical": "Furniture and interiors",
+      "canonical_url": "https://ergonomik.ee/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "woo-plugin-assets",
+        "woo-runtime",
+        "woo-body",
+        "wordpress",
+        "working Woo Store API",
+        "working WordPress REST API",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "29e0e484-8655-44d1-8f73-125f0fe5aed9",
+      "name": "Eurobio Lab",
+      "website": "https://eurobiolab.com",
+      "country": "Estonia",
+      "platform": "WordPress (non-WooCommerce)",
+      "vertical": "Beauty and personal care",
+      "canonical_url": "https://eurobiolab.com/",
+      "confidence": "high",
+      "commerce_fit": "content_only",
+      "evidence": [
+        "wordpress",
+        "working WordPress REST API"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "9a04c99d-3d14-40a5-8fdf-4c72d18971ba",
+      "name": "Goodpoint Chemicals",
+      "website": "https://goodpointchemicals.com",
+      "country": "Estonia",
+      "platform": "WooCommerce",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://goodpointchemicals.com/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "woo-plugin-assets",
+        "woo-runtime",
+        "woo-body",
+        "wordpress",
+        "working Woo Store API",
+        "working WordPress REST API",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "e85750b5-ffec-459e-a595-798671fcd02c",
+      "name": "GRENARDI Group",
+      "website": "https://grenardi.ee",
+      "country": "Estonia",
+      "platform": "Custom/Other",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://grenardi.ee/",
+      "confidence": "medium",
+      "commerce_fit": "custom_or_feed_required",
+      "evidence": [
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "85b0672c-de0e-4c30-bce6-d720d9d5fa03",
+      "name": "Hoov Haapsalu",
+      "website": "https://hoov.ee",
+      "country": "Estonia",
+      "platform": "WordPress (non-WooCommerce)",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://hoov.ee/",
+      "confidence": "high",
+      "commerce_fit": "content_only",
+      "evidence": [
+        "wordpress",
+        "working WordPress REST API"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "4ab97cdf-ac08-4088-9b7c-ad23c2ffff1a",
+      "name": "Kaubamaja",
+      "website": "https://www.kaubamaja.ee",
+      "country": "Estonia",
+      "platform": "Custom/Other",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://www.kaubamaja.ee/",
+      "confidence": "medium",
+      "commerce_fit": "custom_or_feed_required",
+      "evidence": [
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "2b823917-abd0-4b3e-af70-527277c16466",
+      "name": "LaBocca Restaurants",
+      "website": "https://labocca.ee",
+      "country": "Estonia",
+      "platform": "WordPress (non-WooCommerce)",
+      "vertical": "Hospitality",
+      "canonical_url": "https://labocca.ee/",
+      "confidence": "high",
+      "commerce_fit": "content_only",
+      "evidence": [
+        "wordpress",
+        "working WordPress REST API"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "73685ac2-b0aa-42c1-942d-7a0e319db58d",
+      "name": "Liina Stein",
+      "website": "https://liinastein.com",
+      "country": "Estonia",
+      "platform": "Shopify",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://liinastein.com/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "shopify-cdn",
+        "shopify-runtime",
+        "myshopify-domain",
+        "working /products.json",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "e13680d7-8e34-4cd8-b12f-dba31b6f3ae3",
+      "name": "Liv Outdoor",
+      "website": "https://livoutdoor.ee",
+      "country": "Estonia",
+      "platform": "Custom/Other",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://livoutdoor.eu/",
+      "confidence": "medium",
+      "commerce_fit": "custom_or_feed_required",
+      "evidence": [
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "e09845d8-a914-4226-80c3-cd6eb2c193b7",
+      "name": "Macta Beauty",
+      "website": "https://mactabeauty.com",
+      "country": "Estonia",
+      "platform": "Magento",
+      "vertical": "Beauty and personal care",
+      "canonical_url": "https://www.mactabeauty.com/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "magento-runtime",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "d7e1fcc2-517d-42df-8df8-2cffad053478",
+      "name": "Maxilla Hambakliinik",
+      "website": "https://www.maxilla.ee",
+      "country": "Estonia",
+      "platform": "WordPress (non-WooCommerce)",
+      "vertical": "Healthcare",
+      "canonical_url": "https://www.maxilla.ee/",
+      "confidence": "high",
+      "commerce_fit": "content_only",
+      "evidence": [
+        "wordpress",
+        "working WordPress REST API"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "effca799-ed03-4164-b228-f858671d880c",
+      "name": "Medicum",
+      "website": "https://www.medicum.ee",
+      "country": "Estonia",
+      "platform": "WordPress (non-WooCommerce)",
+      "vertical": "Healthcare",
+      "canonical_url": "https://www.medicum.ee/",
+      "confidence": "high",
+      "commerce_fit": "content_only",
+      "evidence": [
+        "wordpress",
+        "working WordPress REST API"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "6217642e-1b9c-4ed1-a330-5defe3817eaf",
+      "name": "Merianto",
+      "website": "https://merianto.com",
+      "country": "Estonia",
+      "platform": "WordPress (non-WooCommerce)",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://merianto.com/",
+      "confidence": "high",
+      "commerce_fit": "custom_or_feed_required",
+      "evidence": [
+        "wordpress",
+        "working WordPress REST API",
+        "cart"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "afb7e17c-2d83-4878-8f34-5a65d7b9ee14",
+      "name": "Nanordica Medical",
+      "website": "https://nanordica.com",
+      "country": "Estonia",
+      "platform": "Wix",
+      "vertical": "Healthcare",
+      "canonical_url": "https://www.nanordica.com/",
+      "confidence": "high",
+      "commerce_fit": "custom_or_feed_required",
+      "evidence": [
+        "wix",
+        "laravel",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "8a21b46a-4088-4425-8b0e-237955891b5b",
+      "name": "NoCry Safety",
+      "website": "https://nocry.com",
+      "country": "Estonia",
+      "platform": "Shopify",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://nocry.com/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "shopify-cdn",
+        "shopify-runtime",
+        "myshopify-domain",
+        "working /products.json",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "5e283970-b1a5-4f94-aff3-7ed9e01f8b7b",
+      "name": "OCCO",
+      "website": "https://occo.ee",
+      "country": "Estonia",
+      "platform": "WordPress (non-WooCommerce)",
+      "vertical": "Furniture and interiors",
+      "canonical_url": "https://occo.ee/",
+      "confidence": "high",
+      "commerce_fit": "content_only",
+      "evidence": [
+        "wordpress",
+        "working WordPress REST API"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "c64ccd6c-3426-438a-9196-f48bce8f6faf",
+      "name": "Old Hapsal Hotel",
+      "website": "https://oldhapsalhotel.ee",
+      "country": "Estonia",
+      "platform": "WordPress (non-WooCommerce)",
+      "vertical": "Hospitality",
+      "canonical_url": "https://oldhapsalhotel.ee/",
+      "confidence": "high",
+      "commerce_fit": "content_only",
+      "evidence": [
+        "wordpress",
+        "working WordPress REST API",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "d52c7a36-a9c0-4c3a-aa4d-2fbf11d9f593",
+      "name": "Öun Drinks",
+      "website": "https://oundrinks.com",
+      "country": "Estonia",
+      "platform": "WooCommerce",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://oundrinks.com/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "woo-plugin-assets",
+        "woo-runtime",
+        "woo-body",
+        "wordpress",
+        "working Woo Store API",
+        "working WordPress REST API",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "5de05d1b-2d74-4385-9283-3c1198b393d2",
+      "name": "Pädaste Manor",
+      "website": "https://www.padaste.ee",
+      "country": "Estonia",
+      "platform": "WordPress (non-WooCommerce)",
+      "vertical": "Hospitality",
+      "canonical_url": "https://www.padaste.ee/",
+      "confidence": "high",
+      "commerce_fit": "content_only",
+      "evidence": [
+        "wordpress",
+        "working WordPress REST API"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "1b14567d-867f-48d9-bec6-01cbcb518104",
+      "name": "Printall",
+      "website": "https://printall.ee",
+      "country": "Estonia",
+      "platform": "WordPress (non-WooCommerce)",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://www.printall.ee/et/",
+      "confidence": "high",
+      "commerce_fit": "content_only",
+      "evidence": [
+        "wordpress",
+        "working WordPress REST API"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "7f712bfc-414c-482a-97ee-98fd007efad5",
+      "name": "Pro Beauté Baltic",
+      "website": "https://probeauty.ee",
+      "country": "Estonia",
+      "platform": "OpenCart",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://probeauty.ee/",
+      "confidence": "high",
+      "commerce_fit": "custom_or_feed_required",
+      "evidence": [
+        "opencart",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "16f208a4-b35f-4e7f-8da1-633735eed951",
+      "name": "ProScreen",
+      "website": "https://proscreen.ee",
+      "country": "Estonia",
+      "platform": "WordPress (non-WooCommerce)",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://proscreen.eu/",
+      "confidence": "high",
+      "commerce_fit": "content_only",
+      "evidence": [
+        "wordpress",
+        "working WordPress REST API"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "5409091e-f01e-4c06-a7b9-70c060120282",
+      "name": "ProVida Kliinik",
+      "website": "https://provida.ee",
+      "country": "Estonia",
+      "platform": "WordPress (non-WooCommerce)",
+      "vertical": "Healthcare",
+      "canonical_url": "https://provida.ee/",
+      "confidence": "high",
+      "commerce_fit": "content_only",
+      "evidence": [
+        "wordpress",
+        "working WordPress REST API",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "ece046ff-585f-4a60-9c25-3fae132d384d",
+      "name": "PsychEval",
+      "website": "https://psycheval.ee",
+      "country": "Estonia",
+      "platform": "Wix",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://www.psycheval.info/",
+      "confidence": "high",
+      "commerce_fit": "custom_or_feed_required",
+      "evidence": [
+        "wix",
+        "laravel",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "86060e91-42bf-4157-9053-6f8beaa6fbb4",
+      "name": "Rahva Raamat",
+      "website": "https://rahvaraamat.ee",
+      "country": "Estonia",
+      "platform": "Custom (Next.js)",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://rahvaraamat.ee/et",
+      "confidence": "high",
+      "commerce_fit": "custom_or_feed_required",
+      "evidence": [
+        "nextjs",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "c5bf7e49-e46d-451c-9947-24688301a053",
+      "name": "Renalis",
+      "website": "https://renalis.ee",
+      "country": "Estonia",
+      "platform": "Custom/Other",
+      "vertical": "Healthcare",
+      "canonical_url": "https://renalis.ee/",
+      "confidence": "medium",
+      "commerce_fit": "content_only",
+      "evidence": [],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "366114f2-adb6-4a31-85cc-0c682ba7bce2",
+      "name": "Salonshop Baltic",
+      "website": "https://salonshop.ee",
+      "country": "Estonia",
+      "platform": "WooCommerce",
+      "vertical": "Beauty and personal care",
+      "canonical_url": "https://salonshop.ee/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "woo-plugin-assets",
+        "woo-runtime",
+        "woo-body",
+        "wordpress",
+        "working Woo Store API",
+        "working WordPress REST API",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "f3127077-7757-417a-942a-d8e1cd7e0cca",
+      "name": "Sangar",
+      "website": "https://sangar.ee",
+      "country": "Estonia",
+      "platform": "WooCommerce",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://sangar.ee/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "woo-plugin-assets",
+        "woo-runtime",
+        "woo-body",
+        "wordpress",
+        "working Woo Store API",
+        "working WordPress REST API",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "ba0cc6fe-f36e-45eb-9bb6-67d746509297",
+      "name": "Seisuk Furniture",
+      "website": "https://seisuk.ee",
+      "country": "Estonia",
+      "platform": "Shopify",
+      "vertical": "Furniture and interiors",
+      "canonical_url": "https://seisuk.ee/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "shopify-cdn",
+        "shopify-runtime",
+        "myshopify-domain",
+        "working /products.json",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "63745298-cdab-4307-b011-69d2fde927f0",
+      "name": "Sellme.ee",
+      "website": "https://sellme.ee",
+      "country": "Estonia",
+      "platform": "OpenCart",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://sellme.ee/",
+      "confidence": "high",
+      "commerce_fit": "custom_or_feed_required",
+      "evidence": [
+        "opencart",
+        "cart"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "daab7ec2-6877-4e41-86e0-8b426c7ebe18",
+      "name": "Silen",
+      "website": "https://silen.com",
+      "country": "Estonia",
+      "platform": "Custom (Next.js)",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://silen.com/en",
+      "confidence": "high",
+      "commerce_fit": "content_only",
+      "evidence": [
+        "nextjs"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "7b821be8-97d2-483f-a588-af44349a67ef",
+      "name": "Suun",
+      "website": "https://suun.ee",
+      "country": "Estonia",
+      "platform": "WooCommerce",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://suun.ee/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "woo-plugin-assets",
+        "woo-runtime",
+        "woo-body",
+        "wordpress",
+        "working Woo Store API",
+        "working WordPress REST API",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "12806dda-ef36-42dc-9c12-ac4b52bce010",
+      "name": "SYNLAB Eesti",
+      "website": "https://synlab.ee",
+      "country": "Estonia",
+      "platform": "WooCommerce",
+      "vertical": "Healthcare",
+      "canonical_url": "https://synlab.ee/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "woo-plugin-assets",
+        "woo-runtime",
+        "woo-body",
+        "wordpress",
+        "working Woo Store API",
+        "working WordPress REST API",
+        "cart"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "93db9932-9f3f-4c99-8620-63e660618938",
+      "name": "T1 Tallinn",
+      "website": "https://t1tallinn.com",
+      "country": "Estonia",
+      "platform": "WordPress (non-WooCommerce)",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://t1tallinn.com/",
+      "confidence": "high",
+      "commerce_fit": "content_only",
+      "evidence": [
+        "wordpress",
+        "working WordPress REST API"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "af5f13dd-fe2e-4d55-90a4-a0812f34c8ca",
+      "name": "Tamec Trade",
+      "website": "https://tamectrade.ee",
+      "country": "Estonia",
+      "platform": "Custom/Other",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://tamectrade.ee/",
+      "confidence": "medium",
+      "commerce_fit": "custom_or_feed_required",
+      "evidence": [
+        "cart"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "602ae077-81f0-4b20-93b9-e1ac27d55dbf",
+      "name": "Tasku Keskus",
+      "website": "https://tasku.ee",
+      "country": "Estonia",
+      "platform": "WordPress (non-WooCommerce)",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://tasku.ee/",
+      "confidence": "high",
+      "commerce_fit": "custom_or_feed_required",
+      "evidence": [
+        "wordpress",
+        "working WordPress REST API",
+        "cart"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "7640b99c-d2df-4f1e-be36-64c40c1c0866",
+      "name": "Tervis Spa Group",
+      "website": "https://www.terviseparadiis.ee",
+      "country": "Estonia",
+      "platform": "WordPress (non-WooCommerce)",
+      "vertical": "Hospitality",
+      "canonical_url": "https://terviseparadiis.ee/",
+      "confidence": "high",
+      "commerce_fit": "content_only",
+      "evidence": [
+        "wordpress"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "5e779ae0-d9d8-4638-90cd-4402e33babb7",
+      "name": "The Club Estonia",
+      "website": "https://theclub.ee",
+      "country": "Estonia",
+      "platform": "Custom (Next.js)",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://www.theclub.ee/et",
+      "confidence": "high",
+      "commerce_fit": "custom_or_feed_required",
+      "evidence": [
+        "nextjs",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "0a34b7e8-ab61-4ea2-b724-5760b069f432",
+      "name": "The Health Clinic",
+      "website": "https://thehealthclinic.eu",
+      "country": "Estonia",
+      "platform": "WordPress (non-WooCommerce)",
+      "vertical": "Healthcare",
+      "canonical_url": "https://thehealthclinic.eu/",
+      "confidence": "high",
+      "commerce_fit": "content_only",
+      "evidence": [
+        "wordpress",
+        "working WordPress REST API"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "ecc49cbf-ef58-416a-a244-079e39088996",
+      "name": "Topauto",
+      "website": "https://topauto.ee",
+      "country": "Estonia",
+      "platform": "Custom/Other",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://www.topauto.ee/",
+      "confidence": "medium",
+      "commerce_fit": "custom_or_feed_required",
+      "evidence": [
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "86770522-271a-430f-bbd8-6b8101e617c4",
+      "name": "Tradehouse",
+      "website": "https://tradehouse.ee",
+      "country": "Estonia",
+      "platform": "Custom (Nuxt)",
+      "vertical": "Beauty and personal care",
+      "canonical_url": "https://tradehouse.ee/?lang=et",
+      "confidence": "high",
+      "commerce_fit": "custom_or_feed_required",
+      "evidence": [
+        "nuxt",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "47bc6ffb-a128-44c7-976e-38b70e5128c8",
+      "name": "Unique Hotels Group",
+      "website": "https://uhotelsgroup.com",
+      "country": "Estonia",
+      "platform": "WordPress (non-WooCommerce)",
+      "vertical": "Hospitality",
+      "canonical_url": "https://www.uhotelsgroup.com/",
+      "confidence": "high",
+      "commerce_fit": "content_only",
+      "evidence": [
+        "wordpress",
+        "working WordPress REST API"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "34e6bf60-c88c-4f28-97e2-09932fcc33fe",
+      "name": "Uuskasutuskeskus",
+      "website": "https://uuskasutus.ee",
+      "country": "Estonia",
+      "platform": "WooCommerce",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://uuskasutus.ee/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "woo-plugin-assets",
+        "woo-runtime",
+        "woo-body",
+        "wordpress",
+        "working Woo Store API",
+        "working WordPress REST API",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "c7cd3bea-0103-409e-b961-e3c803a3f3c0",
+      "name": "vipMedicum",
+      "website": "https://vipmedicum.ee",
+      "country": "Estonia",
+      "platform": "WordPress (non-WooCommerce)",
+      "vertical": "Healthcare",
+      "canonical_url": "https://www.vipmedicum.ee/",
+      "confidence": "high",
+      "commerce_fit": "content_only",
+      "evidence": [
+        "wordpress",
+        "working WordPress REST API"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "64a4645f-2aa1-4b81-a625-50645e8809f4",
+      "name": "Vunder",
+      "website": "https://vunder.ee",
+      "country": "Estonia",
+      "platform": "WooCommerce",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://vunder.ee/lt/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "woo-plugin-assets",
+        "woo-runtime",
+        "woo-body",
+        "wordpress",
+        "working WordPress REST API",
+        "cart"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "1336e67e-e08e-4549-a063-d743e2a351e2",
+      "name": "Wasa Resort",
+      "website": "https://wasahotels.ee",
+      "country": "Estonia",
+      "platform": "WooCommerce",
+      "vertical": "Hospitality",
+      "canonical_url": "https://wasahotels.ee/resort/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "woo-plugin-assets",
+        "woo-runtime",
+        "woo-body",
+        "wordpress",
+        "working WordPress REST API",
+        "cart"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "43991f96-47eb-48c7-8c97-44f7777b53e3",
+      "name": "Adoro",
+      "website": "https://adoro.lv",
+      "country": "Latvia",
+      "platform": "Wix",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://www.adoro.lv/",
+      "confidence": "high",
+      "commerce_fit": "custom_or_feed_required",
+      "evidence": [
+        "wix",
+        "laravel",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "8c32d1e7-bf1c-4ced-8c3b-0c808fe006ec",
+      "name": "Aesthetica",
+      "website": "https://aesthetica.lv",
+      "country": "Latvia",
+      "platform": "WordPress (non-WooCommerce)",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://aesthetica.lv/",
+      "confidence": "high",
+      "commerce_fit": "content_only",
+      "evidence": [
+        "wordpress",
+        "working WordPress REST API"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "ab808a5b-f14e-49db-abdb-f0e7611fb3b1",
+      "name": "AJ Produkti",
+      "website": "https://www.ajprodukti.lv",
+      "country": "Latvia",
+      "platform": "Custom/Other",
+      "vertical": "Furniture and interiors",
+      "canonical_url": "https://www.ajprodukti.lv/",
+      "confidence": "medium",
+      "commerce_fit": "custom_or_feed_required",
+      "evidence": [
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "d53df9c9-3831-4413-8363-b14b3d972eab",
+      "name": "Amelii",
+      "website": "https://amelii.lv",
+      "country": "Latvia",
+      "platform": "WooCommerce",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://amelii.lv/lv/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "woo-plugin-assets",
+        "woo-runtime",
+        "woo-body",
+        "wordpress",
+        "working Woo Store API",
+        "working WordPress REST API",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "09c37fc5-a82c-4e6c-bc16-3e9a115f7726",
+      "name": "ARKOLAT",
+      "website": "https://arkolat.lv",
+      "country": "Latvia",
+      "platform": "Custom (Laravel)",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://arkolat.lv/lv",
+      "confidence": "high",
+      "commerce_fit": "custom_or_feed_required",
+      "evidence": [
+        "laravel",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "36174d73-95d0-4ded-8c98-1fac67665537",
+      "name": "BARBOLETA",
+      "website": "https://barboleta.lv",
+      "country": "Latvia",
+      "platform": "Shopify",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://new.barboleta.lv/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "shopify-cdn",
+        "shopify-runtime",
+        "myshopify-domain",
+        "working /products.json",
+        "productSchema",
+        "offerSchema",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "e1eb0e57-69ae-42df-b497-c03c8ea6ac26",
+      "name": "Birne",
+      "website": "https://birne.lv",
+      "country": "Latvia",
+      "platform": "WooCommerce",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://birne.lv/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "woo-runtime",
+        "woo-body",
+        "wordpress",
+        "working Woo Store API",
+        "working WordPress REST API",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "74e642e2-e6d8-4231-90cc-efe411610445",
+      "name": "BRIVA",
+      "website": "https://briva.lv",
+      "country": "Latvia",
+      "platform": "Custom (Laravel)",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://briva.lv/",
+      "confidence": "high",
+      "commerce_fit": "custom_or_feed_required",
+      "evidence": [
+        "laravel",
+        "cart"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "aa99e58e-5d02-4b3b-8896-85c8410bec2f",
+      "name": "CAMLICA Group",
+      "website": "https://camlica.com",
+      "country": "Latvia",
+      "platform": "Custom/Other",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://camlica.com/",
+      "confidence": "medium",
+      "commerce_fit": "content_only",
+      "evidence": [],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "e0b922a6-9f6f-4edf-b105-66f3962cb311",
+      "name": "Car.lv",
+      "website": "https://car.lv",
+      "country": "Latvia",
+      "platform": "Custom/Other",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://car.lv/",
+      "confidence": "medium",
+      "commerce_fit": "content_only",
+      "evidence": [],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "3d23ad9f-69df-4d37-9337-f01e43f756a5",
+      "name": "Carnitec",
+      "website": "https://carnitec.com",
+      "country": "Latvia",
+      "platform": "WooCommerce",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://carnitec.com/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "woo-plugin-assets",
+        "woo-runtime",
+        "woo-body",
+        "wordpress",
+        "working Woo Store API",
+        "working WordPress REST API",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "a4cd6ace-252c-4c20-ac17-6339d4f236a8",
+      "name": "Dinsbergas Clinic",
+      "website": "https://dinsbergasklinika.lv",
+      "country": "Latvia",
+      "platform": "Wix",
+      "vertical": "Healthcare",
+      "canonical_url": "https://www.dinsbergasklinika.lv/",
+      "confidence": "high",
+      "commerce_fit": "custom_or_feed_required",
+      "evidence": [
+        "wix",
+        "laravel",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "c4f7fbdf-dbdb-40ad-ab80-9b1ca2943cdc",
+      "name": "Exomedica",
+      "website": "https://exomedica.eu",
+      "country": "Latvia",
+      "platform": "WordPress (non-WooCommerce)",
+      "vertical": "Healthcare",
+      "canonical_url": "https://exomedica.eu/",
+      "confidence": "high",
+      "commerce_fit": "content_only",
+      "evidence": [
+        "woo-plugin-assets",
+        "wordpress",
+        "working WordPress REST API"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "2325b7b9-f444-4d03-8711-89ea4b0ce594",
+      "name": "FURE Biostone",
+      "website": "https://www.biostone.lv",
+      "country": "Latvia",
+      "platform": "Wix",
+      "vertical": "Furniture and interiors",
+      "canonical_url": "https://www.biostone.lv/",
+      "confidence": "high",
+      "commerce_fit": "custom_or_feed_required",
+      "evidence": [
+        "wix",
+        "laravel",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "94ac8370-d43e-44ea-8d9a-aacd5bf1e764",
+      "name": "Gemoss",
+      "website": "https://gemoss.lv",
+      "country": "Latvia",
+      "platform": "Magento",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://gemoss.lv/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "rendered Magento runtime assets"
+      ]
+    },
+    {
+      "id": "42ec3bc7-7a57-4f4b-9961-ea9c148cc7b7",
+      "name": "GP Nord",
+      "website": "http://www.gpnord.com",
+      "country": "Latvia",
+      "platform": "WooCommerce",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://gpnord.com/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "woo-plugin-assets",
+        "woo-runtime",
+        "woo-body",
+        "wordpress",
+        "cart"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "996aeae7-428a-4b6f-ae4a-894a5241a3fc",
+      "name": "HAIRRIGA",
+      "website": "https://hairriga.lv",
+      "country": "Latvia",
+      "platform": "Custom/Other",
+      "vertical": "Beauty and personal care",
+      "canonical_url": "https://www.hairriga.lv/",
+      "confidence": "medium",
+      "commerce_fit": "content_only",
+      "evidence": [],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "f772151f-eda5-48b9-8af8-54abfb277147",
+      "name": "Hestio",
+      "website": "https://hestio.lv",
+      "country": "Latvia",
+      "platform": "Custom (Laravel)",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://hestio.lv/",
+      "confidence": "high",
+      "commerce_fit": "custom_or_feed_required",
+      "evidence": [
+        "laravel",
+        "cart"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "a537580c-36e9-4202-9d01-e8520a2be181",
+      "name": "Hotel Amrita",
+      "website": "https://www.amrita.lv",
+      "country": "Latvia",
+      "platform": "WordPress (non-WooCommerce)",
+      "vertical": "Hospitality",
+      "canonical_url": "https://www.amrita.lv/",
+      "confidence": "high",
+      "commerce_fit": "content_only",
+      "evidence": [
+        "wordpress",
+        "working WordPress REST API"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "040250d2-b1be-4137-8620-0061c4d49e16",
+      "name": "House of Sipula",
+      "website": "https://houseofsipula.com",
+      "country": "Latvia",
+      "platform": "Wix",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://www.houseofsipula.com/",
+      "confidence": "high",
+      "commerce_fit": "custom_or_feed_required",
+      "evidence": [
+        "wix",
+        "laravel",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "b95812b5-8121-4a51-aebe-8482dbb4d8c3",
+      "name": "Intrex Serviss",
+      "website": "https://intrex.lv",
+      "country": "Latvia",
+      "platform": "Wix",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://www.intrex.store/",
+      "confidence": "high",
+      "commerce_fit": "custom_or_feed_required",
+      "evidence": [
+        "wix",
+        "laravel",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "64a93cb7-9da4-4cf5-965e-a22cde04f036",
+      "name": "Kärcher Latvija",
+      "website": "https://www.kaercher.com/lv",
+      "country": "Latvia",
+      "platform": "Custom/Other",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://www.karcher.com/lv/",
+      "confidence": "medium",
+      "commerce_fit": "custom_or_feed_required",
+      "evidence": [
+        "cart"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "7c5b6436-b666-455a-a6d2-2d08a69247a0",
+      "name": "Kārļamuiža Country Hotel",
+      "website": "https://www.karlamuiza.lv",
+      "country": "Latvia",
+      "platform": "Custom/Other",
+      "vertical": "Hospitality",
+      "canonical_url": "https://www.karlamuiza.lv/",
+      "confidence": "medium",
+      "commerce_fit": "content_only",
+      "evidence": [],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "9b8761d3-8a58-46d1-9f1d-ea6934f75bec",
+      "name": "Kinema Latvia",
+      "website": "https://kinema.lv",
+      "country": "Latvia",
+      "platform": "WooCommerce",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://kinema.lv/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "woo-plugin-assets",
+        "woo-runtime",
+        "woo-body",
+        "wordpress",
+        "working Woo Store API",
+        "working WordPress REST API",
+        "cart"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "f3e206b3-ee13-4b03-9043-fd22527812bf",
+      "name": "KOOL Latvija",
+      "website": "https://kool.lv",
+      "country": "Latvia",
+      "platform": "Custom/Other",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://kool.lv/",
+      "confidence": "medium",
+      "commerce_fit": "content_only",
+      "evidence": [
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "fcd231d7-ca50-4057-a16c-c01004373704",
+      "name": "LABRAINS",
+      "website": "https://labrains.eu",
+      "country": "Latvia",
+      "platform": "Shopify",
+      "vertical": "Beauty and personal care",
+      "canonical_url": "https://labrains.eu/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "shopify-cdn",
+        "shopify-runtime",
+        "myshopify-domain",
+        "working /products.json",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "86b90f8a-db66-415d-98fa-7c309d41334a",
+      "name": "Lotos Pharma",
+      "website": "https://lotos-pharma.com",
+      "country": "Latvia",
+      "platform": "WooCommerce",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://www.lotos-pharma.com/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "woo-plugin-assets",
+        "woo-runtime",
+        "woo-body",
+        "wordpress",
+        "working Woo Store API",
+        "working WordPress REST API",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "295037af-752b-41d9-bb6b-53cb7fe12c95",
+      "name": "MADARA Cosmetics",
+      "website": "https://www.madaracosmetics.com",
+      "country": "Latvia",
+      "platform": "Shopify",
+      "vertical": "Beauty and personal care",
+      "canonical_url": "https://www.madaracosmetics.com/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "shopify-cdn",
+        "shopify-runtime",
+        "myshopify-domain",
+        "working /products.json",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "c618fcc6-517e-42cb-ab27-3db1a85438a5",
+      "name": "Meimelin",
+      "website": "https://meimelin.lv",
+      "country": "Latvia",
+      "platform": "Shopify",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://www.meimelin.lv/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "shopify-cdn",
+        "shopify-runtime",
+        "myshopify-domain",
+        "working /products.json",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "436cbc2d-a8dc-4a25-87a8-74a3a663a6cb",
+      "name": "Mēness aptieka",
+      "website": "https://www.menessaptieka.lv",
+      "country": "Latvia",
+      "platform": "Custom/Other",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://www.menessaptieka.lv/",
+      "confidence": "medium",
+      "commerce_fit": "content_only",
+      "evidence": [],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "3c1ff173-d249-40a4-bde7-24f3fcf92d33",
+      "name": "MINTprint",
+      "website": "https://mintprint.lv",
+      "country": "Latvia",
+      "platform": "WooCommerce",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://mintprint.lv/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "woo-plugin-assets",
+        "woo-runtime",
+        "woo-body",
+        "wordpress",
+        "working Woo Store API",
+        "working WordPress REST API",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "090bf4d5-7de4-4da5-b2d5-ec68033f0676",
+      "name": "nordi",
+      "website": "https://nordi.lv",
+      "country": "Latvia",
+      "platform": "WooCommerce",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://nordi.com/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "woo-plugin-assets",
+        "woo-runtime",
+        "woo-body",
+        "wordpress",
+        "working Woo Store API",
+        "working WordPress REST API",
+        "cart"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "34ffa4e6-2ebb-4cb5-88f0-65ca9b07728b",
+      "name": "Outfish",
+      "website": "https://outfish.lv",
+      "country": "Latvia",
+      "platform": "Shopify",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://outfish.lv/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "shopify-cdn",
+        "shopify-runtime",
+        "myshopify-domain",
+        "working /products.json",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "744806ce-0099-4d04-873c-7837257380ae",
+      "name": "PURUS.PET",
+      "website": "https://www.puruspet.com",
+      "country": "Latvia",
+      "platform": "Custom/Other",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://puruspet.com/",
+      "confidence": "medium",
+      "commerce_fit": "content_only",
+      "evidence": [],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "d5b821f6-f371-4a56-bd39-1acf60ac5907",
+      "name": "Remedine",
+      "website": "https://remedine.lv",
+      "country": "Latvia",
+      "platform": "OpenCart",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://remedine.lv/",
+      "confidence": "high",
+      "commerce_fit": "custom_or_feed_required",
+      "evidence": [
+        "opencart",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "b1fdf244-758f-4890-866e-8e29b4b63c92",
+      "name": "Ring Baltic",
+      "website": "https://ringbaltic.lv",
+      "country": "Latvia",
+      "platform": "Custom/Other",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://ringbaltic.com/",
+      "confidence": "medium",
+      "commerce_fit": "content_only",
+      "evidence": [],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "9e808c9d-a70b-4722-8f25-bf809dd19d4e",
+      "name": "Rock Distribution",
+      "website": "http://www.rock-distribution.com",
+      "country": "Latvia",
+      "platform": "Webflow",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://www.rock-distribution.com/",
+      "confidence": "high",
+      "commerce_fit": "content_only",
+      "evidence": [
+        "webflow"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "449c139e-b234-4e61-ae9a-b6ef80185cbe",
+      "name": "Rūpes.lv",
+      "website": "https://rupes.lv",
+      "country": "Latvia",
+      "platform": "OpenCart",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://rupes.lv/",
+      "confidence": "high",
+      "commerce_fit": "custom_or_feed_required",
+      "evidence": [
+        "opencart"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "2a5a0bba-3730-46a0-a1c2-a1c024259a43",
+      "name": "SIA Coffee Guru Latvia",
+      "website": "https://www.coffeeguru.lv",
+      "country": "Latvia",
+      "platform": "WooCommerce",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://www.coffeeguru.lv/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "woo-plugin-assets",
+        "woo-runtime",
+        "woo-body",
+        "wordpress",
+        "working Woo Store API",
+        "working WordPress REST API",
+        "cart"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "29ba7146-658d-4428-86c6-4ca98ecf9172",
+      "name": "Sköld Latvia",
+      "website": "https://skold.lv",
+      "country": "Latvia",
+      "platform": "OpenCart",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://skold.lv/",
+      "confidence": "high",
+      "commerce_fit": "custom_or_feed_required",
+      "evidence": [
+        "opencart",
+        "cart"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "08e6e56c-ceec-46b7-bdbd-b629cc1961e1",
+      "name": "stacija.lv",
+      "website": "https://stacija.lv",
+      "country": "Latvia",
+      "platform": "Custom/Other",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://www.stacija.lv/programma/",
+      "confidence": "medium",
+      "commerce_fit": "content_only",
+      "evidence": [],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "57c7a930-fe5a-4cbc-b4c4-a6bc8f4c8120",
+      "name": "TRIBE Riga City Centre",
+      "website": "https://all.accor.com/hotel/B903/index.en.shtml",
+      "country": "Latvia",
+      "platform": "Custom/Other",
+      "vertical": "Hospitality",
+      "canonical_url": "https://all.accor.com/hotel/B903/index.en.shtml",
+      "confidence": "medium",
+      "commerce_fit": "content_only",
+      "evidence": [
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "6de0406b-bebf-448c-bedd-5d52cacb91a2",
+      "name": "Vilbers",
+      "website": "https://vilbers.lv",
+      "country": "Latvia",
+      "platform": "Shopify",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://vilbers.com/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "shopify-cdn",
+        "shopify-runtime",
+        "myshopify-domain",
+        "working /products.json",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "95d5705e-fa29-44b7-9d32-0cb18d03d961",
+      "name": "Woof.lv",
+      "website": "https://woof.lv",
+      "country": "Latvia",
+      "platform": "Shopify",
+      "vertical": "Retail and e-commerce",
+      "canonical_url": "https://woof.lv/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "shopify-cdn",
+        "shopify-runtime",
+        "myshopify-domain",
+        "working /products.json",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "31882a21-d40d-43b6-be24-d86915a67988",
+      "name": "1STOP",
+      "website": "https://www.1stop.lt",
+      "country": "Lithuania",
+      "platform": "Custom (Laravel)",
+      "vertical": "E-komercija",
+      "canonical_url": "https://www.1stop.lt/",
+      "confidence": "high",
+      "commerce_fit": "custom_or_feed_required",
+      "evidence": [
+        "laravel",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "087bcc1f-6393-48b4-a48e-cf9b873c1a1c",
+      "name": "Adele Notes",
+      "website": "https://adelenotes.com/",
+      "country": "Lithuania",
+      "platform": "Shopify",
+      "vertical": "Retail, e-commerce and services",
+      "canonical_url": "https://adelenotes.com/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "shopify-cdn",
+        "shopify-runtime",
+        "myshopify-domain",
+        "working /products.json",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "651cae19-8c18-4575-a05e-166987428642",
+      "name": "ADMODUM",
+      "website": "https://www.admodum.lt/",
+      "country": "Lithuania",
+      "platform": "Wix",
+      "vertical": "Furniture and interiors",
+      "canonical_url": "https://www.admodum.lt/",
+      "confidence": "high",
+      "commerce_fit": "content_only",
+      "evidence": [
+        "wix",
+        "laravel"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "c7bc2974-df5d-4cca-a2ba-da3340509798",
+      "name": "Amber Esthetic",
+      "website": "https://www.amberesthetic.lt/",
+      "country": "Lithuania",
+      "platform": "Drupal",
+      "vertical": "Healthcare",
+      "canonical_url": "https://www.amberesthetic.lt/",
+      "confidence": "high",
+      "commerce_fit": "custom_or_feed_required",
+      "evidence": [
+        "drupal",
+        "cart"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "13cb6bd6-eeff-4486-a47a-9148062ef29b",
+      "name": "Apvalaus stalo klubas",
+      "website": "https://www.asklubas.lt/",
+      "country": "Lithuania",
+      "platform": "Custom/Other",
+      "vertical": "Hospitality",
+      "canonical_url": "https://www.asklubas.lt/",
+      "confidence": "medium",
+      "commerce_fit": "content_only",
+      "evidence": [],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "00c0593e-c9b2-4d7e-b409-c026335873e1",
+      "name": "Aromatic •89•",
+      "website": "https://www.aromatic89.lt/",
+      "country": "Lithuania",
+      "platform": "Custom (Laravel)",
+      "vertical": "Beauty, fashion and personal care",
+      "canonical_url": "https://www.aromatic89.lt/",
+      "confidence": "high",
+      "commerce_fit": "custom_or_feed_required",
+      "evidence": [
+        "laravel",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "2581d820-9224-4739-a824-c5e97327f0ad",
+      "name": "Aromika",
+      "website": "https://aromika.lt/",
+      "country": "Lithuania",
+      "platform": "Shopify",
+      "vertical": "Beauty, fashion and personal care",
+      "canonical_url": "https://aromika.lt/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "shopify-cdn",
+        "shopify-runtime",
+        "myshopify-domain",
+        "working /products.json",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "54619bec-9338-42e2-952c-383616a1b005",
+      "name": "Arredo Deko",
+      "website": "https://arredodeko.lt/",
+      "country": "Lithuania",
+      "platform": "WordPress (non-WooCommerce)",
+      "vertical": "Furniture and interiors",
+      "canonical_url": "https://arredodeko.lt/",
+      "confidence": "high",
+      "commerce_fit": "content_only",
+      "evidence": [
+        "wordpress",
+        "working WordPress REST API"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "b607c960-3929-4c1e-a895-4b1ec89e6318",
+      "name": "AZETA, UAB (Eurovaistine.lt)",
+      "website": "https://www.eurovaistine.lt/",
+      "country": "Lithuania",
+      "platform": "Custom (Next.js)",
+      "vertical": "Healthcare",
+      "canonical_url": "https://www.eurovaistine.lt/",
+      "confidence": "high",
+      "commerce_fit": "custom_or_feed_required",
+      "evidence": [
+        "nextjs",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "e2293a1f-258d-4fad-afc1-2a1a4770ab8b",
+      "name": "BALTEXIM",
+      "website": "https://www.baltexim.lt/",
+      "country": "Lithuania",
+      "platform": "WooCommerce",
+      "vertical": "Retail, e-commerce and services",
+      "canonical_url": "https://www.baltexim.lt/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "woo-plugin-assets",
+        "woo-runtime",
+        "woo-body",
+        "wordpress",
+        "working Woo Store API",
+        "working WordPress REST API",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "5bc87084-aac1-48b1-8477-4ffa154cb821",
+      "name": "Baltijos-Amerikos Klinika",
+      "website": "https://bak.lt",
+      "country": "Lithuania",
+      "platform": "WordPress (non-WooCommerce)",
+      "vertical": "Medicina",
+      "canonical_url": "https://bak.lt/",
+      "confidence": "high",
+      "commerce_fit": "content_only",
+      "evidence": [
+        "wordpress",
+        "working WordPress REST API",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "954b3738-5101-426c-a418-86dafce20a51",
+      "name": "Baros Medical Supplies",
+      "website": "https://baros.lt/",
+      "country": "Lithuania",
+      "platform": "WordPress (non-WooCommerce)",
+      "vertical": "Healthcare",
+      "canonical_url": "https://baros.lt/",
+      "confidence": "high",
+      "commerce_fit": "content_only",
+      "evidence": [
+        "wordpress",
+        "working WordPress REST API"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "a6b7f34d-2b26-414b-ad11-918f9b59bb9f",
+      "name": "Betono Mozaika",
+      "website": "https://www.betonomozaika.lt/",
+      "country": "Lithuania",
+      "platform": "WordPress (non-WooCommerce)",
+      "vertical": "Retail, e-commerce and services",
+      "canonical_url": "https://www.betonomozaika.lt/",
+      "confidence": "high",
+      "commerce_fit": "content_only",
+      "evidence": [
+        "wordpress",
+        "working WordPress REST API"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "eb9dc12e-70f6-4976-8ae5-292a86e144bd",
+      "name": "BOISROIS",
+      "website": "https://boisrois.com/",
+      "country": "Lithuania",
+      "platform": "WordPress (non-WooCommerce)",
+      "vertical": "Furniture and interiors",
+      "canonical_url": "https://boisrois.com/",
+      "confidence": "high",
+      "commerce_fit": "content_only",
+      "evidence": [
+        "wordpress",
+        "working WordPress REST API"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "c303c746-ebb9-4740-b25a-fb907d0a12da",
+      "name": "Bosaddo",
+      "website": "https://bosaddo.com",
+      "country": "Lithuania",
+      "platform": "Shopify",
+      "vertical": "E-komercija",
+      "canonical_url": "https://bosaddo.com/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "shopify-cdn",
+        "shopify-runtime",
+        "myshopify-domain",
+        "working /products.json",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "60d3ed9c-f354-4329-a040-f8b6618701ba",
+      "name": "C&D Style",
+      "website": "https://cdstyle.lt/",
+      "country": "Lithuania",
+      "platform": "Magento",
+      "vertical": "Beauty, fashion and personal care",
+      "canonical_url": "https://cdstyle.lt/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "magento-runtime",
+        "productSchema",
+        "offerSchema",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "08678cc3-4805-4833-b216-da1ee8d775ce",
+      "name": "CASE4YOU",
+      "website": "https://www.case4you.lt",
+      "country": "Lithuania",
+      "platform": "Verskis",
+      "vertical": "E-komercija",
+      "canonical_url": "https://www.case4you.lt/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "verskis-generator",
+        "verskis-assets",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "8f64345d-49fd-4c14-a132-9766fc325042",
+      "name": "Coaty Coat",
+      "website": "https://www.coatycoat.com",
+      "country": "Lithuania",
+      "platform": "Wix",
+      "vertical": "E-komercija",
+      "canonical_url": "https://www.coatycoat.com/",
+      "confidence": "high",
+      "commerce_fit": "custom_or_feed_required",
+      "evidence": [
+        "wix",
+        "laravel",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "8e7b54a2-50a3-46c1-a323-f20d299ca1c7",
+      "name": "Cut My Fashion",
+      "website": "https://cutmyfashion.lt",
+      "country": "Lithuania",
+      "platform": "Shopify",
+      "vertical": "E-komercija",
+      "canonical_url": "https://cutmyfashion.lt/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "shopify-cdn",
+        "shopify-runtime",
+        "myshopify-domain",
+        "working /products.json",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "6cc8d146-bdb9-4589-b5f1-329b9a333362",
+      "name": "DekoForma",
+      "website": "https://www.dekoforma.lt",
+      "country": "Lithuania",
+      "platform": "Custom/Other",
+      "vertical": "Baldai ir interjeras",
+      "canonical_url": "https://www.dekoforma.lt/",
+      "confidence": "medium",
+      "commerce_fit": "content_only",
+      "evidence": [],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "bf3bf9d3-c912-4597-b753-a8bcb5e07027",
+      "name": "DILED",
+      "website": "https://diled.lt",
+      "country": "Lithuania",
+      "platform": "WordPress (non-WooCommerce)",
+      "vertical": "Apšvietimo sprendimai",
+      "canonical_url": "https://diled.lt/",
+      "confidence": "high",
+      "commerce_fit": "content_only",
+      "evidence": [
+        "wordpress",
+        "working WordPress REST API"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "9ccbd1e2-ed5e-4390-8dc5-83f2fca611bd",
+      "name": "Elegant Home",
+      "website": "https://eleganthome.lt",
+      "country": "Lithuania",
+      "platform": "WooCommerce",
+      "vertical": "Baldai ir interjeras",
+      "canonical_url": "https://eleganthome.lt/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "woo-plugin-assets",
+        "woo-runtime",
+        "woo-body",
+        "wordpress",
+        "working Woo Store API",
+        "working WordPress REST API",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "7dc4cb3d-2d9b-4288-b850-67fc0710c94f",
+      "name": "Elesen Lietuva",
+      "website": "https://www.elesen.lt/",
+      "country": "Lithuania",
+      "platform": "Custom/Other",
+      "vertical": "Retail, e-commerce and services",
+      "canonical_url": "https://www.elesen.lt/",
+      "confidence": "medium",
+      "commerce_fit": "custom_or_feed_required",
+      "evidence": [
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "eba97f1a-602c-496f-b4e0-c6dad373687f",
+      "name": "Elevita.lt",
+      "website": "https://elevita.lt/lt/",
+      "country": "Lithuania",
+      "platform": "PrestaShop",
+      "vertical": "Beauty, fashion and personal care",
+      "canonical_url": "https://elevita.lt/lt/",
+      "confidence": "high",
+      "commerce_fit": "custom_or_feed_required",
+      "evidence": [
+        "prestashop",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "257c95f8-58ff-4c0f-8fb2-d915a233c6fe",
+      "name": "EMKO",
+      "website": "https://emko-place.shop/",
+      "country": "Lithuania",
+      "platform": "Shopify",
+      "vertical": "Furniture and interiors",
+      "canonical_url": "https://emko-place.shop/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "shopify-cdn",
+        "shopify-runtime",
+        "myshopify-domain",
+        "working /products.json",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "aa22876e-3ff2-4f96-aed4-d836cbf306cb",
+      "name": "Entryscope",
+      "website": "https://entryscope.com/",
+      "country": "Lithuania",
+      "platform": "Custom/Other",
+      "vertical": "Technology",
+      "canonical_url": "https://entryscope.com/",
+      "confidence": "medium",
+      "commerce_fit": "custom_or_feed_required",
+      "evidence": [
+        "offerSchema"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "56692aaf-96ea-4b72-9972-f310418db72d",
+      "name": "ESEA House",
+      "website": "https://www.eseahouse.com",
+      "country": "Lithuania",
+      "platform": "Wix",
+      "vertical": "E-komercija",
+      "canonical_url": "https://www.eseahouse.com/",
+      "confidence": "high",
+      "commerce_fit": "custom_or_feed_required",
+      "evidence": [
+        "wix",
+        "laravel",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "121bfde7-70bc-486f-9c2a-0c19594ca740",
+      "name": "EURIBIJA",
+      "website": "https://euribija.lt/",
+      "country": "Lithuania",
+      "platform": "WooCommerce",
+      "vertical": "Retail, e-commerce and services",
+      "canonical_url": "https://euribija.lt/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "woo-runtime",
+        "woo-body",
+        "wordpress",
+        "working Woo Store API",
+        "working WordPress REST API",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "e3d52fba-eccc-4504-9a94-c4251e601207",
+      "name": "FITSOUT",
+      "website": "https://fitsout.com/",
+      "country": "Lithuania",
+      "platform": "WordPress (non-WooCommerce)",
+      "vertical": "Furniture and interiors",
+      "canonical_url": "https://fitsout.com/",
+      "confidence": "high",
+      "commerce_fit": "content_only",
+      "evidence": [
+        "wordpress",
+        "working WordPress REST API"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "dbf14b6f-faec-4b10-abe4-1b66020b670f",
+      "name": "Furniture Help",
+      "website": "https://furniturehelp.lt/lt/",
+      "country": "Lithuania",
+      "platform": "WordPress (non-WooCommerce)",
+      "vertical": "Furniture and interiors",
+      "canonical_url": "https://furniturehelp.lt/lt/",
+      "confidence": "high",
+      "commerce_fit": "content_only",
+      "evidence": [
+        "wordpress",
+        "working WordPress REST API",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "83956fa6-ee55-4126-8134-f005d309edd4",
+      "name": "Gadarvy Therapeutics",
+      "website": "https://gadarvytherapeutics.com/",
+      "country": "Lithuania",
+      "platform": "WordPress (non-WooCommerce)",
+      "vertical": "Healthcare",
+      "canonical_url": "https://gadarvytherapeutics.com/",
+      "confidence": "high",
+      "commerce_fit": "content_only",
+      "evidence": [
+        "wordpress",
+        "working WordPress REST API"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "18269e84-d7eb-4258-8117-cfb8a33d5465",
+      "name": "Gergama",
+      "website": "https://gergama.lt/",
+      "country": "Lithuania",
+      "platform": "WordPress (non-WooCommerce)",
+      "vertical": "Furniture and interiors",
+      "canonical_url": "https://gergama.lt/",
+      "confidence": "high",
+      "commerce_fit": "content_only",
+      "evidence": [
+        "wordpress",
+        "working WordPress REST API"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "c8096c4f-9c92-4870-940c-09014371f786",
+      "name": "GFORMA",
+      "website": "https://www.gforma.lt",
+      "country": "Lithuania",
+      "platform": "WordPress (non-WooCommerce)",
+      "vertical": "Baldai ir interjeras",
+      "canonical_url": "https://www.gforma.lt/",
+      "confidence": "high",
+      "commerce_fit": "content_only",
+      "evidence": [
+        "wordpress"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "a0e0b756-019a-484a-b1b2-7d1dc6288d1b",
+      "name": "Glovė",
+      "website": "https://glove.lt",
+      "country": "Lithuania",
+      "platform": "OpenCart",
+      "vertical": "E-komercija",
+      "canonical_url": "https://glove.lt/",
+      "confidence": "high",
+      "commerce_fit": "custom_or_feed_required",
+      "evidence": [
+        "opencart",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "fd7ad822-c7e7-4004-8a0f-16e0a5b742c3",
+      "name": "GOMES Hotel Intel",
+      "website": "https://gomeshotelintel.com/",
+      "country": "Lithuania",
+      "platform": "Custom/Other",
+      "vertical": "Hospitality",
+      "canonical_url": "https://gomeshotelintel.com/",
+      "confidence": "medium",
+      "commerce_fit": "content_only",
+      "evidence": [],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "831ff446-5258-4188-84b2-914883760f4f",
+      "name": "Green Town Restaurant",
+      "website": "https://www.greentown.lt/",
+      "country": "Lithuania",
+      "platform": "Custom (Next.js)",
+      "vertical": "Hospitality",
+      "canonical_url": "https://www.greentown.lt/",
+      "confidence": "high",
+      "commerce_fit": "content_only",
+      "evidence": [
+        "nextjs"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "01193f39-6f34-46d9-a292-ab9bcc739a9d",
+      "name": "greet",
+      "website": "https://www.heygreet.com/en",
+      "country": "Lithuania",
+      "platform": "Custom (Next.js)",
+      "vertical": "Technology",
+      "canonical_url": "https://www.heygreet.com/en",
+      "confidence": "high",
+      "commerce_fit": "custom_or_feed_required",
+      "evidence": [
+        "nextjs",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "2f01de6b-aa27-42ba-9dee-eae4cf91ea51",
+      "name": "GRIDA",
+      "website": "https://www.grida.lt/",
+      "country": "Lithuania",
+      "platform": "Custom/Other",
+      "vertical": "Retail, e-commerce and services",
+      "canonical_url": "https://www.grida.lt/",
+      "confidence": "medium",
+      "commerce_fit": "content_only",
+      "evidence": [],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "1ec8917b-0697-4a3e-ab71-b49050932bf6",
+      "name": "GULBELĖ",
+      "website": "https://gulbele.lt",
+      "country": "Lithuania",
+      "platform": "PrestaShop",
+      "vertical": "E-komercija",
+      "canonical_url": "https://gulbele.lt/",
+      "confidence": "high",
+      "commerce_fit": "custom_or_feed_required",
+      "evidence": [
+        "prestashop",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "9d27c964-44fb-4416-8065-7070095304a8",
+      "name": "Hansab Lietuva",
+      "website": "https://www.hansab.lt/",
+      "country": "Lithuania",
+      "platform": "WordPress (non-WooCommerce)",
+      "vertical": "Retail, e-commerce and services",
+      "canonical_url": "https://www.hansab.lt/",
+      "confidence": "high",
+      "commerce_fit": "content_only",
+      "evidence": [
+        "wordpress",
+        "working WordPress REST API"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "d65e0447-c21a-4c4f-805c-1c5ec9b61a12",
+      "name": "HI-LABS",
+      "website": "https://www.hi-labs.eu/",
+      "country": "Lithuania",
+      "platform": "Webflow",
+      "vertical": "Healthcare",
+      "canonical_url": "https://www.hi-labs.eu/",
+      "confidence": "high",
+      "commerce_fit": "content_only",
+      "evidence": [
+        "webflow"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "2bd20b82-e469-4029-87db-56e83dade990",
+      "name": "HOVDEN",
+      "website": "https://hovden.lt/",
+      "country": "Lithuania",
+      "platform": "WooCommerce",
+      "vertical": "Furniture and interiors",
+      "canonical_url": "https://hovden.lt/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "woo-plugin-assets",
+        "woo-runtime",
+        "woo-body",
+        "wordpress",
+        "working Woo Store API",
+        "working WordPress REST API",
+        "cart"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "81afcc0b-030c-4ee2-9a01-8bb394f40a08",
+      "name": "iDeal Lietuva",
+      "website": "https://www.cec.lt/",
+      "country": "Lithuania",
+      "platform": "Custom (Next.js)",
+      "vertical": "Retail, e-commerce and services",
+      "canonical_url": "https://www.cec.lt/",
+      "confidence": "high",
+      "commerce_fit": "custom_or_feed_required",
+      "evidence": [
+        "nextjs",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "a1a0bcae-cecb-472d-a400-883153a8bbf8",
+      "name": "IDWDISPLAY",
+      "website": "https://idwdisplay.com/",
+      "country": "Lithuania",
+      "platform": "WordPress (non-WooCommerce)",
+      "vertical": "Furniture and interiors",
+      "canonical_url": "https://idwdisplay.com/",
+      "confidence": "high",
+      "commerce_fit": "content_only",
+      "evidence": [
+        "wordpress",
+        "working WordPress REST API"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "45bf9cfa-981c-49d7-a966-405958802e3d",
+      "name": "INDUSTEK UAB",
+      "website": "https://industek.lt/",
+      "country": "Lithuania",
+      "platform": "Custom/Other",
+      "vertical": "Retail, e-commerce and services",
+      "canonical_url": "https://industek.lt/",
+      "confidence": "medium",
+      "commerce_fit": "content_only",
+      "evidence": [],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "eb29624b-4b0a-4a89-a909-4e6a1e22fb50",
+      "name": "Įrankis.lt",
+      "website": "https://irankis.lt",
+      "country": "Lithuania",
+      "platform": "Custom (Nuxt)",
+      "vertical": "Įrangos nuoma",
+      "canonical_url": "https://irankis.lt/",
+      "confidence": "high",
+      "commerce_fit": "content_only",
+      "evidence": [
+        "nuxt"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "e868fb1c-aa72-48e0-8cec-1b608afd0434",
+      "name": "Jacob Colinn",
+      "website": "https://jacobcolinn.com",
+      "country": "Lithuania",
+      "platform": "Shopify",
+      "vertical": "E-komercija",
+      "canonical_url": "https://jacobcolinn.com/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "shopify-cdn",
+        "shopify-runtime",
+        "myshopify-domain",
+        "working /products.json",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "a55be2f7-8c47-4a6d-9aef-1c19888696ce",
+      "name": "jot.jot",
+      "website": "http://www.jotjot.com/",
+      "country": "Lithuania",
+      "platform": "WooCommerce",
+      "vertical": "Furniture and interiors",
+      "canonical_url": "http://www.jotjot.com/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "woo-runtime",
+        "woo-body",
+        "wordpress",
+        "working WordPress REST API",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "e1494eb3-5a2e-47c3-ade2-43380cbe0cc8",
+      "name": "JSC Baldai Jums",
+      "website": "https://www.baldaijums.lt/",
+      "country": "Lithuania",
+      "platform": "WordPress (non-WooCommerce)",
+      "vertical": "Furniture and interiors",
+      "canonical_url": "https://www.baldaijums.lt/",
+      "confidence": "high",
+      "commerce_fit": "content_only",
+      "evidence": [
+        "wordpress",
+        "working WordPress REST API"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "2b687653-6f7c-42e5-96d1-843287c3e9b3",
+      "name": "Kankorėžis",
+      "website": "https://kankorezis.lt",
+      "country": "Lithuania",
+      "platform": "WooCommerce",
+      "vertical": "Baldai ir interjeras",
+      "canonical_url": "https://kankorezis.lt/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "woo-runtime",
+        "woo-body",
+        "wordpress",
+        "working Woo Store API",
+        "working WordPress REST API",
+        "cart"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "ceddc2dc-1974-43f8-a338-0c3209705173",
+      "name": "KOKO Baldai",
+      "website": "https://www.kokobaldai.lt",
+      "country": "Lithuania",
+      "platform": "Wix",
+      "vertical": "Baldai ir interjeras",
+      "canonical_url": "https://www.kokobaldai.lt/",
+      "confidence": "high",
+      "commerce_fit": "custom_or_feed_required",
+      "evidence": [
+        "wix",
+        "laravel",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "efa08dd2-ff2d-424e-8ba3-ed35f05323a6",
+      "name": "Komi",
+      "website": "https://komi.lt",
+      "country": "Lithuania",
+      "platform": "WooCommerce",
+      "vertical": "E-komercija",
+      "canonical_url": "https://komi.lt/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "woo-plugin-assets",
+        "woo-runtime",
+        "woo-body",
+        "wordpress",
+        "working Woo Store API",
+        "working WordPress REST API",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "89ea6670-8549-4de7-ba2e-552e01f9ee5e",
+      "name": "Kotryna Group",
+      "website": "https://www.kotrynagroup.com/",
+      "country": "Lithuania",
+      "platform": "WordPress (non-WooCommerce)",
+      "vertical": "Retail, e-commerce and services",
+      "canonical_url": "https://www.kotrynagroup.com/",
+      "confidence": "high",
+      "commerce_fit": "content_only",
+      "evidence": [
+        "wordpress",
+        "working WordPress REST API"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "dae9557b-4a55-419c-8e50-8847a9227b58",
+      "name": "LAJO baldai",
+      "website": "https://lajo.lt",
+      "country": "Lithuania",
+      "platform": "Custom/Other",
+      "vertical": "Baldai ir interjeras",
+      "canonical_url": "https://lajo.lt/",
+      "confidence": "medium",
+      "commerce_fit": "custom_or_feed_required",
+      "evidence": [
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "f9655ce1-5536-4cc7-bfeb-9b473049137a",
+      "name": "Lauksva",
+      "website": "https://www.lauksva.lt",
+      "country": "Lithuania",
+      "platform": "WooCommerce",
+      "vertical": "Baldai ir interjeras",
+      "canonical_url": "https://www.lauksva.lt/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "woo-plugin-assets",
+        "woo-runtime",
+        "woo-body",
+        "wordpress",
+        "working WordPress REST API",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "b1cd3acf-afb6-4da4-95cf-5fa4f1e23e41",
+      "name": "Lematics",
+      "website": "https://lematics.com/",
+      "country": "Lithuania",
+      "platform": "WordPress (non-WooCommerce)",
+      "vertical": "Furniture and interiors",
+      "canonical_url": "https://lematics.com/",
+      "confidence": "high",
+      "commerce_fit": "custom_or_feed_required",
+      "evidence": [
+        "wordpress",
+        "working WordPress REST API",
+        "cart"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "3680a55e-e1d9-44b5-a056-016f93b07d68",
+      "name": "Lexano",
+      "website": "https://lexano.eu/",
+      "country": "Lithuania",
+      "platform": "WordPress (non-WooCommerce)",
+      "vertical": "Healthcare",
+      "canonical_url": "https://lexano.eu/",
+      "confidence": "high",
+      "commerce_fit": "content_only",
+      "evidence": [
+        "wordpress",
+        "working WordPress REST API"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "3b6c3fdf-1c25-45d8-a99f-0a19b91113b3",
+      "name": "Linen Tales",
+      "website": "https://linentales.com/",
+      "country": "Lithuania",
+      "platform": "Shopify",
+      "vertical": "Beauty, fashion and personal care",
+      "canonical_url": "https://linentales.com/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "shopify-cdn",
+        "shopify-runtime",
+        "myshopify-domain",
+        "working /products.json",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "5a58dc73-4c55-4ae9-81c3-587b12675be2",
+      "name": "MAKO HORECA",
+      "website": "https://makohoreca.com/",
+      "country": "Lithuania",
+      "platform": "WooCommerce",
+      "vertical": "Retail, e-commerce and services",
+      "canonical_url": "https://makohoreca.com/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "woo-plugin-assets",
+        "woo-runtime",
+        "woo-body",
+        "wordpress",
+        "working Woo Store API",
+        "working WordPress REST API",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "2e43a648-4aef-44c5-88bf-65972fed551e",
+      "name": "Medicinos namai",
+      "website": "https://medicinosnamai.lt/",
+      "country": "Lithuania",
+      "platform": "WordPress (non-WooCommerce)",
+      "vertical": "Healthcare",
+      "canonical_url": "https://medicinosnamai.lt/",
+      "confidence": "high",
+      "commerce_fit": "custom_or_feed_required",
+      "evidence": [
+        "wordpress",
+        "working WordPress REST API",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "12481dfa-bd3e-44d3-b159-46ce51f53107",
+      "name": "Medžio bitės",
+      "website": "https://www.medziobites.lt/",
+      "country": "Lithuania",
+      "platform": "OpenCart",
+      "vertical": "Retail, e-commerce and services",
+      "canonical_url": "https://www.medziobites.lt/",
+      "confidence": "high",
+      "commerce_fit": "custom_or_feed_required",
+      "evidence": [
+        "opencart",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "464939c5-ddc5-4dfc-ab09-17fe329a9a52",
+      "name": "MOKI VEŽI",
+      "website": "https://mokivezi.lt/",
+      "country": "Lithuania",
+      "platform": "Custom/Other",
+      "vertical": "Retail, e-commerce and services",
+      "canonical_url": "https://mokivezi.lt/",
+      "confidence": "medium",
+      "commerce_fit": "custom_or_feed_required",
+      "evidence": [
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "330cde50-4cef-4735-90f3-b3b089ea58ba",
+      "name": "Muscle Shop",
+      "website": "https://muscleshop.lt",
+      "country": "Lithuania",
+      "platform": "Shopify",
+      "vertical": "E-komercija",
+      "canonical_url": "https://muscleshop.lt/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "shopify-cdn",
+        "shopify-runtime",
+        "myshopify-domain",
+        "laravel",
+        "working /products.json",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "a278311b-46cd-4a85-9a4c-68ca3480fc0e",
+      "name": "Odore d'amore",
+      "website": "https://odoredamore.lt",
+      "country": "Lithuania",
+      "platform": "Shopify",
+      "vertical": "Grožis ir kosmetika",
+      "canonical_url": "https://odoredamore.shop/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "rendered Shopify CDN/theme assets",
+        "odore-damore.myshopify.com"
+      ]
+    },
+    {
+      "id": "f1fd8a5e-e6b3-46db-8bd6-3b0776a499be",
+      "name": "Ogmina",
+      "website": "https://ogmina.lt",
+      "country": "Lithuania",
+      "platform": "Shopware",
+      "vertical": "E-komercija",
+      "canonical_url": "https://ogmina.lt/",
+      "confidence": "high",
+      "commerce_fit": "custom_or_feed_required",
+      "evidence": [
+        "shopware",
+        "nuxt",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "d26b815e-5dbe-43a5-9417-989d8fde8e27",
+      "name": "OrtoPro - ortopedijos profesionalai",
+      "website": "https://ortopro.lt/",
+      "country": "Lithuania",
+      "platform": "WooCommerce",
+      "vertical": "Healthcare",
+      "canonical_url": "https://ortopro.lt/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "woo-plugin-assets",
+        "woo-runtime",
+        "woo-body",
+        "wordpress",
+        "working Woo Store API",
+        "working WordPress REST API",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "2a65a6f9-b553-4733-be0c-4db850b94bff",
+      "name": "PANDO moto",
+      "website": "https://pandomoto.com/",
+      "country": "Lithuania",
+      "platform": "Shopify",
+      "vertical": "Retail, e-commerce and services",
+      "canonical_url": "https://pandomoto.com/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "shopify-cdn",
+        "shopify-runtime",
+        "myshopify-domain",
+        "laravel",
+        "working /products.json",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "f164f4ae-1452-4f26-a335-5cfc5d7a32e5",
+      "name": "Pilnatvės Sodas",
+      "website": "https://www.pilnatvessodas.lt",
+      "country": "Lithuania",
+      "platform": "Custom/Other",
+      "vertical": "Gėlės ir dovanos",
+      "canonical_url": "https://www.pilnatvessodas.lt/",
+      "confidence": "medium",
+      "commerce_fit": "custom_or_feed_required",
+      "evidence": [
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "63954c46-d7e2-4dd5-a84c-3c12ba851f63",
+      "name": "PLACENTA JSC",
+      "website": "https://placenta.lt/",
+      "country": "Lithuania",
+      "platform": "WooCommerce",
+      "vertical": "Healthcare",
+      "canonical_url": "https://placenta.lt/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "woo-plugin-assets",
+        "woo-runtime",
+        "woo-body",
+        "wordpress",
+        "working Woo Store API",
+        "working WordPress REST API",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "3466ad70-4438-4402-864f-07a7d2717ad5",
+      "name": "PREVINA",
+      "website": "https://previna.lt/",
+      "country": "Lithuania",
+      "platform": "WooCommerce",
+      "vertical": "Retail, e-commerce and services",
+      "canonical_url": "https://previna.lt/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "woo-plugin-assets",
+        "woo-runtime",
+        "woo-body",
+        "wordpress",
+        "working Woo Store API",
+        "working WordPress REST API",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "c2c9698e-e09a-423b-ac63-9c2407624361",
+      "name": "Projects by Woodline",
+      "website": "https://www.projectsbywoodline.com/",
+      "country": "Lithuania",
+      "platform": "Wix",
+      "vertical": "Furniture and interiors",
+      "canonical_url": "https://www.projectsbywoodline.com/",
+      "confidence": "high",
+      "commerce_fit": "custom_or_feed_required",
+      "evidence": [
+        "wix",
+        "laravel",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "7da20c28-c458-404d-ba9f-165b53229988",
+      "name": "Pulsetto",
+      "website": "https://pulsetto.tech/",
+      "country": "Lithuania",
+      "platform": "Shopify",
+      "vertical": "Healthcare",
+      "canonical_url": "https://pulsetto.tech/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "shopify-cdn",
+        "shopify-runtime",
+        "myshopify-domain",
+        "working /products.json",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "257eeb45-b6ef-45d0-b1cc-8bcf507aeb34",
+      "name": "RAIT",
+      "website": "https://raitgroup.com/",
+      "country": "Lithuania",
+      "platform": "WordPress (non-WooCommerce)",
+      "vertical": "Retail, e-commerce and services",
+      "canonical_url": "https://raitgroup.com/",
+      "confidence": "high",
+      "commerce_fit": "content_only",
+      "evidence": [
+        "wordpress",
+        "working WordPress REST API"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "604deb1b-c74c-438a-a028-22e229fb6c14",
+      "name": "REWO | Real Estate",
+      "website": "https://rewo.lt/",
+      "country": "Lithuania",
+      "platform": "WordPress (non-WooCommerce)",
+      "vertical": "Retail, e-commerce and services",
+      "canonical_url": "https://rewo.lt/",
+      "confidence": "high",
+      "commerce_fit": "content_only",
+      "evidence": [
+        "wordpress",
+        "working WordPress REST API"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "8ef9701f-28a6-4404-82bc-25dc2ed3a02d",
+      "name": "Samana Samana - pasirūpins tavo įmonės dovana | samanasamana.lt",
+      "website": "https://samanasamana.lt/",
+      "country": "Lithuania",
+      "platform": "WooCommerce",
+      "vertical": "Retail, e-commerce and services",
+      "canonical_url": "https://samanasamana.lt/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "woo-plugin-assets",
+        "woo-runtime",
+        "woo-body",
+        "wordpress",
+        "working Woo Store API",
+        "working WordPress REST API",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "3c617ea2-fcc7-44cc-aa36-dcadb22ac1a5",
+      "name": "SAMANOSE",
+      "website": "https://samanose.lt",
+      "country": "Lithuania",
+      "platform": "WordPress (non-WooCommerce)",
+      "vertical": "Interjero dizainas",
+      "canonical_url": "https://samanose.lt/",
+      "confidence": "high",
+      "commerce_fit": "content_only",
+      "evidence": [
+        "wordpress",
+        "working WordPress REST API"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "8c5a4d9a-0a6e-457d-b28a-8e2739879f6f",
+      "name": "ScienceForBrain",
+      "website": "https://scienceforbrain.com/",
+      "country": "Lithuania",
+      "platform": "Custom/Other",
+      "vertical": "Healthcare",
+      "canonical_url": "https://scienceforbrain.com/",
+      "confidence": "medium",
+      "commerce_fit": "content_only",
+      "evidence": [],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "a348582f-a4a7-4e96-bc3f-cc251e1fb8ef",
+      "name": "SEDI",
+      "website": "https://sedi.lt",
+      "country": "Lithuania",
+      "platform": "WooCommerce",
+      "vertical": "Baldai ir interjeras",
+      "canonical_url": "https://sedi.lt/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "woo-plugin-assets",
+        "woo-runtime",
+        "woo-body",
+        "wordpress",
+        "working Woo Store API",
+        "working WordPress REST API",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "96bb88de-7744-4271-85ac-eebb55caeff1",
+      "name": "Self.co",
+      "website": "https://self.co/",
+      "country": "Lithuania",
+      "platform": "Shopify",
+      "vertical": "Healthcare",
+      "canonical_url": "https://self.co/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "shopify-cdn",
+        "shopify-runtime",
+        "myshopify-domain",
+        "working /products.json",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "99e4a268-4422-4d6a-ba11-dc66212e3f1d",
+      "name": "Skaitmeninės šypsenos",
+      "website": "https://skaitmeninessypsenos.lt/",
+      "country": "Lithuania",
+      "platform": "WordPress (non-WooCommerce)",
+      "vertical": "Healthcare",
+      "canonical_url": "https://skaitmeninessypsenos.lt/",
+      "confidence": "high",
+      "commerce_fit": "content_only",
+      "evidence": [
+        "wordpress",
+        "working WordPress REST API"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "5d18a641-8d86-485f-8037-e5672880c50f",
+      "name": "Smells Like Spells",
+      "website": "https://smellslikespells.com",
+      "country": "Lithuania",
+      "platform": "WooCommerce",
+      "vertical": "E-komercija",
+      "canonical_url": "https://smellslikespells.com/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "rendered WooCommerce plugin/runtime assets"
+      ]
+    },
+    {
+      "id": "f5b15c12-3502-4198-acb5-6ef50a8cb713",
+      "name": "Solid Supply",
+      "website": "https://solidsupply.eu/",
+      "country": "Lithuania",
+      "platform": "Custom/Other",
+      "vertical": "Retail, e-commerce and services",
+      "canonical_url": "https://solidsupply.eu/",
+      "confidence": "medium",
+      "commerce_fit": "content_only",
+      "evidence": [],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "cd58052c-d1f5-4efc-84b9-7689a8d77d41",
+      "name": "Son de Flor",
+      "website": "https://sondeflor.com",
+      "country": "Lithuania",
+      "platform": "Shopify",
+      "vertical": "E-komercija",
+      "canonical_url": "https://sondeflor.com/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "shopify-cdn",
+        "shopify-runtime",
+        "myshopify-domain",
+        "working /products.json",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "a597b865-4fc5-43d9-b4a3-b6974c97fc39",
+      "name": "Sportuok.lt",
+      "website": "https://sportuok.lt",
+      "country": "Lithuania",
+      "platform": "Custom/Other",
+      "vertical": "Sportas",
+      "canonical_url": "https://sportuok.lt/",
+      "confidence": "medium",
+      "commerce_fit": "custom_or_feed_required",
+      "evidence": [
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "384c9720-c939-47f7-bd13-e0fc8a1bd259",
+      "name": "Stokker",
+      "website": "https://www.stokker.lt",
+      "country": "Lithuania",
+      "platform": "WordPress (non-WooCommerce)",
+      "vertical": "E-komercija",
+      "canonical_url": "https://www.stokker.lt/lt",
+      "confidence": "high",
+      "commerce_fit": "custom_or_feed_required",
+      "evidence": [
+        "wordpress",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "0de7b840-9e08-4484-818a-c236063f20de",
+      "name": "SYNC longevity clinic",
+      "website": "https://synclongevity.com/",
+      "country": "Lithuania",
+      "platform": "WordPress (non-WooCommerce)",
+      "vertical": "Healthcare",
+      "canonical_url": "https://synclongevity.com/",
+      "confidence": "high",
+      "commerce_fit": "custom_or_feed_required",
+      "evidence": [
+        "wordpress",
+        "working WordPress REST API",
+        "cart"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "f793acdf-af2f-4b92-bb6d-ceec7f5b4c66",
+      "name": "Tankos UAB",
+      "website": "https://tankos.lt/",
+      "country": "Lithuania",
+      "platform": "Custom/Other",
+      "vertical": "Furniture and interiors",
+      "canonical_url": "https://tankos.lt/",
+      "confidence": "medium",
+      "commerce_fit": "content_only",
+      "evidence": [],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "c75bc571-3af7-44fa-96ee-bd8f45bbe0b1",
+      "name": "Taurus Jewels",
+      "website": "https://taurusjewels.com",
+      "country": "Lithuania",
+      "platform": "WooCommerce",
+      "vertical": "Juvelyrika",
+      "canonical_url": "https://taurusjewels.com/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "woo-plugin-assets",
+        "woo-runtime",
+        "woo-body",
+        "wordpress",
+        "working Woo Store API",
+        "working WordPress REST API",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "7020a7fa-5edf-4cc6-9b2b-b33d9a99aa8a",
+      "name": "Terra Recognita",
+      "website": "https://terrarecognita.com",
+      "country": "Lithuania",
+      "platform": "WooCommerce",
+      "vertical": "Juvelyrika",
+      "canonical_url": "https://terrarecognita.com/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "woo-plugin-assets",
+        "woo-runtime",
+        "woo-body",
+        "wordpress",
+        "working Woo Store API",
+        "working WordPress REST API",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "2e7725c1-1bea-40fa-913a-dc06fd49b353",
+      "name": "Topo centras",
+      "website": "https://www.topocentras.lt/",
+      "country": "Lithuania",
+      "platform": "Custom/Other",
+      "vertical": "Retail, e-commerce and services",
+      "canonical_url": "https://www.topocentras.lt/",
+      "confidence": "medium",
+      "commerce_fit": "custom_or_feed_required",
+      "evidence": [
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "c2b8cc6a-9bee-48ec-9ef4-f28000446679",
+      "name": "UAB Arte Domestica",
+      "website": "https://www.artedomestica.eu/",
+      "country": "Lithuania",
+      "platform": "WooCommerce",
+      "vertical": "Furniture and interiors",
+      "canonical_url": "https://www.artedomestica.eu/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "woo-plugin-assets",
+        "woo-runtime",
+        "wordpress",
+        "working Woo Store API",
+        "working WordPress REST API",
+        "cart"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "ae83ef89-a544-4b7b-b0bd-ef79512b683f",
+      "name": "UAB Baldų Mozaika",
+      "website": "https://www.baldumozaika.lt/",
+      "country": "Lithuania",
+      "platform": "WordPress (non-WooCommerce)",
+      "vertical": "Furniture and interiors",
+      "canonical_url": "https://www.baldumozaika.lt/",
+      "confidence": "high",
+      "commerce_fit": "content_only",
+      "evidence": [
+        "wordpress",
+        "working WordPress REST API"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "b28d5f1f-e99f-4a96-8db5-679250e5d5d9",
+      "name": "UAB Laurema",
+      "website": "https://laurema.lt/",
+      "country": "Lithuania",
+      "platform": "WordPress (non-WooCommerce)",
+      "vertical": "Retail, e-commerce and services",
+      "canonical_url": "https://laurema.lt/",
+      "confidence": "high",
+      "commerce_fit": "custom_or_feed_required",
+      "evidence": [
+        "wordpress",
+        "working WordPress REST API",
+        "cart"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "c4eabb6a-3460-41af-9161-01279d3c236e",
+      "name": "UAB Limedika",
+      "website": "https://limedika.lt/index.php/lt/",
+      "country": "Lithuania",
+      "platform": "Joomla",
+      "vertical": "Healthcare",
+      "canonical_url": "https://limedika.lt/index.php/lt/",
+      "confidence": "high",
+      "commerce_fit": "content_only",
+      "evidence": [
+        "joomla"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "d0bbe036-3ab3-4da2-af89-09410458c763",
+      "name": "VDS Baldai",
+      "website": "https://vdsbaldai.lt",
+      "country": "Lithuania",
+      "platform": "WordPress (non-WooCommerce)",
+      "vertical": "Baldai ir interjeras",
+      "canonical_url": "https://vdsbaldai.lt/",
+      "confidence": "high",
+      "commerce_fit": "content_only",
+      "evidence": [
+        "wordpress",
+        "working WordPress REST API"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "e6da3f42-466f-42d3-889a-cc79518bbf8d",
+      "name": "VE-SAV",
+      "website": "https://ve-sav.com",
+      "country": "Lithuania",
+      "platform": "Shopify",
+      "vertical": "E-komercija",
+      "canonical_url": "https://ve-sav.com/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "shopify-cdn",
+        "shopify-runtime",
+        "myshopify-domain",
+        "working /products.json",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "ca33ebe4-1fcd-4629-8e41-9a5bc6da2b9e",
+      "name": "Verkter Group",
+      "website": "https://www.verkter.com",
+      "country": "Lithuania",
+      "platform": "Custom/Other",
+      "vertical": "E-komercija",
+      "canonical_url": "https://www.verkter.com/",
+      "confidence": "medium",
+      "commerce_fit": "content_only",
+      "evidence": [],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "5c59e106-e1f7-4765-8a6a-dacc58d170ec",
+      "name": "Witsee",
+      "website": "https://www.witsee.com/",
+      "country": "Lithuania",
+      "platform": "WooCommerce",
+      "vertical": "Technology",
+      "canonical_url": "https://www.witsee.com/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "woo-plugin-assets",
+        "woo-runtime",
+        "woo-body",
+        "wordpress",
+        "working Woo Store API",
+        "working WordPress REST API",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "6eb01ee6-9325-47f6-b489-0ebdfd5d7200",
+      "name": "WOODLINE",
+      "website": "https://www.woodline.lt",
+      "country": "Lithuania",
+      "platform": "Verskis",
+      "vertical": "Statyba ir interjeras",
+      "canonical_url": "https://www.woodline.lt/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "verskis-generator",
+        "verskis-assets",
+        "cart"
+      ],
+      "checked_at": "2026-08-31"
+    },
+    {
+      "id": "af83ecb5-a36c-4ddf-a2d3-c91f6349cfce",
+      "name": "ZEFYRAS",
+      "website": "https://www.zefyras.com",
+      "country": "Lithuania",
+      "platform": "WooCommerce",
+      "vertical": "E-komercija",
+      "canonical_url": "https://www.zefyras.com/",
+      "confidence": "high",
+      "commerce_fit": "native",
+      "evidence": [
+        "woo-plugin-assets",
+        "woo-runtime",
+        "woo-body",
+        "wordpress",
+        "working Woo Store API",
+        "working WordPress REST API",
+        "cart",
+        "checkout"
+      ],
+      "checked_at": "2026-08-31"
+    }
+  ]
+}
+

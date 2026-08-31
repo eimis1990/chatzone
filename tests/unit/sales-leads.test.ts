@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { formatStatusAge } from '@/lib/sales-leads'
+import { formatStatusAge, matchesLeadCountry } from '@/lib/sales-leads'
 
 describe('formatStatusAge', () => {
   const asOf = '2026-07-29T12:00:00.000Z'
@@ -19,5 +19,23 @@ describe('formatStatusAge', () => {
 
   it('handles invalid stored timestamps safely', () => {
     expect(formatStatusAge('not-a-date', asOf)).toBe('Unknown')
+  })
+})
+
+describe('matchesLeadCountry', () => {
+  it('keeps Lithuania matching case-insensitively', () => {
+    expect(matchesLeadCountry('Lithuania', 'lithuania')).toBe(true)
+    expect(matchesLeadCountry(' lithuania ', 'lithuania')).toBe(true)
+    expect(matchesLeadCountry('Latvia', 'lithuania')).toBe(false)
+  })
+
+  it('groups every named non-Lithuanian country under Other', () => {
+    expect(matchesLeadCountry('Latvia', 'other')).toBe(true)
+    expect(matchesLeadCountry('Estonia', 'other')).toBe(true)
+    expect(matchesLeadCountry('Lithuania', 'other')).toBe(false)
+  })
+
+  it('does not restrict the all-countries view', () => {
+    expect(matchesLeadCountry('Finland', 'all')).toBe(true)
   })
 })

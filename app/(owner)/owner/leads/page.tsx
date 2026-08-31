@@ -25,7 +25,7 @@ export default async function SalesLeadsPage() {
       <div>
         <h1 className="text-lg font-semibold">Sales leads</h1>
         <p className="text-sm text-muted-foreground">
-          Research, prioritize, and contact Lithuanian prospects.
+          Research, prioritize, and contact prospects from web and LinkedIn discovery.
         </p>
       </div>
 

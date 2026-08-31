@@ -12,6 +12,7 @@ import {
   ExternalLinkIcon,
   FilterXIcon,
   Globe2Icon,
+  LinkIcon,
   LoaderCircleIcon,
   MailIcon,
   MapPinIcon,
@@ -75,9 +76,11 @@ import {
   FOLLOW_UP_AFTER_DAYS,
   formatStatusAge,
   isContacted,
+  matchesLeadCountry,
   needsFollowUp,
+  type SalesLeadCountryFilter,
 } from '@/lib/sales-leads'
-import type { SalesLead, SalesLeadStatus } from '@/lib/types'
+import type { SalesLead, SalesLeadOrigin, SalesLeadStatus } from '@/lib/types'
 import { SALES_EMAIL_DEMO_RECIPIENT } from '@/lib/sales-email-send'
 import { SALES_EMAIL_TEMPLATE, type SalesEmailTemplateId } from '@/lib/sales-email-templates'
 
@@ -452,9 +455,11 @@ export function SalesLeadsTable({
   asOf: string
 }) {
   const [leads, setLeads] = useState(initialLeads)
+  const [leadOrigin, setLeadOrigin] = useState<SalesLeadOrigin>('default')
   const [query, setQuery] = useState('')
   const [vertical, setVertical] = useState<string | null>(null)
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
+  const [countryFilter, setCountryFilter] = useState<SalesLeadCountryFilter>('all')
   const [openLead, setOpenLead] = useState<SalesLead | null>(null)
   const [isDetailOpen, setIsDetailOpen] = useState(false)
   const [detailTab, setDetailTab] = useState<'details' | 'email'>('details')
@@ -462,9 +467,17 @@ export function SalesLeadsTable({
   const [sendingDemoLeadId, setSendingDemoLeadId] = useState<string | null>(null)
   const [, startTransition] = useTransition()
 
+  const originCounts = useMemo(() => ({
+    default: leads.filter((lead) => lead.lead_origin === 'default').length,
+    linkedin: leads.filter((lead) => lead.lead_origin === 'linkedin').length,
+  }), [leads])
+  const tabLeads = useMemo(
+    () => leads.filter((lead) => lead.lead_origin === leadOrigin),
+    [leads, leadOrigin],
+  )
   const verticals = useMemo(
-    () => [...new Set(leads.map((lead) => lead.vertical))].sort((a, b) => a.localeCompare(b)),
-    [leads],
+    () => [...new Set(tabLeads.map((lead) => lead.vertical))].sort((a, b) => a.localeCompare(b)),
+    [tabLeads],
   )
   const counts = useMemo(() => {
     const byStatus = new Map<SalesLeadStatus, number>()
@@ -472,7 +485,7 @@ export function SalesLeadsTable({
     let hasBot = 0
     let followUpDue = 0
     let scoreSum = 0
-    for (const lead of leads) {
+    for (const lead of tabLeads) {
       byStatus.set(lead.status, (byStatus.get(lead.status) ?? 0) + 1)
       if (isContacted(lead.status)) contacted += 1
       if (lead.has_chatbot) hasBot += 1
@@ -483,25 +496,30 @@ export function SalesLeadsTable({
       byStatus,
       contacted,
       hasBot,
-      noBot: leads.length - hasBot,
+      noBot: tabLeads.length - hasBot,
       followUpDue,
       awaitingReply: AWAITING_REPLY.reduce((sum, status) => sum + (byStatus.get(status) ?? 0), 0),
       demoTrack: DEMO_TRACK.reduce((sum, status) => sum + (byStatus.get(status) ?? 0), 0),
-      averageScore: leads.length ? Math.round(scoreSum / leads.length) : 0,
+      averageScore: tabLeads.length ? Math.round(scoreSum / tabLeads.length) : 0,
     }
-  }, [leads, asOf])
+  }, [tabLeads, asOf])
 
   /** Count for a quick tab / dropdown entry. */
   const statusCount = (filter: StatusFilter) =>
     filter === 'all'
-      ? leads.length
+      ? tabLeads.length
       : filter === 'awaiting_reply'
         ? counts.awaitingReply
         : filter === 'demo_track'
           ? counts.demoTrack
           : (counts.byStatus.get(filter) ?? 0)
 
-  const hasActiveFilters = Boolean(query.trim() || vertical || statusFilter !== 'all')
+  const hasActiveFilters = Boolean(
+    query.trim()
+    || vertical
+    || statusFilter !== 'all'
+    || (leadOrigin === 'linkedin' && countryFilter !== 'all'),
+  )
 
   const changeStatus = (id: string, status: SalesLeadStatus) => {
     const previous = leads
@@ -567,13 +585,25 @@ export function SalesLeadsTable({
   }
 
   const filtered = useMemo(() => {
-    let list = leads
+    let list = tabLeads
+    if (leadOrigin === 'linkedin' && countryFilter !== 'all') {
+      list = list.filter((lead) => matchesLeadCountry(lead.country, countryFilter))
+    }
     if (vertical) list = list.filter((lead) => lead.vertical === vertical)
     if (statusFilter !== 'all') list = list.filter((lead) => matchesStatusFilter(lead, statusFilter))
     if (query.trim()) {
       const normalized = query.trim().toLowerCase()
       list = list.filter((lead) =>
-        [lead.name, lead.legal_name, lead.city, lead.ceo, lead.email, lead.vertical, lead.platform]
+        [
+          lead.name,
+          lead.legal_name,
+          lead.city,
+          lead.country,
+          lead.ceo,
+          lead.email,
+          lead.vertical,
+          lead.platform,
+        ]
           .filter(Boolean)
           .join(' ')
           .toLowerCase()
@@ -581,12 +611,21 @@ export function SalesLeadsTable({
       )
     }
     return list
-  }, [leads, vertical, statusFilter, query])
+  }, [tabLeads, leadOrigin, countryFilter, vertical, statusFilter, query])
 
   const resetFilters = () => {
     setQuery('')
     setVertical(null)
     setStatusFilter('all')
+    setCountryFilter('all')
+  }
+
+  const changeLeadOrigin = (origin: SalesLeadOrigin) => {
+    setLeadOrigin(origin)
+    setQuery('')
+    setVertical(null)
+    setStatusFilter('all')
+    setCountryFilter('all')
   }
 
   const openDetails = (lead: SalesLead) => {
@@ -598,10 +637,51 @@ export function SalesLeadsTable({
 
   return (
     <div className="flex flex-col gap-5">
+      <div
+        className="grid w-full grid-cols-2 gap-1 rounded-xl border bg-muted p-1"
+        role="tablist"
+        aria-label="Lead discovery source"
+      >
+        {([
+          { value: 'default', label: 'Default', count: originCounts.default, icon: SearchIcon },
+          { value: 'linkedin', label: 'LinkedIn', count: originCounts.linkedin, icon: LinkIcon },
+        ] as const).map((tab) => {
+          const active = leadOrigin === tab.value
+          const Icon = tab.icon
+          return (
+            <button
+              key={tab.value}
+              type="button"
+              role="tab"
+              aria-label={`${tab.label} (${tab.count})`}
+              aria-selected={active}
+              onClick={() => changeLeadOrigin(tab.value)}
+              className={cn(
+                'flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all',
+                active
+                  ? 'bg-card text-foreground shadow-sm ring-1 ring-border'
+                  : 'text-muted-foreground hover:bg-card/60 hover:text-foreground',
+              )}
+            >
+              <Icon className="size-4" aria-hidden="true" />
+              <span>{tab.label}</span>
+              <span
+                className={cn(
+                  'rounded px-1.5 py-0.5 text-xs font-semibold tabular-nums',
+                  active ? 'bg-primary/10 text-primary' : 'bg-foreground/10',
+                )}
+              >
+                {tab.count}
+              </span>
+            </button>
+          )
+        })}
+      </div>
+
       <section className="grid grid-cols-2 gap-3 xl:grid-cols-4" aria-label="Pipeline summary">
         <StatCard
           label="Total leads"
-          value={leads.length}
+          value={tabLeads.length}
           detail={`${counts.noBot} without a chatbot · ${counts.hasBot} switch`}
           icon={UsersIcon}
           tone="#e8590c"
@@ -684,7 +764,14 @@ export function SalesLeadsTable({
             })}
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-[minmax(220px,1fr)_220px_200px]">
+          <div
+            className={cn(
+              'grid gap-3 sm:grid-cols-2',
+              leadOrigin === 'linkedin'
+                ? 'xl:grid-cols-[minmax(220px,1fr)_220px_200px_180px]'
+                : 'lg:grid-cols-[minmax(220px,1fr)_220px_200px]',
+            )}
+          >
             <label className="relative block">
               <span className="sr-only">Search sales leads</span>
               <SearchIcon className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
@@ -706,10 +793,10 @@ export function SalesLeadsTable({
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
-                  <SelectItem value="all">All categories ({leads.length})</SelectItem>
+                  <SelectItem value="all">All categories ({tabLeads.length})</SelectItem>
                   {verticals.map((item) => (
                     <SelectItem key={item} value={item}>
-                      {item} ({leads.filter((lead) => lead.vertical === item).length})
+                      {item} ({tabLeads.filter((lead) => lead.vertical === item).length})
                     </SelectItem>
                   ))}
                 </SelectGroup>
@@ -724,7 +811,7 @@ export function SalesLeadsTable({
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
-                  <SelectItem value="all">All statuses ({leads.length})</SelectItem>
+                  <SelectItem value="all">All statuses ({tabLeads.length})</SelectItem>
                   <SelectItem value="awaiting_reply">Emails sent ({counts.awaitingReply})</SelectItem>
                   <SelectItem value="demo_track">Demo — all stages ({counts.demoTrack})</SelectItem>
                   {STATUS_ORDER.map((status) => (
@@ -735,14 +822,36 @@ export function SalesLeadsTable({
                 </SelectGroup>
               </SelectContent>
             </Select>
+
+            {leadOrigin === 'linkedin' && (
+              <Select
+                value={countryFilter}
+                onValueChange={(value) => setCountryFilter(value as SalesLeadCountryFilter)}
+              >
+                <SelectTrigger aria-label="Filter by country" className="h-10 w-full bg-background">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectItem value="all">All countries ({tabLeads.length})</SelectItem>
+                    <SelectItem value="lithuania">
+                      Lithuania ({tabLeads.filter((lead) => matchesLeadCountry(lead.country, 'lithuania')).length})
+                    </SelectItem>
+                    <SelectItem value="other">
+                      Other ({tabLeads.filter((lead) => matchesLeadCountry(lead.country, 'other')).length})
+                    </SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            )}
           </div>
         </CardContent>
       </Card>
 
       <Card className="overflow-hidden shadow-none">
         <CardHeader>
-          <CardTitle>Pipeline</CardTitle>
-          <CardDescription>{filtered.length} of {leads.length} prospects match the current view.</CardDescription>
+          <CardTitle>{leadOrigin === 'linkedin' ? 'LinkedIn pipeline' : 'Default pipeline'}</CardTitle>
+          <CardDescription>{filtered.length} of {tabLeads.length} prospects match the current view.</CardDescription>
           <CardAction>
             <Badge variant="outline">
               <TargetIcon data-icon="inline-start" />
@@ -762,6 +871,9 @@ export function SalesLeadsTable({
                   <TableHead className="w-48 border-r text-xs uppercase tracking-wide text-muted-foreground">Company</TableHead>
                   <TableHead className="border-r text-xs uppercase tracking-wide text-muted-foreground">Platform</TableHead>
                   <TableHead className="w-36 border-r text-xs uppercase tracking-wide text-muted-foreground">Category</TableHead>
+                  {leadOrigin === 'linkedin' && (
+                    <TableHead className="w-32 border-r text-xs uppercase tracking-wide text-muted-foreground">Country</TableHead>
+                  )}
                   <TableHead className="border-r text-xs uppercase tracking-wide text-muted-foreground">Contact</TableHead>
                   <TableHead className="border-r text-xs uppercase tracking-wide text-muted-foreground">Status</TableHead>
                   <TableHead className="w-28 text-xs uppercase tracking-wide text-muted-foreground">Updated</TableHead>
@@ -822,6 +934,13 @@ export function SalesLeadsTable({
                           <VerticalBadge vertical={lead.vertical} onAccent={isClient} />
                         </div>
                       </TableCell>
+                      {leadOrigin === 'linkedin' && (
+                        <TableCell className={cellBorder}>
+                          <span className={cn('text-xs', isClient ? 'text-primary-foreground/80' : 'text-muted-foreground')}>
+                            {lead.country}
+                          </span>
+                        </TableCell>
+                      )}
                       <TableCell className={cellBorder}>
                         <div className="flex min-w-40 flex-col gap-0.5">
                           {lead.email ? (
@@ -908,6 +1027,15 @@ export function SalesLeadsTable({
                       <span className="mt-1 flex flex-wrap items-center gap-2">
                         <PlatformBadge platform={lead.platform} onAccent={isClient} />
                         <VerticalBadge vertical={lead.vertical} onAccent={isClient} />
+                        {leadOrigin === 'linkedin' && (
+                          <Badge
+                            variant="outline"
+                            className={cn(isClient && 'border-white/30 bg-white/10 text-primary-foreground')}
+                          >
+                            <MapPinIcon data-icon="inline-start" />
+                            {lead.country}
+                          </Badge>
+                        )}
                         {!isClient && <BotBadge has={lead.has_chatbot} />}
                       </span>
                     </span>
@@ -944,15 +1072,25 @@ export function SalesLeadsTable({
                 <SearchIcon className="size-5 text-muted-foreground" aria-hidden="true" />
               </span>
               <div>
-                <p className="font-medium">No leads found</p>
-                <p className="mt-1 text-sm text-muted-foreground">Try clearing a filter or using a broader search.</p>
+                <p className="font-medium">
+                  {leadOrigin === 'linkedin' && tabLeads.length === 0
+                    ? 'No LinkedIn leads yet'
+                    : 'No leads found'}
+                </p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {leadOrigin === 'linkedin' && tabLeads.length === 0
+                    ? 'Qualified LinkedIn and Sales Navigator leads will appear here after import.'
+                    : 'Try clearing a filter or using a broader search.'}
+                </p>
               </div>
-              <Button variant="outline" size="sm" onClick={resetFilters}>Clear filters</Button>
+              {tabLeads.length > 0 && (
+                <Button variant="outline" size="sm" onClick={resetFilters}>Clear filters</Button>
+              )}
             </div>
           )}
         </CardContent>
         <CardFooter className="justify-between text-xs text-muted-foreground">
-          <span>Showing {filtered.length} of {leads.length}</span>
+          <span>Showing {filtered.length} of {tabLeads.length}</span>
           <span className="hidden sm:inline">Priority weighs fit, reachability, revenue, and service pressure.</span>
         </CardFooter>
       </Card>
@@ -1056,6 +1194,9 @@ export function SalesLeadsTable({
                   <dl className="grid shrink-0 gap-3 sm:grid-cols-2">
                     <DetailItem label="Company" value={openLead.legal_name} icon={Building2Icon} />
                     <DetailItem label="City" value={openLead.city} icon={MapPinIcon} />
+                    {openLead.lead_origin === 'linkedin' && (
+                      <DetailItem label="Country" value={openLead.country} icon={Globe2Icon} />
+                    )}
                     <DetailItem label="Decision-maker" value={openLead.ceo} icon={UserRoundIcon} />
                     <DetailItem label="Platform" value={openLead.platform} icon={StoreIcon} />
                     <DetailItem label="Email" value={openLead.email} icon={MailIcon} copyable />
@@ -1067,6 +1208,14 @@ export function SalesLeadsTable({
                       icon={Globe2Icon}
                       href={openLead.website}
                     />
+                    {openLead.lead_origin === 'linkedin' && openLead.linkedin_url && (
+                      <DetailItem
+                        label="LinkedIn"
+                        value="Open profile"
+                        icon={LinkIcon}
+                        href={openLead.linkedin_url}
+                      />
+                    )}
                   </dl>
 
                   {openLead.status === 'delivery_failed' && (

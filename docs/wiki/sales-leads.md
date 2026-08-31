@@ -9,10 +9,25 @@ emails, and manual status progression.
   then name (`app/(owner)/owner/leads/page.tsx:15`). The table was introduced in
   `supabase/migrations/0036_sales_leads.sql:8`; `has_chatbot` was added in
   `0037_sales_leads_has_chatbot.sql:7`.
+- Discovery channel is explicit: `lead_origin` is either `default` for regular
+  web research or `linkedin` for LinkedIn/Sales Navigator. It is separate from
+  the free-text `source` research evidence. Every row stores a nonblank canonical
+  English `country`, plus an optional LinkedIn profile URL
+  (`supabase/migrations/20260828101532_add_sales_lead_origin_and_country.sql:3-24`;
+  `lib/types.ts:505-528`). The migration preserves the existing 300 leads as
+  `default` / `Lithuania`.
 - The client UI filters locally by text, vertical, status, and chatbot presence
   (`components/owner/SalesLeadsTable.tsx:297`). Status changes are optimistic,
   persist through `setLeadStatus`, update `status_updated_at`, and roll back both
   status and timestamp on error (`:313`; `app/(owner)/owner/leads/actions.ts:18`).
+- The owner screen first scopes the full pipeline by the `Default` or `LinkedIn`
+  source tab, so summary cards, status counts, categories, search, and results do
+  not mix channels (`components/owner/SalesLeadsTable.tsx:470-505`, `:640-679`).
+  Only the LinkedIn tab exposes the coarse `Lithuania` / `Other` filter; `Other`
+  is a filter group, never a stored country value. The actual country name stays
+  visible in LinkedIn desktop rows, mobile cards, and lead details
+  (`lib/sales-leads.ts:3-16`; `components/owner/SalesLeadsTable.tsx:587-614`,
+  `:826-845`, `:874-876`).
 - The route heading follows the same compact title/subtitle pattern as other
   owner pages (`app/(owner)/owner/leads/page.tsx:23`). Desktop uses a flat,
   score-first data grid with platform in its own column; below `md`, leads become
@@ -232,6 +247,75 @@ emails, and manual status progression.
 
 ## Prospect seeds
 
+- LinkedIn list membership is only a discovery signal. Before import, qualify
+  the company and role, resolve the canonical website, deduplicate against the
+  existing pipeline, and retain the real country name and profile URL. Do not
+  bulk-import a Sales Navigator list from title/geography alone.
+- Email readiness is a separate qualification step. Mark a lead email-ready
+  only when the address is published on the company's official website; prefer
+  a generic business inbox, retain a named address only when the company itself
+  publishes it, and never infer or guess an address from a domain.
+- The first qualified LinkedIn batch retained 37 of 148 Lithuanian list members:
+  one relevant buyer per company, an active official website, no email or phone
+  harvesting, and normalized-domain/profile deduplication. Four retained sites
+  exposed an existing chat widget and two could not be conclusively checked, so
+  `has_chatbot` remains evidence rather than an import gate
+  (`supabase/migrations/20260828104419_import_clean_lithuanian_linkedin_leads.sql:1-134`).
+- The follow-on Latvia/Estonia Sales Navigator search was configured for
+  1–200-person companies; Owner/Partner, CXO, Director, or Experienced Manager;
+  Founder, Co-Founder, CEO, Owner, Managing Director, Head of Ecommerce, or
+  Ecommerce Manager; and consumer-facing retail, apparel, grocery, furniture,
+  personal care, sporting goods, medical, health-care, and hospitality
+  industries. Person geography and company headquarters must both be filtered;
+  the corrected search produced 589 discovery results. The qualified batch
+  retained 100 active official sites (44 Latvia, 56 Estonia), no personal
+  emails or phones, and no duplicate normalized hosts. Fourteen profile URLs
+  loaded cleanly and were retained; the remaining rows keep the buyer and
+  Sales Navigator provenance without fabricating a URL
+  (`supabase/migrations/20260828114048_import_baltic_linkedin_leads.sql:1`).
+- The same role, company-size, and industry filters were run for Lithuania with
+  both person geography and company headquarters set to Lithuania. From 547
+  discovery results, 182 unique companies were extracted from the first eight
+  result pages. The follow-on batch retained 63 net-new companies with unique
+  official domains, unique Sales Navigator profile URLs, a public
+  official-site email on every row, and no detected chatbot. Three otherwise
+  valid email-ready companies were excluded because a chatbot was detected.
+  Migration `20260828135339_import_email_verified_lithuanian_linkedin_leads.sql`
+  raised the live pipeline to 500 leads: 300 Default and 200 LinkedIn, with the
+  LinkedIn set split 100 Lithuania / 100 Other
+  (`supabase/research/lithuania_linkedin_email_verified.json:1`;
+  `scripts/generate-lithuania-linkedin-email-import.mjs:1`).
+- The original 37-lead Lithuania batch was later checked separately for
+  outreach readiness. Official-site research verified 35 public business
+  emails; LAJO baldai exposes only a contact form and Pilnatvės Sodas exposes
+  phone/WhatsApp but no company email, so both remain blank rather than using a
+  guessed address. Migration
+  `20260831065717_enrich_existing_lithuanian_linkedin_emails.sql` updates only
+  those 35 existing rows and preserves their lifecycle status
+  (`supabase/research/lithuania_linkedin_existing_email_enrichment.json:1`).
+- The 100 Latvia/Estonia LinkedIn leads were checked separately on 2026-08-31.
+  Official-site research found a published business address for all 100 rows
+  (44 Latvia, 56 Estonia). Generic company inboxes are preferred; the small
+  number of branch, property, or named addresses are retained only where the
+  official company site itself publishes them. Owner-approved and applied live
+  on 2026-08-31 via `20260831160910_enrich_baltic_linkedin_emails.sql` (matched
+  by row UUID from the evidence artifact,
+  `supabase/research/baltic_linkedin_existing_email_enrichment.json:1`).
+  LinkedIn email coverage is now 198/200 — the two intentional Lithuanian
+  blanks (LAJO baldai, Pilnatvės Sodas) remain.
+- Platform qualification was subsequently completed for all 200 LinkedIn leads
+  and applied live. The verifier uses first-party HTML, headers/cookies, native
+  endpoint probes, and rendered assets for blocked sites. WooCommerce now
+  requires multiple active storefront signals or an active Store API plus a
+  storefront signal; a generic WordPress or plugin mention is not sufficient.
+  The final set contains 72 native Loqara commerce platforms (WooCommerce,
+  Shopify, Magento, or Verskis), 55 storefronts needing a feed/API/custom
+  connector, and 73 content/service sites that can use the normal knowledge-base
+  assistant without catalog integration. In particular, 1STOP is correctly
+  recorded as `Custom (Laravel)`, not WooCommerce
+  (`scripts/research-sales-lead-platforms.mjs:1`;
+  `supabase/research/linkedin_200_platform_verified.json:1`;
+  `supabase/migrations/20260831102808_update_linkedin_lead_platforms.sql:1`).
 - Researched batches belong in timestamped, idempotent migrations with
   normalized-host and normalized-email guards plus
   `on conflict (website) do nothing`. Exact batch-size assertions should make
@@ -260,4 +344,4 @@ emails, and manual status progression.
   research and keep status `ready` until outreach or a buyer response occurs
   (`supabase/migrations/20260720130000_add_mobel_sales_lead.sql:1`).
 
-_Last verified: 2026-08-25 (delivery-failure lifecycle, live backfill, sender retry behavior, and full test suite)._
+_Last verified: 2026-08-31 (source tabs, LinkedIn country grouping, 200 LinkedIn imports, official-site email coverage, and live platform classification for every LinkedIn lead)._
