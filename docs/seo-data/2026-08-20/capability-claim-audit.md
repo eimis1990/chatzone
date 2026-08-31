@@ -78,10 +78,11 @@ action or distinguish Shopify product search from WooCommerce/Magento order
 lookup. Review generic matches manually because provider-specific pages and
 conditional educational guidance remain valid.
 
-## Still open
+## Third-party review closure — 2026-08-26
 
-- [ ] Complete a current-primary-source review of every time-sensitive vendor
-  feature and price before marking Phase 0 Task 0.5 fully accepted.
-- [ ] Add the reviewer date/evidence beside each comparison's future refresh
-  record. This audit corrected Loqara capability truth; it did not certify every
-  third-party price in the comparison backlog.
+- [x] Completed a current-primary-source review of the time-sensitive vendor
+  feature and price claims used by the priority comparison backlog. See
+  `docs/seo-data/2026-08-26-vendor-source-review.md`.
+- [x] Added the 26 August 2026 reviewer date/evidence to the priority vendor and
+  comparison pages. Future material refreshes must repeat the check rather than
+  inheriting this date indefinitely.

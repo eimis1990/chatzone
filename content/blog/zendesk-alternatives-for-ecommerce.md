@@ -67,7 +67,7 @@ A side-by-side before the detail. "Store actions" means native product search an
 | **Help Scout** | AI Answers add-on | Via apps/integrations | No | Per user | Small teams wanting a simple, human inbox |
 | **Zendesk** | Included, per-resolution billing | Via apps | Phone (Talk) | Per agent + usage-billed AI | Enterprises already on Zendesk |
 
-<p style="font-size:0.8125rem;color:#6b7280;margin-top:-0.5rem"><em>Details are approximate and as of mid-2026. Always check each vendor's current pricing and app listings.</em></p>
+<p style="font-size:0.8125rem;color:#6b7280;margin-top:-0.5rem"><em>Vendor features and prices reviewed against official sources on 26 August 2026. Figures are approximate; always check current pricing and app listings.</em></p>
 
 ## The alternatives, in detail
 
@@ -157,4 +157,4 @@ A grounded AI agent with a one-line embed can be live the same day: add your con
 
 [Try Loqara on your store free](/#get-started) — one line, no credit card, live in an afternoon.
 
-*Other tools' details are approximate and as of mid-2026 — check their current pricing and app listings.*
+*Other vendors' features and prices were reviewed against official sources on 26 August 2026. They remain approximate; check current pricing and app listings.*

@@ -125,6 +125,8 @@ Skip the pricing-page math and start from your own numbers:
 
 Do this once and the "how much does it cost?" question answers itself, in your currency and your volume rather than the vendor's. If you're a small store still deciding whether AI support is worth it at all, our guide to [AI customer service for small online stores](/blog/ai-customer-service-small-stores) covers that decision from the budget side.
 
+Do not fill the model with a generic industry resolution percentage. The current [AI customer service statistics for 2026](/blog/ai-customer-service-statistics) show strong adoption and reported value, but they also explain why those surveys do not supply a comparable cost or deflection benchmark for your store.
+
 ## Frequently asked questions
 
 ### How much does an AI chatbot cost per month in 2026?

@@ -15,6 +15,12 @@ A store does not need to choose between “humans who care” and “automation 
 
 Live chat and AI chatbots can occupy the same chat window while doing very different work.
 
+Language can change that division of labour: AI may extend repetitive coverage
+in supported languages, while a human handles nuance and exceptions. Use the
+[multilingual AI support checklist](/blog/multilingual-ai-customer-support) to
+test language coverage instead of assuming a model's language list applies to
+the complete support flow.
+
 <blockquote class="quick-answer"><strong>Use live chat</strong> when a shopper needs judgment, negotiation, empathy, account-sensitive action, or an exception. Use an AI chatbot for repeatable questions, approved product and policy facts, catalog discovery, and immediate first-line help. Most growing e-commerce stores benefit from a hybrid: AI handles verified routine work, then transfers the conversation and context to a person.</blockquote>
 
 <div class="takeaways">

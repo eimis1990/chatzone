@@ -73,7 +73,7 @@ A side-by-side before the detail. "WooCommerce actions" means native product sea
 | **Crisp** | AI credits per plan | Light, via integrations | No | Per workspace | Small teams wanting a tidy inbox |
 | **Zendesk** | Included + paid Copilot add-on | Via apps/API | No | Per agent + AI usage | Enterprises already on Zendesk |
 
-<p style="font-size:0.8125rem;color:#6b7280;margin-top:-0.5rem"><em>Details are approximate and as of mid-2026. Always check each vendor's current pricing and WooCommerce/plugin listing.</em></p>
+<p style="font-size:0.8125rem;color:#6b7280;margin-top:-0.5rem"><em>Vendor features and prices reviewed against official sources on 26 August 2026. Figures are approximate; always check current pricing and WooCommerce/plugin listings.</em></p>
 
 ## The tools, in detail
 
@@ -110,7 +110,7 @@ Re:amaze is a capable multichannel helpdesk whose [WooCommerce integration](http
 
 <p class="pills"><span class="pill">Best for: small teams</span><span class="pill">AI credits per plan</span></p>
 
-Crisp is a clean team inbox with a [WordPress plugin](https://wordpress.org/plugins/crisp/) and a pleasant chat widget, [priced per workspace rather than per seat](https://crisp.chat/en/pricing/) (free plan, then from $45/month). Its AI runs on plan-included credit allowances rather than being a deeply grounded e-commerce agent, and its WooCommerce order actions are lighter than the helpdesks above — fine if you mainly want organised live chat with some automation on top.
+Crisp is a clean team inbox with a [WordPress plugin](https://wordpress.org/plugins/crisp/) and a pleasant chat widget, [priced per workspace rather than per seat](https://crisp.chat/en/pricing/) (free plan, then from $45/month). Its Hugo AI Agent trains on company knowledge and runs on plan-included credit allowances; WooCommerce actions still depend on integrations rather than a native commerce toolset — fine if you mainly want organised live chat with a credit-capped AI layer.
 
 ### Zendesk — the enterprise heavyweight
 
@@ -146,7 +146,7 @@ A grounded chatbot won't. Loqara only answers from the content you give it and c
 
 ### How much does an AI chatbot for WooCommerce cost?
 
-It depends on the pricing unit. Loqara is priced per conversation with a free tier of 100 conversations a month; helpdesk suites like Gorgias and Zendesk bill per AI "resolution" on top of their base subscriptions (ticket-volume tiers for Gorgias, per-agent seats for Zendesk); native plugins are cheap upfront but run on your own hosting. Model your real monthly volume against each unit before committing, because the same traffic can cost very differently.
+It depends on the pricing unit. Loqara is priced per conversation with a free tier of 100 conversations a month; Zendesk combines per-agent seats with AI resolutions, while Gorgias combines a human-ticket allowance with a separate AI-resolution allowance (AI-resolved threads do not also count as helpdesk tickets); native plugins are cheap upfront but run on your own hosting. Model your real monthly volume against each definition before committing, because the same traffic can cost very differently.
 
 ### Should I use a WordPress plugin or a SaaS chatbot?
 
@@ -166,4 +166,4 @@ A grounded agent with a one-line embed can be live the same day: add your conten
 
 [Try Loqara on your WooCommerce store free](/#get-started) — one line, no credit card, live in an afternoon.
 
-*Other tools' details are approximate and as of mid-2026 — check their current pricing and plugin listings.*
+*Other vendors' features and prices were reviewed against official sources on 26 August 2026. They remain approximate; check current pricing and plugin listings.*

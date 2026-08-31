@@ -172,6 +172,33 @@ compatibility, with a professional handoff for safety-sensitive work. Each post
 has one text-free editorial cover and one physically plausible realistic use-case
 scene generated with OpenAI Image 2, both optimized to 1200×800 WebP.
 
+The 2026-08-26 statistics refresh establishes the source-review pattern for
+evidence roundups. `ai-customer-service-statistics` uses current original
+research, states each sample population, labels sentiment/adoption/reported
+outcomes, discloses vendor-publisher incentives, and refuses to convert a broad
+survey into a store-level savings guarantee. Its downloadable CSV preserves the
+figure, measurement type, population, source URL, review date, and limitation.
+When GSC hides exact-page query rows, keep the established owner URL and avoid a
+title test; an accurate description/value update is still allowed when logged
+with exact previous/new copy and a timed same-window review.
+
+Freshness pages must show a material review, not just a newer `updated` date.
+The 2026-08-26 `new-ai-chatbots-2026` refresh uses a visible change log, checks
+availability and pricing against official sources, distinguishes a consumer
+rollout from API availability, and replaces unsupported category-superiority
+language with a workflow test. When an existing title has a small but strong
+position sample and GSC suppresses its queries, retain it and test the
+description first.
+
+Language marketing must reflect product-level coverage rather than the
+underlying model's language list. Loqara currently supports English and
+Lithuanian (`docs/wiki/commerce.md:32-38`). Multilingual articles must distinguish
+text from voice coverage, require native review of every enabled language, and
+avoid promising that grounding guarantees accuracy or that adding a language is
+always a settings-only change. The 2026-08-26 Task 1.3 refresh adds the reusable
+coverage/grounding/data/handoff/native-review test to
+`multilingual-ai-customer-support`.
+
 ## Backlink acquisition baseline (2026-08-15)
 
 Search-index sampling (not a complete backlink export) found that Loqara's visible
@@ -323,4 +350,4 @@ the compact closing reply sits farther inward near the fox to balance the larger
 cards on the left. `prefers-reduced-motion` disables rotation and leaves the chair conversation visible
 (`components/landing/HeroConversation.tsx`).
 
-_Last verified: 2026-08-25 (working tree; capability-claim and content-loop audit)._
+_Last verified: 2026-08-26 (working tree; Phase 0 gate and first evidence refresh)._

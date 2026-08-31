@@ -54,7 +54,7 @@ That difference in starting point explains almost every row of the comparison be
 | **Voice support for customers** | No | Yes (telephony included from Suite Team) |
 | **Scaling path** | Plan ladder jumps ~$49 → $300+/mo | Smooth but multi-dimensional (seats + resolutions + add-ons) |
 
-<p style="font-size:0.8125rem;color:#6b7280;margin-top:-0.5rem"><em>Prices as of mid-2026, annual billing where applicable, from <a href="https://www.tidio.com/pricing/" rel="nofollow">tidio.com/pricing</a> and <a href="https://www.zendesk.com/pricing/" rel="nofollow">zendesk.com/pricing</a> — both vendors change packaging often, so check before deciding.</em></p>
+<p style="font-size:0.8125rem;color:#6b7280;margin-top:-0.5rem"><em>Prices reviewed on 26 August 2026, annual billing where applicable, from <a href="https://www.tidio.com/pricing/" rel="nofollow">tidio.com/pricing</a> and <a href="https://www.zendesk.com/pricing/" rel="nofollow">zendesk.com/pricing</a> — both vendors change packaging often, so check before deciding.</em></p>
 
 <figure>
 <img src="/blog/vendor-zendesk.webp" alt="Zendesk agent workspace with AI-assisted ticket handling across email, chat, and voice channels" width="1200" height="750" loading="lazy" />
@@ -133,4 +133,4 @@ Zendesk includes telephony from Suite Team up, with generative AI for voice on h
 
 **The honest bottom line:** Tidio and Zendesk are both good at what they're for — they're just for different companies. Small and hands-on: Tidio. Support department at scale: Zendesk. Store in the middle that mostly needs accurate, grounded answers and order lookups at a predictable price: look at the newer category built exactly for that before you settle for either.
 
-*Both vendors' details are approximate and as of mid-2026 — check their current pricing pages before making decisions.*
+*Both vendors' public features and prices were reviewed on 26 August 2026. They remain approximate; check current pricing and quoted usage terms before deciding.*

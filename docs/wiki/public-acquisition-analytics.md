@@ -38,8 +38,12 @@ columns to `signups`; `/api/signup` writes them only from the strict bounded sch
 dimensions (`app/(owner)/owner/signups/page.tsx:7-42`,
 `components/owner/SignupsExport.tsx:5-69`).
 
-The deploy/configuration checklist and GA4 Explore recipe live in
-`docs/seo-data/organic-funnel-report.md`. Do not call Task 0.4 production-verified
-until that checklist passes.
+The deploy/configuration checklist, GA4 Explore recipe, and controlled production
+evidence live in `docs/seo-data/organic-funnel-report.md`. GA4 Realtime is the
+immediate deployment check; the saved Explore is the durable report and can lag
+while GA4 processes newly registered dimensions.
 
-_Last verified: 2026-08-26 (migration applied; application deployment and live journey pending)._
+_Last verified: 2026-08-26 (migration and application commit `94a9e4b` live;
+six GA4 dimensions and the organic funnel Explore configured; controlled
+production journey verified through GA4 Realtime, database, owner card, and
+CSV; labeled test signup deleted after explicit confirmation)._

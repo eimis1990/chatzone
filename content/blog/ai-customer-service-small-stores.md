@@ -13,6 +13,8 @@ If you run a small online store, you've probably typed the same answer to "where
 
 This is written for solo founders and small teams, not enterprise support orgs. So instead of a feature checklist, here's what's actually worth doing at your size, what's safe to skip until you're bigger, and what it should reasonably cost to find out.
 
+For category context, our [20 AI customer service statistics for 2026](/blog/ai-customer-service-statistics) separates current adoption and customer-expectation surveys from the outcome evidence a small store still has to measure for itself.
+
 <blockquote class="quick-answer">Most small stores need less than they think: grounded answers from your own content, live order lookup, lead capture outside business hours, and 24/7 coverage without hiring. Skip per-seat helpdesk suites and heavy automation until volume justifies them. Start free, install in one line, and add voice only if customers actually ask for it.</blockquote>
 
 <div class="takeaways">

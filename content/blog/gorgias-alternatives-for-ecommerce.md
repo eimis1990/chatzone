@@ -11,7 +11,7 @@ image: /blog/gorgias-alternatives-for-ecommerce.webp
 
 Gorgias is one of the best-known helpdesks in e-commerce, and deservedly so — it's a genuinely capable, mature platform that pulls email, chat, social, and SMS into one inbox and automates returns and order edits better than almost anyone. If you run an established support team that lives in a shared inbox all day, it's a serious tool. The trouble is that most people searching for a "Gorgias alternative" aren't unhappy with the product. They're unhappy with the *fit*.
 
-The friction is usually weight and cost. Gorgias is a full multichannel helpdesk priced for teams, and its AI Agent bills **per resolution** on top of a ticket-based plan ([Gorgias pricing](https://www.gorgias.com/pricing)) — math that's hard to forecast when you're a lean store doing a few hundred conversations a month. So the real question is rarely "is Gorgias good?" It is. The question is "is it the right *weight* for my store right now?" Below is an honest look at the best alternatives in 2026, who each one actually suits, and how to choose.
+The friction is usually weight and cost. Gorgias combines a ticket-volume helpdesk with a separate AI Agent allowance billed by resolved interaction ([Gorgias pricing](https://www.gorgias.com/pricing)) — two usage estimates to model when you're a lean store doing a few hundred conversations a month. So the real question is rarely "is Gorgias good?" It is. The question is "is it the right *weight* for my store right now?" Below is an honest look at the best alternatives in 2026, who each one actually suits, and how to choose.
 
 <blockquote class="quick-answer">For most lean and growing stores, the best Gorgias alternative is <strong>Loqara</strong>: grounded AI chat <em>and</em> voice, live product search, supported-store order lookup, a one-line install, and predictable per-conversation pricing with a real free tier. Stay on Gorgias if you run a busy multichannel team where its per-resolution AI math already pays off.</blockquote>
 
@@ -39,7 +39,7 @@ It's the wrong call when you're a small or growing store that mostly needs to de
 
 <div class="proscons">
 <div class="pros"><p class="pc-title">Where Gorgias shines</p><ul><li>Mature multichannel helpdesk (email, chat, social, SMS in one inbox)</li><li>Deep automation — macros, rules, returns and order edits</li><li>Strong AI Agent once you're at real support volume</li><li>Built for teams that live in the inbox all day</li></ul></div>
-<div class="cons"><p class="pc-title">Why small stores look elsewhere</p><ul><li>AI billed <em>per resolution</em> on top of a ticket-based plan — hard to forecast</li><li>A conversation fully resolved by AI Agent is charged both a ticket fee and an automation fee (<a href="https://docs.gorgias.com/en-US/what-counts-as-a-billable-ticket-or-automated-interaction-199385" rel="nofollow">Gorgias docs</a>)</li><li>Full helpdesk weight most small stores don't need yet</li><li>Priced and billed in USD, around a team workflow</li></ul></div>
+<div class="cons"><p class="pc-title">Why small stores look elsewhere</p><ul><li>AI Agent is a separate resolved-interaction add-on beside the helpdesk plan</li><li>Most annual AI plans charge about $0.90 per resolved interaction, so automation spend rises with successful resolutions</li><li>Full helpdesk weight most small stores don't need yet</li><li>Priced and billed in USD, around a team workflow</li></ul></div>
 </div>
 
 ## What should I look for in an alternative?
@@ -64,7 +64,7 @@ A side-by-side before the detail. "Store actions" means native product search an
 | **Zendesk** | Included, usage-billed | Via apps | No | Per agent + usage-billed AI | Enterprises already on Zendesk |
 | **Help Scout** | AI add-on | Via apps | No | Per seat | Small teams wanting a simple inbox |
 
-<p style="font-size:0.8125rem;color:#6b7280;margin-top:-0.5rem"><em>Details are approximate and as of mid-2026. Always check each vendor's current pricing and app listing.</em></p>
+<p style="font-size:0.8125rem;color:#6b7280;margin-top:-0.5rem"><em>Vendor features and prices reviewed against official sources on 26 August 2026. Figures are approximate; always check current pricing and app listings.</em></p>
 
 ### Loqara — chat and voice in one widget *(that's us)*
 
@@ -109,7 +109,7 @@ Powerful and endlessly configurable, but heavy and expensive for most small stor
 
 <div class="callout">
 <p class="callout-title">The pricing trap to watch</p>
-<p>"$X per <strong>resolution</strong>" and "$X per <strong>conversation</strong>" are not the same thing, and in our experience the gap on the same traffic can be a real multiple. A "resolution" is defined by the vendor and can be triggered generously — and with Gorgias, a conversation fully resolved by AI Agent is charged both a ticket fee and an automation fee (<a href="https://docs.gorgias.com/en-US/what-counts-as-a-billable-ticket-or-automated-interaction-199385" rel="nofollow">Gorgias docs</a>), so you pay twice for one thread. A "conversation" is simply one customer thread. Before you commit, model your real monthly volume against each pricing unit. Our <a href="/blog/how-to-choose-ai-support-agent">buyer's checklist</a> walks through the questions that actually decide it, and our piece on the <a href="/blog/chatbot-roi-metrics-that-matter">ROI metrics that matter</a> shows what to measure once you're live.</p>
+<p>"$X per <strong>resolution</strong>" and "$X per <strong>conversation</strong>" are not the same thing. Gorgias currently charges about $0.90 per AI-resolved interaction on most annual plans ($1 on starter/monthly pricing), but a thread fully resolved by AI does <em>not</em> also count as a billable helpdesk ticket (<a href="https://www.gorgias.com/blog/ai-agent-pricing" rel="nofollow">Gorgias AI pricing guide</a>). A conversation-priced plan instead meters the whole customer thread whether AI or a human resolves it. Before you commit, model your real monthly volume and expected automation rate against each definition. Our <a href="/blog/how-to-choose-ai-support-agent">buyer's checklist</a> walks through the questions that actually decide it, and our piece on the <a href="/blog/chatbot-roi-metrics-that-matter">ROI metrics that matter</a> shows what to measure once you're live.</p>
 </div>
 
 ## How to choose your Gorgias alternative
@@ -132,7 +132,7 @@ For a small or growing store, the best alternative is usually a per-conversation
 
 ### Why is Gorgias considered expensive?
 
-Gorgias is a full multichannel helpdesk priced for teams, and its AI Agent bills per resolution on top of a ticket-based plan ([Gorgias pricing](https://www.gorgias.com/pricing)). A conversation fully resolved by AI Agent is charged both a ticket fee and an automation fee ([Gorgias docs](https://docs.gorgias.com/en-US/what-counts-as-a-billable-ticket-or-automated-interaction-199385)), so the same thread is charged twice. That math works well at high volume but is hard to predict for a store doing only a few hundred conversations a month.
+Gorgias is a full multichannel helpdesk with ticket-volume tiers and a separate AI Agent allowance. Its current [AI pricing guide](https://www.gorgias.com/blog/ai-agent-pricing) lists about $0.90 per resolved interaction on most annual plans and explains that an AI-resolved conversation does not also count as a billable helpdesk ticket. The model is fairer than double charging, but total spend still depends on both human ticket volume and successful AI resolutions.
 
 ### What's the difference between per-resolution and per-conversation pricing?
 
@@ -156,4 +156,4 @@ If you already run a busy multichannel support team, rely on its macros and auto
 
 [Try Loqara on your store free](/#get-started) — one line, no credit card, live in an afternoon.
 
-*Other tools' details are approximate and as of mid-2026 — check their current pricing and app listings.*
+*Other vendors' features and prices were reviewed against official sources on 26 August 2026. They remain approximate; check current pricing and app listings.*

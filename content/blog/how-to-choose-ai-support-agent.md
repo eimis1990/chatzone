@@ -13,6 +13,8 @@ Every AI support tool demos beautifully. You type a question, it answers in a fr
 
 This is a buyer's checklist, written by people who build one of these tools (Loqara) but would rather you pick the right one than the wrong one. It's vendor-neutral on purpose: the questions below apply whether you're looking at Loqara, an incumbent helpdesk, or a flow-builder. Work through them in order, run the math on your own numbers, and the field narrows fast. (If you're still assembling a shortlist to run through it, start with our [round-up of the best chatbot platforms](/blog/best-chatbot-platforms).)
 
+New model names should not reset that process. Our [review of the material 2026 chatbot changes](/blog/new-ai-chatbots-2026) shows which voice, commerce, and action-taking updates are available now and which still need an availability check.
+
 <blockquote class="quick-answer">Choose by what decides value, not the feature list: the <strong>pricing model</strong> (per-resolution, per-conversation, and per-seat can be <strong>several times apart</strong> on the same traffic), <em>grounding</em> so it answers only from your content, real store actions like product search and order lookup, clean human handoff, and a one-line install. Then test it on real traffic before you pay.</blockquote>
 
 <div class="takeaways">

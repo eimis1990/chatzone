@@ -60,7 +60,7 @@ A side-by-side before the detail. "Store actions" means native product search an
 | **Crisp** | Credit-based | Light, via integrations | No | Flat per-workspace tiers | Tiny teams wanting a cheap inbox |
 | **Zendesk** | Billed per resolution | Via apps | Add-on | Per agent + AI usage | Enterprises already on Zendesk |
 
-<p style="font-size:0.8125rem;color:#6b7280;margin-top:-0.5rem"><em>Details are approximate and as of mid-2026. Always check each vendor's current pricing and app listing.</em></p>
+<p style="font-size:0.8125rem;color:#6b7280;margin-top:-0.5rem"><em>Vendor features and prices reviewed against official sources on 26 August 2026. Figures are approximate; always check current pricing and app listings.</em></p>
 
 ## The alternatives, in detail
 
@@ -79,7 +79,7 @@ Where Tidio treats AI as an add-on, Loqara is AI-first. It answers from your own
 
 <p class="pills"><span class="pill pill-best">Best for: busy support teams</span><span class="pill">AI billed per resolution</span><span class="pill">Multichannel</span></p>
 
-Gorgias pulls email, chat, social, and SMS into one inbox and automates returns and order edits deeply. Its AI Agent is strong, but it's billed per resolution on top of the plan fee — Gorgias plans scale by ticket volume rather than seats ([Gorgias pricing](https://www.gorgias.com/pricing)) — so it shines once you're handling real volume with a team in the inbox all day. For a lean store coming off Tidio, that can be more helpdesk machinery — and cost — than you need yet. If it feels heavy, our [Gorgias alternatives guide](/blog/gorgias-alternatives-for-ecommerce) covers lighter options.
+Gorgias pulls email, chat, social, and SMS into one inbox and automates returns and order edits deeply. Its helpdesk scales by human-handled ticket volume, while AI Agent uses a separate resolved-interaction allowance; AI-resolved threads do not also count as helpdesk tickets ([Gorgias AI pricing](https://www.gorgias.com/blog/ai-agent-pricing)). It shines once you're handling real volume with a team in the inbox all day. For a lean store coming off Tidio, that can be more helpdesk machinery — and cost — than you need yet. If it feels heavy, our [Gorgias alternatives guide](/blog/gorgias-alternatives-for-ecommerce) covers lighter options.
 
 ### Re:amaze — the classic multichannel middle ground
 
@@ -97,7 +97,7 @@ Fin is one of the strongest AI agents on the market and Intercom's tooling is ex
 
 <p class="pills"><span class="pill">Best for: tiny teams on a budget</span><span class="pill">Flat per-workspace pricing</span></p>
 
-Crisp is a friendly, low-cost shared inbox with flat per-workspace tiers from $45 to $295/month ([Crisp pricing](https://crisp.chat/en/pricing/)), which appeals to very small teams. Like Tidio, its strength is the inbox and basic automation; AI runs on usage credits bundled into each tier rather than a grounded agent that natively searches your store. A fine lateral move from Tidio if cost is the main driver — less so if AI quality is.
+Crisp is a friendly, low-cost shared inbox with flat per-workspace tiers from $45 to $295/month ([Crisp pricing](https://crisp.chat/en/pricing/)), which appeals to very small teams. Its Hugo AI Agent trains on company knowledge and runs on monthly credits included with paid plans; commerce-specific actions still rely on integrations rather than a native product-and-order toolset. A fair lateral move from Tidio if inbox simplicity and a capped AI allowance are the main drivers.
 
 ### Zendesk — the enterprise suite
 
@@ -155,4 +155,4 @@ If you mostly want live chat with hand-built flows and light automation, and you
 
 [Try Loqara on your store free](/#get-started) — one line, no credit card, live in an afternoon.
 
-*Other tools' details are approximate and as of mid-2026 — check their current pricing and app listings.*
+*Other vendors' features and prices were reviewed against official sources on 26 August 2026. They remain approximate; check current pricing and app listings.*

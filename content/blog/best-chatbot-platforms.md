@@ -11,6 +11,8 @@ image: /blog/best-chatbot-platforms.webp
 
 Search for "best chatbot platforms" and you'll find twenty near-identical lists, most of them ranked by affiliate payout rather than merit. This one is different in two ways: every screenshot below is a real capture of the vendor's product page from July 2026 (not a stock illustration), and we'll tell you plainly when a platform is a bad fit — including our own, which sits at #6, not #1.
 
+If you are deciding whether a new 2026 release changes the shortlist at all, our [dated AI chatbot developments review](/blog/new-ai-chatbots-2026) separates deployable voice, commerce, and agent features from infrastructure announcements.
+
 One honest note before we start: "best" depends entirely on what you're building. A five-person Shopify store, a 200-agent enterprise support org, and an agency building bots for clients need three completely different tools. So instead of pretending there's one winner, each section ends with a clear "Best for:" line — find yours and skip the rest.
 
 <blockquote class="quick-answer">There's no single best platform — it depends on your size and use case. <strong>Zendesk AI</strong> or <strong>Intercom Fin</strong> lead for enterprise, <strong>Gorgias</strong> for established e-commerce teams, <strong>Tidio</strong> for small-business DIY, and <strong>Voiceflow</strong> or <strong>Chatbase</strong> for builders. <strong>Loqara</strong> (our product) fits stores wanting grounded chat and voice without a full helpdesk. Avoid starting anything new on Drift — it's sunsetting.</blockquote>
@@ -43,15 +45,15 @@ Three criteria, weighted in this order:
 | **Zendesk AI** | Add-on | Per agent + per AI resolution | Via suite | Enterprises on Zendesk |
 | **Intercom Fin** | Core product | ~$0.99 per resolution + seats | Yes (Fin Voice) | SaaS & larger support orgs |
 | **Tidio** | Lyro = metered add-on | Per billable conversation | No | Small biz, DIY flows |
-| **Gorgias** | Per-resolution add-on | Ticket-volume tiers + per resolution | Add-on | Established e-commerce teams |
+| **Gorgias** | Per-resolution add-on | Ticket-volume tiers + ~$0.90 per AI resolution | Add-on | Established e-commerce teams |
 | **HubSpot (Breeze)** | Credits per conversation | Seats + credits | No | Teams already on HubSpot CRM |
 | **Loqara** | Grounded, included | Per conversation, free tier | Yes (add-on) | Small–mid online stores |
 | **Drift (Salesloft)** | Yes | Custom | No | No one new — sunsetting |
-| **Crisp** | Gated to top plan | Per workspace | No | Budget multichannel inbox |
+| **Crisp** | Hugo AI + plan credits | Per workspace + AI credits | No | Budget multichannel inbox |
 | **Chatbase** | Core product | Credit-based tiers | Yes | DIY custom-data bots |
 | **Voiceflow** | Bring your own | Usage-based (quote) | Yes | Agencies & product teams |
 
-<p style="font-size:0.8125rem;color:#6b7280;margin-top:-0.5rem"><em>All pricing details are approximate and as of mid-2026 — always check the vendor's pricing page before deciding.</em></p>
+<p style="font-size:0.8125rem;color:#6b7280;margin-top:-0.5rem"><em>Vendor features and prices reviewed against official sources on 26 August 2026. Figures are approximate; always check current billing terms before deciding.</em></p>
 
 ## 1. Zendesk AI — the enterprise resolution machine
 
@@ -75,7 +77,7 @@ The catch is weight. Zendesk assumes you have a support *organisation*: admins, 
 
 Credit where due: Fin is the AI agent everyone else measures against. It answers from your help content, executes multi-step procedures, hands off cleanly, and now speaks on the phone too. Intercom went all-in — the company even [renamed its corporate entity to Fin in May 2026, and Salesforce agreed to acquire it for approximately $3.6 billion in June](https://martech.org/salesforce-acquires-fin-formerly-known-as-intercom/). Whatever happens post-acquisition, the product today is excellent.
 
-Pricing is per outcome: [$0.99 per resolution](https://www.intercom.com/pricing) as of July 2026 — worth re-checking with an acquisition in flight. That sounds cheap until you model it: real-world resolution rates plus seat costs for your human team mean a busy support org can see four-figure monthly bills that scale with traffic. And Fin's DNA is SaaS support — for store-specific jobs like live catalog search and order lookups, it leans on integrations rather than doing it natively. We wrote a full breakdown in our [Intercom alternatives for e-commerce](/blog/intercom-alternatives-for-ecommerce) guide.
+Pricing is per outcome: [$0.99 per resolution](https://www.intercom.com/pricing) as reviewed on 26 August 2026. That sounds cheap until you model it: real-world resolution rates plus seat costs for your human team mean a busy support org can see four-figure monthly bills that scale with traffic. And Fin's DNA is SaaS support — for store-specific jobs like live catalog search and order lookups, it leans on integrations rather than doing it natively. We wrote a full breakdown in our [Intercom alternatives for e-commerce](/blog/intercom-alternatives-for-ecommerce) guide.
 
 **Best for:** SaaS companies and larger support orgs that want the most proven AI agent and can absorb per-resolution economics.
 
@@ -101,7 +103,7 @@ The confusion is in the billing. Tidio charges per *billable conversation* — a
 
 Gorgias is what happens when a helpdesk grows up entirely inside e-commerce. Email, chat, social, SMS, and voice flow into one inbox; the AI Agent can genuinely act — order edits, returns, refunds — because the Shopify integration runs deep. For an established store with a support team living in the inbox all day, it's arguably the most complete package in this list.
 
-The economics are the thing to model carefully. Plans are tiered by ticket volume (never per agent), and the AI Agent bills per resolved conversation on top — Gorgias doesn't publish the per-resolution rate on its [pricing page](https://www.gorgias.com/pricing), so get it in writing before you sign. Voice and SMS are separately billed add-ons that scale with call and text volume. None of this is unreasonable at scale; it just means lean stores often pay for helpdesk machinery they don't use yet. If that's you, see our [Gorgias alternatives](/blog/gorgias-alternatives-for-ecommerce) rundown.
+The economics are the thing to model carefully. Helpdesk plans are tiered by ticket volume (never per agent), while AI Agent is a separate add-on billed by resolved interaction. Gorgias's current [AI pricing guide](https://www.gorgias.com/blog/ai-agent-pricing) publishes $0.90 per resolved interaction on most annual plans, with starter and monthly rates beginning at $1. A conversation fully resolved by AI does not also count as a billable helpdesk ticket. Voice and SMS are separately billed add-ons that scale with call and text volume. None of this is unreasonable at scale; it just means lean stores often pay for helpdesk machinery they don't use yet. If that's you, see our [Gorgias alternatives](/blog/gorgias-alternatives-for-ecommerce) rundown.
 
 **Best for:** established e-commerce brands with real ticket volume and a multichannel support team.
 
@@ -114,7 +116,7 @@ The economics are the thing to model carefully. Plans are tiered by ticket volum
 
 HubSpot's chatbot story has two layers: the old free rule-based Chatflows builder, and the newer Breeze Customer Agent — an AI agent that answers from your knowledge base and website content, cites sources, and escalates when its confidence drops. Because it lives inside the CRM, every conversation lands on a contact record automatically, which is the real superpower here: marketing, sales, and support see the same customer.
 
-The trade-offs are control and cost accounting. Customisation of the AI's behaviour is limited compared to dedicated platforms, and pricing involves seat fees plus HubSpot Credits — the Customer Agent burns roughly [50 credits per conversation, with extra credits at about $0.01 each](https://www.hubspot.com/pricing/service), so busy traffic eats the monthly allowance fast. If you're already paying for HubSpot, Breeze is an easy yes. Adopting the whole HubSpot suite *just* to get the chatbot rarely makes sense.
+The trade-offs are control and cost accounting. Customisation of the AI's behaviour is limited compared to dedicated platforms, and pricing involves seats plus HubSpot Credits — the current [HubSpot credit rate sheet](https://legal.hubspot.com/hubspot-product-and-services-catalog) charges credits when Customer Agent delivers a qualifying text resolution, while [extra credits cost $0.01 each](https://www.hubspot.com/products/artificial-intelligence/credits). If you're already paying for HubSpot, Breeze is an easy yes. Adopting the whole HubSpot suite *just* to get the chatbot rarely makes sense.
 
 **Best for:** teams already running on HubSpot CRM who want support conversations tied to contact records.
 
@@ -153,7 +155,7 @@ If you're a Drift customer, the practical advice is simple: plan your migration 
 
 Crisp is quietly one of the best value propositions in customer messaging: a clean shared inbox, live chat, a knowledge base, campaigns, and a long integration list, priced per workspace rather than per seat — which gets genuinely cheap for small teams as headcount grows. The product is fast, the widget is pleasant, and the free tier is usable.
 
-The asterisk is AI. Crisp's fully autonomous AI agent is gated to its top-tier Plus plan ([$295/month per workspace](https://crisp.chat/en/pricing/), with paid plans running $45–$295), and lower tiers get only small AI-credit allowances. So the "affordable" Crisp and the "AI-powered" Crisp are different price points. If what you want is a solid human-first inbox with AI as a garnish, Crisp is excellent. If AI-first support is the goal, the gating undermines the value story.
+The asterisk is AI usage, not access. Crisp's Hugo AI Agent is available from the $45/month Mini plan, with monthly AI credits included across paid tiers: roughly 90 automated conversations on Mini, 450 on Essentials, and 1,350 on Plus according to [Crisp's current pricing](https://crisp.chat/en/pricing/). That makes it a credible knowledge-trained agent as well as a shared inbox. Store-specific actions still depend on integrations rather than a native commerce toolset, so model both the credit allowance and the integration work.
 
 **Best for:** budget-conscious small teams that want a multichannel inbox first and AI second.
 
@@ -198,7 +200,7 @@ One last pattern worth naming: almost every vendor above moved to some form of u
 There's no single winner — it depends on your size and use case. Intercom Fin and Zendesk AI lead for enterprise support, Gorgias for established e-commerce teams, Tidio for small-business DIY, Voiceflow for agencies, and Loqara (our product) for online stores that want grounded AI chat and voice with per-conversation pricing.
 
 ### How much does a chatbot platform cost?
-As of mid-2026, anywhere from free to four figures monthly. The pricing unit matters more than the sticker: per-resolution models (Intercom at ~$0.99; Gorgias and Zendesk quote their rates through sales) scale with traffic; credit systems (Chatbase, HubSpot) scale with usage; per-conversation models (Loqara, from €0 to €449/month) are the most predictable. Always check the vendor's current pricing page.
+As reviewed on 26 August 2026, anywhere from free to four figures monthly. The pricing unit matters more than the sticker: Intercom starts at $0.99 per outcome, Gorgias publishes about $0.90 per resolved interaction on most annual plans, and Zendesk quotes its automated-resolution rate; credit systems such as Chatbase and HubSpot scale with usage; per-conversation models such as Loqara (from €0 to €449/month) are easier to forecast. Always check the vendor's current pricing page.
 
 ### What happened to Drift?
 Drift was acquired by Salesloft in 2024, suffered a major OAuth token breach in August 2025 that took the product offline that September, and after the Clari–Salesloft merger its sunset was announced in March 2026. Existing customers should plan a migration; new buyers should choose an actively maintained platform.
@@ -213,4 +215,4 @@ Gorgias if you're an established brand needing a full multichannel helpdesk; Loq
 
 **The honest bottom line:** the "best chatbot platform" is the one whose pricing unit, integration depth, and weight class match your business — not the one at the top of anyone's list, including this one. Shortlist two, trial both on real traffic, and let the invoices and transcripts decide.
 
-*All vendor details and prices are approximate and as of mid-2026 — check each vendor's pricing page before you commit.*
+*Vendor features and prices were reviewed against official sources on 26 August 2026. They remain approximate; check each vendor's current pricing and contract terms before you commit.*

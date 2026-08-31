@@ -35,13 +35,13 @@ Below is what Zendesk AI actually includes in 2026, what it costs plan by plan, 
 
 "Zendesk AI" isn't one product — it's a family of features layered across the Suite. It helps to separate them, because they're bought (and billed) differently:
 
-**AI agents.** The customer-facing piece: autonomous bots that answer questions across messaging, email, and — on higher tiers — voice. As of mid-2026, AI agent capabilities are included in every Suite and Support plan rather than sold as a separate "Advanced AI Agents" add-on, which simplified what used to be a confusing lineup. The catch is that usage is metered: you pay per *automated resolution* (more on that below).
+**AI agents.** The customer-facing piece: autonomous bots that answer questions across messaging, email, and — on higher tiers — voice. As reviewed on 26 August 2026, AI agent capabilities are included in every Suite and Support plan rather than sold as a separate "Advanced AI Agents" add-on. Usage is still metered by *automated resolution* (more on that below).
 
-**Copilot.** The agent-facing piece: drafting replies, summarising tickets, suggesting next steps for your human team. It's a paid add-on — around $50 per agent per month billed annually, as of mid-2026.
+**Copilot.** The agent-facing piece: drafting replies, summarising tickets, suggesting next steps for your human team. Zendesk's current pricing lists it at $50 per agent per month on annual billing.
 
 **Intelligent triage and routing.** Auto-classifying tickets by intent, sentiment, and language, then routing them to the right person or queue. Genuinely useful at volume; largely irrelevant if two people share one inbox.
 
-**Quality assurance and workforce management.** AI-scored conversation reviews and staffing forecasts, each sold as its own add-on (third-party breakdowns put them at roughly $35 and $25 per agent per month respectively — check current pricing).
+**Quality assurance and workforce management.** AI-scored conversation reviews and staffing forecasts are packaged as optional workforce products. Zendesk's public pricing currently lists a $50/agent/month Workforce Engagement Bundle; confirm the exact included modules and contract terms with sales.
 
 Notice the pattern: almost everything is designed around the assumption that you have a *team of agents* whose productivity is worth optimising. That's the correct assumption for Zendesk's core market. It's the wrong one for a store where the goal is simply "answer customers well without hiring anyone."
 
@@ -49,7 +49,7 @@ One more thing worth knowing before the pricing: setup is a project, not an afte
 
 ## Zendesk pricing in 2026, plan by plan
 
-Here's the lineup as of mid-2026 (annual billing, per agent per month — always check [Zendesk's pricing page](https://www.zendesk.com/pricing/) for current numbers):
+Here's the lineup reviewed on 26 August 2026 (annual billing, per agent per month — always check [Zendesk's pricing page](https://www.zendesk.com/pricing/) for current numbers):
 
 | Plan | Price (annual) | What you get | AI included |
 | --- | --- | --- | --- |
@@ -58,11 +58,11 @@ Here's the lineup as of mid-2026 (annual billing, per agent per month — always
 | **Suite Professional** | $115/agent/mo | Adds skills-based routing, IVR, better analytics | AI agents + admin Copilot features |
 | **Suite Enterprise + Copilot** | Custom (talk to sales) | Sandbox, custom roles, approval workflows | Intelligent triage, auto assist, generative voice AI |
 
-<p style="font-size:0.8125rem;color:#6b7280;margin-top:-0.5rem"><em>Prices and inclusions as of mid-2026 — Zendesk changes its packaging fairly often, so verify against the current pricing page before budgeting.</em></p>
+<p style="font-size:0.8125rem;color:#6b7280;margin-top:-0.5rem"><em>Prices and inclusions reviewed against Zendesk's official pricing on 26 August 2026. Packaging and quoted usage rates can change, so verify before budgeting.</em></p>
 
 Two things the table doesn't show. First, the interesting AI features cluster at the top: the deeper automation lives on Professional and Enterprise. Second, seats are only the floor of the bill — the AI agents, Copilot, QA, and WFM each add their own line item.
 
-For a rough sense of scale: independent cost breakdowns of real deployments put a 20-agent team handling a few thousand tickets a month somewhere in the $6,000–$8,000/month range all-in once add-ons and resolutions are counted. Your mileage will vary a lot, but the direction of travel is clear — Zendesk bills grow in several dimensions at once.
+The exact total depends on seats, plan, add-ons, channels, and the automated-resolution rate in your quote. Zendesk's public pricing does not publish one universal all-in figure, so model those line items explicitly instead of relying on a generic deployment estimate.
 
 ## How does per-resolution pricing really work?
 
@@ -70,8 +70,8 @@ This is the part worth slowing down on, because it decides whether Zendesk AI is
 
 Zendesk's AI agents are billed per **automated resolution** — you pay only when the AI fully resolves a customer request without escalating to a human. On paper that's fair, even elegant: no resolution, no charge. In practice, three things catch buyers out:
 
-1. **The included allotment is small.** Each plan bundles a modest number of automated resolutions (reports suggest on the order of a handful per agent per month, varying by tier). Past that, every AI-resolved conversation is an overage.
-2. **The vendor defines "resolved."** A customer who gets an answer and simply closes the tab can count as a resolution. You're trusting the metering, and third-party estimates put overage rates at roughly $1.50–$2.00 per resolution as of mid-2026 — check your contract, because this is exactly the number that varies by negotiation.
+1. **Allowances and rates are contract-sensitive.** Zendesk says AI agents are included in Suite and Support plans, but the public pricing page does not publish one universal automated-resolution allowance or overage rate. Get both numbers in writing for your selected plan.
+2. **The vendor defines "resolved."** Zendesk bills when the AI successfully resolves a request without escalation. Read the current automated-resolution definition and reporting rules, then verify them against your contract before forecasting.
 3. **Success makes the bill grow.** The better the AI performs, the more you pay. That's defensible economics, but it means your costs scale with your *ticket volume*, not your team size — which is backwards for a growing store whose whole aim is to automate more.
 
 <div class="callout">
@@ -120,11 +120,11 @@ For that buyer, Zendesk AI in 2026 is arguably the safest choice on the market. 
 
 ### What is Zendesk AI and what does it include?
 
-Zendesk AI is the umbrella for the AI features across the Zendesk Suite: customer-facing autonomous AI agents (included on all plans as of mid-2026, billed per automated resolution), the agent-facing Copilot add-on (~$50/agent/month), intelligent triage and routing, and separate QA and workforce-management add-ons. It's a layer across the whole helpdesk rather than a single product.
+Zendesk AI is the umbrella for the AI features across the Zendesk Suite: customer-facing autonomous AI agents (included on Suite and Support plans as reviewed 26 August 2026, billed per automated resolution), the agent-facing Copilot add-on ($50/agent/month on annual billing), intelligent triage and routing, and optional workforce products. It's a layer across the whole helpdesk rather than a single product.
 
 ### How much does Zendesk AI cost in 2026?
 
-Seats run from $19/agent/month (Support Team) through $55 (Suite Team) and $115 (Suite Professional) to custom Enterprise pricing, billed annually. On top of that, AI agent usage is metered per automated resolution beyond a small included allotment, and Copilot, QA, and WFM are separate per-agent add-ons. All figures are as of mid-2026 — check Zendesk's pricing page, as packaging changes often.
+Seats run from $19/agent/month (Support Team) through $55 (Suite Team) and $115 (Suite Professional) to custom Enterprise pricing, billed annually. AI agent usage is metered per automated resolution, Copilot is $50/agent/month on annual billing, and optional workforce products add more. These public figures were reviewed on 26 August 2026; ask Zendesk for the resolution allowance and rate applying to your contract.
 
 ### What counts as an "automated resolution" in Zendesk?
 
@@ -142,4 +142,4 @@ Yes, but typically through marketplace apps and integrations rather than nativel
 
 **The honest bottom line:** Zendesk AI in 2026 is a genuinely strong, complete platform — for support organisations. If you have the team and the volume, buy it with confidence. If you're a store with a handful of people and mostly repetitive product and order questions, it's an expensive way to solve a smaller problem, and a [purpose-built alternative](/blog/zendesk-alternatives-for-ecommerce) will get you live faster at a price you can actually forecast.
 
-*Zendesk's details are approximate and as of mid-2026 — check the vendor's pricing page before making decisions.*
+*Zendesk's public features and prices were reviewed on 26 August 2026. They remain approximate; check the current pricing page and your quoted automated-resolution terms before deciding.*

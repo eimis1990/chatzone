@@ -67,7 +67,7 @@ A side-by-side before the detail. "Store actions" means native product search an
 | **Crisp** | Usage credits | Via integrations | No | Flat per workspace | Tiny teams wanting a cheap shared inbox |
 | **Intercom (Fin)** | Fin, per resolution | Via apps | Phone (Fin Voice) | Per seat + per resolution | Larger SaaS/support orgs |
 
-<p style="font-size:0.8125rem;color:#6b7280;margin-top:-0.5rem"><em>Details are approximate and as of mid-2026. Always check each vendor's current pricing and app listings.</em></p>
+<p style="font-size:0.8125rem;color:#6b7280;margin-top:-0.5rem"><em>Vendor features and prices reviewed against official sources on 26 August 2026. Figures are approximate; always check current pricing and app listings.</em></p>
 
 ### Loqara — chat and voice, built for stores *(that's us)*
 
@@ -90,7 +90,7 @@ Tidio is approachable and visual, with a flow builder that's lovely if you enjoy
 
 <p class="pills"><span class="pill pill-best">Best for: busy support teams</span><span class="pill">AI billed per resolution</span><span class="pill">Multichannel</span></p>
 
-If your real need is a *store-focused* version of Intercom rather than something lighter, Gorgias is the closest fit. It pulls email, chat, social, and SMS into one inbox and automates returns and order edits deeply. Pricing is tiered by ticket volume rather than per agent, and its AI Agent is available on every plan but, like Fin, billed per resolution ([Gorgias pricing](https://www.gorgias.com/pricing)) — so you've solved the "SaaS-shaped" problem but kept the dual-meter pricing. It shines once you're handling real volume with a team in the inbox all day; for a lean store it's still a lot of helpdesk machinery. See [Gorgias alternatives](/blog/gorgias-alternatives-for-ecommerce) if it feels heavy.
+If your real need is a *store-focused* version of Intercom rather than something lighter, Gorgias is the closest fit. It pulls email, chat, social, and SMS into one inbox and automates returns and order edits deeply. The helpdesk is tiered by human-handled ticket volume rather than agents, while AI Agent uses a separate per-resolution allowance; AI-resolved threads do not also count as helpdesk tickets ([Gorgias AI pricing](https://www.gorgias.com/blog/ai-agent-pricing)). It shines once you're handling real volume with a team in the inbox all day; for a lean store it's still a lot of helpdesk machinery. See [Gorgias alternatives](/blog/gorgias-alternatives-for-ecommerce) if it feels heavy.
 
 ### Re:amaze — lighter multichannel middle ground
 
@@ -108,11 +108,11 @@ Powerful and endlessly configurable, but heavy and expensive for most stores —
 
 <p class="pills"><span class="pill">Best for: very small teams</span><span class="pill">Flat per-workspace pricing</span></p>
 
-Crisp is a budget-friendly multichannel inbox with flat per-workspace pricing rather than per-seat — free to start, then $45–$295/month per workspace ([Crisp pricing](https://crisp.chat/en/pricing/)) — which appeals to tiny teams watching every euro. Its AI is billed through usage credits rather than being a native grounded agent, and store actions come via integrations rather than first-class catalog and order tools — but as a cheap, friendly inbox it's a fair landing spot for a startup store.
+Crisp is a budget-friendly multichannel inbox with flat per-workspace pricing rather than per-seat — free to start, then $45–$295/month per workspace ([Crisp pricing](https://crisp.chat/en/pricing/)) — which appeals to tiny teams watching every euro. Its Hugo AI Agent can train on company knowledge and is funded by monthly AI credits from the $45 Mini plan upward. Store actions still come via integrations rather than first-class catalog and order tools, but as a friendly inbox plus a credit-capped AI agent it is a fair landing spot for a startup store.
 
 <div class="callout">
 <p class="callout-title">The pricing trap: "per resolution" vs "per conversation"</p>
-<p>This is the single biggest reason an Intercom bill surprises people. A <strong>resolution</strong> is defined by the vendor and can be counted generously — a customer who comes back twice can rack up multiple resolutions. A <strong>conversation</strong> is one customer thread, full stop. On identical traffic the two units can price out very differently. Before you commit to any tool here, model your real monthly volume against its pricing unit — and remember Intercom and Gorgias stack a platform/seat fee <em>on top of</em> that meter. Our <a href="/blog/how-to-choose-ai-support-agent">buyer's checklist</a> walks through the questions that actually decide it.</p>
+<p>This is the single biggest reason an Intercom bill surprises people. A <strong>resolution</strong> is defined by the vendor, while a <strong>conversation</strong> is one customer thread. On identical traffic the units can price out very differently. Intercom combines paid seats with Fin outcomes; Gorgias combines a ticket-volume helpdesk allowance with a separate AI-resolution allowance, although AI-resolved threads do not also count as helpdesk tickets. Before you commit, model your real volume against each vendor's exact definitions. Our <a href="/blog/how-to-choose-ai-support-agent">buyer's checklist</a> walks through the questions that actually decide it.</p>
 </div>
 
 ## How to choose your Intercom alternative
@@ -154,4 +154,4 @@ The good ones do, on every plan. Loqara includes a shared-inbox live handoff so 
 
 [Try Loqara on your store free](/#get-started) — one line, no credit card, live in an afternoon.
 
-*Other tools' details are approximate and as of mid-2026 — check their current pricing and app listings.*
+*Other vendors' features and prices were reviewed against official sources on 26 August 2026. They remain approximate; check current pricing and app listings.*

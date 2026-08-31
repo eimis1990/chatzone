@@ -62,20 +62,42 @@ keep `ai_referral` separate rather than merging it with search.
 
 - [x] Apply `20260826085019_signup_acquisition_attribution.sql` before deploying
       the application code.
-- [ ] Register the six GA4 custom dimensions above.
-- [ ] Open a public article with a controlled URL such as
+- [x] Deploy application commit `94a9e4b` and confirm the live public bundle
+      contains the attribution and funnel event code.
+- [x] Register the six GA4 custom dimensions above.
+- [x] Open a public article with a controlled URL such as
       `?utm_source=seo_test&utm_medium=organic&utm_campaign=phase0` in a clean
       browser profile.
-- [ ] Click Get Started, edit one field, and submit a clearly labeled internal
+- [x] Click Get Started, edit one field, and submit a clearly labeled internal
       test address.
-- [ ] Confirm exactly one CTA click, dialog open, signup start, submit, and
-      recorded-signup event with the same first-touch dimensions.
-- [ ] Confirm the owner signup card and CSV show the article pathname and
+- [x] Confirm the CTA click, dialog open, signup start, submit, and recorded-
+      signup events in GA4 Realtime. The first deliberately too-fast attempt
+      produced no `signup_succeeded`; the valid delayed attempt produced exactly
+      one recorded-signup event, matching the API/DB result.
+- [x] Confirm the owner signup card and CSV show the article pathname and
       `seo_test / organic`.
-- [ ] Delete the internal test signup after verification.
-- [ ] Confirm `/owner`, `/app`, `/embed`, `/present`, and `/login` traffic is
+- [x] Delete the internal test signup after verification.
+- [x] Confirm `/owner`, `/app`, `/embed`, `/present`, and `/login` traffic is
       absent from the public-site analytics stream.
-- [ ] Record the deployment SHA and screenshots/links in the main program log.
+- [x] Record the deployment SHA and production evidence in the main program log.
 
-Until this production test passes, the Phase 0 conversion-report acceptance gate
-remains open.
+### Production evidence — 2026-08-26
+
+- GA4 property `https://www.loqara.com`: six event-scoped custom dimensions
+  registered and Explore `Organic landing-page signup funnel` created with an
+  `Organic funnel` tab, organic-medium event segment, five funnel stages, and
+  landing-path breakdown. Standard Explore data is still subject to GA4's normal
+  processing delay.
+- GA4 Realtime showed the controlled article as the only active public page and
+  received `get_started_cta_clicked`, `get_started_opened`, `signup_started`,
+  `signup_submitted`, and one `signup_succeeded`. Opening the authenticated owner
+  page did not create a second public page view or active public-site user.
+- Production signup `hello+seo-test-20260826@loqara.com` stored CTA source `nav`,
+  landing path `/blog/best-ai-chatbot-for-ecommerce`, acquisition
+  `seo_test / organic`, campaign `phase0`, and the first-touch timestamp. The
+  owner card and `loqara-signups-2026-08-26.csv` exposed the same fields.
+- Application/deployment commit: `94a9e4b` on `main`.
+
+The production journey, report setup, and test-data cleanup pass Task 0.4's
+acceptance criterion. After explicit owner confirmation, the labeled test signup
+was deleted and a production query confirmed zero matching rows remain.
