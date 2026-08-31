@@ -70,18 +70,40 @@ environment-specific and must never be mixed (`lib/stripe/client.ts:16`,
 - The copied live catalog contains 8 active products, including the metered
   voice-overage product. Live price ids still need to be collected and verified
   before the Production environment is populated.
-- The owner reports that the live webhook destination has now been created and
-  all 11 live price ids have been added to Vercel Production. ⚠️ verify the
-  endpoint's event selection, signing secret, and deployed environment with a
-  live smoke test.
+- Live webhook `we_1U5sH6BPga6Qu0zHCUsOMuZl` targets
+  `https://www.loqara.com/api/stripe/webhook`, enabled, with exactly the four
+  events the handler consumes (verified 2026-08-31 via API).
 - The live Customer Portal has invoice history, customer information, payment
   methods, and end-of-period cancellation enabled. Plan switching remains off,
   as required by the application-managed subscription flow.
-- Stripe's account-status page has a past-due request for a business
-  verification document and reports both payments and payouts paused.
-- Vercel Production reportedly has all 11 live price ids. ⚠️ verify the live
-  runtime key and webhook signing secret are also present, redeploy, then test
-  one real Checkout and its webhook delivery before inviting clients.
+- Account verification is complete: `charges_enabled` and `payouts_enabled`
+  are both true, no requirements due (verified 2026-08-31).
+
+## 2026-08-31 first live subscription — verified end to end
+
+HomeByNB (customer `cus_VAq7C7kSkLsg9B`, UAB POP Diva, info@homebynb.lt)
+subscribed to Starter monthly (€149, `loqara_starter_month`) on 2026-08-31.
+Cross-checked live Stripe ↔ prod `organizations` row: sub id, customer id,
+status `active`, interval `month`, and `current_period_end`
+(2026-09-30T13:03:45Z) all match, so Checkout → webhook → `syncSubscriptionToOrg`
+works in production. Live `/api/widget-config` serves the bot from
+`homebynb.lt` and 403s foreign origins.
+
+## Sandbox subs vs revenue metrics
+
+Local/preview environments use sandbox Stripe keys but share the prod DB, so a
+sandbox checkout (e.g. the owner's 3IMIS test org) writes a real-looking
+paid-plan row. `syncSubscriptionToOrg` now persists `organizations.stripe_livemode`
+from the subscription, and `computeMrr` skips rows where it is `false` — sandbox
+subs keep their entitlements for testing but never count toward MRR/ARR/paying
+clients on the owner dashboard (`lib/stripe/sync.ts`, `lib/billing/mrr.ts:44`,
+migration `20260831154220`). `NULL` (legacy, pre-column) is treated as live.
+
+Note: **no subscription ≠ dead widget.** A lapsed/absent subscription drops the
+org to the `free` plan (`lib/stripe/sync.ts:64`): extras beyond 1 bot are
+paused, but the oldest bot keeps serving with free entitlements until the
+100-conversations/month hard block in `/api/chat` (`lib/usage.ts:101`). This is
+by design (grace degradation), not a bug.
 
 ## Accounting and go-live
 

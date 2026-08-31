@@ -9,6 +9,8 @@ export interface BillingOrg {
   billing_interval: BillingInterval | null
   voice_addon: boolean
   visualizer_addon: boolean
+  /** Stripe livemode of the synced sub; false = sandbox/test, null = legacy (treated as live). */
+  stripe_livemode: boolean | null
 }
 
 export interface MrrBreakdown {
@@ -41,6 +43,7 @@ export function computeMrr(orgs: BillingOrg[]): MrrBreakdown {
 
   for (const o of orgs) {
     if (o.is_platform) continue
+    if (o.stripe_livemode === false) continue // sandbox/test subscription — not real money
     if (!PAYING.includes(o.subscription_status)) continue
 
     const base = PLANS[o.plan].monthly

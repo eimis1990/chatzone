@@ -51,7 +51,7 @@ export default async function OwnerDashboardPage() {
       .order('created_at', { ascending: true }),
     supabase
       .from('organizations')
-      .select('is_platform, plan, subscription_status, billing_interval, voice_addon, visualizer_addon'),
+      .select('is_platform, plan, subscription_status, billing_interval, voice_addon, visualizer_addon, stripe_livemode'),
     supabase.from('organizations').select('id, is_demo').or('is_platform.eq.true,is_demo.eq.true'),
   ])
 

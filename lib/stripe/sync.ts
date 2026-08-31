@@ -68,6 +68,9 @@ export async function syncSubscriptionToOrg(sub: Stripe.Subscription): Promise<v
     .from('organizations')
     .update({
       stripe_subscription_id: sub.id,
+      // Sandbox subs grant entitlements (needed for testing) but are excluded
+      // from revenue metrics via this flag.
+      stripe_livemode: sub.livemode,
       plan,
       subscription_status: status,
       billing_interval: interval,

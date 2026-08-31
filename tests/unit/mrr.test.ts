@@ -8,6 +8,7 @@ const org = (o: Partial<BillingOrg>): BillingOrg => ({
   billing_interval: null,
   voice_addon: false,
   visualizer_addon: false,
+  stripe_livemode: null,
   ...o,
 })
 
@@ -44,6 +45,16 @@ describe('computeMrr', () => {
     ])
     expect(r.mrr).toBe(0)
     expect(r.payingClients).toBe(0)
+  })
+
+  it('excludes sandbox (livemode=false) subs but counts legacy null as live', () => {
+    const r = computeMrr([
+      org({ plan: 'starter', subscription_status: 'active', billing_interval: 'month', stripe_livemode: false }),
+      org({ plan: 'starter', subscription_status: 'active', billing_interval: 'month', stripe_livemode: true }),
+      org({ plan: 'starter', subscription_status: 'active', billing_interval: 'month', stripe_livemode: null }),
+    ])
+    expect(r.mrr).toBe(298)
+    expect(r.payingClients).toBe(2)
   })
 
   it('counts trialing as committed revenue', () => {

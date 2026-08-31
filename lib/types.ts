@@ -47,6 +47,8 @@ export interface Organization {
   billing_interval: BillingInterval | null
   current_period_end: string | null
   cancel_at_period_end: boolean
+  /** Stripe livemode of the synced sub; false = sandbox/test, null = pre-column legacy. */
+  stripe_livemode: boolean | null
   voice_addon: boolean
   /** Loqara's own internal org (not a client) — powers the dogfooded landing bot. */
   is_platform: boolean
@@ -502,6 +504,8 @@ export type SalesLeadStatus =
   | 'rejected'
   | 'client'
 
+export type SalesLeadOrigin = 'default' | 'linkedin'
+
 /** Owner outreach pipeline row (researched prospect company). */
 export interface SalesLead {
   id: string
@@ -518,6 +522,12 @@ export interface SalesLead {
   hook: string | null
   fit_note: string | null
   source: string | null
+  /** Discovery channel; separate from the free-text research evidence in `source`. */
+  lead_origin: SalesLeadOrigin
+  /** Canonical English country name. */
+  country: string
+  /** LinkedIn or Sales Navigator profile URL for LinkedIn-origin leads. */
+  linkedin_url: string | null
   score: number
   score_why: string | null
   email_subject: string | null
