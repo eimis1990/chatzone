@@ -301,3 +301,18 @@ Format: `YYYY-MM-DD TAG — note`. Tags: `INGEST` (new/updated knowledge),
 - 2026-08-31 FIX/BILLING — Sandbox subscriptions no longer inflate owner-dashboard revenue: sync persists `organizations.stripe_livemode` from the Stripe sub, `computeMrr` excludes `livemode=false` rows (entitlements untouched), and migration `20260831154220` backfilled HomeByNB=live / 3IMIS=sandbox in prod. Dashboard now reports MRR €149 / 1 paying client once deployed. NOTE: migration history has a known intentional gap — local `20260831102808` (Baltic email updates) stays unapplied pending approval, so don't blind `supabase db push`; this migration was applied via the eu-central-1 session pooler (aws-1) and recorded in schema_migrations manually. See stripe-billing.
 - 2026-08-31 INGEST/SALES — Owner approved the Latvia/Estonia email write: applied `20260831160910_enrich_baltic_linkedin_emails.sql` live, updating all 100 rows by UUID from the reviewed evidence artifact with in-migration count guards. LinkedIn email coverage is now 198/200. Also reconciled migration history: the platform-classification migration was recorded remotely as `20260831102953`, so the local file was renamed from `20260831102808` to match — `supabase migration list` now shows no mismatches. See sales-leads.
 - 2026-08-31 FEAT/WIDGET — Conversations now survive page navigations on the host site: ChatWindow persists the conversation id per bot public key in localStorage (24h activity window) and on mount restores the transcript via the existing /api/messages plus one poll call for handoff status — zero new endpoints. Live-embed only via a new `persistKey` prop (EmbedShell passes it; the configurator preview never resumes); restart clears the stored id. Verified in-browser on the 3IMIS test copy: full turn → reload restored the transcript, restart → reload started clean. See widget-and-embed.
+
+## 2026-09-01 — Mobile widget: no host zoom, keyboard-aware sheet
+
+Fixed the iOS "tap the message field and the page zooms / widget doesn't fit"
+report. Root causes: 14px composer textarea (iOS zooms the top-level page for
+focused fields under 16px) and a layout-viewport-sized fixed sheet (iOS scrolls
+the visual viewport for the keyboard instead of shrinking the layout one).
+Touch devices now get 16px embed inputs; the mobile sheet tracks
+`visualViewport` and locks host `<html>` overflow while open. See
+[widget-and-embed](widget-and-embed.md#mobile-full-screen-sheet-640px).
+Also: quick-action tiles showed square corners on iOS — WebKit doesn't clip a
+`filter: blur` child to a rounded `overflow:hidden` parent, so the corner glow
+leaked. Fixed with a `-webkit-mask-image` on the tile
+(`components/widget/QuickActionButtons.tsx`). Reuse that trick for any blurred
+child inside a rounded clip in the widget.

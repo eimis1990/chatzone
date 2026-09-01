@@ -719,6 +719,15 @@
 
 /* Widget composer: placeholder inherits an auto-contrast color derived from
    the configured message-field background (set inline as --cbz-ph-color). */
+/* iOS Safari zooms the whole host page when a focused field is under 16px.
+   Touch devices get 16px inputs inside the embed so the full-screen sheet
+   stays put; desktop keeps the compact 14px. */
+@media (hover: none) and (pointer: coarse) {
+  #embed-root textarea,
+  #embed-root input {
+    font-size: 16px;
+  }
+}
 .cbz-composer-input::placeholder {
   color: var(--cbz-ph-color, #9ca3af);
 }

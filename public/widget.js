@@ -530,11 +530,16 @@
     if (isMobile()) {
       // True full screen — max real estate for the on-screen keyboard. Edge to
       // edge, no radius/shadow; the in-header ✕ (rendered by ChatWindow) closes it.
+      // Track the *visual* viewport: iOS doesn't shrink the layout viewport for
+      // the on-screen keyboard, it scrolls it instead — a plain top/bottom:0
+      // sheet would then slide up and expose the host page underneath.
+      var vv = window.visualViewport
       wrapper.style.width = 'auto'
       wrapper.style.left = '0px'
       wrapper.style.right = '0px'
-      wrapper.style.top = '0px'
-      wrapper.style.bottom = '0px'
+      wrapper.style.top = Math.round(vv ? vv.offsetTop : 0) + 'px'
+      wrapper.style.bottom = 'auto'
+      wrapper.style.height = Math.round(vv ? vv.height : window.innerHeight) + 'px'
       iframeContainer.style.flex = '1 1 auto'
       iframeContainer.style.minHeight = '0'
       iframeContainer.style.height = 'auto'
@@ -543,6 +548,7 @@
     } else {
       wrapper.style.width = Math.round(IFRAME_WIDTH * (isExpanded ? EXPAND_FACTOR : 1)) + 'px'
       wrapper.style.top = 'auto'
+      wrapper.style.height = ''
       wrapper.style.left = 'auto'
       wrapper.style.right = 'auto'
       wrapper.style[isRight ? 'right' : 'left'] = sideOffset() + 'px'
@@ -567,6 +573,22 @@
     }
     // Keep the iframe's header (✕ vs avatar) in sync across rotation/resize.
     sendViewport()
+    lockHostScroll(isOpen && isMobile())
+  }
+  // While the full-screen sheet is open nothing of the host page should move
+  // behind it. Restores whatever overflow the host had.
+  var hostOverflow = null
+  function lockHostScroll(lock) {
+    var el = document.documentElement
+    if (lock) {
+      if (hostOverflow === null) {
+        hostOverflow = el.style.overflow
+        el.style.overflow = 'hidden'
+      }
+    } else if (hostOverflow !== null) {
+      el.style.overflow = hostOverflow
+      hostOverflow = null
+    }
   }
 
   // The "Powered by Loqara" badge renders INSIDE the iframe (under the
@@ -577,6 +599,10 @@
 
   sizeWidget()
   window.addEventListener('resize', sizeWidget)
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', sizeWidget)
+    window.visualViewport.addEventListener('scroll', sizeWidget)
+  }
 
   var iframe = null
   var isOpen = false
@@ -771,6 +797,7 @@
     // On mobile the panel is full screen with its own in-header ✕, so hide the
     // floating launcher (it would cover the composer). Desktop keeps it.
     if (isMobile()) launcher.style.display = 'none'
+    lockHostScroll(isMobile())
     renderLauncher()
     showCallButton()
   }
@@ -787,6 +814,7 @@
       closeTimer = null
     }, 300)
     isOpen = false
+    lockHostScroll(false)
     launcher.style.display = 'flex' // restore (was hidden on mobile while open)
     launcher.setAttribute('aria-expanded', 'false')
     launcher.setAttribute('aria-label', 'Open chat')

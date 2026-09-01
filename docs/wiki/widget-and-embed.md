@@ -98,6 +98,20 @@ restart confirmation sheet uses that same background, with theme-aware copy and
 secondary-button contrast instead of a hard-coded white surface
 (`components/widget/ChatWindow.tsx:1501`).
 
+## Mobile full-screen sheet (≤640px)
+
+On phones `sizeWidget()` sizes the fixed wrapper to the **visual** viewport
+(`visualViewport.offsetTop`/`height`, re-run on its `resize`/`scroll`), not
+`top:0;bottom:0`. iOS never shrinks the layout viewport for the keyboard — it
+scrolls the visual viewport instead — so a layout-viewport sheet slid up and
+exposed the host page. While open on mobile the host `<html>` gets
+`overflow:hidden` (previous value restored on close) via `lockHostScroll`.
+Inside the embed, touch devices (`hover:none and pointer:coarse`) get 16px
+`textarea`/`input` — anything under 16px makes iOS Safari zoom the *host* page
+on focus, which was the "widget zooms and doesn't fit" report (2026-09-01).
+Desktop keeps 14px. Test: `tests/unit/widget-loader.test.ts` "mobile full-screen
+sheet" (`public/widget.js` `sizeWidget`, `app/globals.css` `#embed-root textarea`).
+
 ## Conversation continuity across page navigations
 
 Each navigation on the host site destroys and recreates the chat iframe, so

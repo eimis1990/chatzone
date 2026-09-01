@@ -293,3 +293,27 @@ describe('widget.js loader', () => {
     expect(launcher?.style.backgroundColor).toBe('rgb(192, 75, 12)')
   })
 })
+
+describe('mobile full-screen sheet', () => {
+  it('sizes to the visual viewport and locks host scroll while open', () => {
+    const { window, document } = setupDOM('MOBILE_KEY')
+    Object.defineProperty(window, 'innerWidth', { value: 390, configurable: true })
+    Object.defineProperty(window, 'innerHeight', { value: 844, configurable: true })
+    // Keyboard open: visual viewport is shorter and pushed down.
+    Object.defineProperty(window, 'visualViewport', {
+      value: { offsetTop: 60, height: 500, addEventListener: () => {} },
+      configurable: true,
+    })
+    const launcher = document.querySelector<HTMLElement>('[data-cbz-launcher]')!
+    const wrapper = document.querySelector<HTMLElement>('[data-cbz-wrapper]')!
+
+    launcher.click()
+    expect(wrapper.style.top).toBe('60px')
+    expect(wrapper.style.height).toBe('500px')
+    expect(wrapper.style.bottom).toBe('auto')
+    expect(document.documentElement.style.overflow).toBe('hidden')
+
+    launcher.click()
+    expect(document.documentElement.style.overflow).toBe('')
+  })
+})

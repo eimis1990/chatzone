@@ -139,7 +139,10 @@ export function QuickActionButtons({
             type="button"
             onClick={() => onSelect(q, i)}
             variants={item}
-            className={`group relative flex min-h-[64px] flex-col justify-end overflow-hidden p-3 text-left text-sm font-medium leading-snug ${surfaceClasses} ${textClasses}${fullWidth ? ' col-span-2' : ''}`}
+            // The mask is for iOS Safari: WebKit doesn't clip a blurred child
+            // (the glow below) to a rounded overflow-hidden parent, so the glow
+            // painted square corners. Masking the tile to its own box fixes it.
+            className={`group relative flex min-h-[64px] flex-col justify-end overflow-hidden p-3 text-left text-sm font-medium leading-snug [-webkit-mask-image:-webkit-radial-gradient(white,black)] ${surfaceClasses} ${textClasses}${fullWidth ? ' col-span-2' : ''}`}
             style={{ borderRadius: radius, ...bubbleBorder, ...surfaceStyle }}
           >
             {/* Soft glow in the top-right corner, tinted to the header color.
