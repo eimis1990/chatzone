@@ -98,6 +98,8 @@ export function EmbedShell({
       // close, since the floating launcher is hidden while open on mobile.
       onRequestClose={() => window.parent?.postMessage({ type: 'cbz-close' }, '*')}
       isMobileOverride={parentMobile}
+      // Keep the conversation across page navigations on the host site.
+      persistKey={publicKey}
     />
   )
 }

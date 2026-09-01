@@ -98,6 +98,22 @@ restart confirmation sheet uses that same background, with theme-aware copy and
 secondary-button contrast instead of a hard-coded white surface
 (`components/widget/ChatWindow.tsx:1501`).
 
+## Conversation continuity across page navigations
+
+Each navigation on the host site destroys and recreates the chat iframe, so
+`ChatWindow` persists the conversation id in iframe-origin localStorage
+(`cbz_conv_<publicKey>`, `{id, ts}`; ts refreshed per message) and resumes it on
+mount when it's under 24h old (`RESUME_WINDOW_MS`): transcript via the existing
+`/api/messages`, handoff status/agent via one `poll` call — no new endpoints.
+Restored turns are text-only (product cards etc. aren't persisted). The server
+rebuilds model context from the conversation id, and `/api/chat` re-verifies the
+visitor id on the next send, so a stale id silently starts a fresh conversation.
+The `persistKey` prop gates all of it: `EmbedShell` passes the public key; the
+configurator preview omits it and always starts fresh. Restart ("Start new
+conversation") removes the stored key. Tests:
+`tests/unit/chat-window-resume.test.tsx` (note: this jsdom/Node pairing has no
+localStorage — the test stubs it via `vi.stubGlobal`).
+
 ## Temporary visitor blocks
 
 The live iframe checks its browser-local visitor id before rendering interactive

@@ -52,7 +52,18 @@ interface ChatWindowProps {
    * which falls back to its own media query.
    */
   isMobileOverride?: boolean
+  /**
+   * Live embed only: persist the conversation id in localStorage under this
+   * key (the bot's public key) so a mid-chat visitor keeps their conversation
+   * across page navigations. Omitted in the configurator preview, which must
+   * always start fresh.
+   */
+  persistKey?: string
 }
+
+/** Resume a stored conversation only while it saw activity this recently. */
+const RESUME_WINDOW_MS = 24 * 60 * 60 * 1000
+const convStorageKey = (persistKey: string) => `cbz_conv_${persistKey}`
 
 function generateId() {
   return Math.random().toString(36).slice(2)
@@ -137,7 +148,7 @@ const RESTART_CONFIRM: Record<BotLanguage, { title: string; cancel: string; conf
 
 const POLL_INTERVAL_MS = 4000
 
-export function ChatWindow({ config, transport, initialLanguage, onRequestClose, isMobileOverride }: ChatWindowProps) {
+export function ChatWindow({ config, transport, initialLanguage, onRequestClose, isMobileOverride, persistKey }: ChatWindowProps) {
   const languages = config.languages ?? ['en']
 
   // Narrow viewport → the widget is a full-screen sheet, so show an in-header
@@ -271,6 +282,13 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
 
   /** Clear the conversation and start fresh. */
   const handleRestart = useCallback(() => {
+    if (persistKey) {
+      try {
+        localStorage.removeItem(convStorageKey(persistKey))
+      } catch {
+        /* storage unavailable */
+      }
+    }
     setMessages([])
     setConversationId(undefined)
     setShowLeadForm(false)
@@ -284,7 +302,7 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
     setRoomPhoto(null)
     lastPollTsRef.current = undefined
     updateHandoff('bot')
-  }, [updateHandoff])
+  }, [updateHandoff, persistKey])
 
   const toggleRoomProduct = useCallback((p: CommerceProduct) => {
     setRoomSelection((prev) =>
@@ -495,6 +513,70 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
       active = false
     }
   }, [transport])
+
+  // Live widget: remember the conversation so page navigations keep it. The
+  // timestamp refreshes on every message, so the resume window tracks activity.
+  useEffect(() => {
+    if (!persistKey || !conversationId) return
+    try {
+      localStorage.setItem(
+        convStorageKey(persistKey),
+        JSON.stringify({ id: conversationId, ts: Date.now() }),
+      )
+    } catch {
+      /* storage unavailable */
+    }
+  }, [persistKey, conversationId, messages.length])
+
+  // Live widget: resume a recent conversation after a page navigation. The
+  // server rebuilds model context from the conversation id, so restoring the
+  // id + transcript is enough. Product cards and other rich payloads are not
+  // persisted — restored turns are text-only. /api/chat re-verifies the
+  // visitor id on the next send, so a stale id just starts a fresh
+  // conversation instead of resuming someone else's.
+  useEffect(() => {
+    if (!persistKey) return
+    let active = true
+    let stored: { id?: string; ts?: number } = {}
+    try {
+      stored = JSON.parse(localStorage.getItem(convStorageKey(persistKey)) ?? '{}') as {
+        id?: string
+        ts?: number
+      }
+    } catch {
+      return
+    }
+    if (!stored.id || !stored.ts || Date.now() - stored.ts > RESUME_WINDOW_MS) return
+    const convId = stored.id
+    void (async () => {
+      try {
+        const rows = await transport.fetchMessages(convId)
+        const restored: ChatMessage[] = rows
+          .filter(
+            (m): m is { id: string; role: 'user' | 'assistant'; content: string } =>
+              (m.role === 'user' || m.role === 'assistant') && Boolean(m.content),
+          )
+          .map((m) => ({ id: m.id, role: m.role, content: m.content }))
+        if (!active || !restored.length) return
+        // A visitor may have typed before the restore resolved — never clobber.
+        setMessages((prev) => (prev.length ? prev : restored))
+        setConversationId((prev) => prev ?? convId)
+        // An open human-handoff episode resumes too (the poll effect takes over).
+        const data = await transport.poll(convId).catch(() => null)
+        if (!active || !data) return
+        if (data.serverTime) lastPollTsRef.current = data.serverTime
+        setAgentName(data.agentName ?? null)
+        if (data.status === 'requested' || data.status === 'live') updateHandoff(data.status)
+      } catch {
+        // Conversation gone (retention, deleted) — start fresh silently.
+      }
+    })()
+    return () => {
+      active = false
+    }
+    // Mount-only by design (persistKey never changes in the live embed).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [persistKey])
 
   /**
    * After a full chat turn, fetch the real DB message ids for the conversation
