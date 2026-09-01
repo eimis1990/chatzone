@@ -311,6 +311,10 @@ the visual viewport for the keyboard instead of shrinking the layout one).
 Touch devices now get 16px embed inputs; the mobile sheet tracks
 `visualViewport` and locks host `<html>` overflow while open. See
 [widget-and-embed](widget-and-embed.md#mobile-full-screen-sheet-640px).
+Follow-up the same evening: a real-phone check on homebynb.lt still zoomed
+and the host scrolled under the sheet. `overflow:hidden` + 16px inputs are not
+enough on iOS; the mobile lock now pins `<body>` with `position:fixed` and
+swaps the host viewport meta to `maximum-scale=1` while open.
 Also: quick-action tiles showed square corners on iOS — WebKit doesn't clip a
 `filter: blur` child to a rounded `overflow:hidden` parent, so the corner glow
 leaked. Fixed with a `-webkit-mask-image` on the tile

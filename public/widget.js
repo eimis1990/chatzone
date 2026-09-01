@@ -575,19 +575,49 @@
     sendViewport()
     lockHostScroll(isOpen && isMobile())
   }
-  // While the full-screen sheet is open nothing of the host page should move
-  // behind it. Restores whatever overflow the host had.
-  var hostOverflow = null
+  // While the full-screen sheet is open the host page must neither scroll nor
+  // zoom behind it. iOS ignores overflow:hidden for touch scrolling, so the
+  // body is pinned with position:fixed (the one technique iOS honours), and the
+  // host viewport meta gets maximum-scale=1, which is what actually stops
+  // Safari's zoom-on-focus. Everything is restored verbatim on close.
+  var LOCKED_VIEWPORT = 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no'
+  var hostLock = null
   function lockHostScroll(lock) {
-    var el = document.documentElement
+    var html = document.documentElement
+    var body = document.body
     if (lock) {
-      if (hostOverflow === null) {
-        hostOverflow = el.style.overflow
-        el.style.overflow = 'hidden'
+      if (hostLock || !body) return
+      var meta = document.querySelector('meta[name="viewport"]')
+      hostLock = {
+        scrollY: window.scrollY || 0,
+        html: html.style.cssText,
+        body: body.style.cssText,
+        meta: meta,
+        metaContent: meta ? meta.getAttribute('content') : null,
       }
-    } else if (hostOverflow !== null) {
-      el.style.overflow = hostOverflow
-      hostOverflow = null
+      if (!meta) {
+        meta = document.createElement('meta')
+        meta.setAttribute('name', 'viewport')
+        document.head.appendChild(meta)
+        hostLock.meta = meta
+      }
+      meta.setAttribute('content', LOCKED_VIEWPORT)
+      html.style.overflow = 'hidden'
+      css(body, {
+        position: 'fixed',
+        top: -hostLock.scrollY + 'px',
+        left: '0px',
+        right: '0px',
+        width: '100%',
+        overflow: 'hidden',
+      })
+    } else if (hostLock) {
+      if (hostLock.metaContent === null) hostLock.meta.parentNode.removeChild(hostLock.meta)
+      else hostLock.meta.setAttribute('content', hostLock.metaContent)
+      html.style.cssText = hostLock.html
+      body.style.cssText = hostLock.body
+      window.scrollTo(0, hostLock.scrollY)
+      hostLock = null
     }
   }
 

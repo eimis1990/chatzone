@@ -295,8 +295,14 @@ describe('widget.js loader', () => {
 })
 
 describe('mobile full-screen sheet', () => {
-  it('sizes to the visual viewport and locks host scroll while open', () => {
+  it('sizes to the visual viewport and locks host scroll/zoom while open', () => {
     const { window, document } = setupDOM('MOBILE_KEY')
+    window.scrollTo = () => {}
+    Object.defineProperty(window, 'scrollY', { value: 300, configurable: true })
+    const meta = document.createElement('meta')
+    meta.setAttribute('name', 'viewport')
+    meta.setAttribute('content', 'width=device-width, initial-scale=1')
+    document.head.appendChild(meta)
     Object.defineProperty(window, 'innerWidth', { value: 390, configurable: true })
     Object.defineProperty(window, 'innerHeight', { value: 844, configurable: true })
     // Keyboard open: visual viewport is shorter and pushed down.
@@ -312,8 +318,14 @@ describe('mobile full-screen sheet', () => {
     expect(wrapper.style.height).toBe('500px')
     expect(wrapper.style.bottom).toBe('auto')
     expect(document.documentElement.style.overflow).toBe('hidden')
+    // iOS-proof scroll lock + no zoom-on-focus while the sheet is open.
+    expect(document.body.style.position).toBe('fixed')
+    expect(document.body.style.top).toBe('-300px')
+    expect(meta.getAttribute('content')).toContain('maximum-scale=1')
 
     launcher.click()
     expect(document.documentElement.style.overflow).toBe('')
+    expect(document.body.style.position).toBe('')
+    expect(meta.getAttribute('content')).toBe('width=device-width, initial-scale=1')
   })
 })

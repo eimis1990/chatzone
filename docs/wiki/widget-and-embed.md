@@ -104,12 +104,16 @@ On phones `sizeWidget()` sizes the fixed wrapper to the **visual** viewport
 (`visualViewport.offsetTop`/`height`, re-run on its `resize`/`scroll`), not
 `top:0;bottom:0`. iOS never shrinks the layout viewport for the keyboard — it
 scrolls the visual viewport instead — so a layout-viewport sheet slid up and
-exposed the host page. While open on mobile the host `<html>` gets
-`overflow:hidden` (previous value restored on close) via `lockHostScroll`.
-Inside the embed, touch devices (`hover:none and pointer:coarse`) get 16px
-`textarea`/`input` — anything under 16px makes iOS Safari zoom the *host* page
-on focus, which was the "widget zooms and doesn't fit" report (2026-09-01).
-Desktop keeps 14px. Test: `tests/unit/widget-loader.test.ts` "mobile full-screen
+exposed the host page. While open on mobile `lockHostScroll` takes over the
+host: `<body>` is pinned with `position:fixed; top:-scrollY` (iOS ignores
+`overflow:hidden` for touch scrolling — this is the one technique it honours)
+and the host `<meta name=viewport>` is swapped to `maximum-scale=1,
+user-scalable=no`, which is what actually stops Safari's zoom-on-focus. Both
+are restored verbatim on close (scroll position included). Inside the embed,
+touch devices (`hover:none and pointer:coarse`) also get 16px
+`textarea`/`input`; that alone did **not** stop the zoom in the field
+(homebynb.lt, 2026-09-01), so the viewport swap is the real fix and the font
+rule is belt-and-braces. Desktop keeps 14px. Test: `tests/unit/widget-loader.test.ts` "mobile full-screen
 sheet" (`public/widget.js` `sizeWidget`, `app/globals.css` `#embed-root textarea`).
 
 ## Conversation continuity across page navigations
