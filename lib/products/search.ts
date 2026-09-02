@@ -37,11 +37,10 @@ export function docToDetails(doc: string | null | undefined): string | undefined
 
 /** Whether this bot has a synced semantic product index. */
 async function hasIndex(botId: string, db: SupabaseClient): Promise<boolean> {
-  const { count } = await db
-    .from('product_embeddings')
-    .select('id', { count: 'exact', head: true })
-    .eq('bot_id', botId)
-  return (count ?? 0) > 0
+  // Existence, not a count: an exact count walks every row of the bot's
+  // catalog (636ms observed on 2.5k products); one row is enough.
+  const { data } = await db.from('product_embeddings').select('id').eq('bot_id', botId).limit(1)
+  return (data?.length ?? 0) > 0
 }
 
 type Commerce = NonNullable<Bot['config']['commerce']>
@@ -122,52 +121,53 @@ export async function searchCatalog(
 
   try {
     const semantic = commerceProviderProfile(c).semantic
-    t = performance.now()
-    const indexed = semantic?.configured(c) && (await hasIndex(bot.id, db))
-    mark('hasIndex', t)
-    if (semantic && indexed) {
+    if (semantic?.configured(c)) {
       const semanticQuery = semantic.normalizeQuery?.(query) ?? query
+      // The index check and the query embedding are independent — run both at
+      // once. A bot without an index wastes one cheap embedding call.
       t = performance.now()
-      const embedding = await embedOne(semanticQuery)
-      mark('embed', t)
-      const candidatePoolSize = semantic.candidatePoolSize?.(limit) ?? limit
-      t = performance.now()
-      const { data } = await db.rpc(semantic.matcherRpc, {
-        p_bot_id: bot.id,
-        p_embedding: embedding,
-        p_query_text: semanticQuery,
-        p_k: candidatePoolSize,
-        // 'unisex' means "no specific recipient" — filtering BY it would exclude
-        // women/men/kids-tagged items (the model sends it unprompted).
-        p_audience: !opts.audience || opts.audience === 'unisex' ? null : opts.audience,
-      })
-      const matches = (data ?? []) as IndexedProductMatch[]
-      mark('match', t)
-      if (matches.length) {
-        // Provider profiles own any store/index compatibility checks. This keeps
-        // a provider's edge case out of the shared retrieval path.
-        if (semantic.acceptsIndex && !semantic.acceptsIndex(c, matches)) {
-          console.warn(`[agent] ${c.provider} index is incompatible; using live search`)
-        } else {
-          t = performance.now()
-          const live = await semantic.hydrate(c, matches)
-          mark('hydrate', t)
-          // Semantic matches exist but the store API returned nothing → the store
-          // is unreachable, not out of stock. Surface that instead of letting the
-          // keyword fallback hit the same dead store and read as "unavailable".
-          if (live.size === 0) throw new Error('product hydration failed: store API unreachable')
-          // Preserve semantic rank order; keep only in-stock, live-priced products.
-          // Carry the indexed doc along as `details` so the model can discuss and
-          // compare (attributes/categories/description beyond the live short one).
-          const products = matches
-            .map((m): CommerceProduct | undefined => {
-              const p = live.get(m.external_id)
-              return p ? { ...p, details: docToDetails(m.doc) } : undefined
-            })
-            .filter((p): p is CommerceProduct => Boolean(p) && p!.inStock)
-          if (products.length) {
-            logTiming('semantic', products.length)
-            return sortByPrice(products.slice(0, limit), opts.sort)
+      const [indexed, embedding] = await Promise.all([hasIndex(bot.id, db), embedOne(semanticQuery)])
+      mark('hasIndex+embed', t)
+      if (indexed) {
+        const candidatePoolSize = semantic.candidatePoolSize?.(limit) ?? limit
+        t = performance.now()
+        const { data } = await db.rpc(semantic.matcherRpc, {
+          p_bot_id: bot.id,
+          p_embedding: embedding,
+          p_query_text: semanticQuery,
+          p_k: candidatePoolSize,
+          // 'unisex' means "no specific recipient" — filtering BY it would exclude
+          // women/men/kids-tagged items (the model sends it unprompted).
+          p_audience: !opts.audience || opts.audience === 'unisex' ? null : opts.audience,
+        })
+        const matches = (data ?? []) as IndexedProductMatch[]
+        mark('match', t)
+        if (matches.length) {
+          // Provider profiles own any store/index compatibility checks. This keeps
+          // a provider's edge case out of the shared retrieval path.
+          if (semantic.acceptsIndex && !semantic.acceptsIndex(c, matches)) {
+            console.warn(`[agent] ${c.provider} index is incompatible; using live search`)
+          } else {
+            t = performance.now()
+            const live = await semantic.hydrate(c, matches)
+            mark('hydrate', t)
+            // Semantic matches exist but the store API returned nothing → the store
+            // is unreachable, not out of stock. Surface that instead of letting the
+            // keyword fallback hit the same dead store and read as "unavailable".
+            if (live.size === 0) throw new Error('product hydration failed: store API unreachable')
+            // Preserve semantic rank order; keep only in-stock, live-priced products.
+            // Carry the indexed doc along as `details` so the model can discuss and
+            // compare (attributes/categories/description beyond the live short one).
+            const products = matches
+              .map((m): CommerceProduct | undefined => {
+                const p = live.get(m.external_id)
+                return p ? { ...p, details: docToDetails(m.doc) } : undefined
+              })
+              .filter((p): p is CommerceProduct => Boolean(p) && p!.inStock)
+            if (products.length) {
+              logTiming('semantic', products.length)
+              return sortByPrice(products.slice(0, limit), opts.sort)
+            }
           }
         }
       }
