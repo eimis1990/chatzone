@@ -97,7 +97,19 @@ export async function searchCatalog(
     query = urlSlugWords(pageUrl) || query
   }
 
+  // One `[agent] search_products timing` line per call — each tool step is a
+  // full model round trip on top of this, so know which half is slow.
+  const t0 = performance.now()
+  const marks: string[] = []
+  const mark = (label: string, since: number) => marks.push(`${label}=${Math.round(performance.now() - since)}ms`)
+  const logTiming = (path: string, n: number) =>
+    console.log(
+      `[agent] search_products timing path=${path} results=${n} total=${Math.round(performance.now() - t0)}ms ${marks.join(' ')}`,
+    )
+
+  let t = performance.now()
   query = await applyProductSearchSynonyms(db, bot.id, query)
+  mark('synonyms', t)
 
   // Whole-catalog superlatives ("cheapest product", empty query) need the
   // store's own price ordering — the semantic index stores no prices ("cheapest
@@ -110,10 +122,16 @@ export async function searchCatalog(
 
   try {
     const semantic = commerceProviderProfile(c).semantic
-    if (semantic?.configured(c) && (await hasIndex(bot.id, db))) {
+    t = performance.now()
+    const indexed = semantic?.configured(c) && (await hasIndex(bot.id, db))
+    mark('hasIndex', t)
+    if (semantic && indexed) {
       const semanticQuery = semantic.normalizeQuery?.(query) ?? query
+      t = performance.now()
       const embedding = await embedOne(semanticQuery)
+      mark('embed', t)
       const candidatePoolSize = semantic.candidatePoolSize?.(limit) ?? limit
+      t = performance.now()
       const { data } = await db.rpc(semantic.matcherRpc, {
         p_bot_id: bot.id,
         p_embedding: embedding,
@@ -124,13 +142,16 @@ export async function searchCatalog(
         p_audience: !opts.audience || opts.audience === 'unisex' ? null : opts.audience,
       })
       const matches = (data ?? []) as IndexedProductMatch[]
+      mark('match', t)
       if (matches.length) {
         // Provider profiles own any store/index compatibility checks. This keeps
         // a provider's edge case out of the shared retrieval path.
         if (semantic.acceptsIndex && !semantic.acceptsIndex(c, matches)) {
           console.warn(`[agent] ${c.provider} index is incompatible; using live search`)
         } else {
+          t = performance.now()
           const live = await semantic.hydrate(c, matches)
+          mark('hydrate', t)
           // Semantic matches exist but the store API returned nothing → the store
           // is unreachable, not out of stock. Surface that instead of letting the
           // keyword fallback hit the same dead store and read as "unavailable".
@@ -144,7 +165,10 @@ export async function searchCatalog(
               return p ? { ...p, details: docToDetails(m.doc) } : undefined
             })
             .filter((p): p is CommerceProduct => Boolean(p) && p!.inStock)
-          if (products.length) return sortByPrice(products.slice(0, limit), opts.sort)
+          if (products.length) {
+            logTiming('semantic', products.length)
+            return sortByPrice(products.slice(0, limit), opts.sort)
+          }
         }
       }
     }
@@ -154,7 +178,11 @@ export async function searchCatalog(
     console.error('[agent] semantic product search failed, falling back to keyword:', err)
   }
 
-  return sortByPrice(await searchStore(c, { query, limit }), opts.sort)
+  t = performance.now()
+  const keyword = await searchStore(c, { query, limit })
+  mark('keyword', t)
+  logTiming('keyword', keyword.length)
+  return sortByPrice(keyword, opts.sort)
 }
 
 /** Numeric value of a display price ("99.00 €", "3,99 €"); NaN when unparseable. */

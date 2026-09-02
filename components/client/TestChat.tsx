@@ -40,6 +40,7 @@ type LiveConfig = {
   }
   model?: string
   temperature?: number
+  fastLane?: boolean
   systemPrompt?: string
   /** Component-library variants (componentKey → variantId) for preview parity. */
   components?: Record<string, string>
@@ -723,6 +724,9 @@ function buildFullConfig(config: LiveConfig): BotConfig {
     },
     model: config.model ?? DEFAULT_CHAT_MODEL,
     temperature: config.temperature ?? DEFAULT_TEMPERATURE,
+    // Owner-only flag with no form field — carried through so the preview
+    // takes the same lane as the live widget.
+    fastLane: config.fastLane,
     leadCapture: {
       enabled: config.leadCapture?.enabled ?? false,
       trigger: config.leadCapture?.trigger ?? 'on_fallback',
