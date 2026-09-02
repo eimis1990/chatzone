@@ -21,8 +21,8 @@ import { storeConfigured } from '@/lib/commerce/capabilities'
 
 /** Top cosine similarity a KB hit needs before we trust it enough to skip the
  *  big model and tools. Observed on the HomeByNB copy: returns 0.55, payment
- *  0.60, delivery 0.45; incidental noise sits below 0.3. */
-export const FAST_LANE_SIMILARITY = 0.45
+ *  0.60, delivery 0.45, Lithuanian returns 0.41; incidental noise sits below 0.3. */
+export const FAST_LANE_SIMILARITY = 0.4
 
 // Anything a commerce tool owns stays in the full lane: products, gift cards,
 // vouchers (search_products); delivery (shipping_info); orders (order_status);

@@ -106,7 +106,7 @@ How a bot's answers stay grounded in the client's own content.
   noise chunks (top sim 0.276), so the old zero-match rewrite never fired —
   and preview had no rewrite at all (preview/live parity gap).
 - **Fast lane** (`lib/ai/fast-lane.ts`, per-bot `config.fastLane`, default off):
-  after retrieval, a top similarity ≥ 0.45 with no product/delivery/order/
+  after retrieval, a top similarity ≥ 0.40 with no product/delivery/order/
   discount intent (EN+LT stems) and no product cards on screen answers with NO
   tools and the plain KB prompt (commerce block omitted) — same model. Applied
   in both `/api/chat` and `/api/preview/chat`. Rollout: 3IMIS test copy first.

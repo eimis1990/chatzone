@@ -44,7 +44,7 @@ We have no timing data, so which bucket dominates is a guess.
 - `botConfigSchema.fastLane: boolean` (default `false`). No UI in this pass;
   the owner flips it in the bot config. Not exposed to clients.
 - Decision AFTER retrieval, no extra model call:
-  `fastLane && topSimilarity >= FAST_LANE_SIMILARITY && !looksLikeProductIntent(message)`
+  `fastLane && topSimilarity >= FAST_LANE_SIMILARITY (0.40) && !looksLikeProductIntent(message)`
   → **no tools**, the plain KB prompt (commerce block omitted), **same model**.
   Anything else → the exact path we ship today.
 - Model swap dropped after measuring (2026-09-02, same prompt, 3 runs each):
