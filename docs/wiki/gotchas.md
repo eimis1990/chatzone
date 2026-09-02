@@ -368,3 +368,28 @@ the first token in 0.56–0.90s; gpt-4.1-mini 0.93–1.39s; gpt-4.1-nano
 bot's model and only drops tools + the commerce prompt. Re-measure before
 proposing a model swap for latency (script pattern: `streamText` + `textStream`
 timing, see `lib/ai/fast-lane.ts` header).
+
+## A CTE over vector rows that is read twice gets materialized — and spills
+
+`match_products` selected a bot's rows (with their 6KB embeddings) into a
+`base` CTE used by four branches. Postgres materializes a CTE referenced more
+than once; 2.5k rows x 6KB overflow `work_mem`, so every call wrote ~40MB of
+temp files and re-read them four times (EXPLAIN: `temp written=1332`), and the
+FTS branch recomputed `to_tsvector` per row instead of using the GIN index.
+660ms warm, 4.3s cold. Write `with base as not materialized (` so each branch
+uses its own index — but then the vector branch picks HNSW, which with a
+`bot_id` post-filter returned 7 of 30 rows; order by `1 - (embedding <=> q)
+desc` to force the exact per-bot scan (~25ms at 2.5k rows). A function-level
+`set hnsw.iterative_scan` is refused for our role. Check any new matcher with
+`supabase db query --linked -f explain.sql` before shipping it.
+
+## The live function body may not match the migration files
+
+`pg_get_functiondef('public.match_products(uuid, vector, text, int, text,
+float)'::regprocedure)` showed the field-aware Verskis body (`loose_prefix`,
+`field_raw`) live on the SHARED matcher on 2026-09-02, although migration
+`20260717162814` defines the provider-neutral hybrid/title body and
+`supabase migration list` says everything is applied. Symptom on Woo bots:
+3-letter-prefix noise ("pledas" → acne patches, "kuponas" → backpacks). When
+ranking looks wrong, fingerprint the live definition before reading SQL files.
+Fix pending in migration `20260902210000` (also the perf fix above).

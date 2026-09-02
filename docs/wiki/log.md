@@ -328,3 +328,11 @@ child inside a rounded clip in the widget.
   pinned to `fra1` next to the DB. Decisions: no model swap (gpt-4.1 has the
   lowest ttft), gift cards stay a product search by design. See
   rag-and-knowledge, gotchas, conventions, spec 2026-09-02.
+- 2026-09-02 PERF (cont.) — Tool-step timing added to `searchCatalog`
+  (`[agent] search_products timing …`): a HomeByNB gift-card search spent
+  4.3s in `match_products` and 2.7s in the store's own Store API (cold WP).
+  Root cause of the RPC time: materialized CTE spilling to temp; the live body
+  is also the Verskis field-aware matcher, not the documented neutral one.
+  Migration `20260902210000` written and verified under a temp name (16/17
+  recall unchanged, 5-10x faster) — NOT applied yet: it changes live ranking
+  for all Woo/Shopify/Magento bots, so it waits for the owner's go. See gotchas.
