@@ -349,3 +349,22 @@ reputation. If a client still reports a missing invite: verify the mailbox
 exists (SMTP RCPT check), then have them search Microsoft quarantine — and just
 copy the invite link from `/owner/clients/[orgId]` and send it by another
 channel. `emailEnabled()` keys on `HOSTINGER_EMAIL_PASSWORD`.
+
+## Vercel functions and the database must share a region
+
+Until 2026-09-02 production functions ran in `iad1` (default) while the
+Supabase project is `eu-central-1`: the `x-vercel-id` header read
+`fra1::iad1::…`. Every PostgREST round trip crossed the Atlantic, and a chat
+turn makes ~5 sequential ones before the model is called. `vercel.json`
+`"regions": ["fra1"]` pins the project; Next's `preferredRegion` segment
+option is ignored for the Node runtime on Vercel, so don't reach for it.
+Check with `curl -sI https://www.loqara.com/api/... | grep x-vercel-id`.
+
+## A smaller model is not a faster first token
+
+Measured 2026-09-02 on the same ~2k-token prompt, 3 runs each: gpt-4.1 reached
+the first token in 0.56–0.90s; gpt-4.1-mini 0.93–1.39s; gpt-4.1-nano
+0.97–1.98s; gpt-4o-mini 0.58–1.88s. The chat fast lane therefore keeps the
+bot's model and only drops tools + the commerce prompt. Re-measure before
+proposing a model swap for latency (script pattern: `streamText` + `textStream`
+timing, see `lib/ai/fast-lane.ts` header).

@@ -11,7 +11,8 @@
 - Config holds: display/theme, `languages`/`content` ([i18n](languages-i18n.md)),
   `systemPrompt`(+`systemPromptId`), `persona`, `leadCapture`, `allowedDomains`
   ([widget](widget-and-embed.md)), `proactiveGreeting`, `commerce`
-  ([commerce](commerce.md)), `voice` ([voice](voice.md)).
+  ([commerce](commerce.md)), `voice` ([voice](voice.md)). `fastLane` (owner-only, no UI;
+  flipped in the DB — see [rag-and-knowledge](rag-and-knowledge.md#retrieval-libairetrievalts)).
 - `proactiveGreeting` is opt-in and stores a delay (0–30s), page/session
   frequency, up to five `{text}` variants per language, and independent bubble
   colors/font/radius. When enabled, the primary language must have at least one

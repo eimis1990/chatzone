@@ -321,3 +321,10 @@ leaked. Fixed with a `-webkit-mask-image` on the tile
 (`components/widget/QuickActionButtons.tsx`). Reuse that trick for any blurred
 child inside a rounded clip in the widget.
 - 2026-09-02 INGEST — Owner portal: Analytics tab on client bots (`/owner/clients/[orgId]/bots/[botId]/analytics`) reuses the client `AnalyticsSection`; tab hidden for demos. Decision: no separate owner analytics model yet. Also fixed stale wiki claim — `/app/analytics` is retired, rollup lives on Home. See owner-dashboard, client-portal.
+- 2026-09-02 PERF — Chat latency (branch `perf/chat-fast-lane`): retrieval now
+  overlaps the DB checks, independent reads batched, one `[chat] timing` line
+  per turn; per-bot `fastLane` flag (strong KB hit + no tool intent → no tools,
+  plain KB prompt, same model) enabled on the 3IMIS test copy only; functions
+  pinned to `fra1` next to the DB. Decisions: no model swap (gpt-4.1 has the
+  lowest ttft), gift cards stay a product search by design. See
+  rag-and-knowledge, gotchas, conventions, spec 2026-09-02.

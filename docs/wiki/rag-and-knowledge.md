@@ -105,6 +105,17 @@ How a bot's answers stay grounded in the client's own content.
   `/api/preview/chat`. Before this, "o kur ji yra?" pulled 5 privacy-policy
   noise chunks (top sim 0.276), so the old zero-match rewrite never fired —
   and preview had no rewrite at all (preview/live parity gap).
+- **Fast lane** (`lib/ai/fast-lane.ts`, per-bot `config.fastLane`, default off):
+  after retrieval, a top similarity ≥ 0.45 with no product/delivery/order/
+  discount intent (EN+LT stems) and no product cards on screen answers with NO
+  tools and the plain KB prompt (commerce block omitted) — same model. Applied
+  in both `/api/chat` and `/api/preview/chat`. Rollout: 3IMIS test copy first.
+  Spec: `docs/superpowers/specs/2026-09-02-chat-latency-fast-lane-design.md`.
+- **Timing log**: every model-backed turn logs one `[chat] timing bot=… lane=…
+  model=… pre=…ms retrievalWait=…ms embed=…ms match=…ms top=0.xx rewrote=0|1
+  ttft=…ms total=…ms toolCalls=N` line (`ndjsonChatResponse`, `commerce-tool.ts`).
+  Retrieval starts right after the bot resolves and overlaps the DB checks, so
+  `retrievalWait` is normally 0; the `rewrote=1` path adds ~1.4s sequentially.
 
 ## Eval harnesses (`scripts/`)
 

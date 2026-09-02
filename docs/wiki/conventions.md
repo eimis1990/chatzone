@@ -17,6 +17,8 @@ House rules that aren't obvious from the code.
   `vercel deploy --prod` via CLI is just the fallback. See `docs/DEPLOY.md`.
 - There is no staging gate; `main` is production. Verify (`tsc`, `npm test`,
   lint) before pushing.
+- **Functions run in `fra1`** (`vercel.json` `regions`), next to the Supabase
+  project in `eu-central-1`. Keep them colocated — see gotchas.
 
 ## Git
 
