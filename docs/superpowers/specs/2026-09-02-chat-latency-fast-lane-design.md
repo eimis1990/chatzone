@@ -45,14 +45,33 @@ We have no timing data, so which bucket dominates is a guess.
   the owner flips it in the bot config. Not exposed to clients.
 - Decision AFTER retrieval, no extra model call:
   `fastLane && topSimilarity >= FAST_LANE_SIMILARITY && !looksLikeProductIntent(message)`
-  → `gpt-4.1-mini`, **no tools**, same prompt otherwise. Anything else → the
-  exact path we ship today.
+  → **no tools**, the plain KB prompt (commerce block omitted), **same model**.
+  Anything else → the exact path we ship today.
+- Model swap dropped after measuring (2026-09-02, same prompt, 3 runs each):
+  gpt-4.1 ttft 0.56–0.90s; gpt-4.1-mini 0.93–1.39s; gpt-4.1-nano 0.97–1.98s;
+  gpt-4o-mini 0.58–1.88s. The big model is the fastest to first token, so the
+  lane only removes tools and the commerce prompt.
 - `looksLikeProductIntent`: cheap keyword/regex check in both languages
   (price, buy, order, product, "kiek kainuoja", "ar turite", etc.) plus "the
   conversation is currently showing product cards". Errs toward the slow lane.
 - `lane` appears in the timing log so we can see hit rate and misroutes.
 - Rollout: merge flag-off → enable on the 3IMIS test copy → run
   `scripts/eval-answers.mjs` → enable for HomeByNB → revert is a config edit.
+
+## Findings from the first measurements (local dev → prod DB, 2026-09-02)
+
+| phase | FAQ turn | note |
+|---|---|---|
+| pre (DB rounds before the model) | 0.6–1.1s | ~5 sequential PostgREST rounds at ~100ms each from Vilnius |
+| retrieval wait | 0ms | fully overlapped with the DB work after commit 1 |
+| rewrite path (elliptical follow-up) | +1.4s | gpt-4o-mini rewrite + second embed/match, sequential |
+| model ttft after pre | 1.0–1.5s | gpt-4.1, prompt-cached |
+| gift-card question | 12–14s ttft | 2 `search_products` calls; by design a product |
+
+**Region:** production functions run in `iad1` (x-vercel-id `fra1::iad1::…`)
+while the Supabase project is `eu-central-1`. Every DB round trip crosses the
+Atlantic. Pinning functions to `fra1` is the cheapest remaining win and is
+part of this branch (commit 3).
 
 ## Out of scope (decide after we have timing data)
 

@@ -257,6 +257,8 @@ export const botConfigFormSchema = z.object({
   roomVisualizerModel: z.enum(['nano-banana-pro', 'gpt-image-2']).default('nano-banana-pro'),
   model: z.string().default(DEFAULT_CHAT_MODEL),
   temperature: z.number().min(0).max(2).default(DEFAULT_TEMPERATURE),
+  // Owner-only, no UI: flipped in the bot config during rollout (lib/ai/fast-lane.ts).
+  fastLane: z.boolean().optional(),
   leadCapture: z
     .object({
       enabled: z.boolean().default(false),

@@ -7,6 +7,7 @@ import { retrieveContext, serviceRetrievalDeps } from '@/lib/ai/retrieval'
 import { buildMessages, contentFor, defaultLanguage, type ChatMessage } from '@/lib/ai/prompt'
 import { commerceEnabled, makeProductTools, ndjsonChatResponse, ndjsonText } from '@/lib/ai/commerce-tool'
 import { DEFAULT_CHAT_MODEL, DEFAULT_TEMPERATURE } from '@/lib/ai/chat-models'
+import { fastLaneConfig, pickLane } from '@/lib/ai/fast-lane'
 import { rewriteQuery } from '@/lib/ai/query-rewrite'
 import { searchCatalog } from '@/lib/products/search'
 import { createRateLimiter } from '@/lib/ratelimit'
@@ -311,8 +312,12 @@ export async function POST(req: Request) {
     })
   }
 
+  // Fast lane (per-bot flag): strong KB hit + no tool intent → no tools, plain
+  // KB prompt, same model. Otherwise the full path below is unchanged.
+  const lane = pickLane(bot.config, message, retrieval.topSimilarity, shownProducts)
+  const fast = lane === 'fast'
   const messages = buildMessages(
-    bot.config,
+    fast ? fastLaneConfig(bot.config) : bot.config,
     retrieval.chunks,
     history,
     message,
@@ -340,10 +345,11 @@ export async function POST(req: Request) {
     headers: baseHeaders,
     timing: {
       startedAt: t0,
-      label: `bot=${bot.id} model=${model} pre=${Math.round(tPre - t0)}ms retrievalWait=${retrievalWaitMs}ms ${retrievalLabel}`,
+      label: `bot=${bot.id} lane=${lane} model=${model} pre=${Math.round(tPre - t0)}ms retrievalWait=${retrievalWaitMs}ms ${retrievalLabel}`,
     },
-    tools: commerce
-      ? makeProductTools(
+    tools:
+      commerce && !fast
+        ? makeProductTools(
           bot.config,
           productSink,
           orderSink,

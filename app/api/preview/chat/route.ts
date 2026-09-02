@@ -10,6 +10,7 @@ import type { BotConfig } from '@/lib/types'
 import type { CommerceProduct, OrderStatus } from '@/lib/commerce/types'
 import { createRateLimiter } from '@/lib/ratelimit'
 import { DEFAULT_CHAT_MODEL, DEFAULT_TEMPERATURE } from '@/lib/ai/chat-models'
+import { fastLaneConfig, pickLane } from '@/lib/ai/fast-lane'
 import { rewriteQuery } from '@/lib/ai/query-rewrite'
 import { searchCatalog } from '@/lib/products/search'
 import { assignedComponents } from '@/lib/widget-components/availability'
@@ -21,6 +22,7 @@ export const maxDuration = 60
 const limiter = createRateLimiter({ capacity: 20, refillPerSec: 1 })
 
 export async function POST(req: Request) {
+  const t0 = performance.now()
   const json = (b: unknown, status = 200) =>
     new Response(JSON.stringify(b), { status, headers: { 'Content-Type': 'application/json' } })
 
@@ -87,8 +89,13 @@ export async function POST(req: Request) {
     .filter((m) => m.role === 'assistant' && m.products?.length)
     .at(-1)?.products as CommerceProduct[] | undefined
 
+  // Same fast-lane decision as the live route, so the owner can test the flag
+  // from the dashboard preview before enabling it for visitors.
+  const lane = pickLane(config, message, retrieval.topSimilarity, shownProducts)
+  const fast = lane === 'fast'
+  const model = config.model || DEFAULT_CHAT_MODEL
   const messages = buildMessages(
-    config,
+    fast ? fastLaneConfig(config) : config,
     retrieval.chunks,
     history as ChatMessage[],
     message,
@@ -100,11 +107,13 @@ export async function POST(req: Request) {
   const candidates = new Map<string, CommerceProduct>()
   const shownMap = new Map((shownProducts ?? []).map((p) => [p.id, p]))
 
-  return ndjsonChatResponse(openai(config.model || DEFAULT_CHAT_MODEL), messages, {
+  return ndjsonChatResponse(openai(model), messages, {
     temperature: config.temperature ?? DEFAULT_TEMPERATURE,
     headers: {},
-    tools: commerce
-      ? makeProductTools(
+    timing: { startedAt: t0, label: `preview bot=${botId} lane=${lane} model=${model}` },
+    tools:
+      commerce && !fast
+        ? makeProductTools(
           config,
           productSink,
           orderSink,

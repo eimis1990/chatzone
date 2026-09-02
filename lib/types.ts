@@ -291,6 +291,9 @@ export interface BotConfig {
   roomVisualizerModel?: 'nano-banana-pro' | 'gpt-image-2'
   model: string
   temperature: number
+  /** Owner-only rollout flag: strong knowledge-base hits with no tool intent
+   *  answer on a small tool-less model (see lib/ai/fast-lane.ts). Default off. */
+  fastLane?: boolean
   leadCapture: {
     enabled: boolean
     trigger: LeadTrigger
