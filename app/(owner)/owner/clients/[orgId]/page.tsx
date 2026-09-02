@@ -4,12 +4,12 @@ import {
   ArrowLeftIcon,
   BarChart3Icon,
   BotIcon,
-  Building2Icon,
   CalendarDaysIcon,
   KeyRoundIcon,
   MailIcon,
-  MessageCircleIcon,
   MessagesSquareIcon,
+  MoonIcon,
+  PanelTopOpenIcon,
   PlusIcon,
   Settings2Icon,
   SparklesIcon,
@@ -17,6 +17,7 @@ import {
 } from 'lucide-react'
 import { requireRole } from '@/lib/auth/guards'
 import { createServerClient } from '@/lib/supabase/server'
+import { getOrgAnalyticsRollup } from '@/lib/analytics/org-rollup'
 import { StatTileGrid, type StatTileData } from '@/components/client/charts/StatCard'
 import { LiveIndicator } from '@/components/LiveIndicator'
 import { Badge } from '@/components/ui/badge'
@@ -100,7 +101,7 @@ export default async function ClientDetailPage({
   const supabase = await createServerClient()
 
   // Owner sees all rows via RLS — parallel fetches
-  const [{ data: orgStat }, { data: bots }, { data: invites }, { data: setupOrders }] =
+  const [{ data: orgStat }, { data: bots }, { data: invites }, { data: setupOrders }, rollup] =
     await Promise.all([
       supabase
         .from('org_stats')
@@ -122,6 +123,8 @@ export default async function ClientDetailPage({
         .select('id, package, amount_cents, currency, status, created_at')
         .eq('org_id', orgId)
         .order('created_at', { ascending: false }),
+      // Same 30-day proof-of-value rollup the client sees on their Home.
+      getOrgAnalyticsRollup(supabase, orgId, 30),
     ])
 
   // Demo bots available to duplicate into this client (empty → picker hidden).
@@ -147,21 +150,38 @@ export default async function ClientDetailPage({
   const inviteRows = (invites ?? []) as Pick<Invite, 'id' | 'email' | 'status' | 'expires_at' | 'created_at'>[]
   const setupRows = (setupOrders ?? []) as SetupOrderRow[]
   const statTiles: StatTileData[] = [
-    { label: 'Bots', value: orgStat.bots, icon: BotIcon, accent: 'green' },
+    {
+      label: 'Widget opens',
+      value: rollup.totals.widgetOpens,
+      icon: PanelTopOpenIcon,
+      accent: 'violet',
+      sub: `${rollup.activeBots} of ${rollup.rows.length} ${rollup.rows.length === 1 ? 'bot' : 'bots'} had activity`,
+    },
     {
       label: 'Conversations',
-      value: orgStat.conversations,
-      icon: MessageCircleIcon,
+      value: rollup.totals.conversations,
+      icon: MessagesSquareIcon,
       accent: 'blue',
+      sub: `${rollup.chatStartRate}% of opens started a chat`,
     },
     {
-      label: 'Messages',
-      value: orgStat.messages,
-      icon: MessagesSquareIcon,
-      accent: 'violet',
+      label: 'Leads captured',
+      value: rollup.totals.leads,
+      icon: UserRoundCheckIcon,
+      accent: 'green',
+      sub: `${rollup.leadCaptureRate}% of conversations became leads`,
     },
-    { label: 'Leads', value: orgStat.leads, icon: UserRoundCheckIcon, accent: 'amber' },
+    {
+      label: 'After hours',
+      value: `${rollup.afterHoursRate}%`,
+      icon: MoonIcon,
+      accent: 'amber',
+      sub: `${rollup.totals.afterHours} conversations outside working hours`,
+    },
   ]
+  // Header avatar: the client's bot logo when one is set, else an org monogram.
+  const orgAvatar =
+    botRows.map((b) => b.config.avatarUrl || b.config.botAvatarUrl).find(Boolean) ?? null
   const demoOptions = (demoBots ?? []).map((bot) => ({ id: bot.id, name: bot.name }))
 
   return (
@@ -179,9 +199,18 @@ export default async function ClientDetailPage({
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex min-w-0 items-center gap-3">
-          <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-            <Building2Icon className="size-6" aria-hidden="true" />
-          </span>
+          {orgAvatar ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={orgAvatar}
+              alt=""
+              className="size-12 shrink-0 rounded-xl object-cover ring-1 ring-black/5"
+            />
+          ) : (
+            <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-lg font-bold text-primary">
+              {orgStat.org_name.charAt(0).toUpperCase()}
+            </span>
+          )}
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
               <h1 className="truncate text-2xl font-semibold">{orgStat.org_name}</h1>
@@ -203,8 +232,16 @@ export default async function ClientDetailPage({
         />
       </div>
 
-      {/* Compact account overview */}
-      <StatTileGrid stats={statTiles} />
+      {/* Proof-of-value snapshot — same numbers the client sees on Home */}
+      <div className="flex flex-col gap-3">
+        <div className="flex items-baseline justify-between">
+          <h2 className="text-sm font-semibold">Last 30 days</h2>
+          <span className="text-xs text-muted-foreground">
+            {orgStat.conversations} conversations · {orgStat.messages} messages all time
+          </span>
+        </div>
+        <StatTileGrid stats={statTiles} />
+      </div>
 
       {/* Bots list */}
       <Card>
