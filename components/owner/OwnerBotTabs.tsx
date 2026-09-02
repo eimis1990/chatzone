@@ -2,10 +2,16 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { SlidersHorizontalIcon, DatabaseIcon, Code2Icon, BlocksIcon } from 'lucide-react'
+import {
+  SlidersHorizontalIcon,
+  DatabaseIcon,
+  Code2Icon,
+  BlocksIcon,
+  BarChart3Icon,
+} from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-/** Configure / Knowledge / Embed tabs for the owner editing a client's bot. */
+/** Configure / Knowledge / Components / Embed / Analytics tabs for the owner editing a client's bot. */
 export function OwnerBotTabs({
   orgId,
   botId,
@@ -23,6 +29,8 @@ export function OwnerBotTabs({
     { label: 'Knowledge', href: `${base}/knowledge`, icon: DatabaseIcon },
     { label: 'Components', href: `${base}/components`, icon: BlocksIcon },
     { label: 'Embed', href: `${base}/embed`, icon: Code2Icon },
+    // ponytail: demos (base override) get preview traffic only — no analytics route there.
+    ...(baseProp ? [] : [{ label: 'Analytics', href: `${base}/analytics`, icon: BarChart3Icon }]),
   ]
 
   return (

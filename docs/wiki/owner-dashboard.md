@@ -60,6 +60,18 @@ A tombstone row (`demo_transfers`, migration `20260803090000`) keeps a
 `/owner/clients/[orgId]/bots/[botId]/configure`. After transfer the bot counts
 in owner stats automatically (it left the `is_demo` org).
 
+## Client bot editor (done-for-you)
+
+`/owner/clients/[orgId]/bots/[botId]/{configure,knowledge,components,embed,analytics}`
+share `OwnerBotTabs` (`components/owner/OwnerBotTabs.tsx`) and the amber
+"editing as owner" banner layout. **Analytics** reuses the client's per-bot
+`AnalyticsSection` verbatim (aggregates only — no transcripts), loaded via the
+service client with an `org_id === orgId` check. The tab is hidden when
+`OwnerBotTabs` gets a `base` override (the demos editor has no analytics route;
+demo bots only carry preview traffic). Decision 2026-09-02: no separate
+owner-side analytics model or cross-client dashboard until several paying
+clients exist; per-client cost/token spend belongs in billing, not here.
+
 ## Demo presentation sharing
 
 `Present` remains an owner-authenticated preview at `/present/[botId]`. `Share`

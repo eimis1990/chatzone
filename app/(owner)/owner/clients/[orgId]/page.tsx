@@ -2,6 +2,7 @@ import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import {
   ArrowLeftIcon,
+  BarChart3Icon,
   BotIcon,
   Building2Icon,
   CalendarDaysIcon,
@@ -43,7 +44,7 @@ import { DuplicateDemoBotForm } from '@/components/owner/DuplicateDemoBotForm'
 import { CreateBotDialog } from '@/components/client/CreateBotDialog'
 import { createBotForOrg, createBotFromDemo } from './actions'
 import { SETUP_PACKAGES } from '@/lib/setup-packages'
-import { cn } from '@/lib/utils'
+import { cn, readableTextColor } from '@/lib/utils'
 import type { Bot, Invite } from '@/lib/types'
 
 interface SetupOrderRow {
@@ -248,50 +249,95 @@ export default async function ClientDetailPage({
             </Empty>
           </CardContent>
         ) : (
-          <CardContent className="px-0">
-            <div className="divide-y border-y">
-              {botRows.map((bot) => (
+          <CardContent className="flex flex-col gap-3">
+            {botRows.map((bot) => {
+              const lang = bot.config.defaultLanguage ?? 'en'
+              const greeting =
+                bot.config.content?.[lang]?.greeting ?? bot.config.content?.en?.greeting ?? ''
+              const avatar = bot.config.avatarUrl || bot.config.botAvatarUrl
+              const brand = bot.config.theme?.primaryColor ?? '#e97634'
+              const isActive = bot.status === 'active'
+              return (
                 <div
                   key={bot.id}
-                  className="flex flex-col gap-4 px-4 py-4 transition-colors hover:bg-muted/40 sm:flex-row sm:items-center sm:px-6"
+                  className={cn(
+                    'relative flex flex-col gap-4 overflow-hidden rounded-2xl border p-4 transition-all hover:-translate-y-px hover:shadow-md sm:flex-row sm:items-center sm:p-5',
+                    isActive ? 'bg-card' : 'bg-muted',
+                  )}
                 >
-                  <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                    <BotIcon className="size-5" aria-hidden="true" />
-                  </span>
-                  <div className="flex min-w-0 flex-1 flex-col gap-1">
-                    <p className="truncate font-medium">{bot.name}</p>
-                    <div className="flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground">
-                      <KeyRoundIcon className="size-3.5 shrink-0" aria-hidden="true" />
-                      <span className="truncate font-mono" title={bot.public_key}>
-                        {bot.public_key}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="flex w-full flex-wrap items-center gap-x-3 gap-y-2 sm:w-auto sm:justify-end">
-                    <div className="flex flex-wrap items-center gap-3">
-                      <LiveIndicator lastSeenAt={bot.last_seen_at} />
-                      <Badge variant={bot.status === 'active' ? 'default' : 'secondary'}>
-                        {bot.status === 'active' ? 'Active' : 'Paused'}
+                  {isActive && (
+                    <div
+                      aria-hidden="true"
+                      className="pointer-events-none absolute -right-8 -top-8 size-28 rounded-full opacity-20 blur-2xl"
+                      style={{ backgroundColor: brand }}
+                    />
+                  )}
+                  {avatar ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={avatar}
+                      alt=""
+                      className="relative size-12 shrink-0 rounded-xl object-cover ring-1 ring-black/5"
+                    />
+                  ) : (
+                    <span
+                      className="relative flex size-12 shrink-0 items-center justify-center rounded-xl text-lg font-bold"
+                      style={{ backgroundColor: `${brand}1a`, color: brand }}
+                    >
+                      {bot.name.charAt(0).toUpperCase()}
+                    </span>
+                  )}
+                  <div className="relative flex min-w-0 flex-1 flex-col gap-1.5">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="truncate text-base font-semibold">{bot.name}</p>
+                      <Badge
+                        variant={isActive ? 'default' : 'secondary'}
+                        style={
+                          isActive
+                            ? { backgroundColor: brand, color: readableTextColor(brand) }
+                            : undefined
+                        }
+                      >
+                        {isActive ? 'Active' : 'Paused'}
                       </Badge>
-                      <span className="hidden items-center gap-1.5 text-xs text-muted-foreground md:inline-flex">
+                      <LiveIndicator lastSeenAt={bot.last_seen_at} />
+                    </div>
+                    {greeting && (
+                      <p className="line-clamp-1 text-sm text-muted-foreground">{greeting}</p>
+                    )}
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                      <span
+                        className="inline-flex items-center gap-1.5 rounded-md bg-muted px-1.5 py-0.5 font-mono"
+                        title={bot.public_key}
+                      >
+                        <KeyRoundIcon className="size-3" aria-hidden="true" />
+                        {bot.public_key.slice(0, 8)}…{bot.public_key.slice(-4)}
+                      </span>
+                      <span className="inline-flex items-center gap-1">
                         <CalendarDaysIcon className="size-3.5" aria-hidden="true" />
                         Created {formatDistanceToNow(bot.created_at)}
                       </span>
                     </div>
+                  </div>
+                  <div className="relative flex shrink-0 gap-2 sm:flex-col md:flex-row">
+                    <Link
+                      href={`/owner/clients/${orgId}/bots/${bot.id}/analytics`}
+                      className={cn(buttonVariants({ variant: 'outline' }), 'h-10 flex-1 sm:flex-none')}
+                    >
+                      <BarChart3Icon data-icon="inline-start" />
+                      Analytics
+                    </Link>
                     <Link
                       href={`/owner/clients/${orgId}/bots/${bot.id}/configure`}
-                      className={cn(
-                        buttonVariants({ variant: 'outline' }),
-                        'ml-auto h-10 w-full sm:ml-0 sm:w-auto',
-                      )}
+                      className={cn(buttonVariants(), 'h-10 flex-1 sm:flex-none')}
                     >
                       <Settings2Icon data-icon="inline-start" />
                       Configure
                     </Link>
                   </div>
                 </div>
-              ))}
-            </div>
+              )
+            })}
           </CardContent>
         )}
 

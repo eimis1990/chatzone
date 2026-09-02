@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import { ArrowLeftIcon } from 'lucide-react'
 import { requireRole } from '@/lib/auth/guards'
 import { createServiceClient } from '@/lib/supabase/service'
 
@@ -33,14 +34,19 @@ export default async function OwnerBotEditorLayout({
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <div className="flex shrink-0 flex-wrap items-center gap-x-2 gap-y-1 border-b border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-900">
-        <span>
-          Editing <strong>{bot.name}</strong> for <strong>{org?.name ?? 'client'}</strong> as the
-          platform owner — changes go live on save.
-        </span>
-        <Link href={`/owner/clients/${orgId}`} className="font-medium underline">
-          ← Back to client
+      <div className="flex shrink-0 flex-wrap items-center gap-x-3 gap-y-1 bg-primary px-4 py-2 text-sm text-primary-foreground">
+        <Link
+          href={`/owner/clients/${orgId}`}
+          className="inline-flex items-center gap-1.5 rounded-md bg-white/15 px-2.5 py-1 font-medium transition-colors hover:bg-white/25"
+        >
+          <ArrowLeftIcon className="size-4" aria-hidden="true" />
+          Back to client
         </Link>
+        <span className="text-primary-foreground/90">
+          Editing <strong className="text-primary-foreground">{bot.name}</strong> for{' '}
+          <strong className="text-primary-foreground">{org?.name ?? 'client'}</strong> as the platform
+          owner — changes go live on save.
+        </span>
       </div>
       <div className="min-h-0 flex-1">{children}</div>
     </div>

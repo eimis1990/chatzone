@@ -37,21 +37,18 @@
 
 ## Organization analytics
 
-- `/app/analytics` is the cross-bot quick view; per-bot Analytics routes remain
-  the detailed drill-down. The server page scopes conversations, leads, and
-  widget events to the user's organization and selected date window
-  (`app/(client)/app/analytics/page.tsx:123-208`).
-- The page aggregates widget opens, conversations, leads, link clicks, and
-  weighted after-hours counts before rendering. Zero-denominator rates are `0%`,
-  and bots with no tracked activity get an explicit empty comparison state
-  (`app/(client)/app/analytics/page.tsx:210-253`, `:337-343`).
-- Visual order is summary KPI cards → grouped cross-bot activity chart →
-  conversion snapshot → precise clickable table. The page title/subtitle and
-  date-range control stay consistent with the other client screens
-  (`app/(client)/app/analytics/page.tsx:263-317`, `:319-475`).
+- The standalone `/app/analytics` screen is RETIRED (commit `e71f1a8`); the
+  cross-bot rollup now renders inline on Home (`app/(client)/app/page.tsx`,
+  `rollup` block) using `getOrgAnalyticsRollup`
+  (`lib/analytics/org-rollup.ts`) — one row per bot, totals, chat-start /
+  lead-capture / after-hours rates, 30-day window. Per-bot Analytics routes
+  (`components/bot-views/AnalyticsSection.tsx`) remain the detailed drill-down
+  and are shared with the owner portal (owner's own bot + client bots).
+- Zero-denominator rates are `0%`; bots with no tracked activity get an explicit
+  empty comparison state.
 - The grouped Recharts view uses semantic theme colors, exact-value tooltips,
-  a visible legend, and a text summary for assistive technology; the table is
-  the exact-data fallback (`components/client/charts/OrgBotComparisonChart.tsx:22-112`).
+  a visible legend, and a text summary for assistive technology
+  (`components/client/charts/OrgBotComparisonChart.tsx`).
 
 ## Settings workspace
 

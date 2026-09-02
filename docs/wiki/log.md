@@ -320,3 +320,4 @@ Also: quick-action tiles showed square corners on iOS — WebKit doesn't clip a
 leaked. Fixed with a `-webkit-mask-image` on the tile
 (`components/widget/QuickActionButtons.tsx`). Reuse that trick for any blurred
 child inside a rounded clip in the widget.
+- 2026-09-02 INGEST — Owner portal: Analytics tab on client bots (`/owner/clients/[orgId]/bots/[botId]/analytics`) reuses the client `AnalyticsSection`; tab hidden for demos. Decision: no separate owner analytics model yet. Also fixed stale wiki claim — `/app/analytics` is retired, rollup lives on Home. See owner-dashboard, client-portal.
