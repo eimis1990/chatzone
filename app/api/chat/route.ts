@@ -44,6 +44,7 @@ export async function OPTIONS(req: Request) {
 }
 
 export async function POST(req: Request) {
+  const t0 = performance.now()
   const origin = req.headers.get('origin')
   const cors = corsHeaders(origin)
   const json = (body: unknown, status = 200, extraHeaders: Record<string, string> = {}) =>
@@ -73,11 +74,49 @@ export async function POST(req: Request) {
       ? parsed.data.language
       : defaultLanguage(bot.config)
 
-  // Origin allowlist + active visitor block + rate limit.
   if (!isOriginAllowed(origin, bot.config.allowedDomains ?? [])) {
     return json({ error: 'Origin not allowed' }, 403)
   }
-  const activeBlock = await getActiveVisitorBlock(svc, bot.id, visitorId)
+
+  // Retrieval (embedding + hybrid search) only needs the bot and the message,
+  // so it runs from here while the DB checks below happen. Awaited where it is
+  // used; a blocked/rate-limited/handoff turn wastes one embedding call. The
+  // detached catch only prevents an unhandled-rejection warning on early
+  // returns — the real `await` below still surfaces the error.
+  const retrievalPromise = retrieveContext(bot.id, message, {}, serviceRetrievalDeps(svc))
+  retrievalPromise.catch(() => {})
+
+  // Independent reads in one round: active block, conversation ownership,
+  // recent visitor turns (abuse check), history, component folders. History is
+  // read BEFORE the user turn is inserted, so it needs no trailing slice.
+  const [activeBlock, existing, recentUserMessages, historyRows, allowedComponents, overLimit] =
+    await Promise.all([
+      getActiveVisitorBlock(svc, bot.id, visitorId),
+      conversationId
+        ? svc
+            .from('conversations')
+            .select('id, handoff_status, had_fallback')
+            .eq('id', conversationId)
+            .eq('bot_id', bot.id)
+            .eq('visitor_id', visitorId)
+            .single<{ id: string; handoff_status: HandoffStatus | null; had_fallback: boolean | null }>()
+            .then((r) => r.data)
+        : null,
+      loadRecentVisitorMessages(svc, bot.id, visitorId),
+      conversationId
+        ? svc
+            .from('messages')
+            .select('role, content, products')
+            .eq('conversation_id', conversationId)
+            .order('created_at', { ascending: true })
+            .limit(40)
+            .then((r) => r.data ?? [])
+        : [],
+      assignedComponents(svc, bot.config.commerce?.provider ?? null),
+      // Only consulted when this turn opens a new conversation.
+      conversationId ? false : isOverConversationLimit(svc, bot.org_id),
+    ])
+
   if (activeBlock) {
     return json(
       { error: 'Visitor blocked', code: 'visitor_blocked', blockedUntil: activeBlock.expiresAt },
@@ -90,27 +129,16 @@ export async function POST(req: Request) {
   }
 
   // Find or create the conversation, carrying its handoff state.
-  let convId = conversationId ?? null
-  let handoffStatus: HandoffStatus = 'bot'
-  let priorHadFallback = false
-  if (convId) {
-    const { data: existing } = await svc
-      .from('conversations')
-      .select('id, handoff_status, had_fallback')
-      .eq('id', convId)
-      .eq('bot_id', bot.id)
-      .eq('visitor_id', visitorId)
-      .single<{ id: string; handoff_status: HandoffStatus | null; had_fallback: boolean | null }>()
-    if (!existing) convId = null
-    else {
-      handoffStatus = existing.handoff_status ?? 'bot'
-      priorHadFallback = Boolean(existing.had_fallback)
-    }
-  }
+  // An id that fails the bot+visitor ownership check is treated as absent —
+  // and its prefetched history is discarded with it.
+  let convId = existing ? conversationId! : null
+  const handoffStatus: HandoffStatus = existing?.handoff_status ?? 'bot'
+  const priorHadFallback = Boolean(existing?.had_fallback)
+  const ownedHistoryRows = existing ? historyRows : []
   if (!convId) {
     // Hard block: once the org is over its monthly conversation pool, new
     // conversations get an offline message and the model is never called.
-    if (await isOverConversationLimit(svc, bot.org_id)) {
+    if (overLimit || (conversationId && (await isOverConversationLimit(svc, bot.org_id)))) {
       return ndjsonText(OFFLINE_MESSAGE[lang] ?? OFFLINE_MESSAGE.en, { ...cors })
     }
     const { data: created } = await svc
@@ -126,14 +154,15 @@ export async function POST(req: Request) {
   // Assess across this visitor's recent turns before adding the current one.
   // The triggering message is still persisted for audit, but the model and
   // human-handoff path never receive another turn after a block decision.
-  const recentUserMessages = await loadRecentVisitorMessages(svc, bot.id, visitorId)
   const abuse = assessVisitorAbuse(message, recentUserMessages)
-  const { data: userMessageRow } = await svc
-    .from('messages')
-    .insert({ conversation_id: convId, role: 'user', content: message })
-    .select('id')
-    .single<{ id: string }>()
-  await svc.from('conversations').update({ last_message_at: new Date().toISOString() }).eq('id', convId)
+  const [{ data: userMessageRow }] = await Promise.all([
+    svc
+      .from('messages')
+      .insert({ conversation_id: convId, role: 'user', content: message })
+      .select('id')
+      .single<{ id: string }>(),
+    svc.from('conversations').update({ last_message_at: new Date().toISOString() }).eq('id', convId),
+  ])
 
   const handoffHeaders = { ...cors, 'x-conversation-id': convId }
 
@@ -214,38 +243,39 @@ export async function POST(req: Request) {
     return ndjsonText(ack, { ...handoffHeaders, 'x-handoff': 'requested' })
   }
 
-  // Load recent history (excluding the just-inserted message handled by buildMessages tail).
-  const { data: historyRows } = await svc
-    .from('messages')
-    .select('role, content, products')
-    .eq('conversation_id', convId)
-    .order('created_at', { ascending: true })
-    .limit(40)
-  const history: ChatMessage[] = (historyRows ?? [])
-    .slice(0, -1) // drop the user message we just inserted; buildMessages adds it as the tail
-    .map((m) => ({ role: m.role as ChatMessage['role'], content: m.content as string }))
+  // History was read before this turn was inserted; buildMessages adds the
+  // current message as the tail.
+  const history: ChatMessage[] = ownedHistoryRows.map((m) => ({
+    role: m.role as ChatMessage['role'],
+    content: m.content as string,
+  }))
   // The cards the shopper is currently looking at: the last assistant turn that
   // displayed products. Injected into the prompt so "the first one" resolves.
-  const shownProducts =
-    (historyRows ?? [])
-      .filter((m) => m.role === 'assistant' && (m.products as CommerceProduct[] | null)?.length)
-      .at(-1)?.products as CommerceProduct[] | undefined
+  const shownProducts = ownedHistoryRows
+    .filter((m) => m.role === 'assistant' && (m.products as CommerceProduct[] | null)?.length)
+    .at(-1)?.products as CommerceProduct[] | undefined
 
-  // Retrieve grounding context; on a miss, retry once with a condensed standalone
-  // query (visitors write elliptical follow-ups like "o kiek kainuoja?" that
-  // embed poorly on their own).
-  let retrieval = await retrieveContext(bot.id, message, {}, serviceRetrievalDeps(svc))
+  // Grounding context started at the top of the request; on a miss, retry once
+  // with a condensed standalone query (visitors write elliptical follow-ups
+  // like "o kiek kainuoja?" that embed poorly on their own).
+  const tPre = performance.now()
+  let retrieval = await retrievalPromise
+  let rewrote = false
   if (retrieval.isLowConfidence) {
+    rewrote = true
     const rewritten = await rewriteQuery(message, history)
     if (rewritten) {
       const retry = await retrieveContext(bot.id, rewritten, {}, serviceRetrievalDeps(svc))
       if (!retry.isLowConfidence) retrieval = retry
     }
   }
+  // How long the model call was held up waiting on retrieval beyond the DB work.
+  const retrievalWaitMs = Math.round(performance.now() - tPre)
+  const retrievalLabel =
+    `embed=${retrieval.timings.embedMs}ms match=${retrieval.timings.matchMs}ms ` +
+    `top=${retrieval.topSimilarity.toFixed(2)} rewrote=${rewrote ? 1 : 0}`
 
   const commerce = commerceEnabled(bot.config)
-  // Component-library folders: what this provider (+ core) may render.
-  const allowedComponents = await assignedComponents(svc, bot.config.commerce?.provider ?? null)
   const baseHeaders = { ...handoffHeaders, 'x-handoff': 'bot' }
 
   // Weak retrieval with no product search → fallback + lead-capture signal.
@@ -304,9 +334,14 @@ export async function POST(req: Request) {
   // when the card was first shown — fine within a live session.
   const shownMap = new Map((shownProducts ?? []).map((p) => [p.id, p]))
 
-  return ndjsonChatResponse(openai(bot.config.model || DEFAULT_CHAT_MODEL), messages, {
+  const model = bot.config.model || DEFAULT_CHAT_MODEL
+  return ndjsonChatResponse(openai(model), messages, {
     temperature: bot.config.temperature ?? DEFAULT_TEMPERATURE,
     headers: baseHeaders,
+    timing: {
+      startedAt: t0,
+      label: `bot=${bot.id} model=${model} pre=${Math.round(tPre - t0)}ms retrievalWait=${retrievalWaitMs}ms ${retrievalLabel}`,
+    },
     tools: commerce
       ? makeProductTools(
           bot.config,

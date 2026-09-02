@@ -40,6 +40,10 @@ export interface RetrievalResult {
   isWeak: boolean
   /** Empty OR nothing scored convincingly — the query-rewrite-retry trigger. */
   isLowConfidence: boolean
+  /** Best cosine similarity among matches (0 when empty) — for latency/quality logs. */
+  topSimilarity: number
+  /** Wall-clock split of the two network hops, for the `[chat] timing` log. */
+  timings: { embedMs: number; matchMs: number }
 }
 
 /** Embeds the query and fetches the most similar chunks for a bot. */
@@ -52,8 +56,11 @@ export async function retrieveContext(
   const k = opts.k ?? DEFAULT_K
   const minSimilarity = opts.minSimilarity ?? DEFAULT_MIN_SIMILARITY
 
+  const t0 = performance.now()
   const embedding = await deps.embedQuery(query)
+  const t1 = performance.now()
   const matched = await deps.matchChunks(botId, embedding, query, k, minSimilarity)
+  const t2 = performance.now()
 
   const topSimilarity = matched.reduce((max, m) => Math.max(max, m.similarity ?? 0), 0)
   return {
@@ -61,6 +68,8 @@ export async function retrieveContext(
     chunks: matched.map((m) => ({ content: m.content, source_id: m.source_id })),
     isWeak: matched.length === 0,
     isLowConfidence: matched.length === 0 || topSimilarity < LOW_CONFIDENCE_SIMILARITY,
+    topSimilarity,
+    timings: { embedMs: Math.round(t1 - t0), matchMs: Math.round(t2 - t1) },
   }
 }
 

@@ -445,6 +445,9 @@ interface NdjsonOptions {
   /** Shown (and persisted) if the stream dies mid-generation — a blank reply
    *  reads as the bot silently ignoring the visitor. */
   errorText?: string
+  /** When set, one `[chat] timing` line is logged per request: the caller's
+   *  label (pre-model phases) + time-to-first-token, total and tool calls. */
+  timing?: { startedAt: number; label: string }
 }
 
 /**
@@ -482,6 +485,8 @@ export function ndjsonChatResponse(
     async start(controller) {
       const line = (obj: unknown) => controller.enqueue(encoder.encode(JSON.stringify(obj) + '\n'))
       let fullText = ''
+      let firstTokenAt = 0
+      let toolCalls = 0
       let emittedProductKey = ''
       const emitProductsIfChanged = () => {
         if (opts.suppressProducts) return
@@ -498,9 +503,12 @@ export function ndjsonChatResponse(
             const delta = (part as { text?: string; textDelta?: string }).text ??
               (part as { textDelta?: string }).textDelta ?? ''
             if (delta) {
+              if (!firstTokenAt) firstTokenAt = performance.now()
               fullText += delta
               line({ t: 'text', v: delta })
             }
+          } else if (part.type === 'tool-call') {
+            toolCalls++
           }
           // display_products mutates productSink while the tool result streams.
           // Send cards immediately instead of waiting for the final prose.
@@ -544,6 +552,13 @@ export function ndjsonChatResponse(
             // it silently drops the turn from the transcript, so log it.
             console.error('[agent] failed to persist assistant message:', err)
           }
+        }
+        if (opts.timing) {
+          const now = performance.now()
+          const ttft = firstTokenAt ? Math.round(firstTokenAt - opts.timing.startedAt) : -1
+          console.log(
+            `[chat] timing ${opts.timing.label} ttft=${ttft}ms total=${Math.round(now - opts.timing.startedAt)}ms toolCalls=${toolCalls}`,
+          )
         }
         controller.close()
       }
