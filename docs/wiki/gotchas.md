@@ -392,4 +392,4 @@ float)'::regprocedure)` showed the field-aware Verskis body (`loose_prefix`,
 `supabase migration list` says everything is applied. Symptom on Woo bots:
 3-letter-prefix noise ("pledas" → acne patches, "kuponas" → backpacks). When
 ranking looks wrong, fingerprint the live definition before reading SQL files.
-Fix pending in migration `20260902210000` (also the perf fix above).
+Fixed by migration `20260902210000` (applied 2026-09-02, also the perf fix above).

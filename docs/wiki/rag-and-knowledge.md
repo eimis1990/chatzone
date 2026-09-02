@@ -109,7 +109,8 @@ How a bot's answers stay grounded in the client's own content.
   after retrieval, a top similarity ≥ 0.40 with no product/delivery/order/
   discount intent (EN+LT stems) and no product cards on screen answers with NO
   tools and the plain KB prompt (commerce block omitted) — same model. Applied
-  in both `/api/chat` and `/api/preview/chat`. Rollout: 3IMIS test copy first.
+  in both `/api/chat` and `/api/preview/chat`. Enabled on the 3IMIS test copy and
+  on the live HomeByNB bot since 2026-09-02 (revert = set `fastLane: false`).
   Spec: `docs/superpowers/specs/2026-09-02-chat-latency-fast-lane-design.md`.
 - **Timing log**: every model-backed turn logs one `[chat] timing bot=… lane=…
   model=… pre=…ms retrievalWait=…ms embed=…ms match=…ms top=0.xx rewrote=0|1

@@ -336,3 +336,10 @@ child inside a rounded clip in the widget.
   Migration `20260902210000` written and verified under a temp name (16/17
   recall unchanged, 5-10x faster) — NOT applied yet: it changes live ranking
   for all Woo/Shopify/Magento bots, so it waits for the owner's go. See gotchas.
+- 2026-09-02 SHIP — `perf/chat-fast-lane` merged to main and deployed; functions
+  now serve from `fra1` (x-vercel-id `fra1::fra1`). Migration `20260902210000`
+  applied: `match_products` 150ms warm (was 0.7s warm / 4.3s cold) and back to
+  the provider-neutral body. `fastLane` enabled on the live HomeByNB bot too.
+  Live warm probes: returns 1.3s to first token (was 3.5–4s), face cream for men
+  3.7s (was 11–12s), gift cards 2.4s (was 10–15s). First request after a deploy
+  is a cold start (7s) — expected.
