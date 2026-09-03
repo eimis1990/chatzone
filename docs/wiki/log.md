@@ -343,3 +343,6 @@ child inside a rounded clip in the widget.
   Live warm probes: returns 1.3s to first token (was 3.5–4s), face cream for men
   3.7s (was 11–12s), gift cards 2.4s (was 10–15s). First request after a deploy
   is a cold start (7s) — expected.
+- 2026-09-03 INGEST — Owner Clients cards now show Conversations / Prod. suggestions / Prod. clicks; `org_stats` view extended (migration `20260903080000`, applied to prod). Gotcha: replace-view may only append columns. See owner-dashboard, gotchas.
+- 2026-09-03 INGEST — Client Home tiles: Leads/Link clicks → Suggested products/Product clicks; `getOrgAnalyticsRollup` now counts `messages.products` per bot (PostgREST embedded filter on `conversations!inner`) and exposes `productClickRate`. Owner Clients card labels shortened to Suggestions/Clicks. See client-portal.
+

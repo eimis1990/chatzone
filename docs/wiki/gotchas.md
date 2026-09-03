@@ -393,3 +393,12 @@ float)'::regprocedure)` showed the field-aware Verskis body (`loose_prefix`,
 3-letter-prefix noise ("pledas" → acne patches, "kuponas" → backpacks). When
 ranking looks wrong, fingerprint the live definition before reading SQL files.
 Fixed by migration `20260902210000` (applied 2026-09-02, also the perf fix above).
+
+## `create or replace view` can only APPEND columns
+
+Postgres refuses to rename/reorder existing view columns in place
+(`cannot change name of view column "x" to "y"`, SQLSTATE 42P16). When
+extending a view like `org_stats`, add the new columns **after** the last
+existing one, or `drop view` + recreate (which also drops dependent grants).
+Bit us on `20260903080000_org_stats_product_counts.sql`.
+

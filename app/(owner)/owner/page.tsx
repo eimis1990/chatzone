@@ -22,6 +22,8 @@ interface OrgStatRow {
   conversations: number
   messages: number
   leads: number
+  product_suggestions: number
+  product_clicks: number
   last_activity_at: string | null
 }
 

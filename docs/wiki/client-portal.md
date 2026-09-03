@@ -41,7 +41,10 @@
   cross-bot rollup now renders inline on Home (`app/(client)/app/page.tsx`,
   `rollup` block) using `getOrgAnalyticsRollup`
   (`lib/analytics/org-rollup.ts`) — one row per bot, totals, chat-start /
-  lead-capture / after-hours rates, 30-day window. Per-bot Analytics routes
+  lead-capture / product-click / after-hours rates, 30-day window. Home tiles:
+  Widget opens · Conversations · Suggestions · Product clicks (leads and
+  link clicks live in the conversion snapshot below). Suggested products come
+  from `messages.products` via a `conversations!inner(bot_id)` embedded filter. Per-bot Analytics routes
   (`components/bot-views/AnalyticsSection.tsx`) remain the detailed drill-down
   and are shared with the owner portal (owner's own bot + client bots).
 - Zero-denominator rates are `0%`; bots with no tracked activity get an explicit

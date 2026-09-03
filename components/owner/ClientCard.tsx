@@ -1,9 +1,9 @@
 import Link from 'next/link'
 import {
   ArrowUpRightIcon,
-  BotIcon,
   MessagesSquareIcon,
-  SparklesIcon,
+  MousePointerClickIcon,
+  ShoppingBagIcon,
   type LucideIcon,
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
@@ -17,6 +17,8 @@ export interface ClientCardOrg {
   bots: number
   conversations: number
   leads: number
+  product_suggestions: number
+  product_clicks: number
   last_activity_at: string | null
 }
 
@@ -106,9 +108,9 @@ export function ClientCard({
         </div>
 
         <div className="relative mt-4 grid grid-cols-3 gap-2">
-          <StatTile icon={BotIcon} label="Bots" value={org.bots} />
-          <StatTile icon={MessagesSquareIcon} label="Chats" value={org.conversations} />
-          <StatTile icon={SparklesIcon} label="Leads" value={org.leads} />
+          <StatTile icon={MessagesSquareIcon} label="Conversations" value={org.conversations} />
+          <StatTile icon={ShoppingBagIcon} label="Suggestions" value={org.product_suggestions} />
+          <StatTile icon={MousePointerClickIcon} label="Clicks" value={org.product_clicks} />
         </div>
       </div>
     </Link>

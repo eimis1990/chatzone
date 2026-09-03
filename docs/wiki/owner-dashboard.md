@@ -32,6 +32,10 @@ The six stat cards and the earnings card load in one `Promise.all`
 
 - **Clients / Active bots / Conversations / Messages / Leads** — the `owner_stats`
   view (`supabase/migrations/0003_rpc.sql:35`), `security_invoker`.
+- Client cards (`components/owner/ClientCard.tsx`) show Conversations / Prod.
+  suggestions / Prod. clicks from `org_stats`, which gained `product_suggestions`
+  (sum of `jsonb_array_length(messages.products)`) and `product_clicks`
+  (`widget_events.type = 'product_click'`) in migration `20260903080000`.
 - **Leads** specifically is `count(*)` of `public.leads` (bot lead-captures). It is
   independent of Signups — different table, no trigger couples them.
 - **Signups** — `count(*)` of `public.signups` (landing-page emails).
