@@ -2,13 +2,21 @@ import { fireEvent, render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 
 import { LinkedInBoard } from '@/components/owner/LinkedInBoard'
-import type { LinkedInPost } from '@/lib/types'
+import { SocialBoards } from '@/components/owner/SocialBoards'
+import type { LinkedInPost, SocialPost } from '@/lib/types'
 
 vi.mock('@/app/(owner)/owner/linkedin/actions', () => ({
   createLinkedInPost: vi.fn(),
   deleteLinkedInPost: vi.fn(),
   updateLinkedInPost: vi.fn(),
   updateLinkedInPostPositions: vi.fn(),
+}))
+
+vi.mock('@/app/(owner)/owner/social/actions', () => ({
+  createSocialPost: vi.fn(),
+  deleteSocialPost: vi.fn(),
+  updateSocialPost: vi.fn(),
+  updateSocialPostPositions: vi.fn(),
 }))
 
 const post: LinkedInPost = {
@@ -39,5 +47,48 @@ describe('LinkedInBoard', () => {
     expect(screen.getByDisplayValue(post.body)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Copy post and link' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Copy image alt text' })).toBeInTheDocument()
+  })
+
+  it('adapts the editor and copy action for Instagram captions', async () => {
+    const instagramPost: SocialPost = {
+      ...post,
+      platform: 'instagram',
+      source_linkedin_post_id: post.id,
+    }
+
+    render(<LinkedInBoard initialPosts={[instagramPost]} platform="instagram" />)
+    fireEvent.click(screen.getByRole('button', { name: `Open ${post.title}` }))
+
+    expect(await screen.findByRole('dialog', { name: 'Edit Instagram post' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Copy caption' })).toBeInTheDocument()
+    expect(screen.getByText('Reference only; caption links are not included when copying.')).toBeInTheDocument()
+    expect(screen.getByText(`${post.body.length} / 2,200`)).toBeInTheDocument()
+  })
+})
+
+describe('SocialBoards', () => {
+  it('places the segmented platform tabs below the active platform heading', () => {
+    const facebookPost: SocialPost = {
+      ...post,
+      id: '10000000-0000-4000-8000-000000000002',
+      platform: 'facebook',
+      source_linkedin_post_id: post.id,
+    }
+    const instagramPost: SocialPost = {
+      ...post,
+      id: '10000000-0000-4000-8000-000000000003',
+      platform: 'instagram',
+      source_linkedin_post_id: post.id,
+    }
+
+    render(<SocialBoards initialPosts={[facebookPost, instagramPost]} />)
+
+    const heading = screen.getByRole('heading', { name: 'Facebook posts' })
+    const tablist = screen.getByRole('tablist', { name: 'Social platform' })
+    expect(heading.compareDocumentPosition(tablist) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Instagram (1)' }))
+    expect(screen.getByRole('heading', { name: 'Instagram posts' })).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: 'Instagram (1)' })).toHaveAttribute('aria-selected', 'true')
   })
 })

@@ -1,5 +1,27 @@
 # Messaging channels
 
+## Current review audit (2026-09-05)
+
+- Meta submission `2453576515143984` shows Verification/App settings complete,
+  with Allowed usage, Data handling, and Reviewer instructions incomplete.
+  Historical company-verification blockers below are superseded by this UI check.
+- 3IMIS now sees an available Messenger card. Localhost OAuth returns the Loqara
+  Page successfully, but final connection fails `page_taken`; the other-org guard
+  remains active (`app/(client)/app/channels/messenger/connect/page.tsx:116`).
+  Resolved with explicit owner authorization: connection moved to 3IMIS/Chatfox,
+  OAuth completed via UI, encrypted token verified. Live AI reply, human handoff,
+  staff reply delivery, and AI resumption after Resolve all passed. The original
+  conversation remains on the original Loqara bot.
+- Local development bypasses channel entitlement (`lib/channels/entitlement.ts:26`);
+  3IMIS has no production Messenger add-on. A locally available card does not
+  establish hosted reviewer access.
+- Disconnect retains transcripts (`lib/channels/disconnect.ts:6`); OpenAI processes
+  channel prompts (`lib/channels/processor.ts:114`). Review answers must not claim
+  disconnect deletes all data or that there are no third-party processors.
+- See [submission pack](../meta-app-review.md) for remaining evidence and account
+  setup blockers. Older implementation and dashboard notes below are historical;
+  reverify before relying on them.
+
 ## Product state
 
 - Subscription shows one card per channel; all three read **Coming soon**.

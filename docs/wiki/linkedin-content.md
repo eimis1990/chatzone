@@ -30,7 +30,7 @@ Owner-only planning workspace for moving posts from an angle to publish-ready co
   by `supabase/migrations/20260711112234_linkedin_post_order_and_visuals.sql:2`.
 - Draft visuals are local 1200×628 PNG/WebP assets under `public/linkedin/`. The
   image URL and meaningful alt text live with each post so the drawer can
-  preview and copy both. The 16 current drafts have a cohesive, text-free
+  preview and copy both. An earlier 16-post slate has a cohesive, text-free
   illustrated set generated with Higgsfield's GPT Image 2 workflow; source
   prompts live in `scripts/linkedin-image-prompts.mjs` and the versioned assets
   end in `-illustrated.webp`.
@@ -61,8 +61,28 @@ Owner-only planning workspace for moving posts from an angle to publish-ready co
   id, 3–5 tags each). The seed appends them to each draft body at build time; the
   same module backfills live rows, so DB and seed stay in sync. Bodies in the seed
   stay tag-free, so a reseed never double-appends.
+- The September 2026 slate is a separate, idempotent addition rather than another
+  full-board restore. Its 20 complete posts live in
+  `scripts/linkedin-september-2026-content.mjs:1`; four keep the UUIDs of reviewed
+  ideas so applying the slate promotes them without duplicates, while six
+  evidence-dependent or overlapping ideas remain in the Ideas column. The live
+  result was verified as 20 drafts / 6 ideas / 30 posted.
+- The September visuals are 20 local 1200×628 WebPs (`public/linkedin/31-*`
+  through `50-*`) generated from four related editorial media directions. The
+  reproducible prompt manifest is
+  `scripts/linkedin-september-2026-image-prompts.mjs:1`.
+- `scripts/seed-linkedin-september-2026.mjs:18` is a dry run unless `--apply` is
+  passed. Apply validates every local image, uploads stable copies to the public
+  `public-assets/linkedin/september-2026/` storage prefix, then upserts the posts
+  with those public URLs (`scripts/seed-linkedin-september-2026.mjs:51`). This
+  makes a new slate usable on the live board without waiting for a website asset
+  deployment; keep the local originals and prompts as the reproducible source.
 - Copy follows a founder-led LinkedIn shape: a specific observation, short
   paragraphs, concrete evidence or a useful framework, and no engagement bait.
   Ideas stay brief; drafts contain complete publishable copy.
+- The board component is also the shared presentation layer for the Facebook
+  and Instagram queues; platform-specific actions, limits, copy behavior, and
+  guidance are selected through its `platform` prop. See
+  [social-content](social-content.md).
 
-_Last verified: 2026-08-01 (working tree)._
+_Last verified: 2026-09-03 (working tree)._

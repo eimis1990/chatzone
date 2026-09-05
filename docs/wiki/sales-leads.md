@@ -85,6 +85,15 @@ emails, and manual status progression.
 - `email_subject` and `email_body` are operational snapshots stored on each
   lead, not generated at send time. Existing-chatbot leads should acknowledge
   the incumbent respectfully and give a concrete reason to compare.
+- LinkedIn prepared emails are localized from the canonical `country` field:
+  Lithuania receives Lithuanian subjects/bodies, while every other country
+  receives English. `scripts/prepare-linkedin-sales-lead-emails.mjs` owns the
+  dry-run/repair/apply workflow, reads concise first-party homepage metadata for
+  the personalized two-sentence opening, preserves lifecycle timestamps, and
+  enforces the platform boundary: only WooCommerce, Shopify, Magento, and
+  Verskis may claim direct catalogue grounding. The 2026-09-04 plan populated
+  all 200 LinkedIn rows (100 Lithuanian, 100 English); 198 have verified inboxes,
+  while LAJO baldai and Pilnatvės Sodas intentionally remain addressless.
 - Every first-touch body starts with `Laba diena,` followed by a blank line.
   Validate this alongside the opt-out before sending. Migration
   `20260730033800_restore_greeting_to_researched_sales_leads.sql:1` repaired the
@@ -344,4 +353,4 @@ emails, and manual status progression.
   research and keep status `ready` until outreach or a buyer response occurs
   (`supabase/migrations/20260720130000_add_mobel_sales_lead.sql:1`).
 
-_Last verified: 2026-08-31 (source tabs, LinkedIn country grouping, 200 LinkedIn imports, official-site email coverage, and live platform classification for every LinkedIn lead)._
+_Last verified: 2026-09-04 (source tabs, LinkedIn country grouping, 200 localized prepared emails, official-site email coverage, and live platform classification for every LinkedIn lead)._

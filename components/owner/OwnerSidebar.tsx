@@ -25,6 +25,7 @@ import {
   type LucideIcon,
   PresentationIcon,
   NewspaperIcon,
+  Share2Icon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { SignOutButton } from '@/components/client/SignOutButton'
@@ -76,6 +77,7 @@ const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
       { label: 'Sales leads', href: '/owner/leads', icon: TargetIcon },
       { label: 'Content', href: '/owner/content', icon: NewspaperIcon },
       { label: 'LinkedIn', href: '/owner/linkedin', icon: MegaphoneIcon },
+      { label: 'Facebook / Instagram', href: '/owner/social', icon: Share2Icon },
     ],
   },
   {

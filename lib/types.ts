@@ -113,6 +113,14 @@ export interface LinkedInPost {
   updated_at: string
 }
 
+export type SocialPlatform = 'facebook' | 'instagram'
+
+/** Owner-only Facebook or Instagram content tracker entry (see /owner/social). */
+export interface SocialPost extends LinkedInPost {
+  source_linkedin_post_id: string | null
+  platform: SocialPlatform
+}
+
 export interface VoiceConfig {
   enabled: boolean
   ttsEnabled: boolean

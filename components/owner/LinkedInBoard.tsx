@@ -1,7 +1,7 @@
 'use client'
 
 import Image from 'next/image'
-import { useRef, useState, useTransition } from 'react'
+import { useRef, useState, useTransition, type ReactNode } from 'react'
 import {
   closestCorners,
   DndContext,
@@ -54,13 +54,60 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import type { LinkedInPost, LinkedInPostStatus } from '@/lib/types'
+import type { LinkedInPost, LinkedInPostStatus, SocialPlatform, SocialPost } from '@/lib/types'
 import {
   createLinkedInPost,
   deleteLinkedInPost,
   updateLinkedInPost,
   updateLinkedInPostPositions,
 } from '@/app/(owner)/owner/linkedin/actions'
+import {
+  createSocialPost,
+  deleteSocialPost,
+  updateSocialPost,
+  updateSocialPostPositions,
+} from '@/app/(owner)/owner/social/actions'
+
+type BoardPlatform = 'linkedin' | SocialPlatform
+type ContentPost = LinkedInPost | SocialPost
+
+const PLATFORM_COPY: Record<BoardPlatform, {
+  label: string
+  title: string
+  description: string
+  bodyLimit: number
+  bodyPlaceholder: string
+  imageGuidance: string
+  altGuidance: string
+}> = {
+  linkedin: {
+    label: 'LinkedIn',
+    title: 'LinkedIn posts',
+    description: 'Shape the content pipeline, drag posts into place, and publish with a consistent voice.',
+    bodyLimit: 3_000,
+    bodyPlaceholder: 'The complete LinkedIn post…',
+    imageGuidance: 'Landscape 1.91:1 works well in the feed.',
+    altGuidance: 'Add this in LinkedIn’s image alt-text field.',
+  },
+  facebook: {
+    label: 'Facebook',
+    title: 'Facebook posts',
+    description: 'Conversation-led captions, direct links, and a fresh queue built from the strongest Loqara topics.',
+    bodyLimit: 5_000,
+    bodyPlaceholder: 'The complete Facebook caption…',
+    imageGuidance: 'The existing 1.91:1 visual is ready for the Facebook feed.',
+    altGuidance: 'Add this as the Facebook image description.',
+  },
+  instagram: {
+    label: 'Instagram',
+    title: 'Instagram posts',
+    description: 'Tighter, saveable captions with feed-ready artwork and no dependence on caption links.',
+    bodyLimit: 2_200,
+    bodyPlaceholder: 'The complete Instagram caption…',
+    imageGuidance: 'Landscape 1.91:1 is feed-safe; use 9:16 variants for Reels or Stories.',
+    altGuidance: 'Add this in Instagram’s accessibility settings.',
+  },
+}
 
 const COLUMNS: {
   key: LinkedInPostStatus
@@ -109,7 +156,7 @@ interface FormState {
   sort_order?: number
 }
 
-type BoardState = Record<LinkedInPostStatus, LinkedInPost[]>
+type BoardState = Record<LinkedInPostStatus, ContentPost[]>
 
 const EMPTY: FormState = {
   title: '',
@@ -128,7 +175,7 @@ function normalizeBoard(board: BoardState): BoardState {
   }
 }
 
-function boardFromPosts(posts: LinkedInPost[]): BoardState {
+function boardFromPosts(posts: ContentPost[]): BoardState {
   const sorted = [...posts].sort(
     (a, b) => a.sort_order - b.sort_order || a.created_at.localeCompare(b.created_at),
   )
@@ -139,7 +186,7 @@ function boardFromPosts(posts: LinkedInPost[]): BoardState {
   })
 }
 
-function replacePost(board: BoardState, saved: LinkedInPost): BoardState {
+function replacePost(board: BoardState, saved: ContentPost): BoardState {
   const next: BoardState = {
     idea: board.idea.filter((post) => post.id !== saved.id),
     draft: board.draft.filter((post) => post.id !== saved.id),
@@ -153,7 +200,17 @@ function postCount(board: BoardState): number {
   return board.idea.length + board.draft.length + board.posted.length
 }
 
-export function LinkedInBoard({ initialPosts }: { initialPosts: LinkedInPost[] }) {
+export function LinkedInBoard({
+  initialPosts,
+  platform = 'linkedin',
+  headerAddon,
+}: {
+  initialPosts: ContentPost[]
+  platform?: BoardPlatform
+  headerAddon?: ReactNode
+}) {
+  const platformCopy = PLATFORM_COPY[platform]
+  const fieldPrefix = platform === 'linkedin' ? 'li' : platform === 'facebook' ? 'fb' : 'ig'
   const initialBoard = boardFromPosts(initialPosts)
   const [board, setBoard] = useState<BoardState>(initialBoard)
   const boardRef = useRef(initialBoard)
@@ -178,7 +235,7 @@ export function LinkedInBoard({ initialPosts }: { initialPosts: LinkedInPost[] }
     setOpen(true)
   }
 
-  function openEdit(post: LinkedInPost) {
+  function openEdit(post: ContentPost) {
     setForm({
       id: post.id,
       title: post.title,
@@ -201,8 +258,8 @@ export function LinkedInBoard({ initialPosts }: { initialPosts: LinkedInPost[] }
       toast.error('Drafts and posted entries need post copy')
       return
     }
-    if (form.body.length > 3000) {
-      toast.error('LinkedIn post copy must stay under 3,000 characters')
+    if (form.body.length > platformCopy.bodyLimit) {
+      toast.error(`${platformCopy.label} copy must stay under ${platformCopy.bodyLimit.toLocaleString()} characters`)
       return
     }
 
@@ -218,9 +275,13 @@ export function LinkedInBoard({ initialPosts }: { initialPosts: LinkedInPost[] }
 
     startTransition(async () => {
       try {
-        const saved = form.id
-          ? await updateLinkedInPost(form.id, payload)
-          : await createLinkedInPost(payload)
+        const saved = platform === 'linkedin'
+          ? form.id
+            ? await updateLinkedInPost(form.id, payload)
+            : await createLinkedInPost(payload)
+          : form.id
+            ? await updateSocialPost(platform, form.id, payload)
+            : await createSocialPost(platform, payload)
         commitBoard(replacePost(boardRef.current, saved))
         toast.success(form.id ? 'Post updated' : 'Post added')
         setOpen(false)
@@ -242,7 +303,9 @@ export function LinkedInBoard({ initialPosts }: { initialPosts: LinkedInPost[] }
 
     startTransition(async () => {
       try {
-        const saved = await updateLinkedInPostPositions(updates)
+        const saved = platform === 'linkedin'
+          ? await updateLinkedInPostPositions(updates)
+          : await updateSocialPostPositions(platform, updates)
         const savedById = new Map(saved.map((post) => [post.id, post]))
         commitBoard(
           normalizeBoard({
@@ -258,11 +321,12 @@ export function LinkedInBoard({ initialPosts }: { initialPosts: LinkedInPost[] }
     })
   }
 
-  function remove(post: LinkedInPost) {
+  function remove(post: ContentPost) {
     if (!window.confirm('Delete this post? This cannot be undone.')) return
     startTransition(async () => {
       try {
-        await deleteLinkedInPost(post.id)
+        if (platform === 'linkedin') await deleteLinkedInPost(post.id)
+        else await deleteSocialPost(platform, post.id)
         commitBoard({
           idea: boardRef.current.idea.filter((item) => item.id !== post.id),
           draft: boardRef.current.draft.filter((item) => item.id !== post.id),
@@ -303,13 +367,13 @@ export function LinkedInBoard({ initialPosts }: { initialPosts: LinkedInPost[] }
         <div className="flex shrink-0 flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-lg font-semibold">LinkedIn posts</h1>
+              <h1 className="text-lg font-semibold">{platformCopy.title}</h1>
               <Badge variant="outline" className="font-normal text-muted-foreground">
                 {postCount(board)} planned
               </Badge>
             </div>
             <p className="text-sm text-muted-foreground">
-              Shape the content pipeline, drag posts into place, and publish with a consistent voice.
+              {platformCopy.description}
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -324,8 +388,10 @@ export function LinkedInBoard({ initialPosts }: { initialPosts: LinkedInPost[] }
           </div>
         </div>
 
+        {headerAddon}
+
         <DndContext
-          id="linkedin-posts-board"
+          id={`${platform}-posts-board`}
           sensors={sensors}
           collisionDetection={closestCorners}
           onDragStart={({ active }) => {
@@ -392,6 +458,7 @@ export function LinkedInBoard({ initialPosts }: { initialPosts: LinkedInPost[] }
                 posts={board[column.key]}
                 pending={pending}
                 activePostId={activePostId}
+                boardId={fieldPrefix}
                 onAdd={() => openNew(column.key)}
                 onOpen={openEdit}
               />
@@ -412,13 +479,13 @@ export function LinkedInBoard({ initialPosts }: { initialPosts: LinkedInPost[] }
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent
-          aria-label={form.id ? 'Edit LinkedIn post' : 'Create LinkedIn post'}
+          aria-label={form.id ? `Edit ${platformCopy.label} post` : `Create ${platformCopy.label} post`}
           className="top-0 right-0 bottom-0 left-auto grid h-dvh max-h-dvh w-full max-w-2xl translate-x-0 translate-y-0 grid-rows-[auto_minmax(0,1fr)_auto] gap-0 rounded-none border-l bg-background p-0 shadow-2xl duration-200 sm:max-w-2xl data-open:slide-in-from-right-full data-open:zoom-in-100 data-closed:slide-out-to-right-full data-closed:zoom-out-100 motion-reduce:duration-0"
           overlayClassName="bg-black/25 duration-200 supports-backdrop-filter:backdrop-blur-[2px] motion-reduce:duration-0"
         >
           <DialogHeader className="border-b px-5 py-4 pr-14">
             <div className="flex flex-wrap items-center gap-2">
-              <DialogTitle>{form.id ? 'Edit LinkedIn post' : 'Create LinkedIn post'}</DialogTitle>
+              <DialogTitle>{form.id ? `Edit ${platformCopy.label} post` : `Create ${platformCopy.label} post`}</DialogTitle>
               {form.id && (
                 <Badge variant="secondary" className="font-normal">
                   {STATUS_LABEL[form.status]}
@@ -437,7 +504,7 @@ export function LinkedInBoard({ initialPosts }: { initialPosts: LinkedInPost[] }
                 <div className="overflow-hidden rounded-xl border bg-muted/30">
                   <Image
                     src={form.image_url}
-                    alt={form.image_alt || 'LinkedIn post visual preview'}
+                    alt={form.image_alt || `${platformCopy.label} post visual preview`}
                     width={1200}
                     height={628}
                     unoptimized
@@ -450,11 +517,16 @@ export function LinkedInBoard({ initialPosts }: { initialPosts: LinkedInPost[] }
                 <div className="grid gap-2 sm:grid-cols-2">
                   <Button
                     variant="outline"
-                    onClick={() => void copyText(form.link ? `${form.body}\n\n${form.link}` : form.body, 'Post and link copied — paste into LinkedIn')}
-                    aria-label="Copy post and link"
+                    onClick={() => void copyText(
+                      platform === 'instagram' || !form.link ? form.body : `${form.body}\n\n${form.link}`,
+                      platform === 'instagram'
+                        ? 'Caption copied — paste into Instagram'
+                        : `Post${form.link ? ' and link' : ''} copied — paste into ${platformCopy.label}`,
+                    )}
+                    aria-label={platform === 'instagram' ? 'Copy caption' : 'Copy post and link'}
                   >
                     <CopyIcon data-icon="inline-start" />
-                    Copy post + link
+                    {platform === 'instagram' ? 'Copy caption' : 'Copy post + link'}
                   </Button>
                   <Button
                     variant="outline"
@@ -469,9 +541,9 @@ export function LinkedInBoard({ initialPosts }: { initialPosts: LinkedInPost[] }
               )}
 
               <Field>
-                <FieldLabel htmlFor="li-title">Working title / hook</FieldLabel>
+                <FieldLabel htmlFor={`${fieldPrefix}-title`}>Working title / hook</FieldLabel>
                 <Input
-                  id="li-title"
+                  id={`${fieldPrefix}-title`}
                   value={form.title}
                   onChange={(event) => setForm((current) => ({ ...current, title: event.target.value }))}
                   placeholder="A specific observation the reader will recognize"
@@ -479,40 +551,44 @@ export function LinkedInBoard({ initialPosts }: { initialPosts: LinkedInPost[] }
               </Field>
 
               <Field>
-                <FieldLabel htmlFor="li-body">Post copy</FieldLabel>
+                <FieldLabel htmlFor={`${fieldPrefix}-body`}>Post copy</FieldLabel>
                 <Textarea
-                  id="li-body"
+                  id={`${fieldPrefix}-body`}
                   value={form.body}
                   onChange={(event) => setForm((current) => ({ ...current, body: event.target.value }))}
-                  placeholder={form.status === 'idea' ? 'A short angle or evidence to explore…' : 'The complete LinkedIn post…'}
-                  maxLength={3000}
+                  placeholder={form.status === 'idea' ? 'A short angle or evidence to explore…' : platformCopy.bodyPlaceholder}
+                  maxLength={platformCopy.bodyLimit}
                   className="min-h-80 whitespace-pre-wrap leading-6"
                 />
                 <FieldDescription className="flex justify-between gap-3">
                   <span>{form.status === 'idea' ? 'Ideas can stay brief.' : 'Use short paragraphs and one clear takeaway.'}</span>
-                  <span className="shrink-0 tabular-nums">{form.body.length} / 3000</span>
+                  <span className="shrink-0 tabular-nums">{form.body.length} / {platformCopy.bodyLimit.toLocaleString()}</span>
                 </FieldDescription>
               </Field>
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <Field>
-                  <FieldLabel htmlFor="li-link">Supporting link</FieldLabel>
+                  <FieldLabel htmlFor={`${fieldPrefix}-link`}>Supporting link</FieldLabel>
                   <Input
-                    id="li-link"
+                    id={`${fieldPrefix}-link`}
                     value={form.link}
                     onChange={(event) => setForm((current) => ({ ...current, link: event.target.value }))}
                     placeholder="https://www.loqara.com/blog/…"
                   />
-                  <FieldDescription>Optional; use it in the post or first comment.</FieldDescription>
+                  <FieldDescription>
+                    {platform === 'instagram'
+                      ? 'Reference only; caption links are not included when copying.'
+                      : 'Optional; use it in the post or first comment.'}
+                  </FieldDescription>
                 </Field>
 
                 <Field>
-                  <FieldLabel htmlFor="li-status">Pipeline stage</FieldLabel>
+                  <FieldLabel htmlFor={`${fieldPrefix}-status`}>Pipeline stage</FieldLabel>
                   <Select
                     value={form.status}
                     onValueChange={(value) => setForm((current) => ({ ...current, status: value as LinkedInPostStatus }))}
                   >
-                    <SelectTrigger id="li-status" className="w-full">
+                    <SelectTrigger id={`${fieldPrefix}-status`} className="w-full">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -528,24 +604,24 @@ export function LinkedInBoard({ initialPosts }: { initialPosts: LinkedInPost[] }
 
               <div className="grid gap-4 rounded-xl border bg-muted/30 p-4 sm:grid-cols-2">
                 <Field>
-                  <FieldLabel htmlFor="li-image">Post image URL</FieldLabel>
+                  <FieldLabel htmlFor={`${fieldPrefix}-image`}>Post image URL</FieldLabel>
                   <Input
-                    id="li-image"
+                    id={`${fieldPrefix}-image`}
                     value={form.image_url}
                     onChange={(event) => setForm((current) => ({ ...current, image_url: event.target.value }))}
                     placeholder="/linkedin/post-visual.webp"
                   />
-                  <FieldDescription>Landscape 1.91:1 works well in the feed.</FieldDescription>
+                  <FieldDescription>{platformCopy.imageGuidance}</FieldDescription>
                 </Field>
                 <Field>
-                  <FieldLabel htmlFor="li-image-alt">Image alt text</FieldLabel>
+                  <FieldLabel htmlFor={`${fieldPrefix}-image-alt`}>Image alt text</FieldLabel>
                   <Input
-                    id="li-image-alt"
+                    id={`${fieldPrefix}-image-alt`}
                     value={form.image_alt}
                     onChange={(event) => setForm((current) => ({ ...current, image_alt: event.target.value }))}
                     placeholder="Describe what the image communicates"
                   />
-                  <FieldDescription>Add this in LinkedIn&rsquo;s image alt-text field.</FieldDescription>
+                  <FieldDescription>{platformCopy.altGuidance}</FieldDescription>
                 </Field>
               </div>
             </FieldGroup>
@@ -582,15 +658,17 @@ function PostColumn({
   posts,
   pending,
   activePostId,
+  boardId,
   onAdd,
   onOpen,
 }: {
   column: (typeof COLUMNS)[number]
-  posts: LinkedInPost[]
+  posts: ContentPost[]
   pending: boolean
   activePostId: string | null
+  boardId: string
   onAdd: () => void
-  onOpen: (post: LinkedInPost) => void
+  onOpen: (post: ContentPost) => void
 }) {
   const { setNodeRef, isOver } = useDroppable({
     id: column.key,
@@ -601,7 +679,7 @@ function PostColumn({
   return (
     <section
       ref={setNodeRef}
-      aria-labelledby={`linkedin-column-${column.key}`}
+      aria-labelledby={`${boardId}-column-${column.key}`}
       className={cn(
         'flex min-h-[280px] flex-col overflow-hidden rounded-xl border bg-muted/30 transition-colors lg:min-h-0',
         isOver && 'border-primary/40 bg-primary/5 ring-2 ring-primary/10',
@@ -614,7 +692,7 @@ function PostColumn({
         <div className="min-w-0">
           <div className="flex items-center gap-2">
             <span className={cn('size-2 rounded-full', column.dot)} aria-hidden="true" />
-            <h2 id={`linkedin-column-${column.key}`} className="text-sm font-semibold">
+            <h2 id={`${boardId}-column-${column.key}`} className="text-sm font-semibold">
               {column.label}
             </h2>
           </div>
@@ -665,7 +743,7 @@ function PostCard({
   active,
   onOpen,
 }: {
-  post: LinkedInPost
+  post: ContentPost
   index: number
   pending: boolean
   active: boolean
