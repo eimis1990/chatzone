@@ -28,6 +28,30 @@ Two roles: **owner** (platform / us) and **client** (a store on the platform).
   (`app/(owner)/owner/clients/[orgId]/page.tsx:178-314`,
   `components/owner/DuplicateDemoBotForm.tsx:22-65`).
 
+## Password reset
+
+Own flow, no Supabase auth email. `requestPasswordReset` (`app/(auth)/reset-password/actions.ts`)
+mints a recovery token with `auth.admin.generateLink({ type: 'recovery' })` and
+emails `${NEXT_PUBLIC_APP_URL}/reset-password?token_hash=…` from hello@loqara.com
+(`passwordResetEmail` in `lib/notify.ts`). The page exchanges the hash with
+`verifyOtp({ type: 'recovery', token_hash })` (single-use, 1 h) and then calls
+`updateUser({ password })`. Always answers "if an account exists…" — no enumeration.
+Why not `resetPasswordForEmail`: its link bounces through Supabase's verify
+endpoint, whose fallback Site URL is still `http://localhost:3000`
+(see gotchas), and PKCE requires the same browser that requested the reset.
+⚠️ No per-address cooldown on the request action yet.
+
+## Deleting a client
+
+**Delete client** on the client detail page (`DeleteClientButton` → `deleteOrganization`
+→ `lib/orgs/delete.ts`) requires typing the org name. Refuses the platform org and any
+org with a live Stripe subscription (`trialing|active|past_due` + subscription id) —
+cancel in Stripe first. Deletes ElevenLabs agents (best effort), then the org row
+(FK cascades cover bots/knowledge/conversations/leads/events/members/invites/orders),
+then auth users who belonged ONLY to that org and are not owners
+(`usersToDeleteWithOrg`, tested in `tests/unit/org-delete-policy.test.ts`).
+Not cleaned: `public-assets` storage objects (logos), `bug_reports.org_id` is set null.
+
 ## Owner signup triage
 
 - `/owner/signups` derives New, Invited, and Accepted groups from the signup row

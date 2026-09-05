@@ -40,6 +40,7 @@ import {
 } from '@/components/ui/empty'
 import { formatDistanceToNow, formatTimeUntil } from '@/lib/date-utils'
 import { SuspendToggle } from '@/components/owner/SuspendToggle'
+import { DeleteClientButton } from '@/components/owner/DeleteClientButton'
 import { ResendInviteButton } from '@/components/owner/ResendInviteButton'
 import { DuplicateDemoBotForm } from '@/components/owner/DuplicateDemoBotForm'
 import { CreateBotDialog } from '@/components/client/CreateBotDialog'
@@ -226,10 +227,13 @@ export default async function ClientDetailPage({
             </p>
           </div>
         </div>
-        <SuspendToggle
-          orgId={orgId}
-          currentStatus={orgStat.status as 'active' | 'suspended'}
-        />
+        <div className="flex flex-wrap items-center gap-2">
+          <DeleteClientButton orgId={orgId} orgName={orgStat.org_name} />
+          <SuspendToggle
+            orgId={orgId}
+            currentStatus={orgStat.status as 'active' | 'suspended'}
+          />
+        </div>
       </div>
 
       {/* Proof-of-value snapshot — same numbers the client sees on Home */}

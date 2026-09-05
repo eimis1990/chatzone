@@ -5,6 +5,7 @@ import { requireRole } from '@/lib/auth/guards'
 import { createServiceClient } from '@/lib/supabase/service'
 import { createBotInOrg } from '@/lib/bots/create'
 import { duplicateDemoBot } from '@/lib/bots/duplicate'
+import { deleteOrganizationCascade, type DeleteOrgResult } from '@/lib/orgs/delete'
 import { sendEmail, emailEnabled } from '@/lib/email'
 import { clientInviteEmail } from '@/lib/notify'
 import { getEnv } from '@/lib/env'
@@ -117,5 +118,16 @@ export async function createBotFromDemo(
   await requireRole('owner')
   const res = await duplicateDemoBot(orgId, demoBotId)
   if (res.id) revalidatePath(`/owner/clients/${orgId}`)
+  return res
+}
+
+/**
+ * Permanently delete a client organisation and everything in it. Owner-only.
+ * Refuses when a live Stripe subscription exists; see lib/orgs/delete.ts.
+ */
+export async function deleteOrganization(orgId: string): Promise<DeleteOrgResult> {
+  await requireRole('owner')
+  const res = await deleteOrganizationCascade(createServiceClient(), orgId)
+  if (res.ok) revalidatePath('/owner/clients')
   return res
 }

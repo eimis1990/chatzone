@@ -40,7 +40,16 @@ function esc(s: string): string {
     .replace(/"/g, '&quot;')
 }
 
-function shell(title: string, bodyHtml: string, ctaLabel: string, ctaUrl: string): string {
+const ADMIN_FOOTER =
+  "You receive these because you're an admin of this workspace. Turn them off in Settings → Notifications."
+
+function shell(
+  title: string,
+  bodyHtml: string,
+  ctaLabel: string,
+  ctaUrl: string,
+  footer: string = ADMIN_FOOTER,
+): string {
   return `<div style="font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;max-width:520px;margin:0 auto;padding:24px;color:#18181b">
   <p style="font-size:13px;color:#71717a;margin:0 0 16px">Loqara</p>
   <h2 style="font-size:18px;margin:0 0 12px">${esc(title)}</h2>
@@ -48,7 +57,7 @@ function shell(title: string, bodyHtml: string, ctaLabel: string, ctaUrl: string
   <p style="margin:24px 0">
     <a href="${ctaUrl}" style="background:#18181b;color:#fff;text-decoration:none;padding:10px 18px;border-radius:8px;font-size:14px">${esc(ctaLabel)}</a>
   </p>
-  <p style="font-size:12px;color:#a1a1aa;margin-top:24px">You receive these because you're an admin of this workspace. Turn them off in Settings → Notifications.</p>
+  <p style="font-size:12px;color:#a1a1aa;margin-top:24px">${esc(footer)}</p>
 </div>`
 }
 
@@ -210,6 +219,21 @@ export function clientInviteEmail(
        <p style="font-size:14px;margin:0">Create your account with the button below, and the guided setup will train your assistant on your website, match it to your brand, and give you the install snippet.</p>`,
       'Create your account',
       inviteUrl,
+    ),
+  }
+}
+
+/** Password reset — sent from hello@loqara.com instead of Supabase's default sender. */
+export function passwordResetEmail(resetUrl: string): { subject: string; html: string } {
+  return {
+    subject: 'Reset your Loqara password',
+    html: shell(
+      'Reset your password',
+      `<p style="font-size:14px;margin:0 0 8px">Someone asked to reset the password for this Loqara account. Click below to choose a new one.</p>
+       <p style="font-size:14px;margin:0">The link works once and expires in an hour.</p>`,
+      'Choose a new password',
+      resetUrl,
+      "If you didn't request this, you can ignore this email — your password stays the same.",
     ),
   }
 }

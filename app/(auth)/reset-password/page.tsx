@@ -7,13 +7,14 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { requestPasswordReset } from './actions'
 
 /**
  * Two-phase page:
- *  1. Request phase  — user enters their email; we send a magic reset link.
- *  2. Recovery phase — the reset link puts a #access_token in the URL;
- *                      we detect AUTH_STATE_CHANGE -> PASSWORD_RECOVERY and
- *                      show the "choose new password" form.
+ *  1. Request phase  — user enters their email; the server action emails a
+ *                      reset link from hello@loqara.com.
+ *  2. Recovery phase — the link carries ?token_hash=…; we exchange it for a
+ *                      session with verifyOtp, then let the user set a password.
  */
 export default function ResetPasswordPage() {
   const router = useRouter()
@@ -27,18 +28,22 @@ export default function ResetPasswordPage() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
-  // Detect the PASSWORD_RECOVERY event that Supabase fires after the user
-  // clicks the reset link. It arrives via onAuthStateChange.
+  // A reset link lands here with ?token_hash=… — exchange it for a session so
+  // updateUser() can run. Consumed once; an expired/used link shows an error.
   useEffect(() => {
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'PASSWORD_RECOVERY') {
+    const tokenHash = new URLSearchParams(window.location.search).get('token_hash')
+    if (!tokenHash) return
+    supabase.auth.verifyOtp({ type: 'recovery', token_hash: tokenHash }).then(({ error: otpError }) => {
+      if (otpError) {
+        setError('This reset link is invalid or has expired. Request a new one below.')
+      } else {
         setPhase('recovery')
       }
+      // Drop the token from the address bar either way.
+      window.history.replaceState(null, '', window.location.pathname)
     })
-    return () => subscription.unsubscribe()
-  }, [supabase])
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- run once on mount
+  }, [])
 
   // ── Phase 1: send request email ──────────────────────────────────────────
   async function handleRequestReset(e: React.FormEvent<HTMLFormElement>) {
@@ -47,16 +52,14 @@ export default function ResetPasswordPage() {
     setMessage(null)
     setLoading(true)
 
-    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`,
-    })
+    const res = await requestPasswordReset(email)
 
     setLoading(false)
 
-    if (resetError) {
-      setError(resetError.message)
+    if (!res.ok) {
+      setError(res.error ?? 'Something went wrong. Please try again.')
     } else {
-      setMessage('Check your email for a password reset link.')
+      setMessage('If an account exists for that email, a reset link is on its way.')
     }
   }
 

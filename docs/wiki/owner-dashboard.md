@@ -48,6 +48,12 @@ On 2026-07-11 the Leads card read 5 purely from seeded Aurora demo leads (identi
 timestamps, fake names); they were deleted so real leads count from 0. If demo data
 reappears in totals, that's the cause — not a code bug.
 
+## Deleting a client
+
+Client detail header: **Delete client** (type-the-name dialog) next to Suspend.
+Policy and cascade live in `lib/orgs/delete.ts`; details in
+[access-model](access-model.md#deleting-a-client). Live Stripe subscription → refused.
+
 ## Demo bot transfers
 
 A demo bot becomes the client's real bot in one action: **Transfer** on the

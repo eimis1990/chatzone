@@ -402,3 +402,14 @@ extending a view like `org_stats`, add the new columns **after** the last
 existing one, or `drop view` + recreate (which also drops dependent grants).
 Bit us on `20260903080000_org_stats_product_counts.sql`.
 
+## Supabase Auth "Site URL" is still `http://localhost:3000`
+
+The hosted project's Auth → URL Configuration was never pointed at loqara.com,
+and the redirect allowlist has no production entry, so ANY Supabase-sent auth
+link (`resetPasswordForEmail`, magic links, `generateLink` with `redirectTo`)
+falls back to localhost:3000 — which on the founder's machine is the running
+dev server, hence "the reset link just opened the Loqara website". Probe:
+`admin.generateLink(..., { redirectTo })` echoes the normalised `redirect_to`.
+The app now avoids Supabase-hosted links (own reset email with `token_hash`,
+own invite links), so fix the dashboard when convenient rather than urgently.
+
