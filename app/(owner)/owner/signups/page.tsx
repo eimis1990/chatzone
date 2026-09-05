@@ -1,6 +1,6 @@
 import { requireRole } from '@/lib/auth/guards'
 import { createServerClient } from '@/lib/supabase/server'
-import { companyNameFromWebsite } from '@/lib/invites'
+import { companyNameFromWebsite, inviteStatusForSignup, type InviteRef } from '@/lib/invites'
 import { SignupsExport } from '@/components/owner/SignupsExport'
 import { AcceptedSignupsTable } from '@/components/owner/AcceptedSignupsTable'
 import { SignupCard, type SignupCardData } from '@/components/owner/SignupCard'
@@ -36,18 +36,12 @@ export default async function SignupsPage() {
   ])
 
   const rows = (signupData ?? []) as SignupRow[]
-  const invites = (inviteData ?? []) as { email: string; status: string }[]
-
-  // Latest invite status per email (invites are ordered newest-first).
-  const inviteByEmail = new Map<string, string>()
-  for (const inv of invites) {
-    const key = inv.email.toLowerCase()
-    if (!inviteByEmail.has(key)) inviteByEmail.set(key, inv.status)
-  }
+  const invites = (inviteData ?? []) as InviteRef[]
 
   const cards: SignupCardData[] = rows.map((s) => ({
     ...s,
-    inviteStatus: inviteByEmail.get(s.email.toLowerCase()) ?? null,
+    // Newest invite sent AFTER this signup — older ones belong to a past signup.
+    inviteStatus: inviteStatusForSignup(s, invites),
     // Their own stated company name wins; the domain guess is the fallback.
     suggestedName: s.company?.trim() || companyNameFromWebsite(s.website),
   }))

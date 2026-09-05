@@ -55,7 +55,11 @@ Not cleaned: `public-assets` storage objects (logos), `bug_reports.org_id` is se
 ## Owner signup triage
 
 - `/owner/signups` derives New, Invited, and Accepted groups from the signup row
-  plus the latest invite status (`app/(owner)/owner/signups/page.tsx:40-63`).
+  plus the newest invite sent AT/AFTER that signup (`inviteStatusForSignup`,
+  `lib/invites.ts`). Older invites for the same email are ignored on purpose: an
+  onboarded client who signs up again (after the owner deleted the old row)
+  shows as New, not Accepted. Note `signups.email` is unique — the landing form
+  silently no-ops (`recorded: false`) while an old row still exists.
 - Preserve the lifecycle-specific UI: New/Invited remain action cards, while
   Accepted is a compact responsive table that folds website/source/timeline
   metadata into the client cell on narrow screens

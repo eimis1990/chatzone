@@ -62,3 +62,28 @@ export function companyNameFromWebsite(website: string | null | undefined): stri
     return ''
   }
 }
+
+export interface InviteRef {
+  email: string
+  status: string
+  created_at: string
+}
+
+/**
+ * The invite that belongs to THIS signup: same email and sent at/after the
+ * signup was recorded. Older invites (e.g. an already-onboarded client who
+ * signs up again after the owner deleted the previous signup row) don't count,
+ * so the fresh row shows up as New instead of jumping straight to Accepted.
+ * `invites` must be ordered newest-first.
+ */
+export function inviteStatusForSignup(
+  signup: { email: string; created_at: string },
+  invites: InviteRef[],
+): string | null {
+  const email = signup.email.toLowerCase()
+  const match = invites.find(
+    (inv) => inv.email.toLowerCase() === email && inv.created_at >= signup.created_at,
+  )
+  return match?.status ?? null
+}
+
