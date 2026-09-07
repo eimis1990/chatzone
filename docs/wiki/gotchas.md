@@ -423,6 +423,15 @@ while the KB had the phone and email all along. `shouldRewriteQuery`
 (`lib/ai/query-rewrite.ts`) now also rewrites any message of ≤3 words, and the
 rewritten retrieval wins whenever it beats the raw one.
 
+## The live preview rebuilds BotConfig by hand — new keys silently vanish
+
+`components/client/TestChat.tsx` `buildFullConfig` (and the public-config mapping
+above it) copy fields one by one. A new `BotConfig` key that isn't added there
+reaches the public widget but NOT the owner/client preview — on 2026-09-07 the
+`open_lead_form` tool worked live and "did nothing" in the preview because
+`leadCapture.offerOnIntent` was dropped. Add every new config key to both
+mappings.
+
 ## A bare `header` remove-selector deletes list-item titles
 
 WordPress "The Events Calendar" (and many card/list widgets) wrap each item's

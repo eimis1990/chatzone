@@ -56,6 +56,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { TagInput } from '@/components/ui/tag-input'
 import { Switch } from '@/components/ui/switch'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Scrubber } from '@/components/ui/scrubber'
@@ -1816,71 +1817,9 @@ export function ConfigForm({
 
             {leadCaptureEnabled && (
               <>
-              <SettingsGroup title="When the form appears" description="Pick the moment the built-in form pops up in the chat. The assistant can also open it itself when it hears a booking or contact request.">
-              <div className="space-y-4">
-                <div className="space-y-1.5">
-                  <Label>Trigger</Label>
-                  <Controller
-                    name="leadCapture.trigger"
-                    control={control}
-                    render={({ field }) => {
-                      const TRIGGERS = [
-                        {
-                          value: 'on_fallback',
-                          label: "When the bot can't answer",
-                          hint: 'The form appears when the bot has no answer, so a human can follow up.',
-                        },
-                        {
-                          value: 'after_n_messages',
-                          label: 'After N visitor messages',
-                          hint: "Appears once the visitor has sent their Nth message — set N below.",
-                        },
-                        {
-                          value: 'manual',
-                          label: 'Manual (quick action)',
-                          hint: 'Appears only when the visitor taps a welcome-screen quick action set to "Open contact form" (Content → Suggested questions).',
-                        },
-                      ] as const
-                      const current = TRIGGERS.find((o) => o.value === field.value) ?? TRIGGERS[0]
-                      return (
-                        <>
-                          <Select value={field.value} onValueChange={field.onChange}>
-                            <SelectTrigger className="w-full">
-                              <span>{current.label}</span>
-                            </SelectTrigger>
-                            <SelectContent>
-                              {TRIGGERS.map((o) => (
-                                <SelectItem key={o.value} value={o.value}>
-                                  <div className="py-0.5">
-                                    <div className="text-sm">{o.label}</div>
-                                    <div className="text-xs text-muted-foreground max-w-[340px] whitespace-normal">
-                                      {o.hint}
-                                    </div>
-                                  </div>
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <p className="text-xs text-muted-foreground">{current.hint}</p>
-                        </>
-                      )
-                    }}
-                  />
-                </div>
-
-                {watch('leadCapture.trigger') === 'after_n_messages' && (
-                  <div className="space-y-1.5">
-                    <Label htmlFor="afterNMessages">Trigger after N messages</Label>
-                    <Input
-                      id="afterNMessages"
-                      type="number"
-                      min={1}
-                      {...register('leadCapture.afterNMessages', { valueAsNumber: true })}
-                      placeholder="3"
-                    />
-                  </div>
-                )}
-
+              <SettingsGroup title="Show the form when…" description="Turn on any of these. Welcome-screen quick actions set to “Open contact form” can always open it.">
+              <div className="space-y-3">
+                {/* 1 — assistant decides (additive, independent of `trigger`) */}
                 <div className="flex items-start gap-3 rounded-md border p-3">
                   <Controller
                     name="leadCapture.offerOnIntent"
@@ -1890,20 +1829,78 @@ export function ConfigForm({
                     )}
                   />
                   <div className="flex-1 space-y-1.5">
-                    <Label htmlFor="leadOfferOnIntent">Let the assistant open it on request</Label>
+                    <Label htmlFor="leadOfferOnIntent">The visitor asks to book, order or be contacted</Label>
                     <p className="text-xs text-muted-foreground">
-                      When a visitor wants to book, reserve, order a service or be contacted, the assistant opens the form
-                      and prefills what it already knows — instead of asking for details one by one.
+                      The assistant recognises the request, opens the form and prefills what it already knows — instead of
+                      asking for details one by one.
                     </p>
                     {watch('leadCapture.offerOnIntent') && (
-                      <Input
-                        {...register('leadCapture.intentHint')}
-                        placeholder="What counts as a request here — e.g. hall rental, accommodation or event bookings"
-                        className="text-sm"
-                      />
+                      <div className="space-y-1">
+                        <Label className="text-xs">What counts as a request here</Label>
+                        <Controller
+                          name="leadCapture.intentHint"
+                          control={control}
+                          render={({ field: f }) => (
+                            <TagInput
+                              id="leadIntentHint"
+                              value={splitList(f.value ?? '')}
+                              onChange={(tags) => f.onChange(tags.join(', '))}
+                              placeholder="Type a keyword and press Enter — e.g. hall rental, accommodation, events"
+                              max={12}
+                            />
+                          )}
+                        />
+                      </div>
                     )}
                   </div>
                 </div>
+
+                {/* 2 & 3 — automatic triggers (one at a time; none = quick action only) */}
+                <Controller
+                  name="leadCapture.trigger"
+                  control={control}
+                  render={({ field }) => (
+                    <>
+                      <div className="flex items-start gap-3 rounded-md border p-3">
+                        <Switch
+                          id="leadTriggerFallback"
+                          className="mt-0.5"
+                          checked={field.value === 'on_fallback'}
+                          onCheckedChange={(v) => field.onChange(v ? 'on_fallback' : 'manual')}
+                        />
+                        <div className="flex-1 space-y-1">
+                          <Label htmlFor="leadTriggerFallback">The bot can&rsquo;t answer</Label>
+                          <p className="text-xs text-muted-foreground">Shown when the bot has no answer, so a human can follow up.</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3 rounded-md border p-3">
+                        <Switch
+                          id="leadTriggerAfterN"
+                          className="mt-0.5"
+                          checked={field.value === 'after_n_messages'}
+                          onCheckedChange={(v) => field.onChange(v ? 'after_n_messages' : 'manual')}
+                        />
+                        <div className="flex-1 space-y-1.5">
+                          <Label htmlFor="leadTriggerAfterN">After a number of visitor messages</Label>
+                          <p className="text-xs text-muted-foreground">Shown once the visitor has sent their Nth message.</p>
+                          {field.value === 'after_n_messages' && (
+                            <div className="flex items-center gap-2">
+                              <Label htmlFor="afterNMessages" className="text-xs">N =</Label>
+                              <Input
+                                id="afterNMessages"
+                                type="number"
+                                min={1}
+                                className="h-8 w-20"
+                                {...register('leadCapture.afterNMessages', { valueAsNumber: true })}
+                                placeholder="3"
+                              />
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </>
+                  )}
+                />
               </div>
               </SettingsGroup>
 
@@ -2020,16 +2017,16 @@ export function ConfigForm({
                       </div>
                       {fieldType === 'select' && (
                         <div className="space-y-1">
-                          <Label className="text-xs">Choices (comma separated)</Label>
+                          <Label className="text-xs">Choices</Label>
                           <Controller
                             name={`leadCapture.fields.${index}.options`}
                             control={control}
                             render={({ field: f }) => (
-                              <Input
-                                defaultValue={(f.value ?? []).join(', ')}
-                                onBlur={(e) => f.onChange(splitList(e.target.value))}
-                                placeholder="Wedding, Conference, Birthday"
-                                className="text-sm"
+                              <TagInput
+                                value={f.value ?? []}
+                                onChange={f.onChange}
+                                placeholder="Type a choice and press Enter — Wedding, Conference, Birthday"
+                                max={20}
                               />
                             )}
                           />
@@ -2070,15 +2067,17 @@ export function ConfigForm({
                     name="leadCapture.delivery.emails"
                     control={control}
                     render={({ field: f }) => (
-                      <Input
+                      <TagInput
                         id="leadExtraEmails"
-                        defaultValue={(f.value ?? []).join(', ')}
-                        onBlur={(e) => f.onChange(splitList(e.target.value))}
-                        placeholder="reception@yourvenue.lt, sales@yourvenue.lt"
+                        value={f.value ?? []}
+                        onChange={f.onChange}
+                        validate={(t) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(t)}
+                        placeholder="Type an address and press Enter — reception@yourvenue.lt"
+                        max={5}
                       />
                     )}
                   />
-                  <p className="text-xs text-muted-foreground">Comma separated, up to 5 addresses — e.g. the reception or sales inbox.</p>
+                  <p className="text-xs text-muted-foreground">Up to 5 addresses — e.g. the reception or sales inbox. Workspace admins are emailed regardless.</p>
                 </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="leadWebhook">Webhook URL</Label>

@@ -52,6 +52,7 @@ type LiveConfig = {
     fields?: Array<{ key: string; label: string; required?: boolean; type?: LeadField['type']; options?: string[] }>
     offerOnIntent?: boolean
     intentHint?: string
+    title?: string
   }
   allowedDomains?: string[]
   avatarUrl?: string
@@ -622,6 +623,8 @@ function buildPreviewPublicConfig(config: LiveConfig): PublicBotConfig {
     leadCapture: {
       enabled: config.leadCapture?.enabled ?? false,
       trigger: config.leadCapture?.trigger ?? 'on_fallback',
+      afterNMessages: config.leadCapture?.afterNMessages,
+      title: config.leadCapture?.title,
       fields: (config.leadCapture?.fields ?? []).map((f) => ({
         key: f.key,
         label: f.label,
@@ -735,6 +738,10 @@ function buildFullConfig(config: LiveConfig): BotConfig {
       enabled: config.leadCapture?.enabled ?? false,
       trigger: config.leadCapture?.trigger ?? 'on_fallback',
       afterNMessages: config.leadCapture?.afterNMessages,
+      title: config.leadCapture?.title,
+      // Without these the preview never offers open_lead_form (bit us on demo day).
+      offerOnIntent: config.leadCapture?.offerOnIntent,
+      intentHint: config.leadCapture?.intentHint,
       fields: (config.leadCapture?.fields ?? []).map((f) => ({
         key: f.key,
         label: f.label,
