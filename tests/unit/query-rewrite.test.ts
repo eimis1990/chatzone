@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { rewriteQuery } from '@/lib/ai/query-rewrite'
+import { rewriteQuery, shouldRewriteQuery } from '@/lib/ai/query-rewrite'
 
 describe('rewriteQuery', () => {
   it('returns the rewritten standalone query from the model', async () => {
@@ -33,3 +33,18 @@ describe('rewriteQuery', () => {
     ).toBeNull()
   })
 })
+
+describe('shouldRewriteQuery', () => {
+  it('rewrites on low retrieval confidence', () => {
+    expect(shouldRewriteQuery('kaip grąžinti prekę per 14 dienų', true)).toBe(true)
+  })
+  it('rewrites short affirmations even when retrieval looks confident', () => {
+    expect(shouldRewriteQuery('Taip', false)).toBe(true)
+    expect(shouldRewriteQuery('yes please', false)).toBe(true)
+    expect(shouldRewriteQuery('the first one', false)).toBe(true)
+  })
+  it('skips the pass for a confident, fully-formed question', () => {
+    expect(shouldRewriteQuery('Kokie jūsų darbo laikai savaitgalį?', false)).toBe(false)
+  })
+})
+

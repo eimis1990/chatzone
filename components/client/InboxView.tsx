@@ -14,6 +14,7 @@ import {
 import { toast } from 'sonner'
 import { createBrowserClient } from '@/lib/supabase/browser'
 import { Button } from '@/components/ui/button'
+import { SuggestedProducts } from '@/components/client/SuggestedProducts'
 import { cn } from '@/lib/utils'
 import type { ConversationChannel, HandoffStatus, Message } from '@/lib/types'
 import type { HandoffAction } from '@/lib/handoff'
@@ -401,6 +402,7 @@ export function InboxView({
                         </span>
                       )}
                       <span className="whitespace-pre-wrap">{m.content}</span>
+                      {!isUser && <SuggestedProducts products={m.products} />}
                     </div>
                   </div>
                 )

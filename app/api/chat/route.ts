@@ -7,8 +7,9 @@ import { retrieveContext, serviceRetrievalDeps } from '@/lib/ai/retrieval'
 import { buildMessages, contentFor, defaultLanguage, type ChatMessage } from '@/lib/ai/prompt'
 import { commerceEnabled, makeProductTools, ndjsonChatResponse, ndjsonText } from '@/lib/ai/commerce-tool'
 import { DEFAULT_CHAT_MODEL, DEFAULT_TEMPERATURE } from '@/lib/ai/chat-models'
-import { fastLaneConfig, pickLane } from '@/lib/ai/fast-lane'
-import { rewriteQuery } from '@/lib/ai/query-rewrite'
+import { fastLaneConfig, pickLane, FAST_LANE_SIMILARITY } from '@/lib/ai/fast-lane'
+import { CANONICAL_KIND } from '@/lib/ingestion/canonical'
+import { rewriteQuery, shouldRewriteQuery } from '@/lib/ai/query-rewrite'
 import { searchCatalog } from '@/lib/products/search'
 import { createRateLimiter } from '@/lib/ratelimit'
 import { detectHandoffIntent, HANDOFF_ACK } from '@/lib/handoff'
@@ -256,18 +257,21 @@ export async function POST(req: Request) {
     .filter((m) => m.role === 'assistant' && (m.products as CommerceProduct[] | null)?.length)
     .at(-1)?.products as CommerceProduct[] | undefined
 
-  // Grounding context started at the top of the request; on a miss, retry once
-  // with a condensed standalone query (visitors write elliptical follow-ups
-  // like "o kiek kainuoja?" that embed poorly on their own).
+  // Grounding context started at the top of the request; on a miss — or a
+  // message too short to embed ("Taip") — retry once with a condensed
+  // standalone query (visitors write elliptical follow-ups like "o kiek
+  // kainuoja?" that embed poorly on their own).
   const tPre = performance.now()
   let retrieval = await retrievalPromise
   let rewrote = false
-  if (retrieval.isLowConfidence) {
+  if (shouldRewriteQuery(message, retrieval.isLowConfidence)) {
     rewrote = true
     const rewritten = await rewriteQuery(message, history)
     if (rewritten) {
       const retry = await retrieveContext(bot.id, rewritten, {}, serviceRetrievalDeps(svc))
-      if (!retry.isLowConfidence) retrieval = retry
+      // A short affirmation's own retrieval is noise even when it scores ok —
+      // prefer the rewritten context whenever it clears the bar, or beats it.
+      if (!retry.isLowConfidence || retry.topSimilarity > retrieval.topSimilarity) retrieval = retry
     }
   }
   // How long the model call was held up waiting on retrieval beyond the DB work.
@@ -313,8 +317,25 @@ export async function POST(req: Request) {
   }
 
   // Fast lane (per-bot flag): strong KB hit + no tool intent → no tools, plain
-  // KB prompt, same model. Otherwise the full path below is unchanged.
-  const lane = pickLane(bot.config, message, retrieval.topSimilarity, shownProducts)
+  // KB prompt, same model. Otherwise the full path below is unchanged. Store
+  // bots additionally need the top hit to be a canonical support summary —
+  // one cheap lookup, only paid when the lane would otherwise be fast.
+  let topIsCanonical = false
+  const topSourceId = retrieval.matched[0]?.source_id
+  if (
+    bot.config.fastLane &&
+    commerce &&
+    topSourceId &&
+    retrieval.topSimilarity >= FAST_LANE_SIMILARITY
+  ) {
+    const { data: topSource } = await svc
+      .from('knowledge_sources')
+      .select('metadata')
+      .eq('id', topSourceId)
+      .maybeSingle<{ metadata: { kind?: string } | null }>()
+    topIsCanonical = topSource?.metadata?.kind === CANONICAL_KIND
+  }
+  const lane = pickLane(bot.config, message, retrieval.topSimilarity, shownProducts, topIsCanonical)
   const fast = lane === 'fast'
   const messages = buildMessages(
     fast ? fastLaneConfig(bot.config) : bot.config,

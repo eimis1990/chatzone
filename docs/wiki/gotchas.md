@@ -413,3 +413,23 @@ dev server, hence "the reset link just opened the Loqara website". Probe:
 The app now avoids Supabase-hosted links (own reset email with `token_hash`,
 own invite links), so fix the dashboard when convenient rather than urgently.
 
+## Short follow-ups ("Taip") retrieve junk that still clears the confidence bar
+
+A one-word affirmation embeds close enough to random chunks to score ~0.34,
+above `LOW_CONFIDENCE_SIMILARITY` (0.28), so the standalone-query rewrite never
+ran and the model answered from whatever nav/footer text was in context — on
+HomeByNB that turned "send me the store contacts" into Facebook/Instagram links
+while the KB had the phone and email all along. `shouldRewriteQuery`
+(`lib/ai/query-rewrite.ts`) now also rewrites any message of ≤3 words, and the
+rewritten retrieval wins whenever it beats the raw one.
+
+## Knowledge ingested before 2026-08-12 is ~60% navigation noise
+
+Jina Reader only got `X-Remove-Selector: header, footer, nav, aside` on
+2026-08-12 (`910ad97`). Every URL source ingested earlier chunked the whole
+menu tree: HomeByNB live had 674/1000 link-list chunks, its /kontaktai page 51
+chunks with one real one. Symptom: topic queries return five menu chunks.
+Fix = re-ingest (`scripts/reingest-bot.mts <botId> [--dry]`; re-embeds, ~12s
+per page). Verified on the 3IMIS HomeByNB copy: 358 → 105 chunks, 0 noisy.
+Check `knowledge_sources.updated_at` before blaming retrieval.
+

@@ -57,7 +57,7 @@ export default async function OrgInboxPage() {
     const sb = await createServerClient()
     const { data } = await sb
       .from('messages')
-      .select('id, conversation_id, role, content, citations, token_count, created_at, feedback, from_human')
+      .select('id, conversation_id, role, content, citations, token_count, created_at, feedback, from_human, products')
       .eq('conversation_id', conversationId)
       .order('created_at', { ascending: true })
     return (data ?? []) as Message[]

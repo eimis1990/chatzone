@@ -9,7 +9,11 @@
   Page successfully, but final connection fails `page_taken`; the other-org guard
   remains active (`app/(client)/app/channels/messenger/connect/page.tsx:116`).
   Resolved with explicit owner authorization: connection moved to 3IMIS/Chatfox,
-  OAuth completed via UI, encrypted token verified. Live AI reply, human handoff,
+  OAuth completed via UI, encrypted token verified.
+  **2026-09-05 (later):** owner moved the same connection row to the new demo
+  account's org **Loqara Demo** / bot **Loqara Demo** (login info.epicshorts@gmail.com)
+  and set `messenger_addon=true` there so the production card passes the gate.
+  Messenger conversations created before the move stay on Chatfox/Loqara bots. Live AI reply, human handoff,
   staff reply delivery, and AI resumption after Resolve all passed. The original
   conversation remains on the original Loqara bot.
 - Local development bypasses channel entitlement (`lib/channels/entitlement.ts:26`);
@@ -144,4 +148,17 @@ Keep the 24-hour user-initiated Messenger rule and server-side entitlement
 checks from `docs/CHANNELS_IMPLEMENTATION.md:18-20` and
 `docs/CHANNELS_IMPLEMENTATION.md:185-202`.
 
-_Last verified: 2026-07-30 (ff4a0a9)._
+## Meta App Review state (2026-09-05)
+
+- Submission `2453576515143984` uses a Website platform at
+  `https://www.loqara.com/`; production reviewer navigation instructions and
+  the combined setup/customer-side video are uploaded.
+- The Loqara Page (`1271781096017184`) is connected to the Loqara Demo org and
+  chatbot. The dedicated portal login has Messenger entitlement enabled.
+- App Roles has one accepted real Facebook Tester, “Loqara Demo.” Meta's
+  `pages_messaging` form requires this kind of account; an App Roles-generated
+  test user cannot receive bot messages.
+- Data handling lists Supabase, Vercel, and OpenAI as processors. MB Lokara is
+  the Lithuanian controller and still needs removal from the processor list.
+
+_Last verified: 2026-09-05._

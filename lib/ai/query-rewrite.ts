@@ -37,3 +37,16 @@ async function defaultGenerate(prompt: string): Promise<string> {
   const { text } = await generateText({ model: openai('gpt-4o-mini'), temperature: 0, prompt })
   return text
 }
+
+/**
+ * Whether to spend the rewrite pass. Low retrieval confidence is the obvious
+ * trigger; the other is a message too short to embed meaningfully ("Taip",
+ * "yes", "ok", "the first one") — those score 0.3+ on random chunks, so the
+ * confidence gate alone lets junk context through and the model improvises.
+ */
+export function shouldRewriteQuery(message: string, isLowConfidence: boolean): boolean {
+  if (isLowConfidence) return true
+  const words = message.trim().split(/\s+/).filter(Boolean)
+  return words.length <= 3
+}
+

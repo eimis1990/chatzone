@@ -39,6 +39,12 @@ export function pickLane(
   message: string,
   topSimilarity: number,
   shownProducts?: ShownProducts,
+  /** Whether the best-matching chunk is a canonical support summary (returns,
+   *  shipping, payment, contact…). Store bots only skip tools for those: a
+   *  crawled shop page full of category links scores 0.4+ on "veido kremas"
+   *  too, and skipping search_products there means no product cards at all
+   *  (HomeByNB, 2026-09). Undefined = unknown → treated as not canonical. */
+  topIsCanonical?: boolean,
 ): Lane {
   if (!config.fastLane) return 'full'
   if (topSimilarity < FAST_LANE_SIMILARITY) return 'full'
@@ -47,6 +53,7 @@ export function pickLane(
   // "The first one" refers to cards on screen — needs display_products.
   if (shownProducts?.length) return 'full'
   if (TOOL_INTENT.test(message)) return 'full'
+  if (!topIsCanonical) return 'full'
   return 'fast'
 }
 

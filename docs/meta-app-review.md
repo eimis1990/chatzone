@@ -18,6 +18,9 @@ Submit at App Dashboard → Review → App Review.
   **Resolved with owner authorization:** moved the existing connection to 3IMIS /
   Chatfox, then completed Connect Page through the UI. Verified active status and
   non-null encrypted token; the original conversation stays on the Loqara bot.
+  **Superseded 2026-09-05:** the connection now lives on the **Loqara Demo** org
+  (info.epicshorts@gmail.com, `messenger_addon=true`) — use that account for the
+  screencast and reviewer instructions, not 3IMIS.
 - Live dry run now passed: customer question → AI reply; human request →
   acknowledgement and Needs human Inbox entry; Take over → staff reply delivered
   in Messenger; Resolve → subsequent customer question receives an AI reply.
@@ -29,10 +32,13 @@ Submit at App Dashboard → Review → App Review.
 - Messenger review form explicitly asks for a real Facebook account with the
   Tester role; App Roles-generated test users cannot receive bot messages.
   Keep this distinct from the dedicated Loqara portal reviewer login.
-- Native computer control remained unavailable after permission/reset attempts.
-  The owner started macOS recording manually; the complete browser walkthrough
-  was repeated during that recording. The saved video has not yet been located
-  or inspected, so no video has been uploaded.
+- Review video is ready at
+  `/Users/eimantaskudarauskas/Desktop/0905/Loqara-Messenger-App-Review-complete.mp4`.
+  It combines the 98-second setup/Inbox walkthrough with the owner's 32-second
+  phone-side Messenger conversation (2:11 total, 1352×720, H.264/AAC). The
+  combined file is uploaded for `pages_show_list`, `pages_manage_metadata`,
+  `pages_messaging`, and `business_management`, and is also attached to the
+  website reviewer instructions.
 - The Messenger card is enabled locally because development bypasses the channel
   entitlement gate. 3IMIS has no production Messenger entitlement; arrange a
   dedicated hosted reviewer account before supplying access instructions.
@@ -40,17 +46,30 @@ Submit at App Dashboard → Review → App Review.
   calls `/me/accounts`, with no separate Business Manager asset discovery call.
   Verify why the configured grant needs it rather than treating portfolio
   ownership alone as demonstrated API usage.
-- Reviewer access must use a reachable hosted URL, with a dedicated test login
-  and appropriate channel entitlement. Localhost is not a reviewer access URL.
+- The Website platform is now configured as `https://www.loqara.com/`, with
+  production testing instructions. Reviewer access uses the dedicated Loqara
+  Demo account (`info.epicshorts@gmail.com`, Messenger entitlement enabled).
+  Its password still must be entered in Meta's reviewer-credentials field.
+- Meta App Roles now shows **1 tester**: the real Facebook account “Loqara
+  Demo.” The invitation has been accepted. Keep it distinct from App
+  Roles-generated test users, which cannot receive bot messages.
 - The sequence below remains a proposed shot list; replace its timestamps after
   inspecting the actual recording. The live walkthrough included OAuth details,
   successful Page connection, customer question/AI reply, staff takeover and reply
   delivery, and bot resumption. Mask unrelated Messenger chat-list content before
   uploading. Do not alter or fabricate the demonstrated results.
-- Saved draft explanations for pages_show_list, pages_manage_metadata, and
-  pages_messaging in Meta; Loqara is selected as the review Page (confirmed on
-  reopening the messaging dialog). Video, reviewer access, data handling, and
-  allowed-usage confirmations remain incomplete. Nothing submitted.
+- Saved explanations for all video-backed permissions; Meta marks the required
+  API calls Completed. Loqara is selected as the review Page and the production
+  Page is connected to the Loqara Demo chatbot. Allowed-usage confirmations,
+  two factual government-request answers, the reviewer password, and the
+  Facebook tester credentials in the `pages_messaging` review instructions
+  remain incomplete. Nothing submitted.
+- Data handling now lists the actual processors: Supabase, Inc. (Frankfurt
+  project region plus US/Singapore access), Vercel Inc. (configured `iad1` US
+  function region), and OpenAI Ireland Ltd. (its published API processing
+  locations). MB Lokara is correctly entered as the Lithuanian controller but
+  is still duplicated in the processor list; Meta warns removing that entry
+  cannot be undone, so remove it only with owner confirmation.
 - Corrected the data-handling guidance below: disconnect preserves transcripts;
   AI processing involves subprocessors.
 

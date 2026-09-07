@@ -166,3 +166,25 @@ Product search is a **separate** index — see [commerce](commerce.md). RAG
 chunks are for policy/FAQ/general content only.
 
 _Last verified: 2026-08-10 (working tree, HomeByNB feedback round)._
+
+## Re-ingesting a bot's URL sources
+
+`scripts/reingest-bot.mts <botId> [--dry]` runs `ingestSource` over every URL
+source of a bot (needs env: `set -a; source .env.local; set +a`, run via
+`npm exec --yes --package=tsx -- tsx …`). Use it after ingestion-pipeline fixes;
+old chunks never update on their own. See the pre-2026-08-12 nav-noise gotcha.
+
+## Fast lane: store bots need a canonical top hit
+
+`pickLane` (`lib/ai/fast-lane.ts`) skips tools only when the best chunk is a
+canonical support summary (`knowledge_sources.metadata.kind = 'canonical'`);
+the chat route does one `knowledge_sources` lookup for the top `source_id`, paid
+only when the lane would otherwise be fast. Why: on HomeByNB, crawled shop pages
+(category link lists, curated files) scored ≥0.4 on product nouns ("veido
+kremas", "Nata puodai"), so 13 of 28 recent product questions went fast → no
+`search_products` → zero product cards; with the canonical rule 0 of 28 do,
+while returns/warranty/payment/contact questions all still hit a canonical page
+and stay fast. KB-only bots are unaffected. Measured 2026-09-07 with the live
+KB via `match_chunks_hybrid` (probe idea: embed the question, take the top hit's
+source, check its kind).
+
