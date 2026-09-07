@@ -104,6 +104,65 @@ import { cn, readableTextColor } from '@/lib/utils'
 import { normalizeLanguageSelection } from '@/lib/validation/normalize-languages'
 import { SUPPORTED_LANGUAGES, languageMeta } from '@/lib/i18n/languages'
 
+// ── Lead capture form builder helpers ────────────────────────────────────────
+const LEAD_FIELD_TYPES = [
+  { value: 'text', label: 'Short text' },
+  { value: 'email', label: 'Email' },
+  { value: 'tel', label: 'Phone' },
+  { value: 'number', label: 'Number' },
+  { value: 'date', label: 'Date' },
+  { value: 'textarea', label: 'Long text' },
+  { value: 'select', label: 'Choice list' },
+] as const
+type LeadFieldTypeValue = (typeof LEAD_FIELD_TYPES)[number]['value']
+type LeadFieldDraft = { key: string; label: string; required: boolean; type?: LeadFieldTypeValue; options?: string[] }
+
+/** "Jūsų tel. numeris" → "jusu_tel_numeris" — a stable column name for Leads/webhooks. */
+function slugifyKey(label: string): string {
+  return label
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .slice(0, 40)
+}
+function splitList(raw: string): string[] {
+  return raw.split(/[,;\n]/).map((x) => x.trim()).filter(Boolean)
+}
+const LEAD_TEMPLATES: Record<'contact' | 'reservation', Record<'en' | 'lt', LeadFieldDraft[]>> = {
+  contact: {
+    en: [
+      { key: 'name', label: 'Name', required: false, type: 'text' },
+      { key: 'email', label: 'Email', required: true, type: 'email' },
+    ],
+    lt: [
+      { key: 'name', label: 'Vardas', required: false, type: 'text' },
+      { key: 'email', label: 'El. paštas', required: true, type: 'email' },
+    ],
+  },
+  reservation: {
+    en: [
+      { key: 'name', label: 'Full name', required: true, type: 'text' },
+      { key: 'email', label: 'Email', required: true, type: 'email' },
+      { key: 'phone', label: 'Phone number', required: true, type: 'tel' },
+      { key: 'service', label: 'Service you are interested in', required: true, type: 'text' },
+      { key: 'guests', label: 'Number of guests', required: true, type: 'number' },
+      { key: 'date', label: 'Preferred date', required: true, type: 'date' },
+      { key: 'message', label: 'Short description of your request', required: false, type: 'textarea' },
+    ],
+    lt: [
+      { key: 'name', label: 'Vardas ir pavardė', required: true, type: 'text' },
+      { key: 'email', label: 'El. paštas', required: true, type: 'email' },
+      { key: 'phone', label: 'Tel. numeris', required: true, type: 'tel' },
+      { key: 'service', label: 'Dominanti paslauga', required: true, type: 'text' },
+      { key: 'guests', label: 'Dalyvių kiekis', required: true, type: 'number' },
+      { key: 'date', label: 'Pageidaujama data', required: true, type: 'date' },
+      { key: 'message', label: 'Trumpas užklausos aprašymas', required: false, type: 'textarea' },
+    ],
+  },
+}
+
 interface ConfigFormProps {
   botId: string
   /** Internal bot name (sidebar label) — editable, distinct from displayName. */
@@ -322,6 +381,7 @@ export function ConfigForm({
     reset,
     watch,
     setValue,
+    getValues,
     formState: { errors, isDirty, isSubmitting },
   } = form
 
@@ -1755,7 +1815,8 @@ export function ConfigForm({
             </SettingsGroup>
 
             {leadCaptureEnabled && (
-              <SettingsGroup title="Trigger and form" description="The widget shows a small built-in form in the chat with the fields below. Choose when it pops up and which details it asks for — without at least one field, nothing can appear.">
+              <>
+              <SettingsGroup title="When the form appears" description="Pick the moment the built-in form pops up in the chat. The assistant can also open it itself when it hears a booking or contact request.">
               <div className="space-y-4">
                 <div className="space-y-1.5">
                   <Label>Trigger</Label>
@@ -1807,18 +1868,6 @@ export function ConfigForm({
                   />
                 </div>
 
-                <div className="space-y-1.5">
-                  <Label htmlFor="leadFormTitle">Form title</Label>
-                  <Input
-                    id="leadFormTitle"
-                    {...register('leadCapture.title')}
-                    placeholder="Leave your details / Palikite savo kontaktus"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Leave empty to use the built-in title in the visitor&rsquo;s language.
-                  </p>
-                </div>
-
                 {watch('leadCapture.trigger') === 'after_n_messages' && (
                   <div className="space-y-1.5">
                     <Label htmlFor="afterNMessages">Trigger after N messages</Label>
@@ -1832,68 +1881,178 @@ export function ConfigForm({
                   </div>
                 )}
 
+                <div className="flex items-start gap-3 rounded-md border p-3">
+                  <Controller
+                    name="leadCapture.offerOnIntent"
+                    control={control}
+                    render={({ field }) => (
+                      <Switch checked={!!field.value} onCheckedChange={field.onChange} id="leadOfferOnIntent" className="mt-0.5" />
+                    )}
+                  />
+                  <div className="flex-1 space-y-1.5">
+                    <Label htmlFor="leadOfferOnIntent">Let the assistant open it on request</Label>
+                    <p className="text-xs text-muted-foreground">
+                      When a visitor wants to book, reserve, order a service or be contacted, the assistant opens the form
+                      and prefills what it already knows — instead of asking for details one by one.
+                    </p>
+                    {watch('leadCapture.offerOnIntent') && (
+                      <Input
+                        {...register('leadCapture.intentHint')}
+                        placeholder="What counts as a request here — e.g. hall rental, accommodation or event bookings"
+                        className="text-sm"
+                      />
+                    )}
+                  </div>
+                </div>
+              </div>
+              </SettingsGroup>
+
+              <SettingsGroup title="Form" description="The fields a visitor fills in. Start from a template or build your own — each field becomes a column on the Leads screen.">
+              <div className="space-y-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="leadFormTitle">Form title</Label>
+                  <Input
+                    id="leadFormTitle"
+                    {...register('leadCapture.title')}
+                    placeholder="Leave your details / Palikite savo kontaktus"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Leave empty to use the built-in title in the visitor&rsquo;s language.
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-xs text-muted-foreground">Start from a template:</span>
+                  {(
+                    [
+                      ['contact', 'Contact details'],
+                      ['reservation', 'Reservation request'],
+                    ] as const
+                  ).map(([id, label]) => (
+                    <Button
+                      key={id}
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const lt = (watch('defaultLanguage') ?? watch('languages')?.[0]) === 'lt'
+                        leadFieldsArray.replace(LEAD_TEMPLATES[id][lt ? 'lt' : 'en'])
+                      }}
+                    >
+                      {label}
+                    </Button>
+                  ))}
+                </div>
+
                 <div className="space-y-3">
                   <Label>Fields</Label>
-                  {leadFieldsArray.fields.map((field, index) => (
-                    <div
-                      key={field.id}
-                      className="grid gap-2 rounded-md border p-3 sm:grid-cols-[1fr_1fr_auto_auto]"
-                    >
-                      <div className="space-y-1">
-                        <Label className="text-xs">Key</Label>
+                  {leadFieldsArray.fields.map((field, index) => {
+                    const fieldType = (watch(`leadCapture.fields.${index}.type`) ?? 'text') as LeadFieldTypeValue
+                    return (
+                    <div key={field.id} className="space-y-2 rounded-md border p-3">
+                      <div className="grid gap-2 sm:grid-cols-[1.4fr_1fr_auto_auto]">
+                        <div className="space-y-1">
+                          <Label className="text-xs">Label</Label>
+                          <Input
+                            {...register(`leadCapture.fields.${index}.label`, {
+                              onBlur: (e) => {
+                                if (!getValues(`leadCapture.fields.${index}.key`)) {
+                                  setValue(`leadCapture.fields.${index}.key`, slugifyKey(e.target.value), { shouldDirty: true })
+                                }
+                              },
+                            })}
+                            placeholder="Phone number"
+                            className="text-sm"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-xs">Type</Label>
+                          <Controller
+                            name={`leadCapture.fields.${index}.type`}
+                            control={control}
+                            render={({ field: f }) => (
+                              <Select value={f.value ?? 'text'} onValueChange={f.onChange}>
+                                <SelectTrigger className="w-full text-sm">
+                                  <span>{LEAD_FIELD_TYPES.find((t) => t.value === (f.value ?? 'text'))?.label}</span>
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {LEAD_FIELD_TYPES.map((t) => (
+                                    <SelectItem key={t.value} value={t.value}>
+                                      {t.label}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            )}
+                          />
+                        </div>
+                        <div className="flex items-end gap-1.5 pb-0.5">
+                          <Controller
+                            name={`leadCapture.fields.${index}.required`}
+                            control={control}
+                            render={({ field: f }) => (
+                              <Switch
+                                checked={f.value}
+                                onCheckedChange={f.onChange}
+                                size="sm"
+                                id={`field-required-${index}`}
+                              />
+                            )}
+                          />
+                          <Label
+                            htmlFor={`field-required-${index}`}
+                            className="text-xs whitespace-nowrap"
+                          >
+                            Required
+                          </Label>
+                        </div>
+                        <div className="flex items-end">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon-sm"
+                            onClick={() => leadFieldsArray.remove(index)}
+                            aria-label="Remove field"
+                          >
+                            <TrashIcon />
+                          </Button>
+                        </div>
+                      </div>
+                      {fieldType === 'select' && (
+                        <div className="space-y-1">
+                          <Label className="text-xs">Choices (comma separated)</Label>
+                          <Controller
+                            name={`leadCapture.fields.${index}.options`}
+                            control={control}
+                            render={({ field: f }) => (
+                              <Input
+                                defaultValue={(f.value ?? []).join(', ')}
+                                onBlur={(e) => f.onChange(splitList(e.target.value))}
+                                placeholder="Wedding, Conference, Birthday"
+                                className="text-sm"
+                              />
+                            )}
+                          />
+                        </div>
+                      )}
+                      <div className="flex items-center gap-2">
+                        <Label className="text-xs text-muted-foreground whitespace-nowrap">Key</Label>
                         <Input
                           {...register(`leadCapture.fields.${index}.key`)}
-                          placeholder="email"
-                          className="text-sm"
+                          placeholder="phone"
+                          className="h-7 max-w-[200px] font-mono text-xs"
                         />
-                      </div>
-                      <div className="space-y-1">
-                        <Label className="text-xs">Label</Label>
-                        <Input
-                          {...register(`leadCapture.fields.${index}.label`)}
-                          placeholder="Email address"
-                          className="text-sm"
-                        />
-                      </div>
-                      <div className="flex items-end gap-1.5 pb-0.5">
-                        <Controller
-                          name={`leadCapture.fields.${index}.required`}
-                          control={control}
-                          render={({ field: f }) => (
-                            <Switch
-                              checked={f.value}
-                              onCheckedChange={f.onChange}
-                              size="sm"
-                              id={`field-required-${index}`}
-                            />
-                          )}
-                        />
-                        <Label
-                          htmlFor={`field-required-${index}`}
-                          className="text-xs whitespace-nowrap"
-                        >
-                          Required
-                        </Label>
-                      </div>
-                      <div className="flex items-end">
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon-sm"
-                          onClick={() => leadFieldsArray.remove(index)}
-                          aria-label="Remove field"
-                        >
-                          <TrashIcon />
-                        </Button>
+                        <span className="text-[11px] text-muted-foreground">Column name on the Leads screen and in webhooks — filled from the label.</span>
                       </div>
                     </div>
-                  ))}
+                    )
+                  })}
                   <Button
                     type="button"
                     variant="outline"
                     size="sm"
                     onClick={() =>
-                      leadFieldsArray.append({ key: '', label: '', required: false })
+                      leadFieldsArray.append({ key: '', label: '', required: false, type: 'text' })
                     }
                   >
                     <PlusIcon />
@@ -1902,6 +2061,35 @@ export function ConfigForm({
                 </div>
               </div>
               </SettingsGroup>
+
+              <SettingsGroup title="Where leads go" description="Every submission is saved on the Leads screen and emailed to workspace admins. Add more destinations below.">
+              <div className="space-y-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="leadExtraEmails">Also email</Label>
+                  <Controller
+                    name="leadCapture.delivery.emails"
+                    control={control}
+                    render={({ field: f }) => (
+                      <Input
+                        id="leadExtraEmails"
+                        defaultValue={(f.value ?? []).join(', ')}
+                        onBlur={(e) => f.onChange(splitList(e.target.value))}
+                        placeholder="reception@yourvenue.lt, sales@yourvenue.lt"
+                      />
+                    )}
+                  />
+                  <p className="text-xs text-muted-foreground">Comma separated, up to 5 addresses — e.g. the reception or sales inbox.</p>
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="leadWebhook">Webhook URL</Label>
+                  <Input id="leadWebhook" {...register('leadCapture.delivery.webhookUrl')} placeholder="https://hooks.zapier.com/…" />
+                  <p className="text-xs text-muted-foreground">
+                    We POST each lead as JSON (event, bot, fields, time) — works with Zapier, Make, n8n or your own endpoint.
+                  </p>
+                </div>
+              </div>
+              </SettingsGroup>
+              </>
             )}
           </CardContent>
         </CollapsibleSection>

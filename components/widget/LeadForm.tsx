@@ -30,8 +30,62 @@ const STRINGS: Record<BotLanguage, {
   },
 }
 
+/** Native input per field type — no picker libraries; the browser does dates/numbers. */
+function FieldInput({
+  field,
+  value,
+  onChange,
+  className,
+  style,
+  placeholder,
+}: {
+  field: LeadField
+  value: string
+  onChange: (v: string) => void
+  className: string
+  style: React.CSSProperties
+  placeholder?: string
+}) {
+  const type = field.type ?? (field.key === 'email' ? 'email' : 'text')
+  const common = {
+    id: `lead-${field.key}`,
+    value,
+    required: field.required,
+    'aria-label': field.label,
+    placeholder,
+    className,
+    style,
+  }
+  if (type === 'textarea') {
+    return <textarea {...common} rows={3} onChange={(e) => onChange(e.target.value)} className={`${className} resize-none`} />
+  }
+  if (type === 'select') {
+    return (
+      <select {...common} onChange={(e) => onChange(e.target.value)}>
+        <option value="">{placeholder ?? field.label}</option>
+        {(field.options ?? []).map((o) => (
+          <option key={o} value={o}>
+            {o}
+          </option>
+        ))}
+      </select>
+    )
+  }
+  return (
+    <input
+      {...common}
+      type={type}
+      inputMode={type === 'tel' ? 'tel' : type === 'number' ? 'numeric' : undefined}
+      min={type === 'number' ? 0 : undefined}
+      onChange={(e) => onChange(e.target.value)}
+    />
+  )
+}
+
 interface LeadFormProps {
   fields: LeadField[]
+  /** Values the assistant already learned in chat (from `open_lead_form`). */
+  initialValues?: Record<string, string>
   primaryColor: string
   /** Widget language — picks the built-in strings. */
   lang?: BotLanguage
@@ -49,13 +103,14 @@ export function LeadForm({
   lang = 'en',
   title,
   variant = 'default',
+  initialValues,
   onSubmit,
   onDismiss,
 }: LeadFormProps) {
   const t = STRINGS[lang] ?? STRINGS.en
   const heading = title?.trim() || t.title
   const [values, setValues] = useState<Record<string, string>>(
-    Object.fromEntries(fields.map((f) => [f.key, '']))
+    Object.fromEntries(fields.map((f) => [f.key, initialValues?.[f.key] ?? '']))
   )
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
@@ -108,16 +163,13 @@ export function LeadForm({
         </div>
         <form onSubmit={handleSubmit} className="space-y-2" noValidate>
           {fields.map((field) => (
-            <input
+            <FieldInput
               key={field.key}
-              id={`lead-${field.key}`}
-              type={field.key === 'email' ? 'email' : 'text'}
+              field={field}
               value={values[field.key] ?? ''}
-              onChange={(e) => setValues((prev) => ({ ...prev, [field.key]: e.target.value }))}
-              required={field.required}
-              aria-label={field.label}
+              onChange={(v) => setValues((prev) => ({ ...prev, [field.key]: v }))}
               placeholder={`${field.label}${field.required ? ' *' : ''}`}
-              className="w-full rounded-full border border-gray-200 bg-white px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-offset-0"
+              className="w-full rounded-full border border-gray-200 bg-white px-4 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-0"
               style={{ '--tw-ring-color': primaryColor } as React.CSSProperties}
             />
           ))}
@@ -157,15 +209,11 @@ export function LeadForm({
               {field.label}
               {field.required && <span className="text-red-500 ml-0.5" aria-hidden="true">*</span>}
             </label>
-            <input
-              id={`lead-${field.key}`}
-              type={field.key === 'email' ? 'email' : 'text'}
+            <FieldInput
+              field={field}
               value={values[field.key] ?? ''}
-              onChange={(e) =>
-                setValues((prev) => ({ ...prev, [field.key]: e.target.value }))
-              }
-              required={field.required}
-              className="w-full rounded-lg border border-gray-200 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-offset-0"
+              onChange={(v) => setValues((prev) => ({ ...prev, [field.key]: v }))}
+              className="w-full rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-0"
               style={{ '--tw-ring-color': primaryColor } as React.CSSProperties}
             />
           </div>

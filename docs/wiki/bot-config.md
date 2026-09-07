@@ -140,3 +140,26 @@ details before claiming no match. It is published in `system_prompts` and assign
 to the Mobel bot (and the separate 3IMIS/Chafox Verskis test bot).
 
 _Last verified: 2026-07-27._
+
+## Lead capture (request/booking forms)
+
+Spec: `docs/superpowers/specs/2026-09-07-lead-capture-forms-design.md`. Client
+variation is config, never code:
+
+- **Typed fields** — `LeadField.type` ∈ text/email/tel/number/date/textarea/select
+  (+ `options` for select), rendered as native inputs by `FieldInput` in
+  `components/widget/LeadForm.tsx`. No `type` → text (key `email` → email input).
+- **AI trigger** — `leadCapture.offerOnIntent` + `intentHint` give the model an
+  `open_lead_form` tool (`lib/ai/lead-tool.ts`), offered from both chat routes on
+  the full lane when the `lead-form` component is allowed. The tool pushes
+  `{prefill}` to `leadFormSink`; `ndjsonChatResponse` emits one
+  `{t:'lead_form'}` line; `ChatWindow.openLeadFormFromAssistant` shows the form
+  with `initialValues`. Additive to the single-select `trigger`.
+- **Delivery** — `leadCapture.delivery.{emails, webhookUrl}`;
+  `lib/lead-delivery.ts deliverLead` runs admin email (pref-gated, unchanged),
+  extra emails (not pref-gated) and the webhook (`assertPublicUrl`, 5 s timeout,
+  `lead.created` JSON) independently; nothing there can fail `/api/lead`.
+- **UI** — ConfigForm lead card = "When the form appears" → "Form" (templates:
+  Contact details / Reservation request, LT/EN by bot language; key auto-slugged
+  from label on blur) → "Where leads go".
+

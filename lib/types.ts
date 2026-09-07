@@ -75,10 +75,16 @@ export interface Invite {
 }
 
 /** Lead-capture field definition (part of BotConfig). */
+export type LeadFieldType = 'text' | 'email' | 'tel' | 'number' | 'date' | 'textarea' | 'select'
+
 export interface LeadField {
   key: string
   label: string
   required: boolean
+  /** Native input type; omitted → text (key `email` still renders as email). */
+  type?: LeadFieldType
+  /** Choices for `select`. */
+  options?: string[]
 }
 
 export type LeadTrigger = 'on_fallback' | 'after_n_messages' | 'manual'
@@ -308,6 +314,16 @@ export interface BotConfig {
     afterNMessages?: number
     title?: string
     fields: LeadField[]
+    /** Additive to `trigger`: the model gets an `open_lead_form` tool and opens
+     *  the form itself when the visitor wants to book / order / be contacted. */
+    offerOnIntent?: boolean
+    /** What counts as intent for this business ("hall rental or event booking"). */
+    intentHint?: string
+    /** Where new leads go besides the Leads screen + admin email. */
+    delivery?: {
+      emails?: string[]
+      webhookUrl?: string
+    }
   }
   allowedDomains: string[]
   /** Live product search (e-commerce). */

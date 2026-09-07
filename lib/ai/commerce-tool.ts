@@ -3,6 +3,7 @@ import { openai } from '@ai-sdk/openai'
 import { z } from 'zod'
 import type { BotConfig } from '@/lib/types'
 import type { CommerceProduct, OrderStatus } from '@/lib/commerce/types'
+import type { LeadFormRequest } from '@/lib/ai/lead-tool'
 import {
   providerCandidateDetailsLimit,
   providerCompleteDisplaySelection,
@@ -468,6 +469,8 @@ export function ndjsonChatResponse(
     /** Component-library gating: provider folder lacks product-cards → the reply
      *  stays text-only (tools still run; the model can answer in prose). */
     suppressProducts?: boolean
+    /** Filled by `open_lead_form` (lib/ai/lead-tool.ts); emitted as one `lead_form` line. */
+    leadFormSink?: LeadFormRequest[]
   } & NdjsonOptions,
 ): Response {
   const result = streamText({
@@ -531,6 +534,8 @@ export function ndjsonChatResponse(
         emitProductsIfChanged()
         const order = opts.orderSink ?? []
         if (order.length) line({ t: 'order', v: order[0] })
+        const leadForm = opts.leadFormSink ?? []
+        if (leadForm.length) line({ t: 'lead_form', v: leadForm[leadForm.length - 1] })
       } catch (err) {
         console.error('[agent] chat stream failed:', err)
         if (!fullText && opts.errorText) {

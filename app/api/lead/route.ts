@@ -2,7 +2,7 @@ import { z } from 'zod'
 import { createServiceClient } from '@/lib/supabase/service'
 import { isOriginAllowed, corsHeaders } from '@/lib/widget-auth'
 import { createRateLimiter } from '@/lib/ratelimit'
-import { notifyLeadCaptured } from '@/lib/notify'
+import { deliverLead } from '@/lib/lead-delivery'
 import type { Bot } from '@/lib/types'
 
 // ~5 lead submissions/min per bot, small burst.
@@ -76,7 +76,7 @@ export async function POST(req: Request) {
       conversation_id: linkedConversationId,
       fields,
     })
-    .select('id')
+    .select('id, created_at')
     .single()
 
   if (error) {
@@ -84,8 +84,13 @@ export async function POST(req: Request) {
     return json({ error: 'Failed to save lead' }, 500)
   }
 
-  // Fire-and-forget: a failed email must never fail the lead submission.
-  void notifyLeadCaptured(svc, { id: bot.id, org_id: bot.org_id, name: bot.name }, fields)
+  // Fire-and-forget: a failed email/webhook must never fail the lead submission.
+  void deliverLead(svc, bot, {
+    id: lead.id,
+    conversationId: linkedConversationId,
+    fields,
+    createdAt: lead.created_at,
+  })
 
   return json({ id: lead.id }, 201)
 }

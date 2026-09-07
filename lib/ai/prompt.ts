@@ -60,6 +60,15 @@ export function buildSystemPrompt(
     // Without this the model has no idea what "upcoming" means and treats every
     // dated item in the context (past or postponed) as current.
     `Today's date is ${new Date().toISOString().slice(0, 10)}. Treat dates in the context relative to it.`,
+    ...(config.leadCapture?.enabled && config.leadCapture.offerOnIntent && config.leadCapture.fields?.length
+      ? [
+          'REQUEST FORM: you have an `open_lead_form` tool. When the visitor wants to book, reserve, ' +
+            `order a service, or asks to be contacted${config.leadCapture.intentHint?.trim() ? ` (for this business: ${config.leadCapture.intentHint.trim()})` : ''}, ` +
+            'call it ONCE, prefilling any details they already gave, then briefly tell them to complete ' +
+            'the form that just opened. Do not collect the form details one question at a time in chat, ' +
+            'and do not call it again in the same conversation unless they ask for the form.',
+        ]
+      : []),
     // Warmth: the old replies read as cold and clipped ("Here are some products").
     // Make the assistant feel like a friendly, attentive shop helper.
     'WARMTH: be genuinely warm, friendly and human — like a helpful shop assistant who is glad to ' +

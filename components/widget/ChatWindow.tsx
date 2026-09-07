@@ -216,6 +216,14 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
   const [conversationId, setConversationId] = useState<string | undefined>()
   const [showLeadForm, setShowLeadForm] = useState(false)
   const [leadDismissed, setLeadDismissed] = useState(false)
+  // Prefill from the assistant's `open_lead_form` call (details already given in chat).
+  const [leadPrefill, setLeadPrefill] = useState<Record<string, string>>({})
+  const openLeadFormFromAssistant = useCallback((v: unknown) => {
+    const prefill = (v as { prefill?: Record<string, string> } | null)?.prefill ?? {}
+    setLeadPrefill(prefill)
+    setLeadDismissed(false)
+    setShowLeadForm(true)
+  }, [])
   // When set, the full-height product list overlay covers the chat body.
   const [listProducts, setListProducts] = useState<{
     products: CommerceProduct[]
@@ -293,6 +301,7 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
     setConversationId(undefined)
     setShowLeadForm(false)
     setLeadDismissed(false)
+    setLeadPrefill({})
     setListProducts(null)
     setAgentName(null)
     setConfirmRestart(false)
@@ -778,6 +787,8 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
                 )
               } else if (event.t === 'order' && event.v) {
                 accumulatedOrder = event.v as OrderStatus
+              } else if (event.t === 'lead_form') {
+                openLeadFormFromAssistant(event.v)
               }
             } catch {
               // Malformed NDJSON line — skip
@@ -801,6 +812,8 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
               )
             } else if (event.t === 'order' && event.v) {
               accumulatedOrder = event.v as OrderStatus
+            } else if (event.t === 'lead_form') {
+              openLeadFormFromAssistant(event.v)
             }
           } catch {
             // skip
@@ -836,7 +849,7 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
         setStreaming(false)
       }
     },
-    [streaming, conversationId, leadDismissed, config.leadCapture, activeLang, transport, syncMessageIds, updateHandoff, buildHistory, activateVisitorBlock]
+    [streaming, conversationId, leadDismissed, config.leadCapture, activeLang, transport, syncMessageIds, updateHandoff, buildHistory, activateVisitorBlock, openLeadFormFromAssistant]
   )
 
   /** "Open URL" quick action: reply with a short note + a button to the link. */
@@ -1406,6 +1419,7 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
             primaryColor={primaryColor}
             lang={activeLang}
             title={config.leadCapture.title}
+            initialValues={leadPrefill}
             variant={config.components?.['lead-form'] === 'minimal' ? 'minimal' : 'default'}
             onSubmit={handleLeadSubmit}
             onDismiss={() => {

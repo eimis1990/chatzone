@@ -13,6 +13,7 @@ import { rewriteQuery, shouldRewriteQuery } from '@/lib/ai/query-rewrite'
 import { searchCatalog } from '@/lib/products/search'
 import { createRateLimiter } from '@/lib/ratelimit'
 import { detectHandoffIntent, HANDOFF_ACK } from '@/lib/handoff'
+import { leadToolEnabled, makeLeadTools, type LeadFormRequest } from '@/lib/ai/lead-tool'
 import { notifyHandoffRequested } from '@/lib/notify'
 import { isOverConversationLimit, maybeSendUsageWarning } from '@/lib/usage'
 import { assessVisitorAbuse } from '@/lib/security/visitor-abuse'
@@ -360,6 +361,29 @@ export async function POST(req: Request) {
   // when the card was first shown — fine within a live session.
   const shownMap = new Map((shownProducts ?? []).map((p) => [p.id, p]))
 
+  // Request/booking form tool — independent of commerce (venues, clinics…).
+  const leadFormSink: LeadFormRequest[] = []
+  const leadTools = !fast && leadToolEnabled(bot.config, allowedComponents) ? makeLeadTools(bot.config, leadFormSink) : {}
+  const productTools =
+    commerce && !fast
+      ? makeProductTools(
+        bot.config,
+        productSink,
+        orderSink,
+        (p) => {
+          // Log the model's actual query — invaluable when ranking looks wrong.
+          console.log(
+            `[agent] search_products query="${p.query}" audience=${p.audience ?? '-'} sort=${p.sort ?? '-'}`,
+          )
+          return searchCatalog(bot, p.query, svc, p.limit ?? 24, { audience: p.audience, sort: p.sort })
+        },
+        candidates,
+        shownMap,
+        allowedComponents,
+      )
+      : {}
+  const tools = { ...productTools, ...leadTools }
+
   const model = bot.config.model || DEFAULT_CHAT_MODEL
   return ndjsonChatResponse(openai(model), messages, {
     temperature: bot.config.temperature ?? DEFAULT_TEMPERATURE,
@@ -368,24 +392,8 @@ export async function POST(req: Request) {
       startedAt: t0,
       label: `bot=${bot.id} lane=${lane} model=${model} pre=${Math.round(tPre - t0)}ms retrievalWait=${retrievalWaitMs}ms ${retrievalLabel}`,
     },
-    tools:
-      commerce && !fast
-        ? makeProductTools(
-          bot.config,
-          productSink,
-          orderSink,
-          (p) => {
-            // Log the model's actual query — invaluable when ranking looks wrong.
-            console.log(
-              `[agent] search_products query="${p.query}" audience=${p.audience ?? '-'} sort=${p.sort ?? '-'}`,
-            )
-            return searchCatalog(bot, p.query, svc, p.limit ?? 24, { audience: p.audience, sort: p.sort })
-          },
-          candidates,
-          shownMap,
-          allowedComponents,
-        )
-      : undefined,
+    tools: Object.keys(tools).length ? tools : undefined,
+    leadFormSink,
     productSink,
     orderSink,
     candidates,

@@ -10,10 +10,14 @@ export const SYSTEM_PROMPT_MAX = 32000
 // ---------------------------------------------------------------------------
 // Bot configuration
 // ---------------------------------------------------------------------------
+export const leadFieldTypeSchema = z.enum(['text', 'email', 'tel', 'number', 'date', 'textarea', 'select'])
+
 export const leadFieldSchema = z.object({
   key: z.string().min(1),
   label: z.string().min(1),
   required: z.boolean().default(false),
+  type: leadFieldTypeSchema.optional(),
+  options: z.array(z.string().min(1).max(80)).max(20).optional(),
 })
 
 export const DEFAULT_VOICE_ID = '21m00Tcm4TlvDq8ikWAM' // ElevenLabs "Rachel"
@@ -267,6 +271,17 @@ export const botConfigFormSchema = z.object({
       // Custom form heading; empty → a built-in default in the widget language.
       title: z.string().max(80).optional(),
       fields: z.array(leadFieldSchema).default([]),
+      offerOnIntent: z.boolean().optional(),
+      intentHint: z.string().max(200).optional(),
+      delivery: z
+        .object({
+          // '' from an empty form input must not fail validation.
+          emails: z.array(z.string().email()).max(5).optional(),
+          webhookUrl: z
+            .union([z.literal(''), z.string().url().max(500).regex(/^https?:\/\//, 'Webhook must be an http(s) URL')])
+            .optional(),
+        })
+        .optional(),
     })
     .default({ enabled: false, trigger: 'on_fallback', fields: [] }),
   allowedDomains: z.array(z.string()).default([]),

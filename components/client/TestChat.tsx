@@ -20,7 +20,7 @@ import { detectHandoffIntent, HANDOFF_ACK } from '@/lib/handoff'
 import type { ChatTransport } from '@/lib/widget-transport'
 import type { PublicBotConfig } from '@/lib/widget-config'
 import { playGreetingSound } from '@/lib/greeting-sound'
-import type { BotConfig, BotLanguage, SuggestedQuestion } from '@/lib/types'
+import type { BotConfig, BotLanguage, SuggestedQuestion, LeadField } from '@/lib/types'
 import { readableTextColor } from '@/lib/utils'
 import { fontStack } from '@/lib/fonts'
 
@@ -49,7 +49,9 @@ type LiveConfig = {
     enabled?: boolean
     trigger?: BotConfig['leadCapture']['trigger']
     afterNMessages?: number
-    fields?: Array<{ key: string; label: string; required?: boolean }>
+    fields?: Array<{ key: string; label: string; required?: boolean; type?: LeadField['type']; options?: string[] }>
+    offerOnIntent?: boolean
+    intentHint?: string
   }
   allowedDomains?: string[]
   avatarUrl?: string
@@ -624,6 +626,8 @@ function buildPreviewPublicConfig(config: LiveConfig): PublicBotConfig {
         key: f.key,
         label: f.label,
         required: f.required ?? false,
+        type: f.type,
+        options: f.options,
       })),
     },
     voice: {
@@ -735,6 +739,8 @@ function buildFullConfig(config: LiveConfig): BotConfig {
         key: f.key,
         label: f.label,
         required: f.required ?? false,
+        type: f.type,
+        options: f.options,
       })),
     },
     allowedDomains: config.allowedDomains ?? [],

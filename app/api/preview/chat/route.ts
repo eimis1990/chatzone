@@ -13,6 +13,7 @@ import { DEFAULT_CHAT_MODEL, DEFAULT_TEMPERATURE } from '@/lib/ai/chat-models'
 import { fastLaneConfig, pickLane } from '@/lib/ai/fast-lane'
 import { rewriteQuery } from '@/lib/ai/query-rewrite'
 import { searchCatalog } from '@/lib/products/search'
+import { leadToolEnabled, makeLeadTools, type LeadFormRequest } from '@/lib/ai/lead-tool'
 import { assignedComponents } from '@/lib/widget-components/availability'
 
 export const maxDuration = 60
@@ -107,13 +108,11 @@ export async function POST(req: Request) {
   const candidates = new Map<string, CommerceProduct>()
   const shownMap = new Map((shownProducts ?? []).map((p) => [p.id, p]))
 
-  return ndjsonChatResponse(openai(model), messages, {
-    temperature: config.temperature ?? DEFAULT_TEMPERATURE,
-    headers: {},
-    timing: { startedAt: t0, label: `preview bot=${botId} lane=${lane} model=${model}` },
-    tools:
-      commerce && !fast
-        ? makeProductTools(
+  const leadFormSink: LeadFormRequest[] = []
+  const leadTools = !fast && leadToolEnabled(config, allowedComponents) ? makeLeadTools(config, leadFormSink) : {}
+  const productTools =
+    commerce && !fast
+      ? makeProductTools(
           config,
           productSink,
           orderSink,
@@ -129,7 +128,15 @@ export async function POST(req: Request) {
           shownMap,
           allowedComponents,
         )
-      : undefined,
+      : {}
+  const tools = { ...productTools, ...leadTools }
+
+  return ndjsonChatResponse(openai(model), messages, {
+    temperature: config.temperature ?? DEFAULT_TEMPERATURE,
+    headers: {},
+    timing: { startedAt: t0, label: `preview bot=${botId} lane=${lane} model=${model}` },
+    tools: Object.keys(tools).length ? tools : undefined,
+    leadFormSink,
     productSink,
     orderSink,
     candidates,
