@@ -150,8 +150,10 @@ export function LeadForm({
   // inputs labelled by placeholder, slim submit. Same behavior, less chrome.
   if (variant === 'minimal') {
     return (
-      <div className="mx-4 mb-4">
-        <div className="mb-1.5 flex items-center justify-between">
+      // max-h + inner scroll: a 7-field reservation form must never push the
+      // submit button below the widget's bottom edge (seen on Taujėnų dvaras).
+      <div className="mx-4 mb-4 flex max-h-[78%] min-h-0 flex-col">
+        <div className="mb-1.5 flex shrink-0 items-center justify-between">
           <p className="text-xs font-medium text-gray-500">{heading}</p>
           <button
             onClick={onDismiss}
@@ -161,7 +163,8 @@ export function LeadForm({
             ×
           </button>
         </div>
-        <form onSubmit={handleSubmit} className="space-y-2" noValidate>
+        <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col" noValidate>
+          <div className="min-h-0 flex-1 space-y-2 overflow-y-auto">
           {fields.map((field) => (
             <FieldInput
               key={field.key}
@@ -174,10 +177,11 @@ export function LeadForm({
             />
           ))}
           {error && <p className="text-xs text-red-600" role="alert">{error}</p>}
+          </div>
           <button
             type="submit"
             disabled={submitting}
-            className="w-full rounded-full py-2 text-sm font-medium text-white transition-opacity hover:opacity-80 disabled:opacity-50"
+            className="mt-2 w-full shrink-0 rounded-full py-2 text-sm font-medium text-white transition-opacity hover:opacity-80 disabled:opacity-50"
             style={{ backgroundColor: primaryColor }}
           >
             {submitting ? t.sending : t.send}
@@ -188,8 +192,8 @@ export function LeadForm({
   }
 
   return (
-    <div className="mx-4 mb-4 rounded-xl border border-gray-200 bg-white shadow-sm">
-      <div className="px-4 pt-3 pb-2 border-b border-gray-100 flex items-center justify-between">
+    <div className="mx-4 mb-4 flex max-h-[78%] min-h-0 flex-col rounded-xl border border-gray-200 bg-white shadow-sm">
+      <div className="flex shrink-0 items-center justify-between border-b border-gray-100 px-4 pt-3 pb-2">
         <p className="text-sm font-semibold text-gray-800">{heading}</p>
         <button
           onClick={onDismiss}
@@ -199,7 +203,8 @@ export function LeadForm({
           ×
         </button>
       </div>
-      <form onSubmit={handleSubmit} className="p-4 space-y-3" noValidate>
+      <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col" noValidate>
+        <div className="min-h-0 flex-1 space-y-3 overflow-y-auto p-4">
         {fields.map((field) => (
           <div key={field.key}>
             <label
@@ -219,6 +224,8 @@ export function LeadForm({
           </div>
         ))}
         {error && <p className="text-xs text-red-600" role="alert">{error}</p>}
+        </div>
+        <div className="shrink-0 border-t border-gray-100 p-3">
         <button
           type="submit"
           disabled={submitting}
@@ -227,6 +234,7 @@ export function LeadForm({
         >
           {submitting ? t.sending : t.send}
         </button>
+        </div>
       </form>
     </div>
   )
