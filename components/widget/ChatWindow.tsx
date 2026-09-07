@@ -224,6 +224,19 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
     setLeadDismissed(false)
     setShowLeadForm(true)
   }, [])
+  // Voice `open_lead_form` client tool: same form, spoken confirmation back to the agent.
+  const handleVoiceOpenLeadForm = useCallback(
+    (prefill: Record<string, string>) => {
+      if (!config.leadCapture.enabled || config.leadCapture.fields.length === 0) {
+        return 'The request form is not available; offer the business contact details instead.'
+      }
+      const keys = new Set(config.leadCapture.fields.map((f) => f.key))
+      const clean = Object.fromEntries(Object.entries(prefill).filter(([k]) => keys.has(k)))
+      openLeadFormFromAssistant({ prefill: clean })
+      return 'The request form is now open on screen with the known details prefilled. Tell the caller to complete and send it; do not ask for the details by voice.'
+    },
+    [config.leadCapture, openLeadFormFromAssistant],
+  )
   // When set, the full-height product list overlay covers the chat body.
   const [listProducts, setListProducts] = useState<{
     products: CommerceProduct[]
@@ -1199,6 +1212,7 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
             onDiscount={handleVoiceDiscount}
             onKnowledge={handleVoiceKnowledge}
             onProductDetails={handleVoiceProductDetails}
+            onOpenLeadForm={handleVoiceOpenLeadForm}
             className="flex-shrink-0"
           />
         )}

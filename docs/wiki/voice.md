@@ -167,3 +167,17 @@ conversation/commerce anchors + the bot's display name for every lt-enabled bot
 not elimination.
 
 _Last verified: 2026-07-23 (02fbe04)._
+
+## Request form over voice (`open_lead_form`)
+
+When `leadCapture.offerOnIntent` is on (`leadToolEnabled`), `ensureTools` also
+creates a client tool `open_lead_form` (`buildLeadFormToolConfig`, param
+`prefillJson` — ElevenLabs client-tool params are flat, so the prefill map is a
+JSON string, same pattern as `display_products`). The prompt gets a REQUEST FORM
+paragraph and the "never collect name/phone/email" rule gains an explicit
+exception. `VoiceCallButton` parses the JSON and calls `onOpenLeadForm`;
+`ChatWindow.handleVoiceOpenLeadForm` filters keys to configured fields, opens the
+same LeadForm the text bot uses, and returns the sentence the agent speaks. The
+agent hash includes the lead-tool state, intent hint and field keys, so toggling
+the trigger or editing fields re-syncs the agent on the next call.
+

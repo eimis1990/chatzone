@@ -3,6 +3,7 @@ import {
   agentConfigHash,
   buildAgentConfig,
   buildDisplayToolConfig,
+  buildLeadFormToolConfig,
   buildSearchToolConfig,
 } from '@/lib/ai/elevenlabs-agent'
 import { DEFAULT_VOICE_LLM, isValidVoiceLlm } from '@/lib/ai/voice-models'
@@ -155,5 +156,39 @@ describe('agentConfigHash', () => {
       commerce: { ...base.commerce, enabled: true, provider: 'verskis', storeUrl: 'https://store.example' },
     })
     expect(agentConfigHash(a)).not.toBe(agentConfigHash(b))
+  })
+})
+
+describe('voice request form (open_lead_form)', () => {
+  const leadConfig = {
+    ...defaultBotConfig('Bot'),
+    leadCapture: {
+      enabled: true,
+      trigger: 'on_fallback' as const,
+      offerOnIntent: true,
+      intentHint: 'hall rental or event bookings',
+      fields: [
+        { key: 'name', label: 'Vardas', required: true, type: 'text' as const },
+        { key: 'date', label: 'Data', required: true, type: 'date' as const },
+      ],
+    },
+  }
+
+  it('describes the configured fields and intent to the agent', () => {
+    const tool = buildLeadFormToolConfig(leadConfig)
+    expect(tool.name).toBe('open_lead_form')
+    expect(tool.expects_response).toBe(true)
+    expect(tool.description).toContain('hall rental or event bookings')
+    expect(tool.description).toContain('date (Data, required)')
+  })
+
+  it('adds REQUEST FORM guidance only when the AI trigger is on, and changes the agent hash', () => {
+    const withForm = buildAgentConfig(makeBot(leadConfig))
+    const without = buildAgentConfig(makeBot())
+    const promptOf = (c: ReturnType<typeof buildAgentConfig>) =>
+      JSON.stringify(c).includes('REQUEST FORM')
+    expect(promptOf(withForm)).toBe(true)
+    expect(promptOf(without)).toBe(false)
+    expect(agentConfigHash(makeBot(leadConfig))).not.toBe(agentConfigHash(makeBot()))
   })
 })

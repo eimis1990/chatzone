@@ -4,6 +4,7 @@ import type { Bot, BotLanguage } from '@/lib/types'
 import { MissingVoiceKeyError } from '@/lib/ai/tts'
 import { isValidVoiceLlm, DEFAULT_VOICE_LLM } from '@/lib/ai/voice-models'
 import { orderLookupEnabled, getDiscount, productDetailsSupported } from '@/lib/commerce'
+import { leadToolEnabled } from '@/lib/ai/lead-tool'
 import {
   providerDisplayGuidance,
   providerSearchQueryGuidance,
@@ -102,8 +103,19 @@ function buildAgentPrompt(cfg: Bot['config'], toolIds: string[], languages: BotL
     `When the user asks about products, prices, availability, gifts, gift coupons/vouchers, or wants recommendations, you MUST call the \`search_products\` tool to check the live catalog BEFORE answering — never say something is unavailable or that "we don't have it" from memory. A gift coupon/voucher ("dovanų kuponas") is a PRODUCT to search for, not a discount code. Each search takes a compact descriptive phrase — the product type plus EVERY stated hard constraint; never drop a dimension, color, material, orientation, function, or budget just to shorten the query. Convert spoken number words and measurements to digits and canonical units before calling the tool (for example 2 m by 1.8 m → 200 cm 180 cm).${
       lt ? ' in Lithuanian (e.g. "kvapni žvakė", "kvepalai", "veido kremas sausai odai")' : ''
     } ${queryGuidance ? `${queryGuidance} ` : ''}Never pass a whole conversational sentence. EXCEPTION: when the user names a specific brand or product name (like "Slim Lady"), search that name verbatim — do not turn it into a category. Run only ONE product search per request unless the result explicitly says to retry: search returns CANDIDATES but shows nothing yet. Review their structured facts against the full active constraint ledger, then call \`display_products\` exactly once with only verified matches. Missing data is unverified, never a match. Never display a product that violates even one hard constraint, and never pad a tight search with weak alternatives. TYPE CHECK (critical): semantic search returns nearest neighbours even when the requested category does not exist in this catalog, so candidates can be a DIFFERENT product type that merely relates (teas or a body mist for a perfume search). Verify each candidate genuinely IS the requested product type before displaying it. If none are, do NOT display them and do NOT say you found the item — say plainly the catalog does not carry it, name what the search actually found (the honest nearby categories), and ask if they would like to see those instead. Never present different-type products as if they were the requested item. Do not announce that you found options or are about to show some variants BEFORE reviewing the candidates — search first, review silently, then speak the true outcome. An attribute listing several values (for example "Spalva: balta, pilka, ruda"), or a product noting a color/fabric selection ("spalvų pasirinkimas"), means the product can be ORDERED in other colors — it counts as a match for a requested color; mention that the color can be chosen on the product page. If no product matches a requested color exactly, offer only the closest light/neutral shades and say plainly that there is no exact match. ${displayGuidance ? `${displayGuidance} ` : ''}Choose the single best-fitting query for what they actually asked — if they named a type, use it (a gift "set"/"komplektas" → "dovanų rinkinys" or "rinkinys"; perfume → "kvepalai"; face cream → "veido kremas"). For a vague or open gift request, do NOT search the word "gift"/"dovana" itself and do NOT fan out into several category searches — pick the ONE most fitting category and ask ONE short question to narrow it. If the user says WHO it is for (for men/a man/husband/dad → men; for women/a woman/mum/her → women; for a child/kid/baby → kids), also set the tool's \`audience\`. If a search returns nothing, retry with a synonym or base form before saying it is unavailable. After \`display_products\` succeeds, DO NOT read product names, prices, or details aloud — the cards carry that. Instead say ONE or two short, warm sentences that acknowledge this specific request and invite them to look.`,
-    'You CANNOT place orders, take payment, or complete a purchase, and you must NEVER ask for the person\'s name, address, phone number, or email in order to buy something — orders are not taken over the call. So never offer to take an order or collect delivery/contact details. When they want to buy or have chosen an item, the products are shown on screen as cards — tell them to tap the one they want to open it and complete the order on the website. You are glad to help them choose or answer questions, but the checkout itself happens on the site.',
+    'You CANNOT place orders, take payment, or complete a purchase, and you must NEVER ask for the person\'s name, address, phone number, or email in order to buy something — orders are not taken over the call. So never offer to take an order or collect delivery/contact details. When they want to buy or have chosen an item, the products are shown on screen as cards — tell them to tap the one they want to open it and complete the order on the website. You are glad to help them choose or answer questions, but the checkout itself happens on the site.' +
+      (leadToolEnabled(cfg) ? ' The ONE exception is the on-screen request form described below.' : ''),
   ]
+  if (leadToolEnabled(cfg)) {
+    const hint = cfg.leadCapture.intentHint?.trim()
+    parts.push(
+      'REQUEST FORM: when the caller wants to book, reserve, order a service, get a quote, or asks to be ' +
+        `contacted${hint ? ` (for this business: ${hint})` : ''}, do NOT say you cannot help and do NOT ` +
+        'collect their details by voice. Call `open_lead_form` ONCE, passing any details they already ' +
+        'said (dates as YYYY-MM-DD), then say in one short sentence that the request form is now open on ' +
+        'their screen and the team will confirm availability and details. Never call it twice in one call.',
+    )
+  }
   if (productDetailsSupported(cfg.commerce)) {
     parts.push(
       'If the user asks to hear MORE about one specific product — its details, ingredients, ' +
@@ -241,7 +253,7 @@ export function buildAgentConfig(bot: Bot, toolIds: string[] = []): AgentConfig 
 export function agentConfigHash(bot: Bot, toolIds: string[] = []): string {
   const cfg = bot.config
   const material = JSON.stringify([
-    'v32-type-relevance', // bump to force re-sync when the agent payload shape changes
+    'v33-lead-form', // bump to force re-sync when the agent payload shape changes
     cfg.displayName, // agent name follows the bot's display name
     cfg.languages,
     cfg.defaultLanguage ?? null,
@@ -257,6 +269,9 @@ export function agentConfigHash(bot: Bot, toolIds: string[] = []): string {
     productDetailsSupported(cfg.commerce),
     cfg.commerce?.provider ?? null,
     cfg.commerce?.storeUrl ?? '',
+    leadToolEnabled(cfg),
+    cfg.leadCapture?.intentHint ?? '',
+    (cfg.leadCapture?.fields ?? []).map((f) => f.key),
   ])
   return createHash('sha256').update(material).digest('hex').slice(0, 32)
 }
@@ -304,6 +319,35 @@ function buildKnowledgeToolConfig() {
         },
       },
       required: ['query'],
+    },
+  }
+}
+
+/** CLIENT tool: the browser opens the bot's configured request/booking form (prefilled). */
+export function buildLeadFormToolConfig(config: Bot['config']) {
+  const fields = config.leadCapture.fields
+  const fieldList = fields.map((f) => `${f.key} (${f.label}${f.required ? ', required' : ''})`).join(', ')
+  const hint = config.leadCapture.intentHint?.trim()
+  return {
+    type: 'client' as const,
+    name: 'open_lead_form',
+    description:
+      'Open the request/booking form on the caller\'s screen so they can send their details to the team. ' +
+      'Call it when the caller wants to book, reserve, order a service, get a quote, or be contacted' +
+      (hint ? ` (${hint})` : '') +
+      `. Form fields: ${fieldList}. Call at most once per call.`,
+    expects_response: true,
+    parameters: {
+      type: 'object' as const,
+      properties: {
+        prefillJson: {
+          type: 'string' as const,
+          description:
+            'A JSON object string of field key → value for details the caller already gave, e.g. ' +
+            '{"guests":"120","date":"2026-10-26"}. Use {} when nothing is known yet.',
+        },
+      },
+      required: ['prefillJson'],
     },
   }
 }
@@ -480,6 +524,9 @@ async function ensureTools(db: SupabaseClient, bot: Bot): Promise<string[]> {
   }
   if (getDiscount(bot.config.commerce).enabled) {
     ids.push(await ensureTool(db, `cbz_tool_discount_${bot.id}`, buildDiscountToolConfig()))
+  }
+  if (leadToolEnabled(bot.config)) {
+    ids.push(await ensureTool(db, `cbz_tool_leadform_${bot.id}`, buildLeadFormToolConfig(bot.config)))
   }
   return ids
 }

@@ -65,6 +65,8 @@ interface VoiceCallButtonProps {
   /** Implements `search_knowledge` — retrieve KB context, return a spoken answer. */
   onKnowledge?: (query: string) => Promise<string>
   onProductDetails?: (productName: string) => Promise<string>
+  /** Implements `open_lead_form` — open the request form (prefilled), return what to say. */
+  onOpenLeadForm?: (prefill: Record<string, string>) => string
   /** Corner radius (px) for the call button. */
   radius?: number
   /** Use the shorter idle label ("Call Agent") — for the tight mobile header. */
@@ -95,6 +97,7 @@ interface InnerProps {
   onDiscount?: () => Promise<string>
   onKnowledge?: (query: string) => Promise<string>
   onProductDetails?: (productName: string) => Promise<string>
+  onOpenLeadForm?: (prefill: Record<string, string>) => string
   radius?: number
   shortLabel?: boolean
   iconOnly?: boolean
@@ -116,6 +119,7 @@ function VoiceCallInner({
   onDiscount,
   onKnowledge,
   onProductDetails,
+  onOpenLeadForm,
   radius,
   shortLabel,
   iconOnly,
@@ -201,6 +205,19 @@ function VoiceCallInner({
         } catch {
           return 'Product details are temporarily unavailable.'
         }
+      },
+      // Open the configured request/booking form on screen, prefilled with what
+      // the caller already said; the returned sentence is what the agent speaks.
+      open_lead_form: async (params: { prefillJson?: string }) => {
+        if (!onOpenLeadForm) return 'The request form is not available right now.'
+        let prefill: Record<string, string> = {}
+        try {
+          const parsed = JSON.parse(params?.prefillJson || '{}') as Record<string, unknown>
+          for (const [k, v] of Object.entries(parsed)) if (typeof v === 'string' || typeof v === 'number') prefill[k] = String(v)
+        } catch {
+          prefill = {}
+        }
+        return onOpenLeadForm(prefill)
       },
       // Look up the knowledge base and return text the agent answers from.
       search_knowledge: async (params: { query?: string }) => {
@@ -487,6 +504,7 @@ export function VoiceCallButton({
   onDiscount,
   onKnowledge,
   onProductDetails,
+  onOpenLeadForm,
   radius,
   shortLabel,
   iconOnly,
@@ -513,6 +531,7 @@ export function VoiceCallButton({
           onDiscount={onDiscount}
           onKnowledge={onKnowledge}
           onProductDetails={onProductDetails}
+          onOpenLeadForm={onOpenLeadForm}
           radius={radius}
           shortLabel={shortLabel}
           iconOnly={iconOnly}
