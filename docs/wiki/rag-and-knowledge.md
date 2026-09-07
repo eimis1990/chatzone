@@ -22,10 +22,20 @@ How a bot's answers stay grounded in the client's own content.
   [access-model](access-model.md)), then **Jina Reader** (`jina-reader.ts`,
   renders JS → Markdown) with fallback to direct `fetch` +
   Readability/Turndown (`parse.ts:8` `extractReadableText`) if Jina fails.
-  Jina requests send `X-Remove-Selector: header, footer, nav, aside` to match
-  the Readability path — without it every page ingests its nav/language-picker
-  link lists, which crowd real content out of top-k (taujenudvaras.lt
-  "kontaktai" queries returned five nav chunks). Both paths then strip image
+  Jina requests send an `X-Remove-Selector` (`jina-reader.ts`) that drops
+  `nav`/`aside`, top-level `header`/`footer` (but NOT ones nested in
+  `article`/`li` — list widgets put each item's title in its own `<header>`,
+  see [gotchas](gotchas.md#a-bare-header-remove-selector-deletes-list-item-titles))
+  and common cookie-consent widgets (CookieYes, CLI, OneTrust, Cookiebot).
+  Without nav removal every page ingests its nav/language-picker link lists,
+  which crowd real content out of top-k (taujenudvaras.lt "kontaktai" queries
+  returned five nav chunks); without cookie removal each page adds ~4 noise
+  chunks of cookie-policy text. Both paths then run `cleanMarkdown`
+  (`parse.ts`): folds Jina's `Title:/URL Source:/Markdown Content:` preamble
+  into a `#` heading (it used to be a useless chunk 0 on every page), drops
+  link-only lines to in-page anchors ("Skip to content", "Back to top"), and
+  unwraps links whose URL is ≥200 chars (social share links carry the whole
+  post URL-encoded; those `%C4%97…` chunks outranked real content). Both paths then strip image
   markdown (`stripMarkdownImages`): images embed nothing, and an image-only
   block between a heading and its body used to split them into separate chunks.
 - **Chunk** (`chunk.ts:81` `chunkText`): heading-aware — splits on blank

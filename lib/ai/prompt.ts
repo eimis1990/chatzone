@@ -57,6 +57,9 @@ export function buildSystemPrompt(
     config.systemPrompt,
     `Tone: ${config.persona.tone}. Verbosity: ${config.persona.verbosity}.`,
     `Always respond in ${languageName}, regardless of the language the user writes in.`,
+    // Without this the model has no idea what "upcoming" means and treats every
+    // dated item in the context (past or postponed) as current.
+    `Today's date is ${new Date().toISOString().slice(0, 10)}. Treat dates in the context relative to it.`,
     // Warmth: the old replies read as cold and clipped ("Here are some products").
     // Make the assistant feel like a friendly, attentive shop helper.
     'WARMTH: be genuinely warm, friendly and human — like a helpful shop assistant who is glad to ' +

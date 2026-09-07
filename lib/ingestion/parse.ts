@@ -18,6 +18,24 @@ export function stripMarkdownImages(md: string): string {
     .trim()
 }
 
+/**
+ * Reader-markdown hygiene on top of image stripping, learned from taujenudvaras.lt:
+ * - Jina's `Title: … / URL Source: … / Markdown Content:` preamble became a
+ *   useless first chunk on every page — fold the title into a `#` heading.
+ * - Link-only lines to in-page anchors ("Skip to content", "Back to top") are chrome.
+ * - Social share links carry the whole post URL-encoded in their query string;
+ *   the chunker then indexes `%C4%97…` garbage that outranks real content. Any
+ *   link whose URL is ≥200 chars is unwrapped to its text.
+ */
+export function cleanMarkdown(md: string): string {
+  return stripMarkdownImages(
+    md
+      .replace(/^Title:\s*(.+)\n+(?:URL Source:.*\n+)?(?:Published Time:.*\n+)?Markdown Content:\s*\n/, '# $1\n\n')
+      .replace(/^\[[^\]\n]+\]\([^)\s]*#[^)\s]*\)\s*$/gm, '')
+      .replace(/\[([^\]\n]*)\]\([^)\s]{200,}\)/g, '$1'),
+  )
+}
+
 export async function extractReadableText(html: string, url: string): Promise<string> {
   // Dynamic imports keep jsdom (ESM-only in recent versions) out of the
   // module graph at build time, avoiding the require()-of-ESM error.
@@ -42,7 +60,7 @@ export async function extractReadableText(html: string, url: string): Promise<st
   const title = article?.title?.trim()
   let md = td.turndown(bodyHtml)
   if (title && !md.startsWith('#')) md = `# ${title}\n\n${md}`
-  return stripMarkdownImages(md)
+  return cleanMarkdown(md)
 }
 
 /**
@@ -107,7 +125,7 @@ export async function parseUrl(url: string, fetchImpl: typeof fetch = fetch): Pr
     // server may still pass).
     const { readerMarkdown } = await import('@/lib/ingestion/jina-reader')
     const md = await readerMarkdown(url)
-    if (md && !looksLikeBotChallenge(md)) return stripMarkdownImages(md)
+    if (md && !looksLikeBotChallenge(md)) return cleanMarkdown(md)
   }
   const res = await fetchImpl(url)
   if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`)

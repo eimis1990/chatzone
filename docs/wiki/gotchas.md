@@ -423,6 +423,24 @@ while the KB had the phone and email all along. `shouldRewriteQuery`
 (`lib/ai/query-rewrite.ts`) now also rewrites any message of ≤3 words, and the
 rewritten retrieval wins whenever it beats the raw one.
 
+## A bare `header` remove-selector deletes list-item titles
+
+WordPress "The Events Calendar" (and many card/list widgets) wrap each item's
+title + date in its own `<header>`. Jina's `X-Remove-Selector: header` (used
+2026-08-12 → 2026-09-07) therefore stripped every event name from
+taujenudvaras.lt/events, leaving `Št 19 / Paroda eks [...]` — the bot answered
+"no upcoming events" in LT and quoted a stale homepage date in EN. The selector
+in `lib/ingestion/jina-reader.ts` now keeps `article header` / `li header` and
+also removes cookie-consent widgets (CookieYes banner text was 4 of 8 chunks on
+that page). Symptom to watch for: a chunk with a date/day but no title. Also:
+the crawler ranks `/event/…` detail pages last by design, so an "upcoming
+events" demo needs those pages added as sources by hand. Even then a list page
+chunks per `###` event heading, so "artėjantys renginiai" retrieved contact
+summaries instead of the exhibition — a curated `text` source ("Renginiai /
+Upcoming events", one LT + one EN block, no sub-headings so each stays ONE
+chunk) is what makes the answer reliable. Keep such a summary compact: a
+`##` per event split it into 5 chunks and only the header chunk was retrieved.
+
 ## Knowledge ingested before 2026-08-12 is ~60% navigation noise
 
 Jina Reader only got `X-Remove-Selector: header, footer, nav, aside` on

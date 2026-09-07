@@ -15,6 +15,8 @@ for (const s of sources ?? []) {
   const before = (await svc.from('document_chunks').select('id', { count: 'exact', head: true }).eq('source_id', s.id)).count
   if (DRY) { console.log(`  ${s.name}  chunks=${before}`); continue }
   const t = Date.now()
+  // Keyless Jina is IP rate-limited; without a pause ~20% of pages fall back to Readability (thinner content).
+  await new Promise((r) => setTimeout(r, 1500))
   await ingestSource(s.id, { repo: makeServiceRepo(svc) })
   const after = await svc.from('knowledge_sources').select('status,error_message').eq('id', s.id).single()
   const cnt = (await svc.from('document_chunks').select('id', { count: 'exact', head: true }).eq('source_id', s.id)).count
