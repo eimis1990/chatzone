@@ -190,6 +190,16 @@ language with a workflow test. When an existing title has a small but strong
 position sample and GSC suppresses its queries, retain it and test the
 description first.
 
+The 2026-09-09 refresh keeps that URL as the intent owner and adds a dedicated
+GPT-6 Astra section (`content/blog/new-ai-chatbots-2026.md:29`). The section
+separates model capability from the application layer: live commerce data,
+tool definitions, permissions, identity checks, confirmations, logs, and human
+handoff remain product responsibilities. Model claims and pricing link to
+official OpenAI developer documentation, OpenAI-reported characteristics are
+labelled as such, and the decision rule is cost per resolved customer job—not
+token price alone. The existing title remains unchanged; the description is the
+snippet test.
+
 Language marketing must reflect product-level coverage rather than the
 underlying model's language list. Loqara currently supports English and
 Lithuanian (`docs/wiki/commerce.md:32-38`). Multilingual articles must distinguish

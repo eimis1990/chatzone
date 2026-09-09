@@ -1,8 +1,8 @@
 ---
 title: "New AI chatbots to watch in 2026: Nvidia, voice agents, and vertical AI"
-description: "What changed in AI chatbots in 2026: GPT-Live voice, Nvidia ACE, action-taking agents, and vertical workflows—reviewed for online stores in August."
+description: "What GPT-6 Astra, continuous voice, tool-using agents, and AI product discovery change for online stores—and what still needs proof."
 date: 2026-07-03
-updated: 2026-08-26
+updated: 2026-09-09
 topic: vendor-comparisons
 related: best-chatbot-platforms, best-ai-chatbot-for-ecommerce, ai-voice-agents-explained
 author: Eimantas Kudarauskas
@@ -11,13 +11,14 @@ image: /blog/new-ai-chatbots-2026.webp
 
 Every few months, a new wave of AI chatbots arrives with a press cycle claiming everything before it is obsolete. Most store owners do not need another launch list. They need to know which changes affect product discovery, customer support, cost, and the work required to deploy an agent safely.
 
-This review separates four material developments from the noise. We build an e-commerce AI agent ourselves, so our interest in grounded, vertical agents is not neutral. The vendor facts below come from official product pages and documentation reviewed on **26 August 2026**; our recommendations are labelled as judgement rather than market evidence.
+This review separates five material developments from the noise. We build an e-commerce AI agent ourselves, so our interest in grounded, vertical agents is not neutral. The GPT-6 Astra documentation was reviewed on **9 September 2026**; the other vendor facts were reviewed on **26 August 2026**. Our recommendations are labelled as judgement rather than market evidence.
 
-<blockquote class="quick-answer">The most useful new AI chatbot developments in 2026 are <strong>more natural continuous voice</strong>, <strong>agents that can use tools</strong>, <strong>AI-native product discovery</strong>, and <strong>more specialised workflows</strong>. Nvidia ACE is mainly infrastructure for developers, not a store chatbot. For an online store, start with accurate product and policy answers, then test one controlled action or voice workflow.</blockquote>
+<blockquote class="quick-answer">The most useful 2026 shifts are <strong>stronger models for multi-step computer work</strong>, <strong>more natural continuous voice</strong>, <strong>tool-using agents</strong>, <strong>AI-native product discovery</strong>, and <strong>specialised workflows</strong>. For an online store, a stronger model can improve difficult tasks, but accurate data, scoped permissions, testing, and human handoff still determine whether the customer experience is trustworthy.</blockquote>
 
 <div class="takeaways">
 <p class="takeaways-title">What changed since our July review</p>
 <ul>
+<li><strong>OpenAI released GPT-6 Astra:</strong> its API documentation positions it for complex reasoning, computer use, research, and long multi-step workflows. That raises the capability ceiling; it does not supply a store's live data, permissions, or quality controls.</li>
 <li><strong>OpenAI introduced GPT-Live on 8 July:</strong> it uses full-duplex interaction and can delegate deeper work while the conversation continues. At launch, OpenAI said API availability was still planned, so do not confuse the ChatGPT rollout with a generally available developer API.</li>
 <li><strong>OpenAI refocused commerce on discovery:</strong> its 2026 update says merchants can use their own checkout while product feeds and Shopify Catalog improve how products appear in ChatGPT.</li>
 <li><strong>Voice pricing is easier to inspect:</strong> ElevenAgents currently lists a free allowance and $0.08 additional call minutes, while explicitly billing language-model and telephony usage separately.</li>
@@ -25,7 +26,33 @@ This review separates four material developments from the noise. We build an e-c
 </ul>
 </div>
 
-## 1. Nvidia's chatbot story is infrastructure, not a store app
+## 1. What does GPT-6 Astra change for e-commerce AI agents?
+
+OpenAI describes [GPT-6 Astra](https://developers.openai.com/api/docs/models/gpt-6-astra) as its most capable model for complex reasoning, computer use, research, and document creation. The model accepts text and images, supports function calling and Structured Outputs, and can use Responses API tools including web search, file search, code execution, computer use, and MCP connections. OpenAI's [model guidance](https://developers.openai.com/api/docs/guides/latest-model) says Astra is designed for multi-step workflows across browsers and professional software.
+
+For e-commerce, that raises the ceiling on difficult workflows. An agent may have more capacity to interpret an ambiguous request, compare several constraints, inspect an interface, call a tool, and keep track of the customer's goal across multiple steps. That could help with complicated product comparisons, technical compatibility questions, or preparing a back-office action for review.
+
+It does **not** automatically give a chatbot current prices, stock, order records, or permission to change anything. Those capabilities come from the surrounding product: its store connection, retrieval system, identity checks, tool definitions, confirmation rules, logs, and human handoff. A larger context window cannot repair stale inventory or a contradictory returns policy.
+
+<div class="callout">
+<p class="callout-title">What changes—and what does not</p>
+<p><strong>What changes:</strong> the model may be able to handle harder, longer and more visual tasks. <strong>What does not:</strong> the merchant or chatbot vendor still has to provide trusted data, restrict every action, test real customer questions, and make takeover easy when the model is uncertain.</p>
+</div>
+
+OpenAI also describes Astra as better at respecting task boundaries and communicating uncertainty than its previous models. Treat that as a vendor-reported model characteristic, not a production guarantee. A store should still test whether the complete assistant stays within policy when a shopper asks for an unavailable discount, an unsupported refund, an address change, or information about someone else's order.
+
+The price reinforces the need for testing. OpenAI currently lists Astra at **$10 per million input tokens and $50 per million output tokens**, before tool-call charges. OpenAI says stronger task performance and lower output-token use can reduce its estimated cost per completed task in some evaluations, despite the higher token price. That does not establish the cost of a real store conversation. Compare models using resolved customer jobs, answer quality, escalation rate, latency, and total cost—not token price alone.
+
+| Possible benefit | Evidence a store should request |
+| --- | --- |
+| Better complex product comparisons | A test using live price, stock, variants, and deliberately conflicting constraints |
+| Longer multi-step workflows | A trace showing every tool call, permission, confirmation, and changed record |
+| Stronger visual understanding | A product-image test that also checks the answer against the catalogue rather than guessing from appearance |
+| More capable difficult-case routing | Results for the same real questions across quality, latency, handoff rate, and cost per resolved job |
+
+Our recommendation is to use a model upgrade as a reason to rerun the workflow test, not to skip it. Start with the [knowledge-base checklist](/blog/ecommerce-ai-chatbot-knowledge-base), test the assistant against [real failure cases before launch](/blog/test-ai-chatbot-before-launch), and keep a [human handoff with the full conversation context](/blog/ai-chatbot-human-handoff). Those controls matter whichever model sits underneath the product.
+
+## 2. Nvidia's chatbot story is infrastructure, not a store app
 
 People searching for an “Nvidia AI chatbot” often mean ChatRTX, a Windows reference application that ran retrieval-augmented generation over local files on supported RTX hardware. Nvidia's own repository says the project was [deprecated and stopped being maintained on 21 January 2026](https://github.com/NVIDIA/ChatRTX).
 
@@ -39,7 +66,7 @@ The practical distinction is simple:
 
 If a chatbot comparison treats Nvidia ACE as interchangeable with a Shopify or WooCommerce support app, it is comparing infrastructure with an application. Ask what the finished product does in your store, not which GPU stack appears in its architecture diagram.
 
-## 2. Voice became more capable—but availability still needs checking
+## 3. Voice became more capable—but availability still needs checking
 
 The largest new voice announcement since this page first appeared was OpenAI's [GPT-Live release on 8 July 2026](https://openai.com/index/introducing-gpt-live/). OpenAI describes a full-duplex design that can listen and speak continuously, decide when to pause or interrupt, and delegate search or deeper reasoning to another model while maintaining the conversation. A 31 July update added provenance signals to supported generated audio.
 
@@ -61,7 +88,7 @@ That last sentence matters more than the headline rate. A voice-agent cost estim
 
 Our judgement: voice is ready to **trial**, not automatically ready for every customer conversation. Test product questions or order-status routing first. Keep payment disputes, identity-sensitive changes, safety issues, and ambiguous complaints behind a deliberate confirmation or human handoff. Our [voice AI guide for e-commerce](/blog/voice-ai-for-ecommerce-support) explains that scope in more detail.
 
-## 3. “Agentic” now means a controlled action, not a longer answer
+## 4. “Agentic” now means a controlled action, not a longer answer
 
 The useful definition of an agent is operational: it can use a tool or system to complete a bounded task. For a store, that might mean searching current inventory, retrieving an order after identity verification, creating a support ticket, or preparing a return request for approval.
 
@@ -76,7 +103,7 @@ That is a more useful lesson than claiming that every purchase will move inside 
 
 For a small store, the safest progression is answer → retrieve → prepare → execute. Let the agent answer from approved content first, then retrieve read-only data, then prepare an action for approval. Only automate execution after logs show the earlier stages are reliable.
 
-## 4. Specialised workflows matter more than a “vertical wins” slogan
+## 5. Specialised workflows matter more than a “vertical wins” slogan
 
 It is tempting to say vertical agents beat general agents. We found no current primary evidence that supports that as a universal performance claim, so we will not make it.
 
@@ -108,6 +135,14 @@ Loqara is specialised in e-commerce, so we naturally value those defaults. That 
 
 ## Frequently asked questions
 
+### Will GPT-6 Astra automatically make an e-commerce chatbot better?
+
+No. A stronger model may improve difficult reasoning, visual input, and multi-step tool use, but the complete assistant still depends on current store data, well-defined tools, scoped permissions, identity checks, testing, and human handoff. Ask for results on your real catalogue and policies rather than assuming a model name guarantees them.
+
+### Should every customer message use GPT-6 Astra?
+
+Not necessarily. Routine questions may not need the most capable—and more expensive—model. Compare quality, latency, escalation rate, and cost per resolved customer job on representative conversations. A sensible system may route difficult cases to a stronger model while handling simple, well-grounded answers more efficiently.
+
 ### Does Nvidia make a chatbot for online stores?
 
 Not as a ready-to-install store product. ChatRTX was a local Windows reference app and is no longer maintained. Nvidia ACE provides speech, animation, and digital-human components for developers and enterprises building their own experiences.
@@ -130,6 +165,6 @@ Choose the product that passes your real workflow test with the least risky cust
 
 ---
 
-**The honest bottom line:** the 2026 change is not that every chatbot became autonomous. Voice interaction improved, product discovery moved into AI interfaces, and tool-using agents became easier to deploy. A store still wins by starting with accurate data, one bounded customer job, clear permissions, and a human path when the agent is unsure.
+**The honest bottom line:** the 2026 change is not that every chatbot became autonomous. Models can handle harder multi-step work, voice interaction improved, product discovery moved into AI interfaces, and tool-using agents became easier to deploy. A store still wins by starting with accurate data, one bounded customer job, clear permissions, and a human path when the agent is unsure.
 
-*Vendor features, availability, and public prices were reviewed against official sources on 26 August 2026. Recheck them before purchasing.*
+*GPT-6 Astra capabilities and pricing were reviewed against official OpenAI documentation on 9 September 2026. Other vendor features, availability, and public prices were reviewed on 26 August 2026. Recheck current terms before purchasing.*
