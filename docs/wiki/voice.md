@@ -36,7 +36,7 @@ on **ElevenLabs Conversational AI**.
   "Žinoma"/"Of course" — that repetition was a real complaint, fixed 2026-07-08).
   ⚠️ **gotcha:** `agentConfigHash` hashes `cfg.systemPrompt` but NOT the hardcoded
   voice-block text, so when you change `buildAgentPrompt` you must bump its version
-  marker (`agentConfigHash`, currently `v32-type-relevance`) or live agents
+  marker (`agentConfigHash`, currently `v34-website-content-lt-speech`) or live agents
   won't re-sync.
 - **Language lock:** `buildAgentPrompt` injects the bot's available language names
   (from `languages[]`) and forbids replying in anything outside that set — added
@@ -181,3 +181,18 @@ same LeadForm the text bot uses, and returns the sentence the agent speaks. The
 agent hash includes the lead-tool state, intent hint and field keys, so toggling
 the trigger or editing fields re-syncs the agent on the next call.
 
+
+## Website content and Lithuanian contact speech (2026-09-10)
+
+- Text retrieves knowledge before generation (`app/api/chat/route.ts:89`); voice
+  relies on the model calling `search_knowledge` (`app/api/widget/knowledge/route.ts:41`).
+  A shopping-only role can therefore reject recipes before seeing relevant knowledge.
+  Voice now explicitly searches for website recipes/articles/guides before an
+  out-of-scope redirect, without substituting product recommendations or inventing
+  missing content (`lib/ai/elevenlabs-agent.ts:110`).
+- Lithuanian spoken responses omit phone numbers and direct callers to website
+  contacts; they must not claim a number was displayed/sent. Email wording expands
+  `el.` to the appropriate form of `elektroninis paštas`, with `eta`/`taškas`
+  instead of English `at`/`dot` (`lib/ai/elevenlabs-agent.ts:121`).
+  Text chat remains unchanged. These are model instructions; audible behavior
+  still needs a live Lithuanian call check after deployment.
