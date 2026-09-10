@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { createServerClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { retrieveContext, serviceRetrievalDeps } from '@/lib/ai/retrieval'
+import { voiceKnowledgeAnswer } from '@/lib/ai/voice-knowledge'
 
 export const maxDuration = 20
 
@@ -30,11 +31,7 @@ export async function POST(req: Request) {
   let answer = ''
   try {
     const retrieval = await retrieveContext(botId, query, {}, serviceRetrievalDeps(svc))
-    if (retrieval.chunks.length) {
-      // Keep it tight: the voice agent only needs enough context to answer in a
-      // sentence or two — a smaller payload means a faster spoken reply.
-      answer = retrieval.chunks.slice(0, 3).map((c) => c.content).join('\n\n').slice(0, 900)
-    }
+    answer = voiceKnowledgeAnswer(retrieval.chunks)
   } catch {
     // ignore — empty answer signals "not found" to the tool
   }

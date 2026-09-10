@@ -196,3 +196,15 @@ the trigger or editing fields re-syncs the agent on the next call.
   instead of English `at`/`dot` (`lib/ai/elevenlabs-agent.ts:121`).
   Text chat remains unchanged. These are model instructions; audible behavior
   still needs a live Lithuanian call check after deployment.
+
+## Voice knowledge evidence truncation (2026-09-10)
+
+Pilnas Puodas in **Loqara Demos** called `search_knowledge` with `pristatymo
+informacija`, but received only the first 900 characters of a privacy-policy
+chunk. Replaying that query returned delivery details as match 2 and delivery
+coverage as match 4. Preview's 3-chunk/900-character cap discarded both.
+Both knowledge routes now use `voiceKnowledgeAnswer` to preserve all top-5
+retrieved passages, matching text evidence without a joined-prefix character
+cutoff (`lib/ai/voice-knowledge.ts:7`, `app/api/preview/knowledge/route.ts:37`,
+`app/api/widget/knowledge/route.ts:42`). No agent hash bump is needed: this
+changes tool responses, not the agent payload. See [rag-and-knowledge](rag-and-knowledge.md).

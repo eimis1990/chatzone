@@ -3,6 +3,7 @@ import { createServiceClient } from '@/lib/supabase/service'
 import { isOriginAllowed, corsHeaders } from '@/lib/widget-auth'
 import { createRateLimiter } from '@/lib/ratelimit'
 import { retrieveContext, serviceRetrievalDeps } from '@/lib/ai/retrieval'
+import { voiceKnowledgeAnswer } from '@/lib/ai/voice-knowledge'
 import type { Bot } from '@/lib/types'
 
 export const maxDuration = 20
@@ -39,11 +40,7 @@ export async function POST(req: Request) {
   let answer = ''
   try {
     const retrieval = await retrieveContext(bot.id, query, {}, serviceRetrievalDeps(svc))
-    if (retrieval.chunks.length) {
-      // Same top-5 evidence as text chat so spoken and typed answers agree; the
-      // voice prompt tells the agent to summarise, so a fuller payload is fine.
-      answer = retrieval.chunks.map((c) => c.content).join('\n\n').slice(0, 4000)
-    }
+    answer = voiceKnowledgeAnswer(retrieval.chunks)
   } catch (err) {
     // Return empty so the tool tells the user it can't find it — but log it.
     console.error('[agent] voice knowledge retrieval failed:', err)

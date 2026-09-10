@@ -369,3 +369,5 @@ child inside a rounded clip in the widget.
 - 2026-09-09 CONTENT/SEO — Refreshed `new-ai-chatbots-2026` with a dedicated GPT-6 Astra section grounded in official OpenAI developer documentation. Kept the established title/owner URL, updated the description and freshness disclosure, separated model capability from store data/tools/permissions, and added workflow evidence, internal links, and two Astra FAQs. See blog-and-seo.
 
 2026-09-10 FIX — Voice: search website recipes/articles before shopping-only rejection; Lithuanian speech omits phone numbers and expands email abbreviations with localized address wording. Bumped agent sync hash. See [voice](voice.md).
+
+2026-09-10 FIX — Confirmed Pilnas Puodas voice delivery miss from call tool evidence: preview truncated knowledge to 900 characters, dropping delivery matches. Shared full top-k evidence formatter now serves preview and public voice; regression covers later matches. See [voice](voice.md).
