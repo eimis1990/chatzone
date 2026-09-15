@@ -10,6 +10,7 @@ import { Composer } from './Composer'
 import { VisitorBlockedScreen } from './VisitorBlockedScreen'
 import { VoiceCallButton, type CallState } from '@/components/voice/VoiceCallButton'
 import { LeadForm } from './LeadForm'
+import { OrderLookupForm } from './OrderLookupForm'
 import { WelcomeScreen } from './WelcomeScreen'
 import type { QuickActionsVariant } from './QuickActionButtons'
 
@@ -216,6 +217,8 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
   const [conversationId, setConversationId] = useState<string | undefined>()
   const [showLeadForm, setShowLeadForm] = useState(false)
   const [leadDismissed, setLeadDismissed] = useState(false)
+  // "Track your order" quick action — the order-lookup panel (lead form's slot).
+  const [showOrderForm, setShowOrderForm] = useState(false)
   // Prefill from the assistant's `open_lead_form` call (details already given in chat).
   const [leadPrefill, setLeadPrefill] = useState<Record<string, string>>({})
   const openLeadFormFromAssistant = useCallback((v: unknown) => {
@@ -956,6 +959,11 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
         setShowLeadForm(true)
         return
       }
+      if (mode === 'order' && config.orderLookup) {
+        setShowLeadForm(false)
+        setShowOrderForm(true)
+        return
+      }
       if (mode === 'url') {
         showLinkAction(label, sqUrl(action)!)
         return
@@ -975,7 +983,7 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
         label,
       )
     },
-    [showLinkAction, sendMessage, requestHandoff, runProductsAction, track, config.leadCapture.enabled, config.leadCapture.fields.length],
+    [showLinkAction, sendMessage, requestHandoff, runProductsAction, track, config.leadCapture.enabled, config.leadCapture.fields.length, config.orderLookup],
   )
 
   // While in handoff, poll for the agent's status + new human replies (~4s).
@@ -1084,6 +1092,9 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
   // Custom chat-body background: a base color with an optional image overlaid at
   // a chosen opacity. Defaults preserve the original solid-white look.
   const bgColor = config.theme.backgroundColor || '#ffffff'
+  // Order form + order card sit on the chat background with a bubble border;
+  // on a dark background they stay white (the card's text is dark).
+  const cardBg = isLightColor(bgColor) ? bgColor : '#ffffff'
   const bgImage = config.theme.backgroundImageUrl
   const bgImageOpacity = (config.theme.backgroundImageOpacity ?? 100) / 100
   // Whether the chat body is dark — drives readable colors for chips/text that
@@ -1417,6 +1428,7 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
             bubbleBorderWidth={bubbleBorderWidth}
             botBubbleColor={botBubbleColor}
             darkBackground={darkChat}
+            cardBackground={cardBg}
             onSeeAllProducts={(products, sourceUrl) => setListProducts({ products, sourceUrl })}
             onFeedback={handleFeedback}
             onProductClick={trackProductClick}
@@ -1440,6 +1452,23 @@ export function ChatWindow({ config, transport, initialLanguage, onRequestClose,
               setShowLeadForm(false)
               setLeadDismissed(true)
             }}
+          />
+        )}
+
+        {/* Order lookup ("Track your order" quick action) */}
+        {showOrderForm && !(showLeadForm && !leadDismissed) && (
+          <OrderLookupForm
+            lang={activeLang}
+            primaryColor={primaryColor}
+            backgroundColor={cardBg}
+            borderColor={bubbleBorderColor}
+            bubbleRadius={bubbleRadius}
+            lookup={(orderId, email) => transport.lookupOrder(orderId, email)}
+            onFound={(order) => {
+              setMessages((prev) => [...prev, { id: generateId(), role: 'assistant', content: '', order }])
+              setShowOrderForm(false)
+            }}
+            onDismiss={() => setShowOrderForm(false)}
           />
         )}
 

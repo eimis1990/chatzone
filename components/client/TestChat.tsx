@@ -19,6 +19,7 @@ import { DEFAULT_CHAT_MODEL, DEFAULT_TEMPERATURE } from '@/lib/ai/chat-models'
 import { detectHandoffIntent, HANDOFF_ACK } from '@/lib/handoff'
 import type { ChatTransport } from '@/lib/widget-transport'
 import type { PublicBotConfig } from '@/lib/widget-config'
+import { orderLookupEnabled } from '@/lib/commerce/capabilities'
 import { playGreetingSound } from '@/lib/greeting-sound'
 import type { BotConfig, BotLanguage, SuggestedQuestion, LeadField } from '@/lib/types'
 import { readableTextColor } from '@/lib/utils'
@@ -639,6 +640,8 @@ function buildPreviewPublicConfig(config: LiveConfig): PublicBotConfig {
       sttEnabled: config.voice?.sttEnabled ?? true,
     },
     roomVisualizer: false,
+    // Preview uses the LIVE form values; the lookup itself hits the SAVED config.
+    orderLookup: orderLookupEnabled(config.commerce as BotConfig['commerce'] | undefined),
     components: config.components,
     // Preview assumes the plan allows hiding — the live widget enforces it.
     hideBadge: config.theme?.hideBadge ?? false,

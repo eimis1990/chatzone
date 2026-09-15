@@ -41,7 +41,7 @@ export const suggestedQuestionSchema = z.union([
     prompt: z.string().max(300).optional().or(z.literal('')),
     url: z.string().url().optional().or(z.literal('')),
     query: z.string().max(300).optional().or(z.literal('')),
-    action: z.enum(['handoff', 'lead', 'products']).optional(),
+    action: z.enum(['handoff', 'lead', 'products', 'order']).optional(),
   }),
 ])
 

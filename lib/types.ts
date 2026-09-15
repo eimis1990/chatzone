@@ -138,7 +138,7 @@ export interface VoiceConfig {
 }
 
 /** Typed quick-action behaviors beyond plain text/url. */
-export type SuggestedQuestionAction = 'handoff' | 'lead' | 'products'
+export type SuggestedQuestionAction = 'handoff' | 'lead' | 'products' | 'order'
 
 /**
  * A welcome-screen quick action. A plain string is shorthand for a button whose
@@ -148,6 +148,8 @@ export type SuggestedQuestionAction = 'handoff' | 'lead' | 'products'
  *   - `action: 'lead'`     → open the lead-capture contact form (when enabled).
  *   - `action: 'products'` → show product cards for `query` (a search phrase or
  *     a store category/tag/collection page URL) — no LLM round-trip.
+ *   - `action: 'order'`    → open the order-lookup form (order number + email);
+ *     a match renders the order-status card. Needs `orderLookupEnabled`.
  *   - `url` set            → the bot replies with a link button to that URL.
  *   - `prompt` set         → that message is sent to the bot.
  *   - none of the above    → the label itself is sent.

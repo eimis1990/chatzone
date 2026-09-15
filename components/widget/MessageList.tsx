@@ -53,6 +53,8 @@ interface MessageListProps {
   botBubbleColor?: string
   /** Dark chat background — glass bubbles switch to a dark-scheme treatment. */
   darkBackground?: boolean
+  /** Order-status card surface (widget background; white on dark themes). */
+  cardBackground?: string
   onSeeAllProducts?: (products: CommerceProduct[], sourceUrl?: string) => void
   onFeedback?: (messageId: string, value: 'up' | 'down') => void
   /** Analytics: a product card link was followed (messageId = persisted id when known). */
@@ -79,6 +81,7 @@ export function MessageList({
   bubbleBorderWidth = 0,
   botBubbleColor,
   darkBackground = false,
+  cardBackground,
   onSeeAllProducts,
   onFeedback,
   onProductClick,
@@ -284,6 +287,8 @@ export function MessageList({
                 primaryColor={primaryColor}
                 language={activeLang}
                 variant={componentVariants?.['order-status'] === 'timeline' ? 'timeline' : 'default'}
+                backgroundColor={cardBackground}
+                borderColor={bubbleBorderColor}
               />
             </div>
           )}

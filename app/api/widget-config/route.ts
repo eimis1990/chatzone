@@ -115,13 +115,14 @@ export async function GET(req: Request) {
     await svc.from('bots').update({ last_seen_at: new Date().toISOString() }).eq('id', bot.id)
   }
 
-  return json(
-    publicBotConfig(
-      bot.config,
-      // Internal orgs (owner's own + demo bots) may hide the badge regardless
-      // of plan — badge hiding is still opt-in via theme.hideBadge.
-      internal ? { ...entitlements, removeBadge: true } : entitlements,
-      internal || Boolean(org?.voice_addon),
-    ),
+  const pub = publicBotConfig(
+    bot.config,
+    // Internal orgs (owner's own + demo bots) may hide the badge regardless
+    // of plan — badge hiding is still opt-in via theme.hideBadge.
+    internal ? { ...entitlements, removeBadge: true } : entitlements,
+    internal || Boolean(org?.voice_addon),
   )
+  // The order form renders the order-status card, so it follows that folder.
+  if (!allowedVariants.has('order-status')) pub.orderLookup = false
+  return json(pub)
 }

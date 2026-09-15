@@ -166,6 +166,17 @@ order lookup available.
   `display_products` (agent picks which to actually show, rendered as cards), plus
   `shipping_info` (WooCommerce only, `shippingInfoSupported`), `order_status` (only if
   `orderLookupEnabled`) and `discount_code` (only if a discount is configured).
+- **"Track your order" quick action** (2026-09-15): `action: 'order'` on a suggested question
+  opens `components/widget/OrderLookupForm.tsx` (order number + email, fixed — every provider's
+  lookup takes exactly `{ orderId, email }`). Submit → `transport.lookupOrder` →
+  `/api/widget/order` (same origin-checked, rate-limited route the voice tool uses); a match is
+  appended as an assistant message with `order`, so the normal `OrderStatusCard` renders in the
+  transcript; a miss is an inline error. Gated by `PublicBotConfig.orderLookup`
+  (`orderLookupEnabled` + the `order-status` component folder, `app/api/widget-config/route.ts`);
+  the ConfigForm option is disabled without REST creds. Form + card use the widget background
+  (white on dark themes), `bubbleBorderColor`, `bubbleRadius`, `primaryColor`.
+  ⚠️ As of 2026-09-15 **no bot in the DB has REST creds** — order lookup has never run live;
+  HomeByNB's "Užsakymo būsena" quick action is still a plain prompt.
 - **`shipping_info`** (2026-08-10, HomeByNB feedback): live checkout shipping rates via the
   public Store API cart flow — ephemeral Cart-Token + cheapest in-stock item + the store's
   ccTLD country → the exact `shipping_rates` the shopper would see ("DPD Paštomatai 2,23 €",

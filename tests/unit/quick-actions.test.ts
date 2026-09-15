@@ -18,6 +18,7 @@ describe('suggestedQuestionSchema — typed actions', () => {
     ['url', { label: 'Sale', prompt: '', url: 'https://store.example.com/sale' }],
     ['handoff', { label: 'Talk to a human', prompt: '', url: '', action: 'handoff' }],
     ['lead', { label: 'Leave your details', prompt: '', url: '', action: 'lead' }],
+    ['order', { label: 'Track your order', prompt: '', url: '', action: 'order' }],
   ]
 
   it.each(roundTrips)('round-trips the %s form', (_name, value) => {
@@ -77,6 +78,11 @@ describe('sqMode / sqAction', () => {
     expect(sqMode({ label: 'Details', action: 'lead' })).toBe('lead')
   })
 
+  it('order action is recognized', () => {
+    expect(sqMode({ label: 'Track', action: 'order' })).toBe('order')
+    expect(sqAction({ label: 'Track', action: 'order' })).toBe('order')
+  })
+
   it('url beats prompt; prompt beats label', () => {
     expect(sqMode({ label: 'L', prompt: 'p', url: 'https://e.com' })).toBe('url')
     expect(sqMode({ label: 'L', prompt: 'p' })).toBe('prompt')
@@ -122,6 +128,28 @@ const baseConfig: BotConfig = {
   commerce: { enabled: false, provider: 'woocommerce', storeUrl: '' },
   voice: { enabled: false, ttsEnabled: true, sttEnabled: true, voices: { en: 'v' } },
 }
+
+describe('publicBotConfig — orderLookup flag', () => {
+  it('is false without REST credentials', () => {
+    expect(publicBotConfig(baseConfig).orderLookup).toBe(false)
+  })
+
+  it('is true for WooCommerce with key + secret', () => {
+    const cfg: BotConfig = {
+      ...baseConfig,
+      commerce: { enabled: true, provider: 'woocommerce', storeUrl: 'https://s.lt', restKey: 'k', restSecret: 's' },
+    }
+    expect(publicBotConfig(cfg).orderLookup).toBe(true)
+  })
+
+  it('is false for Shopify even with a store', () => {
+    const cfg: BotConfig = {
+      ...baseConfig,
+      commerce: { enabled: true, provider: 'shopify', storeUrl: 'https://s.myshopify.com' },
+    }
+    expect(publicBotConfig(cfg).orderLookup).toBe(false)
+  })
+})
 
 describe('publicBotConfig — quick-action pass-through', () => {
   it('passes the action field through per language', () => {

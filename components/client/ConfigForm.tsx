@@ -43,6 +43,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { botConfigFormSchema } from '@/lib/validation/schemas'
+import { orderLookupEnabled } from '@/lib/commerce/capabilities'
 import { GREETING_SOUNDS, playGreetingSound, type GreetingSound } from '@/lib/greeting-sound'
 import {
   QUICK_ACTION_SUGGESTIONS,
@@ -212,7 +213,7 @@ const MAX_SUGGESTED_QUESTIONS = 6
 // Quick-action type picker (dialog). 'text' and 'url' map to the prompt/url
 // fields; 'handoff', 'lead' and 'products' become the typed `action` on the
 // saved item ('products' also carries the query field).
-type QaMode = 'text' | 'url' | 'products' | 'handoff' | 'lead'
+type QaMode = 'text' | 'url' | 'products' | 'handoff' | 'lead' | 'order'
 
 const QA_MODE_OPTIONS: { value: QaMode; title: string; description: string }[] = [
   { value: 'text', title: 'Send a message', description: 'Sends text to the bot' },
@@ -220,6 +221,7 @@ const QA_MODE_OPTIONS: { value: QaMode; title: string; description: string }[] =
   { value: 'products', title: 'Show products', description: 'Displays product cards' },
   { value: 'handoff', title: 'Talk to a human', description: 'Requests a team member' },
   { value: 'lead', title: 'Get contact details', description: 'Opens the contact form' },
+  { value: 'order', title: 'Track an order', description: 'Order number + email → status card' },
 ]
 
 /** One-line description of what a saved quick action does (list rows). */
@@ -231,6 +233,7 @@ function qaSummary(f: {
 }): string {
   if (f.action === 'handoff') return 'Requests a human'
   if (f.action === 'lead') return 'Opens the contact form'
+  if (f.action === 'order') return 'Opens the order tracking form'
   if (f.action === 'products') return `Shows products: ${f.query || 'the title'}`
   if (f.url) return `Opens ${f.url}`
   if (f.prompt) return `Sends: ${f.prompt}`
@@ -493,7 +496,10 @@ export function ConfigForm({
       prompt: qaMode === 'text' ? qaDraft.prompt.trim() : '',
       url: qaMode === 'url' ? qaDraft.url.trim() : '',
       query: qaMode === 'products' ? qaDraft.query.trim() : '',
-      action: qaMode === 'handoff' || qaMode === 'lead' || qaMode === 'products' ? qaMode : undefined,
+      action:
+        qaMode === 'handoff' || qaMode === 'lead' || qaMode === 'products' || qaMode === 'order'
+          ? qaMode
+          : undefined,
     }
     if (qaIndex === null) activeSuggestedField.append(value)
     else activeSuggestedField.update(qaIndex, value)
@@ -608,6 +614,8 @@ export function ConfigForm({
   }, [])
 
   const leadCaptureEnabled = watch('leadCapture.enabled')
+  // Order tracking needs saved REST credentials (Woo key/secret or Magento token).
+  const orderLookupOn = orderLookupEnabled(watch('commerce') as BotConfig['commerce'] | undefined)
   const hasChanges = isDirty || name.trim() !== savedName.trim()
 
   // Build a live config for the preview — typed to match TestChat's LiveConfig.
@@ -1100,7 +1108,8 @@ export function ConfigForm({
                           const leadOff = opt.value === 'lead' && !leadCaptureEnabled
                           const productsOff =
                             opt.value === 'products' && !(watch('commerce.enabled') ?? false)
-                          const off = leadOff || productsOff
+                          const orderOff = opt.value === 'order' && !orderLookupOn
+                          const off = leadOff || productsOff || orderOff
                           return (
                             <button
                               key={opt.value}
@@ -1132,6 +1141,12 @@ export function ConfigForm({
                       {!(watch('commerce.enabled') ?? false) && (
                         <p className="text-xs text-muted-foreground">
                           “Show products” needs a connected store.
+                        </p>
+                      )}
+                      {!orderLookupOn && (
+                        <p className="text-xs text-muted-foreground">
+                          “Track an order” needs WooCommerce REST keys or a Magento token in the
+                          Store section.
                         </p>
                       )}
                     </div>
@@ -1189,6 +1204,12 @@ export function ConfigForm({
                     {qaMode === 'lead' && (
                       <p className="text-xs text-muted-foreground">
                         Opens the contact form so the visitor can leave their details.
+                      </p>
+                    )}
+                    {qaMode === 'order' && (
+                      <p className="text-xs text-muted-foreground">
+                        Opens a form asking for the order number and the email used on the order.
+                        A match shows the order-status card in the chat.
                       </p>
                     )}
                   </div>

@@ -7,6 +7,7 @@ import type {
   SuggestedQuestionAction,
 } from '@/lib/types'
 import type { Entitlements } from '@/lib/entitlements'
+import { orderLookupEnabled } from '@/lib/commerce/capabilities'
 
 /** The button text for a suggested question. */
 export function sqLabel(q: SuggestedQuestion): string {
@@ -26,10 +27,10 @@ export function sqUrl(q: SuggestedQuestion): string | undefined {
   return u || undefined
 }
 
-/** The typed behavior of a quick action ('handoff' | 'lead' | 'products'), if any. */
+/** The typed behavior of a quick action ('handoff' | 'lead' | 'products' | 'order'), if any. */
 export function sqAction(q: SuggestedQuestion): SuggestedQuestionAction | undefined {
   if (typeof q === 'string') return undefined
-  return q.action === 'handoff' || q.action === 'lead' || q.action === 'products'
+  return q.action === 'handoff' || q.action === 'lead' || q.action === 'products' || q.action === 'order'
     ? q.action
     : undefined
 }
@@ -43,7 +44,7 @@ export function sqQuery(q: SuggestedQuestion): string {
 /** Behavior of a quick action. Precedence: action > url > prompt > message. */
 export function sqMode(
   q: SuggestedQuestion,
-): 'handoff' | 'lead' | 'products' | 'url' | 'prompt' | 'message' {
+): 'handoff' | 'lead' | 'products' | 'order' | 'url' | 'prompt' | 'message' {
   if (typeof q === 'string') return 'message'
   const action = sqAction(q)
   if (action) return action
@@ -141,6 +142,8 @@ export interface PublicBotConfig {
   }
   /** Widget offers the "see it in your room" product visualizer. */
   roomVisualizer: boolean
+  /** Order lookup (number + email) is usable — gates the 'order' quick action. */
+  orderLookup: boolean
   /** Component-library variant per component key (e.g. product-cards → compact). */
   components?: Record<string, string>
   /** Hide the "Powered by Loqara" badge (true on plans that allow it). */
@@ -278,6 +281,7 @@ export function publicBotConfig(
       sttEnabled: false,
     },
     roomVisualizer: config.roomVisualizer ?? false,
+    orderLookup: orderLookupEnabled(config.commerce),
     components: config.components,
   }
 

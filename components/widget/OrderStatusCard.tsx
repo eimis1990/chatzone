@@ -10,6 +10,9 @@ interface OrderStatusCardProps {
   language?: 'en' | 'lt'
   /** Component-library variant: 'timeline' adds a delivery progress stepper. */
   variant?: 'default' | 'timeline'
+  /** Widget chat background + bubble border, so the card follows the theme. */
+  backgroundColor?: string
+  borderColor?: string
 }
 
 // Timeline steps + which step a status has reached (-1 = not a linear status,
@@ -49,6 +52,8 @@ export function OrderStatusCard({
   primaryColor,
   language = 'en',
   variant = 'default',
+  backgroundColor = '#ffffff',
+  borderColor = '#e5e7eb',
 }: OrderStatusCardProps) {
   if (!order.found) return null
   const t = LABELS[language] ?? LABELS.en
@@ -63,8 +68,8 @@ export function OrderStatusCard({
 
   return (
     <div
-      className="mt-1 w-full border border-gray-200 bg-white overflow-hidden text-sm"
-      style={{ borderRadius: radius }}
+      className="mt-1 w-full border overflow-hidden text-sm"
+      style={{ borderRadius: radius, backgroundColor, borderColor }}
     >
       {/* Header */}
       <div className="flex items-center justify-between gap-2 px-3 py-2 border-b border-gray-100">
