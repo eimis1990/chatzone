@@ -137,9 +137,15 @@ Store** prompt (`docs/prompt-templates/furniture-store.md`) treats dimensions,
 color/material, orientation, and function as verified constraints; preserves all
 other constraints when one is relaxed; and requires base-category search + live
 details before claiming no match. It is published in `system_prompts` and assigned
-to the Mobel bot (and the separate 3IMIS/Chafox Verskis test bot).
+to the Mobel bot (and the separate 3IMIS/Chafox Verskis test bot). The
+**Manufacturer / Private Label B2B** prompt (`private-label-b2b.md`, published
+2026-09-24) covers producers selling private/white label and resell partnerships;
+it separates the three models, treats MOQs/certifications/country lists as
+copy-exactly facts, routes unit pricing and lead times to a quote, and ranks
+service/product pages above blog figures. The PURUS.PET demo bot it was distilled
+from keeps its own bespoke snapshot rather than pinning this template.
 
-_Last verified: 2026-07-27._
+_Last verified: 2026-09-24._
 
 ## Lead capture (request/booking forms)
 
