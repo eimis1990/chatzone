@@ -762,6 +762,13 @@ function buildFullConfig(config: LiveConfig): BotConfig {
       restSecret: config.commerce?.restSecret,
       shopifyDomain: config.commerce?.shopifyDomain,
       shopifyToken: config.commerce?.shopifyToken,
+      // Every provider's "is a store configured" field must reach the preview, or
+      // it silently loses product search (feed demos showed text lists, no cards).
+      magentoToken: config.commerce?.magentoToken,
+      feedUrl: config.commerce?.feedUrl,
+      tlClientId: config.commerce?.tlClientId,
+      tlClientSecret: config.commerce?.tlClientSecret,
+      tlPropertyId: config.commerce?.tlPropertyId,
       discount: config.commerce?.discount
         ? {
             enabled: config.commerce.discount.enabled ?? false,
