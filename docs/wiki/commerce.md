@@ -74,6 +74,14 @@ order lookup available.
   `components/client/ConfigForm.tsx:2200-2250`, `components/client/onboarding/OnboardingWizard.tsx:132-176`).
 - All outbound requests to a tenant's `storeUrl`/`feedUrl`/`shopifyDomain` are SSRF-guarded via
   `assertPublicUrl` before the real network call (`lib/commerce/index.ts:32-44`).
+- **Non-shop sites are demoable with a hand-built feed.** PURUS.PET (B2B manufacturer,
+  custom React site, no store API) got product cards by scraping its 26 product pages
+  into `{products:[{id,title,url,image,price,description,inStock}]}` and hosting the
+  JSON in the bot's `public-assets` folder (2026-09-24). Put the category into
+  `description` so keyword matching finds "dental care"; keep the price a short string
+  (it is shown verbatim on the card). Do NOT name the file `products.json`: `loadFeed`
+  treats that as Shopify's endpoint and follows `?page=N`, returning the same 26
+  products 8 times. The feed is static — regenerate it when the client's range changes.
 - **Shopify stores are demoable WITHOUT a Storefront token** via the feed provider:
   most Shopify shops publicly expose `/products.json` (250/page). `parseFeed` understands
   its shape (price/availability from `variants[0]`, product URL built from `handle` + the
