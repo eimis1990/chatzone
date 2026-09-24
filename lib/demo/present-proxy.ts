@@ -182,7 +182,7 @@ export function rewritePresentHtml(
   const injected = `${OPAQUE_ORIGIN_SHIM}<base href="${baseHref.replace(
     /"/g,
     '&quot;',
-  )}">${clickHandlerScript(origin, proxyPrefix)}`
+  )}">${clickHandlerScript(origin, proxyPrefix)}${MOTION_SETTLE_STYLE}`
 
   const shown = revealHiddenContent(cleaned)
   const head = shown.match(/<head\b[^>]*>/i)
@@ -190,6 +190,18 @@ export function rewritePresentHtml(
   const at = head.index + head[0].length
   return shown.slice(0, at) + injected + shown.slice(at)
 }
+
+/**
+ * Entrance animations that a motion library drives at runtime (framer-motion
+ * sets `opacity:0`, `filter:blur(8px)`, `transform:translateX(-80px)` inline,
+ * then tweens them away) never complete inside the stage frame — puruspet.com's
+ * hero stayed blurred indefinitely (2026-09-24). Force the settled state. The
+ * selectors match `opacity:0;`/trailing `opacity:0` but not `opacity:0.04`
+ * decorations, so faint ornaments keep their intended opacity.
+ */
+const MOTION_SETTLE_STYLE =
+  '<style>[style*="opacity:0;"],[style*="opacity: 0;"],[style$="opacity:0"],[style$="opacity: 0"],[style*="blur("]' +
+  '{opacity:1!important;transform:none!important;filter:none!important}</style>'
 
 /**
  * Scroll-reveal animations pre-hide content inline (`opacity:0;transform:…`)

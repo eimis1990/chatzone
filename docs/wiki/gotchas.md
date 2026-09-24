@@ -482,5 +482,9 @@ and the page's JS never runs. Prerendered content still shows — unless the sit
 pre-hides it inline for a scroll-reveal animation (`style="opacity:0;transform:…"`),
 in which case the stage is blank (puruspet.com, 2026-09-24).
 `rewritePresentHtml` now strips those hides (`revealHiddenContent`,
-`lib/demo/present-proxy.ts`). If a site genuinely needs its JS in the stage,
-the upgrade is proxying its scripts under a path-preserving route with ACAO.
+`lib/demo/present-proxy.ts`). Where the scripts DO run, framer-motion-style
+entrance animations stall mid-tween in the frame (hero stuck at `blur(8px)`),
+so the same rewrite injects `MOTION_SETTLE_STYLE`, forcing inline
+`opacity:0`/`blur(` states to their settled values. If a site genuinely needs
+its JS to finish in the stage, the upgrade is proxying its scripts under a
+path-preserving route with ACAO.

@@ -109,6 +109,15 @@ describe('scroll-reveal pre-hidden content', () => {
   })
 })
 
+describe('runtime motion initial states', () => {
+  it('injects a style that forces motion-hidden elements to their settled state', () => {
+    const out = rewritePresentHtml('<html><head></head><body></body></html>', OPTIONS)
+    expect(out).toContain('[style*="opacity:0;"]')
+    expect(out).toContain('[style*="blur("]')
+    expect(out).toContain('opacity:1!important;transform:none!important;filter:none!important')
+  })
+})
+
 describe('SVG sprite inlining', () => {
   const SPRITE_HTML =
     '<head></head><body><svg><use xlink:href="https://www.karakara.lt/build/icons.svg#cart"/></svg>' +
