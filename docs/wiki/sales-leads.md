@@ -142,12 +142,15 @@ emails, and manual status progression.
   preview dialog's `Copy styled email` writes both `text/html` and the exact
   stored body as `text/plain` (`components/owner/LeadEmailTemplates.tsx:67-79`,
   `:257-265`).
-- `Clean update` is the only outbound design: a compact logo lockup, generous
-  white space, and neutral bordered pitch rows. Its orange top rule is the
-  outer card's border (not a wider inner row), so it stays inside the rounded
-  card at narrow widths. Every shared pitch paragraph, including the
-  `Esu Eimantas...` introduction, lives under one `Trumpai apie Loqara` heading
-  (`lib/sales-email-templates.ts:81-128`).
+- `Clean update` is the only design exposed by the owner UI: a compact logo
+  lockup, generous white space, and neutral bordered pitch rows. Its orange top
+  rule is the outer card's border (not a wider inner row), so it stays inside
+  the rounded card at narrow widths. Every shared pitch paragraph, including
+  the `Esu Eimantas...` introduction, lives under one `Trumpai apie Loqara`
+  heading (`lib/sales-email-templates.ts:81-128`). For manually executed batches,
+  an explicit owner request may instead use the personal Anvol-style rendering:
+  the unchanged stored body as separate `<p>` elements, no card/headline/boxed
+  pitch section, and the same inline fox plus localized founder signature.
 - Do not add `mailto:` response buttons to the Clean update question. A mailto
   URL can open a new draft with a matching `Re:` subject, but email HTML cannot
   supply the original message's `In-Reply-To`/`References` headers, so it cannot
@@ -245,6 +248,10 @@ emails, and manual status progression.
 - Send the live row's `email_subject` and `email_body` snapshots unchanged from
   `hello@loqara.com` with the Loqara sender name and branded signature. Validate
   recipient, subject, and body before sending.
+- The owner reaffirmed the plain personal layout for manual LinkedIn batches on
+  2026-09-10, using the 2026-09-08 Anvol Sent copy as the reference. “Plain”
+  still means multipart text + simple HTML paragraphs so spacing, the CID fox,
+  and localized signature survive; it never means a plain-text-only API send.
 - Treat the lifecycle update as a post-send commit: confirm the exact recipient
   and subject in the provider's Sent folder, then conditionally change only that
   row from `ready` to `email_sent` with fresh `status_updated_at` and `updated_at`

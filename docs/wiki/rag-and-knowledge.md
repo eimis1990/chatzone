@@ -57,6 +57,15 @@ How a bot's answers stay grounded in the client's own content.
 - Changing the chunker requires re-ingesting existing sources (old chunks
   aren't retroactively resplit).
 
+### Curated text sources for content the crawler cannot see
+
+Some site content never reaches the HTML or Jina: accordion FAQ panels that
+mount only when opened (see [gotchas](gotchas.md#accordion-faq-answers-are-invisible-to-the-crawler)),
+event lists rendered client-side, etc. The pattern is a hand-captured `text`
+source with a descriptive name and `metadata.kind` tag (`faq-accordion` on the
+PURUS.PET demo, the curated events source on Taujėnų dvaras); it flows through
+normal ingest → embed → hybrid search. Re-capture when the site changes.
+
 ## Canonical pages (`lib/ingestion/canonical.ts`)
 
 - `generateCanonicalPages` synthesizes 6 "answer summary" pages per bot —
@@ -198,3 +207,4 @@ and stay fast. KB-only bots are unaffected. Measured 2026-09-07 with the live
 KB via `match_chunks_hybrid` (probe idea: embed the question, take the top hit's
 source, check its kind).
 
+The lane has no tools at all, so `fastLaneConfig` must strip every prompt block that advertises one: commerce (`search_products`) and lead capture `offerOnIntent` (`open_lead_form`). A prompt that promises a tool the lane lacks makes the model narrate an action that never happens (2026-09-24).

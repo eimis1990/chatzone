@@ -1,5 +1,23 @@
 # Messaging channels
 
+## Current review result (2026-09-20)
+
+- Submission `2453576515143984` is reviewed: `pages_show_list`,
+  `business_management`, `public_profile` approved; `pages_manage_metadata` and
+  `pages_messaging` rejected for screencast/use-case mismatch. Meta explicitly
+  considers the use case allowed. App remains unpublished; no resubmission made.
+- Metadata evidence must show Page subscription plus an incoming event from
+  that same Page. The implementation subscribes to `messages,messaging_postbacks`
+  (`lib/channels/oauth.ts:133`); demonstrate a message, not the reviewer's optional
+  comment example.
+- Messaging evidence must show Page selection, a human reply sent from Loqara
+  Inbox, and that exact reply arriving in native Messenger. Source confirms the
+  delivery path (`lib/channels/outbound.ts:74`), not current live delivery.
+- [Submission pack](../meta-app-review.md#resubmission--feedback-checked-2026-09-20)
+  contains the replacement recording checklist and draft explanations. A new
+  live recording and production dry run remain required. This result supersedes
+  all historical review-status notes below.
+
 ## Current review audit (2026-09-05)
 
 - Meta submission `2453576515143984` shows Verification/App settings complete,

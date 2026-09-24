@@ -184,8 +184,30 @@ export function rewritePresentHtml(
     '&quot;',
   )}">${clickHandlerScript(origin, proxyPrefix)}`
 
-  const head = cleaned.match(/<head\b[^>]*>/i)
-  if (head?.index === undefined) return injected + cleaned
+  const shown = revealHiddenContent(cleaned)
+  const head = shown.match(/<head\b[^>]*>/i)
+  if (head?.index === undefined) return injected + shown
   const at = head.index + head[0].length
-  return cleaned.slice(0, at) + injected + cleaned.slice(at)
+  return shown.slice(0, at) + injected + shown.slice(at)
+}
+
+/**
+ * Scroll-reveal animations pre-hide content inline (`opacity:0;transform:…`)
+ * and rely on the page's JS to show it. Module scripts (Vite builds) are
+ * CORS-fetched, and a client origin that sends no Access-Control-Allow-Origin
+ * refuses them from our opaque-origin frame — so nothing ever appears and the
+ * backdrop stays blank (seen with puruspet.com). Show that content up front;
+ * where the scripts do run, they set opacity 1 anyway.
+ * ponytail: inline-style regex; proxy the module scripts under a path-preserving
+ * route if a site needs its JS in the stage.
+ */
+function revealHiddenContent(html: string): string {
+  return html.replace(/style\s*=\s*(["'])([^"']*\bopacity\s*:\s*0(?![.\d])[^"']*)\1/gi, (whole, q: string, css: string) => {
+    if (/display\s*:\s*none|visibility\s*:\s*hidden/i.test(css)) return whole
+    const kept = css
+      .split(';')
+      .map((d) => d.trim())
+      .filter((d) => d && !/^(opacity|transform)\s*:/i.test(d))
+    return `style=${q}${[...kept, 'opacity:1'].join(';')}${q}`
+  })
 }

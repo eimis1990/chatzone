@@ -62,10 +62,17 @@ describe('pickLane', () => {
     expect(pickLane(kbOnly, 'Do you offer gift cards?', strong)).toBe('fast')
   })
 
-  it('fastLaneConfig disables the commerce prompt block only', () => {
-    const cfg = fastLaneConfig(shop)
+  it('fastLaneConfig drops only the tool prompt blocks (commerce, lead form)', () => {
+    const withLead = {
+      ...shop,
+      leadCapture: { ...shop.leadCapture, enabled: true, offerOnIntent: true },
+    }
+    const cfg = fastLaneConfig(withLead)
     expect(cfg.commerce.enabled).toBe(false)
     expect(cfg.commerce.storeUrl).toBe('https://shop.example')
+    // The lane has no open_lead_form tool, so the prompt must not advertise one.
+    expect(cfg.leadCapture.offerOnIntent).toBe(false)
+    expect(cfg.leadCapture.enabled).toBe(true)
     expect(shop.commerce.enabled).toBe(true)
   })
 })

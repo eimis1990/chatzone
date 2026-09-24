@@ -116,6 +116,10 @@ viewport-sized `<img>` with nothing to scroll. The backdrop is now the live
 page, re-served from our origin without the framing headers
 (`app/api/present/site/route.ts`, rewriting in `lib/demo/present-proxy.ts`).
 
+- **Scroll-reveal hides are stripped.** Inline `opacity:0;transform:…` styles
+  that a page's JS would clear on scroll are rewritten to `opacity:1`
+  (`revealHiddenContent`), because module scripts from a client origin without
+  CORS never run in the opaque frame — see [gotchas](gotchas.md#module-script-sites-render-blank-in-the-present-stage).
 - **Not an open proxy.** The caller passes `?bot=` (owner session required) or
   `?token=`, never a URL; the target comes from the bot's own config, so only
   owner-configured pages are reachable. `path` must start with a single `/`

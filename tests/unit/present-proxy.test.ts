@@ -89,6 +89,26 @@ describe('rewritePresentHtml', () => {
   })
 })
 
+describe('scroll-reveal pre-hidden content', () => {
+  // Module scripts are CORS-fetched; a client origin without ACAO refuses them
+  // from the opaque frame, so JS-driven reveals never fire and the stage is blank.
+  it('shows content that inline styles hide for a JS reveal animation', () => {
+    const out = rewritePresentHtml(
+      '<html><head></head><body>' +
+        '<h1 style="opacity:0;transform:translateY(20px)">Hero</h1>' +
+        "<p style='color:red; opacity: 0; transform:scale(0.9)'>Text</p>" +
+        '<img style="opacity:0.5;transform:none">' +
+        '<noscript><iframe style="display:none;visibility:hidden"></iframe></noscript>' +
+        '</body></html>',
+      OPTIONS,
+    )
+    expect(out).toContain('<h1 style="opacity:1">Hero</h1>')
+    expect(out).toContain("<p style='color:red;opacity:1'>Text</p>")
+    expect(out).toContain('<img style="opacity:0.5;transform:none">')
+    expect(out).toContain('style="display:none;visibility:hidden"')
+  })
+})
+
 describe('SVG sprite inlining', () => {
   const SPRITE_HTML =
     '<head></head><body><svg><use xlink:href="https://www.karakara.lt/build/icons.svg#cart"/></svg>' +

@@ -58,8 +58,14 @@ export function pickLane(
 }
 
 /** Prompt config for the fast lane: the plain knowledge-base prompt, without
- *  the tool instructions ("you MUST call search_products") the lane has no
- *  tools for. */
+ *  the tool instructions ("you MUST call search_products", "you have an
+ *  `open_lead_form` tool") the lane has no tools for. Keeping the REQUEST FORM
+ *  paragraph while the tool is absent makes the model announce a form that
+ *  never opens. */
 export function fastLaneConfig(config: BotConfig): BotConfig {
-  return { ...config, commerce: { ...config.commerce, enabled: false } }
+  return {
+    ...config,
+    commerce: { ...config.commerce, enabled: false },
+    leadCapture: { ...config.leadCapture, offerOnIntent: false },
+  }
 }

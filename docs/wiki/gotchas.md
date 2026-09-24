@@ -460,3 +460,27 @@ Fix = re-ingest (`scripts/reingest-bot.mts <botId> [--dry]`; re-embeds, ~12s
 per page). Verified on the 3IMIS HomeByNB copy: 358 → 105 chunks, 0 noisy.
 Check `knowledge_sources.updated_at` before blaming retrieval.
 
+
+## Accordion FAQ answers are invisible to the crawler
+
+Radix/shadcn `Accordion` (and most headless accordions) do not mount the panel
+content while closed — the HTML contains only the question buttons and an
+empty `hidden` region, and Jina's JS render does not click anything. The
+crawled chunk is then a list of questions with no answers (seen on every
+puruspet.com FAQ, 2026-09-24), which reads as "the site has an FAQ" while the
+bot cannot answer any of it. Check chunk tails for `### Question? ### Question?`
+runs; capture the answers (browser: click each trigger, read its region) and add
+them as a curated `text` source until the parser learns to expand accordions.
+See [rag-and-knowledge](rag-and-knowledge.md).
+
+## Module-script sites render blank in the present stage
+
+The backdrop frame is an opaque origin (`sandbox="allow-scripts"`). Module
+scripts (`<script type="module">`, every Vite build) are fetched in CORS mode,
+so a client origin that sends no `Access-Control-Allow-Origin` refuses them
+and the page's JS never runs. Prerendered content still shows — unless the site
+pre-hides it inline for a scroll-reveal animation (`style="opacity:0;transform:…"`),
+in which case the stage is blank (puruspet.com, 2026-09-24).
+`rewritePresentHtml` now strips those hides (`revealHiddenContent`,
+`lib/demo/present-proxy.ts`). If a site genuinely needs its JS in the stage,
+the upgrade is proxying its scripts under a path-preserving route with ACAO.
