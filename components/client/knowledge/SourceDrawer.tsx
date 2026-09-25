@@ -2,19 +2,22 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { XIcon, RefreshCwIcon, Trash2Icon, ExternalLinkIcon, SaveIcon, Loader2Icon, PencilIcon, EyeIcon } from 'lucide-react'
+import { XIcon, GlobeIcon, RefreshCwIcon, Trash2Icon, ExternalLinkIcon, SaveIcon, Loader2Icon, PencilIcon, EyeIcon } from 'lucide-react'
 import { marked } from 'marked'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { createBrowserClient } from '@/lib/supabase/browser'
 import type { KnowledgeSource } from '@/lib/types'
 import { TYPE_META, StatusBadge } from './SourceList'
+import { hasLiveConflict } from './refresh'
+import type { RefreshResolve } from '@/lib/ingestion/pipeline'
 
 interface SourceDrawerProps {
   source: KnowledgeSource | null
   onClose: () => void
   onDelete: (source: KnowledgeSource) => void
   onRetry: (source: KnowledgeSource) => void
+  onRefresh: (source: KnowledgeSource, resolve?: RefreshResolve) => void
   onUpdated: (source: KnowledgeSource) => void
 }
 
@@ -256,7 +259,7 @@ function SourceContent({ source }: { source: KnowledgeSource }) {
   )
 }
 
-export function SourceDrawer({ source, onClose, onDelete, onRetry, onUpdated }: SourceDrawerProps) {
+export function SourceDrawer({ source, onClose, onDelete, onRetry, onRefresh, onUpdated }: SourceDrawerProps) {
   // Close on Escape.
   useEffect(() => {
     if (!source) return
@@ -326,6 +329,27 @@ export function SourceDrawer({ source, onClose, onDelete, onRetry, onUpdated }: 
                   {source.error_message}
                 </div>
               )}
+              {hasLiveConflict(source.metadata) && (
+                <div className="space-y-2 rounded-lg border border-orange-300 bg-orange-50 p-3 text-sm text-orange-900 dark:border-orange-900 dark:bg-orange-950/40 dark:text-orange-200">
+                  <p>
+                    <strong>The live page changed</strong> since this source was edited by hand. The bot
+                    still answers from your edited text.
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={source.status === 'processing'}
+                      onClick={() => onRefresh(source, 'keep')}
+                    >
+                      Keep my edit
+                    </Button>
+                    <Button size="sm" disabled={source.status === 'processing'} onClick={() => onRefresh(source, 'live')}>
+                      Use the live page
+                    </Button>
+                  </div>
+                </div>
+              )}
               {/* Source reference (the URL / file); the indexed text is shown + editable below. */}
               {(source.type === 'url' || source.type === 'file') && <SourceContent source={source} />}
               <IndexedContent source={source} onUpdated={onUpdated} />
@@ -333,7 +357,18 @@ export function SourceDrawer({ source, onClose, onDelete, onRetry, onUpdated }: 
 
             {/* Actions (static) */}
             <div className="flex flex-shrink-0 items-center justify-end gap-2 border-t p-4">
-              {source.status === 'error' && (
+              {source.type === 'url' && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={source.status === 'processing'}
+                  onClick={() => onRefresh(source)}
+                >
+                  <GlobeIcon className="size-4" />
+                  Refresh from website
+                </Button>
+              )}
+              {source.status === 'error' && source.type !== 'url' && (
                 <Button variant="outline" size="sm" onClick={() => onRetry(source)}>
                   <RefreshCwIcon className="size-4" />
                   Retry

@@ -2,16 +2,25 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createServerClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
-import { ingestSource, makeServiceRepo } from '@/lib/ingestion/pipeline'
+import { ingestSource, makeServiceRepo, refreshUrlSource, type RefreshOutcome } from '@/lib/ingestion/pipeline'
 import { createRateLimiter } from '@/lib/ratelimit'
 
 // Ingestion (parse + embed) can take a while for large files.
 export const maxDuration = 300
 
-const bodySchema = z.object({ sourceId: z.string().uuid() })
+const bodySchema = z.object({
+  sourceId: z.string().uuid(),
+  // Re-fetch a URL source from the live site (sync / "Refresh from website"),
+  // skipping unchanged pages and flagging manually-edited ones that changed.
+  refresh: z.boolean().optional(),
+  // Settle a flagged manual edit: keep it, or replace it with the live page.
+  resolve: z.enum(['keep', 'live']).optional(),
+})
 
-// ~20 ingestion triggers/min per user, modest burst.
+// ~20 ingestion triggers/min per user, modest burst. A website sync refreshes
+// its pages one call at a time, so it gets its own, roomier bucket.
 const ingestLimiter = createRateLimiter({ capacity: 8, refillPerSec: 0.33 })
+const refreshLimiter = createRateLimiter({ capacity: 30, refillPerSec: 1 })
 
 export async function POST(req: Request) {
   const body = await req.json().catch(() => null)
@@ -27,7 +36,8 @@ export async function POST(req: Request) {
   } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  if (!ingestLimiter.check(user.id)) {
+  const refresh = parsed.data.refresh || parsed.data.resolve !== undefined
+  if (!(refresh ? refreshLimiter : ingestLimiter).check(user.id)) {
     return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 })
   }
 
@@ -42,7 +52,9 @@ export async function POST(req: Request) {
 
   // Run ingestion with the service role (needed to write embeddings).
   const svc = createServiceClient()
-  await ingestSource(parsed.data.sourceId, { repo: makeServiceRepo(svc) })
+  let outcome: RefreshOutcome | undefined
+  if (refresh) outcome = await refreshUrlSource(parsed.data.sourceId, { repo: makeServiceRepo(svc) }, parsed.data.resolve)
+  else await ingestSource(parsed.data.sourceId, { repo: makeServiceRepo(svc) })
 
   const { data: updated } = await supabase
     .from('knowledge_sources')
@@ -53,5 +65,6 @@ export async function POST(req: Request) {
   return NextResponse.json({
     status: updated?.status ?? 'unknown',
     error: updated?.error_message ?? null,
+    outcome,
   })
 }

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { discoverPages } from '@/lib/ingestion/crawl'
+import { discoverPages, pageKey } from '@/lib/ingestion/crawl'
 
 function res(body: string, { ok = true, contentType = 'text/html' } = {}) {
   return {
@@ -75,5 +75,18 @@ describe('discoverPages', () => {
 
   it('dedupes and ignores invalid input', async () => {
     expect(await discoverPages('not a url', 10, (async () => res('')) as unknown as typeof fetch)).toEqual([])
+  })
+
+  it('treats www and apex as one site (sitemap on apex, crawl on www)', async () => {
+    const sitemap = `<urlset><url><loc>https://acme.com/</loc></url><url><loc>https://acme.com/duk</loc></url></urlset>`
+    const fetchImpl = vi.fn(async (url: string) => {
+      if (url === 'https://www.acme.com/robots.txt') return res('Sitemap: https://acme.com/sitemap.xml', { contentType: 'text/plain' })
+      if (url === 'https://acme.com/sitemap.xml') return res(sitemap, { contentType: 'application/xml' })
+      return res('', { ok: false })
+    }) as unknown as typeof fetch
+
+    const pages = await discoverPages('https://www.acme.com/', 25, fetchImpl)
+    expect(pages).toEqual(['https://www.acme.com/', 'https://www.acme.com/duk'])
+    expect(pageKey('https://acme.com/duk/')).toBe(pageKey('https://www.acme.com/duk'))
   })
 })

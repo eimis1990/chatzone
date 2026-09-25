@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react'
 import { toast } from 'sonner'
-import { FileTextIcon, MessageSquareTextIcon, GlobeIcon, UploadIcon, XIcon, WandSparklesIcon, SearchCheckIcon } from 'lucide-react'
+import { FileTextIcon, MessageSquareTextIcon, GlobeIcon, UploadIcon, XIcon, WandSparklesIcon, SearchCheckIcon, RefreshCwIcon } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
@@ -15,6 +15,7 @@ import { FileUpload } from './FileUpload'
 import { SourceList } from './SourceList'
 import { LintResults } from './LintResults'
 import { LintResolveDialog } from './LintResolveDialog'
+import { refreshSource } from './refresh'
 import type { KnowledgeSource, LintFinding } from '@/lib/types'
 
 interface KnowledgeManagerProps {
@@ -44,6 +45,8 @@ export function KnowledgeManager({ botId, initialSources }: KnowledgeManagerProp
   const [addOpen, setAddOpen] = useState(false)
   const [summarizing, setSummarizing] = useState(false)
   const [linting, setLinting] = useState(false)
+  // Website sync progress (pages refreshed / total), null when idle.
+  const [syncing, setSyncing] = useState<{ done: number; total: number } | null>(null)
   const [lint, setLint] = useState<{ findings: LintFinding[]; scanned: number } | null>(null)
   // The finding open in the guided resolution dialog.
   const [resolving, setResolving] = useState<LintFinding | null>(null)
@@ -129,6 +132,74 @@ export function KnowledgeManager({ botId, initialSources }: KnowledgeManagerProp
     }
   }, [botId, refreshSources])
 
+  // Sync with the live website: add new pages, re-fetch every page (unchanged
+  // ones aren't re-embedded; hand-edited ones that changed get flagged), then
+  // rebuild the answer summaries if anything changed.
+  const handleSync = useCallback(async () => {
+    setSyncing({ done: 0, total: 0 })
+    try {
+      const res = await fetch('/api/knowledge/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ botId }),
+      })
+      const plan = (await res.json().catch(() => ({}))) as {
+        sourceIds?: string[]
+        added?: KnowledgeSource[]
+        remaining?: number
+        error?: string
+      }
+      if (!res.ok) throw new Error(plan.error ?? 'Sync failed')
+      const ids = plan.sourceIds ?? []
+      const added = plan.added ?? []
+      setSources((prev) => [...added, ...prev])
+
+      const tally = { updated: 0, unchanged: 0, conflict: 0, error: 0 }
+      for (const [i, id] of ids.entries()) {
+        setSyncing({ done: i, total: ids.length })
+        // Keyless Jina is IP rate-limited; back-to-back fetches push pages onto
+        // the thinner Readability fallback (see scripts/reingest-bot.mts).
+        if (i > 0) await new Promise((r) => setTimeout(r, 1500))
+        setSources((prev) => prev.map((s) => (s.id === id ? { ...s, status: 'processing' } : s)))
+        tally[await refreshSource(id)]++
+        const { data: row } = await createBrowserClient()
+          .from('knowledge_sources')
+          .select('*')
+          .eq('id', id)
+          .single<KnowledgeSource>()
+        if (row) setSources((prev) => prev.map((s) => (s.id === id ? row : s)))
+      }
+
+      // New pages are "updated" too (first index), so this also covers additions.
+      if (tally.updated > 0) {
+        setSyncing({ done: ids.length, total: ids.length })
+        await fetch('/api/knowledge/summarize', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ botId }),
+        }).catch(() => null) // best-effort — "Rebuild summaries" is still there
+        await refreshSources()
+      }
+
+      const changed = tally.updated - added.length
+      const parts = [
+        added.length && `${added.length} new`,
+        changed > 0 && `${changed} updated`,
+        tally.unchanged && `${tally.unchanged} unchanged`,
+        tally.error && `${tally.error} failed`,
+        tally.conflict && `${tally.conflict} need your review (marked "Site changed")`,
+      ].filter(Boolean)
+      const more = plan.remaining ? ` ${plan.remaining} more new pages found — sync again to add them.` : ''
+      const msg = `Website synced: ${parts.join(' · ') || 'nothing to do'}.${more}`
+      if (tally.error || tally.conflict) toast.warning(msg, { duration: 10000 })
+      else toast.success(msg)
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Sync failed')
+    } finally {
+      setSyncing(null)
+    }
+  }, [botId, refreshSources])
+
   // Called by each add-source component after it creates a row + triggers ingest.
   const handleSourceAdded = useCallback((source: KnowledgeSource) => {
     setSources((prev) => [source, ...prev])
@@ -154,6 +225,7 @@ export function KnowledgeManager({ botId, initialSources }: KnowledgeManagerProp
   }, [addOpen])
 
   const readyCount = sources.filter((s) => s.status === 'ready').length
+  const hasWebsite = sources.some((s) => s.type === 'url')
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
@@ -176,6 +248,25 @@ export function KnowledgeManager({ botId, initialSources }: KnowledgeManagerProp
               </CardDescription>
             </div>
             <div className="flex flex-shrink-0 items-center gap-2">
+              {hasWebsite && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="h-10 rounded-md px-4"
+                  onClick={handleSync}
+                  disabled={syncing !== null}
+                  title="Re-read your website: add new pages and update the ones that changed"
+                >
+                  <RefreshCwIcon className={cn('size-4', syncing && 'animate-spin')} />
+                  {syncing
+                    ? syncing.total
+                      ? syncing.done < syncing.total
+                        ? `Syncing ${syncing.done + 1}/${syncing.total}…`
+                        : 'Updating summaries…'
+                      : 'Finding pages…'
+                    : 'Sync website'}
+                </Button>
+              )}
               <Button
                 type="button"
                 variant="outline"

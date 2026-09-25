@@ -113,6 +113,11 @@ export function looksLikeBotChallenge(text: string): boolean {
 }
 
 /** Fetches a URL and extracts its readable text. `fetchImpl` is injectable for tests. */
+/** Jina's "Warning: Target URL returned error 404" preamble line (4xx/5xx). */
+export function jinaTargetError(md: string): boolean {
+  return /^Warning: Target URL returned error [45]\d\d/m.test(md.slice(0, 2000))
+}
+
 export async function parseUrl(url: string, fetchImpl: typeof fetch = fetch): Promise<string> {
   // Real-network path only (tests inject a mock fetch and get the direct path).
   if (fetchImpl === fetch) {
@@ -125,7 +130,10 @@ export async function parseUrl(url: string, fetchImpl: typeof fetch = fetch): Pr
     // server may still pass).
     const { readerMarkdown } = await import('@/lib/ingestion/jina-reader')
     const md = await readerMarkdown(url)
-    if (md && !looksLikeBotChallenge(md)) return cleanMarkdown(md)
+    // Jina answers 200 even when the page is gone — it just prepends a warning.
+    // Fall through to the direct fetch, which throws with the real HTTP status,
+    // so a removed page fails instead of indexing the site's 404 template.
+    if (md && !looksLikeBotChallenge(md) && !jinaTargetError(md)) return cleanMarkdown(md)
   }
   const res = await fetchImpl(url)
   if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`)

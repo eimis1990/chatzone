@@ -4,6 +4,7 @@ import { useEffect, useRef, useCallback, useState } from 'react'
 import { toast } from 'sonner'
 import {
   RefreshCwIcon,
+  GlobeIcon,
   Trash2Icon,
   AlertCircleIcon,
   FileTextIcon,
@@ -20,6 +21,8 @@ import { cn } from '@/lib/utils'
 import { formatDistanceToNow } from '@/lib/date-utils'
 import { createBrowserClient } from '@/lib/supabase/browser'
 import { SourceDrawer } from './SourceDrawer'
+import { hasLiveConflict, refreshSource } from './refresh'
+import type { RefreshResolve } from '@/lib/ingestion/pipeline'
 import type { KnowledgeSource, SourceStatus, SourceType } from '@/lib/types'
 
 interface SourceListProps {
@@ -114,16 +117,20 @@ function sourceSubtitle(source: KnowledgeSource): string {
   }
 }
 
-/** Kebab menu for a card (Retry on errors + Delete). Stops row-click propagation. */
+/** Kebab menu for a card (Refresh / Retry + Delete). Stops row-click propagation. */
 function CardMenu({
   canRetry,
+  canRefresh,
   disabled,
   onRetry,
+  onRefresh,
   onDelete,
 }: {
   canRetry: boolean
+  canRefresh: boolean
   disabled: boolean
   onRetry: () => void
+  onRefresh: () => void
   onDelete: () => void
 }) {
   const [open, setOpen] = useState(false)
@@ -154,9 +161,23 @@ function CardMenu({
       {open && (
         <div
           role="menu"
-          className="absolute right-0 top-full z-20 mt-1 w-36 overflow-hidden rounded-lg border bg-popover p-1 text-popover-foreground shadow-md ring-1 ring-foreground/10"
+          className="absolute right-0 top-full z-20 mt-1 w-52 overflow-hidden rounded-lg border bg-popover p-1 text-popover-foreground shadow-md ring-1 ring-foreground/10"
         >
-          {canRetry && (
+          {canRefresh && (
+            <button
+              type="button"
+              role="menuitem"
+              disabled={disabled}
+              onClick={() => {
+                setOpen(false)
+                onRefresh()
+              }}
+              className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-muted disabled:opacity-50"
+            >
+              <GlobeIcon className="size-4" /> Refresh from website
+            </button>
+          )}
+          {canRetry && !canRefresh && (
             <button
               type="button"
               role="menuitem"
@@ -340,6 +361,31 @@ export function SourceList({ sources, onDeleted, onUpdated, onAddSource }: Sourc
     [onUpdated],
   )
 
+  // Re-fetch a URL source from the live site; `resolve` settles a flagged edit.
+  const handleRefresh = useCallback(
+    async (source: KnowledgeSource, resolve?: RefreshResolve) => {
+      if (inflightRef.current.has(source.id)) return
+      inflightRef.current.add(source.id)
+      onUpdated({ ...source, status: 'processing' })
+      try {
+        const outcome = await refreshSource(source.id, resolve)
+        const { data: fresh } = await createBrowserClient()
+          .from('knowledge_sources')
+          .select('*')
+          .eq('id', source.id)
+          .single<KnowledgeSource>()
+        if (fresh) onUpdated(fresh)
+        if (outcome === 'updated') toast.success(resolve === 'live' ? 'Replaced with the live page' : 'Updated from the website')
+        else if (outcome === 'unchanged') toast.success(resolve === 'keep' ? 'Kept your edit' : 'Already up to date')
+        else if (outcome === 'conflict') toast.warning('The page changed, but it has your manual edits — choose which to keep')
+        else toast.error(fresh?.error_message ?? 'Could not fetch the page')
+      } finally {
+        inflightRef.current.delete(source.id)
+      }
+    },
+    [onUpdated],
+  )
+
   return (
     <>
       <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-4 p-4">
@@ -408,8 +454,10 @@ export function SourceList({ sources, onDeleted, onUpdated, onAddSource }: Sourc
                 </span>
                 <CardMenu
                   canRetry={source.status === 'error'}
-                  disabled={inflightRef.current.has(source.id)}
+                  canRefresh={source.type === 'url'}
+                  disabled={inflightRef.current.has(source.id) || source.status === 'processing'}
                   onRetry={() => handleRetry(source)}
+                  onRefresh={() => handleRefresh(source)}
                   onDelete={() => handleDelete(source)}
                 />
               </div>
@@ -422,6 +470,14 @@ export function SourceList({ sources, onDeleted, onUpdated, onAddSource }: Sourc
                   {canonical && (
                     <span className="shrink-0 rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium text-amber-700">
                       Summary
+                    </span>
+                  )}
+                  {hasLiveConflict(source.metadata) && (
+                    <span
+                      className="shrink-0 rounded-full bg-orange-100 px-1.5 py-0.5 text-[10px] font-medium text-orange-700"
+                      title="The live page changed since this source was edited by hand"
+                    >
+                      Site changed
                     </span>
                   )}
                 </div>
@@ -449,6 +505,7 @@ export function SourceList({ sources, onDeleted, onUpdated, onAddSource }: Sourc
         source={viewing}
         onClose={() => setViewingId(null)}
         onRetry={handleRetry}
+        onRefresh={handleRefresh}
         onUpdated={onUpdated}
         onDelete={(s) => {
           handleDelete(s)

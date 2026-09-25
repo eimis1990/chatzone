@@ -3,7 +3,7 @@ import { createServerClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { ingestSource, makeServiceRepo } from '@/lib/ingestion/pipeline'
 import { generateCanonicalPages } from '@/lib/ingestion/canonical'
-import { discoverPages } from '@/lib/ingestion/crawl'
+import { discoverPages, isProductUrl, pageKey, pageName, priorityScore } from '@/lib/ingestion/crawl'
 import { assertPublicUrl } from '@/lib/net/ssrf'
 import { crawlSchema } from '@/lib/validation/schemas'
 import { createRateLimiter } from '@/lib/ratelimit'
@@ -24,56 +24,6 @@ const INGEST_CAP = 15
 
 // Crawling is expensive — a couple per minute per user.
 const crawlLimiter = createRateLimiter({ capacity: 2, refillPerSec: 0.05 })
-
-// Pages most support questions hit — contact, returns/refunds, terms, privacy,
-// shipping/delivery, payment, warranty, about, FAQ, plus service-business core
-// pages: rentals/pricing/accommodation/services (Lithuanian + English). These
-// are ingested first so a single crawl front-loads the highest-value info.
-const PRIORITY_RE =
-  /(kontakt|contact|susisiek|gr[aą]žin|grazin|return|refund|atsisak|taisykl|s[aą]lyg|salyg|terms|conditions|privatum|privacy|gdpr|slapuk|cookie|pristatym|siunt|delivery|shipping|apmok|mok[eė]jim|payment|garantij|warranty|apie|about|duk|faq|klausim|nuoma|rent|kain|pric|paslaug|service|apgyvendin|accommodation|pramog|edukacij|menu|meniu)/i
-// Dated/low-value posts go last: blogs, news, and event announcements (event
-// calendars churn; a crawl full of expired events answers nothing).
-const BLOG_RE =
-  /\/(patarimai|blog|straipsn|news|tinklarast|article|renginiai|renginys|events?|wydarzenia|veranstaltungen|notikumi|kategorija|category|author)\//i
-
-/** Rank a page for ingestion priority: policy/contact pages first, blogs last. */
-function priorityScore(u: string): number {
-  try {
-    const path = new URL(u).pathname.toLowerCase()
-    if (path === '/' || path === '') return 3 // homepage: general store info
-    // A dated/low-value section always ranks last, even when its slug happens
-    // to contain a priority word (e.g. /renginiai/vasaros-pramogos-…/).
-    if (BLOG_RE.test(path)) return -1
-    return PRIORITY_RE.test(path) ? 5 : 0
-  } catch {
-    return 0
-  }
-}
-
-// Product & category pages are served by the live store feed (always-current
-// prices + stock), so we do NOT ingest them into the knowledge base — that would
-// duplicate the catalog and, worse, freeze prices at crawl time. We crawl only
-// content pages (policies, FAQ, about, blog). Covers WooCommerce (LT + EN).
-const PRODUCT_URL_RE =
-  /\/(produktas|produkto-kategorija|product|product-category|shop|store|parduotuv|prek[eė])\//i
-function isProductUrl(u: string): boolean {
-  try {
-    return PRODUCT_URL_RE.test(new URL(u).pathname.toLowerCase())
-  } catch {
-    return false
-  }
-}
-
-/** Derive a short, readable source name from a page URL (its path, else host). */
-function pageName(u: string): string {
-  try {
-    const x = new URL(u)
-    const path = x.pathname.replace(/\/+$/, '')
-    return path || x.hostname
-  } catch {
-    return u
-  }
-}
 
 export async function POST(req: Request) {
   const parsed = crawlSchema.safeParse(await req.json().catch(() => null))
@@ -112,12 +62,12 @@ export async function POST(req: Request) {
     .eq('bot_id', botId)
     .eq('type', 'url')
   const existingUrls = new Set(
-    (existing ?? []).map((r) => String((r.metadata as { url?: string })?.url ?? '')),
+    (existing ?? []).map((r) => pageKey(String((r.metadata as { url?: string })?.url ?? ''))),
   )
   // Ingest highest-value pages first (policy/contact/etc.), blogs last. Stable
   // sort keeps sitemap order within the same priority tier.
   const fresh = pages
-    .filter((p) => !existingUrls.has(p) && !isProductUrl(p))
+    .filter((p) => !existingUrls.has(pageKey(p)) && !isProductUrl(p))
     .sort((a, b) => priorityScore(b) - priorityScore(a))
   if (fresh.length === 0) {
     return NextResponse.json(

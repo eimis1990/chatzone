@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { ingestSource, type IngestRepo } from '@/lib/ingestion/pipeline'
+import { ingestSource, refreshUrlSource, type IngestRepo } from '@/lib/ingestion/pipeline'
 import type { KnowledgeSource } from '@/lib/types'
 
 function makeRepo(source: KnowledgeSource): {
@@ -72,5 +72,61 @@ describe('ingestSource', () => {
     expect(statuses[0].status).toBe('processing')
     expect(statuses[1].status).toBe('error')
     expect(statuses[1].patch?.error_message).toContain('boom')
+  })
+})
+
+describe('refreshUrlSource', () => {
+  const page = 'Kainos. Plieno čerpių stogas nuo 28 €/m². Šiferis nuo 35 €/m².'
+  const url = (metadata: Record<string, unknown>, status: KnowledgeSource['status'] = 'ready'): KnowledgeSource => ({
+    ...base,
+    type: 'url',
+    status,
+    metadata: { url: 'https://acme.com/kainos', ...metadata },
+  })
+  const parse = (text: string) => ({ parseUrl: vi.fn(async () => text) })
+  const lastMeta = (statuses: Array<{ patch?: Record<string, unknown> }>) =>
+    statuses.at(-1)?.patch?.metadata as Record<string, unknown> | undefined
+
+  it('indexes a changed page and records its hash; the next run is a no-op', async () => {
+    const first = makeRepo(url({ liveHash: 'old' }))
+    expect(await refreshUrlSource('s1', { repo: first.repo, ...deps, ...parse(page) })).toBe('updated')
+    expect(first.inserted[0]).toBeGreaterThan(0)
+    const liveHash = lastMeta(first.statuses)?.liveHash
+    expect(liveHash).toMatch(/^[0-9a-f]{64}$/)
+
+    const second = makeRepo(url({ liveHash }))
+    expect(await refreshUrlSource('s1', { repo: second.repo, ...deps, ...parse(page) })).toBe('unchanged')
+    expect(second.inserted).toEqual([]) // nothing re-embedded
+  })
+
+  it('flags a manually-edited page whose live content changed, without touching its chunks', async () => {
+    const { repo, statuses, inserted } = makeRepo(url({ liveHash: 'old', contentOverride: 'my edit' }))
+    expect(await refreshUrlSource('s1', { repo, ...deps, ...parse(page) })).toBe('conflict')
+    expect(inserted).toEqual([])
+    expect(lastMeta(statuses)).toMatchObject({ contentOverride: 'my edit', liveConflict: true, liveHash: 'old' })
+  })
+
+  it("'keep' keeps the edit and stops flagging; 'live' drops the edit and indexes the page", async () => {
+    const kept = makeRepo(url({ contentOverride: 'my edit', liveConflict: true }))
+    expect(await refreshUrlSource('s1', { repo: kept.repo, ...deps, ...parse(page) }, 'keep')).toBe('unchanged')
+    expect(kept.inserted).toEqual([])
+    expect(lastMeta(kept.statuses)).toMatchObject({ contentOverride: 'my edit' })
+    expect(lastMeta(kept.statuses)?.liveConflict).toBeUndefined()
+
+    const live = makeRepo(url({ contentOverride: 'my edit', liveConflict: true }))
+    expect(await refreshUrlSource('s1', { repo: live.repo, ...deps, ...parse(page) }, 'live')).toBe('updated')
+    expect(live.inserted[0]).toBeGreaterThan(0)
+    expect(lastMeta(live.statuses)?.contentOverride).toBeUndefined()
+    expect(lastMeta(live.statuses)?.liveConflict).toBeUndefined()
+  })
+
+  it('a failed fetch marks the source error but keeps its chunks', async () => {
+    const { repo, statuses, inserted } = makeRepo(url({ liveHash: 'old' }))
+    const parseUrl = vi.fn(async () => {
+      throw new Error('HTTP 404')
+    })
+    expect(await refreshUrlSource('s1', { repo, ...deps, parseUrl })).toBe('error')
+    expect(inserted).toEqual([])
+    expect(statuses.at(-1)).toMatchObject({ status: 'error', patch: { error_message: 'HTTP 404' } })
   })
 })

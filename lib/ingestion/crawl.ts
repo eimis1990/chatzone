@@ -30,11 +30,19 @@ const COMMON_SITEMAPS = [
   '/sitemap/sitemap.xml',
 ]
 
+/** Host without a leading `www.` — www and apex are the same site. */
+const bareHost = (host: string): string => host.replace(/^www\./i, '').toLowerCase()
+
+// www and apex count as one site: stogai-dzukijoje.lt's robots.txt + sitemap list
+// apex URLs while the bot was crawled on www, so every sitemap page was rejected
+// as cross-origin and discovery fell back to scraping links (2 of 11 pages).
 const sameOriginAs =
   (origin: string) =>
   (u: string): boolean => {
     try {
-      return new URL(u, origin).origin === origin
+      const x = new URL(u, origin)
+      const o = new URL(origin)
+      return x.protocol.startsWith('http') && bareHost(x.host) === bareHost(o.host)
     } catch {
       return false
     }
@@ -119,7 +127,9 @@ export async function discoverPages(
     } catch {
       return
     }
-    if (u.origin !== origin || !isLikelyPage(u)) return
+    if (!sameOriginAs(origin)(u.toString()) || !isLikelyPage(u)) return
+    // Normalise www/apex (and http/https) to the base origin so keys dedupe.
+    if (u.origin !== origin) u = new URL(u.pathname + u.search, origin)
     const key = stripHash(u)
     if (seen.has(key)) return
     seen.add(key)
@@ -157,4 +167,66 @@ export async function discoverPages(
   }
 
   return pages.slice(0, maxPages)
+}
+
+// --- Shared by the crawl + sync routes -------------------------------------
+
+// Pages most support questions hit — contact, returns/refunds, terms, privacy,
+// shipping/delivery, payment, warranty, about, FAQ, plus service-business core
+// pages: rentals/pricing/accommodation/services (Lithuanian + English). These
+// are ingested first so a single crawl front-loads the highest-value info.
+const PRIORITY_RE =
+  /(kontakt|contact|susisiek|gr[aą]žin|grazin|return|refund|atsisak|taisykl|s[aą]lyg|salyg|terms|conditions|privatum|privacy|gdpr|slapuk|cookie|pristatym|siunt|delivery|shipping|apmok|mok[eė]jim|payment|garantij|warranty|apie|about|duk|faq|klausim|nuoma|rent|kain|pric|paslaug|service|apgyvendin|accommodation|pramog|edukacij|menu|meniu)/i
+// Dated/low-value posts go last: blogs, news, and event announcements (event
+// calendars churn; a crawl full of expired events answers nothing).
+const BLOG_RE =
+  /\/(patarimai|blog|straipsn|news|tinklarast|article|renginiai|renginys|events?|wydarzenia|veranstaltungen|notikumi|kategorija|category|author)\//i
+
+/** Rank a page for ingestion priority: policy/contact pages first, blogs last. */
+export function priorityScore(u: string): number {
+  try {
+    const path = new URL(u).pathname.toLowerCase()
+    if (path === '/' || path === '') return 3 // homepage: general store info
+    // A dated/low-value section always ranks last, even when its slug happens
+    // to contain a priority word (e.g. /renginiai/vasaros-pramogos-…/).
+    if (BLOG_RE.test(path)) return -1
+    return PRIORITY_RE.test(path) ? 5 : 0
+  } catch {
+    return 0
+  }
+}
+
+// Product & category pages are served by the live store feed (always-current
+// prices + stock), so we do NOT ingest them into the knowledge base — that would
+// duplicate the catalog and, worse, freeze prices at crawl time. We crawl only
+// content pages (policies, FAQ, about, blog). Covers WooCommerce (LT + EN).
+const PRODUCT_URL_RE =
+  /\/(produktas|produkto-kategorija|product|product-category|shop|store|parduotuv|prek[eė])\//i
+export function isProductUrl(u: string): boolean {
+  try {
+    return PRODUCT_URL_RE.test(new URL(u).pathname.toLowerCase())
+  } catch {
+    return false
+  }
+}
+
+/** Derive a short, readable source name from a page URL (its path, else host). */
+export function pageName(u: string): string {
+  try {
+    const x = new URL(u)
+    const path = x.pathname.replace(/\/+$/, '')
+    return path || x.hostname
+  } catch {
+    return u
+  }
+}
+
+/** Identity of a page across www/apex, http/https and a trailing slash. */
+export function pageKey(u: string): string {
+  try {
+    const x = new URL(u)
+    return bareHost(x.host) + (x.pathname.replace(/\/+$/, '') || '/') + x.search
+  } catch {
+    return u
+  }
 }

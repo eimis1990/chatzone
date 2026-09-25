@@ -488,3 +488,23 @@ so the same rewrite injects `MOTION_SETTLE_STYLE`, forcing inline
 `opacity:0`/`blur(` states to their settled values. If a site genuinely needs
 its JS to finish in the stage, the upgrade is proxying its scripts under a
 path-preserving route with ACAO.
+
+## A `contentOverride` freezes a URL source — site changes never arrive
+
+`sourceToText` (`lib/ingestion/pipeline.ts:34`) returns `metadata.contentOverride`
+for **any** type before fetching, so a URL source that was ever edited (source
+drawer, lint "Resolve") re-ingests the old snapshot forever — "retry" and
+`reingest-bot.mts` included. Same for canonical summaries: `generateCanonicalPages`
+keeps an existing override, so "regenerate" also changes nothing. Since
+2026-09-25 **Sync website** flags these ("Site changed" → Keep my edit / Use the
+live page, see rag-and-knowledge); summaries still need the override removed by hand. Hit on Stogai Dzukijoje
+2026-09-25 (prices 27/30/40 → 28/35/45 €/m² stayed stale for weeks).
+
+## Sitemaps on the apex domain were dropped when crawling `www.`
+
+`discoverPages` compared exact origins, so a site crawled as `www.x.lt` whose
+robots.txt/sitemap list `x.lt/...` lost every sitemap URL and fell back to
+scraping links (Stogai: 2 of 11 pages). www and apex now count as one site and
+URLs are rewritten to the crawl origin (`lib/ingestion/crawl.ts`); crawl + sync
+match existing sources by `pageKey` (ignores www, scheme, trailing slash).
+Bots crawled before 2026-09-25 may be missing pages: run **Sync website**.

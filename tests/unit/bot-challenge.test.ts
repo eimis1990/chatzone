@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { looksLikeBotChallenge, parseUrl } from '@/lib/ingestion/parse'
+import { jinaTargetError, looksLikeBotChallenge, parseUrl } from '@/lib/ingestion/parse'
 
 const CHALLENGE_HTML = `<html><body><h1>Performing security verification</h1>
 <p>This website uses a security service to protect against malicious bots.</p>
@@ -22,5 +22,13 @@ describe('bot-challenge detection', () => {
   it('parseUrl throws a clear error instead of indexing a challenge page', async () => {
     const fetchImpl = (async () => new Response(CHALLENGE_HTML, { status: 200, headers: { 'content-type': 'text/html' } })) as unknown as typeof fetch
     await expect(parseUrl('https://example.com/page', fetchImpl)).rejects.toThrow(/bot protection/)
+  })
+})
+
+describe('jinaTargetError', () => {
+  it("spots Jina's warning for a page that no longer exists", () => {
+    const md = 'Title: Home\n\nURL Source: https://acme.com/gone\n\nWarning: Target URL returned error 404: Not Found\n\nMarkdown Content:\n### Acme'
+    expect(jinaTargetError(md)).toBe(true)
+    expect(jinaTargetError('Title: Kainos\n\nMarkdown Content:\nKainos nuo 28 €')).toBe(false)
   })
 })

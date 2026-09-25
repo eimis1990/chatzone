@@ -25,7 +25,7 @@ Add a line here. How the wiki works: [README.md](README.md).
   Customer Portal, accounting exports, and account cutover.
 - [languages-i18n](languages-i18n.md) — language registry, per-bot selection,
   free-tier single language, content de-anchored from English.
-- [rag-and-knowledge](rag-and-knowledge.md) — ingestion pipeline + hybrid retrieval.
+- [rag-and-knowledge](rag-and-knowledge.md) — ingestion pipeline, website sync + hybrid retrieval.
 - [commerce](commerce.md) — store connectors + live product search.
 - [demand-radar](demand-radar.md) — unresolved shopper-demand aggregation,
   merchant action review, and the approval-gated store write-back boundary.

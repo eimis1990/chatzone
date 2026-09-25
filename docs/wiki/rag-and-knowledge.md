@@ -193,6 +193,31 @@ source of a bot (needs env: `set -a; source .env.local; set +a`, run via
 `npm exec --yes --package=tsx -- tsx …`). Use it after ingestion-pipeline fixes;
 old chunks never update on their own. See the pre-2026-08-12 nav-noise gotcha.
 
+## Website sync ("Sync website" / "Refresh from website")
+
+In-app refresh of URL sources, for both owner and client knowledge screens.
+- `POST /api/knowledge/sync` (`app/api/knowledge/sync/route.ts`) only *plans*:
+  takes the origin most URL sources share, re-runs `discoverPages`, inserts up
+  to 25 unseen pages as pending sources, and returns every URL source id.
+- The client (`handleSync` in `components/client/knowledge/KnowledgeManager.tsx`)
+  refreshes them one by one via `POST /api/ingest { refresh: true }` (1.5 s
+  apart for keyless Jina), then calls `/api/knowledge/summarize` if anything
+  changed. Closing the tab stops the loop; each page's state is already saved.
+- `refreshUrlSource` (`lib/ingestion/pipeline.ts`) holds the rules: a sha256
+  `metadata.liveHash` of the fetched text (also written by every live
+  `ingestSource`) means unchanged pages re-embed nothing; a source with a
+  `contentOverride` whose live page changed gets `metadata.liveConflict = true`
+  ("Site changed" pill), and stays on the edit until the drawer's **Keep my
+  edit** (`resolve: 'keep'`) or **Use the live page** (`'live'`) is clicked.
+  An edit with no `liveHash` (made before hashes existed) counts as changed.
+- A fetch failure marks the source error but keeps its chunks, and retrieval
+  doesn't filter by status, so the bot keeps answering from the last good copy.
+  A page removed from the site now fails with HTTP 404 (`jinaTargetError`,
+  `lib/ingestion/parse.ts`), where it used to index the site's 404 template.
+- Ceiling: Jina's first render of a page can differ from its cached copy, so
+  the first sync after a page is added may re-embed it for nothing. That costs
+  a few cents, so it's left as is.
+
 ## Fast lane: store bots need a canonical top hit
 
 `pickLane` (`lib/ai/fast-lane.ts`) skips tools only when the best chunk is a
