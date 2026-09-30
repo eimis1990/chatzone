@@ -34,19 +34,29 @@ export function requireStripe(): Stripe {
 }
 
 /**
- * Checkout params for automatic tax (Stripe Tax). Off until STRIPE_TAX_ENABLED
- * is set to "true" — flipping it on requires Stripe Tax to be activated in the
- * dashboard first (origin address + registrations), otherwise session creation
- * errors. `customer_update` is required by Stripe when combining an existing
- * customer with automatic_tax/tax_id_collection: it saves the address and
- * business name collected in Checkout back onto the customer.
+ * Checkout params for tax handling.
+ *
+ * We are the merchant of record. Stripe switched Managed Payments (Stripe as
+ * MoR: Stripe-issued invoices, extra fee) on by default account-wide in
+ * 2026-09; without an explicit per-session opt-out every Checkout inherits it,
+ * and products without a `tax_code` (setup packages, top-up) fail to even
+ * create a session ("the product tax code is missing").
+ *
+ * Automatic tax (Stripe Tax) stays off until STRIPE_TAX_ENABLED is "true" —
+ * flipping it on requires Stripe Tax to be activated in the dashboard first
+ * (origin address + registrations), otherwise session creation errors.
+ * `customer_update` is required by Stripe when combining an existing customer
+ * with automatic_tax/tax_id_collection: it saves the address and business name
+ * collected in Checkout back onto the customer.
  */
 export function checkoutTaxParams(): Pick<
   Stripe.Checkout.SessionCreateParams,
-  'automatic_tax' | 'billing_address_collection' | 'tax_id_collection' | 'customer_update'
+  'managed_payments' | 'automatic_tax' | 'billing_address_collection' | 'tax_id_collection' | 'customer_update'
 > {
-  if (getEnv().STRIPE_TAX_ENABLED !== 'true') return {}
+  const merchantOfRecord = { managed_payments: { enabled: false } } as const
+  if (getEnv().STRIPE_TAX_ENABLED !== 'true') return merchantOfRecord
   return {
+    ...merchantOfRecord,
     automatic_tax: { enabled: true },
     billing_address_collection: 'required',
     tax_id_collection: { enabled: true },

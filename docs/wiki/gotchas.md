@@ -2,6 +2,16 @@
 
 Sharp edges that have bitten us. Read before debugging something weird.
 
+## Stripe Managed Payments is on by default — Checkout must opt out
+
+New Stripe accounts (ours: live + sandbox) ship with Managed Payments (Stripe as
+merchant of record) enabled by default. A Checkout Session that doesn't pass
+`managed_payments: { enabled: false }` silently runs under Stripe-MoR (Stripe-
+issued invoices), and fails outright for products without a `tax_code`
+("the product tax code is missing"). `checkoutTaxParams()` carries the opt-out;
+never call `checkout.sessions.create` without spreading it
+(`lib/stripe/client.ts:56`). See [stripe-billing](stripe-billing.md).
+
 ## Fixed-height rows still shrink inside a flex-column scroller
 
 `overflow-y-auto` does not by itself force a vertical flex container's children

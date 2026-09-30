@@ -79,6 +79,36 @@ environment-specific and must never be mixed (`lib/stripe/client.ts:16`,
 - Account verification is complete: `charges_enabled` and `payouts_enabled`
   are both true, no requirements due (verified 2026-08-31).
 
+## Managed Payments (Stripe as merchant of record) is ON by default — we opt out
+
+Both the live account and its sandbox have Stripe **Managed Payments** enabled
+by default (verified 2026-09-30 by creating and expiring Checkout Sessions on
+both). Every Checkout Session that doesn't pass `managed_payments[enabled]=false`
+inherits it: Stripe becomes the merchant of record, the invoice is issued by
+Stripe (`invoice.issuer.type = "stripe"`, `account_name = "Link"`, US), Stripe
+handles VAT, and products **must** carry a `tax_code` — the two setup packages
+and the conversations top-up have none, so their Checkout creation failed with
+"Invalid line_items[0]: the product tax code is missing". Plan products have
+`txcd_10103001` and therefore succeeded *silently under MoR*.
+
+Fix: `checkoutTaxParams()` now always returns `managed_payments: { enabled: false }`
+and every `checkout.sessions.create` call spreads it (`lib/stripe/client.ts:56`,
+`app/(client)/app/subscription/page.tsx:214`, `:247`, `:284`). Unit check:
+`tests/unit/stripe-checkout-params.test.ts`. The account-level default can also
+be switched off in the Dashboard (Settings → Managed Payments); the code opt-out
+stays regardless, so a future default flip can't re-enable it.
+
+⚠️ The 2026-08-31 HomeByNB subscription `sub_1UAUsKBPga6Qu0zHF8wL3qv2` was
+created *with* Managed Payments (`subscription.managed_payments.enabled = true`);
+its first invoice `0SPFYCSI-0001` is Stripe-issued (reverse charge, €0 VAT), not
+an MB Lokara invoice. The SDK has no `managed_payments` on subscription update,
+so the only way off is cancel + re-subscribe through the (fixed) Checkout.
+Decision pending with the owner.
+
+If we ever *want* MoR instead: drop the opt-out and set `tax_code` on the three
+products that lack it (`prod_V62AXMOq5xdHZa`, `prod_V62ATaWCESs5H4`,
+`prod_V6p5xQJ6pziCde`).
+
 ## 2026-08-31 first live subscription — verified end to end
 
 HomeByNB (customer `cus_VAq7C7kSkLsg9B`, UAB POP Diva, info@homebynb.lt)
@@ -86,7 +116,8 @@ subscribed to Starter monthly (€149, `loqara_starter_month`) on 2026-08-31.
 Cross-checked live Stripe ↔ prod `organizations` row: sub id, customer id,
 status `active`, interval `month`, and `current_period_end`
 (2026-09-30T13:03:45Z) all match, so Checkout → webhook → `syncSubscriptionToOrg`
-works in production. Live `/api/widget-config` serves the bot from
+works in production — but see the Managed Payments section above: this
+subscription runs under Stripe-as-MoR. Live `/api/widget-config` serves the bot from
 `homebynb.lt` and 403s foreign origins.
 
 ## Sandbox subs vs revenue metrics
