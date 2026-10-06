@@ -14,9 +14,10 @@ import type { NextConfig } from "next";
  *   customer store domains — a host allowlist is impossible by design.
  * - connect-src: Supabase (REST/realtime/storage), GA beacons, ElevenLabs
  *   voice websockets.
- * - NO frame-ancestors / X-Frame-Options anywhere: /embed must remain
- *   embeddable in ANY customer site. If frame-ancestors is ever wanted for
- *   the app shell, it must be scoped per-route and never cover /embed.
+ * - frame-ancestors is ENFORCED (separate header below) on every route except
+ *   /embed, which must remain embeddable in ANY customer site. Our own
+ *   iframes (/present backdrop → /api/present/site) are same-origin, so 'self'
+ *   covers them. Added 2026-10-06 after a clickjacking report on /login.
  */
 const CSP_REPORT_ONLY = [
   "default-src 'self'",
@@ -48,6 +49,14 @@ const nextConfig: NextConfig = {
           // origin; the host page delegates via allow="microphone" in widget.js).
           { key: "Permissions-Policy", value: "camera=(), geolocation=(), microphone=(self), payment=()" },
           { key: "Content-Security-Policy-Report-Only", value: CSP_REPORT_ONLY },
+        ],
+      },
+      {
+        // Everything except /embed/*: block cross-origin framing (clickjacking).
+        source: "/((?!embed(?:/|$)).*)",
+        headers: [
+          { key: "Content-Security-Policy", value: "frame-ancestors 'self'" },
+          { key: "X-Frame-Options", value: "SAMEORIGIN" },
         ],
       },
     ];

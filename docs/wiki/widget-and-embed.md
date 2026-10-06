@@ -12,6 +12,16 @@ How the on-site chat widget loads and gets its config.
    **same-origin**, so the browser sends **no Origin header** (GET) or our own
    host (POST).
 
+## Framing headers — `/embed` is the only frameable route
+
+`next.config.ts` enforces `Content-Security-Policy: frame-ancestors 'self'` +
+`X-Frame-Options: SAMEORIGIN` on every route **except** `/embed/*` (source regex
+`/((?!embed(?:/|$)).*)`). The iframe widget.js mounts must stay embeddable on any
+customer site, so never widen that exception the other way (e.g. a global
+frame-ancestors). Our own iframes (`/present` backdrop → `/api/present/site`) are
+same-origin and pass under `'self'`. Added 2026-10-06 after a clickjacking report
+on `/login`.
+
 ## Config gating — `publicBotConfig` (`lib/widget-config.ts`)
 
 The single public entry point. It strips secrets (systemPrompt, model, keys,
