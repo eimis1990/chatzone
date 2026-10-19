@@ -45,7 +45,7 @@ Three separate systems started joining up.
 
 First, assistants got better at product research. OpenAI’s [shopping research](https://openai.com/index/chatgpt-shopping-research/) can ask clarifying questions and produce a personalised buyer’s guide rather than a generic list of links. Google’s shopping experiences combine natural-language discovery with a Shopping Graph containing tens of billions of listings.
 
-Second, commerce platforms made product data available to those assistants. Shopify’s [Agentic Storefronts](https://www.shopify.com/news/agentic-commerce-momentum) distribute synchronised catalog data to ChatGPT, Microsoft Copilot, Google AI Mode, and Gemini, while keeping orders in the merchant’s existing system.
+Second, commerce platforms made product data available to those assistants. Shopify’s Agentic Storefronts distribute synchronised catalog data to ChatGPT, Microsoft Copilot, Google AI Mode, and Gemini. Merchants can use our [Shopify Agentic Storefronts setup checklist](/blog/shopify-agentic-storefronts-guide) to review eligibility, channel controls, product mapping, checkout behavior, and reporting rather than treating activation as the finish line.
 
 Third, transaction standards arrived. UCP gives agents and merchants a shared way to express product, cart, checkout, and payment capabilities. That reduces the need to build a different custom integration for every assistant.
 

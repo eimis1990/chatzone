@@ -37,6 +37,8 @@ Search behavior reflects that complexity. Baymard Institute identifies compatibi
 
 Keyword search can retrieve products containing the same model name. It cannot safely prove that the selected variant works.
 
+Large household appliances add a different set of constraints: cabinet recesses, ventilation, utilities, delivery access, energy labels, and site-dependent installation. Those workflows are covered separately in our [AI chatbot guide for home appliance stores](/blog/ai-chatbot-home-appliance-stores), so this page stays focused on device and accessory compatibility.
+
 ## What should an electronics compatibility assistant ask?
 
 Ask only for facts that can change eligibility. The sequence depends on the category.

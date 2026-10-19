@@ -88,6 +88,8 @@ This assistant speaks with visitors. It should use the store's [AI-ready knowled
 
 AI search and shopping systems may retrieve product and policy information away from the storefront. Shopify now provides guidance for [optimizing a store for AI](https://help.shopify.com/en/manual/promoting-marketing/seo/optimizing-store-for-ai), including comprehensive product details, structured data, descriptive alt text, and the first-party Knowledge Base app for store FAQs.
 
+That external-discovery layer is managed separately from Sidekick. The [Shopify Agentic Storefronts setup checklist](/blog/shopify-agentic-storefronts-guide) covers Shopify Catalog eligibility, per-channel access, product mapping, checkout differences, search preview, and performance reporting.
+
 ## What can Sidekick help a merchant do today?
 
 Useful tasks fall into five groups.

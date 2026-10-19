@@ -177,6 +177,8 @@ Google compatibility is a documented OpenAI path, but only for registered feeds 
 
 Validation means the record met the ingestion rules. It does not promise visibility, ranking, traffic, or sales for a prompt. OpenAI states that shopping results are selected using factors including relevance and product context; merchants should avoid making guaranteed-placement claims.
 
+When one product remains absent after validation, follow the [seven-layer ChatGPT Shopping troubleshooting workflow](/blog/products-not-appearing-chatgpt-shopping) before rewriting the whole catalog.
+
 ### Treating optional data as a place for unsupported claims
 
 Q&amp;A, relationships, popularity, reviews, and warnings must be real, current, and governed. Do not create fake reviews, false scarcity, or a relationship between products merely to influence recommendations. OpenAI's commerce policies prohibit deceptive merchant practices ([OpenAI, Commerce policies](https://openai.com/policies/commerce-policies/)).

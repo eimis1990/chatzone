@@ -172,6 +172,22 @@ compatibility, with a professional handoff for safety-sensitive work. Each post
 has one text-free editorial cover and one physically plausible realistic use-case
 scene generated with OpenAI Image 2, both optimized to 1200×800 WebP.
 
+The October 19 agentic-discovery and appliance cluster adds three non-overlapping
+jobs. `shopify-agentic-storefronts-guide` owns Shopify-admin setup and governance:
+Catalog eligibility, per-channel access, mapping, checkout differences, preview,
+and reporting; it does not replace the Sidekick/admin intent owned by
+`shopify-ai-assistant-guide` or the category overview in
+`agentic-commerce-ecommerce`. `products-not-appearing-chatgpt-shopping` owns
+incident diagnosis after a product fails to surface; it traces source, eligibility,
+feed processing, crawl access, variant truth, market, freshness, and relevance
+without retargeting the feed-build checklist in `openai-product-feed-ecommerce` or
+the broad preparation guide in `how-to-get-products-recommended-by-chatgpt`.
+`ai-chatbot-home-appliance-stores` owns large-appliance fit, utilities, energy
+facts, delivery access, installation services, and professional handoff; device
+ports and accessory protocols remain with `ai-chatbot-for-electronics-stores`.
+Each post uses a visually checked, photorealistic, text-free OpenAI Image 2 cover
+optimized to 1200×800 WebP.
+
 The 2026-08-26 statistics refresh establishes the source-review pattern for
 evidence roundups. `ai-customer-service-statistics` uses current original
 research, states each sample population, labels sentiment/adoption/reported

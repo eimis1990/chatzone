@@ -54,6 +54,8 @@ Shopify’s March 2026 [Agentic Storefronts announcement](https://www.shopify.co
 
 If your Shopify catalog is messy, AI distribution spreads the mess more efficiently. Fix the source data first.
 
+If a specific eligible item still fails to appear, use the [ChatGPT Shopping product-visibility troubleshooting guide](/blog/products-not-appearing-chatgpt-shopping) to trace Shopify Catalog, feed processing, crawler access, variants, market setup, freshness, and prompt relevance in that order.
+
 ## How can WooCommerce, Magento, and custom stores become eligible?
 
 OpenAI invites merchants to apply for direct product-feed access, but access and capabilities can change. Non-Shopify stores should work on two paths in parallel:

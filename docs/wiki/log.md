@@ -386,3 +386,15 @@ child inside a rounded clip in the widget.
 - 2026-09-25 FEATURE — Knowledge "Sync website" (per bot) + "Refresh from website" (per URL source): sync route plans (discover + add ≤25 new pages), client refreshes each page via `/api/ingest {refresh}`; `liveHash` skips unchanged pages; hand-edited pages whose live page changed get flagged `liveConflict` (Keep my edit / Use the live page) instead of being silently overwritten or silently kept. Also fixed: www/apex sitemap mismatch in `discoverPages` (the reason Stogai only had 2 pages) and Jina 200-with-404-warning pages now fail instead of indexing the 404 template. See rag-and-knowledge, gotchas.
 - 2026-09-30 FIX/BILLING — Setup-package Checkout failed in prod ("Invalid line_items[0]: the product tax code is missing"). Root cause: Stripe Managed Payments (Stripe as merchant of record) is enabled by default on the live account *and* its sandbox; sessions inherit it unless `managed_payments[enabled]=false` is passed, and products without a `tax_code` (both setup packages, conversations top-up) can't be sold under MoR. Plan subscriptions succeeded but silently ran under MoR — HomeByNB's 2026-08-31 sub + invoice are Stripe-issued. `checkoutTaxParams()` now always opts out (all 3 Checkout callers spread it), unit test added, verified against live + sandbox by creating/expiring sessions. Owner decision pending on the existing MoR subscription. See stripe-billing, gotchas.
 - 2026-10-06 SECURITY — Two bounty-beg emails arrived (clickjacking on /login, DMARC p=none). Both technically true, both low-sev boilerplate. Code side: `frame-ancestors 'self'` + `X-Frame-Options: SAMEORIGIN` now enforced on every route except `/embed/*` (verified on dev: / and /login carry it, /embed/<key> does not). DNS side (Hostinger panel, not code): `_dmarc.loqara.com` is `p=none`; SPF + DKIM (hostingermail-a) are already aligned for the Hostinger mailbox, so moving to `p=quarantine` with `rua=mailto:hello@loqara.com` is safe. No bounty paid — no program exists. See widget-and-embed.
+# 2026-10-19 — Shopify agentic discovery, ChatGPT Shopping diagnostics, and appliance-assistant cluster
+
+- Added three distinct public guides: Shopify Agentic Storefronts setup and governance,
+  a seven-layer diagnostic for products missing from ChatGPT Shopping, and a home-
+  appliance assistant workflow covering fit, utilities, energy facts, delivery,
+  installation, and safety handoff.
+- Verified time-sensitive platform claims against current Shopify, OpenAI, and
+  European Commission primary sources; kept external product placement explicitly
+  non-guaranteed and preserved Loqara's Shopify order-lookup limitation.
+- Added contextual backlinks from the existing agentic-commerce, Shopify assistant,
+  ChatGPT recommendation, OpenAI feed, and electronics-store guides. Added the two
+  strategic discovery pages to the curated `public/llms.txt` list.

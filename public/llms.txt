@@ -64,6 +64,7 @@
 - [Add an AI agent to WooCommerce](https://www.loqara.com/blog/add-ai-agent-to-woocommerce): step-by-step WooCommerce setup
 - [How to add an AI chatbot to Magento](https://www.loqara.com/blog/ai-chatbot-for-magento): Magento/Adobe Commerce setup
 - [Shopify AI assistant guide](https://www.loqara.com/blog/shopify-ai-assistant-guide): Sidekick, Magic, and storefront helpers
+- [Shopify Agentic Storefronts setup checklist](https://www.loqara.com/blog/shopify-agentic-storefronts-guide): catalog eligibility, AI channel controls, product mapping, checkout behavior, and reporting
 - [5 ways an AI agent cuts support tickets](https://www.loqara.com/blog/reduce-support-tickets-with-ai): the support-ops pillar
 - ["Where is my order?" — automating the #1 support question](https://www.loqara.com/blog/where-is-my-order-ai): WISMO deflection
 - [Human handoff done right](https://www.loqara.com/blog/ai-chatbot-human-handoff): when AI should step aside
@@ -78,6 +79,7 @@
 - [Generative engine optimization for e-commerce](https://www.loqara.com/blog/generative-engine-optimization-ecommerce): the GEO pillar
 - [Google AI Mode shopping](https://www.loqara.com/blog/google-ai-mode-shopping-ecommerce): preparing product visibility
 - [How to get products recommended by ChatGPT shopping](https://www.loqara.com/blog/how-to-get-products-recommended-by-chatgpt): AI-shopping visibility
+- [Why products do not appear in ChatGPT Shopping](https://www.loqara.com/blog/products-not-appearing-chatgpt-shopping): a seven-layer diagnostic for eligibility, sources, feeds, crawling, variants, markets, freshness, and relevance
 - [OpenAI product feeds for e-commerce](https://www.loqara.com/blog/openai-product-feed-ecommerce): a field-by-field merchant checklist for current product data
 - [Product variants for AI shopping](https://www.loqara.com/blog/product-variants-ai-shopping): how to model sizes, colours, SKUs, URLs, and availability
 - [Product Q&A for AI shopping](https://www.loqara.com/blog/product-qa-ai-shopping): a verified workflow for turning shopper questions into useful product knowledge
