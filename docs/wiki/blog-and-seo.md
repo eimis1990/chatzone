@@ -188,6 +188,21 @@ ports and accessory protocols remain with `ai-chatbot-for-electronics-stores`.
 Each post uses a visually checked, photorealistic, text-free OpenAI Image 2 cover
 optimized to 1200×800 WebP.
 
+The November 9 merchant troubleshooting cluster separates three jobs:
+`holiday-shipping-cutoffs-ecommerce` calculates per-lane order-by dates (not
+general BFCM staffing); `fix-zero-result-ecommerce-searches` triages observed
+query failures (not how semantic ranking works); and
+`google-merchant-center-price-availability-mismatch` diagnoses Google item
+disapprovals (not general Google AI Mode visibility or ChatGPT Shopping).
+The zero-result guide pairs generated cover art with a real [Demand Radar](demand-radar.md)
+screenshot from the development fixture (`app/dev-demand-radar/page.tsx`). Keep
+product screenshots at their native aspect ratio, label synthetic fixtures, and
+link dense screenshots to the full asset. Demand Radar is chat evidence, not
+native storefront search analytics or automatic store write-back.
+Shopify’s current Search & Discovery help documents built-in semantic matching
+and boosts, not the manual synonym menu shown in older guides; do not give
+instructions for that menu without current verification.
+
 The 2026-08-26 statistics refresh establishes the source-review pattern for
 evidence roundups. `ai-customer-service-statistics` uses current original
 research, states each sample population, labels sentiment/adoption/reported

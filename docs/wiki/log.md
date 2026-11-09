@@ -398,3 +398,5 @@ child inside a rounded clip in the widget.
 - Added contextual backlinks from the existing agentic-commerce, Shopify assistant,
   ChatGPT recommendation, OpenAI feed, and electronics-store guides. Added the two
   strategic discovery pages to the curated `public/llms.txt` list.
+
+- 2026-11-09 CONTENT — Added distinct merchant guides for holiday order-by dates, zero-result storefront searches, and Merchant Center offer mismatches, with contextual backlinks, realistic covers, worked examples, and an actual Demand Radar screenshot from fictional development data. See blog-and-seo.

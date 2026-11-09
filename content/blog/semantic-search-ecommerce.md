@@ -147,6 +147,8 @@ Semantic retrieval can also power a wider [conversational-commerce](/blog/conver
 
 Export zero-result searches, low-click queries, reformulations, and support questions. Build an evaluation set from actual customer language rather than clever examples invented for a demo.
 
+Before swapping search engines, [triage the zero-result queries](/blog/fix-zero-result-ecommerce-searches) to see which need an index fix, better catalog data, or an honest out-of-assortment response.
+
 ### Establish the keyword baseline
 
 Record the current top results and business metrics. Semantic search should fix known gaps without making exact-name searches worse.

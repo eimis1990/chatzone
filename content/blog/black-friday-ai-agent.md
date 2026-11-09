@@ -62,7 +62,7 @@ If your goal for the season is simply fewer tickets in the queue, that's a whole
 
 You don't need much, but the order matters. Work through these in advance, on your real traffic, so nothing is a surprise in November:
 
-1. **Load your holiday policies.** Feed the agent your shipping cutoff dates, any extended holiday returns window, and your promo terms (what's discounted, exclusions, gift-card rules). Ground it in your own content so it answers from *your* policy, not a guess. Draft the shipping-cutoff copy now even if the exact dates firm up later.
+1. **Load your holiday policies.** Feed the agent your shipping cutoff dates, any extended holiday returns window, and your promo terms (what's discounted, exclusions, gift-card rules). Ground it in your own content so it answers from *your* policy, not a guess. Use the [holiday shipping cutoff guide](/blog/holiday-shipping-cutoffs-ecommerce) to calculate what you can publish for each delivery zone.
 2. **Connect order lookup.** This is the one that pays for itself. Let the agent look up a customer's order status after an identity check so "where's my order?" resolves itself instead of landing in your inbox.
 3. **Set up human handoff.** Decide what routes to a person — refunds, complaints, anything the agent isn't confident about — and make sure it lands in a [shared inbox](/blog/ai-chatbot-human-handoff) where your team can pick it up without the customer repeating themselves.
 4. **Configure working hours.** Tell the agent when humans are actually available so it sets expectations honestly ("a person will reply Monday morning") instead of promising an instant human at 3am.

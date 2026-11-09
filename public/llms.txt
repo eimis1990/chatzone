@@ -78,6 +78,7 @@
 - [Voice AI for e-commerce support](https://www.loqara.com/blog/voice-ai-for-ecommerce-support): when voice is worth it
 - [Generative engine optimization for e-commerce](https://www.loqara.com/blog/generative-engine-optimization-ecommerce): the GEO pillar
 - [Google AI Mode shopping](https://www.loqara.com/blog/google-ai-mode-shopping-ecommerce): preparing product visibility
+- [Fix Google Merchant Center price and availability mismatches](https://www.loqara.com/blog/google-merchant-center-price-availability-mismatch): diagnose the exact offer across product data, landing page, markup, and checkout
 - [How to get products recommended by ChatGPT shopping](https://www.loqara.com/blog/how-to-get-products-recommended-by-chatgpt): AI-shopping visibility
 - [Why products do not appear in ChatGPT Shopping](https://www.loqara.com/blog/products-not-appearing-chatgpt-shopping): a seven-layer diagnostic for eligibility, sources, feeds, crawling, variants, markets, freshness, and relevance
 - [OpenAI product feeds for e-commerce](https://www.loqara.com/blog/openai-product-feed-ecommerce): a field-by-field merchant checklist for current product data
@@ -87,6 +88,7 @@
 - [Agentic commerce explained](https://www.loqara.com/blog/agentic-commerce-ecommerce): what AI buying agents mean for stores
 - [IndexNow for e-commerce](https://www.loqara.com/blog/indexnow-ecommerce-guide): faster recrawls, practical setup
 - [Semantic search for e-commerce](https://www.loqara.com/blog/semantic-search-ecommerce): how modern product search works
+- [Fix zero-result e-commerce searches](https://www.loqara.com/blog/fix-zero-result-ecommerce-searches): separate retrieval failures from real assortment gaps and verify the fix
 - [AI product recommendation chatbots](https://www.loqara.com/blog/ai-product-recommendation-chatbot): conversational recommendations
 - [AI chatbots for furniture stores](https://www.loqara.com/blog/ai-chatbot-for-furniture-stores): dimension-aware product guidance without guessing
 - [AI chatbots for electronics stores](https://www.loqara.com/blog/ai-chatbot-for-electronics-stores): exact model and specification checks that prevent compatibility mistakes

@@ -63,6 +63,8 @@ The foundations are the same, but conversational requests expose weak data more 
 
 Do not create a separate “AI version” of the product page. One strong source of truth should work for search engines, assistants, onsite search, and people.
 
+If a listing is already flagged, start with the [Merchant Center price and availability mismatch guide](/blog/google-merchant-center-price-availability-mismatch) and compare the submitted offer with the exact variant shoppers land on.
+
 ## What should be in the Merchant Center feed?
 
 Complete every field that helps a shopper distinguish the product. The exact required and recommended attributes vary by category and country, but common priorities include:
