@@ -21,7 +21,7 @@ Assembly order is `app/page.tsx` (the `<main>` block). Code lives in
 | Widget playground at real size (`#showcase`) | `Playground.tsx` | 10:00 (600) |
 | Two ways to go live (`#how`) | `HowItWorks.tsx` | 13:00 (780) |
 | Pricing, done-for-you, FAQ | `../Pricing.tsx`, `../SetupPricing.tsx`, `../Faq.tsx` | 18:30, 20:30, 22:30 |
-| Close ("again tonight") | `Tonight.tsx` | 02:47 next day (1607) |
+| Close ("again tonight"), with the fox | `Tonight.tsx`, `NightFox.tsx` | 02:47 next day (1607) |
 
 - `Scene.tsx` is the shared pinned-scene shell (copy right, visual left) and
   exports `at(from, to)`, the step timing helper.
@@ -71,9 +71,19 @@ Assembly order is `app/page.tsx` (the `<main>` block). Code lives in
   (`.halo`, `.spill`, `.farGlow`) use six or seven stops on an ease-out curve:
   a two-stop glow, or a `box-shadow` with spread, shows its edge as a ring.
 - **The close ends on the footer's colour.** `.tonight`'s gradient finishes on
-  `#101213` so the page runs into `Footer` with no seam; the distant window is
-  the real `WidgetFrame` at `scale: 0.32` with `-webkit-box-reflect` for its
-  reflection (Firefox shows none).
+  `#101213` so the page runs into `Footer` with no seam.
+- **The fox at the close is a transparent video with a still under it**
+  (`NightFox.tsx`, owner's request 2026-11-10). The still is the loop's first
+  frame, so the two line up. The loop is `preload="none"` and starts only when
+  the fox nears the screen; reduced motion and Save-Data never fetch it. It
+  replaces the still only after a frame is drawn to a canvas and its corner
+  reads as transparent, because a browser can play the HEVC file and drop its
+  alpha (a box behind the fox). Sources: HEVC+alpha first (the only transparent
+  video Safari plays), then VP9+alpha.
+- **The fox is cut for a dark page.** `scripts/key-hero-fox.sh` rebuilds both
+  loops and the poster from the opaque `hero-fox-idle.mp4` (about 2 minutes).
+  It erodes 2.2px and clears a clip-specific gap by the right hand; the cut made
+  for the old light page left a pale rim and a white speck on dark.
 - **`#get-started` opens the signup dialog** and is owned by `Tonight.tsx`
   (`openOnHash`). Blog CTAs and chat replies link to it; do not put that id on
   a section.
@@ -138,6 +148,11 @@ Assembly order is `app/page.tsx` (the `<main>` block). Code lives in
   Chromium with the GPU on, so the WebGL sky actually renders.
 - The in-app Browser pane, when hidden, barely advances CSS animation time, so
   its screenshots show half-played states. Use the two commands above.
+
+> ⚠️ verify: the fox's HEVC file does carry
+> an alpha track (checked with AVFoundation), but Safari playing it, and the
+> canvas alpha check passing there, are unseen; if the check fails Safari shows
+> the still.
 
 > ⚠️ verify: Safari and Firefox were not tested. Browsers without scroll-driven
 > animations should show scenes fully revealed (the `@supports` fallback), which

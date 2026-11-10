@@ -2083,62 +2083,116 @@
   letter-spacing: -0.035em;
   text-wrap: balance;
 }
-/* The hero's widget again, far off: the real frame, scaled down, glowing, with
-   its reflection on the ground (-webkit-box-reflect; Firefox just shows none). */
-.far {
+/* The fox who works the night, standing in its own light: a glow behind, a
+   pool of light and a contact shadow at its feet. */
+.foxStage {
   position: relative;
-  height: 24rem;
-  pointer-events: none;
+  display: grid;
+  justify-items: center;
+  /* Room for the speech bubble, which sits above the fox on a phone. */
+  padding: 3.75rem 0 2.25rem;
 }
-/* Centred on the scaled window, which is about 11.5rem tall and stands 7rem up. */
-.farGlow {
+@media (min-width: 640px) {
+  .foxStage {
+    padding-top: 0;
+  }
+}
+.foxGlow {
   position: absolute;
-  bottom: -0.25rem;
+  top: 50%;
   left: 50%;
   width: min(46rem, 130vw);
-  height: 26rem;
-  translate: -50% 0;
+  height: 40rem;
+  translate: -50% -47%;
+  pointer-events: none;
   background: radial-gradient(
     closest-side,
-    rgb(255 164 92 / 0.34) 0%,
-    rgb(252 152 80 / 0.24) 14%,
-    rgb(246 140 68 / 0.16) 30%,
-    rgb(240 128 58 / 0.09) 47%,
+    rgb(255 172 104 / 0.42) 0%,
+    rgb(252 158 86 / 0.3) 14%,
+    rgb(246 140 68 / 0.19) 30%,
+    rgb(240 128 58 / 0.095) 47%,
     rgb(236 122 54 / 0.045) 64%,
     rgb(233 118 52 / 0.015) 80%,
     rgb(233 118 52 / 0) 94%
   );
 }
-/* Laid out at full size and scaled from its foot, so the foot stays put. */
-.farWindow {
-  position: absolute;
-  bottom: 7rem;
-  left: 50%;
-  width: 25.5rem;
-  margin-left: -12.75rem;
-  scale: 0.32;
-  transform-origin: 50% 100%;
-  -webkit-box-reflect: below 6px linear-gradient(transparent 58%, rgb(255 255 255 / 0.24));
-}
-.farWindow .pane {
-  box-shadow:
-    0 0 0 3px rgb(255 255 255 / 0.2),
-    0 0 220px 40px rgb(255 160 90 / 0.5);
-}
-.farPool {
+.foxPool {
   position: absolute;
   bottom: 0;
   left: 50%;
   width: min(30rem, 100vw);
-  height: 7rem;
+  height: 4.25rem;
   translate: -50% 0;
+  pointer-events: none;
   background: radial-gradient(
     50% 100% at 50% 0%,
-    rgb(255 196 140 / 0.34) 0%,
-    rgb(255 178 116 / 0.2) 20%,
-    rgb(250 158 92 / 0.11) 42%,
-    rgb(242 140 72 / 0.05) 64%,
+    rgb(255 200 146 / 0.42) 0%,
+    rgb(255 180 118 / 0.24) 22%,
+    rgb(250 158 92 / 0.12) 44%,
+    rgb(242 140 72 / 0.05) 66%,
     rgb(233 118 52 / 0) 100%
   );
   filter: blur(8px);
+}
+.foxShadow {
+  position: absolute;
+  bottom: 1.875rem;
+  left: 50%;
+  width: 11rem;
+  height: 1.125rem;
+  translate: -50% 0;
+  pointer-events: none;
+  background: radial-gradient(closest-side, rgb(6 7 16 / 0.75), rgb(6 7 16 / 0));
+}
+.fox {
+  position: relative;
+  width: clamp(12.5rem, 24vw, 17rem);
+  aspect-ratio: 9 / 16;
+}
+.fox img,
+.fox video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transition: opacity 0.3s;
+}
+.fox video {
+  opacity: 0;
+}
+.fox[data-live] video {
+  opacity: 1;
+}
+/* The still steps aside once the loop is showing, or it would ghost behind it. */
+.fox[data-live] img {
+  opacity: 0;
+  transition-delay: 0.3s;
+}
+/* What the fox says: above its head on a phone, beside it from tablet up. */
+.foxSays {
+  position: absolute;
+  bottom: calc(100% + 0.375rem);
+  left: 50%;
+  padding: 0.625rem 0.9375rem;
+  white-space: nowrap;
+  translate: -50% 0;
+  border-radius: 1.125rem;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  line-height: 1.35;
+  text-align: left;
+  color: #111827;
+  background: #fff;
+  box-shadow: 0 0 44px rgb(255 190 140 / 0.24);
+}
+@media (min-width: 640px) {
+  .foxSays {
+    top: 11%;
+    right: calc(100% - 1.25rem);
+    bottom: auto;
+    left: auto;
+    translate: none;
+    border-bottom-right-radius: 0.25rem;
+  }
 }

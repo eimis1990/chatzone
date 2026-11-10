@@ -1,4 +1,10 @@
-import { expect, test } from '@playwright/test'
+import { expect, test, type Page } from '@playwright/test'
+
+/** The transparent fox loops (not the still, which is an image). */
+const isFoxLoop = (url: string) => /hero-fox-idle(-hevc)?\.(webm|mp4)$/.test(url)
+
+const scrollToEnd = (page: Page) =>
+  page.evaluate(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'instant' }))
 
 const HEADINGS = [
   'Ieva can’t sleep. She wants to know where her order is.',
@@ -68,13 +74,24 @@ test('reduced motion shows the hero conversation at once, with nothing animating
   const context = await browser.newContext({ reducedMotion: 'reduce' })
   const page = await context.newPage()
   const pageErrors: string[] = []
+  const foxLoops: string[] = []
   page.on('pageerror', (error) => pageErrors.push(error.message))
+  page.on('request', (request) => {
+    if (isFoxLoop(request.url())) foxLoops.push(request.url())
+  })
 
   await page.goto('/')
   const answer = page.getByTestId('hero-window').getByText('Yes, the Luna with oak legs is in stock')
   await expect(answer).toHaveCSS('opacity', '1')
   await expect(answer).toHaveCSS('animation-name', 'none')
-  await expect(page.locator('video')).toHaveCount(0)
+
+  // The fox stays a still image: its loop is never fetched.
+  await scrollToEnd(page)
+  const fox = page.getByTestId('night-fox')
+  await expect(fox.getByRole('img')).toBeVisible()
+  await page.waitForTimeout(1000)
+  expect(foxLoops).toEqual([])
+  await expect(fox).not.toHaveAttribute('data-live', '')
   expect(pageErrors).toEqual([])
 
   await context.close()
@@ -121,11 +138,31 @@ test('mobile landing never scrolls sideways', async ({ browser }) => {
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
   await expect(page.getByTestId('hero-window')).toBeVisible()
   expect(await fits()).toBe(true)
-  await page.evaluate(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'instant' }))
+  await scrollToEnd(page)
   expect(await fits()).toBe(true)
   expect(pageErrors).toEqual([])
 
   await context.close()
+})
+
+test('the fox loop loads only when reached, and shows once it proves transparent', async ({
+  page,
+}) => {
+  const foxLoops: string[] = []
+  page.on('request', (request) => {
+    if (isFoxLoop(request.url())) foxLoops.push(request.url())
+  })
+
+  await page.goto('/')
+  await page.waitForTimeout(1000)
+  expect(foxLoops).toEqual([])
+
+  await scrollToEnd(page)
+  const fox = page.getByTestId('night-fox')
+  await expect(fox).toHaveAttribute('data-live', '')
+  await expect(fox.locator('video')).toHaveCSS('opacity', '1')
+  expect(foxLoops).toHaveLength(1)
+  await expect(page.getByText('Go to bed. I’ve got the store.')).toBeVisible()
 })
 
 test('hero questions swap the conversation', async ({ page }) => {

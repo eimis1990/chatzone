@@ -1,16 +1,11 @@
-import Image from 'next/image'
-import { MicIcon, SendHorizontalIcon } from 'lucide-react'
-import { ProductCards } from '@/components/widget/ProductCards'
 import { GetStartedDialog } from '../GetStartedDialog'
-import { CHAIRS } from './products'
-import { FOX, WidgetFrame } from './WidgetFrame'
+import { NightFox } from './NightFox'
 import s from './night.module.css'
 
 /**
- * The close: the day has run out and it is night again, with the hero's widget
- * still lit in the distance. Owns the `#get-started` hash, which must open the
- * signup dialog (blog CTAs and links in chat replies point at it) rather than
- * scroll anywhere.
+ * The close: the day has run out and it is night again, and the fox is the one
+ * staying up. Owns the `#get-started` hash, which must open the signup dialog
+ * (blog CTAs and links in chat replies point at it) rather than scroll anywhere.
  */
 export function Tonight() {
   return (
@@ -35,41 +30,13 @@ export function Tonight() {
         </div>
       </div>
 
-      {/* The same widget and conversation as the hero, as a picture: scaled to a
-          third, so its text is texture, not copy. */}
-      <div className={s.far} aria-hidden="true">
-        <div className={s.farGlow} />
-        <div className={s.farPool} />
-        <div className={s.farWindow}>
-          <WidgetFrame>
-            <p className={s.stamp}>Today, 02:47</p>
-            <div className={s.thread} data-on="">
-              <p className={`${s.bubble} ${s.fromCustomer}`}>Do you have the Luna in oak?</p>
-              <div className={s.botRow}>
-                <span className={s.botAvatar}>
-                  <Image src={FOX} alt="" fill sizes="28px" className="object-contain p-0.5" />
-                </span>
-                <div className={s.turn}>
-                  <p className={`${s.bubble} ${s.fromAgent}`}>
-                    Yes, the Luna with oak legs is in stock.
-                  </p>
-                </div>
-              </div>
-              <div className={s.products}>
-                <ProductCards products={CHAIRS} primaryColor="#e97634" variant="grid" />
-              </div>
-            </div>
-            <div className={s.composer}>
-              <span className={s.field} />
-              <span className={s.micBtn}>
-                <MicIcon className="size-4" />
-              </span>
-              <span className={s.sendBtn}>
-                <SendHorizontalIcon className="size-4" />
-              </span>
-            </div>
-          </WidgetFrame>
-        </div>
+      <div className={s.foxStage}>
+        <div className={s.foxGlow} aria-hidden="true" />
+        <div className={s.foxPool} aria-hidden="true" />
+        <div className={s.foxShadow} aria-hidden="true" />
+        <NightFox>
+          <p className={`${s.foxSays} ${s.rise}`}>Go to bed. I&rsquo;ve got the store.</p>
+        </NightFox>
       </div>
     </section>
   )
