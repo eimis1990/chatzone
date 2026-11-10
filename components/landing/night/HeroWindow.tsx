@@ -2,20 +2,13 @@
 
 import { useState, type CSSProperties, type ReactNode } from 'react'
 import Image from 'next/image'
-import {
-  FileTextIcon,
-  MicIcon,
-  PhoneIcon,
-  RefreshCwIcon,
-  RotateCcwIcon,
-  SendHorizontalIcon,
-} from 'lucide-react'
+import { FileTextIcon, MicIcon, RefreshCwIcon, SendHorizontalIcon } from 'lucide-react'
 import { ProductCards } from '@/components/widget/ProductCards'
 import type { CommerceProduct } from '@/lib/commerce/types'
+import { FOX, WidgetFrame } from './WidgetFrame'
 import s from './night.module.css'
 
 const PRIMARY = '#e97634'
-const FOX = '/loqara-logo-colorful.webp'
 
 type AskId = 'oak' | 'returns' | 'delivery'
 
@@ -118,124 +111,94 @@ export function HeroWindow() {
   }
 
   return (
-    <div className={s.window}>
+    <div className={s.window} data-testid="hero-window">
       <div className={s.halo} aria-hidden="true" />
       <div className={s.spill} aria-hidden="true" />
-      <div className={s.pane}>
-        <div className={s.paneHead}>
-          <span className={s.avatar}>
-            <Image src={FOX} alt="" fill sizes="32px" className="object-contain p-0.5" />
-          </span>
-          <div className={s.paneId}>
-            <p className={s.paneName}>Demo store</p>
-            <p className={s.paneState}>
-              <span className={s.live} aria-hidden="true" />
-              Online
-            </p>
-          </div>
-          <div className={s.paneTools} aria-hidden="true">
-            <span>EN</span>
-            <span>
-              <PhoneIcon className="size-4" />
-            </span>
-            <span>
-              <RotateCcwIcon className="size-4" />
-            </span>
-          </div>
-        </div>
+      <WidgetFrame>
+        <p className={s.stamp}>Today, 02:47</p>
 
-        <div className={s.paneBody}>
-          <p className={s.stamp}>Today, 02:47</p>
-
-          <div className={s.threads} aria-live="polite">
-            {ASKS.map((a) => {
-              const on = a.id === askId
-              return (
-                <div
-                  key={on ? `${a.id}-${run}` : `${a.id}-off`}
-                  className={s.thread}
-                  data-on={on ? '' : undefined}
-                  aria-hidden={!on}
-                >
-                  <p className={`${s.msg} ${s.bubble} ${s.fromCustomer}`} style={delay(t0 + 1.05)}>
-                    {a.question}
-                  </p>
-                  <div className={s.botRow}>
-                    <span className={`${s.msg} ${s.botAvatar}`} style={delay(t0 + 1.6)}>
-                      <Image src={FOX} alt="" fill sizes="28px" className="object-contain p-0.5" />
-                    </span>
-                    <div className={s.turn}>
-                      <span className={s.typing} style={delay(t0 + 1.6)} aria-hidden="true">
-                        <i />
-                        <i />
-                        <i />
-                      </span>
-                      <p className={`${s.msg} ${s.bubble} ${s.fromAgent}`} style={delay(t0 + 2.6)}>
-                        {a.answer}
-                      </p>
-                    </div>
-                  </div>
-                  {a.products && (
-                    // The real widget component. Inert here: its tiles link out.
-                    <div
-                      className={`${s.msg} ${s.products}`}
-                      style={delay(t0 + 3.2)}
-                      aria-hidden="true"
-                    >
-                      <ProductCards products={PRODUCTS} primaryColor={PRIMARY} variant="grid" />
-                    </div>
-                  )}
-                  <p className={`${s.msg} ${s.note}`} style={delay(t0 + (a.products ? 3.8 : 3.2))}>
-                    {a.proof}
-                  </p>
-                </div>
-              )
-            })}
-          </div>
-
-          <div className={s.chips}>
-            {ASKS.map((a) => (
-              <button
-                key={a.id}
-                type="button"
-                className={s.chip}
-                aria-pressed={a.id === askId}
-                onClick={() => play(a.id)}
+        <div className={s.threads} aria-live="polite">
+          {ASKS.map((a) => {
+            const on = a.id === askId
+            return (
+              <div
+                key={on ? `${a.id}-${run}` : `${a.id}-off`}
+                className={s.thread}
+                data-on={on ? '' : undefined}
+                aria-hidden={!on}
               >
-                {a.label}
-              </button>
-            ))}
-          </div>
-
-          <div className={s.composer}>
-            <button
-              type="button"
-              className={s.field}
-              aria-label="Ask the next example question"
-              onClick={() => play(ASKS[(index + 1) % ASKS.length].id)}
-            >
-              <span key={`p-${run}`} className={s.placeholder} style={delay(t0)}>
-                Type a message…
-              </span>
-              <span key={`t-${run}`} className={s.typed} style={delay(t0)}>
-                {ask.question}
-              </span>
-            </button>
-            <span className={s.micBtn} aria-hidden="true">
-              <MicIcon className="size-4" />
-            </span>
-            <span key={`s-${run}`} className={s.sendBtn} style={delay(t0)} aria-hidden="true">
-              <SendHorizontalIcon className="size-4" />
-            </span>
-          </div>
-
-          <p className={s.powered}>
-            Powered by
-            <Image src={FOX} alt="" width={12} height={12} className="size-3" />
-            <b>Loqara</b>
-          </p>
+                <p className={`${s.msg} ${s.bubble} ${s.fromCustomer}`} style={delay(t0 + 1.05)}>
+                  {a.question}
+                </p>
+                <div className={s.botRow}>
+                  <span className={`${s.msg} ${s.botAvatar}`} style={delay(t0 + 1.6)}>
+                    <Image src={FOX} alt="" fill sizes="28px" className="object-contain p-0.5" />
+                  </span>
+                  <div className={s.turn}>
+                    <span className={s.typing} style={delay(t0 + 1.6)} aria-hidden="true">
+                      <i />
+                      <i />
+                      <i />
+                    </span>
+                    <p className={`${s.msg} ${s.bubble} ${s.fromAgent}`} style={delay(t0 + 2.6)}>
+                      {a.answer}
+                    </p>
+                  </div>
+                </div>
+                {a.products && (
+                  // The real widget component. Inert here: its tiles link out.
+                  <div
+                    className={`${s.msg} ${s.products}`}
+                    style={delay(t0 + 3.2)}
+                    aria-hidden="true"
+                  >
+                    <ProductCards products={PRODUCTS} primaryColor={PRIMARY} variant="grid" />
+                  </div>
+                )}
+                <p className={`${s.msg} ${s.note}`} style={delay(t0 + (a.products ? 3.8 : 3.2))}>
+                  {a.proof}
+                </p>
+              </div>
+            )
+          })}
         </div>
-      </div>
+
+        <div className={s.chips}>
+          {ASKS.map((a) => (
+            <button
+              key={a.id}
+              type="button"
+              className={s.chip}
+              aria-pressed={a.id === askId}
+              onClick={() => play(a.id)}
+            >
+              {a.label}
+            </button>
+          ))}
+        </div>
+
+        <div className={s.composer}>
+          <button
+            type="button"
+            className={s.field}
+            aria-label="Ask the next example question"
+            onClick={() => play(ASKS[(index + 1) % ASKS.length].id)}
+          >
+            <span key={`p-${run}`} className={s.placeholder} style={delay(t0)}>
+              Type a message…
+            </span>
+            <span key={`t-${run}`} className={s.typed} style={delay(t0)}>
+              {ask.question}
+            </span>
+          </button>
+          <span className={s.micBtn} aria-hidden="true">
+            <MicIcon className="size-4" />
+          </span>
+          <span key={`s-${run}`} className={s.sendBtn} style={delay(t0)} aria-hidden="true">
+            <SendHorizontalIcon className="size-4" />
+          </span>
+        </div>
+      </WidgetFrame>
     </div>
   )
 }

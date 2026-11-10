@@ -518,3 +518,22 @@ scraping links (Stogai: 2 of 11 pages). www and apex now count as one site and
 URLs are rewritten to the crawl origin (`lib/ingestion/crawl.ts`); crawl + sync
 match existing sources by `pageKey` (ignores www, scheme, trailing slash).
 Bots crawled before 2026-09-25 may be missing pages: run **Sync website**.
+
+## A default grid track can make a phone page scroll sideways
+
+`display: grid` with no `grid-template-columns` gives one `auto` track, and an
+`auto` track grows to its widest item's min-content. A card with
+`width: min(100%, 24rem)` or a `white-space: nowrap` line inside it then widens
+the whole column past the viewport: the landing's handoff scene made the page
+413px wide on a 390px phone. Declare `grid-template-columns: minmax(0, 1fr)` on
+single-column grids (`components/landing/night/night.module.css:51`, `:651`,
+`:1150`). `tests/e2e/public-landing.spec.ts` ("mobile landing never scrolls
+sideways") guards it. (Discovered 2026-11-10 building the landing.)
+
+## The live widget owns the bottom-right corner of the landing
+
+The landing's own widget launcher and its greeting bubble sit fixed over the
+bottom-right ~260×170px. A tall element on the right of a full-height section
+(the first hero put the chat window there) is covered by them on any laptop
+screen. The landing therefore keeps visuals on the left and copy on the right.
+See [landing-page](landing-page.md).

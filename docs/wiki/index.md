@@ -38,6 +38,9 @@ Add a line here. How the wiki works: [README.md](README.md).
   done-for-you, RLS/security invariants.
 - [client-portal](client-portal.md) — client shell/sidebar branding and the
   organization-wide analytics rollup versus per-bot deep dives.
+- [landing-page](landing-page.md) — the `/` page as one day in a store: pinned
+  scroll scenes, the nav clock, day/night tone, and the rules that keep it
+  no-JS-safe and clear of the live widget.
 - [blog-and-seo](blog-and-seo.md) — markdown blog, FAQ schema, AEO conventions,
   image pipeline.
 - [seo-geo-playbook](seo-geo-playbook.md) — mandatory intent, evidence,

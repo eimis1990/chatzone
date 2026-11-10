@@ -1,18 +1,17 @@
 import { GetStartedDialog } from '../GetStartedDialog'
 import { BRAND_MARKS } from '../brand-marks'
-import { display } from './fonts'
 import { HeroWindow } from './HeroWindow'
 import { NightSky } from './NightSky'
 import s from './night.module.css'
 
 /**
  * The night landing's first moment: 02:47, one lit window, one shopper being
- * answered. `data-night` is the scene's time in minutes past midnight, read by
- * the scroll clock (NightClock).
+ * answered. `data-clock` is the scene's time in minutes past midnight, read by
+ * the nav clock (PageClock); `data-tone` tells the nav which bar to wear.
  */
 export function NightHero() {
   return (
-    <section className={`${s.hero} ${display.variable}`} data-night="167">
+    <section className={s.hero} data-clock="167" data-tone="night">
       <div className={s.skyWrap} aria-hidden="true">
         <NightSky />
       </div>
@@ -34,7 +33,7 @@ export function NightHero() {
               triggerClassName="relative inline-flex h-13 items-center justify-center overflow-hidden rounded-full bg-primary px-9 text-base font-semibold text-white shadow-[0_10px_40px_rgba(233,118,52,0.45)] transition-[transform,background-color] hover:-translate-y-0.5 hover:bg-primary-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             />
             <a
-              href="#night"
+              href="#features"
               className="text-sm font-medium text-white/75 underline decoration-white/30 underline-offset-4 transition-colors hover:text-white hover:decoration-white/70"
             >
               See the rest of the night

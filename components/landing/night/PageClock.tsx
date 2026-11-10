@@ -1,31 +1,32 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import { MoonIcon } from 'lucide-react'
+import { MoonIcon, SunIcon } from 'lucide-react'
 import s from './night.module.css'
 
-// ponytail: the last scene just runs half an hour while it is pinned; give it
-// its own end time if a scene ever needs a different pace.
-const LAST_SCENE_MINUTES = 30
+const DAY = 24 * 60
+const SUNRISE = 6 * 60 + 30
+const SUNSET = 18 * 60 + 30
 
 const fmt = (minutes: number) => {
-  const m = Math.round(minutes)
+  const m = Math.round(minutes) % DAY
   return `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`
 }
 
 /**
- * The scroll clock. Every night section carries `data-night` (minutes past
- * midnight); scrolling between two of them runs the clock from one time to the
- * next, so scrolling the page is the night passing. Written straight to the
- * DOM: no React render per scroll frame.
+ * The page's clock, in the nav bar. Every section carries `data-clock`
+ * (minutes since the first midnight); scrolling between two of them runs the
+ * clock from one time to the next, so scrolling the page is a day passing:
+ * 02:47 in the hero, round to 02:47 the next night at the close. Written
+ * straight to the DOM: no React render per scroll frame.
  */
-export function NightClock() {
+export function PageClock() {
   const box = useRef<HTMLSpanElement>(null)
   const time = useRef<HTMLSpanElement>(null)
 
   useEffect(() => {
-    const scenes = [...document.querySelectorAll<HTMLElement>('[data-night]')]
-    if (!scenes.length) return
+    const scenes = [...document.querySelectorAll<HTMLElement>('[data-clock]')]
+    if (scenes.length < 2) return
     let raf = 0
 
     const update = () => {
@@ -33,19 +34,16 @@ export function NightClock() {
       const y = window.scrollY
       const stops = scenes.map((el) => ({
         top: el.getBoundingClientRect().top + y,
-        at: Number(el.dataset.night),
+        at: Number(el.dataset.clock),
       }))
-      const lastEl = scenes[scenes.length - 1]
-      const end = lastEl.getBoundingClientRect().bottom + y - window.innerHeight
-      stops.push({ top: end, at: stops[stops.length - 1].at + LAST_SCENE_MINUTES })
-
       let i = 0
       while (i < stops.length - 2 && y >= stops[i + 1].top) i++
       const span = Math.max(stops[i + 1].top - stops[i].top, 1)
       const p = Math.min(Math.max((y - stops[i].top) / span, 0), 1)
-      if (time.current) time.current.textContent = fmt(stops[i].at + (stops[i + 1].at - stops[i].at) * p)
-      // Past the night, the clock has nothing to say.
-      if (box.current) box.current.toggleAttribute('data-off', y > end + window.innerHeight * 0.4)
+      const now = stops[i].at + (stops[i + 1].at - stops[i].at) * p
+      if (time.current) time.current.textContent = fmt(now)
+      const ofDay = now % DAY
+      box.current?.toggleAttribute('data-sun', ofDay >= SUNRISE && ofDay < SUNSET)
     }
     const onScroll = () => {
       if (!raf) raf = requestAnimationFrame(update)
@@ -62,8 +60,9 @@ export function NightClock() {
   }, [])
 
   return (
-    <span ref={box} className={s.clock} aria-hidden="true">
+    <span ref={box} className={s.clock} aria-hidden="true" data-testid="page-clock">
       <MoonIcon className="size-3.5" />
+      <SunIcon className="size-3.5" />
       <span ref={time}>02:47</span>
     </span>
   )

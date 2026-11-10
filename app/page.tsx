@@ -1,11 +1,17 @@
 import { LandingNav } from '@/components/landing/LandingNav'
+import { display } from '@/components/landing/night/fonts'
+import { Morning } from '@/components/landing/night/Morning'
 import { NightHero } from '@/components/landing/night/NightHero'
+import { Playground } from '@/components/landing/night/Playground'
+import { SceneHandoff } from '@/components/landing/night/SceneHandoff'
 import { SceneOrder } from '@/components/landing/night/SceneOrder'
-import { Features, Stats, HowItWorks, CTASection } from '@/components/landing/sections'
+import { SceneVoice } from '@/components/landing/night/SceneVoice'
+import { Steps } from '@/components/landing/night/Steps'
+import { Tonight } from '@/components/landing/night/Tonight'
+import night from '@/components/landing/night/night.module.css'
 import { Footer } from '@/components/landing/Footer'
 import { Pricing } from '@/components/landing/Pricing'
 import { SetupPricing } from '@/components/landing/SetupPricing'
-import { Showcase } from '@/components/landing/Showcase'
 import { Faq } from '@/components/landing/Faq'
 import { FAQ } from '@/components/landing/faq-data'
 import { WidgetEmbed } from '@/components/landing/WidgetEmbed'
@@ -106,17 +112,22 @@ export default async function Home() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <LandingNav night />
-      <main>
+      {/* One day in a store, top to bottom: night (02:47, three scenes), sunrise,
+          the day (inbox, restyle, setup), dusk, the evening (pricing, FAQ), and
+          night again. Each section carries its time in `data-clock`. */}
+      <main className={display.variable}>
         <NightHero />
         <SceneOrder />
-        <Showcase />
-        <Features />
-        <Stats />
-        <HowItWorks />
+        <SceneVoice />
+        <SceneHandoff />
+        <Morning />
+        <Playground />
+        <Steps />
+        <div className={night.dusk} data-tone="night" aria-hidden="true" />
         <Pricing />
         <SetupPricing />
         <Faq />
-        <CTASection />
+        <Tonight />
       </main>
       <Footer />
       {landingBot && (

@@ -337,138 +337,6 @@
 
 }
 
-/* Infinite horizontal brand marquee (landing hero). Defined at top level so the
-   keyframes always register regardless of Tailwind's layer handling; the element
-   applies it via inline style. The track holds two identical copies of the logo
-   row, so a -50% shift loops seamlessly. */
-@keyframes brand-marquee {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-50%);
-  }
-}
-.landing-brand-marquee {
-  animation: brand-marquee 120s linear infinite;
-}
-
-/* The landing hero is a viewport composition: copy + character scene + platform
-   strip share the available height instead of accumulating fixed-height blocks. */
-.landing-hero-copy {
-  padding-top: clamp(6.5rem, 13svh, 9.75rem);
-}
-.landing-hero-title {
-  font-size: clamp(2.05rem, min(10.5vw, 8svh), 5.35rem);
-}
-.landing-hero-subtitle {
-  margin-top: clamp(0.75rem, 1.7svh, 1rem);
-  font-size: clamp(0.875rem, min(4vw, 1.8svh), 1.25rem);
-}
-.landing-hero-cta {
-  margin-top: clamp(1rem, 2.2svh, 1.5rem);
-}
-.landing-hero-stage {
-  margin-top: clamp(2rem, 5.5svh, 4.5rem);
-}
-.landing-hero-fox {
-  bottom: -5%;
-  left: 0;
-  height: 84%;
-  width: 100%;
-}
-.landing-hero-fox > img,
-.landing-hero-fox > video {
-  object-position: calc(50% + 0.5rem) center;
-}
-
-@media (min-width: 1024px) {
-  .landing-hero-fox {
-    top: clamp(0.5rem, 1.25svh, 1rem);
-    bottom: auto;
-    height: clamp(28rem, 56svh, 37rem);
-  }
-  .landing-hero-fox > img,
-  .landing-hero-fox > video {
-    object-position: calc(50% + 0.75rem) center;
-  }
-}
-
-@media (max-width: 767px) and (max-height: 740px) {
-  .landing-hero-copy {
-    padding-top: 4.25rem;
-  }
-  .landing-hero-title {
-    font-size: 2.05rem;
-  }
-  .landing-hero-subtitle {
-    font-size: 0.8125rem;
-    line-height: 1.45;
-  }
-  .landing-hero-cta,
-  .landing-hero-stage {
-    margin-top: 0.75rem;
-  }
-}
-
-@keyframes hero-message-in {
-  from {
-    opacity: 0;
-    transform: translateY(16px) scale(0.96);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-@keyframes hero-message-out {
-  from {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-  to {
-    opacity: 0;
-    transform: translateY(16px) scale(0.96);
-  }
-}
-.hero-conversation-scene {
-  animation: hero-scene-in 360ms ease-out both;
-}
-@keyframes hero-scene-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-.hero-message {
-  opacity: 0;
-  transform-origin: center;
-  animation: hero-message-in 620ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
-}
-.hero-message-one {
-  animation-delay: 480ms;
-}
-.hero-message-two {
-  animation-delay: 1.65s;
-}
-.hero-message-three {
-  animation-delay: 2.82s;
-}
-.hero-conversation-scene.is-exiting .hero-message {
-  animation: hero-message-out 520ms cubic-bezier(0.64, 0, 0.78, 0) both;
-}
-.hero-conversation-scene.is-exiting .hero-message-one {
-  animation-delay: 1s;
-}
-.hero-conversation-scene.is-exiting .hero-message-two {
-  animation-delay: 500ms;
-}
-.hero-conversation-scene.is-exiting .hero-message-three {
-  animation-delay: 0ms;
-}
-
 @keyframes landing-button-shimmer {
   0% {
     transform: translateX(-180%) skewX(-12deg);
@@ -484,19 +352,9 @@
   animation: landing-button-shimmer 3.7s ease-in-out infinite;
 }
 @media (prefers-reduced-motion: reduce) {
-  .landing-brand-marquee,
-  .landing-button-shimmer,
-  .hero-conversation-scene,
-  .hero-message,
-  .hero-conversation-scene.is-exiting .hero-message {
-    animation: none;
-  }
-  .hero-message {
-    opacity: 1;
-    transform: none;
-  }
   .landing-button-shimmer {
     display: none;
+    animation: none;
   }
 }
 /* Widget launcher "breathe + pulse" — one synced 6s cycle:

@@ -21,7 +21,7 @@ export function PricingTable() {
               setAnnual(false)
               trackEvent('pricing_billing_toggled', { period: 'monthly' })
             }}
-            className={`rounded-full px-4 py-1.5 font-medium transition-colors ${!annual ? 'bg-white text-[#101213]' : 'text-white/70 hover:text-white'}`}
+            className={`rounded-full px-4 py-1.5 font-medium transition-colors ${!annual ? 'bg-white text-[#0b0f24]' : 'text-white/70 hover:text-white'}`}
           >
             Monthly
           </button>
@@ -31,9 +31,9 @@ export function PricingTable() {
               setAnnual(true)
               trackEvent('pricing_billing_toggled', { period: 'annual' })
             }}
-            className={`rounded-full px-4 py-1.5 font-medium transition-colors ${annual ? 'bg-white text-[#101213]' : 'text-white/70 hover:text-white'}`}
+            className={`rounded-full px-4 py-1.5 font-medium transition-colors ${annual ? 'bg-white text-[#0b0f24]' : 'text-white/70 hover:text-white'}`}
           >
-            Annual <span className="text-primary">· 2 months free</span>
+            Annual <span className="text-primary">2 months free</span>
           </button>
         </div>
       </div>

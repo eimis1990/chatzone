@@ -4,12 +4,13 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { MenuIcon, XIcon } from 'lucide-react'
 import { GetStartedDialog } from './GetStartedDialog'
-import { NightClock } from './night/NightClock'
+import { PageClock } from './night/PageClock'
 import { trackEvent } from '@/lib/analytics'
 
+// In page order: the night's scenes come before the restyle playground.
 const LINKS = [
-  { label: 'Showcase', href: '/#showcase' },
   { label: 'Features', href: '/#features' },
+  { label: 'Showcase', href: '/#showcase' },
   { label: 'How it works', href: '/#how' },
   { label: 'Pricing', href: '/#pricing' },
   { label: 'Blog', href: '/blog' },
@@ -18,22 +19,34 @@ const LINKS = [
 
 /**
  * `solid` forces the light (dark-text) bar — for pages without a dark hero.
- * `night` keeps the bar dark after scroll, for the night landing.
+ * `night` is the landing page, which runs from night to day and back: the bar
+ * wears whichever tone the section under it declares with `data-tone`.
  */
 export function LandingNav({ solid = false, night = false }: { solid?: boolean; night?: boolean }) {
   const [scrolled, setScrolled] = useState(false)
+  const [day, setDay] = useState(false)
   const [open, setOpen] = useState(false)
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24)
+    const toned = night ? [...document.querySelectorAll<HTMLElement>('[data-tone]')] : []
+    const onScroll = () => {
+      setScrolled(window.scrollY > 24)
+      // The last section whose top has passed under the bar sets the tone.
+      let tone = toned[0]?.dataset.tone
+      for (const el of toned) {
+        if (el.getBoundingClientRect().top > 64) break
+        tone = el.dataset.tone
+      }
+      setDay(tone === 'day')
+    }
     onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
-  }, [])
+  }, [night])
 
-  // `solidNav` below means "light bar, dark text"; the night bar never is.
-  const solidNav = !night && (solid || scrolled)
-  const nightBar = night && scrolled
+  // `solidNav` below means "light bar, dark text".
+  const solidNav = night ? day : solid || scrolled
+  const nightBar = night && scrolled && !day
 
   return (
     <header
@@ -46,7 +59,7 @@ export function LandingNav({ solid = false, night = false }: { solid?: boolean; 
       }`}
     >
       <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5">
-        <div className="flex items-center">
+        <div className={`flex items-center ${solidNav ? 'text-gray-900' : 'text-white'}`}>
           <Link
             href="/"
             prefetch={false}
@@ -64,9 +77,9 @@ export function LandingNav({ solid = false, night = false }: { solid?: boolean; 
               Loqara<span className="text-primary">.</span>
             </span>
           </Link>
-          {/* The night landing's scroll clock rides in the bar: always in view,
-              and clear of the page's own corners. */}
-          {night && <NightClock />}
+          {/* The landing's clock rides in the bar: always in view, and clear of
+              the page's own corners. */}
+          {night && <PageClock />}
         </div>
 
         <div className={`hidden items-center gap-8 text-sm font-medium md:flex ${solidNav ? 'text-gray-700' : 'text-white/85'}`}>

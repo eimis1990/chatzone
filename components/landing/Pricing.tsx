@@ -6,6 +6,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { PricingTable } from './PricingTable'
+import night from './night/night.module.css'
 
 const ADDONS: { icon: LucideIcon; name: string; price: string; desc: string }[] = [
   {
@@ -37,11 +38,15 @@ const ADDONS: { icon: LucideIcon; name: string; price: string; desc: string }[] 
 
 export function Pricing() {
   return (
-    <section id="pricing" className="scroll-mt-20 bg-[#101213] text-white">
+    <section
+      id="pricing"
+      className="scroll-mt-16 bg-[#0b0f24] text-white"
+      data-clock="1110"
+      data-tone="night"
+    >
       <div className="mx-auto max-w-7xl px-5 py-20">
         <div className="mx-auto max-w-2xl text-center">
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary">Pricing</p>
-          <h2 className="mt-3 text-5xl font-light tracking-tight sm:text-6xl">Simple, honest pricing</h2>
+          <h2 className={night.h2}>Simple, honest pricing</h2>
           <p className="mt-4 text-lg text-white/70">
             No setup fee. Live handoff on every plan. Start free, upgrade as you grow.
           </p>

@@ -1,8 +1,17 @@
 import { expect, test } from '@playwright/test'
 
-function isHeroVideo(url: string) {
-  return url.endsWith('.mp4') && (url.includes('loqara-hero-') || url.includes('hero-fox-idle'))
-}
+const HEADINGS = [
+  'Ieva can’t sleep. She wants to know where her order is.',
+  'Marta is feeding the baby. She asks out loud instead.',
+  'Jonas asks something the store never wrote down.',
+  'Good morning. Here is your night.',
+  'A widget that fits your brand',
+  'Live in an afternoon',
+  'Simple, honest pricing',
+  'Prefer it done for you?',
+  'Frequently asked questions',
+  'It will be 2:47 AM again tonight.',
+]
 
 test('critical landing content is visible before hydration', async ({ browser }) => {
   const context = await browser.newContext({ javaScriptEnabled: false })
@@ -10,18 +19,18 @@ test('critical landing content is visible before hydration', async ({ browser })
 
   await page.goto('/')
 
-  await expect(page.getByRole('heading', { level: 1 })).toContainText('Let your customers')
-  await expect(page.getByText('Loqara gives every shopper instant answers')).toBeVisible()
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('Your store just answered')
+  await expect(
+    page.getByText('Loqara is the AI chat and voice agent for online stores'),
+  ).toBeVisible()
   await expect(page.getByRole('button', { name: 'Get started' }).first()).toBeVisible()
-  await expect(page.getByText('AI voice + chat · always on')).toHaveCount(0)
-  await expect(page.getByText('Easiest chat view customization on the market!')).toHaveCount(0)
-  await expect(page.getByText("Free to start · add voice when you're ready")).toHaveCount(0)
-  await expect(page.locator('img[src*="hero-lines-higgsfield"]')).toHaveCount(0)
-  await expect(page.getByRole('heading', { name: 'A widget that fits your brand' })).toBeVisible()
-  await expect(page.getByRole('heading', { name: 'One agent. Every part of support.' })).toBeVisible()
-  await expect(page.getByRole('heading', { name: 'Live in an afternoon' })).toBeVisible()
-  await expect(page.getByRole('heading', { name: 'Simple, honest pricing' })).toBeVisible()
-  await expect(page.getByRole('heading', { name: 'Frequently asked questions' })).toBeVisible()
+  for (const name of HEADINGS) {
+    await expect(page.getByRole('heading', { name })).toBeVisible()
+  }
+  // The hero conversation is server HTML revealed by CSS delays alone.
+  await expect(
+    page.getByTestId('hero-window').getByText('Yes, the Luna with oak legs is in stock'),
+  ).toHaveCSS('opacity', '1')
 
   await context.close()
 })
@@ -29,19 +38,18 @@ test('critical landing content is visible before hydration', async ({ browser })
 test('native landing anchors and signup hash remain functional', async ({ browser }) => {
   const context = await browser.newContext()
 
-  const pricingPage = await context.newPage()
-  await pricingPage.goto('/#pricing')
-  await expect(pricingPage.getByRole('heading', { name: 'Simple, honest pricing' })).toBeInViewport()
-
-  const howPage = await context.newPage()
-  await howPage.goto('/#how')
-  await expect(howPage.getByRole('heading', { name: 'Live in an afternoon' })).toBeInViewport()
-
-  const faqPage = await context.newPage()
-  await faqPage.goto('/#faq')
-  await expect(
-    faqPage.getByRole('heading', { name: 'Frequently asked questions' }),
-  ).toBeInViewport()
+  for (const [hash, heading] of [
+    ['#features', HEADINGS[0]],
+    ['#showcase', 'A widget that fits your brand'],
+    ['#how', 'Live in an afternoon'],
+    ['#pricing', 'Simple, honest pricing'],
+    ['#faq', 'Frequently asked questions'],
+  ]) {
+    const page = await context.newPage()
+    await page.goto(`/${hash}`)
+    await expect(page.getByRole('heading', { name: heading })).toBeInViewport()
+    await page.close()
+  }
 
   const signupPage = await context.newPage()
   await signupPage.goto('/#get-started')
@@ -53,62 +61,20 @@ test('native landing anchors and signup hash remain functional', async ({ browse
   await context.close()
 })
 
-test('reduced motion keeps every static hero message visible', async ({ browser }) => {
+test('reduced motion shows the hero conversation at once, with nothing animating', async ({
+  browser,
+}) => {
   const context = await browser.newContext({ reducedMotion: 'reduce' })
   const page = await context.newPage()
   const pageErrors: string[] = []
-  const heroVideoRequests: string[] = []
   page.on('pageerror', (error) => pageErrors.push(error.message))
-  page.on('request', (request) => {
-    if (isHeroVideo(request.url())) {
-      heroVideoRequests.push(request.url())
-    }
-  })
 
   await page.goto('/')
+  const answer = page.getByTestId('hero-window').getByText('Yes, the Luna with oak legs is in stock')
+  await expect(answer).toHaveCSS('opacity', '1')
+  await expect(answer).toHaveCSS('animation-name', 'none')
   await expect(page.locator('video')).toHaveCount(0)
-  await expect(
-    page.getByRole('img', { name: "Loqara's fox support agent standing ready to help" }),
-  ).toBeVisible()
-  await expect(page.locator('.hero-message')).toHaveCount(3)
-  await expect(page.locator('.hero-message-one')).toHaveCSS('opacity', '1')
-  await expect(page.locator('.hero-message-two')).toHaveCSS('opacity', '1')
-  await expect(page.locator('.hero-message-three')).toHaveCSS('opacity', '1')
-  await expect(page.locator('.hero-message-one')).toHaveCSS('animation-name', 'none')
-  await expect(page.locator('.landing-brand-marquee')).toHaveCSS('animation-name', 'none')
-  expect(heroVideoRequests).toEqual([])
   expect(pageErrors).toEqual([])
-
-  await context.close()
-})
-
-test('save-data keeps the landing hero video-free', async ({ browser }) => {
-  const context = await browser.newContext()
-  await context.addInitScript(() => {
-    Object.defineProperty(navigator, 'connection', {
-      configurable: true,
-      value: {
-        effectiveType: '4g',
-        saveData: true,
-        addEventListener: () => {},
-        removeEventListener: () => {},
-      },
-    })
-  })
-  const page = await context.newPage()
-  const heroVideoRequests: string[] = []
-  page.on('request', (request) => {
-    if (isHeroVideo(request.url())) {
-      heroVideoRequests.push(request.url())
-    }
-  })
-
-  await page.goto('/')
-  await expect(page.locator('video')).toHaveCount(0)
-  await expect(
-    page.getByRole('img', { name: "Loqara's fox support agent standing ready to help" }),
-  ).toBeVisible()
-  expect(heroVideoRequests).toEqual([])
 
   await context.close()
 })
@@ -140,83 +106,88 @@ test('landing widget defers network and opens on the first proxy click', async (
   expect(widgetRequests.some((url) => url.includes('/embed/'))).toBe(true)
 })
 
-test('mobile hero animates the fox and reveals the full conversation', async ({ browser }) => {
+test('mobile landing never scrolls sideways', async ({ browser }) => {
   const context = await browser.newContext({ viewport: { width: 390, height: 844 } })
   const page = await context.newPage()
-  const requestedVideos: string[] = []
   const pageErrors: string[] = []
   page.on('pageerror', (error) => pageErrors.push(error.message))
-
-  page.on('request', (request) => {
-    if (isHeroVideo(request.url())) {
-      requestedVideos.push(new URL(request.url()).pathname)
-    }
-  })
+  const fits = () =>
+    page.evaluate(
+      () => document.documentElement.scrollWidth === document.documentElement.clientWidth,
+    )
 
   await page.goto('/')
-  const foxVideo = page.locator('.landing-hero-fox video')
-  await expect(foxVideo).toHaveCount(1)
-  await expect.poll(() => foxVideo.evaluate((video: HTMLVideoElement) => video.paused)).toBe(false)
-  await expect(
-    page.getByRole('img', { name: "Loqara's fox support agent standing ready to help" }),
-  ).toBeVisible()
-  await expect(page.locator('.hero-message-one')).toHaveCSS('opacity', '1')
-  await expect(page.locator('.hero-message-two')).toHaveCSS('opacity', '1')
-  await expect(page.locator('.hero-message-three')).toHaveCSS('opacity', '1')
-  const heroBox = await page.locator('.landing-hero').boundingBox()
-  const foxBox = await page.locator('.landing-hero-fox').boundingBox()
-  const marqueeBox = await page.getByTestId('hero-platform-marquee').boundingBox()
-  expect((heroBox?.y ?? 0) + (heroBox?.height ?? 0)).toBeCloseTo(844, 0)
-  expect((marqueeBox?.y ?? 0) + (marqueeBox?.height ?? 0)).toBeCloseTo(844, 0)
-  expect(Math.abs((foxBox?.x ?? 0) + (foxBox?.width ?? 0) / 2 - 195)).toBeLessThanOrEqual(12)
-  expect(
-    await page.evaluate(
-      () => document.documentElement.scrollWidth === document.documentElement.clientWidth,
-    ),
-  ).toBe(true)
-  expect(requestedVideos).toEqual(['/landing/hero-fox-idle.mp4'])
-
-  await page.goto('/blog')
-  await expect(page.locator('video')).toHaveCount(0)
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
+  await expect(page.getByTestId('hero-window')).toBeVisible()
+  expect(await fits()).toBe(true)
+  await page.evaluate(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'instant' }))
+  expect(await fits()).toBe(true)
   expect(pageErrors).toEqual([])
 
   await context.close()
 })
 
-test('showcase bounds image requests and keeps carousel navigation', async ({ page }) => {
-  const chatViewRequests = new Set<string>()
-  page.on('request', (request) => {
-    if (request.url().includes('chatviews')) {
-      chatViewRequests.add(request.url())
-    }
-  })
+test('hero questions swap the conversation', async ({ page }) => {
+  await page.goto('/')
+  const hero = page.getByTestId('hero-window')
+  const returns = hero.getByRole('button', { name: 'Can I return it?' })
+
+  await expect(hero.getByRole('button', { name: 'Luna in oak?' })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  )
+  await returns.click()
+  await expect(returns).toHaveAttribute('aria-pressed', 'true')
+  await expect(hero.getByText('You have 14 days from delivery')).toHaveCSS('opacity', '1')
+  await expect(hero.getByText('Answered from the store’s Returns page')).toBeVisible()
+
+  // The composer asks the next one.
+  await hero.getByRole('button', { name: 'Ask the next example question' }).click()
+  await expect(hero.getByRole('button', { name: 'Delivery to Riga?' })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  )
+})
+
+test('scrolling a pinned scene plays it and runs the clock', async ({ page }) => {
+  const scrollScene = (progress: number) =>
+    page.evaluate((p) => {
+      const scene = document.querySelector<HTMLElement>('#features')!
+      const top = scene.getBoundingClientRect().top + window.scrollY
+      const pin = scene.offsetHeight - window.innerHeight
+      window.scrollTo({ top: top + pin * p, behavior: 'instant' })
+    }, progress)
 
   await page.goto('/')
-  const carousel = page.getByTestId('widget-design-carousel')
-  await carousel.scrollIntoViewIfNeeded()
-  await expect(carousel.locator('img')).toHaveCount(3)
-  expect(chatViewRequests.size).toBeLessThanOrEqual(3)
+  const clock = page.getByTestId('page-clock')
+  const order = page.getByTestId('order-card')
+  await expect(clock).toHaveText('02:47')
 
-  const firstCard = carousel.getByRole('button', { name: /Purple Loud\.Chapted/ })
-  const secondCard = carousel.getByRole('button', { name: /Green FAMLAI/ })
-  const lastCard = carousel.getByRole('button', { name: /Cream Domo\.AI/ })
+  await scrollScene(0)
+  await expect(clock).toHaveText('03:12')
+  await expect(order).toHaveCSS('opacity', '0')
 
-  await expect(firstCard).toHaveAttribute('aria-current', 'true')
-  await secondCard.click()
-  await expect(secondCard).toHaveAttribute('aria-current', 'true')
+  await scrollScene(0.95)
+  await expect(order).toHaveCSS('opacity', '1')
+  await expect(clock).toHaveText(/^0[34]:\d\d$/)
 
-  await carousel.getByRole('button', { name: 'Go to design 1', exact: true }).click()
-  await carousel.getByRole('button', { name: 'Previous' }).click()
-  await expect(lastCard).toHaveAttribute('aria-current', 'true')
+  // The same conversation, in the visitor's other language.
+  await page.getByRole('button', { name: 'English' }).click()
+  await expect(order).toContainText('Order #10482')
+})
 
-  const stage = page.getByTestId('widget-design-stage')
-  const box = await stage.boundingBox()
-  expect(box).not.toBeNull()
-  if (box) {
-    await page.mouse.move(box.x + box.width * 0.7, box.y + box.height / 2)
-    await page.mouse.down()
-    await page.mouse.move(box.x + box.width * 0.25, box.y + box.height / 2, { steps: 6 })
-    await page.mouse.up()
-  }
-  await expect(firstCard).toHaveAttribute('aria-current', 'true')
+test('morning inbox and widget playground respond', async ({ page }) => {
+  await page.goto('/')
+
+  await page.getByRole('button', { name: 'Take over', exact: true }).click()
+  await expect(page.getByRole('button', { name: 'Return to bot' })).toBeVisible()
+  await expect(page.getByText('You are replying')).toBeVisible()
+
+  const preview = page.getByTestId('playground-preview')
+  await page.getByRole('radio', { name: 'Forest' }).click()
+  expect(
+    await preview.evaluate((el) => getComputedStyle(el).getPropertyValue('--w-accent').trim()),
+  ).toBe('#2f7d5b')
+  await page.getByRole('button', { name: 'Pill' }).click()
+  await expect(preview.getByText('Chat with us')).toBeVisible()
 })
