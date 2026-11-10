@@ -1,5 +1,6 @@
 import { LandingNav } from '@/components/landing/LandingNav'
-import { Hero } from '@/components/landing/Hero'
+import { NightHero } from '@/components/landing/night/NightHero'
+import { SceneOrder } from '@/components/landing/night/SceneOrder'
 import { Features, Stats, HowItWorks, CTASection } from '@/components/landing/sections'
 import { Footer } from '@/components/landing/Footer'
 import { Pricing } from '@/components/landing/Pricing'
@@ -104,9 +105,10 @@ export default async function Home() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <LandingNav solid />
+      <LandingNav night />
       <main>
-        <Hero />
+        <NightHero />
+        <SceneOrder />
         <Showcase />
         <Features />
         <Stats />

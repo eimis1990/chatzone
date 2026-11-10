@@ -1,0 +1,787 @@
+/* Night landing: one night in a store, 02:47 to sunrise.
+   Scoped module so only `/` ships it. Palette:
+   midnight #040612 · dusk #0d122f · horizon #1e1b46 · ember #e97634 (brand)
+   lamplight #ffd9a8 · pane #fffaf2 → #ffeed6 · ink #171a2c */
+
+/* ───────────────────────── Hero ───────────────────────── */
+
+.hero {
+  --ground: clamp(9.5rem, 21svh, 13.5rem);
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  min-height: max(100svh, 44rem);
+  overflow: hidden;
+  color: #fff;
+  background: #05060f;
+}
+
+/* The CSS gradient is the sky when WebGL is unavailable; the canvas fades in
+   over it, so there is no flash either way. */
+.skyWrap {
+  position: absolute;
+  inset: 0 0 var(--ground) 0;
+  z-index: -2;
+  background: linear-gradient(180deg, #040612 0%, #0d122f 58%, #1e1b46 100%);
+}
+.sky {
+  display: block;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 1.4s ease;
+}
+.sky[data-on] {
+  opacity: 1;
+}
+
+.ground {
+  position: absolute;
+  inset: auto 0 0 0;
+  height: var(--ground);
+  z-index: -1;
+  background: linear-gradient(180deg, #0c0e25 0%, #05060f 72%);
+  border-top: 1px solid rgb(190 180 255 / 0.16);
+}
+
+.heroGrid {
+  flex: 1;
+  display: grid;
+  align-items: center;
+  gap: 2.75rem;
+  width: 100%;
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 6.5rem 1.25rem calc(var(--ground) * 0.56);
+}
+/* From here up the window stands on the left and the copy on the right. The
+   live chat launcher and its greeting own the bottom-right corner of the
+   screen, so nothing tall may live there. The copy stays first in the DOM. */
+@media (min-width: 1024px) {
+  .heroGrid {
+    grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+    gap: 3rem;
+    padding-top: 5.5rem;
+  }
+  .heroCopy {
+    grid-column: 2;
+    grid-row: 1;
+  }
+}
+
+.title {
+  font-family: var(--font-night), var(--font-geist-sans), sans-serif;
+  font-variation-settings: 'wdth' 88, 'opsz' 96;
+  font-weight: 650;
+  font-size: clamp(2.75rem, 6.4vw, 5.6rem);
+  line-height: 0.96;
+  letter-spacing: -0.035em;
+}
+.titleLine {
+  display: block;
+}
+.lede {
+  margin-top: 1.5rem;
+  max-width: 33rem;
+  font-size: clamp(1.0625rem, 1.35vw, 1.25rem);
+  line-height: 1.55;
+  color: rgb(235 236 255 / 0.72);
+}
+
+/* ─────────────── The lit window (the demo conversation) ─────────────── */
+
+.window {
+  position: relative;
+  width: min(100%, 25.5rem);
+  justify-self: center;
+  align-self: end;
+}
+@media (min-width: 1024px) {
+  .window {
+    grid-column: 1;
+    grid-row: 1;
+  }
+}
+.halo {
+  position: absolute;
+  inset: -38% -55%;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(
+    closest-side,
+    rgb(255 150 70 / 0.34),
+    rgb(233 118 52 / 0.12) 45%,
+    transparent 72%
+  );
+}
+/* Light falling out of the window onto the ground: its top edge matches the
+   pane's width, then it fans out toward the viewer. */
+.spill {
+  position: absolute;
+  top: calc(100% - 4px);
+  left: -22%;
+  z-index: -1;
+  width: 144%;
+  height: calc(var(--ground) * 0.5);
+  pointer-events: none;
+  background: radial-gradient(
+    62% 105% at 50% 0%,
+    rgb(255 178 108 / 0.5),
+    rgb(255 160 84 / 0.15) 58%,
+    transparent 100%
+  );
+  clip-path: polygon(15.3% 0, 84.7% 0, 100% 100%, 0 100%);
+  filter: blur(7px);
+}
+.pane {
+  position: relative;
+  padding: 0.875rem;
+  border-radius: 1.75rem;
+  color: #171a2c;
+  background: linear-gradient(180deg, #fffaf2 0%, #ffeed6 100%);
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.7),
+    0 0 70px rgb(255 160 84 / 0.5),
+    0 40px 80px -30px rgb(0 0 0 / 0.6);
+}
+.paneHead {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.25rem 0.375rem 0.75rem;
+  border-bottom: 1px solid rgb(23 26 44 / 0.08);
+}
+.avatar {
+  position: relative;
+  flex: none;
+  width: 2.25rem;
+  height: 2.25rem;
+  overflow: hidden;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgb(23 26 44 / 0.15);
+}
+.paneName {
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+.paneState {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.75rem;
+  color: rgb(23 26 44 / 0.62);
+}
+.live {
+  width: 0.4375rem;
+  height: 0.4375rem;
+  border-radius: 50%;
+  background: #2f9e5b;
+  box-shadow: 0 0 0 3px rgb(47 158 91 / 0.18);
+}
+.paneTime {
+  margin-left: auto;
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  color: rgb(23 26 44 / 0.58);
+}
+
+.threads {
+  display: grid;
+}
+.thread {
+  grid-area: 1 / 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  padding: 0.875rem 0.25rem 0.5rem;
+  visibility: hidden;
+}
+.thread[data-on] {
+  visibility: visible;
+}
+/* Every line of a conversation reserves its space up front and only fades in,
+   so nothing shifts while a scene plays. Plain CSS delays: it runs before
+   hydration and without JavaScript. */
+.msg {
+  opacity: 0;
+  animation: msgIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: var(--d, 0s);
+}
+@keyframes msgIn {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.bubble {
+  max-width: 86%;
+  padding: 0.625rem 0.875rem;
+  border-radius: 1.125rem;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+.fromCustomer {
+  align-self: flex-end;
+  border-bottom-right-radius: 0.375rem;
+  color: #fff;
+  background: #1a2048;
+}
+.fromAgent {
+  align-self: flex-start;
+  border-bottom-left-radius: 0.375rem;
+  color: #171a2c;
+  background: #fff;
+  box-shadow:
+    0 1px 2px rgb(23 26 44 / 0.08),
+    0 8px 24px -12px rgb(120 70 20 / 0.25);
+}
+.turn {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.typing {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: inline-flex;
+  gap: 0.25rem;
+  padding: 0.8rem 0.875rem;
+  border-radius: 1.125rem;
+  border-bottom-left-radius: 0.375rem;
+  background: #fff;
+  opacity: 0;
+  animation: typing 1s linear both;
+  animation-delay: var(--d, 0s);
+}
+.typing i {
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: 50%;
+  background: rgb(23 26 44 / 0.45);
+  animation: dot 0.9s ease-in-out infinite;
+}
+.typing i:nth-child(2) {
+  animation-delay: 0.15s;
+}
+.typing i:nth-child(3) {
+  animation-delay: 0.3s;
+}
+@keyframes typing {
+  0% {
+    opacity: 0;
+    transform: translateY(0.375rem);
+  }
+  15% {
+    opacity: 1;
+    transform: none;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes dot {
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  30% {
+    transform: translateY(-3px);
+    opacity: 1;
+  }
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+.card {
+  padding: 0.375rem 0.375rem 0.625rem;
+  border-radius: 1rem;
+  background: #fff;
+  box-shadow:
+    0 1px 2px rgb(23 26 44 / 0.08),
+    0 10px 26px -14px rgb(120 70 20 / 0.3);
+}
+.cardArt {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 10 / 7;
+  padding: 0.5rem;
+  border-radius: 0.75rem;
+}
+/* Short laptop screens: keep the whole window above the fold. */
+@media (min-width: 1024px) and (max-height: 740px) {
+  .cardArt {
+    aspect-ratio: 2 / 1;
+  }
+}
+.cardTitle {
+  margin: 0.5rem 0.25rem 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+.cardMeta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin: 0.25rem 0.25rem 0;
+}
+.price {
+  font-size: 0.875rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.stock {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: #23743f;
+}
+.stock::before {
+  content: '';
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: 50%;
+  background: #2f9e5b;
+}
+.note {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding-left: 0.25rem;
+  font-size: 0.75rem;
+  color: rgb(23 26 44 / 0.62);
+}
+
+.ask {
+  padding: 0.75rem 0.375rem 0.25rem;
+  border-top: 1px solid rgb(23 26 44 / 0.08);
+}
+.askLabel {
+  margin-bottom: 0.5rem;
+  font-size: 0.75rem;
+  color: rgb(23 26 44 / 0.62);
+}
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+}
+.chip {
+  padding: 0.4375rem 0.75rem;
+  border: 1px solid rgb(23 26 44 / 0.16);
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #171a2c;
+  background: rgb(255 255 255 / 0.7);
+  cursor: pointer;
+  transition:
+    background-color 0.15s,
+    border-color 0.15s,
+    color 0.15s;
+}
+.chip:hover {
+  border-color: rgb(23 26 44 / 0.32);
+  background: #fff;
+}
+.chip[aria-pressed='true'] {
+  border-color: #1a2048;
+  color: #fff;
+  background: #1a2048;
+}
+.chip:focus-visible {
+  outline: 2px solid #e97634;
+  outline-offset: 2px;
+}
+
+/* Platforms sit on the ground, in front of the window's light. */
+.platforms {
+  position: absolute;
+  inset: auto 0 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2.25rem;
+  height: calc(var(--ground) * 0.44);
+  padding: 0 1.25rem;
+  font-size: 0.875rem;
+  color: rgb(235 236 255 / 0.5);
+}
+.platforms ul {
+  display: none;
+  align-items: center;
+  gap: 2.25rem;
+}
+.platforms li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  white-space: nowrap;
+  color: rgb(235 236 255 / 0.62);
+}
+.platformsText {
+  text-align: center;
+}
+@media (min-width: 1100px) {
+  .platforms ul {
+    display: flex;
+  }
+  .platformsText span {
+    display: none;
+  }
+}
+
+/* ───────────────────────── Scroll clock ───────────────────────── */
+
+.clock {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-left: 0.875rem;
+  padding: 0.3125rem 0.75rem 0.3125rem 0.5625rem;
+  border: 1px solid rgb(255 255 255 / 0.14);
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: #fff;
+  background: rgb(255 255 255 / 0.06);
+  transition: opacity 0.3s;
+}
+.clock[data-off] {
+  opacity: 0;
+}
+.clock svg {
+  color: #ffd9a8;
+}
+
+/* ───────────────────────── Night scenes ───────────────────────── */
+
+.scene {
+  --stars: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='420' fill='%23fff'%3E%3Ccircle cx='251' cy='126' r='0.73' opacity='0.94'/%3E%3Ccircle cx='282' cy='222' r='1.17' opacity='0.89'/%3E%3Ccircle cx='31' cy='419' r='0.49' opacity='0.43'/%3E%3Ccircle cx='417' cy='25' r='0.59' opacity='0.32'/%3E%3Ccircle cx='30' cy='283' r='1.26' opacity='0.83'/%3E%3Ccircle cx='311' cy='27' r='0.81' opacity='0.62'/%3E%3Ccircle cx='86' cy='375' r='0.45' opacity='0.82'/%3E%3Ccircle cx='61' cy='11' r='0.94' opacity='0.78'/%3E%3Ccircle cx='363' cy='343' r='1.11' opacity='0.78'/%3E%3Ccircle cx='15' cy='142' r='0.47' opacity='0.73'/%3E%3Ccircle cx='161' cy='126' r='1.04' opacity='0.50'/%3E%3Ccircle cx='367' cy='234' r='0.49' opacity='0.60'/%3E%3Ccircle cx='241' cy='174' r='0.53' opacity='0.85'/%3E%3Ccircle cx='252' cy='148' r='0.94' opacity='0.68'/%3E%3Ccircle cx='168' cy='241' r='0.50' opacity='0.36'/%3E%3Ccircle cx='248' cy='221' r='0.65' opacity='0.49'/%3E%3Ccircle cx='190' cy='33' r='1.01' opacity='0.43'/%3E%3Ccircle cx='51' cy='357' r='0.80' opacity='0.70'/%3E%3Ccircle cx='392' cy='104' r='0.67' opacity='0.56'/%3E%3Ccircle cx='265' cy='286' r='0.50' opacity='0.42'/%3E%3Ccircle cx='259' cy='0' r='0.53' opacity='0.81'/%3E%3Ccircle cx='322' cy='181' r='0.58' opacity='0.63'/%3E%3Ccircle cx='107' cy='123' r='1.13' opacity='0.48'/%3E%3Ccircle cx='250' cy='25' r='1.18' opacity='0.75'/%3E%3Ccircle cx='188' cy='73' r='1.10' opacity='0.49'/%3E%3Ccircle cx='93' cy='191' r='1.02' opacity='0.54'/%3E%3Ccircle cx='0' cy='177' r='0.46' opacity='0.94'/%3E%3Ccircle cx='117' cy='242' r='0.78' opacity='0.88'/%3E%3Ccircle cx='303' cy='409' r='0.51' opacity='0.45'/%3E%3Ccircle cx='208' cy='166' r='1.04' opacity='0.63'/%3E%3Ccircle cx='396' cy='327' r='0.69' opacity='0.89'/%3E%3Ccircle cx='164' cy='245' r='1.20' opacity='0.60'/%3E%3Ccircle cx='142' cy='313' r='1.22' opacity='0.87'/%3E%3Ccircle cx='76' cy='103' r='0.56' opacity='0.33'/%3E%3Ccircle cx='57' cy='278' r='1.08' opacity='0.45'/%3E%3Ccircle cx='232' cy='120' r='0.48' opacity='0.69'/%3E%3C/svg%3E");
+  position: relative;
+  color: #fff;
+  background: linear-gradient(180deg, #05060f 0%, #0a0e27 9%, #11163a 55%, #1b1c4d 100%);
+}
+/* ponytail: one seeded tile at two scales instead of a star canvas per scene;
+   the two periods (420px, 610px) keep the repeat from reading as a pattern. */
+.stars {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.6;
+  background-image: var(--stars), var(--stars);
+  background-size:
+    420px 420px,
+    610px 610px;
+  background-position:
+    0 0,
+    137px 211px;
+  mask-image: linear-gradient(180deg, transparent 0, #000 14%);
+}
+.stage {
+  position: relative;
+  display: grid;
+  align-items: center;
+  gap: 2.75rem;
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 5rem 1.25rem;
+}
+@media (min-width: 1024px) {
+  /* The scene is taller than the screen and its stage pins; the scene's own
+     view timeline (declared here) drives each step while it is pinned. */
+  .scene {
+    height: 280svh;
+    view-timeline: --scene block;
+  }
+  .stage {
+    position: sticky;
+    top: 0;
+    grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+    gap: 4rem;
+    height: 100svh;
+    padding: 5.5rem 1.25rem 3rem;
+  }
+  .sceneCopy {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .talk {
+    grid-column: 1;
+    grid-row: 1;
+  }
+}
+
+.when {
+  font-family: var(--font-night), var(--font-geist-sans), sans-serif;
+  font-variation-settings: 'wdth' 88, 'opsz' 48;
+  font-size: 1.75rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  color: #ffd9a8;
+}
+.sceneTitle {
+  margin-top: 0.875rem;
+  font-family: var(--font-night), var(--font-geist-sans), sans-serif;
+  font-variation-settings: 'wdth' 90, 'opsz' 72;
+  font-size: clamp(2rem, 3.6vw, 3.25rem);
+  font-weight: 620;
+  line-height: 1.04;
+  letter-spacing: -0.028em;
+  text-wrap: balance;
+}
+.sceneBody {
+  margin-top: 1.25rem;
+  max-width: 31rem;
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  color: rgb(235 236 255 / 0.72);
+}
+.lang {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1.75rem;
+  font-size: 0.875rem;
+  color: rgb(235 236 255 / 0.62);
+}
+.seg {
+  display: inline-flex;
+  padding: 0.1875rem;
+  border: 1px solid rgb(255 255 255 / 0.14);
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.07);
+}
+.seg button {
+  padding: 0.375rem 0.875rem;
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: rgb(255 255 255 / 0.72);
+  cursor: pointer;
+  transition:
+    background-color 0.15s,
+    color 0.15s;
+}
+.seg button[aria-pressed='true'] {
+  color: #171a2c;
+  background: #fff;
+}
+.seg button:focus-visible {
+  outline: 2px solid #e97634;
+  outline-offset: 2px;
+}
+
+.talk {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  width: 100%;
+  max-width: 36rem;
+  justify-self: center;
+}
+.talk .bubble {
+  max-width: 80%;
+  padding: 0.8125rem 1.125rem;
+  font-size: 1.0625rem;
+}
+.talk .fromCustomer {
+  background: #232a5c;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.08);
+}
+.talk .fromAgent {
+  background: linear-gradient(180deg, #fffaf2, #ffeed6);
+  box-shadow: 0 0 50px rgb(255 160 84 / 0.28);
+}
+.verify {
+  display: flex;
+  align-items: center;
+  align-self: center;
+  gap: 0.625rem;
+  padding: 0.4375rem 0.875rem 0.4375rem 0.4375rem;
+  border: 1px solid rgb(90 210 140 / 0.35);
+  border-radius: 999px;
+  font-size: 0.875rem;
+  color: #b9f3cf;
+  background: rgb(47 158 91 / 0.14);
+}
+.tick {
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  color: #fff;
+  background: #2f9e5b;
+}
+.order {
+  align-self: flex-start;
+  width: min(100%, 28rem);
+  padding: 1.125rem 1.25rem 1.25rem;
+  border-radius: 1.25rem;
+  color: #171a2c;
+  background: linear-gradient(180deg, #fffaf2, #ffeed6);
+  box-shadow: 0 0 70px rgb(255 160 84 / 0.3);
+}
+.orderHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 650;
+}
+.pill {
+  padding: 0.1875rem 0.625rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #17693a;
+  background: #dcf5e5;
+}
+.items {
+  display: grid;
+  gap: 0.25rem;
+  margin-top: 0.75rem;
+  font-size: 0.875rem;
+  color: rgb(23 26 44 / 0.75);
+}
+.items li,
+.total {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  font-variant-numeric: tabular-nums;
+}
+.total {
+  margin-top: 0.625rem;
+  padding-top: 0.625rem;
+  border-top: 1px dashed rgb(23 26 44 / 0.18);
+  font-size: 0.9375rem;
+  font-weight: 650;
+}
+.track {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  margin-top: 1rem;
+}
+/* Runs between the centres of the first and last node (each 1/8 in). */
+.trackLine {
+  position: absolute;
+  top: 0.375rem;
+  right: 12.5%;
+  left: 12.5%;
+  height: 2px;
+  background: rgb(23 26 44 / 0.14);
+}
+.trackFill {
+  position: absolute;
+  inset: 0;
+  background: #e97634;
+  transform: scaleX(0.667);
+  transform-origin: left;
+}
+.node {
+  display: grid;
+  justify-items: center;
+  gap: 0.375rem;
+  font-size: 0.75rem;
+  color: rgb(23 26 44 / 0.58);
+}
+.node::before {
+  content: '';
+  position: relative;
+  z-index: 1;
+  width: 0.875rem;
+  height: 0.875rem;
+  border: 2px solid rgb(23 26 44 / 0.2);
+  border-radius: 50%;
+  background: #fff;
+}
+.node[data-done] {
+  font-weight: 600;
+  color: #171a2c;
+}
+.node[data-done]::before {
+  border-color: #e97634;
+  background: #e97634;
+}
+
+/* Steps are fully visible by default (no JavaScript, no scroll timelines,
+   reduced motion). Where the browser can drive animation from scroll, each
+   step is revealed by scroll position instead: by the pinned scene's timeline
+   on desktop, by its own entry into view on small screens. */
+@keyframes stepIn {
+  from {
+    opacity: 0;
+    transform: translateY(1.25rem) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes fillIn {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(0.667);
+  }
+}
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .step {
+      animation: stepIn 1ms linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 22%;
+    }
+    .trackFill {
+      animation: fillIn 1ms linear both;
+      animation-timeline: view();
+      animation-range: entry 60% cover 40%;
+    }
+  }
+  @media (prefers-reduced-motion: no-preference) and (min-width: 1024px) {
+    .step {
+      animation-timeline: --scene;
+      animation-range: contain var(--from) contain var(--to);
+    }
+    .trackFill {
+      animation-timeline: --scene;
+      animation-range: contain 74% contain 90%;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .msg {
+    opacity: 1;
+    animation: none;
+  }
+  .typing {
+    display: none;
+  }
+}
