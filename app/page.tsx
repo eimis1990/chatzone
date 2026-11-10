@@ -1,12 +1,12 @@
 import { LandingNav } from '@/components/landing/LandingNav'
 import { display } from '@/components/landing/night/fonts'
+import { HowItWorks } from '@/components/landing/night/HowItWorks'
 import { Morning } from '@/components/landing/night/Morning'
 import { NightHero } from '@/components/landing/night/NightHero'
 import { Playground } from '@/components/landing/night/Playground'
 import { SceneHandoff } from '@/components/landing/night/SceneHandoff'
 import { SceneOrder } from '@/components/landing/night/SceneOrder'
 import { SceneVoice } from '@/components/landing/night/SceneVoice'
-import { Steps } from '@/components/landing/night/Steps'
 import { Tonight } from '@/components/landing/night/Tonight'
 import night from '@/components/landing/night/night.module.css'
 import { Footer } from '@/components/landing/Footer'
@@ -122,7 +122,7 @@ export default async function Home() {
         <SceneHandoff />
         <Morning />
         <Playground />
-        <Steps />
+        <HowItWorks />
         <div className={night.dusk} data-tone="night" aria-hidden="true" />
         <Pricing />
         <SetupPricing />

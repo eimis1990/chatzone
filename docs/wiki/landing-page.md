@@ -17,8 +17,8 @@ Assembly order is `app/page.tsx` (the `<main>` block). Code lives in
 | Voice call | `SceneVoice.tsx` | 04:05 (245) |
 | "It does not guess" → lead → handoff | `SceneHandoff.tsx` | 05:20 (320) |
 | Sunrise + morning inbox | `Morning.tsx` | 07:30 (450) |
-| Widget restyle playground (`#showcase`) | `Playground.tsx` | 10:00 (600) |
-| Three setup steps (`#how`) | `Steps.tsx` | 13:00 (780) |
+| Widget playground at real size (`#showcase`) | `Playground.tsx` | 10:00 (600) |
+| Two ways to go live (`#how`) | `HowItWorks.tsx` | 13:00 (780) |
 | Pricing, done-for-you, FAQ | `../Pricing.tsx`, `../SetupPricing.tsx`, `../Faq.tsx` | 18:30, 20:30, 22:30 |
 | Close ("again tonight") | `Tonight.tsx` | 02:47 next day (1607) |
 
@@ -77,6 +77,27 @@ Assembly order is `app/page.tsx` (the `<main>` block). Code lives in
   (`openOnHash`). Blog CTAs and chat replies link to it; do not put that id on
   a section.
 
+## The playground and the two ways to go live
+
+- `Playground.tsx` shows the widget at its real size and restyles it with eight
+  of the configurator's settings (colour incl. any colour, corners, header,
+  chat background, font, suggested-question layout, launcher, language). All
+  of it is CSS variables (`--w-accent`, `--w-radius`, `--w-font`, the `--w-*`
+  surface colours) and `data-*` attributes on `WidgetFrame`; fonts come from
+  the product's own `fontStack()` (`lib/fonts.ts`).
+- Its play button speaks the greeting in the selected language from
+  `public/landing/greeting-{en,lt}.mp3`. Those are recordings made by
+  `node scripts/gen-landing-greeting.mjs [voiceId]` (ElevenLabs, the product's
+  default voice). The spoken text must equal `COPY[lang].greeting` in
+  `Playground.tsx`: change one, re-run the script.
+- `HowItWorks.tsx` leads with done-for-you (owner decision, 2026-11-10: many
+  clients would rather not set it up themselves) and keeps self-serve beside
+  it. Its package chooser, price and timeline read `lib/setup-packages.ts`; the
+  "what we build" sentence per package (`BUILD`) restates that file's feature
+  lists by hand, so keep the two in step.
+- The signup dialog and `/api/signup` both require a website
+  (`lib/website.ts`, `isWebsite`): Loqara answers from one.
+
 ## Claims the copy makes (keep them true)
 
 - The bot answers in the widget's **selected** language, not the language the
@@ -92,7 +113,8 @@ Assembly order is `app/page.tsx` (the `<main>` block). Code lives in
 - `E2E_PORT=3000 npx playwright test tests/e2e/public-landing.spec.ts` reuses a
   running dev server and covers: no-JS content, anchors and the signup hash,
   reduced motion, mobile overflow, hero questions, a pinned scene playing with
-  the clock, the inbox and the playground.
+  the clock, the inbox, the playground (incl. the greeting clip being
+  requested) and the done-for-you path.
 - `node scripts/landing-shots.mjs <outDir> [width height]` takes real-timing
   screenshots (hero, hero scrolled, a scene, the close, the footer) in headless
   Chromium with the GPU on, so the WebGL sky actually renders.

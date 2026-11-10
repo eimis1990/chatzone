@@ -2,13 +2,14 @@
  * POST /api/signup
  *
  * Public "Get started" capture from the landing page dialog. Stores email +
- * website (deduped by email), rate-limited, and pings the platform owner so
- * new prospects never sit unnoticed. Same-origin only (no CORS).
+ * website (both required; deduped by email), rate-limited, and pings the
+ * platform owner so new prospects never sit unnoticed. Same-origin only (no CORS).
  */
 import { z } from 'zod'
 import { createServiceClient } from '@/lib/supabase/service'
 import { createRateLimiter } from '@/lib/ratelimit'
 import { notifyNewSignup } from '@/lib/notify'
+import { isWebsite, normalizeWebsite } from '@/lib/website'
 
 const limiter = createRateLimiter({ capacity: 3, refillPerSec: 0.05 })
 
@@ -53,7 +54,7 @@ export async function POST(req: Request) {
   if (!parsed.success) return json({ error: 'Enter a valid email.' }, 400)
   const email = parsed.data.email.trim().toLowerCase()
   const company = parsed.data.company?.trim() || null
-  const website = parsed.data.website?.trim() || null
+  const website = normalizeWebsite(parsed.data.website ?? '')
 
   // Bot filters. Fake success on the silent signals (honeypot filled, or the
   // form submitted faster than a human could read it) — a 4xx would only teach
@@ -65,6 +66,10 @@ export async function POST(req: Request) {
   }
   if (company && !HAS_LETTERS.test(company)) {
     return json({ error: 'Please enter your company name.' }, 400)
+  }
+  // Checked after the silent bot signals above, so a script still learns nothing.
+  if (!isWebsite(website)) {
+    return json({ error: 'Please enter your website address.' }, 400)
   }
 
   if (!limiter.check(email)) return json({ error: 'Please try again shortly.' }, 429)

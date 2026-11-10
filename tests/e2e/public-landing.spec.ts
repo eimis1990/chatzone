@@ -6,7 +6,7 @@ const HEADINGS = [
   'Jonas asks something the store never wrote down.',
   'Good morning. Here is your night.',
   'A widget that fits your brand',
-  'Live in an afternoon',
+  'Live in an afternoon, or leave it to us',
   'Simple, honest pricing',
   'Prefer it done for you?',
   'Frequently asked questions',
@@ -41,7 +41,7 @@ test('native landing anchors and signup hash remain functional', async ({ browse
   for (const [hash, heading] of [
     ['#features', HEADINGS[0]],
     ['#showcase', 'A widget that fits your brand'],
-    ['#how', 'Live in an afternoon'],
+    ['#how', 'Live in an afternoon, or leave it to us'],
     ['#pricing', 'Simple, honest pricing'],
     ['#faq', 'Frequently asked questions'],
   ]) {
@@ -172,7 +172,7 @@ test('scrolling a pinned scene plays it and runs the clock', async ({ page }) =>
   await expect(clock).toHaveText(/^0[34]:\d\d$/)
 
   // The same conversation, in the visitor's other language.
-  await page.getByRole('button', { name: 'English' }).click()
+  await page.locator('#features').getByRole('button', { name: 'English' }).click()
   await expect(order).toContainText('Order #10482')
 })
 
@@ -188,6 +188,28 @@ test('morning inbox and widget playground respond', async ({ page }) => {
   expect(
     await preview.evaluate((el) => getComputedStyle(el).getPropertyValue('--w-accent').trim()),
   ).toBe('#2f7d5b')
-  await page.getByRole('button', { name: 'Pill' }).click()
+  await page.getByRole('button', { name: 'Pill', exact: true }).click()
   await expect(preview.getByText('Chat with us')).toBeVisible()
+
+  // The widget speaks its greeting in the language it is set to.
+  await page.locator('#showcase').getByRole('button', { name: 'Lietuvių' }).click()
+  await expect(preview.getByText('Virtualus asistentas')).toBeVisible()
+  const clip = page.waitForRequest((request) => request.url().endsWith('/landing/greeting-lt.mp3'))
+  await preview.getByRole('button', { name: 'Išgirsti balso pasisveikinimą' }).click()
+  await clip
+})
+
+test('how it works leads with done-for-you and prices the chosen package', async ({ page }) => {
+  await page.goto('/')
+  const how = page.locator('#how')
+
+  await expect(how.getByRole('heading', { name: 'We set it up for you' })).toBeVisible()
+  await expect(how.getByText('€749')).toBeVisible()
+  await how.getByRole('button', { name: 'Questions, products and orders' }).click()
+  await expect(how.getByText('€995')).toBeVisible()
+  await expect(how.getByText('Live in ~2 weeks.')).toBeVisible()
+
+  await how.getByRole('button', { name: 'Request setup' }).click()
+  const dialog = page.getByRole('dialog')
+  await expect(dialog.getByLabel('Your website')).toHaveAttribute('required', '')
 })

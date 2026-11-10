@@ -1,10 +1,22 @@
 'use client'
 
-import { useState, type CSSProperties } from 'react'
+import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import Image from 'next/image'
-import { MessageCircleIcon, MicIcon, SendHorizontalIcon } from 'lucide-react'
+import {
+  ArrowDownIcon,
+  ChevronRightIcon,
+  MessageCircleIcon,
+  MicIcon,
+  SendHorizontalIcon,
+  SquareIcon,
+  Volume2Icon,
+} from 'lucide-react'
+import { fontStack } from '@/lib/fonts'
 import { FOX, WidgetFrame, type HeaderStyle } from './WidgetFrame'
 import s from './night.module.css'
+
+type Lang = 'en' | 'lt'
+type QuickStyle = 'tiles' | 'pills' | 'list'
 
 const COLOURS = [
   { name: 'Loqara orange', hex: '#e97634' },
@@ -14,29 +26,41 @@ const COLOURS = [
   { name: 'Rose', hex: '#e11d48' },
   { name: 'Ink', hex: '#14182b' },
 ]
-const CORNERS = [
-  { label: 'Sharp', rem: 0.375 },
-  { label: 'Soft', rem: 1 },
-  { label: 'Round', rem: 1.375 },
-]
-const HEADERS: { label: string; id: HeaderStyle }[] = [
-  { label: 'Curved', id: 'curved' },
-  { label: 'Classic', id: 'classic' },
-  { label: 'Floating', id: 'floating' },
-]
-const LAUNCHERS = [
-  { label: 'Circle', id: 'circle' },
-  { label: 'Pill', id: 'pill' },
-] as const
 
-function Segmented<T extends string | number>({
+// What the widget says, per visitor language. GREETING is also what the
+// recordings in public/landing/greeting-<lang>.mp3 speak: change one, re-run
+// scripts/gen-landing-greeting.mjs.
+const COPY = {
+  en: {
+    name: 'Your store',
+    role: 'Virtual assistant',
+    greeting: 'Hi! I’m your store’s assistant. Ask me about products, orders or delivery.',
+    hear: 'Hear the voice greeting',
+    stop: 'Stop',
+    quick: ['How long is delivery?', 'Can I return an item?', 'Where is my order?', 'Talk to a person'],
+    placeholder: 'Type a message…',
+    launcher: 'Chat with us',
+  },
+  lt: {
+    name: 'Jūsų parduotuvė',
+    role: 'Virtualus asistentas',
+    greeting: 'Sveiki! Aš jūsų parduotuvės asistentas. Klauskite apie prekes, užsakymus ar pristatymą.',
+    hear: 'Išgirsti balso pasisveikinimą',
+    stop: 'Sustabdyti',
+    quick: ['Kiek trunka pristatymas?', 'Ar galiu grąžinti prekę?', 'Kur mano užsakymas?', 'Pasikalbėti su žmogumi'],
+    placeholder: 'Rašykite žinutę…',
+    launcher: 'Parašykite mums',
+  },
+} as const
+
+function Choice<T extends string | number | boolean>({
   label,
   options,
   value,
   onChange,
 }: {
   label: string
-  options: { label: string; value: T }[]
+  options: readonly { label: string; value: T }[]
   value: T
   onChange: (value: T) => void
 }) {
@@ -60,105 +84,114 @@ function Segmented<T extends string | number>({
 }
 
 /**
- * The widget, restyled live: the same four things a store owner sets in the
- * configurator (colour, corners, header style, launcher), applied as CSS
- * variables to the same frame the hero uses.
+ * The widget at its real size, restyled live with a sample of what the
+ * configurator sets: colour, corners, header, chat background, font, the
+ * suggested-question layout, launcher and visitor language. The play button
+ * speaks the greeting in the selected language (a recording; voice is an
+ * add-on). Everything is CSS variables and data attributes on the same frame
+ * the hero uses.
  */
 export function Playground() {
   const [accent, setAccent] = useState(COLOURS[0].hex)
   const [radius, setRadius] = useState(1)
   const [header, setHeader] = useState<HeaderStyle>('curved')
-  const [launcher, setLauncher] = useState<(typeof LAUNCHERS)[number]['id']>('circle')
-  const theme = { '--w-accent': accent, '--w-radius': `${radius}rem` } as CSSProperties
+  const [dark, setDark] = useState(false)
+  const [font, setFont] = useState('geist')
+  const [quick, setQuick] = useState<QuickStyle>('tiles')
+  const [launcher, setLauncher] = useState<'circle' | 'pill'>('circle')
+  const [lang, setLang] = useState<Lang>('en')
+  const [speaking, setSpeaking] = useState(false)
+  const audio = useRef<HTMLAudioElement | null>(null)
+
+  const c = COPY[lang]
+  const theme = {
+    '--w-accent': accent,
+    '--w-radius': `${radius}rem`,
+    '--w-font': fontStack(font),
+  } as CSSProperties
+
+  const stop = () => {
+    audio.current?.pause()
+    audio.current = null
+    setSpeaking(false)
+  }
+  const speak = () => {
+    stop()
+    const clip = new Audio(`/landing/greeting-${lang}.mp3`)
+    clip.onended = stop
+    audio.current = clip
+    setSpeaking(true)
+    clip.play().catch(stop)
+  }
+  // A greeting in the old language must not keep talking over the new one.
+  const pickLang = (next: Lang) => {
+    stop()
+    setLang(next)
+  }
+  useEffect(() => () => audio.current?.pause(), [])
+
+  const QuickIcon = quick === 'list' ? ChevronRightIcon : ArrowDownIcon
 
   return (
     <section id="showcase" className={s.day} data-clock="600" data-tone="day">
-      <div className={s.split}>
-        <div>
+      <div className={s.play}>
+        <div className={s.playHead}>
           <h2 className={s.h2}>A widget that fits your brand</h2>
           <p className={s.sub}>
-            Colour, corners, header and launcher are yours to set, and what you see in the preview
-            is what your customers get. Try it. For anything further from the template, we build
-            custom designs on request.
+            This is the widget at its real size. Change it here, switch its language, and press
+            play inside it to hear the greeting. These are eight of the settings in the editor,
+            which also has 24 fonts, launcher icons, background images and more. For anything
+            beyond that, we build custom designs on request.
           </p>
-
-          <div className={s.controls}>
-            <div className={s.control}>
-              <span className={s.controlLabel} id="playground-colour">
-                Colour
-              </span>
-              <div className={s.swatches} role="radiogroup" aria-labelledby="playground-colour">
-                {COLOURS.map((c) => (
-                  <button
-                    key={c.hex}
-                    type="button"
-                    role="radio"
-                    aria-checked={c.hex === accent}
-                    aria-label={c.name}
-                    className={s.swatch}
-                    style={{ backgroundColor: c.hex }}
-                    onClick={() => setAccent(c.hex)}
-                  />
-                ))}
-              </div>
-            </div>
-            <Segmented
-              label="Corners"
-              options={CORNERS.map((c) => ({ label: c.label, value: c.rem }))}
-              value={radius}
-              onChange={setRadius}
-            />
-            <Segmented
-              label="Header"
-              options={HEADERS.map((h) => ({ label: h.label, value: h.id }))}
-              value={header}
-              onChange={setHeader}
-            />
-            <Segmented
-              label="Launcher"
-              options={LAUNCHERS.map((l) => ({ label: l.label, value: l.id }))}
-              value={launcher}
-              onChange={setLauncher}
-            />
-          </div>
-
         </div>
 
         <div className={`${s.preview} ${s.rise}`} style={theme} data-testid="playground-preview">
-          <WidgetFrame name="Your store" header={header} style={theme}>
-            <div className={s.thread} data-on="">
-              <div className={s.botRow}>
-                <span className={s.botAvatar}>
-                  <Image src={FOX} alt="" fill sizes="28px" className="object-contain p-0.5" />
+          <WidgetFrame name={c.name} header={header} lang={lang} dark={dark} style={theme}>
+            <div className={s.welcome} lang={lang}>
+              <div className={s.welcomeWho}>
+                <span className={s.welcomeFace}>
+                  <Image src={FOX} alt="" fill sizes="64px" className="object-contain p-1.5" />
                 </span>
-                <div className={s.turn}>
-                  <p className={`${s.bubble} ${s.fromAgent}`}>
-                    Hi! Ask me about products, orders or delivery.
-                  </p>
-                </div>
+                <p className={s.welcomeName}>{c.name}</p>
+                <p className={s.welcomeRole}>{c.role}</p>
               </div>
-              <p className={`${s.bubble} ${s.fromCustomer}`}>Do you deliver to Riga?</p>
-              <div className={s.botRow}>
-                <span className={s.botAvatar}>
-                  <Image src={FOX} alt="" fill sizes="28px" className="object-contain p-0.5" />
-                </span>
-                <div className={s.turn}>
-                  <p className={`${s.bubble} ${s.fromAgent}`}>
-                    We do. Furniture reaches Latvia in 3 to 5 working days.
-                  </p>
-                </div>
+              <p className={`${s.bubble} ${s.fromAgent}`}>{c.greeting}</p>
+              <button
+                type="button"
+                className={s.hear}
+                aria-pressed={speaking}
+                onClick={speaking ? stop : speak}
+              >
+                {speaking ? (
+                  <>
+                    <span className={s.bars} aria-hidden="true">
+                      <i />
+                      <i />
+                      <i />
+                      <i />
+                    </span>
+                    <SquareIcon className="size-3 fill-current" aria-hidden="true" />
+                    {c.stop}
+                  </>
+                ) : (
+                  <>
+                    <Volume2Icon className="size-4" aria-hidden="true" />
+                    {c.hear}
+                  </>
+                )}
+              </button>
+              <div className={s.quick} data-style={quick} aria-hidden="true">
+                {c.quick.map((q) => (
+                  <span key={q}>
+                    {q}
+                    <QuickIcon className="size-4" />
+                  </span>
+                ))}
               </div>
-            </div>
-            <div className={s.chips} aria-hidden="true">
-              <span className={s.chip} data-on="">
-                Delivery
-              </span>
-              <span className={s.chip}>Returns</span>
-              <span className={s.chip}>My order</span>
             </div>
             <div className={s.composer} aria-hidden="true">
               <span className={s.field}>
-                <span className="text-[#9ca3af]">Type a message…</span>
+                <span style={{ color: 'var(--w-muted)' }}>{c.placeholder}</span>
               </span>
               <span className={s.micBtn}>
                 <MicIcon className="size-4" />
@@ -170,8 +203,101 @@ export function Playground() {
           </WidgetFrame>
           <span className={s.launcher} data-shape={launcher} aria-hidden="true">
             <MessageCircleIcon className="size-6" />
-            <span>Chat with us</span>
+            <span>{c.launcher}</span>
           </span>
+        </div>
+
+        <div className={s.controls}>
+          <div className={s.control}>
+            <span className={s.controlLabel} id="playground-colour">
+              Colour
+            </span>
+            <div className={s.swatches} role="radiogroup" aria-labelledby="playground-colour">
+              {COLOURS.map((colour) => (
+                <button
+                  key={colour.hex}
+                  type="button"
+                  role="radio"
+                  aria-checked={colour.hex === accent}
+                  aria-label={colour.name}
+                  className={s.swatch}
+                  style={{ backgroundColor: colour.hex }}
+                  onClick={() => setAccent(colour.hex)}
+                />
+              ))}
+              <label className={s.anyColour} title="Any colour">
+                <span className="sr-only">Any colour</span>
+                <input type="color" value={accent} onChange={(e) => setAccent(e.target.value)} />
+              </label>
+            </div>
+          </div>
+          <Choice
+            label="Language"
+            options={[
+              { label: 'English', value: 'en' },
+              { label: 'Lietuvių', value: 'lt' },
+            ]}
+            value={lang}
+            onChange={pickLang}
+          />
+          <Choice
+            label="Corners"
+            options={[
+              { label: 'Sharp', value: 0.375 },
+              { label: 'Soft', value: 1 },
+              { label: 'Round', value: 1.375 },
+            ]}
+            value={radius}
+            onChange={setRadius}
+          />
+          <Choice
+            label="Header"
+            options={[
+              { label: 'Curved', value: 'curved' },
+              { label: 'Classic', value: 'classic' },
+              { label: 'Floating', value: 'floating' },
+            ]}
+            value={header}
+            onChange={setHeader}
+          />
+          <Choice
+            label="Background"
+            options={[
+              { label: 'Light', value: false },
+              { label: 'Dark', value: true },
+            ]}
+            value={dark}
+            onChange={setDark}
+          />
+          <Choice
+            label="Font"
+            options={[
+              { label: 'Geist', value: 'geist' },
+              { label: 'Fredoka', value: 'fredoka' },
+              { label: 'Playfair', value: 'playfair' },
+            ]}
+            value={font}
+            onChange={setFont}
+          />
+          <Choice
+            label="Suggested questions"
+            options={[
+              { label: 'Tiles', value: 'tiles' },
+              { label: 'Pills', value: 'pills' },
+              { label: 'List', value: 'list' },
+            ]}
+            value={quick}
+            onChange={setQuick}
+          />
+          <Choice
+            label="Launcher"
+            options={[
+              { label: 'Circle', value: 'circle' },
+              { label: 'Pill', value: 'pill' },
+            ]}
+            value={launcher}
+            onChange={setLauncher}
+          />
         </div>
       </div>
     </section>

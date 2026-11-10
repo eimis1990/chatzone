@@ -10,21 +10,33 @@ export type HeaderStyle = 'curved' | 'classic' | 'floating'
 /**
  * The Loqara widget's chrome, drawn to match components/widget/ChatWindow.tsx:
  * brand header (avatar, name, status, tool buttons), the body sheet, and the
- * "Powered by" line. `style` carries --w-accent / --w-radius for restyling.
+ * "Powered by" line. `style` carries --w-accent / --w-radius / --w-font for
+ * restyling.
  */
 export function WidgetFrame({
   name = 'Demo store',
   header = 'curved',
+  lang = 'en',
+  dark = false,
   style,
   children,
 }: {
   name?: string
   header?: HeaderStyle
+  /** The visitor's language: sets the status word and the language button. */
+  lang?: 'en' | 'lt'
+  /** Dark chat background (theme.backgroundColor in the product). */
+  dark?: boolean
   style?: CSSProperties
   children: ReactNode
 }) {
   return (
-    <div className={s.pane} data-header={header} style={style}>
+    <div
+      className={s.pane}
+      data-header={header}
+      data-bg={dark ? 'dark' : undefined}
+      style={style}
+    >
       <div className={s.paneHead}>
         <span className={s.avatar}>
           <Image src={FOX} alt="" fill sizes="32px" className="object-contain p-0.5" />
@@ -33,11 +45,11 @@ export function WidgetFrame({
           <p className={s.paneName}>{name}</p>
           <p className={s.paneState}>
             <span className={s.live} aria-hidden="true" />
-            Online
+            {lang === 'lt' ? 'Prisijungęs' : 'Online'}
           </p>
         </div>
         <div className={s.paneTools} aria-hidden="true">
-          <span>EN</span>
+          <span>{lang.toUpperCase()}</span>
           <span>
             <PhoneIcon className="size-4" />
           </span>

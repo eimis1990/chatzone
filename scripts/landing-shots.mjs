@@ -38,6 +38,8 @@ const go = async (sel, p, off = 0) => {
   await page.waitForTimeout(900)
 }
 await go('#features', 0.55); await shot('3-order-mid')
+await go('#showcase', 0, -64); await shot('3b-showcase')
+await go('#how', 0, -64); await shot('3c-how')
 await go('[data-clock="1607"]', 0, -120); await shot('4-tonight')
 await go('[data-clock="1607"]', 0, 330); await shot('5-tonight-footer')
 await page.evaluate(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'instant' }))

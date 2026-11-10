@@ -67,6 +67,26 @@ describe('POST /api/signup acquisition attribution', () => {
     expect(notifyNewSignup).toHaveBeenCalledTimes(1)
   })
 
+  it('refuses a signup with no website, or one that is not a web address', async () => {
+    for (const website of [undefined, '', 'n/a', 'mystore']) {
+      const res = await POST(
+        signupRequest({ email: 'no-site@north.test', company: 'North Store', website, t: 3_000 }),
+      )
+      expect(res.status).toBe(400)
+      await expect(res.json()).resolves.toEqual({ error: 'Please enter your website address.' })
+    }
+    expect(insert).not.toHaveBeenCalled()
+    expect(notifyNewSignup).not.toHaveBeenCalled()
+  })
+
+  it('accepts a bare domain and stores it as a full address', async () => {
+    const res = await POST(
+      signupRequest({ email: 'bare@north.test', company: 'North Store', website: 'north.lt', t: 3_000 }),
+    )
+    expect(res.status).toBe(200)
+    expect(insert).toHaveBeenCalledWith(expect.objectContaining({ website: 'https://north.lt' }))
+  })
+
   it('does not write or count a honeypot submission as a completion', async () => {
     const res = await POST(
       signupRequest({

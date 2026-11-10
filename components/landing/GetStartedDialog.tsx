@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Shimmer } from './Shimmer'
 import { trackEvent } from '@/lib/analytics'
+import { isWebsite, normalizeWebsite } from '@/lib/website'
 import {
   captureFirstTouch,
   funnelProperties,
@@ -40,13 +41,6 @@ async function celebrate(origin: { x: number; y: number }) {
 }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-
-/** "my-store.com" → "https://my-store.com"; leaves proper URLs (and blanks) alone. */
-function normalizeWebsite(raw: string): string {
-  const trimmed = raw.trim()
-  if (!trimmed) return ''
-  return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`
-}
 
 /** Human-friendly domain for the success copy ("https://www.foo.com/x" → "foo.com"). */
 function domainOf(website: string): string | null {
@@ -168,7 +162,12 @@ export function GetStartedDialog({
       setError('Please enter a valid email address.')
       return
     }
+    // Loqara answers from a website, so there is nothing to set up without one.
     const site = normalizeWebsite(website)
+    if (!isWebsite(site)) {
+      setError('Please enter your website address.')
+      return
+    }
     setLoading(true)
     setError('')
     trackEvent('signup_submitted', eventProperties())
@@ -179,7 +178,7 @@ export function GetStartedDialog({
         body: JSON.stringify({
           email: cleanEmail,
           company: cleanCompany,
-          ...(site ? { website: site } : {}),
+          website: site,
           source,
           acquisition: acquisition(),
           confirm_url: honeypot,
@@ -304,13 +303,11 @@ export function GetStartedDialog({
                 />
               </div>
               <div className="flex flex-col gap-2">
-                <Label htmlFor={websiteId}>
-                  Your website{' '}
-                  <span className="font-normal text-muted-foreground">(optional)</span>
-                </Label>
+                <Label htmlFor={websiteId}>Your website</Label>
                 <Input
                   id={websiteId}
                   type="text"
+                  required
                   inputMode="url"
                   autoComplete="url"
                   maxLength={200}

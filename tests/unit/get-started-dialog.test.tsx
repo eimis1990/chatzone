@@ -62,4 +62,16 @@ describe('GetStartedDialog acquisition funnel', () => {
       ),
     )
   })
+
+  it('asks for a website before sending anything', async () => {
+    render(<GetStartedDialog source="hero" />)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Get started' }))
+    fireEvent.change(screen.getByLabelText('Company name'), { target: { value: 'North Store' } })
+    fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'owner@north.test' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Request access' }))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Please enter your website address.')
+    expect(fetch).not.toHaveBeenCalled()
+  })
 })
