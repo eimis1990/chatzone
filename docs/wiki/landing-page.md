@@ -17,6 +17,7 @@ Assembly order is `app/page.tsx` (the `<main>` block). Code lives in
 | Voice call | `SceneVoice.tsx` | 04:05 (245) |
 | "It does not guess" → lead → handoff | `SceneHandoff.tsx` | 05:20 (320) |
 | Sunrise + morning inbox | `Morning.tsx` | 07:30 (450) |
+| Analytics strip + Demand Radar | `Radar.tsx` | 08:30 (510) |
 | Widget playground at real size (`#showcase`) | `Playground.tsx` | 10:00 (600) |
 | Two ways to go live (`#how`) | `HowItWorks.tsx` | 13:00 (780) |
 | Pricing, done-for-you, FAQ | `../Pricing.tsx`, `../SetupPricing.tsx`, `../Faq.tsx` | 18:30, 20:30, 22:30 |
@@ -116,8 +117,14 @@ Assembly order is `app/page.tsx` (the `<main>` block). Code lives in
   says "her widget is set to Lithuanian" for that reason.
 - Order lookup needs the order number **and** the billing email to match, and
   exists for WooCommerce and Magento only (`lib/commerce/index.ts`).
-- Voice is an add-on. The inbox numbers are the page's own four example
-  conversations, labelled as an example; no performance metrics are invented.
+- Voice is an add-on. The inbox and the Analytics strip total the page's own
+  four example conversations, labelled as an example; no performance metrics
+  are invented. Metric names are the product's (`AnalyticsSection.tsx`).
+- In the Demand Radar scene only "Add an FAQ" and "Add a missing synonym" are
+  shown as changing the assistant, because only those do
+  ([demand-radar](demand-radar.md)). Everything else is "saved for review".
+  The scene's opening item is Jonas's 05:20 question, scored 2/5 in the inbox,
+  which is what makes it unresolved.
 
 ## Checking it
 

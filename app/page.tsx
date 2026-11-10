@@ -4,6 +4,7 @@ import { HowItWorks } from '@/components/landing/night/HowItWorks'
 import { Morning } from '@/components/landing/night/Morning'
 import { NightHero } from '@/components/landing/night/NightHero'
 import { Playground } from '@/components/landing/night/Playground'
+import { Radar } from '@/components/landing/night/Radar'
 import { SceneHandoff } from '@/components/landing/night/SceneHandoff'
 import { SceneOrder } from '@/components/landing/night/SceneOrder'
 import { SceneVoice } from '@/components/landing/night/SceneVoice'
@@ -113,7 +114,7 @@ export default async function Home() {
       />
       <LandingNav night />
       {/* One day in a store, top to bottom: night (02:47, three scenes), sunrise,
-          the day (inbox, restyle, setup), dusk, the evening (pricing, FAQ), and
+          the day (inbox, radar, restyle, setup), dusk, the evening (pricing, FAQ), and
           night again. Each section carries its time in `data-clock`. */}
       <main className={display.variable}>
         <NightHero />
@@ -121,6 +122,7 @@ export default async function Home() {
         <SceneVoice />
         <SceneHandoff />
         <Morning />
+        <Radar />
         <Playground />
         <HowItWorks />
         <div className={night.dusk} data-tone="night" aria-hidden="true" />

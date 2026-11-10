@@ -15,7 +15,10 @@ interface Conversation {
   /** The AI-written summary the inbox shows for every conversation. */
   summary: string
   topics: string[]
-  /** Waiting for a person; otherwise answered, with its quality score. */
+  /** The AI success score (1 to 5) every conversation gets, and its reason. */
+  score: number
+  why: string
+  /** Waiting for a person; otherwise answered. */
   needsPerson?: boolean
 }
 
@@ -30,6 +33,8 @@ const NIGHT: Conversation[] = [
     summary:
       'Asked whether the Oslo sofa can be made 172 cm wide. Nothing in the store’s content covers custom sizes, so Loqara did not answer. It took his email and passed the conversation on.',
     topics: ['Custom sizes', 'Sofas'],
+    score: 2,
+    why: 'no content covered custom sizes, so the question went unanswered.',
     needsPerson: true,
   },
   {
@@ -42,6 +47,8 @@ const NIGHT: Conversation[] = [
     summary:
       'Voice call. Recommended the Oslo loveseat, 158 cm wide, and showed it on screen with its price and stock.',
     topics: ['Sofas', 'Dimensions'],
+    score: 5,
+    why: 'answered from the catalogue and showed the product.',
   },
   {
     id: 'ieva',
@@ -52,6 +59,8 @@ const NIGHT: Conversation[] = [
     summary:
       'Asked in Lithuanian for an order status. Her email matched the order, so Loqara showed it: shipped.',
     topics: ['Orders'],
+    score: 5,
+    why: 'order found once the email matched.',
   },
   {
     id: 'visitor',
@@ -62,13 +71,15 @@ const NIGHT: Conversation[] = [
     summary:
       'Confirmed the Luna with oak legs is in stock and suggested the Arlow in walnut as the darker option.',
     topics: ['Chairs', 'Stock'],
+    score: 5,
+    why: 'answered from the catalogue with live stock.',
   },
 ]
 
 /**
  * 07:30 — the payoff: the night's conversations, filed the way the product
- * files them (summary, topics, score), with the one that needs a person on
- * top. Pick a row to read it; take Jonas over to see the handoff.
+ * files them (summary, AI success score with its reason, topics), with the one
+ * that needs a person on top. Pick a row to read it; take Jonas over to see the handoff.
  */
 export function Morning() {
   const [openId, setOpenId] = useState('jonas')
@@ -119,12 +130,15 @@ export function Morning() {
                       <span className={`${s.rowSub} block`}>{c.subject}</span>
                     </span>
                     <span className={s.tag} data-needs={c.needsPerson ? '' : undefined}>
-                      {c.needsPerson ? (takenOver ? 'You are replying' : 'Needs a person') : 'Answered 5/5'}
+                      {c.needsPerson ? (takenOver ? 'You are replying' : 'Needs a person') : `Answered ${c.score}/5`}
                     </span>
                   </button>
                   {open && (
                     <div className={s.detail}>
                       <p>{c.summary}</p>
+                      <p className={s.scoreLine}>
+                        <b>AI success {c.score}/5:</b> {c.why}
+                      </p>
                       <ul className={s.topics} aria-label="Topics">
                         {c.topics.map((t) => (
                           <li key={t}>{t}</li>

@@ -5,6 +5,7 @@ const HEADINGS = [
   'Marta is feeding the baby. She asks out loud instead.',
   'Jonas asks something the store never wrote down.',
   'Good morning. Here is your night.',
+  'Jonas was the third to ask that this week.',
   'A widget that fits your brand',
   'Live in an afternoon, or leave it to us',
   'Simple, honest pricing',
@@ -179,6 +180,7 @@ test('scrolling a pinned scene plays it and runs the clock', async ({ page }) =>
 test('morning inbox and widget playground respond', async ({ page }) => {
   await page.goto('/')
 
+  await expect(page.getByText('AI success 2/5:')).toBeVisible()
   await page.getByRole('button', { name: 'Take over', exact: true }).click()
   await expect(page.getByRole('button', { name: 'Return to bot' })).toBeVisible()
   await expect(page.getByText('You are replying')).toBeVisible()
@@ -197,6 +199,21 @@ test('morning inbox and widget playground respond', async ({ page }) => {
   const clip = page.waitForRequest((request) => request.url().endsWith('/landing/greeting-lt.mp3'))
   await preview.getByRole('button', { name: 'Išgirsti balso pasisveikinimą' }).click()
   await clip
+})
+
+test('demand radar turns the unanswered question into an approved fix', async ({ page }) => {
+  await page.goto('/')
+  const radar = page.locator('[data-clock="510"]')
+
+  await expect(radar.getByText('Can the Oslo sofa be made in a custom width?')).toBeVisible()
+  await radar.getByRole('button', { name: 'Approve and add' }).click()
+  await expect(radar.getByText('The assistant answers this from now on.')).toBeVisible()
+  await expect(radar.getByText('Handled')).toBeVisible()
+
+  // Things the assistant cannot change are saved as tasks, not "applied".
+  await radar.getByRole('button', { name: /Paying in instalments/ }).click()
+  await radar.getByRole('button', { name: 'Save for review' }).click()
+  await expect(radar.getByText('Saved to your review list.')).toBeVisible()
 })
 
 test('how it works leads with done-for-you and prices the chosen package', async ({ page }) => {
