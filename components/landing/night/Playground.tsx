@@ -43,8 +43,9 @@ const COPY = {
   },
   lt: {
     name: 'Jūsų parduotuvė',
-    role: 'Virtualus asistentas',
-    greeting: 'Sveiki! Aš jūsų parduotuvės asistentas. Klauskite apie prekes, užsakymus ar pristatymą.',
+    // Feminine forms: the Lithuanian greeting is spoken by a woman's voice.
+    role: 'Virtuali asistentė',
+    greeting: 'Sveiki! Aš jūsų parduotuvės asistentė. Klauskite apie prekes, užsakymus ar pristatymą.',
     hear: 'Išgirsti balso pasisveikinimą',
     stop: 'Sustabdyti',
     quick: ['Kiek trunka pristatymas?', 'Ar galiu grąžinti prekę?', 'Kur mano užsakymas?', 'Pasikalbėti su žmogumi'],
@@ -302,7 +303,7 @@ export function Playground() {
               onChange={setHeader}
             />
             <Choice
-              label="Suggested questions"
+              label="Suggestions"
               options={[
                 { label: 'Tiles', value: 'tiles' },
                 { label: 'Pills', value: 'pills' },

@@ -1399,8 +1399,10 @@
 }
 
 /* ───────────────────── The widget restyle playground ─────────────────────
-   Small screens: heading, then the preview, then the controls, so a change is
-   visible while you make it. Desktop: preview left, heading and controls right. */
+   Small screens: heading, then the preview, then the settings, so a change is
+   visible while you make it. From 1024px the settings sit beside the preview.
+   From 1280px the text, the preview and the settings share one row that is
+   sized to the screen, so the whole section is in view at once. */
 
 .play {
   display: grid;
@@ -1413,19 +1415,38 @@
 }
 @media (min-width: 1024px) {
   .play {
-    grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
-    grid-template-areas: 'preview head' 'preview controls';
-    gap: 2rem 4rem;
-    padding-block: 5rem 7rem;
+    grid-template-columns: 25.5rem minmax(0, 1fr);
+    grid-template-areas: 'head head' 'preview controls';
+    align-items: start;
+    gap: 2rem 2.5rem;
+    padding-block: 4rem 5rem;
+  }
+}
+@media (min-width: 1280px) {
+  /* The section is one screen tall (less the nav bar) and its content is
+     centred in it; the widget's height follows the screen's, within limits. */
+  .play {
+    grid-template-columns: 19rem 25.5rem minmax(0, 1fr);
+    grid-template-areas: 'head preview controls';
+    align-content: center;
+    min-height: calc(100svh - 4rem);
+    padding-block: 2rem 2.5rem;
+  }
+  .playHead .h2 {
+    font-size: 2.5rem;
+  }
+  .playHead .sub {
+    font-size: 1rem;
+  }
+  .play .preview .pane {
+    height: clamp(33.5rem, calc(100svh - 13rem), 39.5rem);
   }
 }
 .playHead {
   grid-area: head;
-  align-self: end;
 }
 .preview {
   grid-area: preview;
-  align-self: center;
   justify-self: center;
   display: flex;
   flex-direction: column;
@@ -1649,7 +1670,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.875rem 1.25rem;
+  padding: 0.75rem 1.25rem;
   border-bottom: 1px solid #eef0f3;
   font-weight: 650;
 }
@@ -1669,7 +1690,7 @@
   outline-offset: 3px;
 }
 .group {
-  padding: 0.875rem 1.25rem 0.75rem;
+  padding: 0.75rem 1.25rem 0.5rem;
 }
 .group + .group {
   border-top: 1px solid #eef0f3;
@@ -1682,10 +1703,10 @@
 }
 .control {
   display: grid;
-  grid-template-columns: 9.5rem minmax(0, 1fr);
+  grid-template-columns: 8.25rem minmax(0, 1fr);
   align-items: center;
   gap: 0.75rem;
-  min-height: 2.75rem;
+  min-height: 2.5rem;
 }
 @media (max-width: 479px) {
   .control {
@@ -1765,7 +1786,7 @@
   background: #fff;
 }
 .segDay button {
-  padding: 0.375rem 0.75rem;
+  padding: 0.3125rem 0.6875rem;
   border-radius: 999px;
   font-size: 0.8125rem;
   font-weight: 600;

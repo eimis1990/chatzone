@@ -8,7 +8,8 @@ import { readFileSync, writeFileSync } from 'node:fs'
 
 const GREETING = {
   en: 'Hi! I’m your store’s assistant. Ask me about products, orders or delivery.',
-  lt: 'Sveiki! Aš jūsų parduotuvės asistentas. Klauskite apie prekes, užsakymus ar pristatymą.',
+  // Feminine (asistentė): the Lithuanian voice is a woman's.
+  lt: 'Sveiki! Aš jūsų parduotuvės asistentė. Klauskite apie prekes, užsakymus ar pristatymą.',
 }
 // Voices from the account's "My voices" (owner's pick, 2026-11-10): a man for
 // English, a woman for Lithuanian. The plain "Archer" voice (L0Dsvb3SLTyegXwtm47J)

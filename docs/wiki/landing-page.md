@@ -87,11 +87,17 @@ Assembly order is `app/page.tsx` (the `<main>` block). Code lives in
   the product's own `fontStack()` (`lib/fonts.ts`).
 - The settings sit in an editor-style panel: titled groups (Look, Layout,
   Language and voice) of label | control rows, with a Reset.
+- From 1280px wide the section is one screen: text, widget and panel share a
+  row, the section is `100svh - 4rem` tall, and the widget's height follows the
+  screen (`clamp(33.5rem, 100svh - 13rem, 39.5rem)`), so everything is in view
+  at once on a laptop (owner's request). Adding a settings row or lengthening
+  the text can push it past one screen: re-check at 1440x790.
 - Its play buttons (in the widget and in the panel) speak the greeting in the
   selected language from `public/landing/greeting-{en,lt}.mp3`. Those are
   recordings made by `node scripts/gen-landing-greeting.mjs [enVoiceId]
   [ltVoiceId]` with ElevenLabs `eleven_v3`: "Archer - Conversational" for
   English, "Alexandra - Conversational and Real" for Lithuanian (owner's pick).
+  The Lithuanian copy is therefore feminine ("asistentė", "Virtuali asistentė").
   The plain "Archer" voice read the line with second-long pauses. v3 varies
   between runs, so listen and re-run if a take drags. The spoken text must
   equal `COPY[lang].greeting` in `Playground.tsx`: change one, re-run the script.

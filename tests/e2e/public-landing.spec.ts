@@ -193,7 +193,7 @@ test('morning inbox and widget playground respond', async ({ page }) => {
 
   // The widget speaks its greeting in the language it is set to.
   await page.locator('#showcase').getByRole('button', { name: 'Lietuvių' }).click()
-  await expect(preview.getByText('Virtualus asistentas')).toBeVisible()
+  await expect(preview.getByText('Virtuali asistentė')).toBeVisible()
   const clip = page.waitForRequest((request) => request.url().endsWith('/landing/greeting-lt.mp3'))
   await preview.getByRole('button', { name: 'Išgirsti balso pasisveikinimą' }).click()
   await clip
