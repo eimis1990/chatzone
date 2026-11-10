@@ -85,11 +85,16 @@ Assembly order is `app/page.tsx` (the `<main>` block). Code lives in
   of it is CSS variables (`--w-accent`, `--w-radius`, `--w-font`, the `--w-*`
   surface colours) and `data-*` attributes on `WidgetFrame`; fonts come from
   the product's own `fontStack()` (`lib/fonts.ts`).
-- Its play button speaks the greeting in the selected language from
-  `public/landing/greeting-{en,lt}.mp3`. Those are recordings made by
-  `node scripts/gen-landing-greeting.mjs [voiceId]` (ElevenLabs, the product's
-  default voice). The spoken text must equal `COPY[lang].greeting` in
-  `Playground.tsx`: change one, re-run the script.
+- The settings sit in an editor-style panel: titled groups (Look, Layout,
+  Language and voice) of label | control rows, with a Reset.
+- Its play buttons (in the widget and in the panel) speak the greeting in the
+  selected language from `public/landing/greeting-{en,lt}.mp3`. Those are
+  recordings made by `node scripts/gen-landing-greeting.mjs [enVoiceId]
+  [ltVoiceId]` with ElevenLabs `eleven_v3`: "Archer - Conversational" for
+  English, "Alexandra - Conversational and Real" for Lithuanian (owner's pick).
+  The plain "Archer" voice read the line with second-long pauses. v3 varies
+  between runs, so listen and re-run if a take drags. The spoken text must
+  equal `COPY[lang].greeting` in `Playground.tsx`: change one, re-run the script.
 - `HowItWorks.tsx` leads with done-for-you (owner decision, 2026-11-10: many
   clients would rather not set it up themselves) and keeps self-serve beside
   it. Its package chooser, price and timeline read `lib/setup-packages.ts`; the

@@ -1636,22 +1636,78 @@
 .launcher[data-shape='circle'] span {
   display: none;
 }
-.controls {
+/* The settings, as an editor panel: titled groups of label | control rows. */
+.panel {
   grid-area: controls;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
-  gap: 1.125rem 1.5rem;
+  overflow: hidden;
+  border: 1px solid #e3e6ea;
+  border-radius: 1.25rem;
+  background: #fff;
+  box-shadow: 0 1px 2px rgb(20 24 43 / 0.04);
+}
+.panelHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.875rem 1.25rem;
+  border-bottom: 1px solid #eef0f3;
+  font-weight: 650;
+}
+.panelHead button {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #4b5160;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.panelHead button:hover {
+  color: #14182b;
+}
+.panelHead button:focus-visible {
+  outline: 2px solid #e97634;
+  outline-offset: 3px;
+}
+.group {
+  padding: 0.875rem 1.25rem 0.75rem;
+}
+.group + .group {
+  border-top: 1px solid #eef0f3;
+}
+.groupTitle {
+  margin-bottom: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 650;
+  color: #8a90a0;
 }
 .control {
   display: grid;
-  gap: 0.5rem;
-  justify-items: start;
-  align-content: start;
+  grid-template-columns: 9.5rem minmax(0, 1fr);
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 2.75rem;
+}
+@media (max-width: 479px) {
+  .control {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.375rem;
+    padding-block: 0.5rem;
+  }
 }
 .controlLabel {
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: #4b5160;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #14182b;
+}
+/* The same play button, on the light panel instead of inside the widget. */
+.panel .hear {
+  --w-line: #e1e4ea;
+  --w-ink: #14182b;
+  --w-bg: #fff;
+  --w-accent: #e97634;
+  align-self: center;
+  justify-self: start;
+  margin-top: 0;
 }
 .swatches {
   display: flex;
@@ -1702,6 +1758,7 @@
 .segDay {
   display: inline-flex;
   flex-wrap: wrap;
+  justify-self: start;
   padding: 0.1875rem;
   border: 1px solid #e1e4ea;
   border-radius: 1.25rem;
