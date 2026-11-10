@@ -18,12 +18,13 @@
 }
 
 /* The CSS gradient is the sky when WebGL is unavailable; the canvas fades in
-   over it, so there is no flash either way. */
+   over it, so there is no flash either way. It runs the full height: the
+   ground is only a darkening laid over its lower fifth. */
 .skyWrap {
   position: absolute;
-  inset: 0 0 var(--ground) 0;
+  inset: 0;
   z-index: -2;
-  background: linear-gradient(180deg, #040612 0%, #0d122f 58%, #1e1b46 100%);
+  background: linear-gradient(180deg, #040612 0%, #0d122f 46%, #252152 80%);
 }
 .sky {
   display: block;
@@ -36,13 +37,24 @@
   opacity: 1;
 }
 
+/* No horizon line: the sky simply deepens into the ground, and the window's
+   light on it is what says there is a floor. The stops ease in so the fade has
+   no visible start. */
 .ground {
   position: absolute;
   inset: auto 0 0 0;
-  height: var(--ground);
+  height: calc(var(--ground) * 1.5);
   z-index: -1;
-  background: linear-gradient(180deg, #0c0e25 0%, #05060f 72%);
-  border-top: 1px solid rgb(190 180 255 / 0.16);
+  background: linear-gradient(
+    180deg,
+    rgb(5 6 15 / 0) 0%,
+    rgb(5 6 15 / 0.06) 14%,
+    rgb(5 6 15 / 0.22) 30%,
+    rgb(5 6 15 / 0.5) 48%,
+    rgb(5 6 15 / 0.78) 66%,
+    rgb(5 6 15 / 0.94) 84%,
+    #05060f 100%
+  );
 }
 
 .heroGrid {
@@ -112,31 +124,38 @@
   inset: -38% -55%;
   z-index: -1;
   pointer-events: none;
+  /* Many stops on an ease-out curve: a two-stop glow shows its edge as a ring. */
   background: radial-gradient(
     closest-side,
-    rgb(255 150 70 / 0.3),
-    rgb(233 118 52 / 0.1) 45%,
-    transparent 72%
+    rgb(255 158 84 / 0.32) 0%,
+    rgb(252 150 76 / 0.24) 16%,
+    rgb(246 138 66 / 0.16) 32%,
+    rgb(240 128 58 / 0.095) 48%,
+    rgb(236 122 54 / 0.05) 63%,
+    rgb(233 118 52 / 0.02) 78%,
+    rgb(233 118 52 / 0) 92%
   );
 }
-/* Light falling out of the window onto the ground: its top edge matches the
-   pane's width, then it fans out toward the viewer. */
+/* Light falling out of the window onto the ground: a soft pool under it, with
+   no hard-edged beam. */
 .spill {
   position: absolute;
-  top: calc(100% - 4px);
-  left: -22%;
+  top: calc(100% - 0.5rem);
+  left: -34%;
   z-index: -1;
-  width: 144%;
-  height: calc(var(--ground) * 0.5);
+  width: 168%;
+  height: calc(var(--ground) * 0.62);
   pointer-events: none;
   background: radial-gradient(
-    62% 105% at 50% 0%,
-    rgb(255 190 130 / 0.46),
-    rgb(255 160 84 / 0.14) 58%,
-    transparent 100%
+    50% 100% at 50% 0%,
+    rgb(255 196 140 / 0.4) 0%,
+    rgb(255 178 116 / 0.26) 18%,
+    rgb(250 158 92 / 0.15) 38%,
+    rgb(242 140 72 / 0.07) 60%,
+    rgb(233 118 52 / 0.02) 80%,
+    rgb(233 118 52 / 0) 100%
   );
-  clip-path: polygon(15.3% 0, 84.7% 0, 100% 100%, 0 100%);
-  filter: blur(7px);
+  filter: blur(6px);
 }
 .pane {
   position: relative;
@@ -627,21 +646,27 @@
   background: var(--sky, #0a0e27);
 }
 /* ponytail: one seeded tile at two scales instead of a star canvas per scene;
-   the two periods (420px, 610px) keep the repeat from reading as a pattern. */
+   the two periods (420px, 610px) keep the repeat from reading as a pattern.
+   The two layers are taller than the section and slide at different speeds
+   while it crosses the screen: the far one lags the scroll more. */
 .stars {
+  --tile: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='420' fill='%23fff'%3E%3Ccircle cx='251' cy='126' r='0.73' opacity='0.94'/%3E%3Ccircle cx='282' cy='222' r='1.17' opacity='0.89'/%3E%3Ccircle cx='31' cy='419' r='0.49' opacity='0.43'/%3E%3Ccircle cx='417' cy='25' r='0.59' opacity='0.32'/%3E%3Ccircle cx='30' cy='283' r='1.26' opacity='0.83'/%3E%3Ccircle cx='311' cy='27' r='0.81' opacity='0.62'/%3E%3Ccircle cx='86' cy='375' r='0.45' opacity='0.82'/%3E%3Ccircle cx='61' cy='11' r='0.94' opacity='0.78'/%3E%3Ccircle cx='363' cy='343' r='1.11' opacity='0.78'/%3E%3Ccircle cx='15' cy='142' r='0.47' opacity='0.73'/%3E%3Ccircle cx='161' cy='126' r='1.04' opacity='0.50'/%3E%3Ccircle cx='367' cy='234' r='0.49' opacity='0.60'/%3E%3Ccircle cx='241' cy='174' r='0.53' opacity='0.85'/%3E%3Ccircle cx='252' cy='148' r='0.94' opacity='0.68'/%3E%3Ccircle cx='168' cy='241' r='0.50' opacity='0.36'/%3E%3Ccircle cx='248' cy='221' r='0.65' opacity='0.49'/%3E%3Ccircle cx='190' cy='33' r='1.01' opacity='0.43'/%3E%3Ccircle cx='51' cy='357' r='0.80' opacity='0.70'/%3E%3Ccircle cx='392' cy='104' r='0.67' opacity='0.56'/%3E%3Ccircle cx='265' cy='286' r='0.50' opacity='0.42'/%3E%3Ccircle cx='259' cy='0' r='0.53' opacity='0.81'/%3E%3Ccircle cx='322' cy='181' r='0.58' opacity='0.63'/%3E%3Ccircle cx='107' cy='123' r='1.13' opacity='0.48'/%3E%3Ccircle cx='250' cy='25' r='1.18' opacity='0.75'/%3E%3Ccircle cx='188' cy='73' r='1.10' opacity='0.49'/%3E%3Ccircle cx='93' cy='191' r='1.02' opacity='0.54'/%3E%3Ccircle cx='0' cy='177' r='0.46' opacity='0.94'/%3E%3Ccircle cx='117' cy='242' r='0.78' opacity='0.88'/%3E%3Ccircle cx='303' cy='409' r='0.51' opacity='0.45'/%3E%3Ccircle cx='208' cy='166' r='1.04' opacity='0.63'/%3E%3Ccircle cx='396' cy='327' r='0.69' opacity='0.89'/%3E%3Ccircle cx='164' cy='245' r='1.20' opacity='0.60'/%3E%3Ccircle cx='142' cy='313' r='1.22' opacity='0.87'/%3E%3Ccircle cx='76' cy='103' r='0.56' opacity='0.33'/%3E%3Ccircle cx='57' cy='278' r='1.08' opacity='0.45'/%3E%3Ccircle cx='232' cy='120' r='0.48' opacity='0.69'/%3E%3C/svg%3E");
   position: absolute;
   inset: 0;
+  overflow: hidden;
   pointer-events: none;
-  --tile: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='420' fill='%23fff'%3E%3Ccircle cx='251' cy='126' r='0.73' opacity='0.94'/%3E%3Ccircle cx='282' cy='222' r='1.17' opacity='0.89'/%3E%3Ccircle cx='31' cy='419' r='0.49' opacity='0.43'/%3E%3Ccircle cx='417' cy='25' r='0.59' opacity='0.32'/%3E%3Ccircle cx='30' cy='283' r='1.26' opacity='0.83'/%3E%3Ccircle cx='311' cy='27' r='0.81' opacity='0.62'/%3E%3Ccircle cx='86' cy='375' r='0.45' opacity='0.82'/%3E%3Ccircle cx='61' cy='11' r='0.94' opacity='0.78'/%3E%3Ccircle cx='363' cy='343' r='1.11' opacity='0.78'/%3E%3Ccircle cx='15' cy='142' r='0.47' opacity='0.73'/%3E%3Ccircle cx='161' cy='126' r='1.04' opacity='0.50'/%3E%3Ccircle cx='367' cy='234' r='0.49' opacity='0.60'/%3E%3Ccircle cx='241' cy='174' r='0.53' opacity='0.85'/%3E%3Ccircle cx='252' cy='148' r='0.94' opacity='0.68'/%3E%3Ccircle cx='168' cy='241' r='0.50' opacity='0.36'/%3E%3Ccircle cx='248' cy='221' r='0.65' opacity='0.49'/%3E%3Ccircle cx='190' cy='33' r='1.01' opacity='0.43'/%3E%3Ccircle cx='51' cy='357' r='0.80' opacity='0.70'/%3E%3Ccircle cx='392' cy='104' r='0.67' opacity='0.56'/%3E%3Ccircle cx='265' cy='286' r='0.50' opacity='0.42'/%3E%3Ccircle cx='259' cy='0' r='0.53' opacity='0.81'/%3E%3Ccircle cx='322' cy='181' r='0.58' opacity='0.63'/%3E%3Ccircle cx='107' cy='123' r='1.13' opacity='0.48'/%3E%3Ccircle cx='250' cy='25' r='1.18' opacity='0.75'/%3E%3Ccircle cx='188' cy='73' r='1.10' opacity='0.49'/%3E%3Ccircle cx='93' cy='191' r='1.02' opacity='0.54'/%3E%3Ccircle cx='0' cy='177' r='0.46' opacity='0.94'/%3E%3Ccircle cx='117' cy='242' r='0.78' opacity='0.88'/%3E%3Ccircle cx='303' cy='409' r='0.51' opacity='0.45'/%3E%3Ccircle cx='208' cy='166' r='1.04' opacity='0.63'/%3E%3Ccircle cx='396' cy='327' r='0.69' opacity='0.89'/%3E%3Ccircle cx='164' cy='245' r='1.20' opacity='0.60'/%3E%3Ccircle cx='142' cy='313' r='1.22' opacity='0.87'/%3E%3Ccircle cx='76' cy='103' r='0.56' opacity='0.33'/%3E%3Ccircle cx='57' cy='278' r='1.08' opacity='0.45'/%3E%3Ccircle cx='232' cy='120' r='0.48' opacity='0.69'/%3E%3C/svg%3E");
   opacity: var(--star-opacity, 0.6);
-  background-image: var(--tile), var(--tile);
-  background-size:
-    420px 420px,
-    610px 610px;
-  background-position:
-    0 0,
-    137px 211px;
   mask-image: linear-gradient(180deg, transparent 0, #000 14%);
+}
+.stars i {
+  position: absolute;
+  inset: -14% 0;
+  background-image: var(--tile);
+  background-size: 420px 420px;
+}
+.stars i + i {
+  background-position: 137px 211px;
+  background-size: 610px 610px;
 }
 .stage {
   position: relative;
@@ -905,6 +930,22 @@
     max-width: 100%;
   }
 }
+@keyframes starsFar {
+  from {
+    transform: translateY(-10%);
+  }
+  to {
+    transform: translateY(10%);
+  }
+}
+@keyframes starsNear {
+  from {
+    transform: translateY(-4%);
+  }
+  to {
+    transform: translateY(4%);
+  }
+}
 @keyframes sunUp {
   from {
     transform: translateY(46%);
@@ -929,6 +970,13 @@
       animation: scrollType 1ms steps(16, end) both;
       animation-timeline: view();
       animation-range: entry 80% cover 45%;
+    }
+    .stars i {
+      animation: starsFar 1ms linear both;
+      animation-timeline: view();
+    }
+    .stars i + i {
+      animation-name: starsNear;
     }
     .rise {
       animation: stepIn 1ms linear both;
@@ -1113,8 +1161,9 @@
   position: relative;
   height: clamp(20rem, 64svh, 36rem);
   overflow: hidden;
+  background: linear-gradient(180deg, #4d2f66 0%, #d5685c 47%, #ffd9a6 82%, #fbfbfa 100%);
   background: linear-gradient(
-    180deg,
+    in oklab 180deg,
     #4d2f66 0%,
     #8a4468 24%,
     #d5685c 47%,
@@ -1542,8 +1591,9 @@
 
 .dusk {
   height: clamp(14rem, 46svh, 26rem);
+  background: linear-gradient(180deg, #f6f8f6 0%, #f3a070 44%, #432c62 84%, #0b0f24 100%);
   background: linear-gradient(
-    180deg,
+    in oklab 180deg,
     #f6f8f6 0%,
     #ffe6c7 22%,
     #f3a070 44%,
@@ -1558,13 +1608,21 @@
   overflow: hidden;
   text-align: center;
   color: #fff;
-  background: linear-gradient(180deg, #0b0f24 0%, #070a1c 62%, #05060f 100%);
+  /* Ends on the footer's colour (#101213), so the page runs into it unbroken. */
+  background: linear-gradient(
+    180deg,
+    #0b0f24 0%,
+    #090c1f 34%,
+    #0a0c18 62%,
+    #0d0e15 82%,
+    #101213 100%
+  );
 }
 .tonightInner {
   position: relative;
   max-width: 50rem;
   margin: 0 auto;
-  padding: 6.5rem 1.25rem 17rem;
+  padding: 6.5rem 1.25rem 3.5rem;
 }
 .tonightTitle {
   font-family: var(--font-night), var(--font-geist-sans), sans-serif;
@@ -1575,40 +1633,62 @@
   letter-spacing: -0.035em;
   text-wrap: balance;
 }
-.horizon {
-  position: absolute;
-  inset: auto 0 0 0;
-  height: 6rem;
-  border-top: 1px solid rgb(190 180 255 / 0.16);
-  background: linear-gradient(180deg, #0c0e25 0%, #05060f 72%);
+/* The hero's widget again, far off: the real frame, scaled down, glowing, with
+   its reflection on the ground (-webkit-box-reflect; Firefox just shows none). */
+.far {
+  position: relative;
+  height: 24rem;
+  pointer-events: none;
 }
-/* The same lit window as the hero, small and far off. */
-.beacon {
+/* Centred on the scaled window, which is about 11.5rem tall and stands 7rem up. */
+.farGlow {
   position: absolute;
-  bottom: 6rem;
+  bottom: -0.25rem;
   left: 50%;
-  width: 3.25rem;
-  height: 4.75rem;
-  margin-left: -1.625rem;
-  border-radius: 0.625rem 0.625rem 0.125rem 0.125rem;
-  background: linear-gradient(180deg, #e97634 0 18%, #fff 18% 100%);
-  box-shadow:
-    0 0 40px 8px rgb(255 160 84 / 0.5),
-    0 0 150px 60px rgb(233 118 52 / 0.26);
+  width: min(46rem, 130vw);
+  height: 26rem;
+  translate: -50% 0;
+  background: radial-gradient(
+    closest-side,
+    rgb(255 164 92 / 0.34) 0%,
+    rgb(252 152 80 / 0.24) 14%,
+    rgb(246 140 68 / 0.16) 30%,
+    rgb(240 128 58 / 0.09) 47%,
+    rgb(236 122 54 / 0.045) 64%,
+    rgb(233 118 52 / 0.015) 80%,
+    rgb(233 118 52 / 0) 94%
+  );
 }
-.beaconSpill {
+/* Laid out at full size and scaled from its foot, so the foot stays put. */
+.farWindow {
+  position: absolute;
+  bottom: 7rem;
+  left: 50%;
+  width: 25.5rem;
+  margin-left: -12.75rem;
+  scale: 0.32;
+  transform-origin: 50% 100%;
+  -webkit-box-reflect: below 6px linear-gradient(transparent 58%, rgb(255 255 255 / 0.24));
+}
+.farWindow .pane {
+  box-shadow:
+    0 0 0 3px rgb(255 255 255 / 0.2),
+    0 0 220px 40px rgb(255 160 90 / 0.5);
+}
+.farPool {
   position: absolute;
   bottom: 0;
   left: 50%;
-  width: 11rem;
-  height: 6rem;
-  margin-left: -5.5rem;
+  width: min(30rem, 100vw);
+  height: 7rem;
+  translate: -50% 0;
   background: radial-gradient(
-    62% 105% at 50% 0%,
-    rgb(255 190 130 / 0.5),
-    rgb(255 160 84 / 0.14) 58%,
-    transparent 100%
+    50% 100% at 50% 0%,
+    rgb(255 196 140 / 0.34) 0%,
+    rgb(255 178 116 / 0.2) 20%,
+    rgb(250 158 92 / 0.11) 42%,
+    rgb(242 140 72 / 0.05) 64%,
+    rgb(233 118 52 / 0) 100%
   );
-  clip-path: polygon(35% 0, 65% 0, 100% 100%, 0 100%);
-  filter: blur(5px);
+  filter: blur(8px);
 }

@@ -45,7 +45,10 @@ export function Scene({
       data-tone="night"
       style={{ '--sky': sky, '--star-opacity': stars } as CSSProperties}
     >
-      <div className={s.stars} aria-hidden="true" />
+      <div className={s.stars} aria-hidden="true">
+        <i />
+        <i />
+      </div>
       <div className={s.stage}>
         <div className={s.sceneCopy}>
           <p className={s.when}>{when}</p>

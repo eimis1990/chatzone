@@ -5,8 +5,11 @@ import s from './night.module.css'
 
 const VERT = 'attribute vec2 a;void main(){gl_Position=vec4(a,0.,1.);}'
 
-// One full-screen pass: sky gradient, slow high cloud, hashed stars, and a
-// touch of grain so the dark gradient does not band.
+// One full-screen pass, back to front: sky gradient, a far and a near layer of
+// hashed stars, a crescent moon with its halo, slow high cloud, and a touch of
+// grain so the dark gradient does not band. Each layer is sampled a share of
+// the scroll (`sc`, px) further down, so the far ones leave the screen slowest,
+// and a smaller share of the pointer (`m`): that is the parallax.
 const FRAG = `
 #ifdef GL_FRAGMENT_PRECISION_HIGH
 precision highp float;
@@ -16,28 +19,44 @@ precision mediump float;
 uniform vec2 r;
 uniform float t;
 uniform vec2 m;
+uniform float sc;
 float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
 float n(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);
   return mix(mix(h(i),h(i+vec2(1.,0.)),f.x),mix(h(i+vec2(0.,1.)),h(i+vec2(1.,1.)),f.x),f.y);}
 float fbm(vec2 p){float a=.5,v=0.;for(int i=0;i<5;i++){v+=a*n(p);p=p*2.03+17.3;a*=.5;}return v;}
-void main(){
-  vec2 uv=gl_FragCoord.xy/r;
-  vec2 p=vec2(uv.x*r.x/r.y,uv.y);
-  vec3 c=mix(vec3(.145,.125,.32),vec3(.051,.071,.184),smoothstep(0.,.45,uv.y));
-  c=mix(c,vec3(.016,.024,.071),smoothstep(.3,1.,uv.y));
-  float cl=fbm(vec2(p.x*1.25+t*.01,p.y*2.8-t*.003)+m*.06);
-  cl=smoothstep(.5,.9,cl)*smoothstep(.1,.5,uv.y);
-  c+=cl*vec3(.055,.065,.14);
-  vec2 g=gl_FragCoord.xy/26.+m*.35;
+float stars(vec2 fc,float cell,float rare,float gain){
+  vec2 g=fc/cell;
   vec2 id=floor(g);
   float k=h(id);
   float sz=h(id+11.3);
   vec2 o=vec2(h(id+3.1),h(id+7.7))-.5;
   float d=length(fract(g)-.5-o*.7);
   float tw=.62+.38*sin(t*(.5+k*1.8)+k*40.);
-  float st=step(.8,k)*smoothstep(.03+.065*sz*sz,0.,d)*(.55+.65*sz)*tw;
-  c+=st*smoothstep(.14,.6,uv.y)*(1.-min(cl*1.6,1.))*vec3(.9,.92,1.);
-  c+=(h(gl_FragCoord.xy+fract(t))-.5)/200.;
+  return step(rare,k)*smoothstep(.03+.065*sz*sz,0.,d)*(.55+.65*sz)*tw*gain;
+}
+void main(){
+  vec2 fc=gl_FragCoord.xy;
+  vec2 uv=fc/r;
+  // The lightest band sits a fifth of the way up, where the ground begins.
+  float y=max(uv.y-.2,0.)/.8;
+  vec3 c=mix(vec3(.145,.125,.32),vec3(.051,.071,.184),smoothstep(0.,.45,y));
+  c=mix(c,vec3(.016,.024,.071),smoothstep(.3,1.,y));
+  vec2 pc=(fc+vec2(m.x*46.,sc*.3+m.y*46.))/r.y;
+  float cl=fbm(vec2(pc.x*1.25+t*.01,pc.y*2.8-t*.003));
+  cl=smoothstep(.5,.9,cl)*smoothstep(.1,.5,y);
+  float st=stars(fc+vec2(m.x*8.,sc*.8+m.y*8.),30.,.86,.7)
+          +stars(fc+vec2(m.x*22.,sc*.55+m.y*22.),21.,.9,1.);
+  float R=min(r.x,r.y)*.034;
+  vec2 mp=r.x>r.y?vec2(r.x*.455,r.y-108.):vec2(r.x*.84,r.y-104.);
+  mp-=vec2(m.x*14.,m.y*14.+sc*.65);
+  float md=distance(fc,mp);
+  float disc=smoothstep(R,R-1.5,md);
+  float moon=disc*smoothstep(R*.9,R*.9+1.5,distance(fc,mp+vec2(R*.5,R*.28)));
+  float halo=exp(-md/(R*2.2))*.22+exp(-md/(R*9.))*.06;
+  c+=st*smoothstep(.14,.6,y)*(1.-min(cl*1.6,1.))*(1.-disc)*vec3(.9,.92,1.);
+  c+=vec3(1.,.93,.82)*(moon+halo*(1.-moon));
+  c+=cl*vec3(.055,.065,.14);
+  c+=(h(fc+fract(t))-.5)/200.;
   gl_FragColor=vec4(c,1.);
 }`
 
@@ -87,10 +106,10 @@ export function NightSky() {
     const uR = gl.getUniformLocation(prog, 'r')
     const uT = gl.getUniformLocation(prog, 't')
     const uM = gl.getUniformLocation(prog, 'm')
+    const uS = gl.getUniformLocation(prog, 'sc')
 
     const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     let raf = 0
-    let last = -1e3
     let onScreen = true
     let mx = 0
     let my = 0
@@ -99,32 +118,26 @@ export function NightSky() {
 
     const draw = (now: number) => {
       raf = 0
-      // ponytail: 1x backing store at ~30fps; the sky is soft, so retina and
-      // 60fps would only cost battery.
-      if (now - last >= 32) {
-        last = now
-        const w = canvas.clientWidth
-        const hgt = canvas.clientHeight
-        if (canvas.width !== w || canvas.height !== hgt) {
-          canvas.width = w
-          canvas.height = hgt
-          gl.viewport(0, 0, w, hgt)
-        }
-        cx += (mx - cx) * 0.06
-        cy += (my - cy) * 0.06
-        gl.uniform2f(uR, w, hgt)
-        gl.uniform1f(uT, now / 1000)
-        gl.uniform2f(uM, cx, cy)
-        gl.drawArrays(gl.TRIANGLES, 0, 3)
+      // ponytail: 1x backing store; the sky is soft, so retina would only cost
+      // battery. It stops drawing once the hero is off screen.
+      const w = canvas.clientWidth
+      const hgt = canvas.clientHeight
+      if (canvas.width !== w || canvas.height !== hgt) {
+        canvas.width = w
+        canvas.height = hgt
+        gl.viewport(0, 0, w, hgt)
       }
+      cx += (mx - cx) * 0.06
+      cy += (my - cy) * 0.06
+      gl.uniform2f(uR, w, hgt)
+      gl.uniform1f(uT, now / 1000)
+      gl.uniform2f(uM, cx, cy)
+      gl.uniform1f(uS, still ? 0 : window.scrollY)
+      gl.drawArrays(gl.TRIANGLES, 0, 3)
       if (!still && onScreen && !document.hidden) raf = requestAnimationFrame(draw)
     }
     const kick = () => {
       if (!raf) raf = requestAnimationFrame(draw)
-    }
-    const redraw = () => {
-      last = -1e3
-      kick()
     }
     const onMove = (e: PointerEvent) => {
       mx = e.clientX / window.innerWidth - 0.5
@@ -136,7 +149,7 @@ export function NightSky() {
     })
     io.observe(canvas)
     window.addEventListener('pointermove', onMove, { passive: true })
-    window.addEventListener('resize', redraw)
+    window.addEventListener('resize', kick)
     document.addEventListener('visibilitychange', kick)
     kick()
     canvas.dataset.on = ''
@@ -145,7 +158,7 @@ export function NightSky() {
       cancelAnimationFrame(raf)
       io.disconnect()
       window.removeEventListener('pointermove', onMove)
-      window.removeEventListener('resize', redraw)
+      window.removeEventListener('resize', kick)
       document.removeEventListener('visibilitychange', kick)
     }
   }, [])

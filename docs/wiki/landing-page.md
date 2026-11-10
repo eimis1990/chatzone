@@ -56,9 +56,23 @@ Assembly order is `app/page.tsx` (the `<main>` block). Code lives in
 - **Sky continuity.** Each night section's gradient starts on the colour the
   previous one ended on (`sky` prop of `Scene`; `.sunrise`, `.dusk`). Change one
   end and its neighbour must follow.
-- **The shader sky is decoration.** `NightSky.tsx` skips software GL
-  (`:59`, `:66`) and the CSS gradient under the canvas is the page without it;
-  reduced motion gets one still frame.
+- **The shader sky is decoration.** `NightSky.tsx` skips software GL (the
+  `failIfMajorPerformanceCaveat` context and the renderer-name check) and the
+  CSS gradient under the canvas is the page without it; reduced motion gets one
+  still frame.
+- **Parallax is depth-ordered.** In the hero shader each layer (far stars, near
+  stars, moon, cloud) is sampled a share of `scrollY` further down (`sc`
+  uniform) and a share of the pointer, so far layers leave the screen slowest.
+  In the scenes and the close, `.stars` holds two tiled `<i>` layers that slide
+  at different speeds on a `view()` timeline (`starsFar` / `starsNear`).
+- **No horizon lines, and glows have many stops.** The hero's ground is a
+  darkening laid over the sky (`.ground`), not a bordered band. Radial glows
+  (`.halo`, `.spill`, `.farGlow`) use six or seven stops on an ease-out curve:
+  a two-stop glow, or a `box-shadow` with spread, shows its edge as a ring.
+- **The close ends on the footer's colour.** `.tonight`'s gradient finishes on
+  `#101213` so the page runs into `Footer` with no seam; the distant window is
+  the real `WidgetFrame` at `scale: 0.32` with `-webkit-box-reflect` for its
+  reflection (Firefox shows none).
 - **`#get-started` opens the signup dialog** and is owned by `Tonight.tsx`
   (`openOnHash`). Blog CTAs and chat replies link to it; do not put that id on
   a section.
@@ -79,8 +93,11 @@ Assembly order is `app/page.tsx` (the `<main>` block). Code lives in
   running dev server and covers: no-JS content, anchors and the signup hash,
   reduced motion, mobile overflow, hero questions, a pinned scene playing with
   the clock, the inbox and the playground.
+- `node scripts/landing-shots.mjs <outDir> [width height]` takes real-timing
+  screenshots (hero, hero scrolled, a scene, the close, the footer) in headless
+  Chromium with the GPU on, so the WebGL sky actually renders.
 - The in-app Browser pane, when hidden, barely advances CSS animation time, so
-  screenshots show half-played states. Trust the Playwright run for timing.
+  its screenshots show half-played states. Use the two commands above.
 
 > ⚠️ verify: Safari and Firefox were not tested. Browsers without scroll-driven
 > animations should show scenes fully revealed (the `@supports` fallback), which

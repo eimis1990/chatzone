@@ -4,7 +4,7 @@ import { useState, type CSSProperties, type ReactNode } from 'react'
 import Image from 'next/image'
 import { FileTextIcon, MicIcon, RefreshCwIcon, SendHorizontalIcon } from 'lucide-react'
 import { ProductCards } from '@/components/widget/ProductCards'
-import type { CommerceProduct } from '@/lib/commerce/types'
+import { CHAIRS } from './products'
 import { FOX, WidgetFrame } from './WidgetFrame'
 import s from './night.module.css'
 
@@ -64,25 +64,6 @@ const ASKS: Ask[] = [
         Answered from the store&rsquo;s Delivery page
       </>
     ),
-  },
-]
-
-const PRODUCTS: CommerceProduct[] = [
-  {
-    id: 'luna',
-    title: 'Luna chair, oak legs',
-    price: '€329',
-    url: '#',
-    imageUrl: '/component-previews/chair.webp',
-    inStock: true,
-  },
-  {
-    id: 'arlow',
-    title: 'Arlow armchair, walnut',
-    price: '€389',
-    url: '#',
-    imageUrl: '/component-previews/chair-walnut.webp',
-    inStock: true,
   },
 ]
 
@@ -152,7 +133,7 @@ export function HeroWindow() {
                     style={delay(t0 + 3.2)}
                     aria-hidden="true"
                   >
-                    <ProductCards products={PRODUCTS} primaryColor={PRIMARY} variant="grid" />
+                    <ProductCards products={CHAIRS} primaryColor={PRIMARY} variant="grid" />
                   </div>
                 )}
                 <p className={`${s.msg} ${s.note}`} style={delay(t0 + (a.products ? 3.8 : 3.2))}>
