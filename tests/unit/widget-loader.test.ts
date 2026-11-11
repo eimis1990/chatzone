@@ -12,7 +12,13 @@ import { JSDOM } from 'jsdom'
 
 const widgetSrc = readFileSync(resolve(process.cwd(), 'public/widget.js'), 'utf8')
 
-function setupDOM(botKey: string, position = 'bottom-right', widgetConfig?: unknown) {
+function setupDOM(
+  botKey: string,
+  position = 'bottom-right',
+  widgetConfig?: unknown,
+  /** Extra attributes on the embed <script>, as a host page would write them. */
+  attributes: Record<string, string> = {},
+) {
   const dom = new JSDOM('<!DOCTYPE html><html><body></body></html>', {
     url: 'https://example.com',
     runScripts: 'dangerously',
@@ -26,6 +32,7 @@ function setupDOM(botKey: string, position = 'bottom-right', widgetConfig?: unkn
   const script = document.createElement('script')
   script.setAttribute('data-bot-key', botKey)
   script.setAttribute('data-position', position)
+  for (const [name, value] of Object.entries(attributes)) script.setAttribute(name, value)
   // src origin is used to derive APP_URL; we point it at a mock origin
   script.setAttribute('src', 'https://app.chatbotzone.com/widget.js')
   document.head.appendChild(script)
@@ -194,6 +201,40 @@ describe('widget.js loader', () => {
       openButton?.click()
       expect(document.querySelector('[data-cbz-iframe]')).not.toBeNull()
       expect(greeting?.style.opacity).toBe('0')
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('shows no greeting and plays no sound when the host sets data-greeting="off"', async () => {
+    vi.useFakeTimers()
+    try {
+      const { document, window } = setupDOM(
+        'QUIET_KEY',
+        'bottom-right',
+        {
+          theme: { primaryColor: '#6366f1', position: 'bottom-right' },
+          proactiveGreeting: {
+            enabled: true,
+            delaySeconds: 0,
+            frequency: 'once_per_session',
+            sound: 'chime',
+            messages: ['Welcome! How can we help?'],
+          },
+        },
+        { 'data-greeting': 'off' },
+      )
+      const audio = vi.fn()
+      Object.assign(window, { AudioContext: audio })
+      await flushPromises()
+      await vi.advanceTimersByTimeAsync(30_000)
+
+      expect(document.querySelector<HTMLElement>('[data-cbz-greeting]')?.style.display).toBe('none')
+      expect(audio).not.toHaveBeenCalled()
+      // Not shown, so not counted as shown: a later page without the opt-out still greets.
+      expect(window.sessionStorage.getItem('cbz_greeting_QUIET_KEY')).toBeNull()
+      // The launcher is untouched: chat is still one tap away.
+      expect(document.querySelector('[data-cbz-launcher]')).not.toBeNull()
     } finally {
       vi.useRealTimers()
     }

@@ -133,7 +133,14 @@ export default async function Home() {
       </main>
       <Footer />
       {landingBot && (
-        <WidgetEmbed botKey={landingBot.key} launcher={landingBot.launcher} loadingPolicy="idle" />
+        // Below 1024px the page is one column of copy, and the widget's greeting
+        // bubble would sit on it for the whole scroll; the launcher alone stays.
+        <WidgetEmbed
+          botKey={landingBot.key}
+          launcher={landingBot.launcher}
+          loadingPolicy="idle"
+          quietBelow={1024}
+        />
       )}
     </>
   )

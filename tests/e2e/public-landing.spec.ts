@@ -129,6 +129,25 @@ test('the hero offers the live assistant, and that opens the real widget', async
   await expect(page.locator('[data-cbz-launcher]')).toHaveAttribute('aria-expanded', 'true')
 })
 
+// Below 1024px the page is one column of copy and the widget's greeting bubble
+// would sit on it. (widget-loader.test.ts proves the widget honours the opt-out.)
+test('the live widget keeps its greeting off the page on narrow screens', async ({ browser }) => {
+  for (const [width, greeting] of [
+    [390, 'off'],
+    [1440, null],
+  ] as const) {
+    const context = await browser.newContext({ viewport: { width, height: 844 } })
+    const page = await context.newPage()
+    await page.goto('/')
+    // Opening the chat injects the loader straight away (it is otherwise idle-loaded).
+    await page.getByTestId('deferred-widget-launcher').click()
+    const loader = page.locator('script[data-cbz-embed]')
+    await expect(loader).toHaveCount(1)
+    expect(await loader.getAttribute('data-greeting')).toBe(greeting)
+    await context.close()
+  }
+})
+
 test('mobile landing never scrolls sideways', async ({ browser }) => {
   const context = await browser.newContext({ viewport: { width: 390, height: 844 } })
   const page = await context.newPage()

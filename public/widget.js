@@ -34,6 +34,12 @@
 
   var position = script.getAttribute('data-position') || 'bottom-right'
 
+  // Host opt-out: data-greeting="off" on the embed <script> keeps the launcher
+  // but never shows the proactive greeting, whatever the bot's config says.
+  // For pages where the bubble would cover content (Loqara's own landing page
+  // sets it on narrow screens).
+  var greetingOff = script.getAttribute('data-greeting') === 'off'
+
   // One live widget per page: if a wrapper is already mounted (second embed
   // snippet, or an SPA remount racing a not-yet-removed instance), skip —
   // duplicate instances double every surface AND the greeting sound.
@@ -451,6 +457,9 @@
   }
 
   function scheduleProactiveGreeting() {
+    // Checked before anything is scheduled, so the greeting's sound cannot
+    // play without its bubble.
+    if (greetingOff) return
     var settings = config && config.proactiveGreeting
     if (!settings || !settings.enabled || !settings.messages || !settings.messages.length) return
     if (settings.frequency === 'once_per_session') {

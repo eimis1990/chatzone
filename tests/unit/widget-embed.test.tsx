@@ -48,6 +48,30 @@ describe('WidgetEmbed', () => {
     expect(clickSpy).toHaveBeenCalledTimes(1)
   })
 
+  // The landing page is one column below 1024px, so the 280px greeting bubble
+  // would sit on its copy for the whole scroll.
+  it('opts out of the greeting on narrow screens only when asked to', () => {
+    const narrow = (matches: boolean) =>
+      vi.stubGlobal('matchMedia', (query: string) => ({ matches, media: query }))
+    const embedScript = () => document.querySelector('script[data-cbz-embed]')
+
+    narrow(true)
+    const quiet = render(<WidgetEmbed botKey="k" quietBelow={1024} />)
+    expect(embedScript()?.getAttribute('data-greeting')).toBe('off')
+    quiet.unmount()
+
+    narrow(false)
+    const wide = render(<WidgetEmbed botKey="k" quietBelow={1024} />)
+    expect(embedScript()?.hasAttribute('data-greeting')).toBe(false)
+    wide.unmount()
+
+    // Presentation routes never ask, whatever the screen.
+    narrow(true)
+    render(<WidgetEmbed botKey="k" />)
+    expect(embedScript()?.hasAttribute('data-greeting')).toBe(false)
+    vi.unstubAllGlobals()
+  })
+
   it('removes the greeting together with every other widget surface on unmount', () => {
     const { unmount } = render(<WidgetEmbed botKey="TEST_KEY" />)
 

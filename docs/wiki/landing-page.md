@@ -193,16 +193,27 @@ Reviewed 2026-11-11 with the owner; these are decisions, not drafts.
 - The in-app Browser pane, when hidden, barely advances CSS animation time, so
   its screenshots show half-played states. Use the two commands above.
 
+## The live widget on this page
+
+- `WidgetEmbed` gets `quietBelow={1024}` (`app/page.tsx`): below that width the
+  page is one column of copy, so the loader is injected with
+  `data-greeting="off"` and the widget never shows its proactive greeting there
+  (owner's request, 2026-11-11). The launcher stays, and the hero's "Or chat
+  with it right now" still opens the chat. Desktop keeps the greeting: it sits
+  in the bottom-right corner the layout leaves free.
+- Do not hide the bubble with CSS instead: the greeting's sound would still
+  play with nothing on screen. The opt-out stops the greeting before it is
+  scheduled ([widget-and-embed](widget-and-embed.md)).
+- The width is read once, when the loader is injected; rotating a tablet
+  afterwards does not change it.
+
 ## Known gaps (2026-11-11)
 
 - White text on the brand orange (`#e97634`) is 3.0:1, below the 4.5:1 that
   14-16px text needs. It is a documented brand choice (`app/globals.css`,
   `--primary`), so it was left; closing it means a darker button orange.
-- The live widget's proactive greeting bubble covers page copy on phones, and
-  its launcher paints above the request dialog's scrim. Both come from
-  `public/widget.js` and the landing bot's own config, not from this page.
-  Hiding the bubble with CSS was tried and dropped: the greeting sound would
-  still play with nothing on screen.
+- The live widget's launcher paints above the request dialog's scrim (it comes
+  from `public/widget.js`, with the highest z-index on the page).
 - The site `<title>` and meta description (`app/layout.tsx`) still say "for any
   website" while the page says "online stores". Left alone because the title is
   an SEO asset with a measured baseline ([seo-baselines](seo-baselines.md)).

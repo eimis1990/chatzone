@@ -48,6 +48,14 @@ timer. Entrance/exit motion is opacity/transform-only and the entrance is skippe
 for `prefers-reduced-motion` (`public/widget.js:159`, `public/widget.js:247`,
 `public/widget.js:305`, `public/widget.js:642`).
 
+A host page can switch the greeting off for one embed with `data-greeting="off"`
+on the `<script>` tag. It is read once at load and checked at the top of
+`scheduleProactiveGreeting`, before any timer, so neither the bubble nor its
+sound fires; the launcher and everything else are unchanged, and the bot's
+config is not touched. Any other value, or no attribute, means the config
+decides. Loqara's landing page sets it on narrow screens (`WidgetEmbed`'s
+`quietBelow`, see [landing-page](landing-page.md)).
+
 The greeting dismiss control uses its own 16px/2px-stroke X so it matches the
 configurator preview. Do not reuse the launcher's 24px close icon here; that icon
 is intentionally larger for the launcher control (`public/widget.js:158`).

@@ -19,6 +19,13 @@ interface WidgetEmbedProps {
    * proxy still renders a circle for the ~6s before widget.js takes over.
    */
   launcher?: LandingLauncherTheme
+  /**
+   * Viewport width in px below which the widget's proactive greeting is switched
+   * off (the launcher stays). For pages that turn into one column of copy on
+   * narrow screens, where the 280px bubble would sit on the text for the whole
+   * scroll. Read once, when the loader is injected.
+   */
+  quietBelow?: number
 }
 
 const LANDING_IDLE_DELAY_MS = 6000
@@ -35,6 +42,7 @@ export function WidgetEmbed({
   position = 'bottom-right',
   loadingPolicy = 'immediate',
   launcher,
+  quietBelow,
 }: WidgetEmbedProps) {
   const [loaded, setLoaded] = useState(false)
   const loadWidgetRef = useRef<(openAfterLoad?: boolean) => void>(() => {})
@@ -115,6 +123,9 @@ export function WidgetEmbed({
       script.setAttribute('data-bot-key', botKey)
       script.setAttribute('data-position', position)
       script.setAttribute('data-cbz-embed', '')
+      if (quietBelow && window.matchMedia(`(max-width: ${quietBelow - 1}px)`).matches) {
+        script.setAttribute('data-greeting', 'off')
+      }
       script.addEventListener('load', () => {
         if (disposed) return
         watchRealLauncher()
@@ -150,7 +161,7 @@ export function WidgetEmbed({
       loadWidgetRef.current = () => {}
       document.querySelectorAll(WIDGET_SELECTOR).forEach((element) => element.remove())
     }
-  }, [botKey, loadingPolicy, position])
+  }, [botKey, loadingPolicy, position, quietBelow])
 
   if (loadingPolicy === 'immediate' || loaded) return null
 
