@@ -52,14 +52,18 @@ function domainOf(website: string): string | null {
 }
 
 /**
- * The landing page's single signup capture: a "Get started" trigger button
- * (each location styles its own via `triggerClassName`) opening a two-step
- * dialog — website + email form → confetti success. Posts to /api/signup with
- * the per-location `source` so acquisition analytics stay comparable.
+ * The landing page's single request form, and its one offer: send your store's
+ * address and get a preview of the assistant answering on your own site within
+ * one working day. Visitors cannot create an account themselves (access is by
+ * invitation), so nothing here may promise instant access. A trigger button
+ * (each location styles its own via `triggerClassName`) opens a two-step
+ * dialog: company + email + website, then a confirmation that says who will
+ * write and when. Posts to /api/signup with the per-location `source` so
+ * acquisition analytics stay comparable.
  */
 export function GetStartedDialog({
   source,
-  label = 'Get started',
+  label = 'See it on my store',
   triggerClassName,
   shimmer = false,
   onOpen,
@@ -206,8 +210,8 @@ export function GetStartedDialog({
       } else {
         const message =
           res.status === 429
-            ? 'Too many attempts — please wait a minute and try again.'
-            : (data.error ?? 'Something went wrong — please try again.')
+            ? 'Too many attempts. Please wait a minute and try again.'
+            : (data.error ?? 'That did not go through. Please try again.')
         setError(message)
         trackEvent('signup_failed', {
           ...eventProperties(),
@@ -215,7 +219,7 @@ export function GetStartedDialog({
         })
       }
     } catch {
-      setError('Network error — please try again.')
+      setError('We could not reach the server. Check your connection and try again.')
       trackEvent('signup_failed', { ...eventProperties(), reason: 'network' })
     } finally {
       setLoading(false)
@@ -247,10 +251,12 @@ export function GetStartedDialog({
               className="mx-auto size-16 object-contain"
             />
             <DialogTitle className="mt-4 text-xl tracking-tight sm:text-2xl">
-              Let&apos;s get your assistant started
+              See it on your own store
             </DialogTitle>
             <DialogDescription className="mt-1.5">
-              Tell us who you are — we&apos;ll set everything up and reach out within a day.
+              Send us your store&rsquo;s address. Within one working day we email you a preview of
+              your assistant answering on your own site. It is free, and there is no card to
+              enter.
             </DialogDescription>
             <form onSubmit={submit} noValidate className="mt-6 flex flex-col gap-4">
               <div className="flex flex-col gap-2">
@@ -337,7 +343,7 @@ export function GetStartedDialog({
                   {loading && (
                     <LoaderCircleIcon className="size-4 animate-spin" aria-hidden="true" />
                   )}
-                  {loading ? 'Sending…' : 'Request access'}
+                  {loading ? 'Sending…' : 'Send me the preview'}
                 </span>
                 <i
                   aria-hidden="true"
@@ -357,16 +363,15 @@ export function GetStartedDialog({
               className="size-16 object-contain"
             />
             <DialogTitle className="mt-5 text-xl tracking-tight sm:text-2xl">
-              You&apos;re on the list! 🎉
+              Thank you. Your preview is next.
             </DialogTitle>
             <DialogDescription className="mt-2 max-w-xs text-balance">
-              We&apos;ll reach out within a day to get{' '}
-              <span className="font-medium text-foreground">{doneName ?? 'your site'}</span>{' '}
-              talking.
+              Eimantas, Loqara&rsquo;s founder, will email you from hello@loqara.com within one
+              working day with a preview of the assistant for{' '}
+              <span className="font-medium text-foreground">{doneName ?? 'your store'}</span>,
+              answering on your own site.
             </DialogDescription>
-            <p className="mt-5 text-xs text-muted-foreground/80">
-              You can close this window — we&apos;ll take it from here.
-            </p>
+            <p className="mt-5 text-xs text-muted-foreground">You can close this window.</p>
           </div>
         )}
       </DialogContent>

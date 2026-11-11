@@ -402,3 +402,5 @@ child inside a rounded clip in the widget.
 - 2026-11-09 CONTENT — Added distinct merchant guides for holiday order-by dates, zero-result storefront searches, and Merchant Center offer mismatches, with contextual backlinks, realistic covers, worked examples, and an actual Demand Radar screenshot from fictional development data. See blog-and-seo.
 
 - 2026-11-10 INGEST — Landing page rebuilt on branch landing-night-shift as "one day in a store" (pinned CSS scroll-timeline scenes, nav clock, day/night tone); added landing-page.md, two gotchas (default grid track overflow on phones, live widget owns the bottom-right corner), rewrote the public-landing e2e spec.
+
+- 2026-11-11 DECISION — Landing copy review (two independent reads + detector): one offer everywhere ("See it on my store": a preview on the visitor's own site within one working day, because visitors cannot self-register), every scene states the owner's gain and the plan it needs, English by default with Lithuanian as a choice, American spelling, 12-hour times, founder named, FAQ reordered trust-first, unbacked claims removed, display type calmed. Rules recorded in landing-page.md.

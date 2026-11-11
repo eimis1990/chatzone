@@ -5,24 +5,11 @@ import { CheckIcon } from 'lucide-react'
 import { Scene, at } from './Scene'
 import s from './night.module.css'
 
-type Lang = 'lt' | 'en'
+type Lang = 'en' | 'lt'
 
 // Order labels mirror the real widget's OrderStatusCard, so the scene shows
 // what a shopper actually sees.
 const COPY = {
-  lt: {
-    ask: 'Labas! Kur mano užsakymas #10482?',
-    reply: 'Sveiki! Tuoj patikrinsiu. Kokiu el. paštu užsakėte?',
-    match: 'Užsakymo numeris ir el. paštas sutampa',
-    order: 'Užsakymas #10482',
-    status: 'Išsiųstas',
-    items: [
-      ['Oslo pagalvėlių rinkinys × 2', '99,90 €'],
-      ['Priežiūros rinkinys × 1', '49,00 €'],
-    ],
-    total: ['Iš viso', '148,90 €'],
-    track: ['Užsakyta', 'Vykdomas', 'Išsiųstas', 'Pristatyta'],
-  },
   en: {
     ask: 'Hi! Where is my order #10482?',
     reply: 'Hello! Let me check. Which email did you order with?',
@@ -36,38 +23,51 @@ const COPY = {
     total: ['Total', '€148.90'],
     track: ['Ordered', 'Processing', 'Shipped', 'Delivered'],
   },
+  lt: {
+    ask: 'Labas! Kur mano užsakymas #10482?',
+    reply: 'Sveiki! Tuoj patikrinsiu. Kokiu el. paštu užsakėte?',
+    match: 'Užsakymo numeris ir el. paštas sutampa',
+    order: 'Užsakymas #10482',
+    status: 'Išsiųstas',
+    items: [
+      ['Oslo pagalvėlių rinkinys × 2', '99,90 €'],
+      ['Priežiūros rinkinys × 1', '49,00 €'],
+    ],
+    total: ['Iš viso', '148,90 €'],
+    track: ['Užsakyta', 'Vykdomas', 'Išsiųstas', 'Pristatyta'],
+  },
 } as const
 
+// The page is in English, so the conversation is too; Lithuanian is one click
+// away, as it is for a shopper in the widget.
 const LANGS: { id: Lang; label: string }[] = [
-  { id: 'lt', label: 'Lietuvių' },
   { id: 'en', label: 'English' },
+  { id: 'lt', label: 'Lithuanian' },
 ]
 
-/**
- * 03:12 — verified order status, in the shopper's language. The language
- * switch is the same choice a visitor gets in the widget.
- */
+/** 3:12 AM — verified order status, in either of the assistant's languages. */
 export function SceneOrder() {
-  const [lang, setLang] = useState<Lang>('lt')
+  const [lang, setLang] = useState<Lang>('en')
   const c = COPY[lang]
 
   return (
     <Scene
       id="features"
       minutes={192}
-      when="03:12"
+      when="3:12 AM"
       sky="linear-gradient(180deg, #05060f 0%, #0a0e27 9%, #11163a 55%, #1b1c4d 100%)"
-      title={<>Ieva can&rsquo;t sleep. She wants to know where her order is.</>}
+      title={<>Greta can&rsquo;t sleep. She wants to know where her order is.</>}
       body={
         <>
-          Her widget is set to Lithuanian, so Loqara answers in Lithuanian. It asks which email she
-          ordered with, and shows the order only once the number and the email match. Order lookup
-          works on WooCommerce and Magento stores.
+          Loqara asks which email she ordered with, and shows the order only when the number and
+          the email match.
         </>
       }
+      gain={<>You wake up to one less &ldquo;where is my order?&rdquo; message.</>}
+      fine={<>Order lookup is part of Starter and up, on WooCommerce and Magento stores.</>}
       aside={
         <div className={s.lang}>
-          <span id="scene-order-lang">Read the conversation in</span>
+          <span id="scene-order-lang">Your shoppers can have it in</span>
           <div className={s.seg} role="group" aria-labelledby="scene-order-lang">
             {LANGS.map((l) => (
               <button
@@ -91,7 +91,7 @@ export function SceneOrder() {
           {c.reply}
         </p>
         <p className={`${s.step} ${s.bubble} ${s.fromCustomer}`} style={at(31, 39)}>
-          ieva@pastas.lt
+          greta@example.com
         </p>
         <p className={`${s.step} ${s.verify}`} style={at(46, 55)}>
           <span className={s.tick}>

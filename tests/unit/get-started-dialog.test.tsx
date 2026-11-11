@@ -23,7 +23,7 @@ describe('GetStartedDialog acquisition funnel', () => {
   it('tracks each funnel stage once and carries first touch into the signup request', async () => {
     render(<GetStartedDialog source="hero" />)
 
-    fireEvent.click(screen.getByRole('button', { name: 'Get started' }))
+    fireEvent.click(screen.getByRole('button', { name: 'See it on my store' }))
     expect(trackEvent).toHaveBeenCalledWith(
       'get_started_cta_clicked',
       expect.objectContaining({ ctaSource: 'hero', landingPath: '/' }),
@@ -39,7 +39,7 @@ describe('GetStartedDialog acquisition funnel', () => {
 
     expect(trackEvent.mock.calls.filter(([name]) => name === 'signup_started')).toHaveLength(1)
 
-    fireEvent.click(screen.getByRole('button', { name: 'Request access' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Send me the preview' }))
 
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1))
     const request = vi.mocked(fetch).mock.calls[0]
@@ -66,10 +66,10 @@ describe('GetStartedDialog acquisition funnel', () => {
   it('asks for a website before sending anything', async () => {
     render(<GetStartedDialog source="hero" />)
 
-    fireEvent.click(screen.getByRole('button', { name: 'Get started' }))
+    fireEvent.click(screen.getByRole('button', { name: 'See it on my store' }))
     fireEvent.change(screen.getByLabelText('Company name'), { target: { value: 'North Store' } })
     fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'owner@north.test' } })
-    fireEvent.click(screen.getByRole('button', { name: 'Request access' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Send me the preview' }))
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Please enter your website address.')
     expect(fetch).not.toHaveBeenCalled()

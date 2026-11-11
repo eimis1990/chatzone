@@ -10,7 +10,7 @@ import { trackEvent } from '@/lib/analytics'
 // In page order: the night's scenes come before the restyle playground.
 const LINKS = [
   { label: 'Features', href: '/#features' },
-  { label: 'Showcase', href: '/#showcase' },
+  { label: 'Design', href: '/#showcase' },
   { label: 'How it works', href: '/#how' },
   { label: 'Pricing', href: '/#pricing' },
   { label: 'Blog', href: '/blog' },

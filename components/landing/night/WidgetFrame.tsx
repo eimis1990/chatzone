@@ -45,7 +45,8 @@ export function WidgetFrame({
           <p className={s.paneName}>{name}</p>
           <p className={s.paneState}>
             <span className={s.live} aria-hidden="true" />
-            {lang === 'lt' ? 'Prisijungęs' : 'Online'}
+            {/* Feminine, to agree with the playground's "Virtuali asistentė". */}
+            {lang === 'lt' ? 'Prisijungusi' : 'Online'}
           </p>
         </div>
         <div className={s.paneTools} aria-hidden="true">

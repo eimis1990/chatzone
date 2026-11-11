@@ -1,15 +1,22 @@
 import { GetStartedDialog } from '../GetStartedDialog'
 import { BRAND_MARKS } from '../brand-marks'
 import { HeroWindow } from './HeroWindow'
+import { LiveChatButton } from './LiveChatButton'
 import { NightSky } from './NightSky'
 import s from './night.module.css'
 
+const SECONDARY =
+  'text-sm font-medium text-white/80 underline decoration-white/30 underline-offset-4 transition-colors hover:text-white hover:decoration-white/70 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white'
+
 /**
- * The night landing's first moment: 02:47, one lit window, one shopper being
+ * The night landing's first moment: 2:47 AM, one lit window, one shopper being
  * answered. `data-clock` is the scene's time in minutes past midnight, read by
  * the nav clock (PageClock); `data-tone` tells the nav which bar to wear.
+ *
+ * `live` is whether Loqara's own widget is switched on for this page: when it
+ * is, the second action opens it, because the real product is the best proof.
  */
-export function NightHero() {
+export function NightHero({ live }: { live: boolean }) {
   return (
     <section className={s.hero} data-clock="167" data-tone="night">
       <div className={s.skyWrap} aria-hidden="true">
@@ -23,23 +30,29 @@ export function NightHero() {
             <span className={s.titleLine}>It&rsquo;s 2:47 AM.</span> Your store just answered.
           </h1>
           <p className={s.lede}>
-            Loqara is the AI chat and voice agent for online stores. It answers shoppers from your
-            own products and policies at any hour, and brings in your team when a person is needed.
+            While you sleep, shoppers still ask. Loqara, the AI chat and voice agent for online
+            stores, answers them from your own products and policies. Anything it can&rsquo;t
+            answer is waiting in your inbox by morning.
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-4">
             <GetStartedDialog
               source="hero"
               shimmer
-              triggerClassName="relative inline-flex h-13 items-center justify-center overflow-hidden rounded-full bg-primary px-9 text-base font-semibold text-white shadow-[0_10px_40px_rgba(233,118,52,0.45)] transition-[transform,background-color] hover:-translate-y-0.5 hover:bg-primary-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              triggerClassName="relative inline-flex h-13 items-center justify-center overflow-hidden rounded-full bg-primary px-8 text-base font-semibold text-white shadow-[0_10px_40px_rgba(233,118,52,0.45)] transition-[transform,background-color] hover:-translate-y-0.5 hover:bg-primary-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             />
-            <a
-              href="#features"
-              className="text-sm font-medium text-white/75 underline decoration-white/30 underline-offset-4 transition-colors hover:text-white hover:decoration-white/70"
-            >
-              See the rest of the night
-            </a>
+            {live ? (
+              <LiveChatButton location="hero" className={SECONDARY}>
+                Or chat with it right now
+              </LiveChatButton>
+            ) : (
+              <a href="#features" className={SECONDARY}>
+                See how the night goes
+              </a>
+            )}
           </div>
-          <p className="mt-4 text-sm text-white/50">Free to start. No credit card needed.</p>
+          <p className="mt-4 text-sm text-white/60">
+            Free, no card needed. Your preview arrives within one working day.
+          </p>
         </div>
 
         <HeroWindow />

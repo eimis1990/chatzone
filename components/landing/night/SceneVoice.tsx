@@ -21,7 +21,7 @@ const LOVESEAT: CommerceProduct[] = [
 type Phase = 'listening' | 'speaking'
 
 /**
- * 04:05 — a voice call. The orb is the widget's own (SiriOrb), calm while the
+ * 4:05 AM — a voice call. The orb is the widget's own (SiriOrb), calm while the
  * shopper talks and lively while Loqara answers; which of the two depends on
  * how far the scene has scrolled.
  */
@@ -57,17 +57,19 @@ export function SceneVoice() {
   return (
     <Scene
       minutes={245}
-      when="04:05"
+      when="4:05 AM"
       sky="linear-gradient(180deg, #1b1c4d 0%, #221d52 50%, #2a2058 100%)"
       stars={0.48}
       title={<>Marta is feeding the baby. She asks out loud instead.</>}
       body={
         <>
-          With the voice add-on, shoppers tap the call button in the widget and just talk. Loqara
-          searches your catalogue, answers out loud in English or Lithuanian, and puts the products
-          on screen while it speaks.
+          She taps the call button in the widget and just talks. Loqara searches your catalog,
+          answers out loud in English or Lithuanian, and puts the product on her screen while it
+          speaks.
         </>
       }
+      gain={<>Shoppers who can&rsquo;t type right now still get an answer.</>}
+      fine={<>Voice is an add-on to any paid plan.</>}
     >
       <div ref={visual} className={s.call}>
         <div className={s.orb} aria-hidden="true">
@@ -79,10 +81,10 @@ export function SceneVoice() {
         </p>
         <div className={s.talk}>
           <p className={`${s.step} ${s.bubble} ${s.fromCustomer}`} style={at(6, 15)}>
-            Do you have a small sofa for a two-metre wall?
+            Do you have a small sofa for a two-meter wall?
           </p>
           <p className={`${s.step} ${s.bubble} ${s.fromAgent}`} style={at(30, 40)}>
-            Yes. The Oslo loveseat is 158 centimetres wide, so it fits with room to spare. It is 549
+            Yes. The Oslo loveseat is 158 centimeters wide, so it fits with room to spare. It is 549
             euros and in stock.
           </p>
           {/* The real widget component, inert: its row links out. */}

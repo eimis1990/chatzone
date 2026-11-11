@@ -5,6 +5,7 @@ import { CheckIcon } from 'lucide-react'
 import { GetStartedDialog } from './GetStartedDialog'
 import { trackEvent } from '@/lib/analytics'
 import { PLANS, DISPLAY_PLANS, POPULAR_PLAN } from '@/lib/plans-catalog'
+import night from './night/night.module.css'
 
 export function PricingTable() {
   const [annual, setAnnual] = useState(true)
@@ -33,7 +34,7 @@ export function PricingTable() {
             }}
             className={`rounded-full px-4 py-1.5 font-medium transition-colors ${annual ? 'bg-white text-[#0b0f24]' : 'text-white/70 hover:text-white'}`}
           >
-            Annual <span className="text-primary">2 months free</span>
+            Annual, <span className="text-primary">2 months free</span>
           </button>
         </div>
       </div>
@@ -51,27 +52,28 @@ export function PricingTable() {
           >
             {popular && (
               <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-white">
-                Most popular
+                Recommended
               </span>
             )}
             <h3 className="text-lg font-semibold">{p.name}</h3>
             <p className="mt-1 text-sm text-white/60">{p.blurb}</p>
 
             <div className="mt-5 flex items-baseline gap-1">
-              <span className="text-4xl font-bold tracking-tight">€{perMonth(p.monthly)}</span>
+              <span className={night.priceBig}>€{perMonth(p.monthly)}</span>
               {p.monthly > 0 && <span className="text-sm text-white/60">/mo</span>}
             </div>
-            <p className="mt-1 h-4 text-xs text-white/45">
-              {p.monthly > 0 ? (annual ? `billed annually · €${p.monthly * 10}/yr` : 'billed monthly') : ' '}
+            <p className="mt-1 h-4 text-xs text-white/60">
+              {p.monthly > 0 ? (annual ? `billed annually, €${(p.monthly * 10).toLocaleString('en-US')} a year` : 'billed monthly') : ' '}
             </p>
 
             <p className="mt-4 text-sm font-medium text-primary">
-              {p.conversations.toLocaleString()} conversations / mo
+              {p.conversations.toLocaleString('en-US')} conversations a month
             </p>
 
+            {/* One offer on the whole page, so one label: every plan starts with
+                the free preview. The plan clicked is in the analytics event. */}
             <GetStartedDialog
               source="pricing"
-              label={p.monthly === 0 ? 'Start free' : 'Get started'}
               shimmer={popular}
               onOpen={() =>
                 trackEvent('pricing_plan_click', {

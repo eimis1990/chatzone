@@ -8,12 +8,55 @@ Every product feature is shown as a small live scene, not a screenshot.
 Assembly order is `app/page.tsx` (the `<main>` block). Code lives in
 `components/landing/night/`; one CSS module, `night.module.css`, ships only on `/`.
 
+## The offer, and the voice (read before touching copy)
+
+Reviewed 2026-11-11 with the owner; these are decisions, not drafts.
+
+- **One offer: "See it on my store".** Visitors cannot create an account
+  (`app/(auth)/` has login, reset and accept-invite only; `/api/signup` stores a
+  request and emails the owner). So every request button says the same thing and
+  the page promises exactly this: send your store's address, and within one
+  working day you are emailed a preview of the assistant answering on your own
+  site, free. Never write "get started", "start free", "sign up", "live in
+  minutes" or "tonight" as something the visitor gets by clicking. The dialog's
+  confirmation names who writes (Eimantas, the founder), from where
+  (hello@loqara.com) and when. `tests/e2e/public-landing.spec.ts` ("the request
+  form promises a preview, not instant access") guards the button labels.
+- **Every scene has three beats** (`Scene.tsx`): what Loqara does, what the
+  owner gets (`gain`, one sentence about them), and what it needs (`fine`: plan,
+  add-on, platform). The night shown is Starter + Voice, and the pricing intro
+  says so with the sum from `lib/plans-catalog.ts`.
+- **The page is in English; Lithuanian is a choice.** Conversations default to
+  English, the language switches are labelled "Lithuanian", and example emails
+  are `@example.com`. Names (Greta, Marta, Jonas) are regional on purpose.
+  "Ieva" was dropped: in the display face its capital I reads as a lowercase l.
+- **American spelling** (catalog, color, customize, meter, installments), to
+  match `en_US` and the rest of the product. **12-hour times** everywhere
+  ("2:47 AM"), including the nav clock.
+- **Words:** the product on a store is "your assistant"; "agent" appears only in
+  the category phrase "AI chat and voice agent"; never "bot" in visitor-facing
+  copy. The people it talks to are "shoppers". The owner's staff are "your
+  team"; one of them is "a person". The score is "AI success".
+- **No em dashes, no "&", no "~"** in copy; plain sentences.
+- **Nothing unbacked:** no "most popular" (the badge says "Recommended"), no
+  "most businesses", no comparisons with other tools, no phone calls (voice is
+  in the widget only), no SSO. The founder is named because `/about` already
+  says one person builds Loqara and answers support.
+- **Display type has one setting per role** (`night.module.css`, the comment
+  above `.title`): Bricolage Grotesque near normal width (wdth 95-100), weight
+  580-600, tracking no tighter than -0.022em, and none at 30px or below. The
+  first version (wdth 88, weight 650, -0.035em) read as a poster and fused
+  letters ("It's", the colon in "2:47"). Prices everywhere use `.priceBig`.
+- **Radar labels are plain words** for the product's three issue types:
+  "Missing answer" (knowledge gap), "Not found in search" (product gap), "Not
+  offered" (store limitation).
+
 ## The pieces
 
 | Section | Component | Time (`data-clock`) |
 |---|---|---|
-| Hero: the lit widget on a shader sky | `NightHero.tsx`, `HeroWindow.tsx`, `NightSky.tsx` | 02:47 (167) |
-| Order status, in Lithuanian | `SceneOrder.tsx` | 03:12 (192) |
+| Hero: the lit widget on a shader sky | `NightHero.tsx`, `HeroWindow.tsx`, `NightSky.tsx`, `LiveChatButton.tsx` | 2:47 AM (167) |
+| Order status (English, Lithuanian on request) | `SceneOrder.tsx` | 3:12 AM (192) |
 | Voice call | `SceneVoice.tsx` | 04:05 (245) |
 | "It does not guess" → lead → handoff | `SceneHandoff.tsx` | 05:20 (320) |
 | Sunrise + morning inbox | `Morning.tsx` | 07:30 (450) |
@@ -50,8 +93,9 @@ Assembly order is `app/page.tsx` (the `<main>` block). Code lives in
 - **Single-column grids declare `minmax(0, 1fr)`** (`:51`, `:651`, `:1150`).
   See [gotchas](gotchas.md#a-default-grid-track-can-make-a-phone-page-scroll-sideways).
 - **Every section sets `data-clock` and `data-tone`.** `PageClock.tsx` (in the
-  nav) interpolates the time between consecutive `data-clock` sections by scroll
-  position; `LandingNav.tsx:31` wears the tone of the last `data-tone` section
+  nav) shows a section's own time while that section is on screen, so it always
+  agrees with the time printed in the scene, and runs forward to the next
+  section's time only as that section slides in; `LandingNav.tsx:31` wears the tone of the last `data-tone` section
   whose top has passed under the bar. A new section without them freezes the
   clock across it and inherits the previous tone.
 - **Sky continuity.** Each night section's gradient starts on the colour the
@@ -148,6 +192,20 @@ Assembly order is `app/page.tsx` (the `<main>` block). Code lives in
   Chromium with the GPU on, so the WebGL sky actually renders.
 - The in-app Browser pane, when hidden, barely advances CSS animation time, so
   its screenshots show half-played states. Use the two commands above.
+
+## Known gaps (2026-11-11)
+
+- White text on the brand orange (`#e97634`) is 3.0:1, below the 4.5:1 that
+  14-16px text needs. It is a documented brand choice (`app/globals.css`,
+  `--primary`), so it was left; closing it means a darker button orange.
+- The live widget's proactive greeting bubble covers page copy on phones, and
+  its launcher paints above the request dialog's scrim. Both come from
+  `public/widget.js` and the landing bot's own config, not from this page.
+  Hiding the bubble with CSS was tried and dropped: the greeting sound would
+  still play with nothing on screen.
+- The site `<title>` and meta description (`app/layout.tsx`) still say "for any
+  website" while the page says "online stores". Left alone because the title is
+  an SEO asset with a measured baseline ([seo-baselines](seo-baselines.md)).
 
 > ⚠️ verify: the fox's HEVC file does carry
 > an alpha track (checked with AVFoundation), but Safari playing it, and the

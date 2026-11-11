@@ -72,7 +72,7 @@ const delay = (seconds: number) => ({ '--d': `${seconds}s` }) as CSSProperties
 /**
  * The hero's lit window: the Loqara widget, playing one example conversation
  * on load. The question is typed into the composer, sent, and answered; the
- * pills (or the composer itself) ask another. Scripted, not the live bot:
+ * pills ask another. Scripted, not the live bot:
  * every line is in the server HTML and the whole reveal is CSS delays, so it
  * plays before hydration and reads complete without JavaScript.
  */
@@ -83,8 +83,7 @@ export function HeroWindow() {
   // nodes (restarting their CSS) and starts at once.
   const [run, setRun] = useState(0)
   const t0 = run === 0 ? 0.6 : 0
-  const index = ASKS.findIndex((a) => a.id === askId)
-  const ask = ASKS[index]
+  const ask = ASKS.find((a) => a.id === askId) ?? ASKS[0]
 
   const play = (id: AskId) => {
     setAskId(id)
@@ -96,7 +95,7 @@ export function HeroWindow() {
       <div className={s.halo} aria-hidden="true" />
       <div className={s.spill} aria-hidden="true" />
       <WidgetFrame>
-        <p className={s.stamp}>Today, 02:47</p>
+        <p className={s.stamp}>Today, 2:47 AM</p>
 
         <div className={s.threads} aria-live="polite">
           {ASKS.map((a) => {
@@ -158,24 +157,22 @@ export function HeroWindow() {
           ))}
         </div>
 
-        <div className={s.composer}>
-          <button
-            type="button"
-            className={s.field}
-            aria-label="Ask the next example question"
-            onClick={() => play(ASKS[(index + 1) % ASKS.length].id)}
-          >
+        {/* The composer only shows the question being typed and sent. It is not
+            a control: the pills above are, and a field that says "Type a
+            message" must not turn out to play a canned one. */}
+        <div className={s.composer} aria-hidden="true">
+          <span className={s.field}>
             <span key={`p-${run}`} className={s.placeholder} style={delay(t0)}>
               Type a message…
             </span>
             <span key={`t-${run}`} className={s.typed} style={delay(t0)}>
               {ask.question}
             </span>
-          </button>
-          <span className={s.micBtn} aria-hidden="true">
+          </span>
+          <span className={s.micBtn}>
             <MicIcon className="size-4" />
           </span>
-          <span key={`s-${run}`} className={s.sendBtn} style={delay(t0)} aria-hidden="true">
+          <span key={`s-${run}`} className={s.sendBtn} style={delay(t0)}>
             <SendHorizontalIcon className="size-4" />
           </span>
         </div>

@@ -3,23 +3,27 @@ import { Scene, at } from './Scene'
 import s from './night.module.css'
 
 /**
- * 05:20 — a question the store never wrote an answer for. Loqara says so,
+ * 5:20 AM — a question the store never wrote an answer for. Loqara says so,
  * takes the shopper's contact, and leaves the conversation for a person.
  */
 export function SceneHandoff() {
   return (
     <Scene
       minutes={320}
-      when="05:20"
+      when="5:20 AM"
       sky="linear-gradient(180deg, #2a2058 0%, #37265f 45%, #4d2f66 100%)"
       stars={0.26}
-      title={<>Jonas asks something the store never wrote down.</>}
+      title={<>Jonas asks something your store never wrote down.</>}
       body={
         <>
           When the answer isn&rsquo;t in your content, Loqara says so instead of inventing one. It
-          takes the shopper&rsquo;s contact details and leaves the whole conversation in your inbox,
-          marked for a person.
+          takes his contact details and leaves the whole conversation in your inbox, marked for a
+          person.
         </>
+      }
+      gain={<>Nothing untrue is said in your name, and the customer isn&rsquo;t lost.</>}
+      fine={
+        <>Handing over to your team is on every plan. Collecting contact details starts on Starter.</>
       }
     >
       <div className={s.talk}>
@@ -44,7 +48,7 @@ export function SceneHandoff() {
             Email
             <span className={s.leadBox}>
               <span className={s.scrollTyped} style={at(47, 58)}>
-                jonas@pastas.lt
+                jonas@example.com
               </span>
             </span>
           </p>
@@ -59,7 +63,7 @@ export function SceneHandoff() {
         <p className={`${s.step} ${s.tray}`} style={at(79, 88)}>
           <b>Needs a person</b>
           <span>Jonas: custom width for the Oslo sofa</span>
-          <time>05:20</time>
+          <time>5:20 AM</time>
         </p>
       </div>
     </Scene>

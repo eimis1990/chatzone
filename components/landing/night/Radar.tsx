@@ -2,6 +2,7 @@
 
 import { useState, type ReactNode } from 'react'
 import { CheckIcon } from 'lucide-react'
+import { GetStartedDialog } from '../GetStartedDialog'
 import s from './night.module.css'
 
 // The night's four conversations again, as the Analytics screen totals them.
@@ -9,19 +10,20 @@ import s from './night.module.css'
 const LAST_NIGHT = [
   ['4', 'Conversations'],
   ['4.3/5', 'AI success'],
-  ['3', 'Product suggestions'],
+  ['3', 'Products shown'],
   ['1', 'Leads'],
 ]
 
 interface Opportunity {
   id: string
-  /** Demand Radar's three issue types (lib/demand-radar.ts). */
-  kind: 'Knowledge gap' | 'Product gap' | 'Store limitation'
+  /** Demand Radar's three issue types (lib/demand-radar.ts), in plain words:
+   *  knowledge gap, product gap, store limitation. */
+  kind: 'Missing answer' | 'Not found in search' | 'Not offered'
   title: string
   shoppers: number
   evidence: string
   heard: string
-  /** The action offered, in the product's wording. */
+  /** The action offered. */
   action: string
   draft: ReactNode
   button: string
@@ -33,12 +35,12 @@ interface Opportunity {
 const OPPORTUNITIES: Opportunity[] = [
   {
     id: 'widths',
-    kind: 'Knowledge gap',
+    kind: 'Missing answer',
     title: 'Custom sofa widths',
     shoppers: 3,
     evidence: 'Can you make the Oslo sofa 172 cm wide?',
-    heard: 'Jonas, 05:20',
-    action: 'Add an FAQ',
+    heard: 'Jonas, 5:20 AM',
+    action: 'Add an answer',
     draft: (
       <>
         <b>Can the Oslo sofa be made in a custom width?</b>
@@ -46,38 +48,38 @@ const OPPORTUNITIES: Opportunity[] = [
       </>
     ),
     button: 'Approve and add',
-    done: 'Added to its knowledge. The assistant answers this from now on.',
+    done: 'Added. Your assistant answers this from now on.',
   },
   {
     id: 'couch',
-    kind: 'Product gap',
+    kind: 'Not found in search',
     title: 'Searches for “couch” find nothing',
     shoppers: 4,
-    evidence: 'Do you have a grey couch?',
-    heard: 'Tuesday, 21:40',
-    action: 'Add a missing synonym',
+    evidence: 'Do you have a gray couch?',
+    heard: 'Tuesday, 9:40 PM',
+    action: 'Teach it the word',
     draft: (
       <>
         <b>Shoppers say “couch”.</b>
-        Your catalogue says “sofa”. Treat them as the same word in product search.
+        Your catalog says “sofa”. Treat them as the same word in product search.
       </>
     ),
     button: 'Approve and add',
     done: 'Added. Searches for “couch” now find your sofas.',
   },
   {
-    id: 'instalments',
-    kind: 'Store limitation',
-    title: 'Paying in instalments',
+    id: 'installments',
+    kind: 'Not offered',
+    title: 'Paying in installments',
     shoppers: 2,
     evidence: 'Can I pay for the sofa in three parts?',
-    heard: 'Sunday, 14:05',
-    action: 'For your store to decide',
+    heard: 'Sunday, 2:05 PM',
+    action: 'For you to decide',
     draft: (
       <>
         <b>Nothing to switch on here.</b>
-        The assistant can only say what your store offers. The radar keeps the evidence so you
-        can weigh it.
+        Your assistant can only say what your store offers. The evidence is kept so you can weigh
+        it.
       </>
     ),
     button: 'Save for review',
@@ -86,9 +88,11 @@ const OPPORTUNITIES: Opportunity[] = [
 ]
 
 /**
- * 08:30 — what the night taught the store. The question nobody had answered
- * (Jonas, 05:20) is back as a ranked opportunity, and approving the fix is one
- * click. Analytics totals the same four conversations above it.
+ * 8:30 AM — what the night taught the store. The question nobody had answered
+ * (Jonas, 5:20 AM) is back as a ranked opportunity, and approving the fix is
+ * one click. Analytics totals the same four conversations above it. This is
+ * also where the page asks for the preview: the visitor has now seen a whole
+ * night and its morning.
  */
 export function Radar() {
   const [openId, setOpenId] = useState('widths')
@@ -98,18 +102,22 @@ export function Radar() {
     <section className={s.day} data-clock="510" data-tone="day">
       <div className={s.split}>
         <div>
-          <p className={s.when}>08:30</p>
+          <p className={s.when}>8:30 AM</p>
           <h2 className={s.sceneTitle}>Jonas was the third to ask that this week.</h2>
           <p className={s.sceneBody}>
-            Demand Radar groups the questions your assistant could not resolve and ranks them by
-            how many shoppers asked: answers missing from your content, products people search for
-            and don&rsquo;t find, things your store doesn&rsquo;t offer. Approve an FAQ or a
-            search synonym and the assistant uses it from then on.
+            Demand Radar shows you what shoppers asked for and didn&rsquo;t get, ranked by how many
+            asked. One click turns the top one into an answer your assistant gives from then on.
+            Analytics shows the rest: how many shoppers it helped, which products they clicked,
+            and how much of it happened after you closed.
           </p>
-          <p className={s.sceneBody}>
-            Analytics covers the rest: an AI success score for every conversation, CSAT, product
-            clicks, and how much of it happened after hours.
-          </p>
+          <p className={s.gain}>Every unanswered question tells you what to fix next.</p>
+          <div className={s.ask}>
+            <GetStartedDialog
+              source="radar"
+              triggerClassName="relative inline-flex h-12 items-center justify-center overflow-hidden rounded-full bg-primary px-7 text-sm font-semibold text-white transition-colors hover:bg-primary-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#14182b]"
+            />
+            <p>Free. We email you a preview of your own store within one working day.</p>
+          </div>
         </div>
 
         <div className={`${s.inbox} ${s.rise}`}>

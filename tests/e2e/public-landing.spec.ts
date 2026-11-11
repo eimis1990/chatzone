@@ -7,14 +7,14 @@ const scrollToEnd = (page: Page) =>
   page.evaluate(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'instant' }))
 
 const HEADINGS = [
-  'Ieva can’t sleep. She wants to know where her order is.',
+  'Greta can’t sleep. She wants to know where her order is.',
   'Marta is feeding the baby. She asks out loud instead.',
-  'Jonas asks something the store never wrote down.',
+  'Jonas asks something your store never wrote down.',
   'Good morning. Here is your night.',
   'Jonas was the third to ask that this week.',
-  'A widget that fits your brand',
-  'Live in an afternoon, or leave it to us',
-  'Simple, honest pricing',
+  'It looks like your store, not like ours',
+  'See it on your store first. Then pick how to go live.',
+  'Free for 100 conversations a month',
   'Prefer it done for you?',
   'Frequently asked questions',
   'It will be 2:47 AM again tonight.',
@@ -27,10 +27,8 @@ test('critical landing content is visible before hydration', async ({ browser })
   await page.goto('/')
 
   await expect(page.getByRole('heading', { level: 1 })).toContainText('Your store just answered')
-  await expect(
-    page.getByText('Loqara is the AI chat and voice agent for online stores'),
-  ).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Get started' }).first()).toBeVisible()
+  await expect(page.getByText('While you sleep, shoppers still ask.')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'See it on my store' }).first()).toBeVisible()
   for (const name of HEADINGS) {
     await expect(page.getByRole('heading', { name })).toBeVisible()
   }
@@ -47,9 +45,9 @@ test('native landing anchors and signup hash remain functional', async ({ browse
 
   for (const [hash, heading] of [
     ['#features', HEADINGS[0]],
-    ['#showcase', 'A widget that fits your brand'],
-    ['#how', 'Live in an afternoon, or leave it to us'],
-    ['#pricing', 'Simple, honest pricing'],
+    ['#showcase', 'It looks like your store, not like ours'],
+    ['#how', 'See it on your store first. Then pick how to go live.'],
+    ['#pricing', 'Free for 100 conversations a month'],
     ['#faq', 'Frequently asked questions'],
   ]) {
     const page = await context.newPage()
@@ -62,7 +60,7 @@ test('native landing anchors and signup hash remain functional', async ({ browse
   await signupPage.goto('/#get-started')
   await expect(signupPage.getByRole('dialog')).toBeVisible()
   await expect(
-    signupPage.getByRole('heading', { name: "Let's get your assistant started" }),
+    signupPage.getByRole('heading', { name: 'See it on your own store' }),
   ).toBeVisible()
 
   await context.close()
@@ -124,6 +122,13 @@ test('landing widget defers network and opens on the first proxy click', async (
   expect(widgetRequests.some((url) => url.includes('/embed/'))).toBe(true)
 })
 
+test('the hero offers the live assistant, and that opens the real widget', async ({ page }) => {
+  await page.goto('/')
+  await page.getByRole('button', { name: 'Or chat with it right now' }).click()
+  await expect(page.locator('[data-cbz-iframe]')).toHaveCount(1)
+  await expect(page.locator('[data-cbz-launcher]')).toHaveAttribute('aria-expanded', 'true')
+})
+
 test('mobile landing never scrolls sideways', async ({ browser }) => {
   const context = await browser.newContext({ viewport: { width: 390, height: 844 } })
   const page = await context.newPage()
@@ -178,13 +183,6 @@ test('hero questions swap the conversation', async ({ page }) => {
   await expect(returns).toHaveAttribute('aria-pressed', 'true')
   await expect(hero.getByText('You have 14 days from delivery')).toHaveCSS('opacity', '1')
   await expect(hero.getByText('Answered from the store’s Returns page')).toBeVisible()
-
-  // The composer asks the next one.
-  await hero.getByRole('button', { name: 'Ask the next example question' }).click()
-  await expect(hero.getByRole('button', { name: 'Delivery to Riga?' })).toHaveAttribute(
-    'aria-pressed',
-    'true',
-  )
 })
 
 test('scrolling a pinned scene plays it and runs the clock', async ({ page }) => {
@@ -199,19 +197,21 @@ test('scrolling a pinned scene plays it and runs the clock', async ({ page }) =>
   await page.goto('/')
   const clock = page.getByTestId('page-clock')
   const order = page.getByTestId('order-card')
-  await expect(clock).toHaveText('02:47')
+  await expect(clock).toHaveText('2:47 AM')
 
   await scrollScene(0)
-  await expect(clock).toHaveText('03:12')
+  await expect(clock).toHaveText('3:12 AM')
   await expect(order).toHaveCSS('opacity', '0')
 
+  // The clock agrees with the scene's own time for as long as the scene plays.
   await scrollScene(0.95)
   await expect(order).toHaveCSS('opacity', '1')
-  await expect(clock).toHaveText(/^0[34]:\d\d$/)
+  await expect(clock).toHaveText('3:12 AM')
 
-  // The same conversation, in the visitor's other language.
-  await page.locator('#features').getByRole('button', { name: 'English' }).click()
+  // English on an English page; the assistant's other language is one click away.
   await expect(order).toContainText('Order #10482')
+  await page.locator('#features').getByRole('button', { name: 'Lithuanian' }).click()
+  await expect(order).toContainText('Užsakymas #10482')
 })
 
 test('morning inbox and widget playground respond', async ({ page }) => {
@@ -231,7 +231,7 @@ test('morning inbox and widget playground respond', async ({ page }) => {
   await expect(preview.getByText('Chat with us')).toBeVisible()
 
   // The widget speaks its greeting in the language it is set to.
-  await page.locator('#showcase').getByRole('button', { name: 'Lietuvių' }).click()
+  await page.locator('#showcase').getByRole('button', { name: 'Lithuanian' }).click()
   await expect(preview.getByText('Virtuali asistentė')).toBeVisible()
   const clip = page.waitForRequest((request) => request.url().endsWith('/landing/greeting-lt.mp3'))
   await preview.getByRole('button', { name: 'Išgirsti balso pasisveikinimą' }).click()
@@ -244,13 +244,27 @@ test('demand radar turns the unanswered question into an approved fix', async ({
 
   await expect(radar.getByText('Can the Oslo sofa be made in a custom width?')).toBeVisible()
   await radar.getByRole('button', { name: 'Approve and add' }).click()
-  await expect(radar.getByText('The assistant answers this from now on.')).toBeVisible()
+  await expect(radar.getByText('Your assistant answers this from now on.')).toBeVisible()
   await expect(radar.getByText('Handled')).toBeVisible()
 
   // Things the assistant cannot change are saved as tasks, not "applied".
-  await radar.getByRole('button', { name: /Paying in instalments/ }).click()
+  await radar.getByRole('button', { name: /Paying in installments/ }).click()
   await radar.getByRole('button', { name: 'Save for review' }).click()
   await expect(radar.getByText('Saved to your review list.')).toBeVisible()
+})
+
+test('the request form promises a preview, not instant access', async ({ page }) => {
+  await page.goto('/')
+
+  // No button on the page may promise an account: visitors cannot make one.
+  for (const label of ['Get started', 'Start free', 'Sign up']) {
+    await expect(page.getByRole('button', { name: label, exact: true })).toHaveCount(0)
+  }
+
+  await page.getByRole('button', { name: 'See it on my store' }).first().click()
+  const dialog = page.getByRole('dialog')
+  await expect(dialog.getByText('Within one working day we email you a preview')).toBeVisible()
+  await expect(dialog.getByRole('button', { name: 'Send me the preview' })).toBeVisible()
 })
 
 test('how it works leads with done-for-you and prices the chosen package', async ({ page }) => {
@@ -261,7 +275,7 @@ test('how it works leads with done-for-you and prices the chosen package', async
   await expect(how.getByText('€749')).toBeVisible()
   await how.getByRole('button', { name: 'Questions, products and orders' }).click()
   await expect(how.getByText('€995')).toBeVisible()
-  await expect(how.getByText('Live in ~2 weeks.')).toBeVisible()
+  await expect(how.getByText('Live in about 2 weeks.')).toBeVisible()
 
   await how.getByRole('button', { name: 'Request setup' }).click()
   const dialog = page.getByRole('dialog')

@@ -47,7 +47,7 @@ const jsonLd = {
       url: SITE_URL,
       logo: `${SITE_URL}/loqara-logo-colorful.png`,
       image: `${SITE_URL}/landing/og.jpg?v=4`,
-      slogan: 'The AI chat & voice agent for modern stores.',
+      slogan: 'The AI chat and voice agent for online stores.',
       sameAs: ['https://www.linkedin.com/company/loqara/'],
       description:
         'Loqara is an AI chat and voice agent for e-commerce stores: it answers from approved knowledge, searches connected catalogs, captures leads, hands off to a human, and supports verified order lookup for WooCommerce and Magento — embedded in one line of code.',
@@ -117,7 +117,7 @@ export default async function Home() {
           the day (inbox, radar, restyle, setup), dusk, the evening (pricing, FAQ), and
           night again. Each section carries its time in `data-clock`. */}
       <main className={display.variable}>
-        <NightHero />
+        <NightHero live={Boolean(landingBot)} />
         <SceneOrder />
         <SceneVoice />
         <SceneHandoff />

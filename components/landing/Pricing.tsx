@@ -5,36 +5,39 @@ import {
   SofaIcon,
   type LucideIcon,
 } from 'lucide-react'
+import { EXTRA_CONVERSATIONS_ADDON, PLANS, VOICE_ADDON } from '@/lib/plans-catalog'
 import { PricingTable } from './PricingTable'
 import night from './night/night.module.css'
 
 const ADDONS: { icon: LucideIcon; name: string; price: string; desc: string }[] = [
   {
     icon: PhoneCallIcon,
-    name: 'Voice agent',
-    price: '€49/mo + €0.20/min',
-    desc: 'Real-time phone & in-widget voice calls powered by ElevenLabs. ~200 minutes included, then per-minute.',
+    name: 'Voice',
+    price: `€${VOICE_ADDON.monthly}/mo + €${VOICE_ADDON.perMinute.toFixed(2)}/min`,
+    desc: `Real-time voice calls inside the widget. About ${VOICE_ADDON.minutesIncluded} minutes included, then per minute.`,
   },
   {
     icon: SofaIcon,
     name: 'Product visualizer',
     price: '€29/mo',
-    desc: 'Let shoppers see your furniture in their own room, rendered by AI.',
+    desc: 'Shoppers see your products in a photo of their own room, rendered by AI.',
   },
   {
     icon: MessageSquareIcon,
     name: 'Channels',
     price: '€19/mo each',
-    desc: 'WhatsApp, Instagram & Messenger (coming soon) — connect any channel with no setup fee.',
+    desc: 'WhatsApp, Instagram and Messenger (coming soon). Connect any channel with no setup fee.',
   },
   {
     icon: ArrowUpRightIcon,
     name: 'Extra conversations',
-    price: '~€15 / 1,000',
-    desc: 'Busy month? Top up any plan instead of jumping a tier — or upgrade whenever you like.',
+    price: `€${EXTRA_CONVERSATIONS_ADDON.price} per ${EXTRA_CONVERSATIONS_ADDON.conversations.toLocaleString('en-US')}`,
+    desc: 'A busy month? Top up any plan without moving up a tier.',
   },
 ]
 
+// What the page's night actually runs on: say it before the prices.
+const NIGHT_COST = PLANS.starter.monthly + VOICE_ADDON.monthly
 
 export function Pricing() {
   return (
@@ -46,9 +49,17 @@ export function Pricing() {
     >
       <div className="mx-auto max-w-7xl px-5 py-20">
         <div className="mx-auto max-w-2xl text-center">
-          <h2 className={night.h2}>Simple, honest pricing</h2>
+          <h2 className={night.h2}>
+            Free for {PLANS.free.conversations} conversations a month
+          </h2>
           <p className="mt-4 text-lg text-white/70">
-            No setup fee. Live handoff on every plan. Start free, upgrade as you grow.
+            Paid plans add your product catalog, order lookup, lead capture and more conversations.
+            Handing over to a person is on every plan, and there is no setup fee when you set it
+            up yourself.
+          </p>
+          <p className="mt-3 text-sm text-white/60">
+            The night you just scrolled through runs on {PLANS.starter.name} with the Voice add-on:
+            €{NIGHT_COST} a month on monthly billing.
           </p>
         </div>
 
@@ -61,7 +72,7 @@ export function Pricing() {
           <div>
             <h3 className="text-lg font-semibold">Enterprise</h3>
             <p className="mt-1 text-sm text-white/60">
-              Unlimited volume, SSO, custom integrations, and a dedicated success contact.
+              Unlimited volume, custom integrations and terms, agreed with you directly.
             </p>
           </div>
           <a
@@ -76,7 +87,7 @@ export function Pricing() {
         <div className="mt-16">
           <h3 className="text-center text-2xl font-semibold tracking-tight">Add-ons</h3>
           <p className="mx-auto mt-3 max-w-xl text-center text-white/70">
-            Bolt on the extras you need — including a voice agent most chat tools don’t offer.
+            Add what you need, when you need it.
           </p>
           <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {ADDONS.map((a) => {

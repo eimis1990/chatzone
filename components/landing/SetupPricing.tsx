@@ -4,10 +4,9 @@ import { GetStartedDialog } from './GetStartedDialog'
 import night from './night/night.module.css'
 
 /**
- * OPTIONAL one-time "done-for-you" setup packages. Positioned as concierge
- * convenience, never a requirement — the free guided onboarding is the default
- * path, and this section must not make self-serve look hard. Shows ONLY the
- * one-time fee so visitors understand they pay once and never repeat it.
+ * The two one-time "done-for-you" setup packages in detail. "How it works"
+ * leads with this option; here is what each package includes. Shows only the
+ * one-time fee, so it is clear you pay once.
  */
 export function SetupPricing() {
   return (
@@ -21,9 +20,9 @@ export function SetupPricing() {
         <div className="mx-auto max-w-2xl text-center">
           <h2 className={night.h2}>Prefer it done for you?</h2>
           <p className="mt-4 text-lg text-white/70">
-            Most businesses go live themselves in minutes — free, with our guided setup. Too busy?
-            Our team trains, fine-tunes and installs your agent end to end.{' '}
-            <span className="font-medium text-white/90">One-time fee, completely optional.</span>
+            Setting it up yourself is free. If you would rather not, we train, fine-tune and
+            install your assistant for you.{' '}
+            <span className="font-medium text-white/90">One fee, once, and entirely optional.</span>
           </p>
         </div>
 
@@ -37,10 +36,8 @@ export function SetupPricing() {
               <p className="mt-1 text-sm text-white/60">{pkg.blurb}</p>
 
               <div className="mt-5 flex items-baseline gap-2">
-                <span className="text-4xl font-bold tracking-tight">
-                  €{pkg.price.toLocaleString('en-US')}
-                </span>
-                <span className="text-sm font-medium text-white/50">one-time</span>
+                <span className={night.priceBig}>€{pkg.price.toLocaleString('en-US')}</span>
+                <span className="text-sm font-medium text-white/60">one-time</span>
               </div>
               <span className="mt-3 inline-flex w-fit items-center rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-white/80">
                 {pkg.timeline}
@@ -64,8 +61,8 @@ export function SetupPricing() {
           ))}
         </div>
 
-        <p className="mt-6 text-center text-sm text-white/50">
-          A single one-time fee — no recurring setup charges, ever.
+        <p className="mt-6 text-center text-sm text-white/60">
+          It starts with the same free preview. No recurring setup charges.
         </p>
       </div>
     </section>

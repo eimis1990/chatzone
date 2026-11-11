@@ -168,6 +168,7 @@ export function WidgetEmbed({
       aria-label="Open chat"
       aria-haspopup="dialog"
       data-testid="deferred-widget-launcher"
+      data-open-chat=""
       onClick={() => {
         trackEvent('landing_widget_launcher_clicked', { loadingPolicy })
         loadWidgetRef.current(true)

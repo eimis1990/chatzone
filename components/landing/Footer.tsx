@@ -15,8 +15,8 @@ export function Footer() {
           Loqara<span className="text-primary">.</span>
         </div>
         <p className="mx-auto mt-6 max-w-md text-balance text-base text-white/55">
-          The AI chat &amp; voice agent for modern stores. Answers, leads, orders, and handoff — in
-          one widget.
+          The AI chat and voice agent for online stores. Answers, product search, order status
+          and handoff to your team, in one widget.
         </p>
 
         <div className="mt-10 flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-sm text-white/45">

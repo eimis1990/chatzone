@@ -49,6 +49,8 @@ export interface AnalyticsEvents {
   faq_opened: { question: string }
   /** The deferred landing-page chat launcher was clicked. */
   landing_widget_launcher_clicked: { loadingPolicy: 'idle' | 'interaction' }
+  /** A landing-page button that opens Loqara's own live widget was clicked. */
+  live_demo_opened: { location: string }
 
   // ── Logged-in app usage ────────────────────────────────────────────────
   /** A new bot was created. */

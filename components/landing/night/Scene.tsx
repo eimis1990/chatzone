@@ -11,7 +11,9 @@ export const at = (from: number, to: number) =>
  * page; the sky gradient keeps sliding behind it. Copy is first in the DOM and
  * sits on the right; `children` is the visual, on the left.
  *
- * `minutes` is the scene's time past midnight, read by the nav clock.
+ * Every scene's copy has the same three beats: what Loqara does (`body`), what
+ * the store owner gets out of it (`gain`), and the plan or platform it needs
+ * (`fine`). `minutes` is the scene's time past midnight, read by the nav clock.
  */
 export function Scene({
   id,
@@ -19,6 +21,8 @@ export function Scene({
   when,
   title,
   body,
+  gain,
+  fine,
   aside,
   sky,
   stars = 0.6,
@@ -29,6 +33,10 @@ export function Scene({
   when: string
   title: ReactNode
   body: ReactNode
+  /** The owner's outcome, in one sentence. */
+  gain: ReactNode
+  /** Which plan, add-on or platform the scene needs. Say the limit. */
+  fine: ReactNode
   /** Controls under the copy. */
   aside?: ReactNode
   /** The section's background: a vertical gradient that starts where the previous scene ended. */
@@ -54,7 +62,9 @@ export function Scene({
           <p className={s.when}>{when}</p>
           <h2 className={s.sceneTitle}>{title}</h2>
           <p className={s.sceneBody}>{body}</p>
+          <p className={s.gain}>{gain}</p>
           {aside}
+          <p className={s.fine}>{fine}</p>
         </div>
         {children}
       </div>

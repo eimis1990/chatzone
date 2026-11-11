@@ -18,7 +18,7 @@ import s from './night.module.css'
 type Lang = 'en' | 'lt'
 type QuickStyle = 'tiles' | 'pills' | 'list'
 
-const COLOURS = [
+const COLORS = [
   { name: 'Loqara orange', hex: '#e97634' },
   { name: 'Forest', hex: '#2f7d5b' },
   { name: 'Ocean', hex: '#2563eb' },
@@ -96,14 +96,14 @@ function Group({ title, children }: { title: string; children: ReactNode }) {
 
 /**
  * The widget at its real size, restyled live with a sample of what the
- * configurator sets: colour, corners, header, chat background, font, the
+ * configurator sets: color, corners, header, chat background, font, the
  * suggested-question layout, launcher and visitor language. The play button
  * speaks the greeting in the selected language (a recording; voice is an
  * add-on). Everything is CSS variables and data attributes on the same frame
  * the hero uses.
  */
 export function Playground() {
-  const [accent, setAccent] = useState(COLOURS[0].hex)
+  const [accent, setAccent] = useState(COLORS[0].hex)
   const [radius, setRadius] = useState(1)
   const [header, setHeader] = useState<HeaderStyle>('curved')
   const [dark, setDark] = useState(false)
@@ -141,7 +141,7 @@ export function Playground() {
   }
   const reset = () => {
     stop()
-    setAccent(COLOURS[0].hex)
+    setAccent(COLORS[0].hex)
     setRadius(1)
     setHeader('curved')
     setDark(false)
@@ -158,11 +158,11 @@ export function Playground() {
     <section id="showcase" className={s.day} data-clock="600" data-tone="day">
       <div className={s.play}>
         <div className={s.playHead}>
-          <h2 className={s.h2}>A widget that fits your brand</h2>
+          <h2 className={s.h2}>It looks like your store, not like ours</h2>
           <p className={s.sub}>
-            This is the widget at its real size. Change it here, switch its language, and press
-            play to hear its greeting. The editor has many more settings, including 24 fonts,
-            and we build custom designs on request.
+            Your color, your font, your language. This is the widget at the size your shoppers see
+            it: change it, then press play to hear it greet them. The editor has many more
+            settings, and we build custom designs on request.
           </p>
         </div>
 
@@ -230,7 +230,7 @@ export function Playground() {
 
         <div className={s.panel}>
           <p className={s.panelHead}>
-            Customise
+            Customize
             <button type="button" onClick={reset}>
               Reset
             </button>
@@ -238,24 +238,24 @@ export function Playground() {
 
           <Group title="Look">
             <div className={s.control}>
-              <span className={s.controlLabel} id="playground-colour">
-                Colour
+              <span className={s.controlLabel} id="playground-color">
+                Color
               </span>
-              <div className={s.swatches} role="radiogroup" aria-labelledby="playground-colour">
-                {COLOURS.map((colour) => (
+              <div className={s.swatches} role="radiogroup" aria-labelledby="playground-color">
+                {COLORS.map((color) => (
                   <button
-                    key={colour.hex}
+                    key={color.hex}
                     type="button"
                     role="radio"
-                    aria-checked={colour.hex === accent}
-                    aria-label={colour.name}
+                    aria-checked={color.hex === accent}
+                    aria-label={color.name}
                     className={s.swatch}
-                    style={{ backgroundColor: colour.hex }}
-                    onClick={() => setAccent(colour.hex)}
+                    style={{ backgroundColor: color.hex }}
+                    onClick={() => setAccent(color.hex)}
                   />
                 ))}
-                <label className={s.anyColour} title="Any colour">
-                  <span className="sr-only">Any colour</span>
+                <label className={s.anyColor} title="Any color">
+                  <span className="sr-only">Any color</span>
                   <input type="color" value={accent} onChange={(e) => setAccent(e.target.value)} />
                 </label>
               </div>
@@ -328,7 +328,7 @@ export function Playground() {
               label="Language"
               options={[
                 { label: 'English', value: 'en' },
-                { label: 'Lietuvių', value: 'lt' },
+                { label: 'Lithuanian', value: 'lt' },
               ]}
               value={lang}
               onChange={pickLang}
