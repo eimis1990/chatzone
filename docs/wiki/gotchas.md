@@ -507,7 +507,10 @@ drawer, lint "Resolve") re-ingests the old snapshot forever — "retry" and
 `reingest-bot.mts` included. Same for canonical summaries: `generateCanonicalPages`
 keeps an existing override, so "regenerate" also changes nothing. Since
 2026-09-25 **Sync website** flags these ("Site changed" → Keep my edit / Use the
-live page, see rag-and-knowledge); summaries still need the override removed by hand. Hit on Stogai Dzukijoje
+live page, see rag-and-knowledge); summaries still need the override removed by hand. An edited URL source also
+means the client must repeat every later site change by hand (HomeByNB's
+`/kontaktai`, 2026-11-12: the site gained Sunday hours, the sync kept the old
+edit and only showed the "Site changed" pill). Hit on Stogai Dzukijoje
 2026-09-25 (prices 27/30/40 → 28/35/45 €/m² stayed stale for weeks).
 
 ## Sitemaps on the apex domain were dropped when crawling `www.`

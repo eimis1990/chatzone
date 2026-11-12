@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { createBrowserClient } from '@/lib/supabase/browser'
 import type { KnowledgeSource } from '@/lib/types'
 import { TYPE_META, StatusBadge } from './SourceList'
-import { hasLiveConflict } from './refresh'
+import { hasLiveConflict, rebuildSummariesInBackground } from './refresh'
 import type { RefreshResolve } from '@/lib/ingestion/pipeline'
 
 interface SourceDrawerProps {
@@ -92,6 +92,7 @@ function IndexedContent({
         .single<KnowledgeSource>()
       if (fin) onUpdated(fin)
       setOriginal(text)
+      if (source.metadata?.kind !== 'canonical') rebuildSummariesInBackground(source.bot_id)
       toast.success('Saved and re-indexed')
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Save failed')

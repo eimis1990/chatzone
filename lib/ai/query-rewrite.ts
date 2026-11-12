@@ -20,7 +20,14 @@ export async function rewriteQuery(
   const prompt =
     'Rewrite the final user message as a short, standalone search query for a help-center ' +
     'knowledge base. Resolve pronouns/references using the conversation. Keep the SAME language ' +
-    'as the user. Output ONLY the query text (3-10 words), nothing else.\n\n' +
+    'as the user. ' +
+    // "kada dirbate?" shares no word with a page that says "Darbo laikas" and
+    // embeds far from it, so the old rewrite ("Kada dirbate?") retrieved the
+    // same noise and the bot said it had no opening hours (HomeByNB, 2026-11-12).
+    "Use the words a help page would use for the topic, not the visitor's conversational " +
+    'verbs: "kada dirbate?" → "parduotuvės darbo laikas", "when are you open?" → ' +
+    '"store opening hours". ' +
+    'Output ONLY the query text (3-10 words), nothing else.\n\n' +
     (recent ? `Conversation:\n${recent}\n\n` : '') +
     `Final user message: ${message}`
   try {

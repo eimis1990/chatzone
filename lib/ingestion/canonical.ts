@@ -104,6 +104,16 @@ function buildPrompt(topic: CanonicalTopic, excerpts: string): string {
     'Within each section, order the facts by how often customers ask for them — the everyday ' +
     'answers first (working hours, address, contact channels, prices, timeframes, steps), and ' +
     'legal/company-registration details (company code, VAT, legal entity) LAST.\n\n' +
+    // Lithuanian sites write hours as "I–V 09:00–17:00, VI 11:00–16:00". Neither
+    // search channel links "ar dirbate sekmadienį?" to "VII", so the hours chunk
+    // was never retrieved for day-name questions (HomeByNB, 2026-11-12).
+    // Deliberately NOT "list the omitted days as closed": tried it, and the
+    // model wrote "Sekmadienis: nedirbame" next to real Sunday hours and
+    // invented a whole schedule from "darbo dienomis".
+    'When the excerpts give opening hours with clock times, write each day or day range with ' +
+    "FULL weekday names in each section's language, expanding shorthand such as I–V, VI, VII, " +
+    'Pr–Pn or Mon–Fri (I = Monday … VII = Sunday). Keep any date limit on temporary hours ' +
+    'exactly as stated. Never add a day, a time, or a "closed" note the excerpts do not state.\n\n' +
     `Excerpts:\n${excerpts}`
   )
 }

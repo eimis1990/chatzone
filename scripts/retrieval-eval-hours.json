@@ -1,0 +1,8 @@
+[
+  { "query": "Ar dirbate sekmadieni?", "expect": ["11:00"] },
+  { "query": "ar dirbate šeštadienį?", "expect": ["11:00"] },
+  { "query": "iki kelintos dirbate šeštadienį?", "expect": ["16:00"] },
+  { "query": "are you open on Sunday?", "expect": ["11:00"] },
+  { "query": "parduotuvės darbo laikas", "expect": ["09:00"] },
+  { "query": "store opening hours", "expect": ["09:00"] }
+]

@@ -21,7 +21,7 @@ import { cn } from '@/lib/utils'
 import { formatDistanceToNow } from '@/lib/date-utils'
 import { createBrowserClient } from '@/lib/supabase/browser'
 import { SourceDrawer } from './SourceDrawer'
-import { hasLiveConflict, refreshSource } from './refresh'
+import { hasLiveConflict, rebuildSummariesInBackground, refreshSource } from './refresh'
 import type { RefreshResolve } from '@/lib/ingestion/pipeline'
 import type { KnowledgeSource, SourceStatus, SourceType } from '@/lib/types'
 
@@ -375,6 +375,7 @@ export function SourceList({ sources, onDeleted, onUpdated, onAddSource }: Sourc
           .eq('id', source.id)
           .single<KnowledgeSource>()
         if (fresh) onUpdated(fresh)
+        if (outcome === 'updated') rebuildSummariesInBackground(source.bot_id)
         if (outcome === 'updated') toast.success(resolve === 'live' ? 'Replaced with the live page' : 'Updated from the website')
         else if (outcome === 'unchanged') toast.success(resolve === 'keep' ? 'Kept your edit' : 'Already up to date')
         else if (outcome === 'conflict') toast.warning('The page changed, but it has your manual edits — choose which to keep')

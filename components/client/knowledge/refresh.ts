@@ -27,3 +27,22 @@ export async function refreshSource(sourceId: string, resolve?: RefreshResolve):
 export function hasLiveConflict(metadata: Record<string, unknown> | null | undefined): boolean {
   return metadata?.liveConflict === true
 }
+
+/**
+ * Rebuild the answer summaries after ONE source changed (a full website sync
+ * does its own rebuild). Summaries are synthesized from the other sources and
+ * outrank them in search, so a change that isn't folded in leaves the bot
+ * quoting the old fact: HomeByNB added Sunday hours to /kontaktai and the
+ * Contact summary kept saying Monday–Saturday (2026-11-12).
+ * ponytail: fire-and-forget, and the route allows ~2 rebuilds a minute per
+ * user — a third quick edit is skipped ("Rebuild summaries" still works).
+ * Debounce/queue here if clients start editing in bursts.
+ */
+export function rebuildSummariesInBackground(botId: string): void {
+  void fetch('/api/knowledge/summarize', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ botId }),
+    keepalive: true, // survives closing the drawer / leaving the page
+  }).catch(() => null)
+}

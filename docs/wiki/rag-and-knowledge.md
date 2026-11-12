@@ -84,6 +84,23 @@ normal ingest → embed → hybrid search. Re-capture when the site changes.
   contact page pushed the working hours out of retrieval reach for
   "kada dirbate?"-style phrasings. Changing this prompt requires
   re-running canonical generation per bot (crawl does it automatically).
+- **Opening hours are written with full weekday names** (2026-11-12, HomeByNB):
+  Lithuanian sites publish "I – V 09:00–17:00, VI 11:00–16:00, VII …". Neither
+  search channel links "ar dirbate sekmadienį?" to "VII", so day-name questions
+  never retrieved the hours chunk and the bot said it had no opening hours. The
+  prompt now expands the shorthand per section language. It does NOT list
+  omitted days as closed — that wording made the model write "Sekmadienis:
+  nedirbame" next to real Sunday hours and invent a schedule from "darbo
+  dienomis". Check with `scripts/retrieval-eval-hours.json`
+  (`eval-retrieval.mjs --file … --bot …`, 3IMIS copy: 6/6 hybrid).
+- **Summaries go stale unless rebuilt, and they outrank what they were built
+  from** (canonical boost). Rebuilds happen after a crawl, after a website sync
+  that changed something, and — since 2026-11-12 — after a single-source edit
+  or "Use the live page" (`rebuildSummariesInBackground`,
+  `components/client/knowledge/refresh.ts`; fire-and-forget, rate-limited to
+  ~2/min per user). Adding a NEW text/Q&A/file source still does not rebuild:
+  click **Rebuild summaries**. `scripts/rebuild-summaries.mts <botId>` does the
+  same from a shell with the working-tree prompt (useful before a deploy).
 - Stored as a normal `knowledge_sources` row with `metadata.kind ===
   'canonical'`; idempotent regeneration preserves a manual
   `contentOverride`. Runs automatically after every crawl
@@ -124,6 +141,13 @@ normal ingest → embed → hybrid search. Re-capture when the site changes.
   `/api/preview/chat`. Before this, "o kur ji yra?" pulled 5 privacy-policy
   noise chunks (top sim 0.276), so the old zero-match rewrite never fired —
   and preview had no rewrite at all (preview/live parity gap).
+- **The rewrite speaks help-page vocabulary** (`lib/ai/query-rewrite.ts`,
+  2026-11-12): it fires on low confidence or a ≤3-word message, and used to
+  echo the visitor ("kada dirbate?" → "Kada dirbate?", which shares no word
+  with "Darbo laikas" and embeds at ~0.21 — same noise, "I don't have the
+  opening hours"). The prompt now asks for the nouns a help page would use
+  ("parduotuvės darbo laikas", "store opening hours"), with one LT and one EN
+  example.
 - **Fast lane** (`lib/ai/fast-lane.ts`, per-bot `config.fastLane`, default off):
   after retrieval, a top similarity ≥ 0.40 with no product/delivery/order/
   discount intent (EN+LT stems) and no product cards on screen answers with NO
