@@ -88,11 +88,21 @@ normal ingest → embed → hybrid search. Re-capture when the site changes.
   Lithuanian sites publish "I – V 09:00–17:00, VI 11:00–16:00, VII …". Neither
   search channel links "ar dirbate sekmadienį?" to "VII", so day-name questions
   never retrieved the hours chunk and the bot said it had no opening hours. The
-  prompt now expands the shorthand per section language. It does NOT list
-  omitted days as closed — that wording made the model write "Sekmadienis:
-  nedirbame" next to real Sunday hours and invent a schedule from "darbo
-  dienomis". Check with `scripts/retrieval-eval-hours.json`
-  (`eval-retrieval.mjs --file … --bot …`, 3IMIS copy: 6/6 hybrid).
+  prompt asks for full names, but the model skips it about one run in three, so
+  `expandRomanWeekdays` does it in code for a numeral in front of a clock time.
+  Check with `scripts/retrieval-eval-hours.json`
+  (`eval-retrieval.mjs --file … --bot …`; live HomeByNB and the 3IMIS copy: 6/6 hybrid).
+- **The synthesizer invents hours if you let it — two guards in code**
+  (`canonical.ts`, tests in `tests/unit/canonical-hours.test.ts`). Told to lead
+  with working hours and name the weekdays, gpt-4o-mini turned "susisiekite
+  darbo valandomis" into "Mon–Fri 9:00–17:00, Sat–Sun closed" on the LIVE
+  HomeByNB bot, and an earlier wording ("list omitted days as closed") wrote
+  "Sekmadienis: nedirbame" next to real Sunday hours. `ungroundedHours` rejects
+  a page whose clock times or "closed" claims are not in its excerpts (one
+  retry, then the existing page is kept); `dropAbsenceLines` removes
+  "nenurodyta / not specified" lines, which otherwise sit beside the real hours
+  at answer time. Prompt wording alone failed three different ways in four rebuilds —
+  read the rebuilt pages after changing this prompt.
 - **Summaries go stale unless rebuilt, and they outrank what they were built
   from** (canonical boost). Rebuilds happen after a crawl, after a website sync
   that changed something, and — since 2026-11-12 — after a single-source edit

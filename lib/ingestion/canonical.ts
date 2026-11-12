@@ -108,14 +108,68 @@ function buildPrompt(topic: CanonicalTopic, excerpts: string): string {
     // search channel links "ar dirbate sekmadienį?" to "VII", so the hours chunk
     // was never retrieved for day-name questions (HomeByNB, 2026-11-12).
     // Deliberately NOT "list the omitted days as closed": tried it, and the
-    // model wrote "Sekmadienis: nedirbame" next to real Sunday hours and
-    // invented a whole schedule from "darbo dienomis".
-    'When the excerpts give opening hours with clock times, write each day or day range with ' +
-    "FULL weekday names in each section's language, expanding shorthand such as I–V, VI, VII, " +
-    'Pr–Pn or Mon–Fri (I = Monday … VII = Sunday). Keep any date limit on temporary hours ' +
-    'exactly as stated. Never add a day, a time, or a "closed" note the excerpts do not state.\n\n' +
+    // model wrote "Sekmadienis: nedirbame" next to real Sunday hours.
+    'Opening hours: include them ONLY when the excerpts state them with clock times, and then ' +
+    "write each day or day range with FULL weekday names in each section's language, expanding " +
+    'shorthand such as I–V, VI, VII, Pr–Pn or Mon–Fri (I = Monday … VII = Sunday). Keep any ' +
+    'date limit on temporary hours exactly as stated. If the excerpts only say something like ' +
+    '"darbo dienomis" or "during business hours", repeat that phrase as it is — never turn it ' +
+    'into a schedule, and never add a day, a time, or a "closed" note the excerpts do not state. ' +
+    'Leave out anything the excerpts do not cover; never write that something is not specified.\n\n' +
     `Excerpts:\n${excerpts}`
   )
+}
+
+/**
+ * Clock times and "closed" claims in a summary that its excerpts never state.
+ * The prompt alone does not hold: on a live bot gpt-4o-mini turned "susisiekite
+ * darbo valandomis" into "Mon–Fri 9:00–17:00, Sat–Sun closed" (2026-11-12),
+ * and summaries outrank the real sources in search.
+ * ponytail: colon times only ("9.00" is indistinguishable from a price), and
+ * only the Lithuanian section — the English one may say "5:00 PM".
+ */
+export function ungroundedHours(content: string, excerpts: string): string[] {
+  const times = (s: string) =>
+    new Set([...s.matchAll(/\b\d{1,2}:\d{2}\b/g)].map((m) => m[0].replace(/^0/, '')))
+  const known = times(excerpts)
+  const bad = [...times(content.split('## Summary (EN)')[0])].filter((t) => !known.has(t))
+  const closed = /nedirb|\bclosed\b/i
+  if (closed.test(content) && !closed.test(excerpts)) bad.push('closed')
+  return bad
+}
+
+/**
+ * Drops "not specified" lines. Asked to lead with working hours, the model
+ * writes "Darbo valandos: nenurodytos" on pages whose excerpts have none — and
+ * that line, in a boosted summary, sits next to the real hours at answer time.
+ */
+export function dropAbsenceLines(content: string): string {
+  const absent = /nenurodyt|nėra (pateikt|nurodyt)|not (specified|provided|stated|available)/i
+  return content
+    .split('\n')
+    .filter((line) => !absent.test(line))
+    .join('\n')
+}
+
+const ROMAN_DAYS = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII']
+const LT_DAYS = ['Pirmadienis', 'Antradienis', 'Trečiadienis', 'Ketvirtadienis', 'Penktadienis', 'Šeštadienis', 'Sekmadienis']
+const EN_DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+
+/**
+ * "I – V 09:00 – 17:00" → "Pirmadienis–Penktadienis 09:00 – 17:00". The prompt
+ * asks for full weekday names, but the model skips it about one run in three —
+ * and without the names no day-name question finds the hours. Only a numeral
+ * (or range) directly in front of a clock time is touched.
+ */
+export function expandRomanWeekdays(content: string): string {
+  const expand = (text: string, days: string[]) =>
+    text.replace(
+      /(^|[\s*(])(VII|VI|IV|V|III|II|I)(?:\s*[–—-]\s*(VII|VI|IV|V|III|II|I))?(?=[\s:*]*\d{1,2}[:.]\d{2})/gm,
+      (_m, pre: string, from: string, to?: string) =>
+        pre + days[ROMAN_DAYS.indexOf(from)] + (to ? `–${days[ROMAN_DAYS.indexOf(to)]}` : ''),
+    )
+  const at = content.indexOf('## Summary (EN)')
+  return at < 0 ? expand(content, LT_DAYS) : expand(content.slice(0, at), LT_DAYS) + expand(content.slice(at), EN_DAYS)
 }
 
 interface CanonicalDeps {
@@ -200,7 +254,15 @@ export async function generateCanonicalPages(
     const excerpts = support.map((m, i) => `[${i + 1}] ${m.content}`).join('\n\n')
     let content = ''
     try {
-      content = (await synthesize(buildPrompt(topic, excerpts))).trim()
+      const prompt = buildPrompt(topic, excerpts)
+      const write = async () => dropAbsenceLines(expandRomanWeekdays((await synthesize(prompt)).trim()))
+      content = await write()
+      // Invented hours: one more try, then keep the page that is already there.
+      if (ungroundedHours(content, excerpts).length) content = await write()
+      if (ungroundedHours(content, excerpts).length) {
+        skipped++
+        continue
+      }
     } catch {
       skipped++
       continue
