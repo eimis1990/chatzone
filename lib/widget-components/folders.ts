@@ -6,6 +6,7 @@ import { CORE_FOLDER } from './availability'
  *  automatically and named. */
 const PROVIDER_LABELS = {
   woocommerce: 'WooCommerce',
+  woocommerce_legacy: 'WooCommerce (legacy catalogue)',
   shopify: 'Shopify',
   magento: 'Magento',
   verskis: 'Verskis',

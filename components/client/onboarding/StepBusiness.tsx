@@ -174,7 +174,7 @@ export function StepBusiness({
             <Label>Store platform</Label>
             <p className="mt-0.5 text-xs text-muted-foreground">
               We&apos;ll connect it and index your catalog automatically, so the bot can recommend
-              products with live prices and stock.
+              products with available pricing and product information.
             </p>
           </div>
           <Select
@@ -187,6 +187,7 @@ export function StepBusiness({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="woocommerce">WooCommerce</SelectItem>
+              <SelectItem value="woocommerce_legacy">WooCommerce (legacy catalogue)</SelectItem>
               <SelectItem value="shopify">Shopify</SelectItem>
               <SelectItem value="magento">Magento</SelectItem>
               <SelectItem value="verskis">Verskis</SelectItem>
@@ -196,6 +197,7 @@ export function StepBusiness({
           </Select>
 
           {(commerce.provider === 'woocommerce' ||
+            commerce.provider === 'woocommerce_legacy' ||
             commerce.provider === 'magento' ||
             commerce.provider === 'verskis') && (
             <div className="space-y-1.5">

@@ -33,6 +33,7 @@ export function storeConfigured(config: CommerceConfig | undefined | null): bool
   if (!config?.enabled) return false
   switch (config.provider) {
     case 'woocommerce':
+    case 'woocommerce_legacy':
       return Boolean(config.storeUrl)
     case 'shopify':
       return Boolean(config.shopifyDomain && config.shopifyToken)
@@ -53,6 +54,7 @@ export function productDetailsSupported(config: CommerceConfig | undefined | nul
   if (!config || !storeConfigured(config)) return false
   return (
     config.provider === 'woocommerce' ||
+    config.provider === 'woocommerce_legacy' ||
     config.provider === 'shopify' ||
     config.provider === 'verskis' ||
     // Room-type details come from the Content API (description, amenities, occupancy).

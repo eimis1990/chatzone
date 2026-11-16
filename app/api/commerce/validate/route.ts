@@ -7,7 +7,7 @@ export const maxDuration = 20
 
 const bodySchema = z.object({
   provider: z
-    .enum(['woocommerce', 'shopify', 'magento', 'verskis', 'feed', 'travelline'])
+    .enum(['woocommerce', 'woocommerce_legacy', 'shopify', 'magento', 'verskis', 'feed', 'travelline'])
     .default('woocommerce'),
   storeUrl: z.string().optional(),
   shopifyDomain: z.string().optional(),
@@ -84,6 +84,7 @@ export async function POST(req: Request) {
       verskis: 'Could not read the Verskis storefront at that URL.',
       feed: 'Could not read a product feed at that URL (expects JSON, XML, or CSV).',
       woocommerce: 'Could not reach the WooCommerce Store API at that URL.',
+      woocommerce_legacy: 'Could not reach the legacy WooCommerce catalogue. Use the canonical store URL (including https).',
       travelline: 'Could not authenticate with TravelLine — check the client ID, secret, and property ID.',
     }
     return NextResponse.json({ ok: false, error: errors[parsed.data.provider] ?? errors.woocommerce })

@@ -4,6 +4,43 @@ Store connectors + product search. Separate from [RAG chunks](rag-and-knowledge.
 
 ## Connectors (`lib/commerce/`)
 
+### Legacy WooCommerce catalogue provider
+
+- Select **WooCommerce (legacy catalogue)** (`woocommerce_legacy`) explicitly;
+  standard WooCommerce remains on its existing v1 API and price behavior.
+  Provider implementation: `lib/commerce/woocommerce-legacy.ts:36`; profile:
+  `lib/products/provider-profiles/woocommerce-legacy.ts:5`.
+- All legacy reads (validation, keyword search, URL listing, details, catalogue
+  sync and semantic hydration) reuse the Woo parsers through a provider-local
+  transport. It rewrites `/wp-json/wc/store/v1/...` to
+  `/?rest_route=/wc/store/...`, which works with `index.php` permalinks too.
+  Canonical store origin only; subdirectory WordPress installs are not supported.
+  Redirects are rejected and real-network targets are SSRF-checked, including
+  direct sync/hydration calls. Failed/malformed catalogue pages throw so a
+  partial fetch cannot prune the existing index.
+- Non-purchasable products lose API prices and gain a quote/availability note;
+  unknown purchasability with a zero/missing price is treated the same way.
+  Explicitly purchasable products retain genuine prices, including zero.
+  Quote-only items cannot count as budget/cheapest matches in direct searches.
+  Provider prompt guidance explains that catalogue stock flags do not confirm
+  availability (`lib/products/provider-profiles/guidance.ts:15`).
+- No order lookup or live shipping tools for this provider. Semantic search
+  uses the neutral `match_products` RPC and a 20-detail candidate budget;
+  [provider isolation](commerce-provider-profiles.md) still applies.
+- Product cards require the additive seed migration
+  `supabase/migrations/20261116045748_legacy_woocommerce_components.sql:1`.
+  Apply it with the release, then select this provider on the **existing** demo
+  bot, save and sync its catalogue. No new bot is needed. Implementation/testing
+  did not deploy code, apply the migration or change a live bot's configuration.
+- Verified against [Woodfurniture](https://woodfurniture.eu/) on 2026-11-16:
+  [legacy API](https://woodfurniture.eu/?rest_route=/wc/store/products&per_page=1)
+  returns 113 unique products with images/descriptions; all were non-purchasable
+  with placeholder GBP zero prices. Search `glow`, full details, complete sync
+  fetch and semantic hydration passed with blank display prices.
+  Opt-in read-only regression: `RUN_LIVE_LEGACY_COMMERCE=1 npm test -- tests/integration/woocommerce-legacy.test.ts`.
+
+_Last verified: 2026-11-16 (local implementation, unit and live API tests)._
+
 ### Public-claim capability matrix
 
 Use this table as the source of truth when writing landing-page or blog claims.
@@ -13,6 +50,7 @@ when the action varies.
 | Provider | Live product search | Semantic index | Order-status lookup | Live shipping rates | Notes |
 | --- | --- | --- | --- | --- | --- |
 | WooCommerce | Yes | Yes | Yes, order number + billing email | Yes | Fullest current commerce integration |
+| WooCommerce legacy catalogue | Yes | Yes | **No** | No | Explicit opt-in; quote-only prices suppressed |
 | Shopify | Yes | Yes with Storefront token; public feed is keyword-only | **No** | No | Never imply that Shopify connection enables Loqara order lookup |
 | Magento | Yes | Yes | Yes, order number + billing email | No | Order lookup requires configured integration token |
 | Verskis | Yes | Yes | **No** | No | Storefront HTML + sitemap integration |
@@ -39,7 +77,7 @@ Cross-cutting public claims:
 provider's commerce tools; it does not make an unsupported Shopify/Verskis/feed
 order lookup available.
 
-- Providers: **woocommerce, shopify, magento, verskis, feed** (`lib/commerce/types.ts:1`). Configured
+- Providers: **woocommerce, woocommerce_legacy, shopify, magento, verskis, feed, travelline** (`lib/commerce/types.ts:1`). Configured
   per-bot in `config.commerce` — `lib/validation/schemas.ts:256-275` (provider, storeUrl,
   restKey/restSecret, shopifyDomain/shopifyToken, magentoToken, feedUrl, discount).
 - `lib/commerce/index.ts` dispatches per-provider: `searchStore` (`:98`), `validateStore`

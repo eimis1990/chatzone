@@ -2609,6 +2609,7 @@ function CommerceSection({ control, watch, setValue, botId }: CommerceSectionPro
   }, [botId])
   const smartSearchSupported =
     provider === 'woocommerce' ||
+    provider === 'woocommerce_legacy' ||
     provider === 'shopify' ||
     provider === 'magento' ||
     provider === 'verskis'
@@ -2812,6 +2813,7 @@ function CommerceSection({ control, watch, setValue, botId }: CommerceSectionPro
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="woocommerce">WooCommerce</SelectItem>
+                      <SelectItem value="woocommerce_legacy">WooCommerce (legacy catalogue)</SelectItem>
                       <SelectItem value="shopify">Shopify</SelectItem>
                       <SelectItem value="magento">Magento</SelectItem>
                       <SelectItem value="verskis">Verskis</SelectItem>
@@ -2823,8 +2825,16 @@ function CommerceSection({ control, watch, setValue, botId }: CommerceSectionPro
               />
             </div>
 
+            {provider === 'woocommerce_legacy' && (
+              <p className="text-xs text-muted-foreground">
+                Search an older WooCommerce catalogue. Products unavailable for online purchase
+                show without prices; customers can request a quote. Order tracking and live
+                shipping rates are not available with this connection.
+              </p>
+            )}
+
             {/* URL-based storefronts. */}
-            {(provider === 'woocommerce' || provider === 'magento' || provider === 'verskis') && (
+            {(provider === 'woocommerce' || provider === 'woocommerce_legacy' || provider === 'magento' || provider === 'verskis') && (
               <div className="space-y-1.5">
                 <Label htmlFor="commerceStoreUrl">Store URL</Label>
                 <Controller

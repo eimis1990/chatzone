@@ -1,3 +1,9 @@
+import {
+  searchLegacyWooProducts,
+  validateLegacyWooStore,
+  fetchLegacyWooProductDetails,
+  listLegacyWooProductsByUrl,
+} from '@/lib/commerce/woocommerce-legacy'
 import type {
   CommerceProduct,
   CommerceProvider,
@@ -85,6 +91,8 @@ export async function searchStore(
   switch (config.provider) {
     case 'woocommerce':
       return searchWooProducts(config.storeUrl, params, deps)
+    case 'woocommerce_legacy':
+      return searchLegacyWooProducts(config.storeUrl, params, deps)
     case 'shopify':
       return searchShopifyProducts(config.shopifyDomain!, config.shopifyToken!, params, deps)
     case 'magento':
@@ -117,6 +125,8 @@ export async function listStoreProductsByUrl(
   switch (config.provider) {
     case 'woocommerce':
       return listWooProductsByUrl(config.storeUrl, pageUrl, limit, deps)
+    case 'woocommerce_legacy':
+      return listLegacyWooProductsByUrl(config.storeUrl, pageUrl, limit, deps)
     case 'shopify':
       return listShopifyCollectionProducts(config.shopifyDomain!, config.shopifyToken!, pageUrl, limit, deps)
     case 'verskis':
@@ -141,6 +151,8 @@ export async function getProductDetails(
   switch (config.provider) {
     case 'woocommerce':
       return fetchWooProductDetails(config.storeUrl, ids, deps)
+    case 'woocommerce_legacy':
+      return fetchLegacyWooProductDetails(config.storeUrl, ids, deps)
     case 'shopify':
       return fetchShopifyProductDetails(config.shopifyDomain!, config.shopifyToken!, ids, deps)
     case 'verskis':
@@ -188,6 +200,8 @@ export async function validateStore(
   switch (config.provider) {
     case 'woocommerce':
       return config.storeUrl ? validateWooStore(config.storeUrl, deps) : { ok: false, total: 0 }
+    case 'woocommerce_legacy':
+      return config.storeUrl ? validateLegacyWooStore(config.storeUrl, deps) : { ok: false, total: 0 }
     case 'shopify':
       return config.shopifyDomain && config.shopifyToken
         ? validateShopifyStore(config.shopifyDomain, config.shopifyToken, deps)

@@ -289,7 +289,7 @@ export const botConfigFormSchema = z.object({
     .object({
       enabled: z.boolean().default(false),
       provider: z
-        .enum(['woocommerce', 'shopify', 'magento', 'verskis', 'feed', 'travelline'])
+        .enum(['woocommerce', 'woocommerce_legacy', 'shopify', 'magento', 'verskis', 'feed', 'travelline'])
         .default('woocommerce'),
       storeUrl: z.string().default(''),
       restKey: z.string().optional().or(z.literal('')),

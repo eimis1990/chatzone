@@ -12,6 +12,14 @@ export interface CommerceProviderPromptGuidance {
  */
 const promptGuidance: Readonly<Record<CommerceProvider, CommerceProviderPromptGuidance>> = Object.freeze({
   woocommerce: {},
+  woocommerce_legacy: {
+    queryGuidance:
+      'This legacy catalogue can contain quote-only products. An empty price means request a quote; ' +
+      'never call it free or use it to claim a budget match or cheapest option. For products marked ' +
+      '"Request a quote", the stock flag is catalogue visibility, not confirmed availability. ' +
+      'Ask the store to confirm price, stock and delivery. Do not promise checkout, order tracking ' +
+      'or live shipping rates. Offer lead capture or human contact for a quote.',
+  },
   shopify: {},
   magento: {},
   verskis: {

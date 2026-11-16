@@ -1,3 +1,4 @@
+import { legacyWoocommerceProductSearchProfile } from './woocommerce-legacy'
 import type { CommerceProvider } from '@/lib/commerce/types'
 import type { CommerceProduct } from '@/lib/commerce/types'
 import { feedProductSearchProfile } from './feed'
@@ -21,6 +22,7 @@ export {
  * shared orchestration path or a store-domain branch. */
 export const commerceProviderProfiles = Object.freeze({
   woocommerce: woocommerceProductSearchProfile,
+  woocommerce_legacy: legacyWoocommerceProductSearchProfile,
   shopify: shopifyProductSearchProfile,
   magento: magentoProductSearchProfile,
   verskis: verskisProductSearchProfile,

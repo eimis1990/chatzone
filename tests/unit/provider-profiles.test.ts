@@ -22,6 +22,7 @@ describe('commerce provider profiles', () => {
       'travelline',
       'verskis',
       'woocommerce',
+      'woocommerce_legacy',
     ])
   })
 

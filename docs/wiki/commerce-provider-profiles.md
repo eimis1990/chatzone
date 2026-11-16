@@ -25,6 +25,7 @@ Current ownership:
 | Provider | Sync source | Matcher / live hydrator | Special behavior |
 | --- | --- | --- | --- |
 | WooCommerce | Woo catalog API | `match_products` / Woo Store API | Provider-neutral hybrid/title ranking |
+| WooCommerce legacy catalogue | Unversioned Woo Store API via `rest_route` | `match_products` / legacy transport | Explicit opt-in; quote-only price suppression; no order/shipping tools |
 | Shopify | Storefront API | `match_products` / Storefront API by GID | Provider-neutral hybrid/title ranking |
 | Magento | GraphQL | `match_products` / GraphQL by SKU | Provider-neutral hybrid/title ranking |
 | Verskis | Product-page HTML | `match_products_verskis` / stored URL | Structured metadata, field-aware attributes, semantic query normalization, 32-row live-hydration headroom, 20-detail browse sets, structured type/attribute completion, detail URL reference, origin guard |
@@ -90,14 +91,15 @@ schema-dependent capabilities.
 | Voice candidate-review/display separation | All providers | Universal parity rule; voice reuses each profile's query guidance, display guidance, and candidate-detail budget before rendering cards |
 | Semantic query normalization | Verskis only | Add `semantic.normalizeQuery` only when a provider's catalog has a repeatable vocabulary/schema mismatch |
 | Candidate overfetch before live hydration | Verskis only | Add `semantic.candidatePoolSize` only when measured live hydration losses prevent filling the requested result count |
-| More than 8 model-visible candidate details | Verskis uses 20 | Raise `candidateDetailsLimit` only when structured details materially improve exhaustive filtering and the token cost is justified |
+| More than 8 model-visible candidate details | Verskis, WooCommerce and legacy Woo use 20 | Raise `candidateDetailsLimit` only when structured details materially improve exhaustive filtering and the token cost is justified |
 | Deterministic browse-set completion/filtering | Verskis only | Add `completeDisplaySelection` only when structured fields can prove category and constraints; never infer from images or prose guesses |
 | Provider-specific matcher RPC | Verskis only | Use only when the neutral matcher cannot represent the provider's document fields/language; keep `match_products` neutral |
 | Visible-HTML price fallback | Verskis connector only | Parser behavior belongs in the affected transport; never copy HTML selectors into another connector |
 
-WooCommerce, Shopify, and Magento therefore receive the universal correctness
-and card-delivery fixes, but retain the neutral matcher, 8-detail budget, normal
-candidate count, and model-selected display set. Tests in
+WooCommerce (including the legacy provider), Shopify, and Magento receive the
+universal correctness and card-delivery fixes with the neutral matcher, normal
+candidate count and model-selected display set. Woo profiles use a 20-detail
+budget; Shopify and Magento retain 8. Tests in
 `tests/unit/provider-profiles.test.ts` and `tests/unit/commerce-tool.test.ts`
 lock those defaults. Adopt an opt-in hook for another provider only after a
 provider-specific reproduction demonstrates the need and after adding both a
