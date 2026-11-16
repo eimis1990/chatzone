@@ -438,3 +438,11 @@ attaches `products` to assistant turns (`previewChatSchema` allows them); the
   the live widget; without an index, both still fall back to live keyword search.
 
 _Last verified: 2026-08-25 (working tree; public capability-claim audit)._
+
+## Plan access (2026-11-16)
+
+Live product search starts at Basic; order lookup requires Starter+. Runtime
+`applyPlanToConfig` sets `commerce.orderLookupAllowed` before registering tools
+or executing widget/preview/voice requests. Connector support and identity
+checks remain required. Saved credentials survive downgrade. See
+[entitlements](plans-and-entitlements.md) and `lib/commerce/capabilities.ts:78`.

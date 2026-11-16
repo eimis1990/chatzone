@@ -126,7 +126,7 @@ The 24-hour proposal is a Loqara billing-session rule, not Meta's messaging perm
 - [x] Test both billing intervals and transitions Basic ↔ Starter/Growth/Scale. Preserve eligible add-ons and quantities. Reconcile the actual Stripe state after errors rather than displaying success from a request alone.
 - [x] Keep the existing proration policy explicit. When a change requires payment or authentication, do not grant benefits merely because a pending change was requested. If payment-confirmed immediate upgrades are adopted, implement Stripe pending-update handling and its supported-payment-method constraints deliberately.
 - [x] Make top-up fulfillment payment-aware and idempotent. Verify the Checkout Session's customer/org, purchased price and quantity, and payment state; derive credit quantity from an approved SKU mapping, not an arbitrary numeric metadata value alone.
-- [ ] Handle immediate and delayed payments, including `checkout.session.async_payment_succeeded`; an unpaid completion grants no credits. Configure the new events on the actual sandbox and production webhook destinations, not just in application code. Database failures return retryable errors.
+- [x] Handle immediate and delayed payments, including `checkout.session.async_payment_succeeded`; an unpaid completion grants no credits. Configure the new events on the actual sandbox and production webhook destinations, not just in application code. Database failures return retryable errors.
 - [x] Freeze the offer in a purchase record. A Basic customer cannot reuse an unexpired Starter top-up session to bypass eligibility: invalidate stale unpaid sessions where possible on plan changes; honor or explicitly reconcile payments that already succeeded during a race.
 - [x] Record the credit month from the agreed payment/fulfillment policy. Recommended: the UTC month payment succeeds, with the expiry shown before purchase; a webhook retry in a later month must not move the credits. Resolve delayed payments near month end transparently.
 - [x] Preserve the purchased quantity on replay and after a later plan change. Add reconciliation for refund/dispute handling; never silently delete spent usage or grant a second pack from repeated events.
@@ -169,14 +169,14 @@ The 24-hour proposal is a Loqara billing-session rule, not Meta's messaging perm
 
 **Depends on:** all prior acceptance gates. Push to `main` auto-deploys production in this repository.
 
-1. [ ] Record the release commit, schema changes, environment changes, affected cohorts, validation output, and the compatible rollback deployment. Exclude unrelated workspace edits.
-2. [ ] Apply backward-compatible schema changes and verify constraints, RLS/grants, indexes, and migrations. Do not populate Basic plan rows before compatible application readers are deployed.
-3. [ ] Provision/verify live prices and webhook event configuration. Deploy the complete compatible application with Basic sales disabled and legacy-Free enforcement unchanged.
-4. [ ] Verify production health and allowed/denied feature calls. Confirm HomeByNB remains on its existing plan with functioning history and its previously configured female bot persona.
-5. [ ] Enable Basic sales only after catalog/environment checks pass. Verify the real client flow through a correctly priced Checkout page without making an unauthorized live purchase. Observe the first authorized purchase through webhook, entitlement sync, usage, and invoice state.
-6. [ ] Verify an actual Basic bot: one language, badge visible, lead capture/dictation/analytics available, product search works, order lookup denied. Verify Free restrictions and Starter order lookup separately.
+1. [x] Record the release commit, schema changes, environment changes, affected cohorts, validation output, and the compatible rollback deployment. Exclude unrelated workspace edits.
+2. [x] Apply backward-compatible schema changes and verify constraints, RLS/grants, indexes, and migrations. Do not populate Basic plan rows before compatible application readers are deployed.
+3. [x] Provision/verify live prices and webhook event configuration. Deploy the complete compatible application with Basic sales disabled and legacy-Free enforcement unchanged.
+4. [x] Verify production health and allowed/denied feature calls. Confirm HomeByNB remains on its existing plan with functioning history and its previously configured female bot persona.
+5. [x] Enable Basic sales only after catalog/environment checks pass. Verify the real client flow through a correctly priced Checkout page without making an unauthorized live purchase. The first actual customer purchase remains a follow-up in step 9.
+6. [x] Verify an actual Basic bot: one language, badge visible, lead capture/dictation/analytics available, product search works, order lookup denied. Verify Free restrictions and Starter order lookup separately.
 7. [ ] Verify Basic + Messenger with a consenting test account: connection, inbound message, AI reply, human takeover, monthly quota, and removed-add-on behavior. Include a new non-role Facebook account's connection flow when available; record that limitation if it cannot be tested.
-8. [ ] Release the reviewed notices and start the legacy-Free transition clock. New Free signups use the new policy immediately; enforce legacy changes only at the recorded effective date.
+8. [x] Release the reviewed notices and start the legacy-Free transition clock. New Free signups use the new policy immediately; enforce legacy changes only at the recorded effective date.
 9. [ ] Review errors, webhook retries, unfulfilled payments, quota mismatches, and support reports during the first day and week. After the notice window, audit actual Free enforcement and stale handoffs.
 10. [ ] Review Basic conversion, upgrades/downgrades, cost per conversation, top-up purchases, and support effort after the first month. Do not change the approved prices automatically based on early results.
 
@@ -231,8 +231,7 @@ Stripe's fulfillment guidance requires payment-state checks, safe repeat fulfill
   session ledger, top-up purchases/review queue, handoff guards, channel delivery
   journal. Existing paid customer subscriptions were not changed.
 - Basic catalog verified in live and sandbox accounts; live IDs are in
-  [billing wiki](../../wiki/stripe-billing.md). Production currently has Basic
-  sales and new notice windows disabled, pending compatible code verification.
+  [billing wiki](../../wiki/stripe-billing.md). Production Basic sales and new in-app notice windows are now enabled.
 - Real sandbox API rehearsal passed monthly/annual Basic, in-place Starter
   changes, annual Basic with all mixed-interval add-ons, Checkout totals and
   declined-payment preservation. Test customers/subscriptions cleaned up.
@@ -264,10 +263,24 @@ Stripe's fulfillment guidance requires payment-state checks, safe repeat fulfill
   analytics/CSAT/export and Free activity-only screen verified while retaining
   data. Magento demo returned no products, so the known live WooCommerce
   catalog was used for the successful search test.
-- HomeByNB remains Starter/female; 1,012 conversations retained. Final sales
-  activation, live Checkout preview and notice-window test are in progress.
-- Loqara platform chatbot pricing correction prepared; publish/re-index together
-  with enabled pricing. No client knowledge sources are changed.
+- HomeByNB remains Starter/female; 1,012 conversations retained. Final activation deployment `1891b33` /
+  `dpl_7FvaQjkyRELXr8rqpQhftsRmvGtR` is READY on www.loqara.com.
+- Live authenticated Checkout showed **€49/month**, the correct Basic product
+  description and merchant-of-record opt-out. No payment information was entered
+  and no live charge/subscription was created; the session was expired afterward.
+- The isolated legacy-Free fixture recorded an effective date exactly 30 days
+  after mounting its in-app notice. Two actual production chat turns delivered
+  text/product output and committed exactly one usage session, with no pending
+  reservation. Basic remains usable when sales are disabled; policy-pause tests
+  preserve deadlines and Basic access.
+- Temporary sandbox subscriptions/customers, live unpaid test Checkout/customer,
+  bot, organization and login cleaned up. Local email setting restored and
+  temporary Stripe forwarding stopped. Activation deployment error-log query
+  returned no error entries during verification. Monthly/yearly catalog and
+  ten webhook events remain configured; existing real paid accounts unchanged.
+- Loqara platform chatbot override and homepage re-indexed after activation:
+  70 chunks, Basic present, no stale Free/100-conversation claim. No client
+  knowledge sources were changed.
 - Existing Free transition audit, first real customer purchase, first-day/week
   monitoring and first-month commercial review remain future follow-up work.
 
@@ -290,3 +303,17 @@ OAuth connection cannot be claimed without a consenting external account.
 
 The full customer transition is complete only after the notice window and
 post-transition audit; deploying the code cannot establish that future result.
+
+### Follow-up verification still required
+
+- Observe the first customer-authorized live payment and monitor day/week-one
+  payment errors or support reports. Sandbox paid fulfillment has passed; a
+  live payment has deliberately not been fabricated.
+- Fresh Basic + Messenger external/non-role OAuth requires a consenting account;
+  prior Loqara Page inbound/AI reply/takeover checks and shared channel unit tests
+  passed. No new customer Facebook account was connected in this rollout.
+- Audit each legacy Free policy after its individual 30-day notice window, then
+  review first-month conversion and costs. No scheduled automation was created.
+- The unrelated existing shared-matcher color-ranking integration assertion
+  still fails; the provider-specific test and all new billing/access/usage tests
+  pass. Do not describe the entire repository integration suite as green.

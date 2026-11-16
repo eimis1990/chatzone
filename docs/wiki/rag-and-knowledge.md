@@ -284,3 +284,11 @@ and hash the page, but intentionally skips embeddings.
   (`lib/knowledge-dates.ts:4`, `components/client/knowledge/SourceList.tsx:492`).
 - Unchanged-refresh toast says “Website checked — no content changes found.”
   Manual overrides remain protected by the existing conflict-resolution flow.
+
+## Platform pricing knowledge (2026-11-16)
+
+Loqara’s own landing bot has a file source with `metadata.contentOverride`;
+re-crawling the homepage alone does not update that source. Basic launch updated
+the override and re-indexed it plus the homepage (70 total chunks; no old
+Free/100-conversation claim). Resolve by platform org + bot ID, never by display
+name. See [entitlements](plans-and-entitlements.md).

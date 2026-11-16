@@ -201,3 +201,12 @@ checks from `docs/CHANNELS_IMPLEMENTATION.md:18-20` and
   the Lithuanian controller and still needs removal from the processor list.
 
 _Last verified: 2026-09-05._
+
+## Basic and usage sessions (2026-11-16)
+
+Basic can buy the Messenger add-on and includes human handoff. Web/Messenger
+allowances now use 24-hour/new-UTC-month sessions, separate from the enduring
+contact thread. Reservation and send receipt are journaled; uncertain delivery
+requires review instead of automatic replay. See [usage sessions](conversation-usage.md)
+and `lib/channels/usage-delivery.ts:7`. The existing Meta permission window
+remains independent of Loqara billing-session rules.
