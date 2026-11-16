@@ -1,5 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { getSessionUser, getUserOrgIds } from '@/lib/auth/guards'
+import { createServiceClient } from '@/lib/supabase/service'
+import { hasMessengerAccess } from '@/lib/channels/access'
 import { getEnv } from '@/lib/env'
 import { signState, buildAuthUrl } from '@/lib/channels/oauth'
 
@@ -16,6 +18,9 @@ export async function GET(req: NextRequest) {
   const orgId = (await getUserOrgIds())[0]
   if (!session || !orgId) {
     return NextResponse.redirect(new URL('/login', env.NEXT_PUBLIC_APP_URL))
+  }
+  if (!(await hasMessengerAccess(createServiceClient(), orgId))) {
+    return NextResponse.redirect(new URL('/app/channels/messenger/connect?error=not_entitled', env.NEXT_PUBLIC_APP_URL))
   }
   const botId = req.nextUrl.searchParams.get('botId')
   const state = signState({ orgId, userId: session.id, botId }, env.META_APP_SECRET)

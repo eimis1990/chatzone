@@ -26,6 +26,7 @@ export async function resetMissingStripeCustomer(
       cancel_at_period_end: false,
       voice_addon: false,
       visualizer_addon: false,
+      messenger_addon: false,
     })
     .eq('id', orgId)
     .eq('stripe_customer_id', missingCustomerId)

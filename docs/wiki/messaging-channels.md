@@ -1,5 +1,26 @@
 # Messaging channels
 
+## Messenger launch — 2026-11-16
+
+Meta app `2452581401910162` is **Published** (verified in Meta dashboard).
+This supersedes all historical unpublished/review notes below.
+
+- Subscription offers Messenger for €19/month or €228/year on annual plans,
+  with explicit confirmation before adding a Stripe item. One Facebook Page
+  per organization; a partial unique index enforces concurrent connects.
+- Billing sync controls `organizations.messenger_addon`; internal demo/platform
+  orgs retain access. OAuth start, connect action, inbound bot processing and
+  Inbox outbound delivery enforce entitlement. Local development has no bypass
+  (`lib/channels/entitlement.ts:12`, `lib/channels/access.ts:4`,
+  `app/api/channels/meta/webhook/route.ts:105`, `lib/channels/outbound.ts:86`).
+- Add/remove uses the existing paid subscription and its interval; changing
+  base-plan interval changes the Messenger item too (`lib/stripe/manage.ts:151`).
+  See [billing](stripe-billing.md) for environment price IDs.
+- Live Loqara Page token and message subscription verified. User's November 16
+  test first confirmed human takeover suppresses AI; after resolving takeover,
+  the next message generated an assistant reply and Meta accepted the send.
+  A new non-role customer's OAuth onboarding still needs real-account testing.
+
 ## Current review result (2026-09-20)
 
 - Submission `2453576515143984` is reviewed: `pages_show_list`,

@@ -32,6 +32,7 @@ const ERRORS: Record<string, string> = {
   session_mismatch: 'Please finish connecting in the same browser you started in.',
   exchange_failed: 'Facebook did not accept the authorization. Try again.',
   not_configured: 'Messenger connect is not configured yet. Contact support.',
+  page_limit: 'Your Messenger add-on includes one Facebook Page. Disconnect the current Page before connecting another.',
   page_taken: 'That Facebook Page is already connected to another Loqara account.',
   connect_failed: 'Connecting the Page failed. Try again.',
   not_entitled: 'The Messenger add-on isn’t active on your plan yet.',
@@ -64,8 +65,7 @@ export default async function ConnectMessengerPage({
   if (!orgId) redirect('/app')
   const { error, botId, disconnected } = await searchParams
 
-  // Entitlement gate — the Meta app is unpublished, so Facebook Login only
-  // works for app-role holders. Checked again inside the write actions.
+  // Paid/internal entitlement, checked again inside the write action.
   const { data: orgRow } = await createServiceClient()
     .from('organizations')
     .select('messenger_addon, is_demo, is_platform')
@@ -122,9 +122,15 @@ export default async function ConnectMessengerPage({
       redirect('/app/channels/messenger/connect?error=page_taken')
     }
 
+    const { data: otherPage, error: limitError } = await svc.from('channel_connections')
+      .select('id').eq('org_id', userOrgId).eq('provider', 'messenger')
+      .neq('status', 'disconnected').neq('external_account_id', page.id).limit(1).maybeSingle()
+    if (limitError) redirect('/app/channels/messenger/connect?error=connect_failed')
+    if (otherPage) redirect('/app/channels/messenger/connect?error=page_limit')
+
     try {
       await subscribePageToApp(page.access_token)
-      await svc.from('channel_connections').upsert(
+      const { error: saveError } = await svc.from('channel_connections').upsert(
         {
           org_id: userOrgId,
           bot_id: bot.id,
@@ -142,6 +148,7 @@ export default async function ConnectMessengerPage({
         },
         { onConflict: 'provider,external_account_id' },
       )
+      if (saveError) throw new Error('Could not save the Messenger connection')
     } catch (err) {
       console.error('[meta-connect] failed:', err instanceof Error ? err.message : err)
       redirect('/app/channels/messenger/connect?error=connect_failed')
@@ -186,6 +193,7 @@ export default async function ConnectMessengerPage({
     .select('id, display_name, avatar_url, external_account_id, bot_id, status')
     .eq('org_id', orgId)
     .eq('provider', 'messenger')
+    .neq('status', 'disconnected')
     .order('updated_at', { ascending: false })
     .limit(1)
     .maybeSingle<{
@@ -235,10 +243,10 @@ export default async function ConnectMessengerPage({
 
       {!entitled ? (
         <div className="rounded-xl border bg-card p-5">
-          <p className="font-medium">Messenger isn’t available on your account yet</p>
+          <p className="font-medium">Add Messenger to connect your Page</p>
           <p className="mt-1 text-sm text-muted-foreground">
-            We’re waiting on Facebook to approve the Loqara app. You’ll be able to connect your
-            Page from the Subscription page as soon as it’s approved.
+            Enable the €19/month Messenger add-on from Subscription, then return here to
+            choose your Facebook Page and chatbot.
           </p>
           <Link
             href="/app/subscription"
@@ -247,12 +255,12 @@ export default async function ConnectMessengerPage({
             Back to Subscription
           </Link>
         </div>
-      ) : connection ? (
+      ) : connection && connection.status !== 'disconnected' && pages.length === 0 ? (
         <div className="overflow-hidden rounded-xl border bg-card">
           <div className="flex items-center gap-3 border-b bg-green-50/60 px-5 py-4">
             <CheckCircle2Icon className="size-5 shrink-0 text-green-600" aria-hidden="true" />
             <p className="text-sm font-medium text-green-900">
-              Messenger is connected and answering
+              {connection.status === 'active' ? 'Messenger is connected' : 'Messenger needs attention'}
             </p>
           </div>
           <div className="flex flex-col gap-5 p-5">
@@ -277,13 +285,14 @@ export default async function ConnectMessengerPage({
                   Answered by <span className="font-medium text-foreground">{connectionBot?.name ?? 'your chatbot'}</span>
                 </p>
               </div>
-              <Badge className="bg-green-100 text-green-800 hover:bg-green-100">Active</Badge>
+              <Badge className="bg-green-100 text-green-800 hover:bg-green-100">{connection.status === 'active' ? 'Active' : 'Reconnect required'}</Badge>
             </div>
             <div className="rounded-lg bg-muted/50 px-4 py-3 text-sm text-muted-foreground">
               Try it: send your Page a message from your personal Messenger — the bot replies in
               a few seconds. Conversations appear in your Inbox with a Messenger badge.
             </div>
             <div className="flex flex-wrap gap-2">
+              {connection.status !== 'active' && <a href="/api/channels/meta/oauth/start" className={buttonVariants()}>Reconnect with Facebook</a>}
               <Link href="/app/inbox" className={cn(buttonVariants(), 'h-10 px-5')}>
                 <InboxIcon className="size-4" aria-hidden="true" />
                 Open Inbox

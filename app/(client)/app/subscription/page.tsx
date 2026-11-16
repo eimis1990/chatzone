@@ -3,7 +3,7 @@ import { createServerClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { BillingPanel } from '@/components/client/BillingPanel'
 import { isStripeConfigured, getStripe, checkoutTaxParams } from '@/lib/stripe/client'
-import { getPriceId, getVoicePriceId, getVisualizerPriceId, getSetupPriceId, getExtraConversationsPriceId, PLANS, DISPLAY_PLANS, VOICE_ADDON, VISUALIZER_ADDON } from '@/lib/stripe/plans'
+import { getPriceId, getMessengerPriceId, getVoicePriceId, getVisualizerPriceId, getSetupPriceId, getExtraConversationsPriceId, PLANS, DISPLAY_PLANS, VOICE_ADDON, VISUALIZER_ADDON } from '@/lib/stripe/plans'
 import { EXTRA_CONVERSATIONS_ADDON } from '@/lib/plans-catalog'
 import { SETUP_PACKAGES } from '@/lib/setup-packages'
 import { ensureStripeCustomer, resetMissingStripeCustomer } from '@/lib/stripe/customer'
@@ -11,6 +11,7 @@ import { isMissingStripeCustomerError } from '@/lib/stripe/errors'
 import {
   changeBasePlan,
   setVoiceAddon,
+  setMessengerAddon,
   setVisualizerAddon,
   reconcileOrgFromStripe,
   activeSubscriptionId,
@@ -150,7 +151,7 @@ export default async function SubscriptionPage({
     }
   }
 
-  // Who may reach the Messenger connect flow while the Meta app is unpublished.
+  // Paid or explicitly granted Messenger access; the Meta app is published.
   const { data: channelOrg } = orgId
     ? await createServiceClient()
         .from('organizations')
@@ -333,6 +334,22 @@ export default async function SubscriptionPage({
     }
   }
 
+  async function setMessenger(enabled: boolean): Promise<{ ok?: boolean; url?: string; error?: string }> {
+    'use server'
+    await requireRole('client')
+    if (typeof enabled !== 'boolean') return { error: 'Invalid request.' }
+    const oid = (await getUserOrgIds())[0]
+    if (!oid) return { error: 'No organization found.' }
+    try {
+      const subscriptionId = await activeSubscriptionId(oid)
+      if (!subscriptionId) return { error: 'Add a paid plan first, then enable Messenger.' }
+      await setMessengerAddon(subscriptionId, enabled)
+      return enabled ? { ok: true, url: '/app/channels/messenger/connect' } : { ok: true }
+    } catch (err) {
+      return { error: err instanceof Error ? err.message : 'Could not update Messenger.' }
+    }
+  }
+
   /** Open the Stripe Billing Customer Portal (org verified). */
   async function openPortal(): Promise<{ url?: string; error?: string }> {
     'use server'
@@ -405,6 +422,9 @@ export default async function SubscriptionPage({
           features: [...VOICE_ADDON.features],
         }}
         messengerEntitled={messengerEntitled}
+        messengerConfigured={Boolean(getMessengerPriceId(billing.interval ?? 'month'))}
+        messengerPaid={Boolean(channelOrg?.messenger_addon) && isPaying}
+        setMessenger={setMessenger}
         visualizerActive={billing.visualizerActive}
         visualizerConfigured={Boolean(getVisualizerPriceId())}
         visualizer={{

@@ -1,4 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { hasMessengerAccess } from '@/lib/channels/access'
 import { getEnv } from '@/lib/env'
 import { createServiceClient } from '@/lib/supabase/service'
 import { sendTextMessage } from '@/lib/channels/meta'
@@ -76,6 +77,17 @@ export async function deliverAgentMessage(
 
   // Instagram DMs send through the linked Page's token via the same API.
   if (conv.channel === 'messenger' || conv.channel === 'instagram') {
+    if (conv.channel === 'messenger') {
+      const svc = createServiceClient()
+      const { data: connection, error } = await svc.from('channel_connections')
+        .select('org_id, status').eq('id', conv.channel_connection_id ?? '').maybeSingle()
+      if (error || !connection || connection.status !== 'active') return { ok: false, error: 'Messenger is disconnected or needs attention.' }
+      try {
+        if (!(await hasMessengerAccess(svc, connection.org_id))) return { ok: false, error: 'The Messenger add-on is inactive. Enable it in Subscription to reply.' }
+      } catch {
+        return { ok: false, error: 'Could not verify Messenger subscription. Please try again.' }
+      }
+    }
     const token = await connectionPageToken(conv.channel_connection_id)
     if (!token) return { ok: false, error: 'Channel sending is not configured' }
     try {

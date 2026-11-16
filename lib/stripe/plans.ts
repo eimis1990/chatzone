@@ -13,6 +13,11 @@ import {
 export { PLANS, PURCHASABLE_PLANS, DISPLAY_PLANS, POPULAR_PLAN, VOICE_ADDON, VISUALIZER_ADDON }
 export type { PlanMeta } from '@/lib/plans-catalog'
 
+/** Messenger follows the base plan's interval: €19/month or €228/year. */
+export function getMessengerPriceId(interval: BillingInterval = 'month'): string | null {
+  return process.env[interval === 'year' ? 'STRIPE_PRICE_MESSENGER_YEAR' : 'STRIPE_PRICE_MESSENGER_MONTH'] ?? null
+}
+
 /** Stripe Price ID for the Voice add-on (monthly), or null when not configured. */
 export function getVoicePriceId(): string | null {
   return process.env.STRIPE_PRICE_VOICE_MONTH ?? null

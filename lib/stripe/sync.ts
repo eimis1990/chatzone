@@ -1,7 +1,7 @@
 import 'server-only'
 import type Stripe from 'stripe'
 import { createServiceClient } from '@/lib/supabase/service'
-import { planFromPriceId, getVoicePriceId, getVisualizerPriceId } from './plans'
+import { planFromPriceId, getVoicePriceId, getVisualizerPriceId, getMessengerPriceId } from './plans'
 import { enforceActiveBotLimit } from '@/lib/bots/enforce-limit'
 import type { Plan, BillingInterval, SubscriptionStatus } from '@/lib/types'
 
@@ -51,9 +51,12 @@ export async function syncSubscriptionToOrg(sub: Stripe.Subscription): Promise<v
   let match: { plan: Plan; interval: BillingInterval } | null = null
   let hasVoice = false
   let hasVisualizer = false
+  const messengerPrices = [getMessengerPriceId(), getMessengerPriceId('year')].filter(Boolean)
+  let hasMessenger = false
   for (const it of items) {
     const pid = it.price?.id
     if (!pid) continue
+    if (messengerPrices.includes(pid) && (it.quantity ?? 0) > 0) hasMessenger = true
     if (voicePriceId && pid === voicePriceId) hasVoice = true
     if (visualizerPriceId && pid === visualizerPriceId) hasVisualizer = true
     const m = planFromPriceId(pid)
@@ -64,7 +67,7 @@ export async function syncSubscriptionToOrg(sub: Stripe.Subscription): Promise<v
   const plan: Plan = paying && match ? match.plan : 'free'
   const interval: BillingInterval | null = paying && match ? match.interval : null
 
-  const { data: updated } = await svc
+  const { data: updated, error: syncError } = await svc
     .from('organizations')
     .update({
       stripe_subscription_id: sub.id,
@@ -78,9 +81,12 @@ export async function syncSubscriptionToOrg(sub: Stripe.Subscription): Promise<v
       cancel_at_period_end: sub.cancel_at_period_end ?? false,
       voice_addon: paying && hasVoice,
       visualizer_addon: paying && hasVisualizer,
+      ...(messengerPrices.length ? { messenger_addon: paying && Boolean(match) && hasMessenger } : {}),
     })
     .eq('stripe_customer_id', customerId)
     .select('id')
+
+  if (syncError) throw new Error(`Could not sync subscription: ${syncError.message}`)
 
   // A downgrade can leave more active bots than the new plan allows — pause
   // the newest extras (never delete; the client can swap which stay active).

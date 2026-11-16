@@ -32,6 +32,7 @@ The self-serve catalog is EUR, tax-exclusive:
 | Scale | €449 | €4,490/year |
 | Voice agent | €49 | — |
 | Product visualizer | €29 | — |
+| Messenger (one Facebook Page) | €19 | €228/year |
 | Voice overage | €0.20/min | metered monthly |
 | Setup — Essential | — | €749 once |
 | Setup — E-commerce | — | €995 once |
@@ -40,6 +41,23 @@ Stable product metadata and price lookup keys make catalog provisioning
 idempotent (`scripts/stripe-setup.mjs:79`, `scripts/stripe-setup.mjs:97`). Voice
 overage uses the `voice_overage_minutes` Billing Meter
 (`scripts/setup-stripe-voice-overage.mjs:17`).
+
+## Messenger launch — 2026-11-16
+
+Live product `prod_VdbmUXby8wFy3E`; monthly price
+`price_1UcKYnBPga6Qu0zHDwnqwPu6`, yearly `price_1UcKYnBPga6Qu0zHX6th7ny6`.
+Lookup keys: `loqara_messenger_month` / `loqara_messenger_year`. Both preserve
+existing SaaS tax code and exclusive tax behavior. Production env names are
+`STRIPE_PRICE_MESSENGER_MONTH` / `STRIPE_PRICE_MESSENGER_YEAR`; provision separate
+sandbox prices before testing real Stripe calls locally (`lib/stripe/plans.ts:17`).
+
+`setMessengerAddon` adds/removes only the Messenger item, prorates through the
+existing subscription, and synchronizes immediately; webhooks reconcile later.
+No-op calls also heal missed syncs. Database sync errors throw so Stripe can retry.
+An active recognized base plan is required, and annual plan changes swap both
+items together (`lib/stripe/manage.ts:79`, `lib/stripe/manage.ts:151`,
+`lib/stripe/sync.ts:84`). Removing the item stops both bot and human Messenger
+replies while keeping conversation history. See [channels](messaging-channels.md).
 
 ## Environment separation
 

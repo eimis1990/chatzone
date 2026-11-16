@@ -76,6 +76,9 @@ interface BillingPanelProps {
   visualizer: { name: string; monthly: number; blurb: string; features: string[] }
   /** Whether this org may reach the Messenger connect flow (see lib/channels/entitlement.ts). */
   messengerEntitled?: boolean
+  messengerConfigured?: boolean
+  messengerPaid?: boolean
+  setMessenger?: (enabled: boolean) => Promise<{ ok?: boolean; url?: string; error?: string }>
   extraConversationsConfigured?: boolean
   /** Top-up conversations already purchased for the current month. */
   extraConversationsCredits?: number
@@ -229,6 +232,9 @@ export function BillingPanel({
   visualizerConfigured,
   visualizer,
   messengerEntitled = false,
+  messengerConfigured = false,
+  messengerPaid = false,
+  setMessenger,
   extraConversationsConfigured = false,
   extraConversationsCredits = 0,
   extraConversations,
@@ -245,6 +251,7 @@ export function BillingPanel({
   const router = useRouter()
   const [annual, setAnnual] = useState(interval !== 'month')
   const [busy, setBusy] = useState<string | null>(null)
+  const [confirmMessenger, setConfirmMessenger] = useState<boolean | null>(null)
   const [confirmVoice, setConfirmVoice] = useState(false)
   const [confirmVisualizer, setConfirmVisualizer] = useState(false)
   const [, startTransition] = useTransition()
@@ -297,6 +304,20 @@ export function BillingPanel({
           await setVoice(enabled),
           enabled ? 'Voice agent added.' : 'Voice agent removed.',
         )
+      } finally {
+        setBusy(null)
+      }
+    })
+  }
+
+  const runMessenger = (enabled: boolean) => {
+    if (!setMessenger) return
+    setBusy('messenger')
+    startTransition(async () => {
+      try {
+        resolve(await setMessenger(enabled), enabled ? 'Messenger added.' : 'Messenger removed. Replies have stopped.')
+      } catch {
+        toast.error('Could not update Messenger. Please try again.')
       } finally {
         setBusy(null)
       }
@@ -847,41 +868,39 @@ export function BillingPanel({
                 }
               />
 
-              {/* Messenger channel — built, but Meta must approve the app before
-                  clients outside our Meta app roles can complete the connect flow. */}
+              {/* Published Messenger: purchase first, then connect a Page. */}
               <AddOnCard
                 image="/addons/fox-addon-messenger-v2.webp"
                 title="Messenger"
                 description="Let your bot answer your Facebook Page's messages."
                 price="€19"
                 priceSuffix="/ month"
+                priceNote={interval === 'year' ? '€228 billed yearly with your plan' : 'Billed with your plan'}
                 features={[
-                  'AI answers on your Facebook Page',
+                  'AI answers on one Facebook Page',
                   'Human takeover from the Inbox',
                   'Connect in minutes — no setup fee',
                 ]}
-                status={messengerEntitled ? 'available' : 'coming'}
-                helper={
-                  messengerEntitled
-                    ? 'Connect a Facebook Page to one of your bots'
-                    : 'Waiting on Facebook app approval'
-                }
-                action={
-                  messengerEntitled ? (
-                    <Link
-                      href="/app/channels/messenger/connect"
-                      className={cn(buttonVariants({ size: 'lg' }), 'h-11 w-full rounded-xl')}
-                    >
+                status={messengerEntitled ? 'active' : 'available'}
+                helper={messengerEntitled
+                  ? 'Connect or manage your Facebook Page'
+                  : !isPaying ? 'Choose a paid plan to add Messenger'
+                    : messengerConfigured ? 'Connect your Page after adding Messenger'
+                      : 'Billing setup is temporarily unavailable — contact support'}
+                action={messengerEntitled ? (
+                  <div className="flex flex-col gap-2">
+                    <Link href="/app/channels/messenger/connect" className={cn(buttonVariants({ size: 'lg' }), 'h-11 w-full rounded-xl')}>
                       <MessageCircleIcon data-icon="inline-start" aria-hidden="true" />
-                      Connect Messenger
+                      Connect / manage Messenger
                     </Link>
-                  ) : (
-                    <Button className="h-11 w-full rounded-xl" size="lg" variant="outline" disabled>
-                      <Clock3Icon data-icon="inline-start" aria-hidden="true" />
-                      Coming soon
-                    </Button>
-                  )
-                }
+                    {messengerPaid && <Button variant="outline" disabled={anyBusy} onClick={() => setConfirmMessenger(false)}>Remove Messenger</Button>}
+                  </div>
+                ) : (
+                  <Button className="h-11 w-full rounded-xl" size="lg" disabled={anyBusy || !isPaying || !messengerConfigured || !setMessenger} onClick={() => setConfirmMessenger(true)}>
+                    {busy === 'messenger' ? <Loader2Icon className="animate-spin" aria-hidden="true" /> : <PlusIcon aria-hidden="true" />}
+                    Add Messenger
+                  </Button>
+                )}
               />
 
               {/* Instagram channel — coming soon */}
@@ -1048,6 +1067,25 @@ export function BillingPanel({
           </p>
         </>
       )}
+
+      <Dialog open={confirmMessenger !== null} onOpenChange={(open) => { if (!open) setConfirmMessenger(null) }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{confirmMessenger ? 'Add Messenger?' : 'Remove Messenger?'}</DialogTitle>
+            <DialogDescription>
+              {confirmMessenger
+                ? `Add one Facebook Page connection for ${interval === 'year' ? '€228/year (€19/month)' : '€19/month'}, plus applicable tax. The remaining billing period is prorated on your subscription. Next, you’ll sign in with Facebook and choose your Page and chatbot.`
+                : 'Messenger replies stop immediately. Past conversations stay in your Inbox, and the unused portion is prorated on your subscription. You can add Messenger again later.'}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" disabled={anyBusy} onClick={() => setConfirmMessenger(null)}>Cancel</Button>
+            <Button disabled={anyBusy} onClick={() => { const enabled = confirmMessenger; setConfirmMessenger(null); if (enabled !== null) runMessenger(enabled) }}>
+              {confirmMessenger ? 'Add and connect' : 'Remove Messenger'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Confirm adding the Product visualizer add-on (extra recurring charge). */}
       <Dialog open={confirmVisualizer} onOpenChange={setConfirmVisualizer}>

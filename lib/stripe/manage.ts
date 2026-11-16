@@ -3,7 +3,7 @@ import type Stripe from 'stripe'
 import { requireStripe, getStripe } from './client'
 import { resetMissingStripeCustomer } from './customer'
 import { isMissingStripeCustomerError } from './errors'
-import { getVoicePriceId, getVoiceOveragePriceId, getVisualizerPriceId, planFromPriceId } from './plans'
+import { getVoicePriceId, getVoiceOveragePriceId, getVisualizerPriceId, getMessengerPriceId, planFromPriceId } from './plans'
 import { syncSubscriptionToOrg } from './sync'
 import { createServiceClient } from '@/lib/supabase/service'
 
@@ -83,7 +83,7 @@ export async function changeBasePlan(subscriptionId: string, newPriceId: string)
   // Exclude every add-on price when locating the base item — otherwise the
   // fallback could mistake an add-on for the plan and "upgrade" it away.
   const addonPriceIds = new Set(
-    [getVoicePriceId(), getVoiceOveragePriceId(), getVisualizerPriceId()].filter(Boolean),
+    [getVoicePriceId(), getVoiceOveragePriceId(), getVisualizerPriceId(), getMessengerPriceId(), getMessengerPriceId('year')].filter(Boolean),
   )
   const sub = await stripe.subscriptions.retrieve(subscriptionId)
   const notAddon = (i: { price?: { id?: string } | null }) => !addonPriceIds.has(i.price?.id ?? '')
@@ -92,8 +92,16 @@ export async function changeBasePlan(subscriptionId: string, newPriceId: string)
     sub.items.data.find(notAddon)
   if (!baseItem) throw new Error('No base plan item found on the subscription.')
 
+  const messengerIds = [getMessengerPriceId(), getMessengerPriceId('year')].filter(Boolean)
+  const messenger = sub.items.data.find((item) => messengerIds.includes(item.price.id))
+  const newInterval = planFromPriceId(newPriceId)?.interval
+  const messengerPrice = newInterval ? getMessengerPriceId(newInterval) : null
+  if (messenger && !messengerPrice) throw new Error('Messenger price is not configured for that billing interval.')
   const updated = await stripe.subscriptions.update(subscriptionId, {
-    items: [{ id: baseItem.id, price: newPriceId }],
+    items: [
+      { id: baseItem.id, price: newPriceId },
+      ...(messenger && messengerPrice ? [{ id: messenger.id, price: messengerPrice, quantity: 1 }] : []),
+    ],
     proration_behavior: 'create_prorations',
   })
   await syncSubscriptionToOrg(updated)
@@ -137,4 +145,28 @@ export async function setVisualizerAddon(subscriptionId: string, enabled: boolea
   const priceId = getVisualizerPriceId()
   if (!priceId) throw new Error('Product visualizer add-on price is not configured.')
   await setAddonItem(subscriptionId, priceId, enabled)
+}
+
+/** One paid Messenger Page per org. Changes follow the existing base-plan interval. */
+export async function setMessengerAddon(subscriptionId: string, enabled: boolean): Promise<void> {
+  const stripe = requireStripe()
+  const sub = await stripe.subscriptions.retrieve(subscriptionId)
+  if (!PAYING_STATUSES.includes(sub.status)) throw new Error('An active paid plan is required.')
+  const base = sub.items.data.map((item) => planFromPriceId(item.price.id)).find(Boolean)
+  if (!base) throw new Error('A paid Loqara plan is required.')
+  const priceId = getMessengerPriceId(base.interval)
+  if (!priceId) throw new Error('Messenger add-on price is not configured.')
+  const ids = [getMessengerPriceId(), getMessengerPriceId('year')].filter(Boolean)
+  const existing = sub.items.data.filter((item) => ids.includes(item.price.id))
+  if ((enabled && existing.length) || (!enabled && !existing.length)) {
+    // Heal a missed webhook even when Stripe already has the requested state.
+    await syncSubscriptionToOrg(sub)
+    return
+  }
+  const updated = await stripe.subscriptions.update(subscriptionId, {
+    items: enabled ? [{ price: priceId, quantity: 1 }] : existing.map((item) => ({ id: item.id, deleted: true })),
+    proration_behavior: 'create_prorations',
+    payment_behavior: 'error_if_incomplete',
+  })
+  await syncSubscriptionToOrg(updated)
 }

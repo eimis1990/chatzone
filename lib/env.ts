@@ -24,6 +24,8 @@ const envSchema = z.object({
   // Optional: enables Stripe billing. Checkout/portal/webhook degrade
   // gracefully (503) when these are absent, so the app runs without billing.
   STRIPE_SECRET_KEY: z.string().min(1).optional(),
+  STRIPE_PRICE_MESSENGER_MONTH: z.string().min(1).optional(),
+  STRIPE_PRICE_MESSENGER_YEAR: z.string().min(1).optional(),
   STRIPE_WEBHOOK_SECRET: z.string().min(1).optional(),
   // Set to "true" ONLY after Stripe Tax is enabled in the Stripe dashboard
   // (origin address + registrations). Turns on automatic tax calculation,

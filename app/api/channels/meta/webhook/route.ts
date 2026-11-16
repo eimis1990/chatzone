@@ -9,6 +9,7 @@ import {
   sendTextMessage,
   type InboundTextMessage,
 } from '@/lib/channels/meta'
+import { hasMessengerAccess } from '@/lib/channels/access'
 import { processChannelMessage } from '@/lib/channels/processor'
 import { connectionPageToken } from '@/lib/channels/outbound'
 import { isOverConversationLimit } from '@/lib/usage'
@@ -99,6 +100,10 @@ async function handleInbound(svc: SupabaseClient, msg: InboundTextMessage) {
     // Keep the unmatched account id — it's the diagnostic for "why didn't my
     // channel answer" and the easiest way to learn a new account's id.
     await finish('skipped', undefined, `no active connection for ${msg.provider}:${msg.accountId}`)
+    return
+  }
+  if (msg.provider === 'messenger' && !(await hasMessengerAccess(svc, connection.org_id))) {
+    await finish('skipped', connection.id, 'Messenger add-on is inactive')
     return
   }
   const { data: bot } = await svc
