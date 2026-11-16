@@ -4,7 +4,7 @@ description: An honest look at using ChatGPT for customer service — what it do
 date: 2026-07-07
 topic: ai-customer-support
 related: conversational-ai-vs-chatbot, prevent-ai-chatbot-hallucinations, how-to-choose-ai-support-agent
-updated: 2026-07-21
+updated: 2026-11-16
 author: Eimantas Kudarauskas
 image: /blog/chatgpt-for-customer-service.webp
 ---
@@ -91,7 +91,7 @@ That's the whole difference: same excellent model, but constrained to the truth 
 
 <p style="font-size:0.8125rem;color:#6b7280;margin-top:-0.5rem"><em>"Raw ChatGPT" here means the model used as-is, without a grounding and integration layer built around it. Capabilities depend on how you deploy it and on your OpenAI plan; check OpenAI's current terms.</em></p>
 
-Loqara is one example of this pattern: grounded chat *and* voice in a single widget, built on top of leading language models, answering from approved store content with sources and searching connected catalogs. WooCommerce and Magento stores can also enable identity-checked order lookup; Shopify, Verskis, and feed stores cannot today. Install is one line. See where it sits among the [best AI chatbots for e-commerce](/blog/best-ai-chatbot-for-ecommerce).
+Loqara is one example of this pattern: grounded chat *and* voice in a single widget, built on top of leading language models, answering from approved store content with sources and searching connected catalogs. WooCommerce and Magento stores on Starter and above can also enable identity-checked order lookup; Shopify, Verskis, and feed stores cannot today. Install is one line. See where it sits among the [best AI chatbots for e-commerce](/blog/best-ai-chatbot-for-ecommerce).
 
 ## Is it safe to put customer data into ChatGPT?
 
@@ -107,7 +107,7 @@ It comes down to what you're trying to do:
 - **A quick, self-contained Q&A bot with a handful of docs, for internal or low-stakes use** → a custom GPT can work.
 - **A customer-facing agent on your storefront that answers correctly, looks up orders, searches your catalog, and hands off to a human** → you want a grounded agent — either built yourself on the API, or an off-the-shelf tool that already has.
 
-If you have the engineering time and want full control, building on the API is a legitimate path. If you'd rather not spend weeks on retrieval, integrations, guardrails, and handoff, that's exactly the work Loqara has already done — priced per conversation, with a real free tier of 100 conversations a month to test on your own traffic, and voice as an optional add-on.
+If you have the engineering time and want full control, building on the API is a legitimate path. If you'd rather not spend weeks on retrieval, integrations, guardrails, and handoff, that's exactly the work Loqara has already done — priced per conversation, with a real free tier of 50 conversations a month to test on your own traffic, and voice as an optional add-on.
 
 ## Frequently asked questions
 
@@ -136,6 +136,6 @@ Some can. Loqara, for instance, offers grounded chat and a real-time voice agent
 
 **The honest bottom line:** you can absolutely use ChatGPT for customer service, and the model behind it is superb — that was never the issue. For a store, the missing pieces are grounding, integration, and guardrails: answering only from your content, looking up real orders, searching your live catalog, and handing off cleanly to a human. Get those, and you get the best of the model without the risk of a bot inventing your return policy.
 
-[Try Loqara free on your store](/#get-started) — grounded chat and voice, one line to install, 100 conversations a month free, no credit card.
+[Try Loqara free on your store](/#get-started) — 50 grounded text conversations a month, one bot, one language, no credit card. Basic adds product search and handoff; voice is a separate add-on on paid plans.
 
 *OpenAI's product tiers and data-handling terms change; details here are directional and as of mid-2026 — check OpenAI's current documentation before deciding.*

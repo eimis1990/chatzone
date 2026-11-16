@@ -4,21 +4,23 @@ description: Tidio is a great starter chat tool, but its Lyro AI is a paid add-o
 date: 2026-06-27
 topic: vendor-comparisons
 related: tidio-vs-zendesk, gorgias-alternatives-for-ecommerce, how-much-does-ai-chatbot-cost
-updated: 2026-07-21
+updated: 2026-11-16
 author: Eimantas Kudarauskas
 image: /blog/tidio-alternatives-for-ecommerce.webp
 ---
+
+*Loqara plan details updated 16 November 2026. Other vendors’ details retain their stated review dates; check their current pricing before buying.*
 
 Tidio is one of the most popular live-chat tools for small businesses, and for good reason: its visual flow builder is genuinely pleasant to use, the widget looks clean, and you can be answering customers within an hour. If you want friendly live chat with some drag-and-drop automation, Tidio does the job well and we won't pretend otherwise.
 
 The friction shows up later. The moment you actually want **AI** answering customers — not scripted flows you maintain by hand, but an agent that reads a question and replies from your real policies and catalog — Tidio's economics shift. Its Lyro AI is a separate paid add-on rather than the heart of the product — starting at around $32.50/month for 50 AI conversations ([Tidio pricing](https://www.tidio.com/pricing/)) — and the tiers jump steeply as you grow. So stores outgrow Tidio not because it's bad, but because they came for chat and now need *grounded AI included*, not bolted on. Here's an honest look at the alternatives — including where staying on Tidio is the right call.
 
-<blockquote class="quick-answer">For most stores that came to Tidio for chat but now need real AI, the best alternative is <strong>Loqara</strong>: grounded AI chat <em>and</em> voice included from the start, live product search, supported-store order lookup, and predictable per-conversation pricing with a real monthly free tier. Stay on Tidio if you mainly want live chat with hand-built flows and don't yet need AI doing the heavy lifting.</blockquote>
+<blockquote class="quick-answer">For most stores that came to Tidio for chat but now need real AI, the best alternative is <strong>Loqara</strong>: grounded AI chat with optional paid voice, live product search, supported-store order lookup, and predictable per-conversation pricing with a real monthly free tier. Stay on Tidio if you mainly want live chat with hand-built flows and don't yet need AI doing the heavy lifting.</blockquote>
 
 <div class="takeaways">
 <p class="takeaways-title">Quick take</p>
 <ul>
-<li><strong>Best Tidio alternative for most stores:</strong> Loqara — grounded AI chat <em>and</em> voice included from the start, live product search, WooCommerce/Magento order lookup, a real monthly free tier, and predictable per-conversation pricing.</li>
+<li><strong>Best Tidio alternative for most stores:</strong> Loqara — grounded AI chat with optional paid voice, live product search, WooCommerce/Magento order lookup, a real monthly free tier, and predictable per-conversation pricing.</li>
 <li><strong>Best for established support teams:</strong> Gorgias — a mature e-commerce helpdesk, though its AI is billed per resolution.</li>
 <li><strong>Best classic multichannel inbox:</strong> Re:amaze — shared inbox with native order actions and lighter AI.</li>
 <li><strong>Best for larger orgs:</strong> Intercom (Fin) or Zendesk — premium suites priced per resolution or per agent.</li>
@@ -52,7 +54,7 @@ A side-by-side before the detail. "Store actions" means native product search an
 
 | Tool | Built-in AI | Store actions | Voice | Pricing model | Best fit |
 | --- | --- | --- | --- | --- | --- |
-| **Loqara** | Grounded, included | Product search; order lookup on WooCommerce/Magento | Yes (add-on) | Per conversation, real free tier | Stores wanting AI (and maybe voice) included |
+| **Loqara** | Grounded, included | Product search: Basic+; WooCommerce/Magento order lookup: Starter+ | Yes (add-on) | Free: 50/month; Basic: €49/month, 400 | Stores wanting AI + optional paid voice |
 | **Tidio** | Lyro (paid add-on) | Order lookup | No | Per conversation + Lyro add-on | Beginners who love flow-building |
 | **Gorgias** | Billed per resolution | Order edits + returns | Add-on (phone) | Ticket tiers + per AI resolution | Established multichannel teams |
 | **Re:amaze** | Basic, included | Native order actions | No | Per seat | Mid-size multichannel stores |
@@ -66,12 +68,14 @@ A side-by-side before the detail. "Store actions" means native product search an
 
 ### Loqara — AI chat and voice in one widget *(that's us)*
 
-<p class="pills"><span class="pill pill-best">Best for: stores that want AI included</span><span class="pill">Free tier: 100 chats/mo</span><span class="pill">Chat + voice</span></p>
+<p class="pills"><span class="pill pill-best">Best for: stores that want AI included</span><span class="pill">Free tier: 50 chats/mo</span><span class="pill">Chat + voice</span></p>
 
-Where Tidio treats AI as an add-on, Loqara is AI-first. It answers from your own content with citations and searches connected catalogs inside one widget you install with a single line. Identity-checked order lookup currently works on WooCommerce and Magento, but not Shopify, Verskis, or generic-feed stores. Product search connects to [WooCommerce](/blog/add-ai-agent-to-woocommerce), [Shopify](/blog/best-ai-chatbot-for-shopify), Magento, Verskis, and supported feeds. Loqara also offers a real-time [voice agent](/blog/voice-ai-for-ecommerce-support) in the same chat widget—in English or Lithuanian. Pricing is per conversation rather than per "resolution," and the free tier of 100 conversations runs *every month*, not as a one-time bucket—so you prove the value on real traffic before paying.
+Where Tidio treats AI as an add-on, Loqara is AI-first. It answers from your own content with citations and searches connected catalogs inside one widget you install with a single line. Identity-checked order lookup currently works on WooCommerce and Magento, but not Shopify, Verskis, or generic-feed stores. Product search connects to [WooCommerce](/blog/add-ai-agent-to-woocommerce), [Shopify](/blog/best-ai-chatbot-for-shopify), Magento, Verskis, and supported feeds. Loqara also offers a real-time [voice agent](/blog/voice-ai-for-ecommerce-support) in the same chat widget—in English or Lithuanian. Pricing is per conversation rather than per "resolution," and the free tier of 50 conversations runs *every month*, not as a one-time bucket—so you prove the value on real traffic before paying.
+
+[Loqara plans](/#pricing): Free includes 50 conversations a month, one bot, one language, and basic activity analytics. **Basic is €49/month or €490/year** for 400 conversations, live product search, human handoff, lead capture, voice dictation, and full analytics with CSAT. Basic keeps the Loqara badge and one-language limit. Starter (€149/month) adds a second bot, both supported languages, badge removal, and identity-checked order lookup on WooCommerce and Magento. Voice calls are a separate paid add-on; Free does not include live commerce, leads, or handoff.
 
 <div class="proscons">
-<div class="pros"><p class="pc-title">Strengths</p><ul><li>Grounded answers with citations — no invented policies</li><li>Live product search across connected catalogs</li><li>Identity-checked order lookup on WooCommerce and Magento</li><li>Chat <em>and</em> voice in the same widget</li><li>Connectors for WooCommerce, Shopify, Magento, plus product feed</li><li>One-line embed, live the same day</li><li>Shared-inbox <a href="/blog/ai-chatbot-human-handoff">live human handoff</a>, analytics, and CSAT included</li><li>Predictable per-conversation pricing, real 100/mo free tier</li></ul></div>
+<div class="pros"><p class="pc-title">Strengths</p><ul><li>Grounded answers with citations — no invented policies</li><li>Live product search on Basic and above</li><li>WooCommerce/Magento order lookup on Starter and above</li><li>Chat and optional paid voice in the same widget</li><li>Connectors for WooCommerce, Shopify, Magento, plus product feed</li><li>One-line embed, live the same day</li><li>Shared-inbox <a href="/blog/ai-chatbot-human-handoff">live human handoff</a>, full analytics, and CSAT on Basic+</li><li>Predictable per-conversation pricing, real 50/mo free tier</li></ul></div>
 <div class="cons"><p class="pc-title">Watch-outs</p><ul><li>Not a full email/social ticketing suite — it's an AI agent + live chat</li><li>Newer than the incumbents below</li><li>Voice is a paid add-on on top of the base plan</li></ul></div>
 </div>
 
@@ -107,14 +111,14 @@ Powerful and endlessly configurable — plans run $19–$115+ per agent/month wi
 
 <div class="callout">
 <p class="callout-title">AI as a paid add-on vs AI included</p>
-<p>This is the real difference between Tidio (and most tools above) and an AI-first tool. With an add-on model you pay for the chat platform, then pay again for AI, and the meter ticks up as you grow — so the all-in cost is hard to predict. With AI <strong>included</strong>, grounded answers, product search, and order lookup are simply part of the plan. Before you commit, model your real monthly volume against each pricing unit: a "resolution" is defined by the vendor and can fire generously, while a "conversation" is one customer thread. Our <a href="/blog/how-to-choose-ai-support-agent">buyer's checklist</a> walks through the questions that decide it.</p>
+<p>This is the real difference between Tidio (and most tools above) and an AI-first tool. With an add-on model you pay for the chat platform, then pay again for AI, and the meter ticks up as you grow — so the all-in cost is hard to predict. With AI <strong>included</strong>, grounded answers are included in every Loqara plan; product search starts on Basic, and WooCommerce/Magento order lookup starts on Starter. Before you commit, model your real monthly volume against each pricing unit: a "resolution" is defined by the vendor and can fire generously, while Loqara counts text sessions, with a new session after 24 hours of inactivity or at the start of a new UTC month. Our <a href="/blog/how-to-choose-ai-support-agent">buyer's checklist</a> walks through the questions that decide it.</p>
 </div>
 
 ## How to choose your Tidio alternative
 
 Match the tool to your stage, not the longest feature list:
 
-- **You want grounded AI (and maybe voice) included, with predictable cost** → Loqara.
+- **You want grounded AI with optional paid voice and predictable cost** → Loqara.
 - **You're a busy multichannel team that lives in an inbox** → Gorgias.
 - **You want a classic shared inbox with native order actions and lighter AI** → Re:amaze.
 - **You're a larger org happy in a premium suite** → Intercom or Zendesk.
@@ -131,11 +135,11 @@ Not in the way most people expect. Tidio's free plan includes only a small, one-
 
 ### What is the best Tidio alternative for AI support?
 
-For most e-commerce stores, Loqara is the closest match because AI is included rather than sold as an add-on. It gives grounded answers with citations, searches connected catalogs, supports identity-checked order lookup on WooCommerce and Magento, and adds an optional voice agent—with a real free tier of 100 conversations a month. Larger support teams may prefer Gorgias or Intercom, which are heavier but built for high-volume multichannel ticketing.
+For most e-commerce stores, Loqara is the closest match because AI is included rather than sold as an add-on. It gives grounded answers with citations, searches connected catalogs, supports identity-checked order lookup on WooCommerce and Magento, and adds an optional voice agent—with a real free tier of 50 conversations a month. Larger support teams may prefer Gorgias or Intercom, which are heavier but built for high-volume multichannel ticketing.
 
 ### Is there a Tidio alternative with a real free tier?
 
-Yes. Loqara's free plan includes 100 conversations every month — a recurring allowance, not a one-time trial bucket — so you can run real traffic through it before paying. That differs from free plans that hand you a fixed lifetime number of AI replies and then stop, which is what catches stores off guard.
+Yes. Loqara's free plan includes 50 conversations every month — a recurring allowance, not a one-time trial bucket — so you can run real traffic through it before paying. That differs from free plans that hand you a fixed lifetime number of AI replies and then stop, which is what catches stores off guard.
 
 ### Do these chatbots connect to WooCommerce, Shopify, and Magento?
 

@@ -2,6 +2,7 @@
 title: "Why your products don’t appear in ChatGPT Shopping (and how to fix it)"
 description: "Diagnose missing products in ChatGPT Shopping across Shopify Catalog, direct feeds, crawler access, eligibility, variants, freshness, relevance, and market setup."
 date: 2026-10-19
+updated: 2026-11-16
 topic: ai-search-visibility
 author: Eimantas Kudarauskas
 authorRole: Founder
@@ -236,6 +237,8 @@ Loqara does not enroll merchants in OpenAI commerce, upload direct feeds to Open
 
 Loqara helps customers once they reach the merchant’s own storefront. It can search supported connected catalogs, answer from approved product and policy knowledge, preserve context, capture leads, and hand uncertain questions to a person.
 
+Live product search and human handoff require [Basic or above](/#pricing). Basic costs €49/month or €490/year and includes 400 conversations, one bot, and one language. Free offers 50 knowledge-based conversations a month, without live commerce or handoff.
+
 The useful overlap is diagnostic: shopper conversations reveal missing attributes, recurring comparison questions, ambiguous variants, and policy gaps. Those findings can improve both the onsite assistant and the product source supplied to external discovery systems.
 
 ## Frequently asked questions
@@ -272,4 +275,4 @@ No. Loqara is an onsite commerce assistant, not an OpenAI merchant-enrollment or
 
 **The practical next step:** choose one missing product and trace it through all seven layers. When the source, eligibility, exact variant, page access, market, freshness, and qualifying attributes are known, the problem becomes a testable catalog issue instead of a vague ranking mystery.
 
-[Try Loqara free](/#get-started) to learn which product questions shoppers still cannot answer after they reach your store.
+[See Loqara on your store](/#get-started) to learn which product questions shoppers still cannot answer after they reach your store.

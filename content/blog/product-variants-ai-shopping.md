@@ -2,6 +2,7 @@
 title: "Product variants for AI shopping: structure sizes, colours, and SKUs"
 description: "Learn how to structure product variants for AI shopping with stable SKUs, group IDs, variant URLs, ProductGroup schema, live stock, and practical validation."
 date: 2026-08-05
+updated: 2026-11-16
 topic: ai-search-visibility
 author: Eimantas Kudarauskas
 authorRole: Founder
@@ -233,6 +234,8 @@ Test the catalogue like a cautious shopper, not only like a feed validator.
 
 Loqara can search products from supported connected commerce platforms and present current product results inside an on-site conversation. The exact fields available depend on what the store and provider expose.
 
+Live product search and human handoff require [Basic or above](/#pricing). Basic costs €49/month or €490/year and includes 400 conversations, one bot, and one language. Free offers 50 knowledge-based conversations a month, without live commerce or handoff.
+
 Loqara should not invent missing variant relationships, compatibility, stock, or attribute values. When an exact choice cannot be verified, the safe path is clarification, an explicitly labelled alternative, or human handoff.
 
 The merchant remains responsible for the source catalogue, variant structure, page experience, destination feeds, and product claims. Better variant data improves both on-site assistance and external shopping discovery; it is not a guarantee of visibility in either system.
@@ -271,4 +274,4 @@ It should not silently choose when the missing attribute changes fit, compatibil
 
 **The practical next step:** choose one variant-heavy product family and trace every child from source catalogue to feed, structured data, URL state, image, price, and live stock.
 
-[Try Loqara free](/#get-started) with real variant questions and verify that every recommended item is the exact purchasable option the shopper requested.
+[See Loqara on your store](/#get-started) with real variant questions and verify that every recommended item is the exact purchasable option the shopper requested.

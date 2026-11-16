@@ -2,6 +2,7 @@
 title: "AI chatbot for fashion stores: help shoppers choose size and fit"
 description: "Learn how a fashion-store AI chatbot can guide size, fit, fabric, and variant choices without pretending it can guarantee how a garment will feel."
 date: 2026-08-14
+updated: 2026-11-16
 topic: ecommerce-ai
 author: Eimantas Kudarauskas
 authorRole: Founder
@@ -157,7 +158,7 @@ Include adjacent sizes, mixed EU/UK/US labels, unisex products, petite and tall 
 
 ## What can Loqara do—and what remains separate?
 
-Loqara can:
+On [Basic and above](/#pricing), Loqara can:
 
 - search current products in supported connected stores;
 - ask conversational questions about intended fit, use, colour, budget, and preferences;
@@ -212,4 +213,4 @@ It should not. The assistant can explain the published policy and help avoid obv
 
 **The honest bottom line:** a fashion assistant earns trust by showing why a size may suit the shopper—and by admitting the measurements it does not have.
 
-[Try Loqara free](/#get-started) with one fit-heavy category, current variants, and a size chart your team would confidently use with a customer.
+[See Loqara on your store](/#get-started) with one fit-heavy category, current variants, and a size chart your team would confidently use with a customer.

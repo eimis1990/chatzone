@@ -2,6 +2,7 @@
 title: "Google AI Mode shopping: how e-commerce stores can prepare"
 description: Learn how products appear in Google AI Mode shopping, which catalog and page signals matter, and what merchants should fix before conversational search grows.
 date: 2026-07-15
+updated: 2026-11-16
 topic: ai-search-visibility
 author: Eimantas Kudarauskas
 image: /blog/google-ai-mode-shopping-ecommerce.webp
@@ -184,4 +185,4 @@ It is one part of GEO. Generative engine optimisation makes content easy for AI 
 
 **The honest bottom line:** Google AI Mode does not require a new kind of marketing fiction. It rewards a more complete version of the truth your product pages and feeds should already contain.
 
-When those shoppers reach your store, [Loqara](/#get-started) can answer the next question from your real catalog and policies — with a free tier for testing it on live traffic.
+When those shoppers reach your store, [Loqara](/#get-started) can answer from your approved policies on Free (50 conversations a month). Live catalog search and human handoff start on [Basic](/#pricing), at €49/month or €490/year for 400 conversations.

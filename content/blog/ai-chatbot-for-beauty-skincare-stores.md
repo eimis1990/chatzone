@@ -2,6 +2,7 @@
 title: "AI chatbot for beauty and skincare stores: guide without medical claims"
 description: "Learn how a beauty-store AI chatbot can compare published ingredients, textures, fragrance, routines, and preferences without diagnosing skin or promising treatment."
 date: 2026-07-25
+updated: 2026-11-16
 topic: ecommerce-ai
 author: Eimantas Kudarauskas
 authorRole: Founder
@@ -173,7 +174,7 @@ Do not suggest a different active ingredient, diagnose the reaction, rank treatm
 
 ## What can Loqara do for a beauty store?
 
-Loqara can:
+On [Basic and above](/#pricing), Loqara can:
 
 - answer from approved product, ingredient, routine, policy, and help content;
 - search current products in supported connected commerce platforms;
@@ -270,4 +271,4 @@ Loqara supports product search for connected Shopify, WooCommerce, Magento, and 
 
 **The honest bottom line:** a beauty assistant should make the product label easier to use, not act as if it can read the shopper’s body.
 
-[Try Loqara free](/#get-started) with one non-medical beauty journey, exact formula data, and a clear professional-help boundary.
+[See Loqara on your store](/#get-started) with one non-medical beauty journey, exact formula data, and a clear professional-help boundary.

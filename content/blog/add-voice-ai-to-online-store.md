@@ -2,7 +2,7 @@
 title: How to add a voice AI agent to your online store
 description: A practical, step-by-step guide to adding a real-time voice AI agent to your online store — how it works, the setup steps, honest limits, and what it costs.
 date: 2026-07-10
-updated: 2026-07-21
+updated: 2026-11-16
 topic: voice-ai
 related: ai-voice-agents-explained, voice-ai-for-ecommerce-support, ai-chatbot-for-online-store
 author: Eimantas Kudarauskas
@@ -21,7 +21,7 @@ This is the practical version of that idea: what a store voice agent is, why it'
 <li><strong>Voice is a channel, not a new brain</strong> — it runs on the same grounded agent as your text chat, answering only from your real content and store data.</li>
 <li><strong>Setup is mostly configuration, not integration:</strong> ground chat first, then flip voice on as an add-on and pick where it shows up.</li>
 <li><strong>It shines for hands-busy, accessibility, and higher-consideration shoppers</strong> — not for every store or every question.</li>
-<li><strong>In Loqara, voice is an optional paid add-on</strong> (around €49/month as of mid-2026) on top of the base per-conversation plan.</li>
+<li><strong>In Loqara, voice is an optional paid add-on</strong> (€49/month with about 200 minutes, then €0.20/minute) on top of a paid chat plan.</li>
 </ul>
 </div>
 
@@ -82,9 +82,9 @@ The pipeline sounds complicated but is simple to describe: speech in, a grounded
 
 Voice isn't a separate integration bolted onto your site — in a tool built this way, it's a setting on the widget you already have. If you haven't picked a chat tool yet, our [comparison of AI chatbots for e-commerce](/blog/best-ai-chatbot-for-ecommerce) covers which ones offer voice at all. Otherwise, the steps are, in order:
 
-1. **Ground the text agent first.** Feed it your policies, FAQs, and product content, then connect your catalog for live product search. WooCommerce and Magento stores can additionally enable identity-checked order lookup. See the [full setup guide](/blog/ai-chatbot-for-online-store) if you haven't done this yet.
-2. **Turn on the voice add-on.** In Loqara this is a toggle on your existing plan, not a new integration—voice inherits the knowledge and provider capabilities the text agent already has.
-3. **Pick and preview a voice.** Choose a voice for each supported language — English and Lithuanian in Loqara — and listen to it exactly as a customer will hear it.
+1. **Ground the text agent first.** Feed it your policies, FAQs, and product content, then connect your catalog for live product search. WooCommerce and Magento stores on Starter and above can additionally enable identity-checked order lookup. See the [full setup guide](/blog/ai-chatbot-for-online-store) if you haven't done this yet.
+2. **Turn on the voice add-on.** In Loqara this is an add-on to your paid plan, not a new integration—voice inherits the knowledge and provider capabilities the text agent already has.
+3. **Pick and preview a voice.** Choose a voice for each enabled language — one on Basic, or both English and Lithuanian on Starter and above — and listen to it exactly as a customer will hear it.
 4. **Decide where it appears.** You don't have to switch it on everywhere — a high-consideration product line or a support page is a better first home than your whole catalog.
 5. **Test the call yourself.** Ask it a policy, a product, and an order-status question, and try interrupting it mid-sentence — this is where you catch a content gap before a customer does.
 6. **Go live and watch.** Nothing new to paste — watch real conversations and expand voice if it's earning its keep. If a call gets stuck, the same [clean human handoff](/blog/ai-chatbot-human-handoff) covering your text chat covers voice too, transcript and all, into a shared inbox.
@@ -99,7 +99,7 @@ What it still can't do well: hold up in a noisy environment (background noise de
 
 Voice costs more to run than text because real-time speech is more demanding to process than exchanging messages — that's true industry-wide, not a markup from any one vendor. That's why it's structured as an add-on rather than bundled into every plan by default: you pay for it where it earns its keep.
 
-In Loqara, the base agent—grounded chat, product search, multilingual support, and WooCommerce/Magento order lookup where configured—is priced per conversation with a genuine free tier (100 conversations a month). Voice sits on top as an optional add-on, roughly €49/month as of mid-2026 (check current pricing before committing). It's worth it when a meaningful slice of customers are hands-busy, accessibility-dependent, deliberating over a bigger purchase, or would otherwise call. If your traffic is mostly quick typed lookups, keep the savings.
+Loqara Free includes 50 text conversations a month for knowledge-based answers. Basic is €49/month or €490/year for 400 text conversations, product search, live handoff, leads, dictation, and full analytics. The optional voice agent adds **€49/month with about 200 minutes included, then €0.20/minute**, on any paid plan. Calls use voice minutes only and do not also consume the text allowance. Basic supports one configured language and retains the badge; both supported languages and WooCommerce/Magento order lookup require Starter or above. [Check current plans](/#pricing).
 
 ## Frequently asked questions
 
@@ -113,13 +113,13 @@ Yes, in practice. Voice runs on the same grounded agent as your text chat — it
 With a tool that ships chat and voice in one widget, there's no separate install. You embed the widget once with a single line of code, then turn voice on as a setting: pick a voice per language, preview it, choose which pages it appears on, and test a call yourself before customers do. No second script tag, no new integration.
 
 ### Can the voice agent look up an order or search products by voice?
-Yes, within the provider's supported actions. Loqara voice runs the same live product search as the text widget and speaks results back. Identity-checked order lookup currently works only for configured WooCommerce and Magento stores—not Shopify, Verskis, or generic feeds. That explicit boundary separates a verified commerce action from a voice FAQ.
+Yes, within the provider's supported actions. Loqara voice runs the same live product search as the text widget and speaks results back. On Starter and above, identity-checked order lookup works only for configured WooCommerce and Magento stores—not Shopify, Verskis, or generic feeds. That explicit boundary separates a verified commerce action from a voice FAQ.
 
 ### What languages can a store voice agent speak?
-That depends on the vendor—voice support is usually a shorter list than the chat side. Loqara voice currently speaks English and Lithuanian; you choose a voice per language and preview it before it goes live. Grounding and product search work in either supported language. Order lookup still depends on the commerce provider and is limited to configured WooCommerce and Magento stores.
+That depends on the vendor—voice support is usually a shorter list than the chat side. Loqara voice currently speaks English and Lithuanian; you choose a voice for each language your plan allows and preview it before it goes live. Grounding and product search work in either supported language. Order lookup still depends on the commerce provider and is limited to configured WooCommerce and Magento stores.
 
 ### How much does adding voice cost?
-It's typically priced as an add-on on top of a base chat plan, since real-time speech costs more to run than text. In Loqara the base grounded agent is priced per conversation with a free tier of 100 conversations a month, and voice adds roughly €49/month as of mid-2026 — always check current pricing, since it can shift.
+Loqara’s voice agent costs €49/month with about 200 minutes included, then €0.20/minute, on top of a paid chat plan. Monthly Basic plus voice is €98/month before tax and other add-ons. Calls use minutes only. Voice dictation is different: it turns speech into a typed chat message and is included on Basic and above.
 
 ### What are the limits of a store voice agent, honestly?
 It struggles in noisy or public environments where speech recognition degrades, and it's a worse fit than reading for long, dense text like a full returns policy. It also can't outperform whatever agent sits underneath it — voice amplifies a well-grounded agent and just as quickly exposes an ungrounded one. It's an add-on to a good text agent, not a fix for a weak one.

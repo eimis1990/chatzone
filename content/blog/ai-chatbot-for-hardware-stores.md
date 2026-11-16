@@ -2,6 +2,7 @@
 title: "AI chatbot for hardware stores: turn projects into product lists"
 description: "Learn how a hardware-store AI chatbot can clarify a project, calculate transparent quantities, find compatible products, and hand risky work to an expert."
 date: 2026-08-14
+updated: 2026-11-16
 topic: ecommerce-ai
 author: Eimantas Kudarauskas
 authorRole: Founder
@@ -181,7 +182,7 @@ Include mixed units, an L-shaped room, an unknown substrate, inconsistent pack c
 
 ## What can Loqara do—and what remains separate?
 
-Loqara can:
+On [Basic and above](/#pricing), Loqara can:
 
 - clarify a bounded project through conversational questions;
 - search current products in supported connected stores;
@@ -239,4 +240,4 @@ No. “I cannot verify the substrate”, “the required companion item is unava
 
 **The honest bottom line:** a hardware assistant should make the assumptions smaller and the evidence clearer before it makes the basket bigger.
 
-[Try Loqara free](/#get-started) with one repeatable project family, structured specifications, and a staff route for every condition the website cannot inspect.
+[See Loqara on your store](/#get-started) with one repeatable project family, structured specifications, and a staff route for every condition the website cannot inspect.

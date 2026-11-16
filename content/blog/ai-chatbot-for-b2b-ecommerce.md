@@ -2,6 +2,7 @@
 title: "AI chatbot for B2B e-commerce: qualify technical buyers before sales"
 description: "Learn how a B2B e-commerce AI chatbot can capture applications, specifications, quantities, timelines, and account context before a specialist takes over."
 date: 2026-07-25
+updated: 2026-11-16
 topic: ecommerce-ai
 author: Eimantas Kudarauskas
 authorRole: Founder
@@ -122,7 +123,7 @@ The distinction is permissions, not intelligence. A language model can phrase a 
 
 ## What does Loqara support for B2B stores?
 
-Loqara can:
+On [Basic and above](/#pricing), Loqara can:
 
 - answer from approved product, policy, and technical content;
 - search current products in supported connected commerce platforms;
@@ -240,4 +241,4 @@ Loqara’s standard commerce connections focus on supported storefront product s
 
 **The honest bottom line:** B2B chat earns its place when it makes the expert conversation start further ahead—not when it tries to impersonate the expert.
 
-[Try Loqara free](/#get-started) with one technical buying journey, a short qualification brief, and a named specialist route for every decision that requires authority.
+[See Loqara on your store](/#get-started) with one technical buying journey, a short qualification brief, and a named specialist route for every decision that requires authority.

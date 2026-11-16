@@ -2,6 +2,7 @@
 title: "OpenAI product feeds for e-commerce: the 2026 merchant checklist"
 description: "Prepare an OpenAI product feed for ChatGPT shopping with the required fields, validation checks, update rules, and honest limits merchants need in 2026."
 date: 2026-08-05
+updated: 2026-11-16
 topic: ai-search-visibility
 author: Eimantas Kudarauskas
 authorRole: Founder
@@ -224,6 +225,8 @@ The goal is not to prove that one prompt always returns the merchant. It is to d
 
 Loqara provides an on-site conversational agent for connected stores. It can search supported product catalogues, answer from approved product and knowledge sources, preserve context, and hand uncertain questions to a person.
 
+Live product search and human handoff require [Basic or above](/#pricing). Basic costs €49/month or €490/year and includes 400 conversations, one bot, and one language. Free offers 50 knowledge-based conversations a month, without live commerce or handoff.
+
 Loqara does **not** currently submit an OpenAI merchant feed, enroll a store in OpenAI commerce, guarantee placement in ChatGPT shopping, or enable ChatGPT checkout. Those are separate merchant and platform workflows.
 
 The overlap is data quality. The same exact product identities, variants, policies, and customer questions that improve an external feed also make on-site assistance more dependable. If shoppers repeatedly ask questions the catalogue cannot answer, improve the source rather than asking either system to infer the missing fact.
@@ -262,4 +265,4 @@ It is one product-discovery input, not the whole of generative engine optimizati
 
 **The practical next step:** export ten representative products and variants, validate every required field, and reconcile every mismatch with the visible store before scaling the feed.
 
-[Try Loqara free](/#get-started) to see how the same governed product and policy data can support accurate conversations inside your own store.
+[See Loqara on your store](/#get-started) to see how the same governed product and policy data can support accurate conversations inside your own store.

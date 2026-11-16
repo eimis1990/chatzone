@@ -2,6 +2,7 @@
 title: "Product Q&A for AI shopping: turn customer questions into useful data"
 description: "Build answer-ready product Q&A from real shopper questions, verified sources, visible page content, and a review workflow—without relying on obsolete FAQ tricks."
 date: 2026-08-05
+updated: 2026-11-16
 topic: ai-search-visibility
 author: Eimantas Kudarauskas
 authorRole: Founder
@@ -243,6 +244,8 @@ Do not interpret fewer support messages automatically as success. A lower questi
 
 Loqara can answer from approved product and knowledge sources, search supported connected catalogues, preserve conversational context, and hand uncertain questions to a person.
 
+Live product search and human handoff require [Basic or above](/#pricing). Basic costs €49/month or €490/year and includes 400 conversations, one bot, and one language. Free offers 50 knowledge-based conversations a month, without live commerce or handoff.
+
 Demand Radar can identify clusters of unresolved product and knowledge questions and prepare selected FAQ knowledge actions for merchant approval. It does not independently prove a product fact, and it does not currently publish edits into the connected store's product pages. The merchant must verify the answer and update the governed source.
 
 Loqara does not guarantee that product Q&amp;A will appear in ChatGPT, Google AI Mode, an AI citation, or a rich result. It also should not invent missing product, policy, compatibility, or safety claims.
@@ -281,4 +284,4 @@ State that the information could not be verified, route the question to the resp
 
 **The practical next step:** take the twenty most repeated pre-purchase questions, assign each to an exact product or policy, and verify whether the current page contains a quotable answer with a named source and owner.
 
-[Try Loqara free](/#get-started) to see which customer questions your catalogue can answer—and which content gaps deserve merchant review.
+[See Loqara on your store](/#get-started) to see which customer questions your catalogue can answer—and which content gaps deserve merchant review.

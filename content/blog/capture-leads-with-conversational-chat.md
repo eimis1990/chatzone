@@ -4,7 +4,7 @@ description: Most store chat is treated as support only. Done right, it's also y
 date: 2026-06-22
 topic: ecommerce-ai
 related: ai-chatbot-for-b2b-ecommerce, conversational-commerce-guide, ai-product-recommendation-chatbot
-updated: 2026-07-21
+updated: 2026-11-16
 author: Eimantas Kudarauskas
 image: /blog/capture-leads-with-conversational-chat.webp
 ---
@@ -77,7 +77,7 @@ Routing should land the lead where your team already works, with the full conver
 - **With full context** — the question asked, the product viewed, the answer given — so the follow-up continues the conversation rather than starting a new one.
 - **At the right priority**, so a hot pre-purchase question doesn't sit behind a routine "where's my order?" message.
 
-Loqara does this inside the same widget that handles support. It answers grounded questions, searches connected product catalogs, captures the lead when the moment is right, and hands off to a human through a shared inbox with the whole thread intact. Supported WooCommerce and Magento stores can also enable identity-checked [order lookup](/blog/reduce-support-tickets-with-ai); Shopify, Verskis, and feed stores cannot today. Because it's available 24/7, the off-hours visitor who would have hit a silent form instead leaves a qualified lead—and your team wakes up to context, not a cold address. It installs with one line, and there's a free tier (100 conversations a month) so you can prove it on your own traffic before paying. There's also an optional [voice agent](/blog/voice-ai-for-ecommerce-support) (English and Lithuanian) for stores whose customers would rather talk than type.
+On Basic and above, Loqara does this inside the same widget that handles support. It answers grounded questions, searches connected product catalogs, captures the lead when the moment is right, and hands off to a human through a shared inbox with the whole thread intact. On Starter and above, supported WooCommerce and Magento stores can also enable identity-checked [order lookup](/blog/reduce-support-tickets-with-ai); Shopify, Verskis, and feed stores cannot today. Because it's available 24/7, the off-hours visitor who would have hit a silent form instead leaves a qualified lead—and your team wakes up to context, not a cold address. It installs with one line. Free offers 50 conversations a month for grounded answers, but lead capture and handoff require Basic (€49/month or €490/year, 400 conversations). There's also an optional [voice agent](/blog/voice-ai-for-ecommerce-support) (English and Lithuanian) for stores whose customers would rather talk than type.
 
 ### Don't forget to measure it
 
@@ -107,4 +107,4 @@ That's where it shines. An AI agent runs 24/7, so the off-hours visitor who woul
 
 **The bottom line:** the leads are already there, mid-conversation, at the highest-intent moment your store gets. A form makes them work before you help and learns almost nothing about them; a conversation helps first, captures second, and hands your team a warm, qualified lead with the full context attached. Answer first, ask once, route with context — and chat starts earning its keep on sales as well as support.
 
-[Try Loqara on your store free](/#get-started) — one line, no credit card, live in an afternoon.
+[See Loqara on your store](/#get-started); choose Basic or above for lead capture and live handoff.

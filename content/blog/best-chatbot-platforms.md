@@ -2,12 +2,14 @@
 title: The 10 best chatbot platforms in 2026 (with real screenshots)
 description: An honest ranking of the 10 best chatbot platforms in 2026 — real screenshots, real pricing models, and which platform actually fits your business and budget.
 date: 2026-07-03
-updated: 2026-07-21
+updated: 2026-11-16
 topic: vendor-comparisons
 related: best-ai-chatbot-for-ecommerce, how-to-choose-ai-support-agent, conversational-ai-vs-chatbot
 author: Eimantas Kudarauskas
 image: /blog/best-chatbot-platforms.webp
 ---
+
+*Loqara plan details updated 16 November 2026. Other vendors’ details retain their stated review dates; check their current pricing before buying.*
 
 Search for "best chatbot platforms" and you'll find twenty near-identical lists, most of them ranked by affiliate payout rather than merit. This one is different in two ways: every screenshot below is a real capture of the vendor's product page from July 2026 (not a stock illustration), and we'll tell you plainly when a platform is a bad fit — including our own, which sits at #6, not #1.
 
@@ -47,7 +49,7 @@ Three criteria, weighted in this order:
 | **Tidio** | Lyro = metered add-on | Per billable conversation | No | Small biz, DIY flows |
 | **Gorgias** | Per-resolution add-on | Ticket-volume tiers + ~$0.90 per AI resolution | Add-on | Established e-commerce teams |
 | **HubSpot (Breeze)** | Credits per conversation | Seats + credits | No | Teams already on HubSpot CRM |
-| **Loqara** | Grounded, included | Per conversation, free tier | Yes (add-on) | Small–mid online stores |
+| **Loqara** | Grounded, included | Free: 50/month; Basic: €49/month, 400 | Yes (add-on) | Small–mid online stores |
 | **Drift (Salesloft)** | Yes | Custom | No | No one new — sunsetting |
 | **Crisp** | Hugo AI + plan credits | Per workspace + AI credits | No | Budget multichannel inbox |
 | **Chatbase** | Core product | Credit-based tiers | Yes | DIY custom-data bots |
@@ -127,7 +129,7 @@ The trade-offs are control and cost accounting. Customisation of the AI's behavi
 <figcaption>Loqara (screenshot: loqara.com, July 2026)</figcaption>
 </figure>
 
-Full disclosure: Loqara is our product, so read this section with that in mind. What it does: a grounded AI agent that answers from approved store content and cites its sources, live product search across connected catalogs, identity-checked order lookup on WooCommerce and Magento (not Shopify), lead capture, human handoff on every plan, and AI analytics (conversation summaries, topics, 1–5 quality scores, CSAT). The unusual part is voice: an add-on (€49/month including ~200 minutes, then €0.20/min) lets customers literally talk to your store in the same widget. Install is one line; pricing is per conversation — Free at €0 for 100 conversations/month, then €149/€249/€449 tiers, no setup fees.
+Full disclosure: Loqara is our product. It answers from approved store knowledge, searches connected product catalogs on Basic and above, and supports identity-checked WooCommerce/Magento order lookup on Starter and above. Shopify order lookup is not supported. Live handoff, lead capture, voice dictation, and full analytics with CSAT start on Basic. Free includes 50 conversations a month, one bot, one language, and basic activity analytics. Basic costs **€49/month or €490/year** for 400 conversations; Starter, Growth, and Scale remain €149, €249, and €449/month. Basic retains the Loqara badge; Starter adds badge removal and both supported languages. The optional voice agent costs €49/month with about 200 minutes included, then €0.20/minute, on top of a paid plan. Calls use voice minutes only. Self-service installation has no setup fee; done-for-you setup is optional and priced separately. See [current plans](/#pricing).
 
 Now the honest limits. Loqara is young — the incumbents above have years of edge-case hardening we don't. It speaks English and Lithuanian only today, so if you need French or German support, pick something else. And it's deliberately e-commerce-focused: if you're a SaaS company or a bank, tools higher up this list will fit better. What we'd claim without blushing: for a small-to-mid online store that wants grounded answers, real store actions, and optional voice — without adopting a full helpdesk — the per-conversation pricing and free tier make it the cheapest honest way to find out if AI support works on your traffic. More context in our [best AI chatbot for e-commerce](/blog/best-ai-chatbot-for-ecommerce) guide.
 

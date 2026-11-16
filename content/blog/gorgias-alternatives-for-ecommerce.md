@@ -4,10 +4,12 @@ description: Gorgias is a powerful helpdesk — but its ticket-plus-per-resoluti
 date: 2026-06-27
 topic: vendor-comparisons
 related: zendesk-alternatives-for-ecommerce, tidio-alternatives-for-ecommerce, best-ai-chatbot-for-ecommerce
-updated: 2026-07-21
+updated: 2026-11-16
 author: Eimantas Kudarauskas
 image: /blog/gorgias-alternatives-for-ecommerce.webp
 ---
+
+*Loqara plan details updated 16 November 2026. Other vendors’ details retain their stated review dates; check their current pricing before buying.*
 
 Gorgias is one of the best-known helpdesks in e-commerce, and deservedly so — it's a genuinely capable, mature platform that pulls email, chat, social, and SMS into one inbox and automates returns and order edits better than almost anyone. If you run an established support team that lives in a shared inbox all day, it's a serious tool. The trouble is that most people searching for a "Gorgias alternative" aren't unhappy with the product. They're unhappy with the *fit*.
 
@@ -47,7 +49,7 @@ It's the wrong call when you're a small or growing store that mostly needs to de
 - **Predictable pricing** — a flat plan with a clear conversation allowance beats per-resolution math you can't forecast.
 - **Grounded answers** — the agent should only answer from your real content, not guess. (See [why grounding matters more than the model](/blog/ai-chatbot-for-online-store).)
 - **Real store actions** — product search and order lookup, not just FAQ matching.
-- **Clean human handoff** — a [shared inbox where a person can take over](/blog/ai-chatbot-human-handoff) on every plan, not just the top tier.
+- **Clean human handoff** — a [shared inbox where a person can take over](/blog/ai-chatbot-human-handoff) on the plan you intend to buy.
 - **Fast setup** — you shouldn't need a migration project to switch.
 
 ## The best Gorgias alternatives, compared
@@ -56,7 +58,7 @@ A side-by-side before the detail. "Store actions" means native product search an
 
 | Tool | Built-in AI | Store actions | Voice | Pricing model | Best fit |
 | --- | --- | --- | --- | --- | --- |
-| **Loqara** | Grounded, included | Product search; order lookup on WooCommerce/Magento | Yes (add-on) | Per conversation, free tier | Lean–mid stores wanting AI + optional voice |
+| **Loqara** | Grounded, included | Product search: Basic+; WooCommerce/Magento order lookup: Starter+ | Yes (add-on) | Free: 50/month; Basic: €49/month, 400 | Lean–mid stores wanting AI + optional voice |
 | **Gorgias** | Per-resolution add-on | Order edits + returns | No | Tiered + per AI resolution | Established multichannel support teams |
 | **Tidio** | Lyro (metered add-on) | Order lookup | No | Per conversation + Lyro add-on | Beginners who like building flows |
 | **Re:amaze** | Included, resolution caps | Native order actions | No | Per seat | Mid-size multichannel stores |
@@ -68,12 +70,14 @@ A side-by-side before the detail. "Store actions" means native product search an
 
 ### Loqara — chat and voice in one widget *(that's us)*
 
-<p class="pills"><span class="pill pill-best">Best for: lean &amp; growing stores</span><span class="pill">Free tier: 100 chats/mo</span><span class="pill">Chat + voice</span></p>
+<p class="pills"><span class="pill pill-best">Best for: lean &amp; growing stores</span><span class="pill">Free tier: 50 chats/mo</span><span class="pill">Chat + voice</span></p>
 
-Loqara answers from your own content with citations and searches connected catalogs inside one widget you install with a single line of code. Identity-checked order lookup is currently available for WooCommerce and Magento, but not Shopify, Verskis, or generic-feed stores. Product search connects to WooCommerce, Shopify, Magento, Verskis, and product feeds. It's the only option here with a real-time **[voice agent](/blog/voice-ai-for-ecommerce-support)** built into the chat widget itself (English and Lithuanian), so customers can literally talk to your store. Pricing is per conversation rather than per "resolution," with a genuine free plan (100 conversations/month) and paid plans from €149 — so there's no per-resolution surprise as you grow. Best for small-to-mid stores that want capable AI support without a heavyweight helpdesk.
+Loqara answers from your own content with citations and searches connected catalogs inside one widget you install with a single line of code. Identity-checked order lookup is currently available for WooCommerce and Magento, but not Shopify, Verskis, or generic-feed stores. Product search connects to WooCommerce, Shopify, Magento, Verskis, and product feeds. It's the only option here with a real-time **[voice agent](/blog/voice-ai-for-ecommerce-support)** built into the chat widget itself (English and Lithuanian), so customers can literally talk to your store. Pricing is per conversation rather than per "resolution," with a genuine free plan (50 conversations/month) and paid plans from €49/month — so there's no per-resolution surprise as you grow. Best for small-to-mid stores that want capable AI support without a heavyweight helpdesk.
+
+[Loqara plans](/#pricing): Free includes 50 conversations a month, one bot, one language, and basic activity analytics. **Basic is €49/month or €490/year** for 400 conversations, live product search, human handoff, lead capture, voice dictation, and full analytics with CSAT. Basic keeps the Loqara badge and one-language limit. Starter (€149/month) adds a second bot, both supported languages, badge removal, and identity-checked order lookup on WooCommerce and Magento. Voice calls are a separate paid add-on; Free does not include live commerce, leads, or handoff.
 
 <div class="proscons">
-<div class="pros"><p class="pc-title">Strengths</p><ul><li>Grounded answers with citations — never invents a policy</li><li>Live product search across connected catalogs</li><li>Identity-checked order lookup on WooCommerce and Magento</li><li>Connectors for WooCommerce, Shopify, Magento (+ product feed)</li><li>Chat <em>and</em> voice in the same widget</li><li>One-line install, live the same day</li><li>Predictable per-conversation pricing, real free tier; shared-inbox handoff, analytics + CSAT</li></ul></div>
+<div class="pros"><p class="pc-title">Strengths</p><ul><li>Grounded answers with citations — never invents a policy</li><li>Live product search on Basic and above</li><li>WooCommerce/Magento order lookup on Starter and above</li><li>Connectors for WooCommerce, Shopify, Magento (+ product feed)</li><li>Chat and optional paid voice in the same widget</li><li>One-line install, live the same day</li><li>Predictable per-conversation pricing, real free tier; handoff, full analytics + CSAT on Basic+</li></ul></div>
 <div class="cons"><p class="pc-title">Watch-outs</p><ul><li>Not a full email/social helpdesk — it's an AI agent + live chat, not a ticketing suite</li><li>Newer than the incumbents below</li><li>Voice is a paid add-on on top of the base plan</li></ul></div>
 </div>
 
@@ -109,7 +113,7 @@ Powerful and endlessly configurable, but heavy and expensive for most small stor
 
 <div class="callout">
 <p class="callout-title">The pricing trap to watch</p>
-<p>"$X per <strong>resolution</strong>" and "$X per <strong>conversation</strong>" are not the same thing. Gorgias currently charges about $0.90 per AI-resolved interaction on most annual plans ($1 on starter/monthly pricing), but a thread fully resolved by AI does <em>not</em> also count as a billable helpdesk ticket (<a href="https://www.gorgias.com/blog/ai-agent-pricing" rel="nofollow">Gorgias AI pricing guide</a>). A conversation-priced plan instead meters the whole customer thread whether AI or a human resolves it. Before you commit, model your real monthly volume and expected automation rate against each definition. Our <a href="/blog/how-to-choose-ai-support-agent">buyer's checklist</a> walks through the questions that actually decide it, and our piece on the <a href="/blog/chatbot-roi-metrics-that-matter">ROI metrics that matter</a> shows what to measure once you're live.</p>
+<p>"$X per <strong>resolution</strong>" and "$X per <strong>conversation</strong>" are not the same thing. Gorgias currently charges about $0.90 per AI-resolved interaction on most annual plans ($1 on starter/monthly pricing), but a thread fully resolved by AI does <em>not</em> also count as a billable helpdesk ticket (<a href="https://www.gorgias.com/blog/ai-agent-pricing" rel="nofollow">Gorgias AI pricing guide</a>). Loqara counts text sessions when an AI response is delivered; a new session begins after 24 hours of inactivity or at the start of a new UTC month. Human-only exchanges do not consume the AI allowance. Before you commit, model your real monthly volume and expected automation rate against each definition. Our <a href="/blog/how-to-choose-ai-support-agent">buyer's checklist</a> walks through the questions that actually decide it, and our piece on the <a href="/blog/chatbot-roi-metrics-that-matter">ROI metrics that matter</a> shows what to measure once you're live.</p>
 </div>
 
 ## How to choose your Gorgias alternative
@@ -122,13 +126,13 @@ Match the tool to your stage, not the longest feature list. A 5-person store and
 - **Mid-size, want a classic inbox with native order actions** → Re:amaze, or Help Scout if you want it even simpler.
 - **Large org already in a premium suite** → Intercom (Fin) or Zendesk.
 
-If you're switching mainly to deflect repetitive tickets, the win comes from the agent actually *doing* things — searching your catalog and looking up orders — not from a bigger model. That's the difference between a bot that [reduces support tickets](/blog/reduce-support-tickets-with-ai) and one that just chats. And whatever you pick, make sure a human can [take over from a shared inbox](/blog/ai-chatbot-human-handoff) the moment the agent reaches its limit — on every plan, not just the top tier.
+If you're switching mainly to deflect repetitive tickets, the win comes from the agent actually *doing* things — searching your catalog and looking up orders — not from a bigger model. That's the difference between a bot that [reduces support tickets](/blog/reduce-support-tickets-with-ai) and one that just chats. And whatever you pick, make sure a human can [take over from a shared inbox](/blog/ai-chatbot-human-handoff) the moment the agent reaches its limit — on the plan you intend to buy.
 
 ## Frequently asked questions
 
 ### What is the best Gorgias alternative for a small store?
 
-For a small or growing store, the best alternative is usually a per-conversation AI agent rather than another full helpdesk. Loqara is built for exactly this — grounded answers, live product search, order lookup on supported WooCommerce and Magento stores, and a flat plan with a free tier of 100 conversations a month — so you avoid the per-resolution pricing that makes Gorgias hard to forecast at low volume.
+For a small or growing store, the best alternative is usually a per-conversation AI agent rather than another full helpdesk. Loqara is built for exactly this — grounded answers, live product search, order lookup on supported WooCommerce and Magento stores, and a flat plan with a free tier of 50 conversations a month — so you avoid the per-resolution pricing that makes Gorgias hard to forecast at low volume.
 
 ### Why is Gorgias considered expensive?
 
@@ -136,7 +140,7 @@ Gorgias is a full multichannel helpdesk with ticket-volume tiers and a separate 
 
 ### What's the difference between per-resolution and per-conversation pricing?
 
-A "conversation" is one customer thread, billed once. A "resolution" is defined by the vendor and can be triggered more generously, so in our experience the same traffic can cost meaningfully more under per-resolution pricing. Per-conversation plans like Loqara's are easier to forecast because the unit is simple and predictable.
+The definition depends on the vendor. Loqara counts a text session when an AI response is delivered. Follow-ups stay in that session until 24 hours of inactivity or a new UTC month starts, even if the transcript remains in the same inbox thread. Voice calls use minutes only. A resolution-based tool uses its own outcome criteria, so model your traffic against both definitions.
 
 ### Will a Gorgias alternative still connect to my store's orders?
 
@@ -144,7 +148,7 @@ Capabilities vary by platform. Loqara searches products on WooCommerce, Shopify,
 
 ### Is there a free Gorgias alternative?
 
-Yes. Loqara has a genuine free tier of 100 conversations per month with no credit card required, which is often enough for a small store to handle its repetitive questions and prove the value before paying. You upgrade when volume — not features — forces it.
+Yes. Loqara has a genuine free tier of 50 conversations per month with no credit card required, which is often enough for a small store to handle its repetitive questions and prove the value before paying. Choose Basic when you need product search, live handoff, leads, or more volume; choose Starter for supported order lookup, both supported languages, or badge removal.
 
 ### Should I just stay on Gorgias?
 

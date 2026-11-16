@@ -2,7 +2,7 @@
 title: AI customer service for small online stores: what you actually need
 description: An honest guide for solo founders and small teams — what AI customer service genuinely helps a small store with, what to skip, and how to start without hiring or coding anything.
 date: 2026-07-10
-updated: 2026-07-21
+updated: 2026-11-16
 topic: ai-customer-support
 related: reduce-support-tickets-with-ai, how-much-does-ai-chatbot-cost, ai-chatbot-for-online-store
 author: Eimantas Kudarauskas
@@ -22,7 +22,7 @@ For category context, our [20 AI customer service statistics for 2026](/blog/ai-
 <ul>
 <li><strong>You need it once the same 3–4 questions eat your day:</strong> shipping times, sizing, returns, "where's my order" — not before.</li>
 <li><strong>Skip the heavyweight helpdesk suites:</strong> per-seat pricing and multichannel ticketing solve a team's problem, not a solo founder's.</li>
-<li><strong>Start on a real free tier</strong> with a one-line install — no developer, live the same day, upgrade only when volume forces it.</li>
+<li><strong>Start on a real free tier</strong> with a one-line install — no developer, live the same day, upgrade when volume or required features justify it.</li>
 <li><strong>Voice is a nice-to-have add-on,</strong> worth it later for some stores, not a requirement to get started.</li>
 </ul>
 </div>
@@ -83,7 +83,7 @@ Nothing, to start — that's the whole point of a real free tier. The part worth
 - **Per resolution** can look cheap per unit but the definition is set by the vendor and can add up fast on unpredictable volume.
 - **Per conversation** scales with your actual customer messages, which is usually the easiest unit for a small store to predict and budget against.
 
-We break down how each model plays out at real volumes in [how much an AI chatbot actually costs](/blog/how-much-does-ai-chatbot-cost) — worth ten minutes before you commit to anything with a multi-month contract. Loqara, for what it's worth, is priced per conversation with a free tier of 100 conversations a month and one language of your choice included; paid plans (from €149/mo) include all languages rather than charging per language, and voice is a paid add-on once you actually need it.
+Our [chatbot cost guide](/blog/how-much-does-ai-chatbot-cost) explains the billing units. Loqara Free has 50 conversations a month, one bot, one language, and basic activity analytics. **Basic is €49/month or €490/year** for 400 conversations, one bot, one language, live handoff, lead capture, product search, voice dictation, and full analytics with CSAT. The Loqara badge stays, and order lookup is not included. Basic can buy 200 extra conversations for €15, expiring at the end of the payment month in UTC. Starter starts at €149/month and adds supported WooCommerce/Magento order lookup, two bots, both English and Lithuanian, and badge removal. [Compare current plans](/#pricing).
 
 ## How do I set it up without a developer?
 
@@ -111,7 +111,9 @@ Usually not on day one — text chat covers the bulk of repetitive questions wit
 Only once repetitive questions — shipping times, sizing, "where's my order" — are eating real time, or you're missing sales because no one answers outside business hours. If you get a handful of messages a day and don't mind replying yourself, it can wait. There's no penalty for starting later once the pattern is clear.
 
 ### What's the cheapest way to start with AI customer service?
-Use a tool with a genuine free tier rather than a time-limited trial. Loqara's free tier covers 100 conversations a month with one language included, which is usually enough for a small store to prove the value on real traffic before paying anything.
+Use a tool with a genuine free tier rather than a time-limited trial. Loqara's free tier covers 50 conversations a month with one language included, which is usually enough for a small store to prove the value on real traffic before paying anything.
+
+Use Free for knowledge-based answers. Product search, live handoff, lead capture, dictation, and full analytics start on Basic; order lookup starts on Starter for supported WooCommerce and Magento stores.
 
 ### Do I need a developer to set this up?
 No, if you pick the right tool. A grounded agent with a one-line embed installs by pasting a snippet into your theme — no integration project, live the same day. If a vendor is quoting you setup weeks, that's a sign it's built for a bigger team than yours.
@@ -126,10 +128,10 @@ Only once you have a team actually living in a shared inbox across email, social
 Not to start. Text chat handles most repetitive questions with a simpler setup. Voice is worth adding later as a paid add-on if your customers specifically ask for it or your product is easier to explain out loud than to describe in text.
 
 ### Do I need multilingual support from day one?
-Only if you're already selling to more than one language market. Most small stores start with one language — Loqara's free tier includes one, and paid plans include all languages rather than charging per language — so treat multilingual support as an upgrade you reach for once international orders justify it, not something you need to launch with.
+Only if you sell to more than one language market. Loqara Free and Basic each include one configured language. Starter and above include both currently supported languages, English and Lithuanian. Voice is a separate add-on on paid plans and follows the plan’s language limit; it does not unlock extra languages.
 
 ---
 
-**The honest bottom line:** a small online store rarely needs a full helpdesk suite — it needs grounded answers from its own content, live order lookup, and coverage for the hours nobody's watching the inbox. Start on a free tier, install it in one line, and upgrade only when your own volume tells you to.
+**The honest bottom line:** a small online store rarely needs a full helpdesk suite — it needs grounded answers from its own content, live order lookup, and coverage for the hours nobody's watching the inbox. Start on a free tier, install it in one line, and choose the paid plan that covers your actual volume and required features.
 
 [Try Loqara free on your store](/#get-started) — one line, no credit card, live in an afternoon.

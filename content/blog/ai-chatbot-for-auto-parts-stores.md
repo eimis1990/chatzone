@@ -2,6 +2,7 @@
 title: "AI chatbot for auto-parts stores: verify fitment before purchase"
 description: "Learn how an auto-parts AI chatbot can collect vehicle details, verify fitment evidence, and exclude incompatible parts without guessing."
 date: 2026-08-14
+updated: 2026-11-16
 topic: ecommerce-ai
 author: Eimantas Kudarauskas
 authorRole: Founder
@@ -171,7 +172,7 @@ Include adjacent build years, the same model with two engines, different body st
 
 ## What can Loqara do—and what remains separate?
 
-Loqara can:
+On [Basic and above](/#pricing), Loqara can:
 
 - ask category-specific questions in natural language;
 - search product information exposed by supported connected stores;
@@ -226,4 +227,4 @@ It can retrieve approved manufacturer instructions within the merchant’s defin
 
 **The honest bottom line:** the best parts assistant is comfortable saying “I need one more identifier” before it says “this fits”.
 
-[Try Loqara free](/#get-started) with one parts category, current application evidence, and a specialist route for every configuration the catalog cannot prove.
+[See Loqara on your store](/#get-started) with one parts category, current application evidence, and a specialist route for every configuration the catalog cannot prove.

@@ -2,6 +2,7 @@
 title: "Agentic commerce explained: what online stores need to do in 2026"
 description: Agentic commerce lets AI research, recommend, and sometimes buy products for shoppers. Here is what it means for e-commerce stores — and what to fix now.
 date: 2026-07-15
+updated: 2026-11-16
 topic: ai-search-visibility
 author: Eimantas Kudarauskas
 image: /blog/agentic-commerce-ecommerce.webp
@@ -165,4 +166,4 @@ No. AI shopping systems still need trustworthy, accessible information about pro
 
 **The honest bottom line:** agentic commerce is already a real discovery layer and an early transaction layer. The stores most likely to benefit are not the ones making the loudest AI claims. They are the ones with clean catalog data, clear policies, and a useful answer at every point of uncertainty.
 
-Want the conversational layer on your own storefront? [Try Loqara free](/#get-started) — grounded answers, live product search, human handoff, and supported WooCommerce/Magento order lookup in one widget.
+Want the conversational layer on your own storefront? [See Loqara on your store](/#get-started). Free includes 50 knowledge-based conversations a month. Basic adds live product search and human handoff from €49/month; verified WooCommerce/Magento order lookup starts on Starter. [Compare plans](/#pricing).

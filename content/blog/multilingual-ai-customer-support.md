@@ -2,7 +2,7 @@
 title: Multilingual customer support with AI (without hiring a bigger team)
 description: How to evaluate multilingual AI customer support for an online store: supported languages, grounded answers, testing, limits, handoff, and rollout steps.
 date: 2026-07-02
-updated: 2026-08-26
+updated: 2026-11-16
 topic: ai-customer-support
 author: Eimantas Kudarauskas
 image: /blog/multilingual-ai-customer-support.webp
@@ -54,6 +54,8 @@ A modern AI agent handles language in three moves, and understanding them tells 
 **3. It preserves language through the supported flow.** The response, follow-up questions, product information, and handoff message should remain consistent. Test those surfaces separately; a translated chat reply does not prove that product cards, forms, emails, or the receiving human team support the same language.
 
 ## A multilingual-support test before you buy
+
+For [Loqara’s current plans](/#pricing), Free and Basic each allow one configured language. Starter and above allow both supported languages, English and Lithuanian. The optional paid voice agent follows that language limit; buying voice does not unlock a second language on Basic.
 
 | Check | Pass condition | Why it matters |
 | --- | --- | --- |

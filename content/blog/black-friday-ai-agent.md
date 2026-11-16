@@ -2,7 +2,7 @@
 title: Get your store ready for Black Friday with an AI agent
 description: A practical, timely prep guide for BFCM — how an AI agent absorbs the support surge (order status, shipping cutoffs, returns, sizing) 24/7 while your team handles the hard cases. Plus a readiness checklist and timeline.
 date: 2026-07-07
-updated: 2026-07-21
+updated: 2026-11-16
 topic: ecommerce-ai
 related: recover-abandoned-carts-ai-chatbot, reduce-support-tickets-with-ai, where-is-my-order-ai
 author: Eimantas Kudarauskas
@@ -98,7 +98,7 @@ This is exactly what order lookup is for. With it connected, the agent answers "
 
 Always. An AI agent isn't a replacement for your team — it's what protects your team's attention during the one weekend they can't afford to drown. The agent handles the repetitive volume so your people handle the judgement calls: the upset customer, the wrong charge, the shopper who's *this close* to a €400 order and just needs a real answer about fit.
 
-That's why clean handoff matters more than raw deflection. Loqara routes anything the agent can't confidently resolve into a shared inbox, with the conversation history attached, so a human steps in without the customer starting over. If a shopper is clearly ready to buy but stalling, the agent can also nudge — the same mechanics that help [recover abandoned carts](/blog/recover-abandoned-carts-ai-chatbot) apply doubly when carts are big and deadlines are tight. The goal is a team that spends BFCM on the conversations that move revenue, not on typing the shipping cutoff for the two-hundredth time.
+That's why clean handoff matters more than raw deflection. On Basic and above, Loqara routes anything the agent can't confidently resolve into a shared inbox, with the conversation history attached, so a human steps in without the customer starting over. If a shopper is clearly ready to buy but stalling, the agent can also nudge — the same mechanics that help [recover abandoned carts](/blog/recover-abandoned-carts-ai-chatbot) apply doubly when carts are big and deadlines are tight. The goal is a team that spends BFCM on the conversations that move revenue, not on typing the shipping cutoff for the two-hundredth time.
 
 ## Frequently asked questions
 
@@ -118,7 +118,9 @@ Yes. The agent absorbs the repetitive volume — order status, shipping, returns
 Yes, within the languages your agent supports — Loqara currently speaks English and Lithuanian, so a shopper who lands during a BFCM promo gets answered in either rather than bouncing. If your holiday traffic includes markets you don't staff around the clock, this matters even more — the agent covers those languages 24/7 while your team sleeps.
 
 ### How much does it cost to run an AI agent through the surge?
-Loqara is priced per conversation, with a genuine free tier of 100 conversations a month, so you can test on real traffic before the season without committing. Per-conversation pricing also means your cost scales with the surge in a predictable way rather than forcing you to guess a seat count in advance. Voice is an optional paid add-on if you want it.
+Loqara is priced per conversation, with a genuine free tier of 50 conversations a month, so you can test on real traffic before the season without committing. Per-conversation pricing also means your cost scales with the surge in a predictable way rather than forcing you to guess a seat count in advance. Voice is an optional paid add-on if you want it.
+
+Basic is €49/month or €490/year for 400 conversations, one bot, one language, product search, handoff, leads, dictation, and full analytics. Basic top-ups add 200 conversations for €15; Starter+ top-ups add 1,000 for €15. Credits expire at the end of the UTC payment month. Choose Starter or above for both English and Lithuanian or supported WooCommerce/Magento order lookup. Free has no live handoff or live commerce. [Compare plans](/#pricing).
 
 ### Is it too late to set one up if it's already autumn?
 No, but move quickly. You lose some of the tuning window, so prioritise: load your policies and order lookup first, test on a quiet week, then set handoff and working hours. Even a couple of weeks of live traffic before BFCM beats switching an untested agent on the morning of the sale. Earlier is better, but late is still far better than never.
@@ -127,4 +129,4 @@ No, but move quickly. You lose some of the tuning window, so prioritise: load yo
 
 **The bottom line:** Black Friday support isn't won in November — it's won by the stores that quietly set up and tuned an AI agent through the summer. Load it with your holiday policies, connect order lookup, get handoff and working hours right, and test it on real traffic while the stakes are low. Then let it absorb the repetitive surge 24/7 while your team handles the cases that actually move revenue.
 
-[Set up your AI agent for Black Friday](/#get-started) — one line to install, live the same afternoon, free for your first 100 conversations.
+[Set up your AI agent for Black Friday](/#get-started) — one line to install, live the same afternoon, free for your first 50 conversations.

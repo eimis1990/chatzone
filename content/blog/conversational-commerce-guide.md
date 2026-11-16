@@ -2,6 +2,7 @@
 title: "Conversational commerce: examples and a practical playbook"
 description: Conversational commerce turns chat and voice into product discovery, sales assistance, support, and handoff. See real use cases and how to implement it.
 date: 2026-07-15
+updated: 2026-11-16
 topic: ecommerce-ai
 author: Eimantas Kudarauskas
 image: /blog/conversational-commerce-guide.webp
@@ -209,4 +210,4 @@ Choose one repetitive or revenue-critical job, connect accurate policies and pro
 
 **The honest bottom line:** conversational commerce works when the conversation reduces uncertainty and carries the customer somewhere useful. A chat bubble alone is not a strategy.
 
-[Try Loqara free](/#get-started) — grounded chat and optional voice, live product search, lead capture, and human handoff in one widget.
+[See Loqara on your store](/#get-started). Basic includes live product search, lead capture, human handoff, and 400 conversations for €49/month or €490/year. Free offers 50 knowledge-based conversations; voice is an optional add-on on paid plans. [Compare plans](/#pricing).

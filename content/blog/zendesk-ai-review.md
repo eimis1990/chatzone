@@ -2,11 +2,14 @@
 title: "Zendesk AI in 2026: features, pricing, and when it's overkill"
 description: An honest Zendesk AI review for 2026 — what the AI agents actually do, how per-resolution pricing works in practice, and when Zendesk AI is overkill.
 date: 2026-07-03
+updated: 2026-11-16
 topic: vendor-comparisons
 related: zendesk-alternatives-for-ecommerce, tidio-vs-zendesk, how-much-does-ai-chatbot-cost
 author: Eimantas Kudarauskas
 image: /blog/zendesk-ai-review.webp
 ---
+
+*Loqara plan details updated 16 November 2026. Other vendors’ details retain their stated review dates; check their current pricing before buying.*
 
 Zendesk AI is genuinely good. Let's get that out of the way first, because most reviews of enterprise software from smaller vendors open with a hatchet job, and that's not what this is. Zendesk has spent years building AI into every layer of its suite — autonomous AI agents, an agent-facing Copilot, intelligent triage, quality assurance — and for a large support organisation, the result is one of the most complete platforms on the market.
 
@@ -103,7 +106,7 @@ Here's the honest test. Zendesk AI is probably overkill if most of these describ
 
 If that's you, you don't need a smaller Zendesk — you need a different shape of tool: an AI agent that answers from your store's own content and plugs into your platform directly. We've written up a full list of [Zendesk alternatives for e-commerce](/blog/zendesk-alternatives-for-ecommerce), but the short version of what to look for: grounded answers (no invented policies), native product search and order lookup, human handoff, and flat pricing.
 
-Full disclosure — Loqara is our product, and it's built for exactly this gap. It answers from approved store knowledge with source citations, searches connected product catalogs, supports identity-checked order lookup on WooCommerce and Magento (not Shopify), hands off to a human on every plan including the free one, and can take real-time voice calls in the widget. Pricing is flat per-conversation — free for 100 conversations a month, then €149–€449/month — so the bill doesn't grow just because the AI got better. One line of script and you're live. It is *not* a Zendesk replacement for a 50-agent org; it's what you use instead of buying one when you're a store, not a support department. Our [buyer's checklist](/blog/how-to-choose-ai-support-agent) can help you pressure-test either choice.
+Full disclosure: Loqara is our product. It answers from approved store knowledge, searches connected product catalogs on Basic and above, and supports identity-checked WooCommerce/Magento order lookup on Starter and above. Shopify order lookup is not supported. Live handoff, lead capture, voice dictation, and full analytics with CSAT start on Basic. Free includes 50 conversations a month, one bot, one language, and basic activity analytics. Basic costs **€49/month or €490/year** for 400 conversations; Starter, Growth, and Scale remain €149, €249, and €449/month. Basic retains the Loqara badge; Starter adds badge removal and both supported languages. The optional voice agent costs €49/month with about 200 minutes included, then €0.20/minute, on top of a paid plan. Calls use voice minutes only. Self-service installation has no setup fee; done-for-you setup is optional and priced separately. See [current plans](/#pricing), then use our [AI support buyer’s checklist](/blog/how-to-choose-ai-support-agent) to compare the workflows you need.
 
 ## Who should still pick Zendesk
 

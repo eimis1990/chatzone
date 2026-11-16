@@ -78,12 +78,32 @@ Supporting, not the headline: it is self-serve and priced without a mandatory se
   Gemini for room renders, Stripe billing (live).
 - **Route groups define the audiences:** `(auth)`, `(client)` at `/app`, `(owner)` at
   `/owner`, `/embed/[publicKey]` for the widget, plus the public marketing/blog routes.
-- **Plans** (EUR/month, annual billed at 10×): Free €0 / 100 conversations · Starter €149 /
-  1,500 · Growth €249 / 4,000 · Scale €449 / 12,000 · Enterprise on request. Add-ons: Voice
-  agent €49, Product visualizer €29. Limits are enforced server-side; UI gates are UX only
+- **Plans** (EUR/month, base plans billed annually at 10×): Free €0 / 50 conversations ·
+  Basic €49 / 400 (€490/year) · Starter €149 / 1,500 · Growth €249 / 4,000 ·
+  Scale €449 / 12,000 · Enterprise on request. Add-ons on paid plans: Voice agent
+  €49/month (about 200 minutes, then €0.20/min), Product visualizer €29/month,
+  Messenger €19/month (€228/year with an annual base plan). Messenger is available;
+  WhatsApp and Instagram are still coming soon. Limits are enforced server-side; UI gates are UX only
   ([`lib/entitlements.ts`](lib/entitlements.ts),
   [`docs/wiki/plans-and-entitlements.md`](docs/wiki/plans-and-entitlements.md)).
-- **Free tier is deliberately narrow:** 1 bot, 1 language, no lead capture, badge stays.
+- **Free:** 1 bot, 1 language, basic activity counts, badge stays; no live handoff,
+  lead capture, voice dictation, live product search, or order lookup.
+- **Basic:** 1 bot, 1 language, live handoff, lead capture, voice dictation, full
+  analytics + CSAT, and live product search. Badge stays; no order lookup.
+- **Starter and above:** both supported languages (English/Lithuanian), badge removal,
+  and identity-checked order lookup on supported WooCommerce/Magento stores.
+  Starter allows 2 bots; higher bot limits are in the shared plan catalog.
+- **Text usage:** web chat and Messenger share the allowance. An AI text session is
+  counted when a response is delivered; a new session starts after 24 hours of
+  inactivity or a new UTC calendar month, even within a persistent inbox thread.
+  Human-only exchanges and previews do not consume the allowance. Voice-agent calls
+  use minutes only; dictation is a text-input feature, not a voice call.
+- **Top-ups:** Basic €15/200 conversations; Starter+ €15/1,000. Optional one-time
+  purchases, not automatic overages; unused credits expire at the end of the UTC
+  payment month. Free cannot buy packs. Annual plans still have monthly allowances.
+- **Existing Free accounts:** a 30-day in-app notice precedes the new limits; the
+  account's displayed deadline governs the transition. New Free accounts use the
+  current limits immediately.
 - **Terminology:** *owner* and *client* are roles, not adjectives — an owner runs the
   platform, a client is an onboarded business. A *bot* belongs to an org. Same-named bots in
   different orgs are different bots.

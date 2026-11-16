@@ -2,6 +2,7 @@
 title: "Semantic search for e-commerce: how product search works"
 description: Semantic search understands what shoppers mean instead of matching only exact keywords. Learn how it works, when it helps, and how to implement it safely.
 date: 2026-07-15
+updated: 2026-11-16
 topic: ecommerce-ai
 author: Eimantas Kudarauskas
 image: /blog/semantic-search-ecommerce.webp
@@ -90,6 +91,8 @@ Hybrid search adds guardrails:
 - reranking based on the whole request.
 
 Loqara’s connected catalog search follows that pattern: it uses semantic matching over an enriched product index, boosts exact title tokens, applies structured filters, and hydrates live price and stock before showing results. If a catalog has not been indexed, it falls back to the store’s live keyword search rather than inventing an answer.
+
+Live product search and human handoff require [Basic or above](/#pricing). Basic costs €49/month or €490/year and includes 400 conversations, one bot, and one language. Free offers 50 knowledge-based conversations a month, without live commerce or handoff.
 
 ## What data does semantic search need?
 
@@ -223,4 +226,4 @@ The software can be connected quickly, but trustworthy relevance takes longer th
 
 **The honest bottom line:** semantic search is not a magic replacement for catalog discipline. It is a better bridge between the language shoppers use and the facts your products contain.
 
-[Try Loqara free](/#get-started) to test natural-language product discovery against your connected store catalog.
+[See Loqara on your store](/#get-started) to test natural-language product discovery against your connected store catalog.

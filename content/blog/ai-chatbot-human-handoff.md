@@ -4,7 +4,7 @@ description: The best AI agents know their limits. Here's how clean human handof
 date: 2026-06-23
 topic: ai-customer-support
 related: live-chat-vs-ai-chatbot-ecommerce, reduce-support-tickets-with-ai, prevent-ai-chatbot-hallucinations
-updated: 2026-07-21
+updated: 2026-11-16
 author: Eimantas Kudarauskas
 image: /blog/ai-chatbot-human-handoff.webp
 ---
@@ -134,6 +134,8 @@ A well-designed agent never leaves the customer hanging. If nobody can take over
 
 **The bottom line:** human handoff isn't the part of your chatbot that admits defeat — it's the part that earns trust. An agent that answers the repetitive majority from your real content, escalates the rest on clear signals, carries full context into a shared inbox, and can hand back when the human is done gives you the best of automation *and* real support. The stores customers actually trust are the ones where reaching a person is easy, fast, and never feels like a fight.
 
-[Loqara](/) includes live human handoff on every plan — a real-time shared inbox with take-over, resolve, and return-to-bot, plus auto-escalation when the agent gets stuck and full conversation context every time.
+[Loqara](/) includes live human handoff on Basic and above (from €49/month) — a real-time shared inbox with take-over, resolve, and return-to-bot, plus auto-escalation when the agent gets stuck and full conversation context every time.
 
-[Try Loqara on your store free](/#get-started) — one line, no credit card, live in an afternoon.
+Free includes 50 conversations a month for grounded answers, but no live handoff. [Basic](/#pricing) includes 400 conversations, one bot, one language, lead capture, product search, dictation, and full analytics with CSAT.
+
+[See Loqara on your store](/#get-started), then choose Basic or above to use live human handoff.

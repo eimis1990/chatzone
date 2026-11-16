@@ -2,6 +2,7 @@
 title: "AI product recommendation chatbots: a practical guide for e-commerce"
 description: Learn how an AI product recommendation chatbot turns natural-language needs into relevant products — plus setup, examples, metrics, and common mistakes.
 date: 2026-07-15
+updated: 2026-11-16
 topic: ecommerce-ai
 author: Eimantas Kudarauskas
 image: /blog/ai-product-recommendation-chatbot.webp
@@ -158,6 +159,8 @@ Write down the constraints a knowledgeable employee uses. If those facts are mis
 
 The assistant needs both the catalog and the context around it: sizing guides, compatibility tables, shipping, returns, warranties, and care. Loqara connects to Shopify, WooCommerce, and Magento, with a generic product feed for other stores.
 
+For the broader role of a [conversational shopping assistant](/blog/conversational-ai-shopping-assistant), consider support and discovery together. Live product search and human handoff require [Basic or above](/#pricing). Basic costs €49/month or €490/year and includes 400 conversations, one bot, and one language. Free offers 50 knowledge-based conversations a month, without live commerce or handoff.
+
 ### 4. Define recommendation guardrails
 
 Tell the agent which claims require evidence, which categories need disclaimers, when to state that no match exists, and when to involve a person. Medical, financial, safety, and regulated-product questions need especially careful boundaries.
@@ -236,4 +239,4 @@ A basic connected assistant can be live quickly, but a trustworthy recommendatio
 
 **The honest bottom line:** the model is not the product expert; your catalog is. The AI’s job is to understand the shopper, retrieve the right facts, and explain a small number of honest matches.
 
-[Try Loqara free](/#get-started) and test product discovery on your real catalog — including live search, grounded answers, and a clean human handoff.
+[See Loqara on your store](/#get-started) and test product discovery on your real catalog — including live search, grounded answers, and a clean human handoff.

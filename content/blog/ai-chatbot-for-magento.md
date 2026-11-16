@@ -2,6 +2,7 @@
 title: "How to add an AI chatbot to Magento and Adobe Commerce"
 description: A practical Magento AI chatbot guide covering catalog search, grounded answers, verified order status, one-line installation, testing, and limitations.
 date: 2026-07-15
+updated: 2026-11-16
 topic: platform-integrations
 author: Eimantas Kudarauskas
 image: /blog/ai-chatbot-for-magento.webp
@@ -56,6 +57,8 @@ If a vendor demo cannot explain where each fact came from, a bigger model will n
 ## How does Loqara connect to Magento?
 
 Loqara treats catalog access and private order access separately.
+
+Plan requirement: catalog search starts on [Basic (€49/month or €490/year)](/#pricing); Magento order lookup requires Starter or above. Free includes 50 monthly conversations for knowledge-based answers and does not include live commerce or human handoff.
 
 ### Product search
 
@@ -192,7 +195,7 @@ It can retrieve semantically relevant candidates from an indexed catalog and the
 
 ### Can it look up Magento orders?
 
-Yes, with a configured Magento integration token and identity verification. Loqara requires both the order number and the billing email to match before returning status. It does not use that status tool to cancel, edit, or refund the order; those requests should reach an authorised person.
+Yes, on Starter and above, with a configured Magento integration token and identity verification. Loqara requires both the order number and the billing email to match before returning status. It does not use that status tool to cancel, edit, or refund the order; those requests should reach an authorised person.
 
 ### Is the Magento access token visible to shoppers?
 
@@ -214,4 +217,4 @@ With Loqara’s optional voice agent, customers can speak through the same websi
 
 **The honest bottom line:** Magento already contains the products and orders. A good AI chatbot makes that information easier to ask without giving the model permission to improvise or change consequential data.
 
-[Try Loqara free](/#get-started) and connect your Magento catalog with one storefront script.
+[See Loqara on your store](/#get-started) and connect your Magento catalog with one storefront script.

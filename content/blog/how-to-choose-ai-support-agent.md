@@ -4,10 +4,12 @@ description: A vendor-neutral checklist for picking an AI chat or voice agent fo
 date: 2026-06-27
 topic: vendor-comparisons
 related: best-ai-chatbot-for-ecommerce, how-much-does-ai-chatbot-cost, test-ai-chatbot-before-launch
-updated: 2026-07-21
+updated: 2026-11-16
 author: Eimantas Kudarauskas
 image: /blog/how-to-choose-ai-support-agent.webp
 ---
+
+*Loqara plan details updated 16 November 2026. Other vendors’ details retain their stated review dates; check their current pricing before buying.*
 
 Every AI support tool demos beautifully. You type a question, it answers in a friendly voice, and you picture the repetitive tickets melting away. Then you install it on your real store, point it at real traffic, and find the polished demo and the day-to-day reality are two different things — including the bill, which can be three or four times what you budgeted for the same volume of conversations.
 
@@ -41,7 +43,7 @@ Feature lists are mostly noise — every vendor checks every box. What separates
 | **Pricing model** | The unit you're billed on, not the sticker price, decides your real cost | Predictable per-conversation or flat allowance; easy to forecast at your volume |
 | **Grounding** | A confident wrong answer creates tickets and erodes trust | Answers only from your content, cites sources, says "I'm not sure" otherwise |
 | **Real store actions** | Most repeat tickets are "where's my order?" and product questions | Native product search + order lookup (with identity check) inside the chat |
-| **Human handoff** | Customers trust a bot more when a person is one step away | Clean handoff to a shared inbox, full context carried, on every plan |
+| **Human handoff** | Customers trust a bot more when a person is one step away | Clean handoff to a shared inbox, full context carried, included in the plan you intend to buy |
 | **Install effort** | A six-week integration delays the value you're paying for | One-line embed, previewable, live the same day, reversible |
 | **Languages & voice** | Your customers don't all type in English, and some prefer to talk | Multilingual answers; optional real-time voice if your audience wants it |
 | **Analytics & CSAT** | You can't prove ROI on numbers you can't see | Deflection, handoff rate, leads captured, and CSAT visible out of the box |
@@ -81,12 +83,12 @@ Decide your success metrics *before* you buy: deflection rate, handoff rate, lea
 If you take one thing from this guide, take this. The three pricing models in the market look comparable on a feature page and behave nothing alike on an invoice.
 
 - **Per resolution** — you pay each time the AI "resolves" a conversation. Predictable at scale, but the vendor defines what counts as a resolution, and that definition can be generous. Common among premium suites: [Intercom's Fin](https://www.intercom.com/pricing) charges $0.99 per resolution, [Zendesk](https://www.zendesk.com/pricing/) bills AI usage per resolution on top of per-agent seats, and [Gorgias](https://www.gorgias.com/pricing) layers per-resolution AI onto ticket-volume tiers (never per agent). Our [Intercom](/blog/intercom-alternatives-for-ecommerce), [Zendesk](/blog/zendesk-alternatives-for-ecommerce), and [Gorgias](/blog/gorgias-alternatives-for-ecommerce) alternatives round-ups dig into each.
-- **Per conversation / interaction** — you pay for every conversation, resolved or not, which means you also pay for the ones the bot *fails*. One customer thread is one unit, which makes it easy to forecast. [Tidio's Lyro](https://www.tidio.com/pricing/) meters its AI this way from around $32.50/month (see our [Tidio alternatives](/blog/tidio-alternatives-for-ecommerce) round-up), and Loqara prices per conversation too.
+- **Per conversation / interaction** — an included session can be used without the customer’s issue being resolved. A failed request with no AI response does not consume Loqara’s allowance. Check the session boundary: Loqara starts a new text session after 24 hours of inactivity or a new UTC month, even within the same thread. [Tidio's Lyro](https://www.tidio.com/pricing/) meters its AI this way from around $32.50/month (see our [Tidio alternatives](/blog/tidio-alternatives-for-ecommerce) round-up), and Loqara prices per conversation too.
 - **Per seat (+ AI add-on)** — you pay per human agent, then the AI is either a separate line or a capped inclusion. [Zendesk](https://www.zendesk.com/pricing/) runs $19–$115 per agent/month with Copilot an extra $50 per agent/month, while [Re:amaze](https://www.reamaze.com/pricing) is $29–$69 per user/month with AI included up to usage caps — either way, the "AI chatbot" you're picturing often isn't fully in the base price.
 
 <div class="callout">
 <p class="callout-title">The pricing trap to watch</p>
-<p>"$X per resolution" and "$X per conversation" are <strong>not</strong> the same thing, and the gap be several times apart on identical traffic. A "resolution" is whatever the vendor decides it is — sometimes counted generously, so one customer thread bills as several events. A "conversation" is one customer thread, full stop. The only way to compare honestly is to take your real monthly volume and multiply it by each tool's actual billable unit. Loqara prices per conversation with a real free tier (100/month) precisely so the number you forecast is the number you pay.</p>
+<p>Both units need a written definition. A resolution uses the vendor’s outcome criteria. Loqara counts text sessions when an AI response is delivered, with a new session after 24 hours of inactivity or at a new UTC month. The same inbox thread can contain multiple sessions. Apply those rules to your traffic, then include the subscription, top-ups, and add-ons in the estimate. Free includes 50 text conversations a month.</p>
 </div>
 
 Whatever model a vendor uses, ask one question: *at my real monthly volume, what's the all-in cost — including the AI, including seats, including overage?* Run that math on your numbers, not the headline price. And check whether the free tier renews every month or is a one-time taste that expires after a few hundred messages.
@@ -95,10 +97,10 @@ Whatever model a vendor uses, ask one question: *at my real monthly volume, what
 
 Match the tool to your **stage**, not the longest feature list. The right answer for a five-person store is the wrong answer for a 200-agent support org, and vice versa.
 
-1. **Just starting out (0–100 conversations/month).** You want grounded answers, real order lookup, and a free tier you can prove value on before paying a cent. Predictable cost matters more than enterprise workflows you won't touch. A flat allowance or per-conversation tool fits cleanly here. See the [best chatbots for online stores](/blog/ai-chatbot-for-online-store).
-2. **Growing store (hundreds/month).** Now install effort, handoff on every plan, and per-conversation predictability separate the field. This is where a per-resolution suite can quietly outpace your budget — model it carefully. Platform guides help: [WooCommerce](/blog/best-ai-chatbot-for-woocommerce) and [Shopify](/blog/best-ai-chatbot-for-shopify).
-3. **Scaling, multichannel (thousands/month, a team in the inbox).** Deep automation across email, social, and SMS starts to justify a heavyweight helpdesk, and per-resolution pricing can pencil out at volume. Weigh it against the AI-agent-plus-live-chat approach. Shortlists: [Gorgias alternatives](/blog/gorgias-alternatives-for-ecommerce) and [Zendesk alternatives](/blog/zendesk-alternatives-for-ecommerce).
-4. **Want to turn chat into a growth channel.** If the agent should also [capture leads conversationally](/blog/capture-leads-with-conversational-chat), confirm that's built in rather than a bolt-on, and that you can measure the leads it produces.
+1. **Testing the basics (up to 50 conversations/month).** Loqara Free lets you test grounded answers with one bot and one language. It does not include live handoff, leads, or commerce. See the [online-store chatbot guide](/blog/ai-chatbot-for-online-store).
+2. **Small business (up to 400 conversations/month).** Basic is €49/month or €490/year and adds product search, handoff, leads, dictation, and full analytics. It keeps one language and the Loqara badge.
+3. **Growing store or more demanding workflow.** Starter begins at €149/month for 1,500 conversations and adds two bots, both supported languages, badge removal, and order lookup on supported WooCommerce/Magento stores. Choose by required features as well as volume.
+4. **Established support operation.** Compare larger allowances, channel needs, team workflows, and total costs against a full helpdesk. Platform guides help: [WooCommerce](/blog/best-ai-chatbot-for-woocommerce) and [Shopify](/blog/best-ai-chatbot-for-shopify).
 
 A quick gut-check before you commit: install it on your real store, point it at a week of real traffic, and watch the metrics. A tool that can't earn its keep in a free or trial week probably won't earn it once you're paying. If you're on WooCommerce specifically, our walkthrough on [adding an AI agent to WooCommerce](/blog/add-ai-agent-to-woocommerce) shows exactly what that test looks like end to end.
 
@@ -111,7 +113,7 @@ The pricing model, because it determines your actual bill more than the headline
 A grounded agent answers only from your own content — your policies, FAQs, and product data — and says "I'm not sure" rather than guessing. It matters because a confident wrong answer (an invented returns window, say) creates more tickets and lost trust than no answer at all. Ask any vendor exactly how they prevent fabricated answers, and look for source citations as proof.
 
 ### Should I pick a tool that charges per resolution or per conversation?
-It depends on your volume and how the vendor defines a "resolution," which can be counted generously. Per-conversation or flat-allowance pricing is usually easier to forecast for small and mid-size stores because one customer thread equals one unit. Per-resolution suites can make sense at high volume with a dedicated team, but always run the math on your own numbers first.
+It depends on your volume and how the vendor defines a "resolution," which can be counted generously. Per-conversation or flat-allowance pricing is usually easier to forecast for small and mid-size stores when you apply the vendor’s exact session definition to your traffic. Per-resolution suites can make sense at high volume with a dedicated team, but always run the math on your own numbers first.
 
 ### Do I really need an AI agent that can look up orders and search products?
 For most stores, yes — those are the tickets that actually repeat. "Where's my order?" and product questions make up the bulk of support volume, and only an agent with live order lookup and catalog search (not just help-center search) can deflect them. A tool that can only answer FAQs is a widget, not a support agent.
@@ -124,7 +126,7 @@ Some can. Loqara, for example, includes an optional real-time [voice agent](/blo
 
 ---
 
-**The bottom line:** the best AI support agent isn't the one with the longest feature list — it's the one whose pricing you can forecast, whose answers you can trust, that can take verified store actions, and that you can install today. Work the checklist, run the math on your own volume, and test it on real traffic before you pay. Loqara was built for the lean-store end of that list: grounded chat and voice, product search across connected catalogs, order lookup on WooCommerce and Magento, handoff on every plan, predictable per-conversation pricing, and one line to install.
+**The bottom line:** the best AI support agent isn't the one with the longest feature list — it's the one whose pricing you can forecast, whose answers you can trust, that can take verified store actions, and that you can install today. Work the checklist, run the math on your own volume, and test it on real traffic before you pay. Loqara was built for the lean-store end of that list: grounded chat and voice, product search across connected catalogs, order lookup on WooCommerce and Magento, handoff on Basic and above, predictable per-conversation pricing, and one line to install.
 
 [Try Loqara on your store free](/#get-started) — one line, no credit card, live in an afternoon.
 

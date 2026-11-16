@@ -2,6 +2,7 @@
 title: "AI chatbot for home appliance stores: fit, delivery, and installation"
 description: "Learn how a home-appliance AI chatbot can verify dimensions, utilities, energy facts, delivery access, accessories, warranty boundaries, and safe human handoff."
 date: 2026-10-19
+updated: 2026-11-16
 topic: ecommerce-ai
 author: Eimantas Kudarauskas
 authorRole: Founder
@@ -242,7 +243,7 @@ Include:
 
 ## What can Loqara do—and what remains separate?
 
-Loqara can:
+On [Basic and above](/#pricing), Loqara can:
 
 - ask category-specific clarification questions;
 - search current products in supported connected stores;
@@ -251,7 +252,7 @@ Loqara can:
 - show relevant products, capture leads, and hand the conversation to staff;
 - use voice as an optional interface for shoppers measuring a space or checking a model label.
 
-Loqara does not inspect the site, measure the opening, verify hidden utilities, certify an installation, provide regulated professional advice, determine legal warranty rights, or guarantee fit from incomplete information. It does not currently provide Shopify order lookup; that capability is limited to supported WooCommerce and Magento stores.
+Loqara does not inspect the site, measure the opening, verify hidden utilities, certify an installation, provide regulated professional advice, determine legal warranty rights, or guarantee fit from incomplete information. It does not currently provide Shopify order lookup; that capability is limited to Starter and above on supported WooCommerce and Magento stores.
 
 ## Which metrics show whether it works?
 
@@ -302,4 +303,4 @@ Electronics guidance often centers on exact device models, ports, protocols, pow
 
 **The honest bottom line:** a home-appliance assistant should make the installation and delivery constraints visible before it makes the product persuasive.
 
-[Try Loqara free](/#get-started) with one appliance family, exact model documentation, and a specialist route for every site condition the storefront cannot verify.
+[See Loqara on your store](/#get-started) with one appliance family, exact model documentation, and a specialist route for every site condition the storefront cannot verify.

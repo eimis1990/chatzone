@@ -69,6 +69,32 @@ Write “on supported WooCommerce and Magento stores” beside Loqara order-look
 claims instead of separating the limitation into a distant disclaimer. Re-run
 the capability audit whenever a provider action changes.
 
+### Plan changes require a blog claim sweep
+
+Pricing is duplicated in prose, stat pills, comparison tables, FAQ answers, and
+closing CTAs; updating the shared pricing component does not update those posts.
+The 2026-11-16 sweep reviewed all 71 posts and corrected 52 for the Basic launch.
+Check against `lib/plans-catalog.ts:30` and `lib/entitlements.ts:32`, including:
+
+- Free 50/no handoff or live commerce; Basic €49/month or €490/year, 400 sessions,
+  one bot/language, retained badge; order lookup and badge removal on Starter+.
+- “Try free” CTAs must not promise paid product search, lead capture, or handoff.
+- A persistent inbox thread is not one lifetime billing unit: the text session
+  resets after 24 hours of inactivity or a new UTC month; voice calls use minutes.
+- Basic €15/200 and Starter+ €15/1,000 packs expire in the UTC payment month.
+- Voice dictation is included text input on Basic+, distinct from paid voice calls.
+
+The [cost guide](../../content/blog/how-much-does-ai-chatbot-cost.md) owns the
+detailed plan table, top-up arithmetic, counting rule, and Free transition note.
+Comparison refreshes explicitly date the Loqara-only review without implying
+competitor prices were rechecked. Preserve original publication dates and URLs;
+only materially edited posts receive `updated` (feeds BlogPosting `dateModified`
+and sitemap `lastModified`). FAQ schema is extracted from the edited visible body.
+`PRODUCT.md:81` also needs updating: Content Studio reads that file as its verified
+product context (`lib/content-studio/generation.ts:56`). Keep `public/llms.txt`
+aligned as well, including Messenger availability. Run `npm run audit:blog` and
+check rendered pricing tables at desktop and phone widths.
+
 ## Images
 
 New blog raster assets use the built-in OpenAI Image 2 workflow and are saved as

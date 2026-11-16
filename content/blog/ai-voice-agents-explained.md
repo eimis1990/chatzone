@@ -2,7 +2,7 @@
 title: "AI voice agents explained: when customers can just talk to your website"
 description: What an AI voice agent is, how a voice chatbot works (speech in, LLM, speech out), what it costs per minute, and the honest limits — explained simply.
 date: 2026-07-03
-updated: 2026-07-21
+updated: 2026-11-16
 topic: voice-ai
 related: add-voice-ai-to-online-store, voice-ai-for-ecommerce-support, conversational-ai-vs-chatbot
 author: Eimantas Kudarauskas
@@ -86,7 +86,7 @@ One place voice earns its cost quickly: customers who struggle with typing — a
 
 The industry unit for voice is the **conversation minute**, covering the whole pipeline — transcription, model, synthesis. Costs vary with voice quality, model, and volume, but for calibration: [ElevenLabs' agents platform](https://elevenlabs.io/pricing/agents) charges $0.08 per additional call minute, with LLM usage billed on top — so all-in costs land in the tens of cents per minute, and vendor pricing usually wraps that in a monthly plan with included minutes plus an overage rate.
 
-For a concrete, disclosed example: Loqara — our product — prices voice as an add-on at **€49/month including roughly 200 minutes, then €0.20/minute** beyond that, on top of a chat plan. The arithmetic worth doing for any vendor is the same: estimate your voice-inclined traffic (it's a minority of visitors), multiply by a typical call length of a couple of minutes, and compare against what those conversations cost you today in support time — or in customers who bounced rather than typed.
+For a concrete, disclosed example: Loqara — our product — prices voice as an add-on at **€49/month including roughly 200 minutes, then €0.20/minute** beyond that, on top of a paid chat plan (Basic starts at €49/month or €490/year). Calls consume voice minutes only, not the text conversation allowance. Voice dictation is a separate Basic+ feature for entering text chat messages. The arithmetic worth doing for any vendor is the same: estimate your voice-inclined traffic (it's a minority of visitors), multiply by a typical call length of a couple of minutes, and compare against what those conversations cost you today in support time — or in customers who bounced rather than typed.
 
 <div class="callout">
 <p class="callout-title">Before you buy: test it like a sceptic</p>
@@ -116,7 +116,7 @@ Three streaming stages: speech-to-text transcribes the customer as they talk; a 
 Yes, if it's integrated with the store's platform. Through tool calls, a voice agent can search the live catalog for price and stock and look up a specific order after verifying the customer's identity — the same actions a good text agent performs, just spoken. Agents without these integrations can only answer general policy questions.
 
 ### How much does an AI voice agent cost?
-Voice is billed by the conversation minute, since speech models run per second of audio. All-in per-minute costs typically land in the tens of cents depending on quality and volume (ElevenLabs, for example, charges $0.08 per extra call minute plus LLM usage), and most vendors package this as a monthly add-on with included minutes plus an overage rate on top of a chat plan.
+Voice is billed by the conversation minute, since speech models run per second of audio. All-in per-minute costs typically land in the tens of cents depending on quality and volume (ElevenLabs, for example, charges $0.08 per extra call minute plus LLM usage), and many vendors package this as a monthly add-on with included minutes plus an overage rate. In Loqara specifically, the add-on requires a paid chat plan and calls use minutes only, without consuming text conversations.
 
 ### When is text chat better than voice?
 Whenever the answer is a list, a link, or a table; whenever the customer is somewhere they can't talk; and whenever sensitive details would have to be read aloud. Voice is an additional channel for people who prefer talking — mobile users, accessibility needs, customers who dislike typing — not a replacement for chat or for human handoff.

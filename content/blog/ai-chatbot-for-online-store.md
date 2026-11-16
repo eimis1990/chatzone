@@ -4,7 +4,7 @@ description: A practical guide to adding an AI chat agent to your e-commerce sto
 date: 2026-06-27
 topic: platform-integrations
 related: add-ai-agent-to-woocommerce, ai-chatbot-for-magento, test-ai-chatbot-before-launch
-updated: 2026-07-21
+updated: 2026-11-16
 author: Eimantas Kudarauskas
 image: /blog/ai-chatbot-for-online-store.webp
 ---
@@ -54,7 +54,7 @@ If a chatbot can't do those things, it's a toy. If it can, it pays for itself. H
 <div class="stat"><div class="stat-num">24/7</div><div class="stat-label">Coverage with no extra headcount</div></div>
 <div class="stat"><div class="stat-num">5</div><div class="stat-label">Core jobs: answer, search, look up, capture, hand off</div></div>
 <div class="stat"><div class="stat-num">1 line</div><div class="stat-label">To install the widget on your store</div></div>
-<div class="stat"><div class="stat-num">100/mo</div><div class="stat-label">Free conversations to test on real traffic</div></div>
+<div class="stat"><div class="stat-num">50/mo</div><div class="stat-label">Free conversations to test on real traffic</div></div>
 </div>
 
 ## Why grounding matters more than the model
@@ -85,7 +85,7 @@ This is also why "which model?" is the wrong first question. A bigger model writ
 Getting a grounded agent live is genuinely a same-day job — no developer required. The flow is the same regardless of platform:
 
 1. **Add your knowledge.** Paste your FAQ, upload policy docs, or point it at your store URL. The agent indexes that content so it has something real to ground answers in.
-2. **Connect your store.** Authorise the catalog connection for live product search. Loqara has connectors for [WooCommerce](/blog/best-ai-chatbot-for-woocommerce), Shopify, and [Magento](/blog/ai-chatbot-for-magento), plus Verskis and product feeds. Identity-checked order lookup is a separate capability available only on WooCommerce and Magento today.
+2. **Connect your store on Basic or above.** Authorise the catalog connection for live product search. Loqara has connectors for [WooCommerce](/blog/best-ai-chatbot-for-woocommerce), Shopify, and [Magento](/blog/ai-chatbot-for-magento), plus Verskis and product feeds. Identity-checked order lookup is a separate capability available on Starter and above for WooCommerce and Magento today.
 3. **Match your brand.** Set colours, corner radius, launcher, and an avatar so the widget looks native to your site, and pick a tone of voice. If you want it, turn on the real-time [voice agent](/blog/voice-ai-for-ecommerce-support) (English and Lithuanian today).
 4. **Preview, then embed.** Test it against your real questions, then drop a single `<script>` tag before `</body>`. The widget appears in the corner and you're answering customers the same afternoon. Edits go live the moment you save.
 
@@ -98,7 +98,7 @@ Installing the widget is the start, not the finish. The agents that actually ear
 - **Leads it would otherwise have lost.** Captured emails from shoppers who weren't ready to buy are revenue you weren't tracking before.
 - **CSAT that holds up.** A grounded agent with clean handoff should score like a decent human shift, not a phone tree.
 
-Loqara surfaces these as analytics plus CSAT out of the box, so you can see deflection, handoff rate, and leads in one place rather than guessing. If you want a framework for which numbers actually matter, see [chatbot ROI metrics that matter](/blog/chatbot-roi-metrics-that-matter). The pattern is simple: fill knowledge gaps wherever the bot says "I'm not sure," and the agent gets measurably better every week.
+Loqara Basic and above include full analytics and CSAT, so you can review handoff, leads, and answer quality in one place. Free provides basic conversation and message counts. If you want a framework for which numbers actually matter, see [chatbot ROI metrics that matter](/blog/chatbot-roi-metrics-that-matter). The pattern is simple: fill knowledge gaps wherever the bot says "I'm not sure," and the agent gets measurably better every week.
 
 ## Frequently asked questions
 
@@ -109,13 +109,13 @@ It's an AI agent that lives in a widget on your store and resolves customer ques
 A traditional live chat widget waits for a human to type a reply, so it only works during staffed hours. An AI chatbot answers instantly, 24/7, grounded in your own content — and only pulls in a human for the cases that genuinely need one. You get the coverage of automation with the safety net of a real person.
 
 ### Will the chatbot make up answers about my products or policies?
-A grounded chatbot won't. Loqara answers only from the content you give it and cites its sources; when it isn't sure, it captures the lead or hands off to a human instead of guessing. Ungrounded, model-only bots are the ones that invent policies — which is exactly the behaviour to avoid.
+A grounded chatbot won't. Loqara answers only from the content you give it and cites its sources; when it is unsure, it should acknowledge the gap. On Basic and above, it can also capture a lead or hand off to a human. Ungrounded, model-only bots are the ones that invent policies — which is exactly the behaviour to avoid.
 
 ### Do I need a developer to add an AI chatbot to my store?
 No. With a one-line embed you add your content, connect your store platform, customise the widget, and paste a single `<script>` tag before `</body>`. Most stores are live the same afternoon, and changes go live the moment you save — no engineering project required.
 
 ### How much does an AI chatbot for an online store cost?
-It depends on the pricing unit, and the differences are large. Loqara is priced per conversation with a genuine free tier of 100 conversations a month, while many helpdesk suites bill per "resolution" on top of seat fees ([Intercom's Fin](https://www.intercom.com/pricing), for example, charges $0.99 per resolution). Model your real monthly volume against each unit before committing, because the same traffic can cost very differently.
+It depends on the pricing unit, and the differences are large. Loqara is priced per conversation with a genuine free tier of 50 conversations a month, while many helpdesk suites bill per "resolution" on top of seat fees ([Intercom's Fin](https://www.intercom.com/pricing), for example, charges $0.99 per resolution). Model your real monthly volume against each unit before committing, because the same traffic can cost very differently.
 
 ### Can the chatbot look up a customer's order?
 Only on a supported order integration. Loqara currently retrieves order status from WooCommerce and Magento after the order number and billing email match. It does not look up Shopify, Verskis, or generic-feed orders today; those stores should keep their native tracking flow and use Loqara for grounded answers, catalog search, lead capture, and handoff.

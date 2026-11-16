@@ -2,6 +2,7 @@
 title: "Shopify Agentic Storefronts: setup checklist for AI sales channels"
 description: "Set up Shopify Agentic Storefronts for ChatGPT, Copilot, Google AI Mode, Gemini, and Meta with the right catalog, channel, checkout, and reporting controls."
 date: 2026-10-19
+updated: 2026-11-16
 topic: platform-integrations
 author: Eimantas Kudarauskas
 authorRole: Founder
@@ -223,7 +224,9 @@ An onsite assistant and Agentic Storefronts serve different moments. The former 
 
 Loqara does not activate Shopify Agentic Storefronts, change Shopify Catalog eligibility, configure external AI checkout, or guarantee that another platform will recommend a product.
 
-Loqara provides the conversational layer on the merchant’s own storefront. It can search a connected Shopify product catalog, answer from approved store knowledge, keep context across follow-up questions, capture leads, and hand a conversation to a person. Shopify order lookup is not currently supported by Loqara; order-status lookup is available only for supported WooCommerce and Magento stores.
+Loqara provides the conversational layer on the merchant’s own storefront. It can search a connected Shopify product catalog, answer from approved store knowledge, keep context across follow-up questions, capture leads, and hand a conversation to a person. Shopify order lookup is not currently supported by Loqara; order-status lookup is available on Starter and above for supported WooCommerce and Magento stores.
+
+Live product search and human handoff require [Basic or above](/#pricing). Basic costs €49/month or €490/year and includes 400 conversations, one bot, and one language. Free offers 50 knowledge-based conversations a month, without live commerce or handoff.
 
 The two layers can share the same discipline: complete product facts, clear policies, current availability, explicit limitations, and a human route for uncertainty.
 
@@ -261,4 +264,4 @@ Enable it when broad distribution matches the business’s data-sharing and chan
 
 **The practical next step:** open **Sales channels > Agentic**, record the global setting, eligible product count, active channels, checkout behavior, and three important search-preview results. That five-minute snapshot will show whether the next job is governance, eligibility, data mapping, or merchandising.
 
-[Try Loqara free](/#get-started) when the external channel brings shoppers to your store and they still need accurate, conversational product help.
+[See Loqara on your store](/#get-started) when the external channel brings shoppers to your store and they still need accurate, conversational product help.

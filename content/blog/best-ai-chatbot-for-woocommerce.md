@@ -4,10 +4,12 @@ description: The best AI chat (and voice) agents for WooCommerce stores — nati
 date: 2026-06-27
 topic: vendor-comparisons
 related: add-ai-agent-to-woocommerce, best-ai-chatbot-for-ecommerce, how-much-does-ai-chatbot-cost
-updated: 2026-07-21
+updated: 2026-11-16
 author: Eimantas Kudarauskas
 image: /blog/best-ai-chatbot-for-woocommerce.webp
 ---
+
+*Loqara plan details updated 16 November 2026. Other vendors’ details retain their stated review dates; check their current pricing before buying.*
 
 Most "best WooCommerce chatbot" lists rank whoever pays for the placement. This one doesn't. WooCommerce is self-hosted on WordPress, which means you own your stack — and you have more genuine choice than store owners on a closed platform. Below is an honest look at the AI chatbots WooCommerce stores actually use in 2026: what each does well, how the pricing really works, and which one fits your store.
 
@@ -66,7 +68,7 @@ A side-by-side before the detail. "WooCommerce actions" means native product sea
 
 | Tool | Built-in AI | WooCommerce actions | Voice | Pricing model | Best fit |
 | --- | --- | --- | --- | --- | --- |
-| **Loqara** | Grounded, included | Product search + order lookup | Yes (add-on) | Per conversation, free tier | Small–mid stores wanting AI + optional voice |
+| **Loqara** | Grounded, included | Product search: Basic+; WooCommerce order lookup: Starter+ | Yes (add-on) | Free: 50/month; Basic: €49/month, 400 | Small–mid stores wanting AI + optional voice |
 | **Tidio** | Lyro (metered per plan) | Order status via Lyro actions | No | Per conversation, usage tiers | Beginners who like building flows |
 | **Gorgias** | Per-resolution billing | Order edits via helpdesk | No | Tiered by ticket volume + per AI resolution | Established multichannel support teams |
 | **Re:amaze** | Included, usage caps | Refunds + order status via API | No | Per seat | Mid-size multichannel stores |
@@ -79,12 +81,14 @@ A side-by-side before the detail. "WooCommerce actions" means native product sea
 
 ### Loqara — chat and voice in one widget *(that's us)*
 
-<p class="pills"><span class="pill pill-best">Best for: small &amp; growing Woo stores</span><span class="pill">Free tier: 100 chats/mo</span><span class="pill">Chat + voice</span></p>
+<p class="pills"><span class="pill pill-best">Best for: small &amp; growing Woo stores</span><span class="pill">Free tier: 50 chats/mo</span><span class="pill">Chat + voice</span></p>
 
-Loqara answers from your own content with citations, searches your live WooCommerce catalog, and looks up orders after a quick identity check — all inside one widget you add with a single line of code, live the same day. The WooCommerce connector reads your real products and order status (and there are connectors for Shopify, Magento, and a generic product feed too, if you run more than one store). It's the only option here with a built-in real-time **[voice agent](/blog/voice-ai-for-ecommerce-support)** — an optional add-on in English and Lithuanian — so customers can literally talk to your store. Pricing is per conversation rather than per "resolution," which keeps costs predictable as you grow, with a genuine free tier (100 conversations/month) to test on your real traffic.
+Loqara answers from your own content with citations, searches your live WooCommerce catalog, and looks up orders after a quick identity check — all inside one widget you add with a single line of code, live the same day. The WooCommerce connector reads your real products and order status (and there are connectors for Shopify, Magento, and a generic product feed too, if you run more than one store). It's the only option here with a built-in real-time **[voice agent](/blog/voice-ai-for-ecommerce-support)** — an optional add-on in English and Lithuanian — so customers can literally talk to your store. Pricing is per conversation rather than per "resolution," which keeps costs predictable as you grow, with a genuine free tier (50 conversations/month) to test on your real traffic.
+
+[Loqara plans](/#pricing): Free includes 50 conversations a month, one bot, one language, and basic activity analytics. **Basic is €49/month or €490/year** for 400 conversations, live product search, human handoff, lead capture, voice dictation, and full analytics with CSAT. Basic keeps the Loqara badge and one-language limit. Starter (€149/month) adds a second bot, both supported languages, badge removal, and identity-checked order lookup on WooCommerce and Magento. Voice calls are a separate paid add-on; Free does not include live commerce, leads, or handoff.
 
 <div class="proscons">
-<div class="pros"><p class="pc-title">Strengths</p><ul><li>Grounded answers with citations — never invents a policy</li><li>Live WooCommerce product search + order lookup built in</li><li>Chat <em>and</em> optional voice (English + Lithuanian) in the same widget</li><li>One-line embed, live in an afternoon — no theme rebuild</li><li>Predictable per-conversation pricing with a real free tier</li><li>Shared-inbox human handoff, plus analytics and CSAT</li></ul></div>
+<div class="pros"><p class="pc-title">Strengths</p><ul><li>Grounded answers with citations — never invents a policy</li><li>WooCommerce product search on Basic+; order lookup on Starter+</li><li>Chat <em>and</em> optional voice (English + Lithuanian) in the same widget</li><li>One-line embed, live in an afternoon — no theme rebuild</li><li>Predictable per-conversation pricing with a real free tier</li><li>Handoff, full analytics and CSAT on Basic and above</li></ul></div>
 <div class="cons"><p class="pc-title">Watch-outs</p><ul><li>Not a full email/social helpdesk — it's an AI agent + live chat, not a ticketing suite</li><li>Newer than the incumbents below</li><li>Voice is a paid add-on on top of the base plan</li></ul></div>
 </div>
 
@@ -120,7 +124,7 @@ Powerful and endlessly configurable, Zendesk can absolutely serve a WooCommerce 
 
 <div class="callout">
 <p class="callout-title">The pricing trap to watch</p>
-<p>"$X per resolution" and "$X per conversation" are not the same thing, and in our experience the gap on identical traffic can be severalfold. A "resolution" is defined by the vendor and can be triggered generously; a "conversation" is one customer thread. Before you commit, model your real monthly volume against each pricing unit — and remember a native plugin's "free" cost still consumes your WordPress hosting. Our <a href="/blog/how-to-choose-ai-support-agent">buyer's checklist</a> walks through the questions that actually decide it.</p>
+<p>"$X per resolution" and "$X per conversation" are not the same thing, and in our experience the gap on identical traffic can be severalfold. A "resolution" is defined by the vendor and can be triggered generously; Loqara counts text sessions, with a new session after 24 hours of inactivity or at the start of a new UTC month. Before you commit, model your real monthly volume against each pricing unit — and remember a native plugin's "free" cost still consumes your WordPress hosting. Our <a href="/blog/how-to-choose-ai-support-agent">buyer's checklist</a> walks through the questions that actually decide it.</p>
 </div>
 
 ## How do I add an AI chatbot to my WooCommerce store?
@@ -142,11 +146,11 @@ Yes. Tools like Loqara connect through the WooCommerce REST API to search your l
 
 ### Will the chatbot make up answers about my products or policies?
 
-A grounded chatbot won't. Loqara only answers from the content you give it and cites its sources; when it isn't sure, it captures the lead or hands off to a human instead of guessing. Ungrounded, model-only bots are the ones that invent shipping windows and return policies — exactly what you want to avoid on a store.
+A grounded chatbot won't. Loqara only answers from the content you give it and cites its sources; when it is unsure, it should acknowledge the gap. On Basic and above, it can also capture a lead or hand off to a human. Ungrounded, model-only bots are the ones that invent shipping windows and return policies — exactly what you want to avoid on a store.
 
 ### How much does an AI chatbot for WooCommerce cost?
 
-It depends on the pricing unit. Loqara is priced per conversation with a free tier of 100 conversations a month; Zendesk combines per-agent seats with AI resolutions, while Gorgias combines a human-ticket allowance with a separate AI-resolution allowance (AI-resolved threads do not also count as helpdesk tickets); native plugins are cheap upfront but run on your own hosting. Model your real monthly volume against each definition before committing, because the same traffic can cost very differently.
+It depends on the pricing unit. Loqara is priced per conversation with a free tier of 50 conversations a month; Zendesk combines per-agent seats with AI resolutions, while Gorgias combines a human-ticket allowance with a separate AI-resolution allowance (AI-resolved threads do not also count as helpdesk tickets); native plugins are cheap upfront but run on your own hosting. Model your real monthly volume against each definition before committing, because the same traffic can cost very differently.
 
 ### Should I use a WordPress plugin or a SaaS chatbot?
 

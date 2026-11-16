@@ -2,6 +2,7 @@
 title: "How to automate e-commerce returns with an AI chatbot"
 description: Learn which parts of returns an AI chatbot can automate safely — policy answers, triage, order verification, labels, refunds, handoff, and measurement.
 date: 2026-07-15
+updated: 2026-11-16
 topic: ai-customer-support
 author: Eimantas Kudarauskas
 image: /blog/automate-returns-with-ai-chatbot.webp
@@ -187,7 +188,7 @@ Do not optimise only for fewer tickets. A customer who gives up after a misleadi
 
 <div class="callout">
 <p class="callout-title">Loqara’s current boundary</p>
-<p>Loqara can answer from the return policy, gather customer details, look up supported order status after verification, and hand the conversation to a person. It does not currently create return labels or issue refunds. The agent should state that boundary plainly rather than simulate an action it cannot perform.</p>
+<p>Loqara can answer from the return policy on Free. Basic and above add lead capture and live handoff; Starter and above add verified WooCommerce/Magento order lookup. It does not currently create return labels or issue refunds. The agent should state that boundary plainly rather than simulate an action it cannot perform.</p>
 </div>
 
 ## Frequently asked questions
@@ -224,4 +225,4 @@ Yes. Before purchase it can answer sizing, compatibility, material, dimensions, 
 
 **The honest bottom line:** automate the repetition, not the judgement. A returns chatbot earns trust by knowing the policy, collecting the right facts, and being precise about what it did — and what still needs a person.
 
-[Try Loqara free](/#get-started) to automate grounded return questions and route exceptions with the full conversation attached.
+[Try Loqara free](/#get-started) for 50 monthly conversations about your published return policy. Basic adds lead capture and live handoff; Starter adds verified WooCommerce/Magento order lookup. Neither plan issues refunds or return labels. [Compare plans](/#pricing).

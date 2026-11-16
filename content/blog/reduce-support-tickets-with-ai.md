@@ -4,7 +4,7 @@ description: Where support volume actually comes from in e-commerce — and how 
 date: 2026-06-26
 topic: ai-customer-support
 related: where-is-my-order-ai, automate-returns-with-ai-chatbot, ai-chatbot-human-handoff
-updated: 2026-07-21
+updated: 2026-11-16
 author: Eimantas Kudarauskas
 image: /blog/reduce-support-tickets-with-ai.webp
 ---
@@ -77,7 +77,7 @@ Most chatbots fail at deflection for the same reason: they match keywords to a h
 <div class="stat"><div class="stat-num">24/7</div><div class="stat-label">Coverage with no extra headcount</div></div>
 <div class="stat"><div class="stat-num">WISMO</div><div class="stat-label">The #1 repetitive ticket in the stores we see</div></div>
 <div class="stat"><div class="stat-num">1 line</div><div class="stat-label">Of code to embed the agent on your store</div></div>
-<div class="stat"><div class="stat-num">100/mo</div><div class="stat-label">Free conversations on Loqara to test on real traffic</div></div>
+<div class="stat"><div class="stat-num">50/mo</div><div class="stat-label">Free conversations on Loqara to test on real traffic</div></div>
 </div>
 
 When the agent reaches its limit — a refund in dispute, a damaged item, anything that needs judgment — it should pass the conversation to a human in a [shared inbox](/blog/ai-chatbot-human-handoff) *with the full transcript attached*, so the customer never repeats themselves. Deflection and handoff aren't opposites; a good system does both, and the handoff quality is what protects CX when the bot steps back.
@@ -122,7 +122,7 @@ Anything needing judgment, empathy, or authority: refund disputes, chargebacks, 
 
 ### Do I need a separate help desk, or can the AI agent handle handoff itself?
 
-You don't need a heavyweight ticketing suite to start. An agent like Loqara includes a shared inbox where a human can take over a conversation instantly — with the full transcript — so the agent handles the repetitive load and your team handles the exceptions, all in one place. You can read more on how [human handoff](/blog/ai-chatbot-human-handoff) should work.
+You don't need a heavyweight ticketing suite to start. Loqara Basic and above include a shared inbox where a human can take over a conversation instantly — with the full transcript — so the agent handles the repetitive load and your team handles the exceptions, all in one place. You can read more on how [human handoff](/blog/ai-chatbot-human-handoff) should work.
 
 ### How quickly can I get an AI agent live to start cutting tickets?
 

@@ -4,7 +4,7 @@ description: Forget vanity stats. These four numbers — deflection, handoff rat
 date: 2026-06-21
 topic: ai-customer-support
 related: how-much-does-ai-chatbot-cost, reduce-support-tickets-with-ai, ai-customer-service-statistics
-updated: 2026-06-30
+updated: 2026-11-16
 author: Eimantas Kudarauskas
 image: /blog/chatbot-roi-metrics-that-matter.webp
 ---
@@ -67,7 +67,7 @@ Measure it by tagging conversations as resolved when the question was genuinely 
 
 CSAT is how customers rate the help they got — a simple thumbs-up/down or short rating after a conversation. It's the quality guardrail on every other metric on this list. Deflection without satisfaction is the classic trap: you can drive automation up by frustrating people into closing the chat, and the dashboard will look great while your reviews quietly rot.
 
-The pattern to watch is divergence. If CSAT drops while deflection rises, the agent is closing conversations it shouldn't. Healthy ROI means both move up together — more conversations handled, and customers still happy with the outcome. Loqara collects CSAT in-conversation so this guardrail is built in, not bolted on.
+The pattern to watch is divergence. If CSAT drops while deflection rises, the agent is closing conversations it shouldn't. Healthy ROI means both move up together — more conversations handled, and customers still happy with the outcome. On Basic and above, Loqara collects CSAT in-conversation so this guardrail is built in, not bolted on.
 
 ### Conversion and AOV influence
 
@@ -79,7 +79,7 @@ A product-aware agent that does live product search and order lookup is what mak
 
 Savings only become ROI when you can divide by a real cost. Cost per conversation is exactly that: what each handled conversation costs, all-in. The catch is that the answer depends on your pricing model — and vendors love to obscure it. "Per resolution" pricing can be defined generously and is hard to predict; per-seat fees don't scale with the work the AI actually does.
 
-Per-conversation pricing makes this metric trivial to read, because the unit you're billed on *is* the metric. Loqara prices per conversation (with a free tier of 100 a month), so cost per conversation is a known number you can drop straight into the ROI math below — not something you reverse-engineer from an invoice.
+Calculate cost per conversation from the actual subscription, add-ons, and top-ups divided by used text sessions. Loqara Free includes 50 sessions a month; Basic costs €49/month or €490/year for 400. A session counts when an AI response is delivered, with a new session after 24 hours of inactivity or at a new UTC month. Unused allowance still has a cost on a paid plan. Measure voice-call cost separately because calls use minutes, not text sessions. See the [worked cost examples](/blog/how-much-does-ai-chatbot-cost).
 
 ### Leads captured
 
@@ -128,6 +128,6 @@ Because the sticker price doesn't tell you what the work costs once volume scale
 
 ---
 
-**The bottom line:** ignore the activity metrics and watch the outcomes — deflection and resolution prove the support savings, CSAT keeps them honest, conversion and lead capture show the upside, and a transparent cost per conversation turns it all into a number you can defend. Loqara surfaces conversation analytics, built-in CSAT, grounded answers, product search, and per-conversation pricing; WooCommerce and Magento stores can also measure identity-checked order lookup. Measure the payback, not the noise.
+**The bottom line:** ignore the activity metrics and watch the outcomes — deflection and resolution prove the support savings, CSAT keeps them honest, conversion and lead capture show the upside, and a transparent cost per conversation turns it all into a number you can defend. Loqara Basic and above provide full analytics, CSAT, product search, and lead capture; Free provides basic activity counts. Starter and above add identity-checked order lookup on WooCommerce and Magento. Measure the payback, not the noise.
 
 [Try Loqara on your store free](/#get-started) — one line, no credit card, live in an afternoon.

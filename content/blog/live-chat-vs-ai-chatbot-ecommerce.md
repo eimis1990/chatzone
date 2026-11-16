@@ -2,6 +2,7 @@
 title: "Live chat vs AI chatbot for e-commerce: which should your store use?"
 description: "Compare live chat and AI chatbots for e-commerce by customer job, speed, accuracy, staffing, product discovery, exceptions, handoff, and cost."
 date: 2026-07-23
+updated: 2026-11-16
 topic: ai-customer-support
 author: Eimantas Kudarauskas
 authorRole: Founder
@@ -246,7 +247,9 @@ Message count and containment rate can look impressive while customers remain un
 
 ## What can Loqara do in a hybrid setup?
 
-Loqara can answer from approved store knowledge, search connected live products, show product cards, capture leads, and transfer the conversation to a person in a shared inbox. Supported commerce integrations can add identity-checked order lookup; availability differs by provider, and Shopify order lookup is not currently supported.
+Loqara can answer from approved store knowledge, search connected live products, show product cards, capture leads, and transfer the conversation to a person in a shared inbox. Starter and above can add identity-checked order lookup on WooCommerce and Magento; availability differs by provider, and Shopify order lookup is not currently supported.
+
+Live product search and human handoff require [Basic or above](/#pricing). Basic costs €49/month or €490/year and includes 400 conversations, one bot, and one language. Free offers 50 knowledge-based conversations a month, without live commerce or handoff.
 
 Optional voice lets English- and Lithuanian-speaking shoppers talk to the assistant. A human still owns exceptions, consequential actions, and knowledge approval.
 
@@ -286,4 +289,4 @@ Track accuracy, useful resolution, repeat contact, customer effort, human minute
 
 **The honest bottom line:** automate the facts you can prove and route the decisions you cannot.
 
-[Try Loqara free](/#get-started) with your real store questions, live product search, and a human handoff that keeps the conversation context.
+[See Loqara on your store](/#get-started) with your real store questions, live product search, and a human handoff that keeps the conversation context.

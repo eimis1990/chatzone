@@ -2,6 +2,7 @@
 title: "How to get your products recommended by ChatGPT shopping"
 description: A practical merchant guide to appearing in ChatGPT shopping results: crawling, product feeds, structured data, product-page content, and GEO measurement.
 date: 2026-07-15
+updated: 2026-11-16
 topic: ai-search-visibility
 author: Eimantas Kudarauskas
 image: /blog/how-to-get-products-recommended-by-chatgpt.webp
@@ -189,4 +190,4 @@ SEO helps pages become discoverable and rank in search results. GEO helps genera
 
 **The honest bottom line:** ChatGPT shopping optimisation is not a new bag of tricks. It is excellent product information, distributed in the formats an assistant can access and kept accurate enough to trust.
 
-Once a shopper reaches your site, [Loqara](/#get-started) can keep the conversation going with grounded answers and live catalog search — free for the first 100 conversations each month.
+Once a shopper reaches your site, [Loqara](/#get-started) can keep the conversation going. Free offers 50 knowledge-based conversations each month; [Basic](/#pricing) adds live catalog search and human handoff for €49/month or €490/year, with 400 conversations included.

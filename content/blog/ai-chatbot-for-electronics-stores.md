@@ -2,6 +2,7 @@
 title: "AI chatbot for electronics stores: prevent compatibility mistakes"
 description: "Learn how an electronics-store AI chatbot can verify device models, ports, power, regions, variants, and accessories without inventing compatibility."
 date: 2026-07-25
+updated: 2026-11-16
 topic: ecommerce-ai
 author: Eimantas Kudarauskas
 authorRole: Founder
@@ -158,6 +159,8 @@ Record supported and unsupported combinations, requirements, limitations, and so
 
 Loqara can search products in supported connected stores and answer from approved knowledge sources. Available product fields differ by platform and catalog. Loqara does not manufacture missing compatibility data or independently certify an electrical setup.
 
+Live product search and human handoff require [Basic or above](/#pricing). Basic costs €49/month or €490/year and includes 400 conversations, one bot, and one language. Free offers 50 knowledge-based conversations a month, without live commerce or handoff.
+
 ### 5. Define refusal and handoff rules
 
 Require a source for exact compatibility, safety, warranty, or firmware claims. Route bespoke setups, contradictory sources, damaged hardware, and uncertain part numbers to a person.
@@ -221,4 +224,4 @@ Loqara supports product search for connected Shopify, WooCommerce, Magento, and 
 
 **The honest bottom line:** the best electronics assistant is willing to exclude a popular product when the evidence does not prove it will work.
 
-[Try Loqara free](/#get-started) with one compatibility-heavy category, real model data, and a specialist route for every setup the catalog cannot verify.
+[See Loqara on your store](/#get-started) with one compatibility-heavy category, real model data, and a specialist route for every setup the catalog cannot verify.

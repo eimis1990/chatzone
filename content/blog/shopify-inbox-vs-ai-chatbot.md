@@ -2,12 +2,15 @@
 title: "Shopify Inbox vs AI chatbot: when is the free option enough?"
 description: "Compare Shopify Inbox with a dedicated AI chatbot for live support, instant answers, product discovery, automation, order tracking, handoff, and cost."
 date: 2026-07-23
+updated: 2026-11-16
 topic: vendor-comparisons
 author: Eimantas Kudarauskas
 authorRole: Founder
 image: /blog/shopify-inbox-vs-ai-chatbot.webp
 related: best-ai-chatbot-for-shopify, shopify-ai-assistant-guide, ai-chatbot-human-handoff
 ---
+
+*Loqara plan details updated 16 November 2026. Other vendors’ details retain their stated review dates; check their current pricing before buying.*
 
 Shopify Inbox is a sensible first chat tool for many Shopify stores. It is native, easy to install, and lets a merchant talk to shoppers without buying a separate helpdesk.
 
@@ -183,7 +186,9 @@ Record accuracy, time to useful answer, shopper effort, human time, unresolved r
 
 Loqara provides grounded AI chat, approved knowledge retrieval, live Shopify product search, conversational recommendations, live human handoff, analytics, and optional English/Lithuanian voice. It can also be embedded on non-Shopify sites and supports other commerce providers.
 
-Current boundary: Loqara does **not** provide Shopify order lookup today. Shopify Inbox’s native “Track my order” instant answer is therefore the stronger choice for that specific Shopify job. Loqara order lookup is available only on supported integrations and requires identity verification.
+Live product search and human handoff require [Basic or above](/#pricing). Basic costs €49/month or €490/year and includes 400 conversations, one bot, and one language. Free offers 50 knowledge-based conversations a month, without live commerce or handoff.
+
+Current boundary: Loqara does **not** provide Shopify order lookup today. Shopify Inbox’s native “Track my order” instant answer is therefore the stronger choice for that specific Shopify job. Loqara order lookup requires Starter or above, a supported WooCommerce or Magento integration, and identity verification.
 
 Inbox is also the more direct answer when a merchant primarily wants staff-operated chat at no additional app charge. Loqara becomes relevant when the store has enough repeatable open-ended work or product-discovery demand to justify a maintained AI system.
 
@@ -221,4 +226,4 @@ Not necessarily. Loqara fits stores that want grounded open-ended answers, live 
 
 **The honest bottom line:** if Shopify Inbox already handles the workload reliably, keep it. Add dedicated AI only for a customer job you can name, test, and measure.
 
-[Try Loqara free](/#get-started) with real Shopify product questions before deciding whether the extra automation earns its place.
+[See Loqara on your store](/#get-started) with real Shopify product questions before deciding whether the extra automation earns its place.

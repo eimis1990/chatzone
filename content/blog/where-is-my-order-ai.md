@@ -2,7 +2,7 @@
 title: '"Where is my order?" — how AI answers your #1 support question automatically'
 description: The most common message in any e-commerce inbox is "where is my order?" Here's why it dominates, and how a grounded AI chat and voice agent verifies identity and answers it automatically, 24/7.
 date: 2026-07-10
-updated: 2026-07-21
+updated: 2026-11-16
 topic: ai-customer-support
 related: reduce-support-tickets-with-ai, automate-returns-with-ai-chatbot, ai-chatbot-human-handoff
 author: Eimantas Kudarauskas
@@ -76,6 +76,8 @@ This is a deliberate trade-off: the identity check adds one small step for the l
 
 Either way, and the identity check applies the same regardless. A shopper can type "where's my order" into the widget or ask out loud through the voice agent, in English or Lithuanian, and get the same verified, live answer back. Voice matters here specifically because "where is my order" is often asked on the move — from a phone, between other things — where typing is the friction point, not the question itself. On Loqara, chat is included and voice is a paid add-on on top of it, so a store can start with chat and turn on voice once it's clear customers want to talk rather than type.
 
+For Loqara, verified order lookup requires Starter or above and a supported WooCommerce or Magento connection. Basic includes product search but not orders; Free includes neither live store tool. Voice is an additional paid add-on and uses minutes only. [Compare plans](/#pricing).
+
 ## What can't the AI do with orders?
 
 It answers status. It does not edit an order, cancel it, process a refund, or take a payment — and it isn't trying to. Those actions carry real consequences if gotten wrong, and they're exactly the cases where [a clean handoff to a human matters more than a fast answer](/blog/ai-chatbot-human-handoff). When a shopper asks to cancel or change something, the honest move is for the agent to say so and route the conversation to a person, rather than stretching into territory it wasn't built for. That boundary is what keeps the automated answer trustworthy for the repetitive majority of questions it's genuinely equipped to handle.
@@ -119,4 +121,4 @@ Once your store is connected (WooCommerce or Magento) and the widget is embedded
 
 **The honest bottom line:** "Where is my order?" is the single most repetitive question in e-commerce support, and it's also one of the easiest to automate safely — as long as the agent checks identity before it discloses anything and knows to step back the moment a request goes beyond status. Get that right and the majority of your order-status inbox stops needing a person at all.
 
-[Try Loqara free and connect your store](/#get-started) — one line of code, live in an afternoon.
+[See Loqara on your store](/#get-started); choose Starter or above for verified WooCommerce/Magento order lookup.

@@ -4,10 +4,12 @@ description: An honest, platform-agnostic comparison of the best AI chatbots for
 date: 2026-06-30
 topic: vendor-comparisons
 related: best-ai-chatbot-for-shopify, best-ai-chatbot-for-woocommerce, how-to-choose-ai-support-agent
-updated: 2026-07-21
+updated: 2026-11-16
 author: Eimantas Kudarauskas
 image: /blog/best-ai-chatbot-for-ecommerce.webp
 ---
+
+*Loqara plan details updated 16 November 2026. Other vendors’ details retain their stated review dates; check their current pricing before buying.*
 
 Search "best AI chatbot for e-commerce" and you'll get a dozen lists that all rank whoever paid for the slot. This isn't that. Below is a straight comparison of the AI chatbots e-commerce stores actually use in 2026 — what each is genuinely good at, how the pricing really works, and who it's the right fit for, whatever you sell on.
 
@@ -56,7 +58,7 @@ A side-by-side before the detail. "Store actions" means native product search an
 
 | Tool | Built-in AI | Store actions | Voice | Pricing model | Best fit |
 | --- | --- | --- | --- | --- | --- |
-| **Loqara** | Grounded, included | Product search; order lookup on WooCommerce/Magento | Yes (add-on) | Per conversation, free tier | Small–mid stores wanting AI + optional voice |
+| **Loqara** | Grounded, included | Product search: Basic+; WooCommerce/Magento order lookup: Starter+ | Yes (add-on) | Free: 50/month; Basic: €49/month, 400 | Small–mid stores wanting AI + optional voice |
 | **Gorgias** | Per-resolution add-on | Order edits + returns | No | Tiered + per AI resolution | Established multichannel teams |
 | **Tidio** | Lyro (paid add-on) | Order lookup | No | Per conversation quota + Lyro add-on | Beginners who like flows |
 | **Intercom (Fin)** | Fin, premium | Via apps | No | Per seat + per resolution | Larger SaaS/support orgs |
@@ -70,12 +72,14 @@ A side-by-side before the detail. "Store actions" means native product search an
 
 ### Loqara — chat and voice in one widget *(that's us)*
 
-<p class="pills"><span class="pill pill-best">Best for: small &amp; growing stores</span><span class="pill">Free tier: 100 chats/mo</span><span class="pill">Chat + voice</span></p>
+<p class="pills"><span class="pill pill-best">Best for: small &amp; growing stores</span><span class="pill">Free tier: 50 chats/mo</span><span class="pill">Chat + voice</span></p>
 
 Loqara answers from approved content with sources and searches connected catalogs from one widget you install with a single line. Identity-checked order lookup currently works on WooCommerce and Magento, but not Shopify, Verskis, or generic-feed stores. Product search connects to those platforms and supported feeds. Loqara also includes an optional real-time [voice agent](/blog/voice-ai-for-ecommerce-support), so customers can talk to your store. Pricing is per conversation rather than per "resolution," which stays predictable as you grow, with a genuine free tier to test on your real traffic.
 
+[Loqara plans](/#pricing): Free includes 50 conversations a month, one bot, one language, and basic activity analytics. **Basic is €49/month or €490/year** for 400 conversations, live product search, human handoff, lead capture, voice dictation, and full analytics with CSAT. Basic keeps the Loqara badge and one-language limit. Starter (€149/month) adds a second bot, both supported languages, badge removal, and identity-checked order lookup on WooCommerce and Magento. Voice calls are a separate paid add-on; Free does not include live commerce, leads, or handoff.
+
 <div class="proscons">
-<div class="pros"><p class="pc-title">Strengths</p><ul><li>Grounded answers with citations — no invented policies</li><li>Live product search + order lookup built in</li><li>Chat <em>and</em> voice in the same widget</li><li>One-line install, live in an afternoon</li><li>Predictable per-conversation pricing, real free tier</li></ul></div>
+<div class="pros"><p class="pc-title">Strengths</p><ul><li>Grounded answers with citations — no invented policies</li><li>Product search on Basic+; WooCommerce/Magento orders on Starter+</li><li>Chat and optional paid voice in the same widget</li><li>One-line install, live in an afternoon</li><li>Predictable per-conversation pricing, real free tier</li></ul></div>
 <div class="cons"><p class="pc-title">Watch-outs</p><ul><li>An AI agent + live chat, not a full email/social ticketing suite</li><li>Newer than the incumbents below</li><li>Voice is a paid add-on on top of the base plan</li></ul></div>
 </div>
 
@@ -127,7 +131,7 @@ Match the tool to your stage, not the longest feature list:
 
 <div class="callout">
 <p class="callout-title">The pricing trap to watch</p>
-<p>"$X per resolution" and "$X per conversation" are not the same thing — in our modeling the gap can be several times over on identical traffic. A "resolution" is defined by the vendor and can be triggered generously; a "conversation" is one customer thread. Model your real monthly volume against each pricing unit before you commit — our <a href="/blog/how-to-choose-ai-support-agent">buyer's checklist</a> walks through the questions that actually decide it.</p>
+<p>"$X per resolution" and "$X per conversation" are not the same thing — in our modeling the gap can be several times over on identical traffic. A "resolution" is defined by the vendor and can be triggered generously; Loqara counts text sessions, with a new session after 24 hours of inactivity or at the start of a new UTC month. Model your real monthly volume against each pricing unit before you commit — our <a href="/blog/how-to-choose-ai-support-agent">buyer's checklist</a> walks through the questions that actually decide it.</p>
 </div>
 
 ## What about your specific platform?
@@ -148,7 +152,7 @@ There's no single winner for every store. For most small-to-mid stores wanting g
 An e-commerce chatbot can take real store actions — searching your live catalog and looking up a customer's order — not just answering FAQ-style questions. That's what deflects "where's my order?" tickets and helps shoppers buy, which a generic chatbot can't do.
 
 ### How much does an AI chatbot for e-commerce cost?
-It depends on the pricing unit. Per-conversation tools like Loqara start free (100 conversations/month) and stay predictable; helpdesk suites bill per "resolution" on top of seat fees — Intercom's Fin is $0.99 per resolution ([Intercom pricing](https://www.intercom.com/pricing)) — which in our modeling can cost several times more on the same traffic. Always model your real monthly volume against each pricing model.
+It depends on the pricing unit. Per-conversation tools like Loqara start free (50 conversations/month) and stay predictable; helpdesk suites bill per "resolution" on top of seat fees — Intercom's Fin is $0.99 per resolution ([Intercom pricing](https://www.intercom.com/pricing)) — which in our modeling can cost several times more on the same traffic. Always model your real monthly volume against each pricing model.
 
 ### Will an AI chatbot make up answers about my products or policies?
 A grounded chatbot won't — it only answers from the content you give it and cites its sources, then captures the lead or hands off when unsure. Ungrounded, model-only bots are the ones that invent policies, which is exactly what to avoid in retail.
@@ -157,7 +161,7 @@ A grounded chatbot won't — it only answers from the content you give it and ci
 With Loqara, yes — it includes an optional real-time voice agent so customers can speak their question and hear the answer out loud, in the languages Loqara supports. Most other tools on this list are text-only today.
 
 ### Is a free AI chatbot good enough for a small store?
-For a starting store, a real free tier (like Loqara's 100 conversations/month) is often enough to handle your repetitive questions and prove the value before you pay. You upgrade when volume — not features — forces it.
+For a starting store, a real free tier (like Loqara's 50 conversations/month) is often enough to handle your repetitive questions and prove the value before you pay. Choose Basic when you need product search, live handoff, leads, or more volume; choose Starter for supported order lookup, both supported languages, or badge removal.
 
 ---
 

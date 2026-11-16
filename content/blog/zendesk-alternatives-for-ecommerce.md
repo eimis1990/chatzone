@@ -4,10 +4,12 @@ description: Zendesk is built for big support organisations. If you run a store 
 date: 2026-06-27
 topic: vendor-comparisons
 related: gorgias-alternatives-for-ecommerce, intercom-alternatives-for-ecommerce, best-ai-chatbot-for-ecommerce
-updated: 2026-07-21
+updated: 2026-11-16
 author: Eimantas Kudarauskas
 image: /blog/zendesk-alternatives-for-ecommerce.webp
 ---
+
+*Loqara plan details updated 16 November 2026. Other vendors’ details retain their stated review dates; check their current pricing before buying.*
 
 Zendesk is the enterprise standard for customer support, and it earned that reputation honestly: it's deep, endlessly configurable, and trusted by organisations running hundreds of agents across dozens of channels. If you're already standardised on it company-wide, it's a very capable platform and switching away may cost you more than it saves.
 
@@ -51,7 +53,7 @@ For a store, the priorities flip. Optimise for fit and predictability, not featu
 - **Store-first, not contact-centre-first** — built around your catalog and orders. ([What a good store agent actually does.](/blog/ai-chatbot-for-online-store))
 - **Predictable, forecastable pricing** — an allowance you can model, not seats plus a per-resolution meter.
 - **Grounded answers + real actions** — product search and order lookup, with an honest "I'm not sure" instead of an invented policy.
-- **One-line install + handoff on every plan** — [live the same day, with a clean path to a human](/blog/ai-chatbot-human-handoff).
+- **One-line install + handoff on your chosen plan** — [live the same day, with a clean path to a human](/blog/ai-chatbot-human-handoff).
 
 ## The best Zendesk alternatives, compared
 
@@ -59,7 +61,7 @@ A side-by-side before the detail. "Store actions" means native product search an
 
 | Tool | Built-in AI | Store actions | Voice | Pricing model | Best fit |
 | --- | --- | --- | --- | --- | --- |
-| **Loqara** | Grounded, included | Product search; order lookup on WooCommerce/Magento | In chat widget (add-on) | Per conversation, free tier | Stores wanting lean AI + optional voice |
+| **Loqara** | Grounded, included | Product search: Basic+; WooCommerce/Magento order lookup: Starter+ | In chat widget (add-on) | Free: 50/month; Basic: €49/month, 400 | Stores wanting lean AI + optional voice |
 | **Gorgias** | Per-resolution, every plan | Order edits + returns | Phone add-on | Tiered by ticket volume + per AI resolution | Established multichannel support teams |
 | **Tidio** | Lyro (metered) | Order lookup | No | Per conversation + metered Lyro | DIY beginners who like flows |
 | **Re:amaze** | Included, capped | Native order actions | No | Per user | Mid-size multichannel stores |
@@ -73,12 +75,14 @@ A side-by-side before the detail. "Store actions" means native product search an
 
 ### Loqara — chat and voice in one widget *(that's us)*
 
-<p class="pills"><span class="pill pill-best">Best for: lean stores wanting AI without the weight</span><span class="pill">Free tier: 100 chats/mo</span><span class="pill">Chat + voice</span></p>
+<p class="pills"><span class="pill pill-best">Best for: lean stores wanting AI without the weight</span><span class="pill">Free tier: 50 chats/mo</span><span class="pill">Chat + voice</span></p>
 
-Loqara is the opposite of an enterprise suite: it's an AI agent plus live chat that you install with one line and have live the same afternoon. It answers strictly from your own content with citations — so it never invents a returns window or a shipping date — and it connects to your store to **search the live catalog** and **look up a customer's order** after a quick identity check. Connectors cover [WooCommerce](/blog/add-ai-agent-to-woocommerce), Shopify, and Magento, plus a generic product feed for everything else. It's also the only option here with an optional real-time **[voice agent](/blog/voice-ai-for-ecommerce-support)** built into the chat widget itself (English and Lithuanian today), so customers can literally talk to your store. Pricing is per conversation — not per vendor-defined "resolution" — with a genuine free tier of 100 conversations a month, so you can prove the value on real traffic before paying.
+Loqara is the opposite of an enterprise suite: it's an AI agent plus live chat that you install with one line and have live the same afternoon. It answers strictly from your own content with citations — so it never invents a returns window or a shipping date — and it connects to your store to **search the live catalog** and **look up a customer's order on WooCommerce or Magento, on Starter and above,** after a quick identity check. Connectors cover [WooCommerce](/blog/add-ai-agent-to-woocommerce), Shopify, and Magento, plus a generic product feed for everything else. It's also the only option here with an optional real-time **[voice agent](/blog/voice-ai-for-ecommerce-support)** built into the chat widget itself (English and Lithuanian today), so customers can literally talk to your store. Pricing is per conversation — not per vendor-defined "resolution" — with a genuine free tier of 50 conversations a month, so you can prove the value on real traffic before paying.
+
+[Loqara plans](/#pricing): Free includes 50 conversations a month, one bot, one language, and basic activity analytics. **Basic is €49/month or €490/year** for 400 conversations, live product search, human handoff, lead capture, voice dictation, and full analytics with CSAT. Basic keeps the Loqara badge and one-language limit. Starter (€149/month) adds a second bot, both supported languages, badge removal, and identity-checked order lookup on WooCommerce and Magento. Voice calls are a separate paid add-on; Free does not include live commerce, leads, or handoff.
 
 <div class="proscons">
-<div class="pros"><p class="pc-title">Strengths</p><ul><li>Grounded answers with citations — no invented policies</li><li>Live product search across connected catalogs</li><li>Identity-checked order lookup on WooCommerce and Magento</li><li>WooCommerce, Shopify, Magento connectors (+ product feed)</li><li>Chat <em>and</em> voice in the same widget</li><li>One-line install, live in an afternoon</li><li>Shared-inbox live human handoff on every plan</li><li>Predictable per-conversation pricing, real free tier</li></ul></div>
+<div class="pros"><p class="pc-title">Strengths</p><ul><li>Grounded answers with citations — no invented policies</li><li>Live product search on Basic and above</li><li>WooCommerce/Magento order lookup on Starter and above</li><li>WooCommerce, Shopify, Magento connectors (+ product feed)</li><li>Chat and optional paid voice in the same widget</li><li>One-line install, live in an afternoon</li><li>Shared-inbox live human handoff on Basic and above</li><li>Predictable per-conversation pricing, real free tier</li></ul></div>
 <div class="cons"><p class="pc-title">Watch-outs</p><ul><li>Not a full email/social ticketing suite — it's an AI agent + live chat</li><li>Newer than the incumbents below</li><li>Voice is a paid add-on on top of the base plan</li></ul></div>
 </div>
 
@@ -129,7 +133,7 @@ Match the tool to your stage, not the longest feature list:
 - **Small team that just wants a calm, human email inbox** → Help Scout.
 - **Large org with complex routing, SLAs, and existing Zendesk** → stay on Zendesk.
 
-The single most important variable is the **pricing model**, not the headline number. "$X per resolution" and "$X per conversation" are not the same unit — a resolution is defined by the vendor and can be triggered generously, while a conversation is one customer thread. Model your real monthly volume against each before committing. If you're on a specific platform, our picks for [Shopify](/blog/best-ai-chatbot-for-shopify) and [WooCommerce](/blog/best-ai-chatbot-for-woocommerce) go deeper, and the [metrics that prove ROI](/blog/chatbot-roi-metrics-that-matter) help you judge whether any of them is paying off.
+The single most important variable is the **pricing model**, not the headline number. "$X per resolution" and "$X per conversation" are not the same unit — a resolution is defined by the vendor and can be triggered generously, while a conversation uses the vendor’s session definition. Loqara starts a new text session after 24 hours of inactivity or at a new UTC month. Model your real monthly volume against each before committing. If you're on a specific platform, our picks for [Shopify](/blog/best-ai-chatbot-for-shopify) and [WooCommerce](/blog/best-ai-chatbot-for-woocommerce) go deeper, and the [metrics that prove ROI](/blog/chatbot-roi-metrics-that-matter) help you judge whether any of them is paying off.
 
 ## Frequently asked questions
 
@@ -140,7 +144,7 @@ For most small stores, a lean AI agent like Loqara fits better than an enterpris
 For many stores, yes — not because the base price is outrageous, but because the AI that deflects tickets is usage-billed per automated resolution on top of agent seats, with the agent-facing Copilot as a separate paid add-on. That stacks up before you've answered a customer. Leaner tools bundle grounded AI into a per-conversation or per-seat plan, which is easier to forecast at store scale.
 
 ### What is the difference between a "resolution" and a "conversation" in pricing?
-A conversation is simply one customer thread, regardless of how many messages it contains. A resolution is a vendor-defined outcome — often when the AI is judged to have answered without a human — and the definition (and what counts) varies by vendor. The practical effect is that the same traffic can cost very differently under each model, so always model your real monthly volume against the specific unit.
+A conversation is a vendor-defined session, not necessarily the permanent thread in your inbox. Loqara counts an AI text session again after 24 hours of inactivity or at a new UTC month, while voice calls use minutes only. A resolution is a vendor-defined outcome — often when the AI is judged to have answered without a human — and the definition (and what counts) varies by vendor. The practical effect is that the same traffic can cost very differently under each model, so always model your real monthly volume against the specific unit.
 
 ### Do I need to migrate all my support history to switch from Zendesk?
 Usually no, if you're moving to a lean AI agent rather than another full helpdesk. Tools like Loqara are grounded in your current content — policies, FAQs, product data — and connect to your store for live orders, so they start working without importing years of tickets. Migrating ticket history matters mainly when you're moving from one full ticketing suite to another.

@@ -4,7 +4,7 @@ description: A practical guide to adding an AI chat and voice agent to your WooC
 date: 2026-06-25
 topic: platform-integrations
 related: best-ai-chatbot-for-woocommerce, ai-chatbot-for-online-store, ecommerce-ai-chatbot-knowledge-base
-updated: 2026-07-21
+updated: 2026-11-16
 author: Eimantas Kudarauskas
 image: /blog/add-ai-agent-to-woocommerce.webp
 ---
@@ -45,13 +45,13 @@ You don't need a developer or a long checklist. You need three pieces of content
 | Your policy + FAQ pages | Grounds answers in your real shipping, returns, and sizing rules | 5 min to point the agent at them |
 | WooCommerce admin access | Lets you connect live product search and order lookup | 5 min to generate API keys |
 | Access to your theme footer (or a scripts plugin) | Where the one-line embed goes | 2 min |
-| A Loqara account (free tier available) | Where you build and customise the agent | 2 min to sign up |
+| A Loqara account: Basic+ for products, Starter+ for orders | Where you build and customise the agent | 2 min to sign up |
 
 **Difficulty:** beginner. **Total time:** an afternoon, most of it spent reviewing answers rather than configuring anything. A chatbot is only as good as what it knows, so the real work is making sure your knowledge is current — not wrestling with code. If you've read our [guide to adding a chatbot to any online store](/blog/ai-chatbot-for-online-store), this is the WooCommerce-specific version of the same checklist.
 
 <div class="stat-grid">
 <div class="stat"><div class="stat-num">1 line</div><div class="stat-label">Of code to install on any WooCommerce theme</div></div>
-<div class="stat"><div class="stat-num">100/mo</div><div class="stat-label">Free conversations to test on real traffic</div></div>
+<div class="stat"><div class="stat-num">50/mo</div><div class="stat-label">Free conversations to test on real traffic</div></div>
 <div class="stat"><div class="stat-num">EN + LT</div><div class="stat-label">Languages supported by the optional voice agent</div></div>
 <div class="stat"><div class="stat-num">Same day</div><div class="stat-label">From sign-up to live on your store</div></div>
 </div>
@@ -71,6 +71,8 @@ This is what makes answers **grounded** — the agent responds only from the con
 Now connect the store itself so the agent can search your **live** products. Instead of a generic "we have several boots," it can answer "show me waterproof boots under €100" with real product names, prices, and links pulled straight from WooCommerce.
 
 In practice this means generating a read-only WooCommerce REST API key (WooCommerce → Settings → Advanced → REST API, with permissions set to *Read* — [WooCommerce's own guide](https://woocommerce.com/document/woocommerce-rest-api/) walks through it) and pasting it into Loqara's connector. Because it reads live data, stock and pricing stay accurate without you syncing anything — when you update a product in WooCommerce, the agent reflects it on the next question.
+
+Plan requirement: live product search starts on Basic; identity-checked WooCommerce order lookup starts on Starter. The Free plan can answer from uploaded policies and FAQs but cannot use live store tools.
 
 ### Step 3 — Turn on order lookup
 
@@ -127,11 +129,11 @@ No. Adding Loqara is a single `<script>` tag you paste before the closing `</bod
 
 ### Can the AI agent search my live WooCommerce products and look up orders?
 
-Yes. Loqara's WooCommerce connector reads your live catalog, so it answers product questions with real names, prices, and links — and it can look up a customer's order status after a quick identity check. Both run on the same connection, so stock and order data stay current without you syncing anything.
+Yes. On Basic and above, Loqara’s WooCommerce connector reads your live catalog, so it answers product questions with real names, prices, and links — and on Starter and above it can look up a customer’s order status after an identity check. Both run on the same connection, so stock and order data stay current without you syncing anything.
 
 ### Will the agent make up answers about my policies?
 
-A grounded agent won't. Loqara answers only from the content you give it and cites its sources; when it isn't sure, it captures the lead or hands off to a human instead of guessing. Keep your policy and FAQ pages current and the agent stays accurate alongside them.
+A grounded agent won't. Loqara answers only from the content you give it and cites its sources; when it is unsure, it should acknowledge the gap. On Basic and above, it can also capture a lead or hand off to a human. Keep your policy and FAQ pages current and the agent stays accurate alongside them.
 
 ### How long does it take to set it up?
 
@@ -143,7 +145,7 @@ Yes, optionally. Loqara includes a real-time [voice agent](/blog/voice-ai-for-ec
 
 ### How much does an AI agent for WooCommerce cost?
 
-Loqara is priced per conversation rather than per "resolution," which keeps costs predictable as you grow, and there's a genuine free tier of 100 conversations a month so you can test on your real traffic before paying. You upgrade when volume forces it — not because a feature is locked behind a higher plan.
+Loqara Free includes 50 conversations a month for knowledge-based answers. Basic (€49/month or €490/year) includes 400 conversations, WooCommerce product search, live handoff, leads, dictation, and full analytics with CSAT, for one bot and one language. Order lookup requires Starter or above, starting at €149/month. Choose by required features as well as traffic. [Compare plans](/#pricing).
 
 ---
 

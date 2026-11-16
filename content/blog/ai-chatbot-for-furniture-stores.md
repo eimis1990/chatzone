@@ -2,6 +2,7 @@
 title: "AI chatbot for furniture stores: help shoppers choose what fits"
 description: "Learn how a furniture-store AI chatbot can guide dimensions, materials, colours, stock, delivery questions, and high-consideration product choices."
 date: 2026-07-23
+updated: 2026-11-16
 topic: ecommerce-ai
 author: Eimantas Kudarauskas
 authorRole: Founder
@@ -183,6 +184,8 @@ Take 20 representative products and try to answer real shopper questions from th
 
 The assistant needs current catalog data plus delivery, assembly, care, warranty, and returns content. Loqara supports live product search for connected Shopify, WooCommerce, Magento, and Verskis stores; the exact fields available still depend on what the storefront publishes.
 
+Live product search and human handoff require [Basic or above](/#pricing). Basic costs €49/month or €490/year and includes 400 conversations, one bot, and one language. Free offers 50 knowledge-based conversations a month, without live commerce or handoff.
+
 ### 4. Define hard constraints and uncertainty rules
 
 Tell the system which requirements exclude a product, which missing fields require disclosure, and which cases go to a person.
@@ -252,4 +255,4 @@ No. It is best used for instant discovery, repeatable product facts, and prepara
 
 **The honest bottom line:** a furniture chatbot earns trust by excluding the wrong product, not by always finding something to recommend.
 
-[Try Loqara free](/#get-started) with one furniture category, real dimensions, live product cards, and a human handoff for everything the catalog cannot prove.
+[See Loqara on your store](/#get-started) with one furniture category, real dimensions, live product cards, and a human handoff for everything the catalog cannot prove.

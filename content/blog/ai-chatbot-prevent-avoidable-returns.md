@@ -2,6 +2,7 @@
 title: "How AI chatbots prevent avoidable returns before the label is printed"
 description: "Learn how pre-return AI troubleshooting can resolve setup, missing-part, compatibility, and expectation problems without blocking legitimate e-commerce returns."
 date: 2026-07-25
+updated: 2026-11-16
 topic: ai-customer-support
 author: Eimantas Kudarauskas
 authorRole: Founder
@@ -141,7 +142,7 @@ Use the manufacturer’s approved safety language and escalation route. Do not i
 
 ## What can Loqara do in this workflow?
 
-Loqara can:
+On [Basic and above](/#pricing), Loqara can:
 
 - answer from the store’s approved product, setup, package-content, and policy sources;
 - search current products in supported connected stores;
@@ -249,4 +250,4 @@ No, but they reinforce each other. Product pages prevent uncertainty before purc
 
 **The honest bottom line:** return prevention is good service only when the product problem is genuinely resolved and the customer’s right to return remains easy to use.
 
-[Try Loqara free](/#get-started) with one low-risk troubleshooting case, approved steps, and an immediate return or human-help exit.
+[See Loqara on your store](/#get-started) with one low-risk troubleshooting case, approved steps, and an immediate return or human-help exit.

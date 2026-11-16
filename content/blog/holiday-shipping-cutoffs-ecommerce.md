@@ -2,6 +2,7 @@
 title: "Holiday shipping cutoffs for e-commerce: set a date you can keep"
 description: "Calculate your store’s holiday order-by dates by delivery zone and service, publish them across checkout and chat, and know when to stop showing a promise."
 date: 2026-11-09
+updated: 2026-11-16
 topic: ecommerce-ai
 author: Eimantas Kudarauskas
 authorRole: Founder
@@ -68,7 +69,7 @@ Give the rule an owner and keep one editable record per lane: eligible items, de
 - **Support and chat:** start with the destination and item if either could change the answer. Direct shoppers to checkout for the available service rather than quoting one you cannot verify.
 - **After the cutoff:** remove the expired message from banners, product copy, scheduled campaigns and chat knowledge. Show confirmed alternatives, if any. If the warehouse falls behind before the cutoff, revise early instead of waiting for the original time.
 
-An AI assistant can answer from the rules you’ve published. Loqara can use approved policy content and hand off exceptions; its live shipping-rate lookup is WooCommerce-only and does not certify a holiday arrival date. Once an order exists, [order tracking is a separate workflow](/blog/where-is-my-order-ai). Loqara’s identity-checked order lookup is available on supported WooCommerce and Magento connections, not Shopify. An order that has shipped still does not have a guaranteed arrival simply because it has a tracking number.
+An AI assistant can answer from the rules you’ve published. Loqara can use approved policy content and hand off exceptions; its live shipping-rate lookup is WooCommerce-only and does not certify a holiday arrival date. Once an order exists, [order tracking is a separate workflow](/blog/where-is-my-order-ai). Loqara’s identity-checked order lookup requires Starter or above on supported WooCommerce and Magento connections, not Shopify. An order that has shipped still does not have a guaranteed arrival simply because it has a tracking number.
 
 ## Test the edges before the banner goes live
 

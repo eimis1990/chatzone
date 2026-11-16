@@ -4,10 +4,12 @@ description: An honest, up-to-date comparison of the best AI chatbots for Shopif
 date: 2026-06-27
 topic: vendor-comparisons
 related: shopify-inbox-vs-ai-chatbot, shopify-ai-assistant-guide, best-ai-chatbot-for-ecommerce
-updated: 2026-07-23
+updated: 2026-11-16
 author: Eimantas Kudarauskas
 image: /blog/best-ai-chatbot-for-shopify.webp
 ---
+
+*Loqara plan details updated 16 November 2026. Other vendors’ details retain their stated review dates; check their current pricing before buying.*
 
 Most "best Shopify chatbot" lists rank whoever pays the most for the placement. This one doesn't. Below is an honest look at the AI chatbots Shopify stores actually use in 2026 — what each is genuinely good at, how the pricing really works, and who it's the right fit for.
 
@@ -56,7 +58,7 @@ A side-by-side before the detail. “Shopify integration” can mean anything fr
 
 | Tool | Built-in AI | Shopify actions | Voice | Pricing model | Best fit |
 | --- | --- | --- | --- | --- | --- |
-| **Loqara** | Grounded, included | Product search; no Shopify order lookup today | Yes (add-on) | Per conversation, free tier | Small–mid stores wanting AI + optional voice |
+| **Loqara** | Grounded, included | Product search: Basic+; no Shopify order lookup | Yes (add-on) | Free: 50/month; Basic: €49/month, 400 | Small–mid stores wanting AI + optional voice |
 | **Gorgias** | Billed per resolution | Order edits + returns | Phone add-on (human agents) | Ticket-volume tiers + per AI resolution | Established multichannel support teams |
 | **Tidio** | Lyro (paid add-on) | Order lookup | No | Per conversation + Lyro add-on | Beginners who like building flows |
 | **Intercom (Fin)** | Fin, premium | Via apps | Fin Voice (phone) | Seats + $0.99 per resolution | Larger SaaS/support orgs |
@@ -69,12 +71,14 @@ A side-by-side before the detail. “Shopify integration” can mean anything fr
 
 ### Loqara — chat and voice in one widget *(that's us)*
 
-<p class="pills"><span class="pill pill-best">Best for: small &amp; growing stores</span><span class="pill">Free tier: 100 chats/mo</span><span class="pill">Chat + voice</span></p>
+<p class="pills"><span class="pill pill-best">Best for: small &amp; growing stores</span><span class="pill">Free tier: 50 chats/mo</span><span class="pill">Chat + voice</span></p>
 
-Loqara answers from your own content with sources and searches your Shopify catalog inside one widget you install with a single line. Shopify order lookup is not currently supported; use Shopify's native tracking flow or a tool with a verified Shopify order integration for that job. Loqara also offers a real-time **[voice agent](/blog/voice-ai-for-ecommerce-support)** inside the chat widget. Pricing is per conversation rather than per “resolution,” and there is a free tier of 100 conversations per month for testing on real traffic.
+Loqara answers from your own content with sources and searches your Shopify catalog inside one widget you install with a single line. Shopify order lookup is not currently supported; use Shopify's native tracking flow or a tool with a verified Shopify order integration for that job. Loqara also offers a real-time **[voice agent](/blog/voice-ai-for-ecommerce-support)** inside the chat widget. Pricing is per conversation rather than per “resolution,” and there is a free tier of 50 conversations per month for testing on real traffic.
+
+[Loqara plans](/#pricing): Free includes 50 conversations a month, one bot, one language, and basic activity analytics. **Basic is €49/month or €490/year** for 400 conversations, live product search, human handoff, lead capture, voice dictation, and full analytics with CSAT. Basic keeps the Loqara badge and one-language limit. Starter (€149/month) adds a second bot, both supported languages, badge removal, and identity-checked order lookup on WooCommerce and Magento. Voice calls are a separate paid add-on; Free does not include live commerce, leads, or handoff.
 
 <div class="proscons">
-<div class="pros"><p class="pc-title">Strengths</p><ul><li>Grounded answers with citations — no invented policies</li><li>Live Shopify product search built in</li><li>Chat <em>and</em> voice in the same widget</li><li>One-line install, live in an afternoon</li><li>Predictable per-conversation pricing, real free tier</li></ul></div>
+<div class="pros"><p class="pc-title">Strengths</p><ul><li>Grounded answers with citations — no invented policies</li><li>Live Shopify product search on Basic and above</li><li>Chat and optional paid voice in the same widget</li><li>One-line install, live in an afternoon</li><li>Predictable per-conversation pricing, real free tier</li></ul></div>
 <div class="cons"><p class="pc-title">Watch-outs</p><ul><li>No Shopify order lookup today</li><li>Not a full email/social helpdesk — it's an AI agent + live chat, not a ticketing suite</li><li>Newer than the incumbents below</li><li>Voice is a paid add-on on top of the base plan</li></ul></div>
 </div>
 
@@ -120,7 +124,7 @@ Match the tool to your stage, not the longest feature list:
 
 <div class="callout">
 <p class="callout-title">The pricing trap to watch</p>
-<p>"$X per resolution" and "$X per conversation" are not the same thing, and the difference can be 3–4× on the same traffic. A "resolution" is defined by the vendor and can be triggered generously; a "conversation" is one customer thread. Before you commit, model your real monthly volume against each pricing unit. Our <a href="/blog/how-to-choose-ai-support-agent">buyer's checklist</a> walks through the questions that actually decide it.</p>
+<p>"$X per resolution" and "$X per conversation" are not the same thing, and the difference can be 3–4× on the same traffic. A "resolution" is defined by the vendor and can be triggered generously; Loqara counts text sessions, with a new session after 24 hours of inactivity or at the start of a new UTC month. Before you commit, model your real monthly volume against each pricing unit. Our <a href="/blog/how-to-choose-ai-support-agent">buyer's checklist</a> walks through the questions that actually decide it.</p>
 </div>
 
 ## How to add an AI chatbot to your Shopify store
@@ -140,10 +144,10 @@ On Shopify specifically, decide how order tracking will work before launch. Shop
 Some tools connect to Shopify products, checkout context, or orders, but those are separate capabilities. Loqara currently searches the live Shopify catalog and does not look up Shopify orders. Check each vendor's supported actions, identity controls, and permissions rather than treating “Shopify integration” as proof of order access.
 
 ### Will the chatbot make up answers about my products or policies?
-A grounded chatbot won't. Loqara only answers from the content you give it and cites its sources; when it isn't sure, it captures the lead or hands off to a human instead of guessing. Ungrounded, model-only bots are the ones that invent policies — which is exactly what you want to avoid.
+A grounded chatbot won't. Loqara only answers from the content you give it and cites its sources; when it is unsure, it should acknowledge the gap. On Basic and above, it can also capture a lead or hand off to a human. Ungrounded, model-only bots are the ones that invent policies — which is exactly what you want to avoid.
 
 ### How much does an AI chatbot for Shopify cost?
-It depends on the pricing unit. Loqara is priced per conversation with a free tier of 100 conversations a month; helpdesk suites like Gorgias and Intercom bill per "resolution" on top of their plan fees. Model your real monthly volume against each unit before committing, because the same traffic can cost very differently.
+It depends on the pricing unit. Loqara is priced per conversation with a free tier of 50 conversations a month; helpdesk suites like Gorgias and Intercom bill per "resolution" on top of their plan fees. Model your real monthly volume against each unit before committing, because the same traffic can cost very differently.
 
 ### Can customers talk to the chatbot by voice?
 With Loqara, yes — it includes an optional real-time [voice agent](/blog/voice-ai-for-ecommerce-support) so customers can speak their question and hear answers, in English or Lithuanian. Among the others, Intercom offers Fin Voice for phone calls (sales-quoted) and Gorgias sells a phone channel for human agents; the rest are text-only today.
@@ -152,7 +156,7 @@ With Loqara, yes — it includes an optional real-time [voice agent](/blog/voice
 A grounded agent with a one-line embed can be live the same day: add your content, connect Shopify, customise the widget, and paste one snippet into your theme. Heavier helpdesk suites take longer to configure because there's more machinery to set up.
 
 ### Is a free chatbot good enough for a small store?
-For a starting store, a real free tier (like Loqara's 100 conversations/month) is often enough to handle your repetitive questions and prove the value before you pay. You upgrade when volume — not features — forces it.
+For a starting store, a real free tier (like Loqara's 50 conversations/month) is often enough to handle your repetitive questions and prove the value before you pay. Choose Basic when you need product search, live handoff, leads, or more volume; choose Starter for supported order lookup, both supported languages, or badge removal.
 
 ---
 

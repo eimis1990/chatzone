@@ -2,6 +2,7 @@
 title: "Conversational AI Shopping Assistants: Are They Worth Implementing?"
 description: "Learn when a conversational AI shopping assistant is worth implementing, how the main options compare, and what to test before launch."
 date: 2026-08-07
+updated: 2026-11-16
 topic: ai-customer-support
 author: Eimantas Kudarauskas
 image: /blog/conversational-ai-shopping-assistant.webp
@@ -118,7 +119,9 @@ A custom implementation offers the most control. It can combine catalog retrieva
 
 Do not compare the cost of a custom assistant using model API charges alone. Data preparation, integrations, testing, monitoring, support operations, and ongoing maintenance are part of its total cost.
 
-Loqara sits between a basic support widget and a fully bespoke build. It provides an embeddable chat and optional voice agent grounded in a store’s own content, with live catalog search and visible citations. It also supports order lookup for WooCommerce and Magento, but not for Shopify, Verskis, or generic-feed stores. Its usefulness still depends on the merchant connecting accurate catalog data and supplying adequate source content.
+Loqara sits between a basic support widget and a fully bespoke build. It provides an embeddable chat and optional voice agent grounded in a store’s own content, with live catalog search and visible citations. On Starter and above, it also supports order lookup for WooCommerce and Magento, but not for Shopify, Verskis, or generic-feed stores. Its usefulness still depends on the merchant connecting accurate catalog data and supplying adequate source content.
+
+Live product search and human handoff require [Basic or above](/#pricing). Basic costs €49/month or €490/year and includes 400 conversations, one bot, and one language. Free offers 50 knowledge-based conversations a month, without live commerce or handoff.
 
 ## Why are data quality and behavior more important than personality?
 
