@@ -6,6 +6,8 @@ import type { CommerceProvider } from '@/lib/commerce/types'
  * must remain pure: no provider transports, SSRF/DNS guards, or Node built-ins.
  */
 export interface CommerceConfig {
+  /** Server-computed plan restriction. */
+  orderLookupAllowed?: boolean
   enabled: boolean
   provider: CommerceProvider
   /** WooCommerce store URL (and base for the REST API). */
@@ -69,7 +71,7 @@ export function shippingInfoSupported(config: CommerceConfig | undefined | null)
 
 /** Whether order lookups are usable (enabled + store + provider credentials). */
 export function orderLookupEnabled(config: CommerceConfig | undefined | null): boolean {
-  if (!config?.enabled || !config.storeUrl) return false
+  if (!config?.enabled || !config.storeUrl || config.orderLookupAllowed === false) return false
   if (config.provider === 'magento') return Boolean(config.magentoToken)
   if (config.provider === 'woocommerce') return Boolean(config.restKey && config.restSecret)
   return false

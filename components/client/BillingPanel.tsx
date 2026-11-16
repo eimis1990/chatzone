@@ -118,11 +118,12 @@ const STATUS_LABEL: Record<SubscriptionStatus, string> = {
   unpaid: 'Unpaid',
 }
 
-const ORDER: Plan[] = ['free', 'starter', 'growth', 'scale', 'enterprise']
+const ORDER: Plan[] = ['free', 'basic', 'starter', 'growth', 'scale', 'enterprise']
 
 /** Doodle-fox art per plan tier (same set as Home's plan rail). */
 const PLAN_ART: Partial<Record<Plan, string>> = {
   free: '/onboarding-fox-doodle.webp',
+  basic: '/onboarding/fox-upgrade.webp',
   starter: '/plans/fox-plan-starter.webp',
   growth: '/plans/fox-plan-growth.webp',
   scale: '/plans/fox-plan-scale.webp',
@@ -252,11 +253,12 @@ export function BillingPanel({
   const [annual, setAnnual] = useState(interval !== 'month')
   const [busy, setBusy] = useState<string | null>(null)
   const [confirmMessenger, setConfirmMessenger] = useState<boolean | null>(null)
+  const [confirmPlan, setConfirmPlan] = useState<BillingPlanOption | null>(null)
   const [confirmVoice, setConfirmVoice] = useState(false)
   const [confirmVisualizer, setConfirmVisualizer] = useState(false)
   const [, startTransition] = useTransition()
 
-  const perMonth = (m: number) => (annual ? Math.round((m * 10) / 12) : m)
+  const perMonth = (m: number) => (annual ? Number(((m * 10) / 12).toFixed(2)) : m)
   const selectedInterval: BillingInterval = annual ? 'year' : 'month'
   const currentRank = ORDER.indexOf(plan)
 
@@ -465,6 +467,7 @@ export function BillingPanel({
           <div className="min-w-0">
             <div>
               <h3 className="text-base font-semibold">Usage this month</h3>
+              <p className="mt-1 text-xs text-muted-foreground">Resets on the 1st at 00:00 UTC. A text session starts after 24 hours of inactivity or in a new month. Voice calls use minutes only.</p>
               <p className="mt-1 text-sm text-muted-foreground">
                 A quick overview of the resources included in your current plan.
               </p>
@@ -633,7 +636,7 @@ export function BillingPanel({
           </div>
 
           {/* Plan cards */}
-          <div id="plans" className="grid scroll-mt-6 gap-5 md:grid-cols-2 lg:grid-cols-4">
+          <div id="plans" className="grid scroll-mt-6 gap-5 md:grid-cols-2 2xl:grid-cols-5">
             {plans.map((p) => {
               const samePlan = p.plan === plan
               const isFree = p.plan === 'free'
@@ -665,7 +668,7 @@ export function BillingPanel({
                 >
                   {p.popular && (
                     <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground transition-transform duration-300 group-hover/plan:scale-110">
-                      Most popular
+                      Recommended
                     </span>
                   )}
                   {PLAN_ART[p.plan] && (
@@ -697,8 +700,8 @@ export function BillingPanel({
                     // Downgrades (and the free tier) stay quiet — accent is for
                     // the upgrade path only.
                     variant={action === 'portal' || rank < currentRank ? 'outline' : 'default'}
-                    disabled={anyBusy || action === null}
-                    onClick={() => (action === 'portal' ? runPortal(p.plan) : runPlan(p, label))}
+                    disabled={anyBusy || action === null || (action === 'plan' && !p.purchasable)}
+                    onClick={() => { if (rank < currentRank) setConfirmPlan(p); else runPlan(p, label) }}
                   >
                     {thisBusy && <Loader2Icon className="size-4 animate-spin" />}
                     {label}
@@ -973,7 +976,7 @@ export function BillingPanel({
                 helper={
                   extraConversationsConfigured
                     ? isPaying
-                      ? 'One-time payment, applies to this month'
+                      ? 'One-time payment; expires at UTC month end'
                       : 'Available with any paid plan'
                     : 'Planned for a future release'
                 }
@@ -1068,6 +1071,20 @@ export function BillingPanel({
         </>
       )}
 
+      <Dialog open={confirmPlan !== null} onOpenChange={(open) => { if (!open) setConfirmPlan(null) }}>
+        <DialogContent><DialogHeader><DialogTitle>Change to {confirmPlan?.name}?</DialogTitle>
+          <DialogDescription>
+            {confirmPlan?.plan === 'free'
+              ? 'Free includes 50 conversations, one active bot and one language. Live handoff, lead capture, dictation, live product search, order lookup, detailed analytics and badge removal will be unavailable when your paid period ends.'
+              : confirmPlan?.plan === 'basic'
+                ? 'Basic includes 400 conversations, one active bot and one language. Order lookup and badge removal will be unavailable. The change takes effect immediately with prorated billing.'
+                : 'Your bot and conversation limits will change immediately, with prorated billing. Check the destination plan’s limits before continuing.'}
+            {' '}Extra bots are paused, starting with the newest; you can choose which bot stays active. Your current primary language is retained. Saved settings, history and purchased credits are preserved. Usage does not reset when changing plans.
+          </DialogDescription></DialogHeader>
+          <DialogFooter><Button variant="outline" onClick={() => setConfirmPlan(null)}>Keep current plan</Button>
+            <Button onClick={() => { const p = confirmPlan; setConfirmPlan(null); if (p) { if (p.plan === 'free') runPortal('free'); else runPlan(p, 'Downgrade') } }}>Continue</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
       <Dialog open={confirmMessenger !== null} onOpenChange={(open) => { if (!open) setConfirmMessenger(null) }}>
         <DialogContent>
           <DialogHeader>

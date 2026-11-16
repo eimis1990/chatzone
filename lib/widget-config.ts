@@ -1,3 +1,4 @@
+import { applyPlanToConfig } from '@/lib/organization-policy'
 import type {
   BotConfig,
   BotLanguage,
@@ -173,6 +174,7 @@ export function publicBotConfig(
   // keeping the bot's chosen primary first so a single-language plan serves
   // exactly that language (not a hardcoded English). Below the limit, leave
   // the configured order untouched (no gating in effect).
+  if (entitlements) config = applyPlanToConfig(config, entitlements)
   const configured = config.languages ?? ['en']
   const limit = entitlements?.maxLanguages ?? Infinity
   const primary =

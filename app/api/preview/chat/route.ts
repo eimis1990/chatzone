@@ -1,3 +1,5 @@
+import { getOrganizationPolicy } from '@/lib/organization-policy-server'
+import { applyPlanToConfig } from '@/lib/organization-policy'
 import { type ModelMessage } from 'ai'
 import { openai } from '@ai-sdk/openai'
 import { createServerClient } from '@/lib/supabase/server'
@@ -31,11 +33,8 @@ export async function POST(req: Request) {
   const parsed = previewChatSchema.safeParse(body)
   if (!parsed.success) return json({ error: 'Invalid request' }, 400)
   const { botId, history, message } = parsed.data
-  const config = parsed.data.config as BotConfig
-  const lang =
-    parsed.data.language && config.languages?.includes(parsed.data.language)
-      ? parsed.data.language
-      : defaultLanguage(config)
+  let config = parsed.data.config as BotConfig
+
 
   // Auth + ownership (RLS: the bot is only visible if it's in the user's org).
   const supabase = await createServerClient()
@@ -45,10 +44,16 @@ export async function POST(req: Request) {
   if (!user) return json({ error: 'Unauthorized' }, 401)
   if (!limiter.check(user.id)) return json({ error: 'Rate limit exceeded' }, 429)
 
-  const { data: bot } = await supabase.from('bots').select('id, config').eq('id', botId).single()
+  const { data: bot } = await supabase.from('bots').select('id, org_id, config').eq('id', botId).single()
   if (!bot) return json({ error: 'Bot not found' }, 404)
 
   const svc = createServiceClient()
+  const { entitlements } = await getOrganizationPolicy(svc, bot.org_id)
+  config = applyPlanToConfig(config, entitlements)
+  const lang =
+    parsed.data.language && config.languages?.includes(parsed.data.language)
+      ? parsed.data.language
+      : defaultLanguage(config)
 
   // Component-library folders — preview mirrors live gating.
   const allowedComponents = await assignedComponents(svc, config.commerce?.provider ?? null)

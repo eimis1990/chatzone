@@ -12,7 +12,12 @@ import {
 import { hasMessengerAccess } from '@/lib/channels/access'
 import { processChannelMessage } from '@/lib/channels/processor'
 import { connectionPageToken } from '@/lib/channels/outbound'
-import { isOverConversationLimit } from '@/lib/usage'
+import { applyBotPolicy } from '@/lib/organization-policy-server'
+import { canHandleConversation } from '@/lib/conversation-access'
+import { reserveConversationSession } from '@/lib/conversation-sessions'
+import { deliverMeteredChannelReply } from '@/lib/channels/usage-delivery'
+import { detectHandoffIntent } from '@/lib/handoff'
+import { maybeSendUsageWarning } from '@/lib/usage'
 import type { Bot, ChannelConnection, HandoffStatus } from '@/lib/types'
 
 // Signature verification needs the raw body + Node crypto.
@@ -116,6 +121,8 @@ async function handleInbound(svc: SupabaseClient, msg: InboundTextMessage) {
     return
   }
 
+  await applyBotPolicy(svc, bot)
+
   // Track the contact (PSID is connection-scoped).
   await svc.from('channel_contacts').upsert(
     {
@@ -138,17 +145,13 @@ async function handleInbound(svc: SupabaseClient, msg: InboundTextMessage) {
     .maybeSingle<{ id: string; handoff_status: HandoffStatus | null }>()
   let convId = existing?.id ?? null
   if (!convId) {
-    // Over the monthly pool → don't create a conversation or call the model.
-    if (await isOverConversationLimit(svc, bot.org_id)) {
-      await finish('skipped', connection.id)
-      return
-    }
     const { data: created, error: convErr } = await svc
       .from('conversations')
       .insert({
         bot_id: bot.id,
         visitor_id: msg.senderId,
         channel: msg.provider,
+        metadata: { usage_v2: true },
         channel_connection_id: connection.id,
       })
       .select('id')
@@ -167,18 +170,35 @@ async function handleInbound(svc: SupabaseClient, msg: InboundTextMessage) {
   // Human takeover: record the turn, never auto-reply over the human.
   const handoff = existing?.handoff_status
   if (handoff === 'requested' || handoff === 'live') {
-    await finish('processed', connection.id)
-    return
+    if (await canHandleConversation(svc, convId)) {
+      await finish('processed', connection.id)
+      return
+    }
+    await svc.from('conversations').update({ handoff_status: 'bot', assigned_to: null }).eq('id', convId)
   }
   // A resolved handoff episode is over; the bot resumes for this new turn.
   if (handoff === 'resolved') {
     await svc.from('conversations').update({ handoff_status: 'bot' }).eq('id', convId)
   }
 
-  const reply = await processChannelMessage(svc, bot, { conversationId: convId, message: msg.text })
-
-  const pageAccessToken = await connectionPageToken(connection.id)
-  if (!pageAccessToken) throw new Error('No Page access token for connection')
-  await sendTextMessage(msg.senderId, reply, pageAccessToken)
+  // Human-only exchanges do not consume an AI conversation unit.
+  const handoffRequest = bot.config.theme?.showHandoffButton !== false &&
+    (bot.config.languages ?? ['en']).some((lang) => detectHandoffIntent(msg.text, lang))
+  const reservation = handoffRequest ? null : await reserveConversationSession(svc, {
+    orgId: bot.org_id, botId: bot.id, channel: msg.provider, visitorId: msg.senderId,
+  })
+  if (reservation && !reservation.allowed) {
+    await finish('skipped', connection.id, `Conversation quota: ${reservation.reason}`)
+    return
+  }
+  await deliverMeteredChannelReply(svc, {
+    provider: msg.provider, eventId: msg.messageId, orgId: bot.org_id, reservation,
+  }, async () => {
+    const pageAccessToken = await connectionPageToken(connection.id)
+    if (!pageAccessToken) throw new Error('No Page access token for connection')
+    const reply = await processChannelMessage(svc, bot, { conversationId: convId, message: msg.text })
+    return sendTextMessage(msg.senderId, reply, pageAccessToken)
+  })
+  if (reservation) void maybeSendUsageWarning(svc, bot.org_id)
   await finish('processed', connection.id)
 }

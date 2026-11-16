@@ -8,15 +8,16 @@
 - Real-time voice agent (optional add-on)
 - Product search and order-status lookup against your store
 - Lead capture during conversations
-- Live human handoff from a shared inbox, on every plan
+- Live human handoff from a shared inbox, on Basic and above
 - Conversation analytics and CSAT
 - One-line `<script>` embed — live in minutes, no engineers
 
 ## Pricing (EUR per month, billed monthly or annually)
 
-- Free — €0 — 100 conversations/mo, 1 bot, single language (your choice), live handoff, basic analytics
+- Free — €0 — 50 conversations/mo, 1 bot, single language (your choice), basic activity statistics; no live handoff
+- Basic — €49/month or €490/year — 400 conversations/mo, 1 bot, 1 language, live handoff, lead capture, dictation, full analytics + CSAT, product search; Loqara badge stays, no order lookup
 - Starter — €149 — 1,500 conversations/mo, 2 bots, all languages, lead capture, product search & order lookup, remove Loqara badge
-- Growth — €249 — 4,000 conversations/mo, up to 5 bots, priority support, advanced analytics
+- Growth — €249 — 4,000 conversations/mo, up to 5 bots, priority support
 - Scale — €449 — 12,000 conversations/mo, unlimited bots, teams & roles, custom data retention, priority SLA
 - Voice agent add-on — €49/mo including ~200 minutes, then €0.20/min
 - No setup fee. Upgrade, downgrade, or cancel anytime.
@@ -125,3 +126,5 @@
 
 - Email: hello@loqara.com
 - Author: [Eimantas Kudarauskas](https://www.loqara.com/authors/eimantas-kudarauskas), founder
+
+Text conversations are usage sessions: a new unit after 24 hours of inactivity or in a new UTC month. Human-only exchanges and previews do not consume units. Voice calls use a separate minute allowance. Purchased credits expire at the end of the UTC month payment succeeds. Existing Free accounts receive a 30-day in-app notice before restrictions change.

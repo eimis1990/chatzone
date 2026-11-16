@@ -1,3 +1,4 @@
+import { applyBotPolicy } from '@/lib/organization-policy-server'
 import { openai } from '@ai-sdk/openai'
 import { generateText, type ModelMessage } from 'ai'
 import type { SupabaseClient } from '@supabase/supabase-js'
@@ -26,6 +27,7 @@ export async function processChannelMessage(
   bot: Bot,
   opts: { conversationId: string; message: string },
 ): Promise<string> {
+  await applyBotPolicy(svc, bot)
   const { conversationId, message } = opts
   const lang = defaultLanguage(bot.config)
 

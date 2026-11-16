@@ -1,4 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { getOrganizationPolicy } from '@/lib/organization-policy-server'
 import { entitlementsFor } from '@/lib/entitlements'
 import { notifyUsageWarning } from '@/lib/notify'
 import type { Plan } from '@/lib/types'
@@ -26,11 +27,12 @@ export async function extraConversationsThisMonth(
   svc: SupabaseClient,
   orgId: string,
 ): Promise<number> {
-  const { data } = await svc
+  const { data, error } = await svc
     .from('conversation_credits')
     .select('conversations')
     .eq('org_id', orgId)
     .eq('month', monthStartISO().slice(0, 10))
+  if (error) throw new Error('Could not load purchased credits')
   return ((data ?? []) as { conversations: number }[]).reduce((sum, r) => sum + r.conversations, 0)
 }
 
@@ -39,15 +41,10 @@ export async function conversationsThisMonth(
   svc: SupabaseClient,
   orgId: string,
 ): Promise<number> {
-  const { data: bots } = await svc.from('bots').select('id').eq('org_id', orgId)
-  const botIds = (bots ?? []).map((b) => (b as { id: string }).id)
-  if (!botIds.length) return 0
-  const { count } = await svc
-    .from('conversations')
-    .select('id', { count: 'exact', head: true })
-    .in('bot_id', botIds)
-    .neq('source', 'preview') // configurator test calls never consume the pool
-    .gte('started_at', monthStartISO())
+  const { count, error } = await svc.from('conversation_usage_sessions')
+    .select('id', { count: 'exact', head: true }).eq('org_id', orgId)
+    .eq('month', monthStartISO().slice(0, 10)).not('committed_at', 'is', null)
+  if (error) throw new Error('Could not load conversation usage')
   return count ?? 0
 }
 
@@ -71,13 +68,14 @@ export async function maybeSendUsageWarning(svc: SupabaseClient, orgId: string):
       .eq('id', orgId)
       .single<{ plan: Plan | null; usage_warned_at: string | null }>()
     if (!org) return
-    const limit = entitlementsFor(org.plan ?? 'free').conversations
+    const [{ entitlements }, credits] = await Promise.all([getOrganizationPolicy(svc, orgId), extraConversationsThisMonth(svc, orgId)])
+    const limit = entitlements.conversations + credits
     if (!Number.isFinite(limit)) return
     const monthStart = monthStartISO()
     if (org.usage_warned_at && org.usage_warned_at >= monthStart) return // already warned this month
 
     const used = await conversationsThisMonth(svc, orgId)
-    if (!shouldWarnUsage(used, org.plan)) return
+    if (used < Math.ceil(limit * USAGE_WARNING_THRESHOLD)) return
 
     // Claim the stamp; only the winner of a concurrent race gets a row back.
     const { data: claimed } = await svc
@@ -102,16 +100,11 @@ export async function isOverConversationLimit(
   svc: SupabaseClient,
   orgId: string,
 ): Promise<boolean> {
-  const { data: org } = await svc
-    .from('organizations')
-    .select('plan')
-    .eq('id', orgId)
-    .single<{ plan: Plan | null }>()
-  const limit = entitlementsFor(org?.plan ?? 'free').conversations
+  const { entitlements } = await getOrganizationPolicy(svc, orgId)
+  const limit = entitlements.conversations
   if (!Number.isFinite(limit)) return false
   const [used, extra] = await Promise.all([
-    conversationsThisMonth(svc, orgId),
-    extraConversationsThisMonth(svc, orgId),
+    conversationsThisMonth(svc, orgId), extraConversationsThisMonth(svc, orgId),
   ])
-  return overConversationLimit(used, org?.plan ?? 'free', extra)
+  return used >= limit + extra
 }

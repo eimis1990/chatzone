@@ -5,7 +5,8 @@ import {
   SofaIcon,
   type LucideIcon,
 } from 'lucide-react'
-import { EXTRA_CONVERSATIONS_ADDON, PLANS, VOICE_ADDON } from '@/lib/plans-catalog'
+import { basicSalesEnabled } from '@/lib/organization-policy-server'
+import { PLANS, VOICE_ADDON } from '@/lib/plans-catalog'
 import { PricingTable } from './PricingTable'
 import night from './night/night.module.css'
 
@@ -24,15 +25,15 @@ const ADDONS: { icon: LucideIcon; name: string; price: string; desc: string }[] 
   },
   {
     icon: MessageSquareIcon,
-    name: 'Channels',
-    price: '€19/mo each',
-    desc: 'WhatsApp, Instagram and Messenger (coming soon). Connect any channel with no setup fee.',
+    name: 'Messenger',
+    price: '€19/mo',
+    desc: 'Connect a Facebook Page with no setup fee. Instagram and WhatsApp are coming soon.',
   },
   {
     icon: ArrowUpRightIcon,
     name: 'Extra conversations',
-    price: `€${EXTRA_CONVERSATIONS_ADDON.price} per ${EXTRA_CONVERSATIONS_ADDON.conversations.toLocaleString('en-US')}`,
-    desc: 'A busy month? Top up any plan without moving up a tier.',
+    price: 'From €15 per pack',
+    desc: 'Basic: 200 extra conversations for €15. Starter+: 1,000 for €15. Paid plans only; credits expire at UTC month end.',
   },
 ]
 
@@ -54,8 +55,7 @@ export function Pricing() {
           </h2>
           <p className="mt-4 text-lg text-white/70">
             Paid plans add your product catalog, order lookup, lead capture and more conversations.
-            Handing over to a person is on every plan, and there is no setup fee when you set it
-            up yourself.
+            Live handoff starts on Basic. There is no setup fee when you set it up yourself.
           </p>
           <p className="mt-3 text-sm text-white/60">
             The night you just scrolled through runs on {PLANS.starter.name} with the Voice add-on:
@@ -64,7 +64,7 @@ export function Pricing() {
         </div>
 
         <div className="mt-12">
-          <PricingTable />
+          <PricingTable basicAvailable={basicSalesEnabled()} />
         </div>
 
         {/* Enterprise */}

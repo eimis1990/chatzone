@@ -1,3 +1,4 @@
+import { applyBotPolicy } from '@/lib/organization-policy-server'
 /**
  * POST /api/preview/order — authenticated playground equivalent of
  * /api/widget/order. Uses the SAVED bot config (so REST creds must be saved to
@@ -33,8 +34,10 @@ export async function POST(req: Request) {
   if (!owned) return NextResponse.json({ found: false, summary: 'Not found.' }, { status: 404 })
 
   const svc = createServiceClient()
-  const { data: bot } = await svc.from('bots').select('config').eq('id', botId).single<Pick<Bot, 'config'>>()
+  const { data: bot } = await svc.from('bots').select('org_id, config').eq('id', botId).single<Pick<Bot, 'org_id' | 'config'>>()
   if (!bot) return NextResponse.json({ found: false, summary: 'Not found.' }, { status: 404 })
+  const planEntitlements = await applyBotPolicy(svc, bot)
+  if (!planEntitlements.orderLookup) return NextResponse.json({ found: false, summary: 'Order lookup requires Starter or above.' }, { status: 403 })
 
   const order = await getOrderStatus(bot.config.commerce, { orderId, email })
   return NextResponse.json({

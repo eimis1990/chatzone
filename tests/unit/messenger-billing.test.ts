@@ -1,8 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 const { retrieve, update, sync } = vi.hoisted(() => ({ retrieve: vi.fn(), update: vi.fn(), sync: vi.fn() }))
 vi.mock('@/lib/stripe/client', () => ({ getStripe: vi.fn(), requireStripe: () => ({ subscriptions: { retrieve, update } }) }))
+vi.mock('@/lib/stripe/topups', () => ({ expireStaleTopups: vi.fn() }))
 vi.mock('@/lib/stripe/sync', () => ({ syncSubscriptionToOrg: sync }))
 vi.mock('@/lib/stripe/plans', () => ({
+  getExtraConversationsPriceId: () => 'topup',
   getMessengerPriceId: (interval = 'month') => `messenger_${interval}`,
   getVoicePriceId: () => 'voice', getVoiceOveragePriceId: () => 'overage', getVisualizerPriceId: () => 'visualizer',
   planFromPriceId: (id: string) => id.startsWith('base_') ? { plan: 'starter', interval: id.slice(5) } : null,
@@ -41,8 +43,8 @@ describe('Messenger subscription changes', () => {
     expect(update).not.toHaveBeenCalled()
   })
   it('moves Messenger to the matching interval when changing the base plan', async () => {
-    retrieve.mockResolvedValue({ items: { data: [item('msg', 'messenger_month'), item('base', 'base_month')] } })
+    retrieve.mockResolvedValue({ customer: 'cus', items: { data: [item('msg', 'messenger_month'), item('base', 'base_month')] } })
     await changeBasePlan('sub', 'base_year')
-    expect(update.mock.calls[0][1].items).toEqual([{ id: 'base', price: 'base_year' }, { id: 'msg', price: 'messenger_year', quantity: 1 }])
+    expect(update.mock.calls[0][1].items).toEqual([{ id: 'base', price: 'base_year', quantity: 1 }, { id: 'msg', price: 'messenger_year', quantity: 1 }])
   })
 })

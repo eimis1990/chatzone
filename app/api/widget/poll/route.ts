@@ -14,6 +14,7 @@
  * Security: scoped by public_key + conversation_id (no auth, like /api/chat);
  * origin-checked and rate-limited.
  */
+import { canHandleConversation } from '@/lib/conversation-access'
 import { z } from 'zod'
 import { createServiceClient } from '@/lib/supabase/service'
 import { isOriginAllowed, corsHeaders } from '@/lib/widget-auth'
@@ -64,6 +65,13 @@ export async function POST(req: Request) {
     .eq('bot_id', bot.id)
     .single<{ id: string; handoff_status: HandoffStatus | null; assigned_to: string | null }>()
   if (!conv) return json({ error: 'Conversation not found' }, 404)
+
+  if ((conv.handoff_status === 'requested' || conv.handoff_status === 'live') &&
+      !(await canHandleConversation(svc, conv.id))) {
+    await svc.from('conversations').update({ handoff_status: 'bot', assigned_to: null }).eq('id', conv.id)
+    conv.handoff_status = 'bot'
+    conv.assigned_to = null
+  }
 
   // Resolve the assigned agent's display name (best-effort).
   let agentName: string | null = null

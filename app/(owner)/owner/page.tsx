@@ -1,3 +1,4 @@
+import { createServiceClient } from '@/lib/supabase/service'
 import { UsersIcon, BotIcon, MessagesSquareIcon, MessageCircleIcon, PresentationIcon, MailIcon } from 'lucide-react'
 import { requireRole } from '@/lib/auth/guards'
 import { createServerClient } from '@/lib/supabase/server'
@@ -53,10 +54,11 @@ export default async function OwnerDashboardPage() {
       .order('created_at', { ascending: true }),
     supabase
       .from('organizations')
-      .select('is_platform, plan, subscription_status, billing_interval, voice_addon, visualizer_addon, stripe_livemode'),
+      .select('is_platform, plan, subscription_status, billing_interval, voice_addon, visualizer_addon, messenger_addon, stripe_livemode'),
     supabase.from('organizations').select('id, is_demo').or('is_platform.eq.true,is_demo.eq.true'),
   ])
 
+  const { count: billingReviews } = await createServiceClient().from('billing_review_events').select('stripe_event_id', { count: 'exact', head: true }).is('resolved_at', null)
   const revenue = computeMrr((billingOrgs ?? []) as BillingOrg[])
 
   const stats: OwnerStats = statsRow ?? {
@@ -110,6 +112,9 @@ export default async function OwnerDashboardPage() {
         <p className="text-sm text-muted-foreground">Platform-wide overview across all clients.</p>
       </div>
 
+      {Boolean(billingReviews) && <p className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950">
+        {billingReviews} billing event(s) need review: refunds, disputes, or fraud warnings. <a className="underline" href="https://dashboard.stripe.com/payments" target="_blank" rel="noreferrer">Review in Stripe</a>. Purchased usage is preserved until reconciled.
+      </p>}
       {/* Earnings + platform stats — one panel: dark MRR header, hairline tiles below */}
       <div className="overflow-hidden rounded-3xl border bg-card">
         <MrrCard {...revenue} />

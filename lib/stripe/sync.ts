@@ -26,7 +26,7 @@ function mapStatus(status: Stripe.Subscription.Status): SubscriptionStatus {
 
 /** Period end is on the item in newer API versions, on the sub in older ones. */
 function periodEndIso(sub: Stripe.Subscription): string | null {
-  const item = sub.items?.data?.[0] as { current_period_end?: number } | undefined
+  const item = sub.items?.data?.find((item) => planFromPriceId(item.price.id)) as { current_period_end?: number } | undefined
   const epoch =
     item?.current_period_end ??
     (sub as unknown as { current_period_end?: number }).current_period_end

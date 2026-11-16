@@ -1,5 +1,7 @@
 'use server'
 
+import { getOrganizationPolicy } from '@/lib/organization-policy-server'
+import { validatePlanConfig } from '@/lib/organization-policy'
 import { requireRole } from '@/lib/auth/guards'
 import { createServerClient } from '@/lib/supabase/server'
 import { botConfigSchema } from '@/lib/validation/schemas'
@@ -48,6 +50,13 @@ export async function saveConfig(
 
   // 3. Update — RLS ensures the row belongs to this user's org
   const supabase = await createServerClient()
+  const { data: current } = await supabase.from('bots').select('org_id, config').eq('id', botId).single()
+  if (!current) return { success: false, error: 'Bot not found.' }
+  const { entitlements } = await getOrganizationPolicy(supabase, current.org_id)
+  const policyError = validatePlanConfig(config, current.config as BotConfig, entitlements)
+  if (policyError) return { success: false, error: policyError }
+  // Hidden language content survives a downgrade/save and can be reused later.
+  config.content = { ...(current.config as BotConfig).content, ...config.content }
   const { error } = await supabase.from('bots').update(update).eq('id', botId)
 
   if (error) {

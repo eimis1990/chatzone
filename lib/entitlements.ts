@@ -20,7 +20,11 @@ export interface Entitlements {
   teams: boolean
   /** Voice dictation in the widget composer (Whisper speech-to-text). */
   dictation: boolean
-  /** Included conversations / month (soft today; for metering later). */
+  handoff: boolean
+  productSearch: boolean
+  orderLookup: boolean
+  analytics: 'basic' | 'full'
+  /** Included usage sessions per UTC calendar month. */
   conversations: number
 }
 
@@ -33,7 +37,13 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
     customRetention: false,
     teams: false,
     dictation: false,
-    conversations: 100,
+    conversations: 50,
+    handoff: false, productSearch: false, orderLookup: false, analytics: 'basic',
+  },
+  basic: {
+    maxBots: 1, maxLanguages: 1, leadCapture: true, removeBadge: false,
+    customRetention: false, teams: false, dictation: true, conversations: 400,
+    handoff: true, productSearch: true, orderLookup: false, analytics: 'full',
   },
   starter: {
     maxBots: 2,
@@ -44,6 +54,7 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
     teams: false,
     dictation: true,
     conversations: 1500,
+    handoff: true, productSearch: true, orderLookup: true, analytics: 'full',
   },
   growth: {
     maxBots: 5,
@@ -54,6 +65,7 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
     teams: false,
     dictation: true,
     conversations: 4000,
+    handoff: true, productSearch: true, orderLookup: true, analytics: 'full',
   },
   scale: {
     maxBots: Infinity,
@@ -64,6 +76,7 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
     teams: true,
     dictation: true,
     conversations: 12000,
+    handoff: true, productSearch: true, orderLookup: true, analytics: 'full',
   },
   enterprise: {
     maxBots: Infinity,
@@ -74,6 +87,7 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
     teams: true,
     dictation: true,
     conversations: Infinity,
+    handoff: true, productSearch: true, orderLookup: true, analytics: 'full',
   },
 }
 

@@ -1,3 +1,4 @@
+import { applyBotPolicy } from '@/lib/organization-policy-server'
 /**
  * POST /api/preview/discount — authenticated playground equivalent of
  * /api/widget/discount (uses the SAVED bot config).
@@ -29,10 +30,11 @@ export async function POST(req: Request) {
   const svc = createServiceClient()
   const { data: bot } = await svc
     .from('bots')
-    .select('config')
+    .select('org_id, config')
     .eq('id', parsed.data.botId)
-    .single<Pick<Bot, 'config'>>()
+    .single<Pick<Bot, 'org_id' | 'config'>>()
   if (!bot) return NextResponse.json({ available: false, summary: 'Not found.' }, { status: 404 })
+  await applyBotPolicy(svc, bot)
 
   const d = getDiscount(bot.config.commerce)
   return NextResponse.json({ available: d.enabled, code: d.code, description: d.description, summary: summarizeDiscount(d) })

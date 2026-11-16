@@ -18,7 +18,7 @@ form uses `label` (English name); the widget switcher uses `nativeLabel` (endony
   each language in `languages[]` (superRefine), **not** English-anchored — a bot
   can be Lithuanian-only. Don't assume `content.en` (see [gotchas](gotchas.md)).
 
-## Free tier
+## Free and Basic
 
 `maxLanguages: 1` → the client picks **one** language of their choice (becomes
 primary); the switcher is disabled. See [plans-and-entitlements](plans-and-entitlements.md).
@@ -26,7 +26,7 @@ primary); the switcher is disabled. See [plans-and-entitlements](plans-and-entit
 ## Flow
 
 - **Form:** `ConfigForm` has an explicit "Available languages" control (multi-
-  select on paid, single-select on free), a primary dropdown (locked on free),
+  select on Starter+, single-select on Free/Basic), a primary dropdown (locked on Free/Basic),
   and the switcher toggle. The RHF resolver runs `normalizeLanguageSelection`
   (`lib/validation/normalize-languages.ts`): prunes content to selected, forces
   primary ∈ selection, disables the switcher when <2. Initial form values are
@@ -50,3 +50,7 @@ primary); the switcher is disabled. See [plans-and-entitlements](plans-and-entit
   published messages stay unchanged until saved.
 
 _Last verified: 2026-07-08 (66f6bb8)._
+
+- Basic also has one chosen language. Server actions reject an excess selection;
+  runtime policy clamps it and preserves dormant translations for re-upgrade
+  (`lib/organization-policy.ts:27`). Verified 2026-11-16.

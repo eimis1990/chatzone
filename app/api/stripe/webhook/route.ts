@@ -2,9 +2,10 @@ import { NextResponse, type NextRequest } from 'next/server'
 import type Stripe from 'stripe'
 import { getStripe } from '@/lib/stripe/client'
 import { getEnv } from '@/lib/env'
-import { syncSubscriptionToOrg } from '@/lib/stripe/sync'
+import { reconcileSubscriptionEvent } from '@/lib/stripe/reconcile-event'
 import { createServiceClient } from '@/lib/supabase/service'
-import { monthStartISO } from '@/lib/usage'
+import { fulfillTopup, expireStaleTopups } from '@/lib/stripe/topups'
+import { getExtraConversationsPriceId, planFromPriceId } from '@/lib/stripe/plans'
 
 // Signature verification needs the raw body + Node crypto.
 export const runtime = 'nodejs'
@@ -31,27 +32,16 @@ export async function POST(req: NextRequest) {
 
   try {
     switch (event.type) {
-      case 'checkout.session.completed': {
+      case 'checkout.session.completed':
+      case 'checkout.session.async_payment_succeeded': {
         const session = event.data.object
-        // One-time Extra-conversations top-up — credit the current month.
-        // The unique session id makes redelivered webhooks a no-op.
-        if (session.metadata?.extra_conversations && session.metadata.org_id) {
-          const svc = createServiceClient()
-          const { error: creditErr } = await svc.from('conversation_credits').insert({
-            org_id: session.metadata.org_id,
-            month: monthStartISO().slice(0, 10),
-            conversations: Number(session.metadata.extra_conversations),
-            stripe_session_id: session.id,
-          })
-          if (creditErr && creditErr.code !== '23505') {
-            // Surface as 500 so Stripe retries — the credit MUST land.
-            throw new Error(`conversation credit insert failed: ${creditErr.message}`)
-          }
+        if (session.metadata?.topup_purchase_id || session.metadata?.extra_conversations) {
+          await fulfillTopup(stripe, createServiceClient(), session, event.created)
         }
         // One-time "done-for-you" setup purchase — record it for the owner.
-        if (session.metadata?.setup_package) {
+        if (session.metadata?.setup_package && session.payment_status === 'paid') {
           const svc = createServiceClient()
-          await svc.from('setup_orders').upsert(
+          const { error } = await svc.from('setup_orders').upsert(
             {
               org_id: session.metadata.org_id ?? null,
               package: session.metadata.setup_package,
@@ -62,19 +52,53 @@ export async function POST(req: NextRequest) {
             },
             { onConflict: 'stripe_session_id' },
           )
+          if (error) throw new Error('Could not record setup payment')
         }
         const sub = session.subscription
         if (sub) {
           const subId = typeof sub === 'string' ? sub : sub.id
-          const full = await stripe.subscriptions.retrieve(subId)
-          await syncSubscriptionToOrg(full)
+          await reconcileSubscriptionEvent(stripe, subId)
         }
         break
       }
       case 'customer.subscription.created':
       case 'customer.subscription.updated':
       case 'customer.subscription.deleted': {
-        await syncSubscriptionToOrg(event.data.object)
+        // Retrieve current state: an old event must not roll back a later change.
+        const sub = await reconcileSubscriptionEvent(stripe, event.data.object.id)
+        if (!sub) break
+        const base = sub.items.data.map((item) => planFromPriceId(item.price.id)).find(Boolean)
+        const customer = typeof sub.customer === 'string' ? sub.customer : sub.customer.id
+        const eligible = ['active','trialing','past_due'].includes(sub.status) && base ? getExtraConversationsPriceId(base.plan) : null
+        await expireStaleTopups(stripe, customer, eligible)
+        break
+      }
+      case 'invoice.paid':
+      case 'invoice.payment_failed': {
+        const subscription = event.data.object.parent?.subscription_details?.subscription
+        if (subscription) await reconcileSubscriptionEvent(stripe, typeof subscription === 'string' ? subscription : subscription.id)
+        break
+      }
+      case 'charge.refunded':
+      case 'charge.dispute.created':
+      case 'radar.early_fraud_warning.created': {
+        const object = event.data.object
+        const chargeRef = event.type === 'charge.refunded' ? object.id : ('charge' in object ? object.charge : null)
+        const charge = chargeRef ? await stripe.charges.retrieve(typeof chargeRef === 'string' ? chargeRef : chargeRef.id) : null
+        const customer = typeof charge?.customer === 'string' ? charge.customer : charge?.customer?.id ?? null
+        const payment = typeof charge?.payment_intent === 'string' ? charge.payment_intent : charge?.payment_intent?.id ?? null
+        const db = createServiceClient()
+        // Preserve consumed credits; refunds/disputes require an explicit,
+        // auditable reconciliation rather than silently resetting usage.
+        const { error } = await db.from('billing_review_events').upsert({
+          stripe_event_id: event.id, stripe_customer_id: customer, stripe_payment_intent_id: payment, kind: event.type,
+        }, { onConflict: 'stripe_event_id', ignoreDuplicates: true })
+        if (error) throw new Error('Could not queue billing review')
+        if (payment) {
+          const { error: reviewError } = await db.from('conversation_topup_purchases').update({ review_reason: event.type })
+            .eq('stripe_payment_intent_id', payment)
+          if (reviewError) throw new Error('Could not flag top-up for review')
+        }
         break
       }
       default:

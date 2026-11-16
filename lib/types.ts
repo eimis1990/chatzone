@@ -12,7 +12,7 @@ export type BotStatus = 'active' | 'paused'
 export type SourceType = 'file' | 'url' | 'qa' | 'text'
 export type SourceStatus = 'pending' | 'processing' | 'ready' | 'error'
 export type MessageRole = 'user' | 'assistant' | 'system'
-export type Plan = 'free' | 'starter' | 'growth' | 'scale' | 'enterprise'
+export type Plan = 'free' | 'basic' | 'starter' | 'growth' | 'scale' | 'enterprise'
 export type BillingInterval = 'month' | 'year'
 export type SubscriptionStatus =
   | 'inactive'
@@ -332,6 +332,8 @@ export interface BotConfig {
   allowedDomains: string[]
   /** Live product search (e-commerce). */
   commerce: {
+    /** Runtime-only server policy; never trusted from saved/client config. */
+    orderLookupAllowed?: boolean
     enabled: boolean
     provider: 'woocommerce' | 'woocommerce_legacy' | 'shopify' | 'magento' | 'verskis' | 'feed' | 'travelline'
     storeUrl: string

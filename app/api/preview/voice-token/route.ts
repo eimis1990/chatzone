@@ -1,3 +1,4 @@
+import { applyBotPolicy } from '@/lib/organization-policy-server'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createServerClient } from '@/lib/supabase/server'
@@ -35,6 +36,7 @@ export async function POST(req: Request) {
   const svc = createServiceClient()
   const { data: bot } = await svc.from('bots').select('*').eq('id', parsed.data.botId).single<Bot>()
   if (!bot) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  await applyBotPolicy(svc, bot)
   if (!bot.config.voice?.enabled) {
     return NextResponse.json({ error: 'Voice not enabled' }, { status: 403 })
   }

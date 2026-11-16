@@ -1,3 +1,4 @@
+import { applyBotPolicy } from '@/lib/organization-policy-server'
 import { z } from 'zod'
 import { createServiceClient } from '@/lib/supabase/service'
 import { isOriginAllowed, corsHeaders } from '@/lib/widget-auth'
@@ -32,6 +33,7 @@ export async function POST(req: Request) {
   const svc = createServiceClient()
   const { data: bot } = await svc.from('bots').select('*').eq('public_key', publicKey).single<Bot>()
   if (!bot || bot.status !== 'active') return json({ answer: '' }, 404)
+  await applyBotPolicy(svc, bot)
   if (!isOriginAllowed(origin, bot.config.allowedDomains ?? [])) return json({ answer: '' }, 403)
   // Per-visitor (IP) key: a per-bot key let one busy visitor throttle everyone.
   const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown'

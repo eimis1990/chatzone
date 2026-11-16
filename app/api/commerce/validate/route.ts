@@ -1,3 +1,5 @@
+import { getOrganizationPolicy } from '@/lib/organization-policy-server'
+import { getUserOrgIds } from '@/lib/auth/guards'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createServerClient } from '@/lib/supabase/server'
@@ -6,6 +8,7 @@ import { validateStore, validateOrderAccess } from '@/lib/commerce'
 export const maxDuration = 20
 
 const bodySchema = z.object({
+  botId: z.string().uuid().optional(),
   provider: z
     .enum(['woocommerce', 'woocommerce_legacy', 'shopify', 'magento', 'verskis', 'feed', 'travelline'])
     .default('woocommerce'),
@@ -35,6 +38,16 @@ export async function POST(req: Request) {
   const body = await req.json().catch(() => null)
   const parsed = bodySchema.safeParse(body)
   if (!parsed.success) return NextResponse.json({ ok: false, error: 'Invalid request' }, { status: 400 })
+
+  let orgId: string | undefined
+  if (parsed.data.botId) {
+    const { data: bot } = await supabase.from('bots').select('org_id').eq('id', parsed.data.botId).single()
+    orgId = bot?.org_id
+  } else orgId = (await getUserOrgIds())[0]
+  if (!orgId) return NextResponse.json({ ok: false, error: 'Bot not found.' }, { status: 404 })
+  const { entitlements } = await getOrganizationPolicy(supabase, orgId)
+  if (parsed.data.mode === 'orders' && !entitlements.orderLookup) return NextResponse.json({ ok: false, error: 'Order lookup requires Starter or above.' }, { status: 403 })
+  if (parsed.data.mode === 'store' && !entitlements.productSearch) return NextResponse.json({ ok: false, error: 'Product search requires Basic or above.' }, { status: 403 })
 
   if (parsed.data.mode === 'orders') {
     // Magento authenticates with a single integration token (passed in restKey slot).

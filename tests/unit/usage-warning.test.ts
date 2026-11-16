@@ -10,6 +10,13 @@ describe('shouldWarnUsage', () => {
     expect(shouldWarnUsage(1500, 'starter')).toBe(true)
   })
 
+  it('warns at the new Free and Basic thresholds', () => {
+    expect(shouldWarnUsage(39, 'free')).toBe(false)
+    expect(shouldWarnUsage(40, 'free')).toBe(true)
+    expect(shouldWarnUsage(319, 'basic')).toBe(false)
+    expect(shouldWarnUsage(320, 'basic')).toBe(true)
+  })
+
   it('never warns on unlimited plans', () => {
     expect(shouldWarnUsage(1_000_000, 'enterprise')).toBe(false)
   })

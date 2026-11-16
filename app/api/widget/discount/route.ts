@@ -1,3 +1,4 @@
+import { applyBotPolicy } from '@/lib/organization-policy-server'
 /**
  * POST /api/widget/discount
  *
@@ -32,10 +33,11 @@ export async function POST(req: Request) {
   const svc = createServiceClient()
   const { data: bot } = await svc
     .from('bots')
-    .select('id, status, config')
+    .select('id, org_id, status, config')
     .eq('public_key', parsed.data.publicKey)
-    .single<Pick<Bot, 'id' | 'status' | 'config'>>()
+    .single<Pick<Bot, 'id' | 'org_id' | 'status' | 'config'>>()
   if (!bot || bot.status !== 'active') return json({ error: 'Bot not available' }, 404)
+  await applyBotPolicy(svc, bot)
   if (!isOriginAllowed(origin, bot.config.allowedDomains ?? [])) {
     return json({ error: 'Origin not allowed' }, 403)
   }

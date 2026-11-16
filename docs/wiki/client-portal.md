@@ -91,3 +91,13 @@ _Last verified: 2026-08-28._
   block lookups show a warning while keeping transcripts usable
   (`components/bot-views/ConversationsSection.tsx:45`). First/last page database
   queries verified against HOME BY NB's bot on 2026-11-16 (50/7 rows, blocks 200).
+
+## Analytics and subscription policy (2026-11-16)
+
+Free now receives basic usage/activity totals; legacy Free keeps the full view
+until its announced deadline. Basic and above receive the existing full
+analytics/CSAT reports. These gates run before detailed queries, on both Home
+and the shared analytics view (`components/bot-views/AnalyticsSection.tsx:77`).
+Subscription shows five plan cards, actual effective allowance, payment-month
+top-up expiry, and downgrade consequences. See [entitlements](plans-and-entitlements.md)
+and [usage sessions](conversation-usage.md).

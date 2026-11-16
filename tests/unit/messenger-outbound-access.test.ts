@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { SupabaseClient } from '@supabase/supabase-js'
 const mocks = vi.hoisted(() => ({ access: vi.fn(), send: vi.fn(), connection: vi.fn() }))
+vi.mock('@/lib/conversation-access', () => ({ canHandleConversation: async () => true }))
 vi.mock('@/lib/channels/access', () => ({ hasMessengerAccess: mocks.access }))
 vi.mock('@/lib/channels/meta', () => ({ sendTextMessage: mocks.send }))
 vi.mock('@/lib/supabase/service', () => ({ createServiceClient: () => ({ from: () => ({ select: () => ({ eq: () => ({ maybeSingle: mocks.connection }) }) }) }) }))

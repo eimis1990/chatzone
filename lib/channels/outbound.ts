@@ -1,3 +1,4 @@
+import { canHandleConversation } from '@/lib/conversation-access'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { hasMessengerAccess } from '@/lib/channels/access'
 import { getEnv } from '@/lib/env'
@@ -74,6 +75,9 @@ export async function deliverAgentMessage(
       channel_connection_id: string | null
     }>()
   if (!conv) return { ok: false, error: 'Conversation not found' }
+  try {
+    if (!(await canHandleConversation(sb, conversationId))) return { ok: false, error: 'Live handoff requires Basic or above.' }
+  } catch { return { ok: false, error: 'Could not verify your plan. Please try again.' } }
 
   // Instagram DMs send through the linked Page's token via the same API.
   if (conv.channel === 'messenger' || conv.channel === 'instagram') {

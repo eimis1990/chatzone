@@ -13,6 +13,10 @@ const org = (o: Partial<BillingOrg>): BillingOrg => ({
 })
 
 describe('computeMrr', () => {
+  it('counts Basic monthly, annual, and Messenger correctly', () => {
+    expect(computeMrr([org({ plan: 'basic', subscription_status: 'active', billing_interval: 'month' })]).mrr).toBe(49)
+    expect(computeMrr([org({ plan: 'basic', subscription_status: 'active', billing_interval: 'year', messenger_addon: true })]).mrr).toBeCloseTo(490 / 12 + 19)
+  })
   it('counts an active monthly plan plus the voice add-on', () => {
     // Mirrors the live 3IMIS row: Growth (€249) + Voice (€49) = €298/mo.
     const r = computeMrr([org({ plan: 'growth', subscription_status: 'active', billing_interval: 'month', voice_addon: true })])

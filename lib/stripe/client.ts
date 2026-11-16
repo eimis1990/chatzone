@@ -7,8 +7,8 @@ import { getEnv } from '@/lib/env'
  * absent the helpers report "not configured" so the checkout/portal/webhook
  * routes can degrade gracefully (503) instead of crashing the app.
  *
- * We pin no explicit apiVersion — the SDK uses the account's default, which
- * keeps us off a hard-coded version string that drifts out of date.
+ * Pin the version validated with the Basic rollout. Webhook snapshots are
+ * reconciled through fresh API reads before subscription entitlements change.
  */
 let cached: Stripe | null = null
 
@@ -21,7 +21,7 @@ export function getStripe(): Stripe | null {
   const key = getEnv().STRIPE_SECRET_KEY
   if (!key) return null
   if (!cached) {
-    cached = new Stripe(key, { typescript: true })
+    cached = new Stripe(key, { typescript: true, apiVersion: '2026-10-28.endive' })
   }
   return cached
 }

@@ -1,7 +1,8 @@
+import { effectiveOrganizationEntitlements } from '@/lib/organization-policy-server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { isOriginAllowed, corsHeaders } from '@/lib/widget-auth'
 import { publicBotConfig } from '@/lib/widget-config'
-import { entitlementsFor, isInternalOrg } from '@/lib/entitlements'
+import { isInternalOrg } from '@/lib/entitlements'
 import { VISUALIZER_ADDON } from '@/lib/plans-catalog'
 import { visualizerUsageMonth } from '@/lib/room-visualizer'
 import { assignedComponentVariants } from '@/lib/widget-components/availability'
@@ -49,16 +50,19 @@ export async function GET(req: Request) {
   // add-on for the org.
   const { data: org } = await svc
     .from('organizations')
-    .select('plan, voice_addon, is_demo, is_platform, visualizer_addon')
+    .select('plan, voice_addon, is_demo, is_platform, visualizer_addon, free_legacy, free_policy_effective_at, free_policy_paused')
     .eq('id', bot.org_id)
     .single<{
+      free_policy_paused: boolean
+      free_legacy: boolean
+      free_policy_effective_at: string | null
       plan: Plan | null
       voice_addon: boolean | null
       is_demo: boolean | null
       is_platform: boolean | null
       visualizer_addon: boolean | null
     }>()
-  const entitlements = entitlementsFor(org?.plan ?? 'free')
+  const entitlements = effectiveOrganizationEntitlements(org ?? {})
   // Internal orgs (owner's own chatbot + demo bots) always have every add-on
   // and skip the render pool; only real client orgs hit the paywall.
   const internal = isInternalOrg(org)

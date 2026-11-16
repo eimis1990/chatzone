@@ -1,5 +1,7 @@
 'use server'
 
+import { getOrganizationPolicy } from '@/lib/organization-policy-server'
+import { validatePlanConfig } from '@/lib/organization-policy'
 import { revalidatePath } from 'next/cache'
 import { requireRole } from '@/lib/auth/guards'
 import { createServerClient } from '@/lib/supabase/server'
@@ -158,6 +160,11 @@ async function saveMergedConfig(
   if (!parsed.success) {
     return { success: false, error: parsed.error.issues.map((i) => i.message).join(', ') }
   }
+  const { data: current } = await supabase.from('bots').select('org_id, config').eq('id', botId).single()
+  if (!current) return { success: false, error: 'Bot not found.' }
+  const { entitlements } = await getOrganizationPolicy(supabase, current.org_id)
+  const policyError = validatePlanConfig(parsed.data, current.config as BotConfig, entitlements)
+  if (policyError) return { success: false, error: policyError }
   const { error } = await supabase.from('bots').update({ config: parsed.data }).eq('id', botId)
   if (error) return { success: false, error: error.message }
   return { success: true }

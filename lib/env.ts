@@ -24,6 +24,11 @@ const envSchema = z.object({
   // Optional: enables Stripe billing. Checkout/portal/webhook degrade
   // gracefully (503) when these are absent, so the app runs without billing.
   STRIPE_SECRET_KEY: z.string().min(1).optional(),
+  FREE_POLICY_NOTICE_ENABLED: z.enum(['true', 'false']).optional(),
+  BASIC_PLAN_ENABLED: z.enum(['true', 'false']).optional(),
+  STRIPE_PRICE_BASIC_MONTH: z.string().min(1).optional(),
+  STRIPE_PRICE_BASIC_YEAR: z.string().min(1).optional(),
+  STRIPE_PRICE_BASIC_CONVERSATIONS: z.string().min(1).optional(),
   STRIPE_PRICE_MESSENGER_MONTH: z.string().min(1).optional(),
   STRIPE_PRICE_MESSENGER_YEAR: z.string().min(1).optional(),
   STRIPE_WEBHOOK_SECRET: z.string().min(1).optional(),

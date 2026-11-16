@@ -1,3 +1,4 @@
+import { applyBotPolicy } from '@/lib/organization-policy-server'
 /**
  * POST /api/widget/request-handoff
  *
@@ -45,6 +46,8 @@ export async function POST(req: Request) {
     .eq('public_key', publicKey)
     .single<Pick<Bot, 'id' | 'org_id' | 'name' | 'status' | 'config'>>()
   if (!bot || bot.status !== 'active') return json({ error: 'Bot not available' }, 404)
+  const ent = await applyBotPolicy(svc, bot)
+  if (!ent.handoff || bot.config.theme.showHandoffButton === false) return json({ error: 'Live handoff is unavailable' }, 403)
   if (!isOriginAllowed(origin, bot.config.allowedDomains ?? [])) {
     return json({ error: 'Origin not allowed' }, 403)
   }

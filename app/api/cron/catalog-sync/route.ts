@@ -1,3 +1,4 @@
+import { applyBotPolicy } from '@/lib/organization-policy-server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { syncProductCatalog } from '@/lib/products/sync'
 import { semanticIndexSupported } from '@/lib/products/search'
@@ -36,6 +37,7 @@ export async function GET(req: Request) {
   // tonight is first tomorrow.
   const eligible: { bot: Bot; lastSyncedAt: string }[] = []
   for (const bot of (bots ?? []) as Bot[]) {
+    await applyBotPolicy(svc, bot)
     const c = bot.config.commerce
     if (!c?.enabled || !semanticIndexSupported(c)) continue
     const { data: latest } = await svc

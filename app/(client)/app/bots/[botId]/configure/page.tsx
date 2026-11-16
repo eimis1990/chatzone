@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation'
 import { requireRole } from '@/lib/auth/guards'
 import { createServerClient } from '@/lib/supabase/server'
 import { ConfigForm } from '@/components/client/ConfigForm'
-import { entitlementsFor } from '@/lib/entitlements'
+import { getOrganizationPolicy } from '@/lib/organization-policy-server'
 import type { Bot, Plan } from '@/lib/types'
 
 export default async function ConfigurePage({
@@ -28,7 +28,7 @@ export default async function ConfigurePage({
     .select('plan, voice_addon, visualizer_addon')
     .eq('id', data.org_id)
     .single<{ plan: Plan | null; voice_addon: boolean | null; visualizer_addon: boolean | null }>()
-  const ent = entitlementsFor(org?.plan ?? 'free')
+  const { entitlements: ent } = await getOrganizationPolicy(supabase, data.org_id)
 
   return (
     <ConfigForm
@@ -37,6 +37,10 @@ export default async function ConfigurePage({
       initialConfig={data.config}
       maxLanguages={ent.maxLanguages}
       canUseLeadCapture={ent.leadCapture}
+      canUseHandoff={ent.handoff}
+      canRemoveBadge={ent.removeBadge}
+      canUseProducts={ent.productSearch}
+      canUseOrders={ent.orderLookup}
       canUseDictation={ent.dictation}
       canUseVoice={Boolean(org?.voice_addon)}
       canUseVisualizer={Boolean(org?.visualizer_addon)}

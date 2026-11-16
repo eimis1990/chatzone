@@ -3,7 +3,7 @@ import { requireRole } from '@/lib/auth/guards'
 import { createServiceClient } from '@/lib/supabase/service'
 import { ConfigForm } from '@/components/client/ConfigForm'
 import { OwnerBotTabs } from '@/components/owner/OwnerBotTabs'
-import { entitlementsFor } from '@/lib/entitlements'
+import { getOrganizationPolicy } from '@/lib/organization-policy-server'
 import { saveClientBotConfig } from './actions'
 import type { Bot, Plan } from '@/lib/types'
 
@@ -35,7 +35,7 @@ export default async function OwnerConfigurePage({
     .select('plan, voice_addon, visualizer_addon')
     .eq('id', orgId)
     .single<{ plan: Plan | null; voice_addon: boolean | null; visualizer_addon: boolean | null }>()
-  const ent = entitlementsFor(org?.plan ?? 'free')
+  const { entitlements: ent } = await getOrganizationPolicy(service, bot.org_id)
 
   return (
     <ConfigForm
@@ -44,6 +44,10 @@ export default async function OwnerConfigurePage({
       initialConfig={bot.config}
       maxLanguages={ent.maxLanguages}
       canUseLeadCapture={ent.leadCapture}
+      canUseHandoff={ent.handoff}
+      canRemoveBadge={ent.removeBadge}
+      canUseProducts={ent.productSearch}
+      canUseOrders={ent.orderLookup}
       canUseDictation={ent.dictation}
       canUseVoice={Boolean(org?.voice_addon)}
       canUseVisualizer={Boolean(org?.visualizer_addon)}

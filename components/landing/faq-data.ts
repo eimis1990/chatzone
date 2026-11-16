@@ -13,7 +13,7 @@ export const FAQ_GROUPS: { title: string; items: QA[] }[] = [
     items: [
       [
         'What if it gives a customer a wrong answer?',
-        'It answers only from your own content and your live catalog, and shows the sources it used. When the answer isn’t there, it says so and offers to pass the shopper to your team. No AI is right every time, so every conversation is saved with a summary and an AI success score for you to check, and Demand Radar shows you which answers are missing.',
+        'It answers only from your own content and your live catalog, and shows the sources it used. When the answer isn’t there, it says so; Basic and above can also pass the shopper to your team. No AI is right every time, so every conversation is saved with a summary and an AI success score for you to check, and Demand Radar shows you which answers are missing.',
       ],
       [
         'Can I see it on my own store before I pay?',
@@ -33,7 +33,7 @@ export const FAQ_GROUPS: { title: string; items: QA[] }[] = [
       ],
       [
         'Can a person take over from the AI?',
-        'Yes, on every plan, including Free. When a shopper needs a person, the conversation moves to a live inbox your team can step into, and goes back to the assistant when you are done.',
+        'Yes, on Basic and above. When a shopper needs a person, the conversation moves to a live inbox your team can step into, and goes back to the assistant when you are done.',
       ],
       [
         'Where is my customers’ data kept?',
@@ -50,23 +50,23 @@ export const FAQ_GROUPS: { title: string; items: QA[] }[] = [
       ],
       [
         'What does it cost to start?',
-        'Nothing. The Free plan gives you 100 conversations a month, one assistant, one language of your choice and handoff to your team, with no card required and no setup fee. Paid plans start at €149 a month, or €124 a month billed annually, and add more conversations, more assistants, both languages, lead capture, product search and order lookup.',
+        'Nothing. The Free plan includes 50 conversations a month, one assistant, one language and basic activity statistics, with no card or setup fee. Basic is €49/month or €490/year and includes 400 conversations, live handoff, lead capture, voice dictation, full analytics and product search. Starter adds order lookup, multiple languages, two bots and badge removal. A new text session starts after 24 hours of inactivity or in a new UTC month; voice calls use their separate minute allowance. Existing Free accounts receive a 30-day transition notice.',
       ],
       [
         'What counts as a conversation?',
-        'One session between a shopper and your assistant, however many messages it includes. Voice calls are an add-on and are billed by the minute.',
+        'A text session is counted once when the assistant responds. A new session starts after 24 hours without activity, or on the first automated reply in a new UTC calendar month. Previews and human-only exchanges are excluded. Voice calls use their separate minute allowance.',
       ],
       [
         'What happens if I reach my conversation limit?',
-        'Conversations in progress carry on. New ones pause until you upgrade or the month resets. Nothing is charged automatically, so there are no surprise bills.',
+        'Conversations in progress carry on. New ones pause until you upgrade, buy an eligible conversation pack, or the UTC calendar month resets. Nothing is charged automatically, so there are no surprise bills.',
       ],
       [
         'Can I change or cancel anytime?',
-        'Yes. Upgrade, downgrade or cancel whenever you like. Changes take effect right away.',
+        'Yes. Upgrade, downgrade or cancel whenever you like. Plan changes take effect immediately with prorated billing. Cancellation takes effect at the end of your paid period.',
       ],
       [
         'Which languages does it speak?',
-        'English and Lithuanian today, with more on the way. On paid plans both are included, not charged per language.',
+        'English and Lithuanian today, with more on the way. Free and Basic include one language of your choice. Starter and above include all supported languages.',
       ],
     ],
   },

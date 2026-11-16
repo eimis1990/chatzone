@@ -1,3 +1,4 @@
+import { applyBotPolicy } from '@/lib/organization-policy-server'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createServerClient } from '@/lib/supabase/server'
@@ -33,6 +34,7 @@ export async function GET(req: Request) {
 
   const svc = createServiceClient()
   const { data: bot } = await svc.from('bots').select('*').eq('id', botId).single<Bot>()
+  if (bot) await applyBotPolicy(svc, bot)
   if (!bot?.config.commerce?.enabled) {
     return NextResponse.json({ indexed: 0, storeTotal: 0, lastSyncedAt: null })
   }
@@ -82,6 +84,9 @@ export async function POST(req: Request) {
   const svc = createServiceClient()
   const { data: bot } = await svc.from('bots').select('*').eq('id', botId).single<Bot>()
   if (!bot) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+
+  const entitlements = await applyBotPolicy(svc, bot)
+  if (!entitlements.productSearch) return NextResponse.json({ error: 'Product search requires Basic or above.' }, { status: 403 })
 
   const writeStatus = (fields: Record<string, unknown>) =>
     svc

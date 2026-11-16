@@ -1,3 +1,4 @@
+import { applyBotPolicy } from '@/lib/organization-policy-server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { getEnv } from '@/lib/env'
 import { getLlmToken } from '@/lib/ai/llm-auth'
@@ -47,6 +48,8 @@ export async function POST(req: Request, ctx: { params: Promise<{ publicKey: str
   if (!bot || bot.status !== 'active') {
     return new Response(JSON.stringify({ error: 'Bot not available' }), { status: 404 })
   }
+
+  await applyBotPolicy(svc, bot)
 
   // RAG on the latest user turn — but never let it block the spoken response for
   // long. ElevenLabs aborts the turn ("custom_llm generation failed") if the LLM

@@ -28,10 +28,17 @@ export const PLANS: Record<Plan, PlanMeta> = {
     plan: 'free',
     name: 'Free',
     monthly: 0,
-    conversations: 100,
+    conversations: 50,
     blurb: 'Try Loqara on your store.',
-    features: ['1 bot', 'Single language', 'Live handoff to your team', 'Basic analytics'],
+    features: ['1 bot', 'Single language', 'Basic analytics'],
     purchasable: false,
+  },
+  basic: {
+    plan: 'basic', name: 'Basic', monthly: 49, conversations: 400,
+    blurb: 'For small businesses.',
+    features: ['1 bot', 'Single language', 'Live handoff to your team', 'Lead capture',
+      'Product search', 'Voice dictation in chat', 'Full analytics + CSAT'],
+    purchasable: true,
   },
   starter: {
     plan: 'starter',
@@ -40,11 +47,11 @@ export const PLANS: Record<Plan, PlanMeta> = {
     conversations: 1500,
     blurb: 'For growing stores.',
     features: [
-      'Everything in Free',
+      'Everything in Basic',
       '2 bots',
       'Lead capture',
       'All languages',
-      'Product search & order lookup',
+      'Order lookup',
       'Voice dictation in chat',
       'Full analytics + CSAT',
       'Remove Loqara badge',
@@ -62,7 +69,6 @@ export const PLANS: Record<Plan, PlanMeta> = {
       'Up to 5 bots',
       'Priority support',
       'Domain allowlist',
-      'Advanced analytics',
     ],
     purchasable: true,
   },
@@ -93,10 +99,10 @@ export const PLANS: Record<Plan, PlanMeta> = {
 }
 
 /** The plans a customer can buy through self-serve Checkout, in display order. */
-export const PURCHASABLE_PLANS: Plan[] = ['starter', 'growth', 'scale']
+export const PURCHASABLE_PLANS: Plan[] = ['basic', 'starter', 'growth', 'scale']
 
 /** Plans shown as cards (landing + in-app subscription): Free + paid. */
-export const DISPLAY_PLANS: Plan[] = ['free', 'starter', 'growth', 'scale']
+export const DISPLAY_PLANS: Plan[] = ['free', 'basic', 'starter', 'growth', 'scale']
 
 /** The plan highlighted as "Most popular". */
 export const POPULAR_PLAN: Plan = 'starter'
@@ -156,3 +162,12 @@ export const VISUALIZER_ADDON = {
   blurb: 'Let shoppers see your furniture in their own room, rendered by AI.',
   features: ['100 renders / month included', 'Up to 5 renders per conversation', 'Works with any paid plan'],
 } as const
+
+/** Paid-plan top-ups are one-time purchases; the server chooses the offer. */
+export function conversationTopupFor(plan: Plan) {
+  if (plan === 'free') return null
+  const conversations = plan === 'basic' ? 200 : 1000
+  return { ...EXTRA_CONVERSATIONS_ADDON, conversations,
+    features: [`${conversations.toLocaleString('en-US')} extra conversations for this month`,
+      'Applies after payment succeeds', 'One-time payment — unused credits expire at month end'] }
+}

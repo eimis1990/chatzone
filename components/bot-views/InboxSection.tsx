@@ -1,3 +1,4 @@
+import { canHandleConversation } from '@/lib/conversation-access'
 import { requireUser } from '@/lib/auth/guards'
 import { createServerClient } from '@/lib/supabase/server'
 import { InboxView, type InboxItem } from '@/components/client/InboxView'
@@ -92,6 +93,9 @@ export async function InboxSection({ botId }: { botId: string }) {
     'use server'
     const session = await requireUser()
     const sb = await createServerClient()
+    if (action === 'take' && !(await canHandleConversation(sb, conversationId))) {
+      throw new Error('Live handoff requires Basic or above.')
+    }
     const status = nextHandoffStatus('bot', action)
     const patch: Record<string, unknown> = { handoff_status: status }
     if (action === 'take') patch.assigned_to = session.id

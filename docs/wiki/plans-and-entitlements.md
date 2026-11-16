@@ -2,57 +2,69 @@
 
 ## Source of truth
 
-`lib/entitlements.ts` — `entitlementsFor(plan)` returns the `Entitlements` for a
-plan (falls back to `free`). Fields: `maxBots`, `maxLanguages`, `leadCapture`,
-`removeBadge`, `customRetention`, `teams`, `conversations`.
+`lib/entitlements.ts:32` is the pure base matrix. Runtime consumers use
+`organizationEntitlements` / `getOrganizationPolicy`, which apply the temporary
+legacy-Free policy and internal-org exception (`lib/organization-policy.ts:15`,
+`lib/organization-policy-server.ts:7`). Prices/copy live in `lib/plans-catalog.ts:30`.
 
-| Plan | maxBots | maxLanguages | leadCapture | removeBadge | teams | conv/mo |
-| --- | --- | --- | --- | --- | --- | --- |
-| free | 1 | 1 | – | – | – | 100 |
-| starter | 2 | ∞ | ✓ | ✓ | – | 1,500 |
-| growth | 5 | ∞ | ✓ | ✓ | – | 4,000 |
-| scale | ∞ | ∞ | ✓ | ✓ | ✓ | 12,000 |
-| enterprise | ∞ | ∞ | ✓ | ✓ | ✓ | ∞ |
+| Plan | Bots | Languages | Text sessions/month | Handoff/leads/dictation | Product search | Orders / remove badge | Analytics |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Free | 1 | 1 | 50 | No | No | No | Basic activity |
+| Basic | 1 | 1 | 400 | Yes | Yes | No | Full + CSAT |
+| Starter | 2 | all | 1,500 | Yes | Yes | Yes | Full + CSAT |
+| Growth | 5 | all | 4,000 | Yes | Yes | Yes | Full + CSAT |
+| Scale | unlimited | all | 12,000 | Yes | Yes | Yes | Full + CSAT |
+| Enterprise | unlimited | all | unlimited | Yes | Yes | Yes | Full + CSAT |
 
-> ⚠️ verify prices/copy against `lib/plans-catalog.ts` and `public/llms.txt` when
-> plans change — those hold the marketing/pricing strings and must stay in sync.
+Basic costs €49/month or €490/year; Starter+ prices are unchanged. Basic top-ups
+are €15/200, Starter+ €15/1,000, and Free cannot purchase packs. Voice calls use
+minutes only; dictation is a separate included text-input feature. See
+[usage sessions](conversation-usage.md) and [billing](stripe-billing.md).
 
-## Where each limit is enforced (server-side — never trust the browser)
+## Enforcement
 
-- **maxBots** → `createBotInOrg` (`lib/bots/create.ts`), used by both the client
-  `createBot` action and the owner `createBotForOrg`.
-- **maxLanguages** → `publicBotConfig` clamps served languages
-  ([widget-and-embed](widget-and-embed.md)); the ConfigForm UI gates selection.
-- **leadCapture / removeBadge / voice-call** → `publicBotConfig`.
-- **Voice minutes** (200/mo included, €0.20/min overage, 30 preview min/mo) →
-  metered from the post-call webhook into `voice_usage`; preview gated at
-  `/api/preview/voice-token`. Full picture in [voice](voice.md) § Billing.
-- The `ConfigForm` gets the numbers via props (`maxLanguages`, `canUseLeadCapture`,
-  `canUseVoice`) from the configure pages; these are UX gates only.
+- `applyPlanToConfig` clamps runtime languages, handoff, badge, leads, suggested
+  actions and commerce without overwriting saved settings
+  (`lib/organization-policy.ts:27`). Shared commerce capabilities enforce the
+  separate order gate (`lib/commerce/capabilities.ts:12`). Widget, direct APIs,
+  previews, Messenger processing and voice-agent generation apply the policy.
+- Configure/onboarding actions validate new settings and preserve dormant saved
+  language content. Owner editing a real client uses that client's policy.
+- `publicBotConfig` also clamps browser capabilities (`lib/widget-config.ts:75`).
+  UI disabled controls are supplemental, never authorization.
+- Handoff request, Inbox claim/reply and channel sends check the same policy.
+  Authenticated direct database updates to handoff state or human messages have
+  an additional trigger guard (`20261116090340_handoff_policy_guards.sql:1`).
+- Detailed analytics are gated before aggregate reads; Free sees conversation
+  and message totals (`components/bot-views/BasicAnalytics.tsx:1`). Transcript
+  history and data/privacy export remain available. Home skips the full rollup.
+- Bot creation/activation limits remain in `lib/bots/create.ts` and
+  `lib/bots/enforce-limit.ts`; downgrade pauses excess active bots, never deletes.
 
-## Notes
+## Legacy Free transition and rollback
 
-- Prefer numeric limits (`maxLanguages: number`) over booleans so single-vs-many
-  generalizes. `maxBots`/`maxLanguages` use `Infinity` for unlimited.
-- Assertions live in `tests/unit/entitlements.test.ts`.
+The migration explicitly marked the eight existing real Free organizations as
+`free_legacy`. New organizations default false; changing to a paid plan clears
+legacy status permanently, so later Free downgrades get the new policy.
 
-## Billing reconciliation
+Legacy access is 100 conversations, handoff, commerce and full analytics until
+the recorded deadline. The in-app notice starts a 30-day window only after it
+mounts; repeated reads cannot move the deadline (`lib/actions/free-policy-notice.ts:6`).
+No outbound notice email is sent. At the deadline, no new handoffs are allowed;
+a previously live handoff has a 24-hour resolution window. Saved data is retained.
 
-- Stripe customer IDs are cached on `organizations`, but Stripe remains the
-  source of truth. A deleted customer or an ID from a different Stripe account
-  returns `resource_missing`. Subscription reads narrow that error to “No such
-  customer”, conditionally clear only the matching cached ID, reset the billing
-  mirror to Free/Inactive, and allow the next checkout to create a replacement
-  (`lib/stripe/errors.ts:1-17`, `lib/stripe/customer.ts:7-76`,
-  `lib/stripe/manage.ts:10-75`). Other Stripe failures still propagate.
+- `BASIC_PLAN_ENABLED=false` stops new Basic purchases without removing existing
+  Basic access. `FREE_POLICY_NOTICE_ENABLED=false` stops new notice windows.
+- `organizations.free_policy_paused=true` pauses enforcement for the selected
+  legacy org while retaining its deadline. Pausing notice display alone does
+  **not** pause an already scheduled policy. This DB field is shared by app and
+  trigger checks. Only trusted service/owner access may change it.
+- After Basic subscribers exist, rollback must retain Basic-compatible readers,
+  schema and credits. Prefer a forward fix; never reset usage or migrate paid
+  clients automatically. Release evidence and remaining monitoring are in the
+  [rollout plan](../superpowers/plans/2026-11-16-basic-plan-and-free-tier.md).
 
-## Subscription add-on cards
+_Internal demo/platform organizations keep Enterprise capabilities. Their
+classification must not be assigned to real customers to bypass billing._
 
-- The client subscription page uses one shared card anatomy for active,
-  available, and coming-soon add-ons: status/header, price and three benefit
-  rows, then a pinned footer with a 44px action and persistent availability
-  note. Keeping all action controls in `CardFooter` prevents copy length from
-  shifting buttons between cards (`components/client/BillingPanel.tsx:88-184`,
-  `:497-681`).
-
-_Last verified: 2026-08-03 (89ac480)._
+_Last verified: 2026-11-16 (Basic rollout implementation)._

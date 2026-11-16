@@ -7,6 +7,7 @@ export interface BillingOrg {
   plan: Plan
   subscription_status: SubscriptionStatus
   billing_interval: BillingInterval | null
+  messenger_addon?: boolean
   voice_addon: boolean
   visualizer_addon: boolean
   /** Stripe livemode of the synced sub; false = sandbox/test, null = legacy (treated as live). */
@@ -46,7 +47,7 @@ export function computeMrr(orgs: BillingOrg[]): MrrBreakdown {
     if (o.stripe_livemode === false) continue // sandbox/test subscription — not real money
     if (!PAYING.includes(o.subscription_status)) continue
 
-    const base = PLANS[o.plan].monthly
+    const base = PLANS[o.plan]?.monthly ?? 0
     if (base <= 0) continue // free / enterprise-custom contribute nothing here
 
     // Annual is billed at 10×/yr (≈2 months free) → normalize to a month.
@@ -54,7 +55,7 @@ export function computeMrr(orgs: BillingOrg[]): MrrBreakdown {
     const voice = o.voice_addon ? VOICE_ADDON.monthly : 0
     const visualizer = o.visualizer_addon ? VISUALIZER_ADDON.monthly : 0
 
-    mrr += monthlyBase + voice + visualizer
+    mrr += monthlyBase + voice + visualizer + (o.messenger_addon ? 19 : 0)
     payingClients += 1
     byPlan[o.plan] = (byPlan[o.plan] ?? 0) + 1
     if (o.voice_addon) voiceAddons += 1

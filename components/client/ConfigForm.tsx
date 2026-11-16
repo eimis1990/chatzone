@@ -175,6 +175,10 @@ interface ConfigFormProps {
   /** Plan's max visitor languages (1 = free/single-language). */
   maxLanguages?: number
   canUseLeadCapture?: boolean
+  canUseHandoff?: boolean
+  canRemoveBadge?: boolean
+  canUseProducts?: boolean
+  canUseOrders?: boolean
   /** Voice add-on gating — disable voice unless the add-on is active. */
   canUseVoice?: boolean
   /** Plan-gated Whisper dictation in the composer (paid tiers). */
@@ -268,6 +272,10 @@ export function ConfigForm({
   initialConfig,
   maxLanguages = Infinity,
   canUseLeadCapture = true,
+  canUseHandoff = true,
+  canRemoveBadge = true,
+  canUseProducts = true,
+  canUseOrders = true,
   canUseVoice = true,
   canUseDictation = false,
   voiceLocked = false,
@@ -280,6 +288,7 @@ export function ConfigForm({
   const router = useRouter()
   // Clients get a trimmed config — the owner manages the technical sections.
   const showAdvanced = audience === 'owner'
+  const commercePlanNote = !canUseProducts ? 'Live product search requires Basic or above.' : !canUseOrders ? 'Product search is included. Order lookup requires Starter or above.' : null
   const canUseMultiple = maxLanguages > 1
   // Internal bot name — lives outside the config schema, saved alongside it.
   const [name, setName] = useState(botName)
@@ -662,6 +671,7 @@ export function ConfigForm({
         <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="pb-10">
 
         {topSlot}
+      {commercePlanNote && <p className="px-6 text-sm text-muted-foreground">{commercePlanNote}</p>}
 
         {/* Sticky toolbar — title + always-visible Save (fixed height so the
             section headers below can pin exactly beneath it). */}
@@ -1631,9 +1641,9 @@ export function ConfigForm({
                       <Switch aria-label="Glass bubbles" checked={field.value ?? false} onCheckedChange={field.onChange} />
                     )} />
                   </CompactToggle>
-                  <CompactToggle label="Human handoff" description="Show talk-to-a-person option">
+                  <CompactToggle label="Human handoff" description={canUseHandoff ? "Show talk-to-a-person option" : "Available on Basic and above"}>
                     <Controller name="theme.showHandoffButton" control={control} render={({ field }) => (
-                      <Switch aria-label="Human handoff" checked={field.value ?? true} onCheckedChange={field.onChange} />
+                      <Switch aria-label="Human handoff" disabled={!canUseHandoff} checked={canUseHandoff && (field.value ?? true)} onCheckedChange={field.onChange} />
                     )} />
                   </CompactToggle>
                   <CompactToggle label="Header logo" description="Show your logo next to the name">
@@ -1646,9 +1656,9 @@ export function ConfigForm({
                       <Switch aria-label="Expandable widget" checked={field.value ?? false} onCheckedChange={field.onChange} />
                     )} />
                   </CompactToggle>
-                  <CompactToggle label="Hide Loqara badge" description="Removes “Powered by Loqara” (paid plans)">
+                  <CompactToggle label="Hide Loqara badge" description="Removes “Powered by Loqara” (Starter and above)">
                     <Controller name="theme.hideBadge" control={control} render={({ field }) => (
-                      <Switch aria-label="Hide Loqara badge" checked={field.value ?? false} onCheckedChange={field.onChange} />
+                      <Switch aria-label="Hide Loqara badge" disabled={!canRemoveBadge} checked={canRemoveBadge && (field.value ?? false)} onCheckedChange={field.onChange} />
                     )} />
                   </CompactToggle>
                   {(watch('voice.enabled') ?? false) && (
@@ -2157,7 +2167,7 @@ export function ConfigForm({
         </CollapsibleSection>
 
         {/* ── Store / Products ── */}
-        <CommerceSection control={control} watch={watch} setValue={setValue} botId={botId} />
+        <CommerceSection control={control} watch={watch} setValue={setValue} botId={botId} canUseProducts={canUseProducts} canUseOrders={canUseOrders} />
 
         {/* ── Allowed Domains (Advanced) ── */}
         <CollapsibleSection header={<SectionHeader
@@ -2600,13 +2610,15 @@ function SystemPromptSelect({
 // CommerceSection — "Store / products" card
 // -------------------------------------------------------------------------
 interface CommerceSectionProps {
+  canUseProducts: boolean
+  canUseOrders: boolean
   control: Control<FormValues>
   watch: UseFormWatch<FormValues>
   setValue: UseFormSetValue<FormValues>
   botId: string
 }
 
-function CommerceSection({ control, watch, setValue, botId }: CommerceSectionProps) {
+function CommerceSection({ control, watch, setValue, botId, canUseProducts, canUseOrders }: CommerceSectionProps) {
   const commerceEnabled = watch('commerce.enabled')
   const provider = watch('commerce.provider') ?? 'woocommerce'
   const storeUrl = watch('commerce.storeUrl') ?? ''
@@ -2724,9 +2736,9 @@ function CommerceSection({ control, watch, setValue, botId }: CommerceSectionPro
     setOrderTest({ status: 'loading' })
     try {
       const body = isMagento
-        ? { provider: 'magento', storeUrl: storeUrl.trim(), mode: 'orders', magentoToken: magentoToken.trim() }
+        ? { botId, provider: 'magento', storeUrl: storeUrl.trim(), mode: 'orders', magentoToken: magentoToken.trim() }
         : {
-            provider: 'woocommerce',
+            botId, provider: 'woocommerce',
             storeUrl: storeUrl.trim(),
             mode: 'orders',
             restKey: restKey.trim(),
@@ -2735,14 +2747,14 @@ function CommerceSection({ control, watch, setValue, botId }: CommerceSectionPro
       const res = await fetch('/api/commerce/validate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
+        body: JSON.stringify({ ...body, botId }),
       })
       const data = (await res.json()) as { ok: boolean; error?: string }
       setOrderTest(data.ok ? { status: 'ok' } : { status: 'error', message: data.error ?? 'Connection failed.' })
     } catch {
       setOrderTest({ status: 'error', message: 'Network error — please try again.' })
     }
-  }, [provider, storeUrl, restKey, restSecret, magentoToken])
+  }, [botId, provider, storeUrl, restKey, restSecret, magentoToken])
 
   const testReady =
     provider === 'shopify'
@@ -2781,7 +2793,7 @@ function CommerceSection({ control, watch, setValue, botId }: CommerceSectionPro
       const res = await fetch('/api/commerce/validate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
+        body: JSON.stringify({ ...body, botId }),
       })
       const data = (await res.json()) as {
         ok: boolean
@@ -2804,7 +2816,7 @@ function CommerceSection({ control, watch, setValue, botId }: CommerceSectionPro
     } catch {
       setTestState({ status: 'error', message: 'Network error — please try again.' })
     }
-  }, [provider, storeUrl, shopifyDomain, shopifyToken, feedUrl, tlClientId, tlClientSecret, tlPropertyId, testReady, setValue])
+  }, [botId, provider, storeUrl, shopifyDomain, shopifyToken, feedUrl, tlClientId, tlClientSecret, tlPropertyId, testReady, setValue])
 
   // Reset test state when the connection inputs change.
   const connKey = `${provider}:${storeUrl}:${shopifyDomain}:${shopifyToken}:${feedUrl}:${tlClientId}:${tlClientSecret}:${tlPropertyId}`
@@ -2832,6 +2844,7 @@ function CommerceSection({ control, watch, setValue, botId }: CommerceSectionPro
                 checked={field.value ?? false}
                 onCheckedChange={field.onChange}
                 id="commerceEnabled"
+                disabled={!canUseProducts}
               />
             )}
           />
@@ -3213,7 +3226,7 @@ function CommerceSection({ control, watch, setValue, botId }: CommerceSectionPro
             {provider === 'woocommerce' && (
             <div className="space-y-3 border-t pt-4">
               <div>
-                <Label>Order lookup (optional)</Label>
+                <Label>Order lookup {canUseOrders ? '(optional)' : '— requires Starter'}</Label>
                 <p className="text-xs text-muted-foreground">
                   Add read-only WooCommerce REST keys so the bot can check order status. Create them in
                   WooCommerce → Settings → Advanced → REST API (permission: Read). Stored securely and
@@ -3264,7 +3277,7 @@ function CommerceSection({ control, watch, setValue, botId }: CommerceSectionPro
                   type="button"
                   variant="outline"
                   size="sm"
-                  disabled={orderTest.status === 'loading' || !restKey.trim() || !restSecret.trim()}
+                  disabled={!canUseOrders || orderTest.status === 'loading' || !restKey.trim() || !restSecret.trim()}
                   onClick={handleTestOrders}
                 >
                   {orderTest.status === 'loading' ? 'Testing…' : 'Test order access'}
@@ -3281,7 +3294,7 @@ function CommerceSection({ control, watch, setValue, botId }: CommerceSectionPro
             {provider === 'magento' && (
             <div className="space-y-3 border-t pt-4">
               <div>
-                <Label>Order lookup (optional)</Label>
+                <Label>Order lookup {canUseOrders ? '(optional)' : '— requires Starter'}</Label>
                 <p className="text-xs text-muted-foreground">
                   Add a Magento integration access token so the bot can check order status. Create it in
                   Magento Admin → System → Integrations (resource access: Sales). Stored securely and
@@ -3312,7 +3325,7 @@ function CommerceSection({ control, watch, setValue, botId }: CommerceSectionPro
                   type="button"
                   variant="outline"
                   size="sm"
-                  disabled={orderTest.status === 'loading' || !magentoToken.trim()}
+                  disabled={!canUseOrders || orderTest.status === 'loading' || !magentoToken.trim()}
                   onClick={handleTestOrders}
                 >
                   {orderTest.status === 'loading' ? 'Testing…' : 'Test order access'}

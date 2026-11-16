@@ -11,7 +11,7 @@ describe('entitlementsFor — plan limits', () => {
     expect(e.removeBadge).toBe(false)
     expect(e.customRetention).toBe(false)
     expect(e.teams).toBe(false)
-    expect(e.conversations).toBe(100)
+    expect(e.conversations).toBe(50)
   })
 
   it('Starter: 2 bots, languages + lead capture + badge removal', () => {
@@ -24,7 +24,7 @@ describe('entitlementsFor — plan limits', () => {
     expect(e.conversations).toBe(1500)
   })
 
-  it('language limit: 1 on free, unlimited on every paid tier', () => {
+  it('language limit: 1 on Free and Basic, unlimited on Starter and above', () => {
     expect(entitlementsFor('free').maxLanguages).toBe(1)
     for (const p of ['starter', 'growth', 'scale', 'enterprise'] as const) {
       expect(entitlementsFor(p).maxLanguages).toBe(Infinity)

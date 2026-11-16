@@ -1,3 +1,5 @@
+import { getOrganizationPolicy } from '@/lib/organization-policy-server'
+import { BasicAnalytics } from './BasicAnalytics'
 import {
   MessagesSquareIcon,
   MessageSquareIcon,
@@ -79,6 +81,11 @@ export async function AnalyticsSection({
   rangeDays: number
 }) {
   const supabase = await createServerClient()
+
+  const { data: scope } = await supabase.from('bots').select('org_id').eq('id', bot.id).single()
+  if (!scope) throw new Error('Bot not found')
+  const { entitlements } = await getOrganizationPolicy(supabase, scope.org_id)
+  if (entitlements.analytics !== 'full') return <BasicAnalytics botId={bot.id} />
 
   const dates = lastNDays(rangeDays)
   const since = new Date()

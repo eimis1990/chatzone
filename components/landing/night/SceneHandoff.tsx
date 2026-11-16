@@ -23,7 +23,7 @@ export function SceneHandoff() {
       }
       gain={<>Nothing untrue is said in your name, and the customer isn&rsquo;t lost.</>}
       fine={
-        <>Handing over to your team is on every plan. Collecting contact details starts on Starter.</>
+        <>Live handoff and lead capture are included in Basic and above.</>
       }
     >
       <div className={s.talk}>

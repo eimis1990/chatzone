@@ -4,7 +4,7 @@ import { createServiceClient } from '@/lib/supabase/service'
 import { BillingPanel } from '@/components/client/BillingPanel'
 import { isStripeConfigured, getStripe, checkoutTaxParams } from '@/lib/stripe/client'
 import { getPriceId, getMessengerPriceId, getVoicePriceId, getVisualizerPriceId, getSetupPriceId, getExtraConversationsPriceId, PLANS, DISPLAY_PLANS, VOICE_ADDON, VISUALIZER_ADDON } from '@/lib/stripe/plans'
-import { EXTRA_CONVERSATIONS_ADDON } from '@/lib/plans-catalog'
+import { conversationTopupFor, EXTRA_CONVERSATIONS_ADDON } from '@/lib/plans-catalog'
 import { SETUP_PACKAGES } from '@/lib/setup-packages'
 import { ensureStripeCustomer, resetMissingStripeCustomer } from '@/lib/stripe/customer'
 import { isMissingStripeCustomerError } from '@/lib/stripe/errors'
@@ -17,7 +17,9 @@ import {
   activeSubscriptionId,
 } from '@/lib/stripe/manage'
 import { entitlementsFor } from '@/lib/entitlements'
-import { extraConversationsThisMonth } from '@/lib/usage'
+import { basicSalesEnabled, getOrganizationPolicy } from '@/lib/organization-policy-server'
+import { createTopupCheckout } from '@/lib/stripe/topups'
+import { extraConversationsThisMonth, conversationsThisMonth } from '@/lib/usage'
 import { canConnectChannels, type ChannelOrg } from '@/lib/channels/entitlement'
 import { voiceUsageThisMonth } from '@/lib/voice-usage'
 import type { Plan, BillingInterval, SubscriptionStatus } from '@/lib/types'
@@ -81,15 +83,8 @@ export default async function SubscriptionPage({
     const { data: bots } = await sb.from('bots').select('id').eq('org_id', oid)
     const botIds = (bots ?? []).map((b) => (b as { id: string }).id)
     if (!botIds.length) return { conversationsUsed: 0, botsUsed: 0, extraConversations, ...voice }
-    const now = new Date()
-    const monthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString()
-    const { count } = await sb
-      .from('conversations')
-      .select('id', { count: 'exact', head: true })
-      .in('bot_id', botIds)
-      .neq('source', 'preview') // configurator test calls never consume the pool
-      .gte('started_at', monthStart)
-    return { conversationsUsed: count ?? 0, botsUsed: botIds.length, extraConversations, ...voice }
+    const count = await conversationsThisMonth(createServiceClient(), oid)
+    return { conversationsUsed: count, botsUsed: botIds.length, extraConversations, ...voice }
   }
 
   // Which one-time setup packages this org has already paid for.
@@ -162,9 +157,10 @@ export default async function SubscriptionPage({
   const messengerEntitled = canConnectChannels(channelOrg)
 
   const isPaying = PAYING.includes(billing.status) && Boolean(billing.subscriptionId)
-  const ent = entitlementsFor(billing.plan)
+  const ent = orgId ? (await getOrganizationPolicy(createServiceClient(), orgId)).entitlements : entitlementsFor('free')
+  const topup = conversationTopupFor(billing.plan) ?? { ...EXTRA_CONVERSATIONS_ADDON, conversations: 200, features: ['Available with a paid plan'] }
 
-  const planOptions = DISPLAY_PLANS.map((pl) => ({
+  const planOptions = DISPLAY_PLANS.filter((plan) => plan !== 'basic' || basicSalesEnabled() || billing.plan === 'basic').map((pl) => ({
     plan: pl,
     name: PLANS[pl].name,
     monthly: PLANS[pl].monthly,
@@ -185,6 +181,9 @@ export default async function SubscriptionPage({
     interval: BillingInterval,
   ): Promise<{ url?: string; ok?: boolean; error?: string }> {
     'use server'
+    await requireRole('client')
+    if (!['month', 'year'].includes(interval) || !['basic','starter','growth','scale'].includes(plan)) return { error: 'Invalid plan.' }
+    if (plan === 'basic' && !basicSalesEnabled()) return { error: 'Basic is not available for purchase yet.' }
     const ids = await getUserOrgIds()
     const oid = ids[0]
     if (!oid) return { error: 'No organization found.' }
@@ -211,7 +210,7 @@ export default async function SubscriptionPage({
         success_url: `${base}/app/subscription?billing=success`,
         cancel_url: `${base}/app/subscription?billing=cancelled`,
         allow_promotion_codes: true,
-        subscription_data: { metadata: { org_id: oid } },
+        subscription_data: { metadata: { org_id: oid }, billing_mode: { type: 'flexible' } },
         ...checkoutTaxParams(),
       })
       return { url: session.url ?? undefined }
@@ -253,7 +252,7 @@ export default async function SubscriptionPage({
     }
   }
 
-  /** Buy a one-time 1,000-conversation top-up for the current month. */
+  /** Buy the paid plan's server-resolved conversation pack. */
   async function buyExtraConversations(): Promise<{ url?: string; error?: string }> {
     'use server'
     const ids = await getUserOrgIds()
@@ -261,29 +260,10 @@ export default async function SubscriptionPage({
     if (!oid) return { error: 'No organization found.' }
     const stripe = getStripe()
     if (!stripe) return { error: 'Billing is not enabled yet.' }
-    const priceId = getExtraConversationsPriceId()
-    if (!priceId) return { error: 'Extra conversations aren’t configured yet.' }
-    // Top-ups extend a paid plan's pool — same gate as the other add-ons.
-    if (!(await activeSubscriptionId(oid))) {
-      return { error: 'Add a paid plan first, then you can top up conversations.' }
-    }
     try {
-      const customerId = await ensureStripeCustomer(oid)
-      const base = process.env.NEXT_PUBLIC_APP_URL ?? ''
-      const session = await stripe.checkout.sessions.create({
-        integration_identifier: 'loqara_checkout_aqkvmztr',
-        mode: 'payment',
-        customer: customerId,
-        line_items: [{ price: priceId, quantity: 1 }],
-        success_url: `${base}/app/subscription?topup=success`,
-        cancel_url: `${base}/app/subscription?topup=cancelled`,
-        metadata: {
-          org_id: oid,
-          extra_conversations: String(EXTRA_CONVERSATIONS_ADDON.conversations),
-        },
-        invoice_creation: { enabled: true },
-        ...checkoutTaxParams(),
-      })
+      const subId = await activeSubscriptionId(oid)
+      if (!subId) return { error: 'Add a paid plan first, then you can top up conversations.' }
+      const session = await createTopupCheckout(stripe, createServiceClient(), oid, subId)
       return { url: session.url ?? undefined }
     } catch (err) {
       return { error: err instanceof Error ? err.message : 'Could not start checkout.' }
@@ -433,14 +413,14 @@ export default async function SubscriptionPage({
           blurb: VISUALIZER_ADDON.blurb,
           features: [...VISUALIZER_ADDON.features],
         }}
-        extraConversationsConfigured={Boolean(getExtraConversationsPriceId())}
+        extraConversationsConfigured={Boolean(getExtraConversationsPriceId(billing.plan))}
         extraConversationsCredits={usage.extraConversations}
         extraConversations={{
-          name: EXTRA_CONVERSATIONS_ADDON.name,
-          price: EXTRA_CONVERSATIONS_ADDON.price,
-          conversations: EXTRA_CONVERSATIONS_ADDON.conversations,
-          blurb: EXTRA_CONVERSATIONS_ADDON.blurb,
-          features: [...EXTRA_CONVERSATIONS_ADDON.features],
+          name: topup.name,
+          price: topup.price,
+          conversations: topup.conversations,
+          blurb: topup.blurb,
+          features: [...topup.features],
         }}
         buyExtraConversations={buyExtraConversations}
         plans={planOptions}

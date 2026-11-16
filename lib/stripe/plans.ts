@@ -34,8 +34,9 @@ export function getVisualizerPriceId(): string | null {
 }
 
 /** Stripe Price ID for the one-time Extra-conversations top-up, or null when not configured. */
-export function getExtraConversationsPriceId(): string | null {
-  return process.env.STRIPE_PRICE_EXTRA_CONVERSATIONS ?? null
+export function getExtraConversationsPriceId(plan: Plan = 'starter'): string | null {
+  if (plan === 'free') return null
+  return (plan === 'basic' ? process.env.STRIPE_PRICE_BASIC_CONVERSATIONS : process.env.STRIPE_PRICE_EXTRA_CONVERSATIONS) ?? null
 }
 
 /** Stripe Price ID for a one-time setup package, or null when not configured. */

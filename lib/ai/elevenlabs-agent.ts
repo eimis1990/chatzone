@@ -1,3 +1,4 @@
+import { applyBotPolicy } from '@/lib/organization-policy-server'
 import { botGenderInstruction } from '@/lib/ai/bot-identity'
 import { createHash } from 'node:crypto'
 import type { SupabaseClient } from '@supabase/supabase-js'
@@ -562,6 +563,7 @@ async function ensureTools(db: SupabaseClient, bot: Bot): Promise<string[]> {
  * needed. Returns the agent_id. Uses the service-role db client.
  */
 export async function ensureAgent(db: SupabaseClient, bot: Bot): Promise<string> {
+  await applyBotPolicy(db, bot)
   const toolIds = await ensureTools(db, bot)
 
   const hash = agentConfigHash(bot, toolIds)

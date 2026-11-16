@@ -2,9 +2,9 @@ import { describe, it, expect } from 'vitest'
 import { overConversationLimit, monthStartISO } from '@/lib/usage'
 
 describe('overConversationLimit — hard-block math', () => {
-  it('Free (100): blocks at and above the limit, allows below', () => {
-    expect(overConversationLimit(99, 'free')).toBe(false)
-    expect(overConversationLimit(100, 'free')).toBe(true)
+  it('Free (50): blocks at and above the limit, allows below', () => {
+    expect(overConversationLimit(49, 'free')).toBe(false)
+    expect(overConversationLimit(50, 'free')).toBe(true)
     expect(overConversationLimit(250, 'free')).toBe(true)
   })
 
@@ -24,7 +24,7 @@ describe('overConversationLimit — hard-block math', () => {
 
   it('null/undefined plan is treated as Free', () => {
     expect(overConversationLimit(100, null)).toBe(true)
-    expect(overConversationLimit(50, undefined)).toBe(false)
+    expect(overConversationLimit(49, undefined)).toBe(false)
   })
 })
 

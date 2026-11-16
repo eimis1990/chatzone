@@ -1,10 +1,10 @@
+import { applyBotPolicy } from '@/lib/organization-policy-server'
 import { z } from 'zod'
 import { createServiceClient } from '@/lib/supabase/service'
 import { isOriginAllowed, corsHeaders } from '@/lib/widget-auth'
 import { createRateLimiter } from '@/lib/ratelimit'
 import { ensureAgent, getConversationToken } from '@/lib/ai/elevenlabs-agent'
 import { MissingVoiceKeyError } from '@/lib/ai/tts'
-import { isOverConversationLimit } from '@/lib/usage'
 import { isInternalOrg } from '@/lib/entitlements'
 import { getActiveVisitorBlock } from '@/lib/visitor-blocks'
 import { VISITOR_BLOCK_HEADER } from '@/lib/visitor-block-shared'
@@ -43,6 +43,7 @@ export async function POST(req: Request) {
     .eq('public_key', parsed.data.publicKey)
     .single<Bot>()
   if (!bot || bot.status !== 'active') return json({ error: 'Bot not available' }, 404)
+  await applyBotPolicy(svc, bot)
   if (!isOriginAllowed(origin, bot.config.allowedDomains ?? [])) {
     return json({ error: 'Origin not allowed' }, 403)
   }
@@ -63,10 +64,6 @@ export async function POST(req: Request) {
     .eq('id', bot.org_id)
     .single<{ voice_addon: boolean | null; is_demo: boolean | null; is_platform: boolean | null }>()
   if (!isInternalOrg(org) && !org?.voice_addon) return json({ error: 'Voice add-on not active' }, 403)
-  // Hard block: no calls once the org is over its monthly conversation pool.
-  if (await isOverConversationLimit(svc, bot.org_id)) {
-    return json({ error: 'Agent offline — monthly limit reached' }, 403)
-  }
   if (!limiter.check(`${bot.id}:${parsed.data.visitorId}`)) {
     return json({ error: 'Rate limit exceeded' }, 429)
   }

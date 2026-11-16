@@ -1,3 +1,4 @@
+import { applyBotPolicy } from '@/lib/organization-policy-server'
 import { type ModelMessage } from 'ai'
 import { openai } from '@ai-sdk/openai'
 import { createServiceClient } from '@/lib/supabase/service'
@@ -15,7 +16,9 @@ import { createRateLimiter } from '@/lib/ratelimit'
 import { detectHandoffIntent, HANDOFF_ACK } from '@/lib/handoff'
 import { leadToolEnabled, makeLeadTools, type LeadFormRequest } from '@/lib/ai/lead-tool'
 import { notifyHandoffRequested } from '@/lib/notify'
-import { isOverConversationLimit, maybeSendUsageWarning } from '@/lib/usage'
+import { maybeSendUsageWarning } from '@/lib/usage'
+import { reserveConversationSession, finishConversationSession } from '@/lib/conversation-sessions'
+import { canHandleConversation } from '@/lib/conversation-access'
 import { assessVisitorAbuse } from '@/lib/security/visitor-abuse'
 import { assessVisitorIntent } from '@/lib/ai/abuse-intel'
 import {
@@ -70,6 +73,7 @@ export async function POST(req: Request) {
     .eq('public_key', publicKey)
     .single<Bot>()
   if (!bot || bot.status !== 'active') return json({ error: 'Bot not available' }, 404)
+  await applyBotPolicy(svc, bot)
 
   // Active language: requested (if enabled) else the bot default.
   const lang =
@@ -81,18 +85,10 @@ export async function POST(req: Request) {
     return json({ error: 'Origin not allowed' }, 403)
   }
 
-  // Retrieval (embedding + hybrid search) only needs the bot and the message,
-  // so it runs from here while the DB checks below happen. Awaited where it is
-  // used; a blocked/rate-limited/handoff turn wastes one embedding call. The
-  // detached catch only prevents an unhandled-rejection warning on early
-  // returns — the real `await` below still surfaces the error.
-  const retrievalPromise = retrieveContext(bot.id, message, {}, serviceRetrievalDeps(svc))
-  retrievalPromise.catch(() => {})
-
   // Independent reads in one round: active block, conversation ownership,
   // recent visitor turns (abuse check), history, component folders. History is
   // read BEFORE the user turn is inserted, so it needs no trailing slice.
-  const [activeBlock, existing, recentUserMessages, historyRows, allowedComponents, overLimit] =
+  const [activeBlock, existing, recentUserMessages, historyRows, allowedComponents] =
     await Promise.all([
       getActiveVisitorBlock(svc, bot.id, visitorId),
       conversationId
@@ -116,8 +112,6 @@ export async function POST(req: Request) {
             .then((r) => r.data ?? [])
         : [],
       assignedComponents(svc, bot.config.commerce?.provider ?? null),
-      // Only consulted when this turn opens a new conversation.
-      conversationId ? false : isOverConversationLimit(svc, bot.org_id),
     ])
 
   if (activeBlock) {
@@ -139,19 +133,13 @@ export async function POST(req: Request) {
   const priorHadFallback = Boolean(existing?.had_fallback)
   const ownedHistoryRows = existing ? historyRows : []
   if (!convId) {
-    // Hard block: once the org is over its monthly conversation pool, new
-    // conversations get an offline message and the model is never called.
-    if (overLimit || (conversationId && (await isOverConversationLimit(svc, bot.org_id)))) {
-      return ndjsonText(OFFLINE_MESSAGE[lang] ?? OFFLINE_MESSAGE.en, { ...cors })
-    }
     const { data: created } = await svc
       .from('conversations')
-      .insert({ bot_id: bot.id, visitor_id: visitorId })
+      .insert({ bot_id: bot.id, visitor_id: visitorId, metadata: { usage_v2: true } })
       .select('id')
       .single()
-    convId = created!.id as string
-    // One admin nudge per month when the org crosses 80% of its allowance.
-    void maybeSendUsageWarning(svc, bot.org_id)
+    if (!created) return json({ error: 'Could not start conversation' }, 503)
+    convId = created.id as string
   }
 
   // Assess across this visitor's recent turns before adding the current one.
@@ -219,7 +207,10 @@ export async function POST(req: Request) {
   // A human is queued (`requested`) or actively handling (`live`): record the
   // visitor turn but do NOT auto-reply — the agent answers from the inbox.
   if (handoffStatus === 'requested' || handoffStatus === 'live') {
-    return new Response('', { status: 200, headers: { ...handoffHeaders, 'x-handoff': handoffStatus } })
+    if (await canHandleConversation(svc, convId)) {
+      return new Response('', { status: 200, headers: { ...handoffHeaders, 'x-handoff': handoffStatus } })
+    }
+    await svc.from('conversations').update({ handoff_status: 'bot', assigned_to: null }).eq('id', convId)
   }
 
   // A resolved handoff episode is over; the bot resumes for this new turn.
@@ -246,6 +237,24 @@ export async function POST(req: Request) {
     return ndjsonText(ack, { ...handoffHeaders, 'x-handoff': 'requested' })
   }
 
+  const reservation = await reserveConversationSession(svc, {
+    orgId: bot.org_id, botId: bot.id, channel: 'web', visitorId,
+  })
+  if (!reservation.allowed) {
+    if (reservation.reason === 'busy') return json({ error: 'A reply is already in progress. Please try again shortly.' }, 429)
+    return ndjsonText(OFFLINE_MESSAGE[lang] ?? OFFLINE_MESSAGE.en, handoffHeaders)
+  }
+  let committed = false
+  const commitUsage = async () => {
+    if (committed) return
+    await finishConversationSession(svc, bot.org_id, reservation, true)
+    committed = true
+    void maybeSendUsageWarning(svc, bot.org_id)
+  }
+  const releaseUsage = async () => {
+    if (!committed) await finishConversationSession(svc, bot.org_id, reservation, false)
+  }
+  try {
   // History was read before this turn was inserted; buildMessages adds the
   // current message as the tail.
   const history: ChatMessage[] = ownedHistoryRows.map((m) => ({
@@ -263,7 +272,7 @@ export async function POST(req: Request) {
   // standalone query (visitors write elliptical follow-ups like "o kiek
   // kainuoja?" that embed poorly on their own).
   const tPre = performance.now()
-  let retrieval = await retrievalPromise
+  let retrieval = await retrieveContext(bot.id, message, {}, serviceRetrievalDeps(svc))
   let rewrote = false
   if (shouldRewriteQuery(message, retrieval.isLowConfidence)) {
     rewrote = true
@@ -298,7 +307,7 @@ export async function POST(req: Request) {
 
     // A repeat fallback means the bot is stuck — escalate to a human.
     let handoff = 'bot'
-    if (priorHadFallback) {
+    if (priorHadFallback && handoffEnabled) {
       await svc
         .from('conversations')
         .update({ handoff_status: 'requested', handoff_requested_at: new Date().toISOString() })
@@ -310,6 +319,7 @@ export async function POST(req: Request) {
       bot.config.leadCapture?.enabled &&
       bot.config.leadCapture.trigger === 'on_fallback' &&
       allowedComponents.has('lead-form')
+    await commitUsage()
     return ndjsonText(fallback, {
       ...baseHeaders,
       'x-lead-capture': leadTrigger ? '1' : '0',
@@ -386,6 +396,8 @@ export async function POST(req: Request) {
 
   const model = bot.config.model || DEFAULT_CHAT_MODEL
   return ndjsonChatResponse(openai(model), messages, {
+    onResponse: commitUsage,
+    onSettled: releaseUsage,
     temperature: bot.config.temperature ?? DEFAULT_TEMPERATURE,
     headers: baseHeaders,
     timing: {
@@ -415,4 +427,8 @@ export async function POST(req: Request) {
         .eq('id', convId)
     },
   })
+  } catch (error) {
+    await releaseUsage()
+    throw error
+  }
 }

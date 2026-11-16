@@ -21,6 +21,7 @@ Add a line here. How the wiki works: [README.md](README.md).
   chat components, per-bot variants, runtime enforcement.
 - [plans-and-entitlements](plans-and-entitlements.md) — per-plan limits and where
   each is enforced server-side.
+- [conversation-usage](conversation-usage.md) — 24-hour/UTC-month text sessions, atomic quota reservations, cutover baseline, and delivery recovery.
 - [stripe-billing](stripe-billing.md) — Checkout, invoicing, catalog, webhooks,
   Customer Portal, accounting exports, and account cutover.
 - [languages-i18n](languages-i18n.md) — language registry, per-bot selection,
@@ -67,6 +68,8 @@ Add a line here. How the wiki works: [README.md](README.md).
   and are excluded from `owner_stats` since migration `20260713120000`.
 
 ## Related docs (not in the wiki — linked, not duplicated)
+
+- [Basic plan and Free tier implementation plan](../superpowers/plans/2026-11-16-basic-plan-and-free-tier.md) — approved €49/400 Basic package, Free 50/no-handoff, phased billing/access/metering work, migration, and release gates.
 
 - `docs/DEPLOY.md`, `docs/SECURITY.md`, `docs/ROADMAP.md`
 - `docs/POTENTIAL_FEATURES.md` — product-differentiation backlog for the widget,

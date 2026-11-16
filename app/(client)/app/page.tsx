@@ -17,8 +17,8 @@ import {
 import { requireRole, getUserOrgIds } from '@/lib/auth/guards'
 import { createServerClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
-import { entitlementsFor } from '@/lib/entitlements'
-import { conversationsThisMonth } from '@/lib/usage'
+import { getOrganizationPolicy } from '@/lib/organization-policy-server'
+import { conversationsThisMonth, extraConversationsThisMonth } from '@/lib/usage'
 import { getOrgAnalyticsRollup, type OrgAnalyticsRollup } from '@/lib/analytics/org-rollup'
 import type { Plan } from '@/lib/types'
 import { CreateBotDialog } from '@/components/client/CreateBotDialog'
@@ -34,13 +34,18 @@ const PLAN_RAILS: Record<Plan, { image: string; title: string; pitch: string; ct
   free: {
     image: '/onboarding/fox-upgrade.webp',
     title: "You're on the Free plan",
-    pitch: 'Starter unlocks 1,500 conversations, 2 bots, all languages, and lead capture.',
+    pitch: 'Basic includes 400 conversations, live handoff, product search, and lead capture for €49/month.',
+    cta: 'See plans',
+  },
+  basic: {
+    image: '/onboarding/fox-upgrade.webp', title: "You're on Basic",
+    pitch: 'Starter adds 1,500 conversations, 2 bots, all languages, order lookup, and badge removal.',
     cta: 'See plans',
   },
   starter: {
     image: '/plans/fox-plan-starter.webp',
     title: "You're on Starter",
-    pitch: 'Growth unlocks 4,000 conversations, up to 5 bots, priority support, and advanced analytics.',
+    pitch: 'Growth unlocks 4,000 conversations, up to 5 bots, priority support.',
     cta: 'See plans',
   },
   growth: {
@@ -129,21 +134,19 @@ export default async function BotsPage() {
 
     if (bots.length > 0) {
       // Plan rail: current tier + live usage (every tier gets its own pitch).
-      const { data: org } = await supabase
-        .from('organizations')
-        .select('plan')
-        .eq('id', orgId)
-        .single<{ plan: Plan | null }>()
-      const plan = (org?.plan ?? 'free') as Plan
-      const used = await conversationsThisMonth(createServiceClient(), orgId)
-      planInfo = { plan, used, limit: entitlementsFor(plan).conversations }
+      const { org, entitlements } = await getOrganizationPolicy(supabase, orgId)
+      const plan = (org.plan ?? 'free') as Plan
+      const [used, extra] = await Promise.all([
+        conversationsThisMonth(createServiceClient(), orgId), extraConversationsThisMonth(createServiceClient(), orgId),
+      ])
+      planInfo = { plan, used, limit: entitlements.conversations + extra }
 
       // Org analytics live on Home now (30-day window).
-      rollup = await getOrgAnalyticsRollup(supabase, orgId, 30)
+      if (entitlements.analytics === 'full') rollup = await getOrgAnalyticsRollup(supabase, orgId, 30)
     }
   }
 
-  const rail = planInfo ? PLAN_RAILS[planInfo.plan] : null
+  const rail = planInfo ? (PLAN_RAILS[planInfo.plan] ?? PLAN_RAILS.free) : null
   // Server component: a fresh pick per request (the page is auth-dynamic).
   const spotlight = ADDON_SPOTLIGHTS[Math.floor(Math.random() * ADDON_SPOTLIGHTS.length)]
 

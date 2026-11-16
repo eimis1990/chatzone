@@ -1,3 +1,5 @@
+import { FreePolicyNotice } from '@/components/client/FreePolicyNotice'
+import { getOrganizationPolicy } from '@/lib/organization-policy-server'
 import type { Metadata } from 'next'
 import { requireRole, getUserOrgIds } from '@/lib/auth/guards'
 import { createServerClient } from '@/lib/supabase/server'
@@ -19,6 +21,7 @@ export default async function ClientLayout({
   const orgIds = await getUserOrgIds()
   const orgId = orgIds[0] ?? null
   let bots: BotLite[] = []
+  let notice: { effectiveAt: string | null } | null = null
   let organizationName = 'Client'
   if (orgId) {
     const supabase = await createServerClient()
@@ -36,6 +39,13 @@ export default async function ClientLayout({
     ])
     bots = (botsData ?? []) as BotLite[]
     organizationName = organization?.name?.trim() || organizationName
+
+    if (process.env.FREE_POLICY_NOTICE_ENABLED === 'true') {
+      const { org } = await getOrganizationPolicy(supabase, orgId)
+      if (org.plan === 'free' && org.free_legacy && !org.is_demo && !org.is_platform) {
+        notice = { effectiveAt: org.free_policy_effective_at ?? null }
+      }
+    }
 
     // Per-bot count of conversations awaiting / in human handoff (sidebar badge).
     const botIds = bots.map((b) => b.id)
@@ -72,6 +82,7 @@ export default async function ClientLayout({
         </div>
         <MobileTopBar />
         <main className="min-h-0 min-w-0 flex-1 overflow-y-auto bg-background pb-20 md:my-3 md:mr-3 md:rounded-2xl md:pb-0 md:shadow-sm">
+          {notice && <FreePolicyNotice {...notice} />}
           {children}
         </main>
         <MobileTabBar inboxCount={inboxTotal} />

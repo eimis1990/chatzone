@@ -27,6 +27,7 @@ The self-serve catalog is EUR, tax-exclusive:
 
 | Item | Monthly | Annual / one-time |
 |---|---:|---:|
+| Basic | €49 | €490/year |
 | Starter | €149 | €1,490/year |
 | Growth | €249 | €2,490/year |
 | Scale | €449 | €4,490/year |
@@ -67,7 +68,7 @@ prices, customers, portal configurations, and webhook signing secrets are all
 environment-specific and must never be mixed (`lib/stripe/client.ts:16`,
 `lib/stripe/plans.ts:17`, `app/api/stripe/webhook/route.ts:12`).
 
-## 2026-08-18 sandbox state
+## 2026-08-18 sandbox state (historical)
 
 - Destination: `acct_1U5pvKBtWM4Edzrx` (`MB Lokara sandbox`, Lithuania, EUR).
 - Complete catalog: 8 active products, 11 active prices, including the voice
@@ -82,7 +83,7 @@ environment-specific and must never be mixed (`lib/stripe/client.ts:16`,
 - The Codex Stripe connection and local keys point to the sandbox. Live mode is
   configured separately through Vercel Production and a live webhook endpoint.
 
-## 2026-08-18 live state
+## 2026-08-18 live state (historical)
 
 - Destination: `acct_1U5pvCBPga6Qu0zH` (`MB Lokara`).
 - The copied live catalog contains 8 active products, including the metered
@@ -162,3 +163,49 @@ summary CSVs for the accountant. Live invoices must first be checked for the
 legal seller name, company code, registered address, and the correct VAT wording.
 See `STRIPE_GO_LIVE.md` and Stripe's [Balance summary
 report](https://docs.stripe.com/reports/balance).
+
+## Basic rollout — 2026-11-16
+
+Basic prices use lookup keys `loqara_basic_month`, `loqara_basic_year` and
+`loqara_basic_conversations_200`; `scripts/provision-basic.mjs` verifies account,
+EUR amounts, recurrence and tax treatment without editing older prices.
+Production IDs: month `price_1UcLoNBPga6Qu0zH6ioKc2o5`, year
+`price_1UcLoNBPga6Qu0zHzO3MDcVa`, 200-pack `price_1UcLoOBPga6Qu0zHcoNASE6L`.
+Env: `STRIPE_PRICE_BASIC_MONTH`, `STRIPE_PRICE_BASIC_YEAR`,
+`STRIPE_PRICE_BASIC_CONVERSATIONS`. Existing Starter+ pack remains €15/1,000.
+
+SDK requests pin `2026-10-28.endive` (`lib/stripe/client.ts:24`). New Checkout
+subscriptions use flexible billing. Existing subscriptions migrate only when a
+customer requests a combination needing mixed intervals. Sandbox API testing
+proved annual Basic + annual Messenger + monthly Voice/Visualizer/voice meter.
+The base item's period defines the displayed renewal. Base item replacement
+preserves one subscription, uses `create_prorations` and
+`error_if_incomplete`; failed payment does not grant the requested upgrade.
+
+Subscription events re-read current customer subscriptions, preventing an old
+cancellation from removing a newer plan (`lib/stripe/reconcile-event.ts:8`).
+Top-up offers are frozen in `conversation_topup_purchases`, checked against the
+current Stripe subscription, then fulfilled from a paid session's verified SKU,
+customer, quantity and amount (`lib/stripe/topups.ts:15`). Unpaid completion grants
+nothing; async success and replay are supported. Credits expire in the UTC
+payment month, not webhook retry month. Database failures return HTTP 500.
+Setup-package paid-order writes retain idempotency and now also require payment.
+
+Additional webhook events: `checkout.session.async_payment_succeeded`,
+`invoice.paid`, `invoice.payment_failed`, `charge.refunded`,
+`charge.dispute.created`, `radar.early_fraud_warning.created`. The live endpoint's
+existing snapshot version is retained; subscription state is freshly retrieved.
+The old sandbox endpoint above **no longer existed** on 2026-11-16: local
+rehearsal uses a temporary Stripe CLI signed-event forwarder. Never point sandbox
+events at the live-key production handler.
+
+Refund/dispute/fraud events enter service-only `billing_review_events`; Owner
+Home shows the unresolved count. Inspect Stripe customer/payment IDs and the
+related purchase/credits before adjusting anything. Never delete consumed usage
+or issue duplicate credits. Record the reviewed outcome in the incident record and set `resolved_at`
+on that event after reconciliation; do not mark unresolved money
+issues complete merely to clear the badge.
+
+Sales/transition controls and rollback are in [entitlements](plans-and-entitlements.md).
+Test scripts create tagged sandbox customers/isolated orgs and clean them up;
+never reconcile a real client using sandbox price IDs.

@@ -440,6 +440,10 @@ export function textMentionsTitle(text: string, title: string): boolean {
 }
 
 interface NdjsonOptions {
+  /** Commit quota before the first useful generated text/card is exposed. */
+  onResponse?: () => Promise<void>
+  /** Release unused reservations, including model errors and empty streams. */
+  onSettled?: () => Promise<void>
   headers: Record<string, string>
   /** Called once with the full assistant text when generation finishes (persistence). */
   onText?: (text: string) => Promise<void> | void
@@ -487,18 +491,23 @@ export function ndjsonChatResponse(
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
       const line = (obj: unknown) => controller.enqueue(encoder.encode(JSON.stringify(obj) + '\n'))
+      let responded = false
+      const responseLine = async (obj: unknown) => {
+        if (!responded) { await opts.onResponse?.(); responded = true }
+        line(obj)
+      }
       let fullText = ''
       let firstTokenAt = 0
       let toolCalls = 0
       let emittedProductKey = ''
-      const emitProductsIfChanged = () => {
+      const emitProductsIfChanged = async () => {
         if (opts.suppressProducts) return
         const products = opts.productSink ?? []
         if (!products.length) return
         const key = products.map((product) => product.id).join('\u0000')
         if (key === emittedProductKey) return
         emittedProductKey = key
-        line({ t: 'products', v: products })
+        await responseLine({ t: 'products', v: products })
       }
       try {
         for await (const part of result.fullStream) {
@@ -507,15 +516,17 @@ export function ndjsonChatResponse(
               (part as { textDelta?: string }).textDelta ?? ''
             if (delta) {
               if (!firstTokenAt) firstTokenAt = performance.now()
+              await responseLine({ t: 'text', v: delta })
               fullText += delta
-              line({ t: 'text', v: delta })
             }
+          } else if (part.type === 'error') {
+            throw part.error
           } else if (part.type === 'tool-call') {
             toolCalls++
           }
           // display_products mutates productSink while the tool result streams.
           // Send cards immediately instead of waiting for the final prose.
-          emitProductsIfChanged()
+          await emitProductsIfChanged()
         }
         const products = opts.productSink ?? []
         // Safety net: the model sometimes lists found products in text (even
@@ -531,11 +542,11 @@ export function ndjsonChatResponse(
           )
           products.push(...named.slice(0, 12))
         }
-        emitProductsIfChanged()
+        await emitProductsIfChanged()
         const order = opts.orderSink ?? []
-        if (order.length) line({ t: 'order', v: order[0] })
+        if (order.length) await responseLine({ t: 'order', v: order[0] })
         const leadForm = opts.leadFormSink ?? []
-        if (leadForm.length) line({ t: 'lead_form', v: leadForm[leadForm.length - 1] })
+        if (leadForm.length) await responseLine({ t: 'lead_form', v: leadForm[leadForm.length - 1] })
       } catch (err) {
         console.error('[agent] chat stream failed:', err)
         if (!fullText && opts.errorText) {
@@ -545,6 +556,7 @@ export function ndjsonChatResponse(
           line({ t: 'text', v: '' })
         }
       } finally {
+        try { await opts.onSettled?.() } catch (err) { console.error('[agent] quota settlement failed:', err) }
         // Persist the assistant turn BEFORE closing the stream. If we close
         // first, the platform can suspend the function before this DB write
         // lands, which intermittently drops assistant messages (and their

@@ -1,3 +1,4 @@
+import { applyBotPolicy } from '@/lib/organization-policy-server'
 import { z } from 'zod'
 import { createServiceClient } from '@/lib/supabase/service'
 import { isOriginAllowed, corsHeaders } from '@/lib/widget-auth'
@@ -48,6 +49,8 @@ export async function POST(req: Request) {
   if (!bot || bot.status !== 'active') {
     return json({ error: 'Bot not found' }, 404)
   }
+  const planEntitlements = await applyBotPolicy(svc, bot)
+  if (!planEntitlements.leadCapture) return json({ error: 'Lead capture requires a paid plan' }, 403)
 
   if (!isOriginAllowed(origin, bot.config.allowedDomains ?? [])) {
     return json({ error: 'Origin not allowed' }, 403)

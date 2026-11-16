@@ -1,5 +1,7 @@
 'use server'
 
+import { getOrganizationPolicy } from '@/lib/organization-policy-server'
+import { validatePlanConfig } from '@/lib/organization-policy'
 import { requireRole } from '@/lib/auth/guards'
 import { createServiceClient } from '@/lib/supabase/service'
 import { botConfigSchema } from '@/lib/validation/schemas'
@@ -41,6 +43,13 @@ export async function saveClientBotConfig(
   }
 
   const service = createServiceClient()
+  const { data: current } = await service.from('bots').select('org_id, config').eq('id', botId).single()
+  if (!current) return { success: false, error: 'Bot not found.' }
+  const { entitlements } = await getOrganizationPolicy(service, current.org_id)
+  const policyError = validatePlanConfig(config, current.config as BotConfig, entitlements)
+  if (policyError) return { success: false, error: policyError }
+  // Hidden language content survives a downgrade/save and can be reused later.
+  config.content = { ...(current.config as BotConfig).content, ...config.content }
   const { error } = await service.from('bots').update(update).eq('id', botId)
   if (error) return { success: false, error: error.message }
 

@@ -7,9 +7,9 @@ import { trackEvent } from '@/lib/analytics'
 import { PLANS, DISPLAY_PLANS, POPULAR_PLAN } from '@/lib/plans-catalog'
 import night from './night/night.module.css'
 
-export function PricingTable() {
+export function PricingTable({ basicAvailable = false }: { basicAvailable?: boolean }) {
   const [annual, setAnnual] = useState(true)
-  const perMonth = (m: number) => (annual ? Math.round((m * 10) / 12) : m)
+  const perMonth = (m: number) => (annual ? Number(((m * 10) / 12).toFixed(2)) : m)
 
   return (
     <div>
@@ -39,8 +39,8 @@ export function PricingTable() {
         </div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-4">
-        {DISPLAY_PLANS.map((key) => {
+      <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-5">
+        {DISPLAY_PLANS.filter((plan) => plan !== 'basic' || basicAvailable).map((key) => {
           const p = PLANS[key]
           const popular = key === POPULAR_PLAN
           return (
@@ -66,7 +66,7 @@ export function PricingTable() {
               {p.monthly > 0 ? (annual ? `billed annually, €${(p.monthly * 10).toLocaleString('en-US')} a year` : 'billed monthly') : ' '}
             </p>
 
-            <p className="mt-4 text-sm font-medium text-primary">
+            <p className="mt-4 min-h-10 text-sm font-medium text-primary">
               {p.conversations.toLocaleString('en-US')} conversations a month
             </p>
 
