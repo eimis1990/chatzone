@@ -2,6 +2,7 @@ import { z } from 'zod'
 import type { BotConfig } from '@/lib/types'
 import { DEFAULT_CHAT_MODEL, DEFAULT_TEMPERATURE } from '@/lib/ai/chat-models'
 import { DEFAULT_VOICE_LLM } from '@/lib/ai/voice-models'
+import { messageTemplates } from '@/lib/i18n/message-templates'
 
 /** Max system-prompt length (chars). Generous — detailed prompts with examples
  *  can run long; the same cap is used by the prompt library + bot config. */
@@ -372,9 +373,8 @@ export function defaultBotConfig(displayName: string): BotConfig {
     languages: ['en'],
     content: {
       en: {
-        greeting: `Hi! I'm ${displayName}. How can I help you today?`,
+        ...messageTemplates('en', displayName),
         suggestedQuestions: [],
-        fallbackMessage: DEFAULT_FALLBACK,
       },
     },
     systemPrompt:

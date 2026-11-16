@@ -35,4 +35,18 @@ primary); the switcher is disabled. See [plans-and-entitlements](plans-and-entit
   the primary; `ChatWindow.tsx` renders the flag switcher only when
   `languages.length > 1 && showLanguageSelector`.
 
+## Greeting and fallback templates
+
+- `lib/i18n/message-templates.ts:4` provides English/Lithuanian starter copy with
+  emojis. Fallback copy does not promise lead capture or a human follow-up, since
+  those features may be disabled. `defaultBotConfig` uses the English templates.
+- `components/client/ConfigForm.tsx:523` fills missing/blank messages on load and
+  language-selection changes, preserving custom text and quick actions. It marks
+  seeded fields dirty so Save & Publish can persist them. The effect depends on
+  the language selection, never message edits, so clearing a textarea to rewrite
+  it does not refill it mid-edit. Each message also has a **Use template** button
+  that explicitly replaces that field with the active language's starter copy.
+- Saved configs are not migrated; templates are editable form defaults. Existing
+  published messages stay unchanged until saved.
+
 _Last verified: 2026-07-08 (66f6bb8)._

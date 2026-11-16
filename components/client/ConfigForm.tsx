@@ -43,6 +43,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { botConfigFormSchema } from '@/lib/validation/schemas'
+import { messageTemplates, seedMessageTemplates } from '@/lib/i18n/message-templates'
 import { orderLookupEnabled } from '@/lib/commerce/capabilities'
 import { GREETING_SOUNDS, playGreetingSound, type GreetingSound } from '@/lib/greeting-sound'
 import {
@@ -519,21 +520,20 @@ export function ConfigForm({
     name: 'allowedDomains',
   })
 
-  // Opening the LT tab seeds any missing fields so a partially-materialized
-  // content.lt (from the field array mounting) never fails validation.
-  const openLtTab = useCallback(() => {
-    const ltContent = watch('content.lt')
-    setValue(
-      'content.lt',
-      {
-        greeting: ltContent?.greeting ?? '',
-        suggestedQuestions: ltContent?.suggestedQuestions ?? [],
-        fallbackMessage: ltContent?.fallbackMessage ?? '',
-      },
-      { shouldDirty: false },
-    )
-    selectLang('lt')
-  }, [watch, setValue, selectLang])
+  // Seed on load/language selection, not on text edits: users can freely replace
+  // the copy without an effect refilling a textarea while they are typing.
+  const selectedLanguageKey = selectedLanguages.join(',')
+  useEffect(() => {
+    for (const lang of getValues('languages') ?? ['en']) {
+      const content = getValues(`content.${lang}`)
+      const seeded = seedMessageTemplates(lang, content, getValues('displayName'))
+      for (const field of ['greeting', 'fallbackMessage'] as const) {
+        if (content?.[field] !== seeded[field]) {
+          setValue(`content.${lang}.${field}`, seeded[field], { shouldDirty: true, shouldValidate: true })
+        }
+      }
+    }
+  }, [selectedLanguageKey, getValues, setValue])
 
   // Toggle a language in/out of the selection. On free (single) plans, selecting
   // replaces the current choice; on paid plans it adds/removes (min one).
@@ -550,8 +550,6 @@ export function ConfigForm({
         next = [...current, lang]
       }
       setValue('languages', next, { shouldDirty: true })
-      // Seed content for a newly-selected language so validation passes.
-      if (next.includes('lt') && !current.includes('lt')) openLtTab()
       if (!current.includes(lang) && watch('proactiveGreeting.enabled')) {
         setValue(
           `proactiveGreeting.messages.${lang}`,
@@ -559,9 +557,10 @@ export function ConfigForm({
           { shouldDirty: true, shouldValidate: true },
         )
       }
-      if (!next.includes(activeLang)) selectLang(next[0])
+      if (next.includes(lang) && !current.includes(lang)) selectLang(lang)
+      else if (!next.includes(activeLang)) selectLang(next[0])
     },
-    [watch, setValue, canUseMultiple, openLtTab, activeLang, selectLang],
+    [watch, setValue, canUseMultiple, activeLang, selectLang],
   )
 
   const onSubmit = useCallback(
@@ -962,17 +961,28 @@ export function ConfigForm({
               ) : null}
               {/* Greeting */}
               <div className="space-y-1.5">
-                <Label htmlFor={`greeting-${activeLang}`}>
-                  Greeting message
-                  <span className="ml-1.5 text-xs text-muted-foreground font-normal">
-                    ({languageMeta(activeLang).label})
-                  </span>
-                </Label>
+                <div className="flex items-center justify-between gap-2">
+                  <Label htmlFor={`greeting-${activeLang}`}>
+                    Greeting message
+                    <span className="ml-1.5 text-xs text-muted-foreground font-normal">
+                      ({languageMeta(activeLang).label})
+                    </span>
+                  </Label>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    aria-label={`Use ${languageMeta(activeLang).label} greeting template`}
+                    onClick={() => setValue(`content.${activeLang}.greeting`, messageTemplates(activeLang, getValues('displayName')).greeting, { shouldDirty: true, shouldValidate: true })}
+                  >
+                    Use template
+                  </Button>
+                </div>
                 <Textarea
                   key={`greeting-${activeLang}`}
                   id={`greeting-${activeLang}`}
                   {...register(`content.${activeLang}.greeting`)}
-                  placeholder={activeLang === 'lt' ? 'Sveiki! Kaip galiu padėti?' : 'Hi! How can I help you today?'}
+                  placeholder={messageTemplates(activeLang).greeting}
                   className="min-h-20"
                 />
                 {activeLang === 'en' && errors.content?.en?.greeting && (
@@ -1236,21 +1246,28 @@ export function ConfigForm({
 
               {/* Fallback message */}
               <div className="space-y-1.5">
-                <Label htmlFor={`fallback-${activeLang}`}>
-                  Fallback message
-                  <span className="ml-1.5 text-xs text-muted-foreground font-normal">
-                    ({languageMeta(activeLang).label})
-                  </span>
-                </Label>
+                <div className="flex items-center justify-between gap-2">
+                  <Label htmlFor={`fallback-${activeLang}`}>
+                    Fallback message
+                    <span className="ml-1.5 text-xs text-muted-foreground font-normal">
+                      ({languageMeta(activeLang).label})
+                    </span>
+                  </Label>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    aria-label={`Use ${languageMeta(activeLang).label} fallback template`}
+                    onClick={() => setValue(`content.${activeLang}.fallbackMessage`, messageTemplates(activeLang).fallbackMessage, { shouldDirty: true, shouldValidate: true })}
+                  >
+                    Use template
+                  </Button>
+                </div>
                 <Textarea
                   key={`fallback-${activeLang}`}
                   id={`fallback-${activeLang}`}
                   {...register(`content.${activeLang}.fallbackMessage`)}
-                  placeholder={
-                    activeLang === 'lt'
-                      ? 'Atsiprašau, nežinau atsakymo…'
-                      : "I'm not sure about that — let me take your details…"
-                  }
+                  placeholder={messageTemplates(activeLang).fallbackMessage}
                   className="min-h-20"
                 />
                 {activeLang === 'en' && errors.content?.en?.fallbackMessage && (
