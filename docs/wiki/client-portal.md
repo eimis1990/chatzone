@@ -75,3 +75,19 @@
 Related: [access-model](access-model.md), [bot-config](bot-config.md).
 
 _Last verified: 2026-08-28._
+
+## Conversation history pagination (2026-11-16)
+
+- The shared client/owner conversations view uses `?page=N` with 50 rows/page,
+  stable `last_message_at, id` ordering, and embedded `messages(count)` plus
+  filtered negative-feedback counts (`lib/conversations.ts:18`). These remain
+  RLS reads. Older history beyond Supabase's default 1,000-row response limit
+  is reachable; stale out-of-range page links resolve to the final page.
+- HomeByNB's 1,007 conversations reproduced HTTP 400s from the former 1,000-ID
+  message filters and 855-visitor block filter. The latter threw during Server
+  Component rendering. Pagination bounds block lookups, and embedded counts
+  avoid downloading/truncating raw message rows.
+- Failed history reads show an explicit retry state. Failed supplementary
+  block lookups show a warning while keeping transcripts usable
+  (`components/bot-views/ConversationsSection.tsx:45`). First/last page database
+  queries verified against HOME BY NB's bot on 2026-11-16 (50/7 rows, blocks 200).

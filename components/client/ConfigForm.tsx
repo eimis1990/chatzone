@@ -625,6 +625,7 @@ export function ConfigForm({
     : { ...watchedValues.theme, showCallButton: false }
   const liveConfig = {
     displayName: watchedValues.displayName,
+    gender: watchedValues.gender,
     tagline: watchedValues.tagline,
     theme: previewTheme,
     voice: watchedValues.voice,
@@ -727,6 +728,30 @@ export function ConfigForm({
               {errors.displayName && (
                 <p className="text-xs text-destructive">{errors.displayName.message}</p>
               )}
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="botGender">Bot gender</Label>
+              <Controller
+                name="gender"
+                control={control}
+                render={({ field }) => (
+                  <Select value={field.value ?? 'unspecified'} onValueChange={(value) => field.onChange(value === 'unspecified' ? undefined : value)}>
+                    <SelectTrigger id="botGender" className="w-full" aria-describedby="botGenderHelp">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="unspecified">Not specified</SelectItem>
+                      <SelectItem value="female">Female</SelectItem>
+                      <SelectItem value="male">Male</SelectItem>
+                      <SelectItem value="neutral">Neutral wording</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+              <p id="botGenderHelp" className="text-xs text-muted-foreground">
+                How the bot refers to itself, including gendered grammar such as “galėdama” in Lithuanian. Applies to chat and voice replies.
+              </p>
             </div>
 
             <div className="space-y-1.5">

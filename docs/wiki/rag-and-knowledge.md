@@ -267,3 +267,20 @@ KB via `match_chunks_hybrid` (probe idea: embed the question, take the top hit's
 source, check its kind).
 
 The lane has no tools at all, so `fastLaneConfig` must strip every prompt block that advertises one: commerce (`search_products`) and lead capture `offerOnIntent` (`open_lead_form`). A prompt that promises a tool the lane lacks makes the model narrate an action that never happens (2026-09-24).
+
+## Knowledge-card dates (2026-11-16)
+
+Cards previously displayed `created_at` without a label: HomeByNB's FAQ showed
+July 28 although `updated_at` was November 13. An unchanged refresh does fetch
+and hash the page, but intentionally skips embeddings.
+
+- Successful website checks now persist `metadata.lastCheckedAt`, including
+  unchanged checks and manual-edit conflicts. Successful indexing separately
+  persists `metadata.indexedAt` (`lib/ingestion/pipeline.ts:85`, `:148`). Failure
+  status updates must not advance either successful-operation timestamp.
+- Cards label the date **Checked**, **Updated**, **Processed** (legacy ready
+  rows with only `updated_at`), or **Added**. `updated_at` alone cannot mean
+  content changed because status transitions update it too
+  (`lib/knowledge-dates.ts:4`, `components/client/knowledge/SourceList.tsx:492`).
+- Unchanged-refresh toast says “Website checked — no content changes found.”
+  Manual overrides remain protected by the existing conflict-resolution flow.

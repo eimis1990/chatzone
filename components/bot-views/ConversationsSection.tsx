@@ -1,3 +1,5 @@
+import Link from 'next/link'
+import { loadConversationPage } from '@/lib/conversations'
 import { createServerClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { TranscriptView } from '@/components/client/TranscriptView'
@@ -40,77 +42,40 @@ export interface ConversationAnalysisResult {
   successReason: string
 }
 
-export async function ConversationsSection({ botId }: { botId: string }) {
+export async function ConversationsSection({ botId, page = 1 }: { botId: string; page?: number }) {
   const supabase = await createServerClient()
-
-  // Fetch conversations with intelligence fields
-  const { data: rawConvs } = await supabase
-    .from('conversations')
-    .select(
-      'id, visitor_id, started_at, last_message_at, summary, topics, had_fallback, success_score, success_reason, channel',
+  const result = await loadConversationPage(supabase, botId, page)
+  if (result.error) {
+    console.error('[conversations] Failed to load conversations', result.error)
+    return (
+      <div role="alert" className="p-6">
+        <p>Conversations could not be loaded. Please try again.</p>
+        <Link href="?page=1" className="underline">Try again</Link>
+      </div>
     )
-    .eq('bot_id', botId)
-    .order('last_message_at', { ascending: false })
-
-  const conversations = (rawConvs ?? []) as Pick<
-    Conversation,
-    | 'id'
-    | 'visitor_id'
-    | 'started_at'
-    | 'last_message_at'
-    | 'summary'
-    | 'topics'
-    | 'had_fallback'
-    | 'success_score'
-    | 'success_reason'
-    | 'channel'
-  >[]
-
-  // Message counts + which conversations got a thumbs-down, in two queries.
-  const ids = conversations.map((c) => c.id)
-
-  const countMap: Record<string, number> = {}
-  const negative = new Set<string>()
-
-  if (ids.length > 0) {
-    const { data: counts } = await supabase
-      .from('messages')
-      .select('conversation_id')
-      .in('conversation_id', ids)
-    for (const row of counts ?? []) {
-      const cid = (row as { conversation_id: string }).conversation_id
-      countMap[cid] = (countMap[cid] ?? 0) + 1
-    }
-
-    const { data: downs } = await supabase
-      .from('messages')
-      .select('conversation_id')
-      .in('conversation_id', ids)
-      .eq('feedback', 'down')
-    for (const row of downs ?? []) {
-      negative.add((row as { conversation_id: string }).conversation_id)
-    }
   }
-
+  const { conversations, total, currentPage, pageSize } = result
+  // Block metadata is supplementary; an outage must not hide transcripts.
   const activeBlocks = await getActiveVisitorBlocks(
-    createServiceClient(),
-    botId,
-    conversations.map((conversation) => conversation.visitor_id),
-  )
+    createServiceClient(), botId, conversations.map((c) => c.visitor_id),
+  ).catch((error) => {
+    console.error('[conversations] Failed to load visitor blocks', error)
+    return null
+  })
 
   const rows: ConversationRow[] = conversations.map((c) => ({
     id: c.id,
     visitor_id: c.visitor_id,
     started_at: c.started_at,
     last_message_at: c.last_message_at,
-    message_count: countMap[c.id] ?? 0,
+    message_count: c.messages[0]?.count ?? 0,
     summary: c.summary ?? null,
     topics: c.topics ?? null,
-    needs_attention: Boolean(c.had_fallback) || negative.has(c.id),
+    needs_attention: Boolean(c.had_fallback) || (c.negative_messages[0]?.count ?? 0) > 0,
     success_score: c.success_score ?? null,
     success_reason: c.success_reason ?? null,
     channel: c.channel ?? 'chat',
-    block_expires_at: activeBlocks.get(c.visitor_id)?.expiresAt ?? null,
+    block_expires_at: activeBlocks?.get(c.visitor_id)?.expiresAt ?? null,
   }))
 
   /**
@@ -225,7 +190,18 @@ export async function ConversationsSection({ botId }: { botId: string }) {
         </p>
       </div>
 
+      {activeBlocks === null && (
+        <p role="status" className="px-4 text-sm text-amber-700">Visitor block status is temporarily unavailable. Transcripts are still available.</p>
+      )}
+      {total > pageSize && (
+        <nav aria-label="Conversation pages" className="flex shrink-0 items-center gap-4 px-4 text-sm md:px-0">
+          {currentPage > 1 && <Link href={`?page=${currentPage - 1}`} className="underline">Newer</Link>}
+          <span>Page {currentPage} of {Math.ceil(total / pageSize)} · {total} conversations</span>
+          {currentPage * pageSize < total && <Link href={`?page=${currentPage + 1}`} className="underline">Older</Link>}
+        </nav>
+      )}
       <TranscriptView
+        key={currentPage}
         conversations={rows}
         loadMessages={loadMessages}
         analyze={analyze}

@@ -184,6 +184,8 @@ export interface ProactiveGreetingConfig {
 
 export interface BotConfig {
   displayName: string
+  /** Grammatical gender used when the assistant refers to itself. */
+  gender?: 'female' | 'male' | 'neutral'
   /** Short subtitle under the name on the welcome screen (e.g. "Virtual assistant"). */
   tagline?: string
   /** Company logo — the default avatar shown in the widget. */

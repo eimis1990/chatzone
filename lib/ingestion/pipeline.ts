@@ -83,7 +83,10 @@ async function indexText(
     token_count: Math.ceil(c.content.length / 4),
   }))
   await full.repo.replaceChunks(source.bot_id, source.id, rows)
-  await full.repo.setStatus(source.id, 'ready', { error_message: null, ...(metadata && { metadata }) })
+  await full.repo.setStatus(source.id, 'ready', {
+    error_message: null,
+    metadata: { ...(metadata ?? source.metadata), indexedAt: new Date().toISOString() },
+  })
 }
 
 /**
@@ -104,7 +107,7 @@ export async function ingestSource(
     const meta = source.metadata as Record<string, unknown>
     // A live page fetch records its hash, so a later sync can skip unchanged pages.
     const fetchedLive = source.type === 'url' && !hasOverride(meta)
-    await indexText(source, text, full, fetchedLive ? { ...meta, liveHash: hashText(text) } : undefined)
+    await indexText(source, text, full, fetchedLive ? { ...meta, liveHash: hashText(text), lastCheckedAt: new Date().toISOString() } : undefined)
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)
     await full.repo.setStatus(sourceId, 'error', { error_message: message })
@@ -142,24 +145,25 @@ export async function refreshUrlSource(
   try {
     const text = await full.parseUrl(String(meta.url))
     const liveHash = hashText(text)
+    const lastCheckedAt = new Date().toISOString()
 
     if (edited && resolve !== 'live') {
       const changed = resolve !== 'keep' && liveHash !== meta.liveHash
       await full.repo.setStatus(sourceId, 'ready', {
         error_message: null,
         metadata: changed
-          ? { ...meta, contentOverride, liveConflict: true }
-          : { ...meta, contentOverride, liveHash },
+          ? { ...meta, contentOverride, liveConflict: true, lastCheckedAt }
+          : { ...meta, contentOverride, liveHash, lastCheckedAt },
       })
       return changed ? 'conflict' : 'unchanged'
     }
 
     if (!edited && source.status === 'ready' && liveHash === meta.liveHash) {
-      await full.repo.setStatus(sourceId, 'ready', { error_message: null })
+      await full.repo.setStatus(sourceId, 'ready', { error_message: null, metadata: { ...meta, liveHash, lastCheckedAt } })
       return 'unchanged'
     }
 
-    await indexText(source, text, full, { ...meta, liveHash })
+    await indexText(source, text, full, { ...meta, liveHash, lastCheckedAt })
     return 'updated'
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)

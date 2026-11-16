@@ -19,6 +19,7 @@ import type { LucideIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { formatDistanceToNow } from '@/lib/date-utils'
+import { knowledgeSourceDate } from '@/lib/knowledge-dates'
 import { createBrowserClient } from '@/lib/supabase/browser'
 import { SourceDrawer } from './SourceDrawer'
 import { hasLiveConflict, rebuildSummariesInBackground, refreshSource } from './refresh'
@@ -377,7 +378,7 @@ export function SourceList({ sources, onDeleted, onUpdated, onAddSource }: Sourc
         if (fresh) onUpdated(fresh)
         if (outcome === 'updated') rebuildSummariesInBackground(source.bot_id)
         if (outcome === 'updated') toast.success(resolve === 'live' ? 'Replaced with the live page' : 'Updated from the website')
-        else if (outcome === 'unchanged') toast.success(resolve === 'keep' ? 'Kept your edit' : 'Already up to date')
+        else if (outcome === 'unchanged') toast.success(resolve === 'keep' ? 'Kept your edit' : 'Website checked — no content changes found')
         else if (outcome === 'conflict') toast.warning('The page changed, but it has your manual edits — choose which to keep')
         else toast.error(fresh?.error_message ?? 'Could not fetch the page')
       } finally {
@@ -411,6 +412,7 @@ export function SourceList({ sources, onDeleted, onUpdated, onAddSource }: Sourc
           const tileLabel = canonical ? 'Answer summary' : label
           const subtitle = sourceSubtitle(source)
           const chunks = counts[source.id]
+          const sourceDate = knowledgeSourceDate(source)
           return (
             <div
               key={source.id}
@@ -486,8 +488,8 @@ export function SourceList({ sources, onDeleted, onUpdated, onAddSource }: Sourc
               </div>
 
               <div className="relative mt-auto flex items-center justify-between gap-2 pt-1">
-                <span className="text-xs text-muted-foreground">
-                  {formatDistanceToNow(source.created_at)}
+                <span className="text-xs text-muted-foreground" title={`${sourceDate.label}: ${new Date(sourceDate.date).toLocaleString()}`}>
+                  {sourceDate.label} {formatDistanceToNow(sourceDate.date)}
                 </span>
                 {source.status === 'ready' && chunks !== undefined ? (
                   <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">

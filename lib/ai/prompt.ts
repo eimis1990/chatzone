@@ -1,3 +1,4 @@
+import { botGenderInstruction } from '@/lib/ai/bot-identity'
 import type { BotConfig, BotLanguage, LanguageContent } from '@/lib/types'
 import type { CommerceProduct } from '@/lib/commerce/types'
 import {
@@ -55,6 +56,7 @@ export function buildSystemPrompt(
 
   const lines = [
     config.systemPrompt,
+    botGenderInstruction(config),
     `Tone: ${config.persona.tone}. Verbosity: ${config.persona.verbosity}.`,
     `Always respond in ${languageName}, regardless of the language the user writes in.`,
     // Without this the model has no idea what "upcoming" means and treats every

@@ -540,3 +540,12 @@ bottom-right ~260×170px. A tall element on the right of a full-height section
 (the first hero put the chat window there) is covered by them on any laptop
 screen. The landing therefore keeps visuals on the left and copy on the right.
 See [landing-page](landing-page.md).
+
+## Large PostgREST `in(...)` filters can crash server-rendered history
+
+HomeByNB reached 1,007 conversations. The old conversations page read the
+first 1,000, then sent their IDs (and 855 distinct visitors) in query strings;
+both `messages` and `visitor_blocks` returned HTTP 400 Bad Request, and the
+block lookup threw the redacted production Server Components error. Use bounded
+pages and embedded counts instead of fetching every message to count in JS
+(`lib/conversations.ts:18`). See [client-portal](client-portal.md#conversation-history-pagination-2026-11-16).

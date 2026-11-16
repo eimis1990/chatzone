@@ -169,3 +169,21 @@ variation is config, never code:
   Contact details / Reservation request, LT/EN by bot language; key auto-slugged
   from label on blur) → "Where leads go".
 
+
+## Grammatical gender (2026-11-16)
+
+- Optional `config.gender` (`female`, `male`, `neutral`; absent means unchanged
+  legacy behavior) is validated and saved with the JSON config; no migration.
+  Display → Names and introduction exposes it beside the display name
+  (`lib/validation/schemas.ts:125`, `components/client/ConfigForm.tsx:733`).
+- `botGenderInstruction` is a pure, Edge-safe shared instruction with explicit
+  Lithuanian self-reference examples (`galėdama` / `galėdamas`) and precedence
+  over old assistant wording. Text (including fast lane and messaging) and
+  ElevenLabs both include it; changing gender invalidates the voice-agent hash
+  (`lib/ai/bot-identity.ts:4`, `lib/ai/prompt.ts:1`,
+  `lib/ai/elevenlabs-agent.ts:1`). It does not infer the visitor's gender or
+  rewrite saved greeting/fallback copy.
+- Preview passes gender through ConfigForm's live config and TestChat's full
+  request config (`components/client/ConfigForm.tsx:628`,
+  `components/client/TestChat.tsx:682`). It stays out of the browser-safe public
+  widget config because only the server needs the instruction.

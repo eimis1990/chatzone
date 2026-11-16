@@ -1,3 +1,4 @@
+import { conversationPage } from '@/lib/conversations'
 import { notFound } from 'next/navigation'
 import { requireRole } from '@/lib/auth/guards'
 import { createServerClient } from '@/lib/supabase/server'
@@ -5,8 +6,10 @@ import { ConversationsSection } from '@/components/bot-views/ConversationsSectio
 
 export default async function ConversationsPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ botId: string }>
+  searchParams: Promise<{ page?: string | string[] }>
 }) {
   await requireRole('client')
   const { botId } = await params
@@ -16,5 +19,5 @@ export default async function ConversationsPage({
   const { data: bot } = await supabase.from('bots').select('id').eq('id', botId).single()
   if (!bot) notFound()
 
-  return <ConversationsSection botId={botId} />
+  return <ConversationsSection botId={botId} page={conversationPage((await searchParams).page)} />
 }

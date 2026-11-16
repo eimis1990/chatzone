@@ -30,6 +30,7 @@ const DEFAULT_VOICE_ID = '21m00Tcm4TlvDq8ikWAM'
 // Partial form values — fields may be undefined mid-edit.
 type LiveConfig = {
   displayName?: string
+  gender?: BotConfig['gender']
   tagline?: string
   showLanguageSelector?: boolean
   theme?: Partial<BotConfig['theme']>
@@ -678,6 +679,7 @@ function buildFullConfig(config: LiveConfig): BotConfig {
 
   return {
     displayName: config.displayName ?? 'Bot',
+    gender: config.gender,
     tagline: config.tagline,
     avatarUrl: config.avatarUrl,
     botAvatarUrl: config.botAvatarUrl,

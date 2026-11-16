@@ -1,3 +1,4 @@
+import { botGenderInstruction } from '@/lib/ai/bot-identity'
 import { createHash } from 'node:crypto'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Bot, BotLanguage } from '@/lib/types'
@@ -95,6 +96,7 @@ function buildAgentPrompt(cfg: Bot['config'], toolIds: string[], languages: BotL
   const displayGuidance = providerDisplayGuidance(cfg.commerce)
   const parts = [
     cfg.systemPrompt,
+    botGenderInstruction(cfg),
     `Language rule (critical): reply ONLY in the language the customer is writing or speaking, which will be one of: ${langNames}. NEVER reply in Russian, or in any language outside that list — not even a single word, product name, or phrase. Keep every reply entirely in ONE language and never mix languages within a sentence (e.g. do not drop a Russian word into a Lithuanian sentence). Do NOT switch languages on your own — only switch if the customer clearly writes to you in the other supported language first.`,
     // Voice delivery style — applies to everything the agent says aloud.
     'You are speaking out loud. Be warm, friendly and personable — sound genuinely happy to help, acknowledge what the person actually asked for in your own words, and never come across as cold, curt, or robotic. Talk like a real, attentive shop assistant having a natural conversation, not a script. VARY how you speak: never open consecutive replies with the same word or a stock phrase — in particular do NOT habitually start with "Žinoma" / "Of course". Keep answers short and conversational — usually one or two sentences — and never read long passages verbatim; summarise. In the response text, write every number as digits with a compact unit or symbol where relevant (for example 2 m, 180 cm, €500), even though the voice will pronounce it naturally. Do NOT use emojis, asterisks, or decorative symbols, since everything you say is read aloud. When speaking English, say an email address or website the natural way a person would: read "hello@example.com" as "hello at example dot com" and "https://www.example.com" as "example dot com". Never spell an address out letter by letter and never say "h t t p s".',
@@ -278,6 +280,7 @@ export function agentConfigHash(bot: Bot, toolIds: string[] = []): string {
   const material = JSON.stringify([
     'v34-website-content-lt-speech', // bump to force re-sync when the agent payload shape changes
     cfg.displayName, // agent name follows the bot's display name
+    cfg.gender ?? null,
     cfg.languages,
     cfg.defaultLanguage ?? null,
     cfg.content,

@@ -414,3 +414,5 @@ child inside a rounded clip in the widget.
 - 2026-11-16 DEPLOY — Applied legacy_woocommerce_components to production (remote version 20261116045748, local filename aligned). Confirmed the new provider has default product cards; existing Woodfurniture demo is a692e41d-8fa4-428e-88c3-efe04e861cec. Code rollout and catalogue connection verification follow.
 
 - 2026-11-16 FIX — Added shared English/Lithuanian greeting and fallback templates with emojis. ConfigForm seeds blank messages on load/language selection, preserves custom copy, and offers per-field Use template buttons; new bots use the English templates. No migration or published-config rewrite. See languages-i18n.
+
+2026-11-16 FIX — Added optional bot grammatical gender across Display settings, saved/preview config, chat/messaging and voice prompts; voice cache includes gender. Knowledge cards now distinguish successful checks from indexing/creation. Reproduced HOME BY NB conversation HTTP 400s from oversized ID filters; replaced with 50-row pagination and embedded counts, preserving older history and graceful metadata failures. See bot-config, rag-and-knowledge, client-portal, and gotchas.

@@ -94,9 +94,14 @@ describe('refreshUrlSource', () => {
     const liveHash = lastMeta(first.statuses)?.liveHash
     expect(liveHash).toMatch(/^[0-9a-f]{64}$/)
 
-    const second = makeRepo(url({ liveHash }))
+    expect(lastMeta(first.statuses)?.indexedAt).toEqual(expect.any(String))
+    expect(lastMeta(first.statuses)?.lastCheckedAt).toEqual(expect.any(String))
+    const indexedAt = '2026-07-28T00:00:00.000Z'
+    const second = makeRepo(url({ liveHash, indexedAt, lastCheckedAt: indexedAt }))
     expect(await refreshUrlSource('s1', { repo: second.repo, ...deps, ...parse(page) })).toBe('unchanged')
     expect(second.inserted).toEqual([]) // nothing re-embedded
+    expect(lastMeta(second.statuses)?.indexedAt).toBe(indexedAt)
+    expect(Date.parse(String(lastMeta(second.statuses)?.lastCheckedAt))).toBeGreaterThan(Date.parse(indexedAt))
   })
 
   it('flags a manually-edited page whose live content changed, without touching its chunks', async () => {
@@ -128,5 +133,6 @@ describe('refreshUrlSource', () => {
     expect(await refreshUrlSource('s1', { repo, ...deps, parseUrl })).toBe('error')
     expect(inserted).toEqual([])
     expect(statuses.at(-1)).toMatchObject({ status: 'error', patch: { error_message: 'HTTP 404' } })
+    expect(lastMeta(statuses)).toBeUndefined() // no successful-check timestamp on failure
   })
 })
