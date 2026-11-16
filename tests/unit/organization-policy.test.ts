@@ -43,3 +43,10 @@ describe('Basic and organization policies', () => {
     expect(conversationTopupFor('starter')).toMatchObject({ conversations: 1000, price: 15 })
   })
 })
+
+it('pauses an announced legacy transition without erasing the deadline or Basic access', () => {
+  const org = { plan: 'free' as const, free_legacy: true, free_policy_effective_at: '2026-11-01T00:00:00Z', free_policy_paused: true }
+  expect(organizationEntitlements(org, new Date('2026-11-16T00:00:00Z'))).toMatchObject({ conversations: 100, handoff: true })
+  expect(organizationEntitlements({ ...org, free_policy_paused: false }, new Date('2026-11-16T00:00:00Z'))).toMatchObject({ conversations: 50, handoff: false })
+  expect(organizationEntitlements({ ...org, plan: 'basic' })).toMatchObject({ conversations: 400, handoff: true })
+})

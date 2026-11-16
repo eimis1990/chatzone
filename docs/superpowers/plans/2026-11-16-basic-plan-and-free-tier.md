@@ -80,7 +80,7 @@ The 24-hour proposal is a Loqara billing-session rule, not Meta's messaging perm
 - [x] Create migrations through `supabase migration new`. Expand the organizations plan constraint to accept Basic. Inspect the actual production constraint name before writing the migration; do not replace the existing migration.
 - [x] Store policy version/cohort and effective timestamps sufficient to reproduce legacy-Free access. Default legacy records to existing behavior until explicitly scheduled; default new accounts to the launched policy.
 - [x] Add separate controls for Basic purchase availability and Free policy activation. Disabling purchases must not remove entitlements from customers who already bought Basic.
-- [ ] Deploy only compatible reader code before any database row or Stripe webhook can introduce Basic. Unknown plan values must not crash Home, Subscription, owner dashboards, or revenue reporting.
+- [x] Deploy only compatible reader code before any database row or Stripe webhook can introduce Basic. Unknown plan values must not crash Home, Subscription, owner dashboards, or revenue reporting.
 
 **Gate:** matrix tests cover every plan and legacy policy; old plans behave unchanged; migration accepts Basic; clients cannot edit their own plan or policy fields; Basic remains unavailable for purchase.
 
@@ -154,14 +154,14 @@ The 24-hour proposal is a Loqara billing-session rule, not Meta's messaging perm
 
 **Depends on:** Phases 2–5.
 
-- [ ] Rehearse the full rollout on isolated test organizations. Local/preview Stripe tests currently can write to the production database: isolate test data and customer IDs, and do not reconcile real client subscriptions with sandbox prices.
+- [x] Rehearse the full rollout on isolated test organizations. Local/preview Stripe tests currently can write to the production database: isolate test data and customer IDs, and do not reconcile real client subscriptions with sandbox prices.
 - [x] Generate an impact report for the legacy-Free cohort, including accounts already above 50 conversations, open handoffs, and enabled commerce. Preview the policy changes without applying them.
 - [x] Prepare customer notice and in-app copy describing 50 conversations, removed handoff, any other newly enforced restrictions, the effective date, retained data, and Basic as an option. The owner reviews and sends/authorizes notices; this planning task sends nothing.
 - [x] Start each applicable notice window from recorded notification availability/delivery, with at least 30 days before enforcement. Failed notice delivery must not silently shorten the window.
 - [x] Define a bounded handoff wind-down: stop new requests at the effective date, preserve existing active handoffs briefly for resolution, and close stale waiting states with honest visitor messaging. Record the selected duration in the runbook; no permanent Free handoff exception.
 - [x] Verify already-used conversations are retained. Users above the new limit can finish permitted existing activity but cannot create new metered sessions until reset, upgrade, or an eligible credit purchase.
 - [x] Ensure paid-to-Free downgrades use the new Free policy once effective and do not revive the legacy cohort. Internal demos remain separately classified.
-- [ ] Exercise the rollback controls before launch: disable new purchases, pause policy activation, and retain service for existing Basic subscribers.
+- [x] Exercise the rollback controls before launch: disable new purchases, pause policy activation, and retain service for existing Basic subscribers.
 
 **Gate:** no deleted data, accidental customer charges, immediate unannounced withdrawal, stuck handoffs, or reset usage. The notice cohort and rollback procedure are reproducible.
 
@@ -238,15 +238,34 @@ Stripe's fulfillment guidance requires payment-state checks, safe repeat fulfill
   declined-payment preservation. Test customers/subscriptions cleaned up.
 - Hosted Postgres race: 12 requests at 399/400 admitted exactly one. Anonymous
   quota RPC rejected, failure releases capacity, same-session reuse counts once.
-- Final full offline run: 908 tests passed; three network suites could not connect
+- Final unit + SQL suite: **148 files / 909 tests passed**. Full offline run before
+  the final pause assertion: 908 tests passed; three network suites could not connect
   inside the sandbox. Network-enabled rerun: 16 passed, one **pre-existing**
   provider-neutral product-color ranking expectation failed. That test and the
   shared matcher are unchanged by this release; see wiki provider-isolation
   convention. Seven opt-in live suites remain skipped. No new billing/access/
   usage regression failed. Typecheck, lint (zero errors), and production build
   passed. Desktop and 390px mobile public pricing checked in Chrome.
-- Signed sandbox webhook rehearsal, authenticated Subscription UI, production
-  activation and post-deployment smoke checks: in progress.
+- Compatible deployment `5940923`, `dpl_2sHaf6zNXG8GisiyuQakpQun8XBD`, is READY
+  with Basic sales and notice windows disabled. Live webhook now subscribes to
+  all ten supported events, retaining snapshot API `2026-07-29.dahlia`.
+- Real sandbox **browser** checkout paid €49 and activated Basic through signed
+  `invoice.paid`, `checkout.session.completed` and subscription-created events,
+  all HTTP 200. A real sandbox €15 top-up credited exactly 200 once; UI showed
+  600 total, its invoice was paid with Managed Payments disabled, and two signed
+  replays after cancellation kept one grant and the original expiry. Delayed-payment/replay/error handling also has focused unit tests.
+- Browser testing found a pre-existing Next render-fetch memoization bug:
+  post-payment billing rereads could show Free while usage showed Basic. Fixed
+  using a fresh AbortSignal, then verified by deliberately making the test
+  billing mirror stale and observing automatic recovery on the first render.
+- Production isolated-bot checks: Basic one language, badge retained, leads,
+  handoff/dictation enabled; order lookup HTTP 403; known HomeByNB public-catalog
+  query returned 12 products. Free lead/order/handoff HTTP 403. Basic full
+  analytics/CSAT/export and Free activity-only screen verified while retaining
+  data. Magento demo returned no products, so the known live WooCommerce
+  catalog was used for the successful search test.
+- HomeByNB remains Starter/female; 1,012 conversations retained. Final sales
+  activation, live Checkout preview and notice-window test are in progress.
 - Loqara platform chatbot pricing correction prepared; publish/re-index together
   with enabled pricing. No client knowledge sources are changed.
 - Existing Free transition audit, first real customer purchase, first-day/week

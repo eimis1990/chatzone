@@ -45,7 +45,11 @@ export default async function SubscriptionPage({
         'plan, subscription_status, billing_interval, current_period_end, cancel_at_period_end, stripe_customer_id, stripe_subscription_id, voice_addon, visualizer_addon',
       )
       .eq('id', oid)
+      // A post-Checkout reconciliation writes during this render. An explicit
+      // signal opts this GET out of React fetch memoization so the reread is fresh.
+      .abortSignal(new AbortController().signal)
       .single()
+    if (error || !data) throw new Error('Could not load billing details. Please try again.')
     const d = (!error && data ? data : {}) as Partial<{
       plan: Plan
       subscription_status: SubscriptionStatus
@@ -82,7 +86,7 @@ export default async function SubscriptionPage({
     ])
     const { data: bots } = await sb.from('bots').select('id').eq('org_id', oid)
     const botIds = (bots ?? []).map((b) => (b as { id: string }).id)
-    if (!botIds.length) return { conversationsUsed: 0, botsUsed: 0, extraConversations, ...voice }
+    // Usage survives bot deletion; an empty bot list must not reset the display.
     const count = await conversationsThisMonth(createServiceClient(), oid)
     return { conversationsUsed: count, botsUsed: botIds.length, extraConversations, ...voice }
   }
@@ -413,7 +417,7 @@ export default async function SubscriptionPage({
           blurb: VISUALIZER_ADDON.blurb,
           features: [...VISUALIZER_ADDON.features],
         }}
-        extraConversationsConfigured={Boolean(getExtraConversationsPriceId(billing.plan))}
+        extraConversationsConfigured={Boolean(getExtraConversationsPriceId(billing.plan === 'free' ? 'basic' : billing.plan))}
         extraConversationsCredits={usage.extraConversations}
         extraConversations={{
           name: topup.name,

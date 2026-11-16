@@ -549,3 +549,14 @@ both `messages` and `visitor_blocks` returned HTTP 400 Bad Request, and the
 block lookup threw the redacted production Server Components error. Use bounded
 pages and embedded counts instead of fetching every message to count in JS
 (`lib/conversations.ts:18`). See [client-portal](client-portal.md#conversation-history-pagination-2026-11-16).
+
+## Billing rereads can reuse the pre-payment row inside one render
+
+Next 16 memoizes identical GET fetches during a Server Component render, even
+when a fresh Supabase client is created. Subscription first read Free, reconciled
+paid Basic from Stripe, then its identical reread returned Free again while a
+separate policy read showed 400 conversations. The billing query now passes a
+fresh `AbortController().signal` to opt out of memoization and throws on read
+failure (`app/(client)/app/subscription/page.tsx:49`). Verified with a real sandbox
+Checkout and a deliberately stale billing mirror on 2026-11-16. See the installed
+Next `fetch` guide's Memoization section; `cache: no-store` alone is insufficient.
