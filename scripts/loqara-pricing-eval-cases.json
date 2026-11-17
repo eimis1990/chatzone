@@ -1,0 +1,165 @@
+[
+  {
+    "id": "basic_en",
+    "language": "en",
+    "question": "What does Basic cost monthly and yearly, how many conversations, bots and languages do I get, and does it include product search, live handoff, leads, dictation, analytics and CSAT? Can I remove the badge or look up orders?",
+    "mustInclude": [
+      "€49/month or €490/year",
+      "400 conversations/month, 1 bot and 1 language",
+      "product search, handoff, lead capture, voice dictation, full analytics and CSAT included",
+      "badge stays and no order lookup"
+    ]
+  },
+  {
+    "id": "free_lt",
+    "language": "lt",
+    "question": "Koks dabar Free plano pokalbių limitas, kiek robotų ir kalbų? Ar nemokamai yra gyvas konsultantas, kontaktų rinkimas, diktavimas, prekių ar užsakymų paieška?",
+    "mustInclude": [
+      "50 conversations/month, 1 bot, 1 language",
+      "no live handoff, lead capture, dictation, product search or order lookup"
+    ]
+  },
+  {
+    "id": "basic_lt",
+    "language": "lt",
+    "question": "Kiek kainuoja Basic mėnesiui ir metams? Kiek pokalbių gaunu, ar yra prekių paieška ir gyvas konsultantas, ar galėsiu pašalinti Loqara ženklelį?",
+    "mustInclude": [
+      "€49/month or €490/year",
+      "400 conversations/month",
+      "product search and handoff included",
+      "badge cannot be removed"
+    ]
+  },
+  {
+    "id": "starter_en",
+    "language": "en",
+    "question": "What does Starter add compared with Basic? Please include monthly and annual price, conversations, bots, languages, badge removal and order lookup support.",
+    "mustInclude": [
+      "€149/month or €1,490/year",
+      "1,500 conversations/month, 2 bots",
+      "English and Lithuanian, badge removal",
+      "order lookup on WooCommerce and Magento only"
+    ]
+  },
+  {
+    "id": "shopify_lt",
+    "language": "lt",
+    "question": "Turiu Shopify. Ar su Basic veiks prekių paieška? Jei pereisiu į Starter, ar galėsiu tikrinti užsakymo būseną?",
+    "mustInclude": [
+      "Basic includes Shopify product search",
+      "Shopify order lookup unsupported even on Starter"
+    ]
+  },
+  {
+    "id": "topups_en",
+    "language": "en",
+    "question": "What do extra conversations cost on Basic versus Starter, can Free buy them, are they charged automatically, and when do unused credits expire?",
+    "mustInclude": [
+      "Basic 200 for €15",
+      "Starter 1,000 for €15",
+      "Free cannot buy",
+      "manual purchases not automatic",
+      "expire end of UTC payment month"
+    ]
+  },
+  {
+    "id": "voice_lt",
+    "language": "lt",
+    "question": "Ar Basic balso diktavimas ir gyvi balso agento skambučiai yra tas pats? Kiek skambučiai kainuoja, kiek minučių įtraukta ir ar jie naudoja 400 tekstinių pokalbių limitą?",
+    "mustInclude": [
+      "dictation is included text input, live calls a separate add-on",
+      "€49/month, about 200 minutes, then €0.20/min",
+      "calls use minutes only, not 400 text allowance"
+    ]
+  },
+  {
+    "id": "counting_en",
+    "language": "en",
+    "question": "What exactly counts as a conversation? If someone returns after 24 hours of inactivity or crosses into a new month in the same chat, does it count again? Do human-only replies, previews and Messenger count?",
+    "mustInclude": [
+      "AI session counted once after an automated answer",
+      "new session after 24h inactivity or new UTC calendar month",
+      "human-only and previews excluded",
+      "Messenger shares text allowance"
+    ]
+  },
+  {
+    "id": "annual_lt",
+    "language": "lt",
+    "question": "Jei Basic apmokėsiu už metus, ar iš karto turėsiu 4800 pokalbių? Ar 40,83 € yra įprasta mėnesinė sąskaita? Kiek mokėčiau pasirinkęs mėnesinį atsiskaitymą ir kada atsinaujina pokalbių limitas?",
+    "mustInclude": [
+      "€490 billed yearly; €40.83 is only monthly equivalent",
+      "€49 monthly billing",
+      "400 per UTC calendar month, not 4,800 upfront"
+    ]
+  },
+  {
+    "id": "messenger_en",
+    "language": "en",
+    "question": "Is Facebook Messenger actually available with Basic now, what does it cost monthly or annually, and do its conversations share my limit? Can I connect Instagram or WhatsApp too?",
+    "mustInclude": [
+      "Messenger available on Basic paid add-on",
+      "€19/month or €228/year with annual base billing",
+      "shared text allowance",
+      "Instagram and WhatsApp coming soon"
+    ]
+  },
+  {
+    "id": "recommend_lt",
+    "language": "lt",
+    "question": "Mažai parduotuvei reikia vieno roboto lietuvių kalba, apie 200 pokalbių per mėnesį, prekių paieškos, kontaktų rinkimo ir perdavimo žmogui. Užsakymų tikrinti nereikia. 149 € per brangu. Ką rekomenduojate?",
+    "mustInclude": [
+      "recommend Basic",
+      "€49/month",
+      "400 conversations, requested functions included"
+    ]
+  },
+  {
+    "id": "limits_en",
+    "language": "en",
+    "question": "Can Basic answer in both Lithuanian and English and let me hide the Loqara badge? What is the lowest plan that allows both?",
+    "mustInclude": [
+      "Basic one chosen language and badge remains",
+      "Starter minimum for both languages and badge removal"
+    ]
+  },
+  {
+    "id": "old_claim_en",
+    "language": "en",
+    "question": "An older answer said your Free plan has 100 conversations and live handoff, and paid plans start at €149. Is that still the current offer for a new account?",
+    "mustInclude": [
+      "current Free 50, no live handoff",
+      "Basic €49 is entry paid tier",
+      "old claims not current for new accounts"
+    ]
+  },
+  {
+    "id": "higher_lt",
+    "language": "lt",
+    "question": "Kokios Growth ir Scale mėnesinės ir metinės kainos, pokalbių bei robotų ribos?",
+    "mustInclude": [
+      "Growth €249/month or €2,490/year, 4,000 conversations, up to 5 bots",
+      "Scale €449/month or €4,490/year, 12,000 conversations, unlimited bots"
+    ]
+  },
+  {
+    "id": "setup_en",
+    "language": "en",
+    "question": "Is setup free? What are the optional done-for-you prices, and does buying E-commerce setup unlock order lookup while I remain on Basic?",
+    "mustInclude": [
+      "self-service setup free",
+      "Essential €749 and E-commerce €995 one-time",
+      "setup does not override Basic's lack of order lookup"
+    ]
+  },
+  {
+    "id": "pack_change_lt",
+    "language": "lt",
+    "question": "Jei su Basic nusipirksiu papildomų pokalbių už 15 € ir pereisiu į Starter, ar mano nupirktas paketas taps 1000 pokalbių ir pradės galioti kitą mėnesį?",
+    "mustInclude": [
+      "Basic purchase stays 200",
+      "plan change does not alter quantity or expiry",
+      "expires end of UTC payment month"
+    ]
+  }
+]

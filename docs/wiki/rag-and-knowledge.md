@@ -292,3 +292,43 @@ re-crawling the homepage alone does not update that source. Basic launch updated
 the override and re-indexed it plus the homepage (70 total chunks; no old
 Free/100-conversation claim). Resolve by platform org + bot ID, never by display
 name. See [entitlements](plans-and-entitlements.md).
+
+### Keep both Loqara assistants current (2026-11-17)
+
+- The website bot is `f17aa806-65f5-454d-b819-5bef4351c8c1` in the platform
+  organization. Its curated file is `1c3cd533-a03e-4083-b64c-d016d3cfb5a8`.
+  [Current EN/LT knowledge](../knowledge/loqara-platform.md) mirrors its
+  `metadata.contentOverride`; this update re-indexed 32 chunks (80 across all
+  four sources). The homepage already had current Basic pricing; legal sources
+  contain no obsolete numeric plan limits. No canonical sources exist here.
+- The live Loqara Facebook Page is wired to a **different** bot,
+  `e0aadebc-c5d7-424c-a6c5-a296132504ea`, named **Loqara Demo**. Its organization
+  has neither `is_platform` nor `is_demo` set. Confirm ownership through active
+  connection `4161152d-292b-4183-9380-54b335b45eab`, not a name match. Its homepage
+  was refreshed and curated text source `76970af1-a721-4b77-b7e6-9e46a5234576`
+  now holds the same knowledge in `metadata.content`.
+- Update **instructions as well as retrieved chunks**. The old website prompt
+  listed only Free/Starter/Growth/Scale. Published immutable v2
+  (`b005b558-a137-4021-803c-dd52a78b1433`) in prompt family
+  `15a1550b-3867-488a-92bf-8a741646ea87`, pinned it, and verified that the bot
+  snapshot, published version and library draft match. Editing only the snapshot
+  would be undone on the next settings save (`lib/prompt-versions.ts:13`).
+  [Website prompt](../prompt-templates/loqara-landing-showcase.md:28) and
+  [Messenger custom prompt](../prompt-templates/loqara-messenger.md:5) explicitly
+  prioritize verified current plan facts over stale retrieval/history. Messenger
+  remains an unlinked custom prompt, preserving its existing configuration model.
+- Future pricing releases must update these two prompts, both curated source
+  copies and affected website sources, then re-index and test both assistants.
+  Align with `lib/plans-catalog.ts:26`, `lib/entitlements.ts:30`, and
+  [conversation usage](conversation-usage.md); do not change other clients' bots.
+- Validation: 16 website pricing scenarios in English/Lithuanian, including an
+  annual-billing follow-up, and 3 Messenger processor scenarios gave correct
+  plan/feature answers. Cases live in `scripts/loqara-pricing-eval-cases.json`;
+  send each case's `language` explicitly to `/api/chat` (the older
+  `eval-answers.mjs` only passes it to the judge). Messenger exercised
+  `processChannelMessage` against its live bot/knowledge using preview fixtures;
+  no Facebook message was sent. Deleted all 19 test chats and 16 usage rows.
+- Voice uses the website prompt snapshot (`lib/ai/elevenlabs-agent.ts:99`), and
+  its config hash includes that text (`:290`). The production voice-token route
+  successfully synced the updated agent and minted a token. No paid voice call
+  was made; direct provider readback was unavailable with the local API key.
