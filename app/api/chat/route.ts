@@ -6,6 +6,8 @@ import { chatRequestSchema } from '@/lib/validation/schemas'
 import { isOriginAllowed, corsHeaders } from '@/lib/widget-auth'
 import { retrieveContext, serviceRetrievalDeps } from '@/lib/ai/retrieval'
 import { buildMessages, contentFor, defaultLanguage, type ChatMessage } from '@/lib/ai/prompt'
+import { webPmsInventoryEnabled } from '@/lib/commerce/capabilities'
+import { makeWebPmsInventoryTool } from '@/lib/ai/webpms-inventory-tool'
 import { commerceEnabled, makeProductTools, ndjsonChatResponse, ndjsonText } from '@/lib/ai/commerce-tool'
 import { DEFAULT_CHAT_MODEL, DEFAULT_TEMPERATURE } from '@/lib/ai/chat-models'
 import { fastLaneConfig, pickLane, FAST_LANE_SIMILARITY } from '@/lib/ai/fast-lane'
@@ -291,10 +293,11 @@ export async function POST(req: Request) {
     `top=${retrieval.topSimilarity.toFixed(2)} rewrote=${rewrote ? 1 : 0}`
 
   const commerce = commerceEnabled(bot.config)
+  const inventory = webPmsInventoryEnabled(bot.config.commerce)
   const baseHeaders = { ...handoffHeaders, 'x-handoff': 'bot' }
 
   // Weak retrieval with no product search → fallback + lead-capture signal.
-  if (retrieval.isWeak && !commerce) {
+  if (retrieval.isWeak && !commerce && !inventory) {
     const fallback = contentFor(bot.config, lang).fallbackMessage
     await svc.from('messages').insert({
       conversation_id: convId,
@@ -392,7 +395,11 @@ export async function POST(req: Request) {
         allowedComponents,
       )
       : {}
-  const tools = { ...productTools, ...leadTools }
+  const tools = {
+    ...productTools,
+    ...leadTools,
+    ...(inventory ? { room_inventory: makeWebPmsInventoryTool(bot.config.commerce.tlWebPmsKey) } : {}),
+  }
 
   const model = bot.config.model || DEFAULT_CHAT_MODEL
   return ndjsonChatResponse(openai(model), messages, {

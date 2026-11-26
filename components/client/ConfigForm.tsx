@@ -2628,6 +2628,7 @@ function CommerceSection({ control, watch, setValue, botId, canUseProducts, canU
   const restSecret = watch('commerce.restSecret') ?? ''
   const magentoToken = watch('commerce.magentoToken') ?? ''
   const feedUrl = watch('commerce.feedUrl') ?? ''
+  const tlWebPmsKey = watch('commerce.tlWebPmsKey') ?? ''
   const tlClientId = watch('commerce.tlClientId') ?? ''
   const tlClientSecret = watch('commerce.tlClientSecret') ?? ''
   const tlPropertyId = watch('commerce.tlPropertyId') ?? ''
@@ -2763,7 +2764,9 @@ function CommerceSection({ control, watch, setValue, botId, canUseProducts, canU
         ? Boolean(feedUrl.trim())
         : provider === 'travelline'
           ? Boolean(tlClientId.trim() && tlClientSecret.trim() && tlPropertyId.trim())
-          : Boolean(storeUrl.trim())
+          : provider === 'travelline_webpms'
+            ? Boolean(tlWebPmsKey.trim())
+            : Boolean(storeUrl.trim())
 
   const skipNextTestResetRef = useRef(false)
 
@@ -2789,7 +2792,9 @@ function CommerceSection({ control, watch, setValue, botId, canUseProducts, canU
                   tlClientSecret: tlClientSecret.trim(),
                   tlPropertyId: tlPropertyId.trim(),
                 }
-              : { provider, storeUrl: storeUrl.trim() }
+              : provider === 'travelline_webpms'
+                ? { provider, tlWebPmsKey: tlWebPmsKey.trim() }
+                : { provider, storeUrl: storeUrl.trim() }
       const res = await fetch('/api/commerce/validate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -2816,10 +2821,10 @@ function CommerceSection({ control, watch, setValue, botId, canUseProducts, canU
     } catch {
       setTestState({ status: 'error', message: 'Network error — please try again.' })
     }
-  }, [botId, provider, storeUrl, shopifyDomain, shopifyToken, feedUrl, tlClientId, tlClientSecret, tlPropertyId, testReady, setValue])
+  }, [botId, provider, storeUrl, shopifyDomain, shopifyToken, feedUrl, tlWebPmsKey, tlClientId, tlClientSecret, tlPropertyId, testReady, setValue])
 
   // Reset test state when the connection inputs change.
-  const connKey = `${provider}:${storeUrl}:${shopifyDomain}:${shopifyToken}:${feedUrl}:${tlClientId}:${tlClientSecret}:${tlPropertyId}`
+  const connKey = `${provider}:${storeUrl}:${shopifyDomain}:${shopifyToken}:${feedUrl}:${tlWebPmsKey}:${tlClientId}:${tlClientSecret}:${tlPropertyId}`
   const prevConnRef = useRef(connKey)
   if (prevConnRef.current !== connKey) {
     prevConnRef.current = connKey
@@ -2874,6 +2879,7 @@ function CommerceSection({ control, watch, setValue, botId, canUseProducts, canU
                       <SelectItem value="verskis">Verskis</SelectItem>
                       <SelectItem value="feed">Product feed (XML / CSV / JSON)</SelectItem>
                       <SelectItem value="travelline">TravelLine (hotels)</SelectItem>
+                      <SelectItem value="travelline_webpms">TravelLine WebPMS (room inventory)</SelectItem>
                     </SelectContent>
                   </Select>
                 )}
@@ -2986,6 +2992,22 @@ function CommerceSection({ control, watch, setValue, botId, canUseProducts, canU
               </div>
             )}
 
+            {provider === 'travelline_webpms' && (
+              <div className="space-y-1.5">
+                <Label htmlFor="tlWebPmsKey">WebPMS API key</Label>
+                <Controller
+                  name="commerce.tlWebPmsKey"
+                  control={control}
+                  render={({ field }) => (
+                    <Input {...field} value={field.value ?? ''} id="tlWebPmsKey" type="password" autoComplete="off" />
+                  )}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Reads total rooms and room types for the hotel linked to this key.
+                </p>
+              </div>
+            )}
+
             {/* TravelLine: Partner API credentials + hotel property id. */}
             {provider === 'travelline' && (
               <div className="space-y-3">
@@ -3088,7 +3110,7 @@ function CommerceSection({ control, watch, setValue, botId, canUseProducts, canU
               {testState.status === 'ok' && (
                 <TestBadge variant="ok">
                   {testState.count > 0
-                    ? provider === 'travelline'
+                    ? provider === 'travelline' || provider === 'travelline_webpms'
                       ? `Connected — ${testState.count} room type${testState.count !== 1 ? 's' : ''}`
                       : `Connected — ${testState.count.toLocaleString()} product${testState.count !== 1 ? 's' : ''} in catalog`
                     : 'Connected'}

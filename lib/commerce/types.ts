@@ -1,4 +1,4 @@
-export type CommerceProvider = 'woocommerce' | 'woocommerce_legacy' | 'shopify' | 'magento' | 'verskis' | 'feed' | 'travelline'
+export type CommerceProvider = 'woocommerce' | 'woocommerce_legacy' | 'shopify' | 'magento' | 'verskis' | 'feed' | 'travelline' | 'travelline_webpms'
 
 /** Normalized product shape used by the chat tool + product cards. */
 export interface CommerceProduct {

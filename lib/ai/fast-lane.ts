@@ -1,6 +1,6 @@
 import type { BotConfig } from '@/lib/types'
 import type { ShownProducts } from '@/lib/ai/prompt'
-import { storeConfigured } from '@/lib/commerce/capabilities'
+import { storeConfigured, webPmsInventoryEnabled } from '@/lib/commerce/capabilities'
 
 /**
  * Fast lane: a visitor turn that the knowledge base answers convincingly and
@@ -46,7 +46,7 @@ export function pickLane(
    *  (HomeByNB, 2026-09). Undefined = unknown → treated as not canonical. */
   topIsCanonical?: boolean,
 ): Lane {
-  if (!config.fastLane) return 'full'
+  if (!config.fastLane || webPmsInventoryEnabled(config.commerce)) return 'full'
   if (topSimilarity < FAST_LANE_SIMILARITY) return 'full'
   // No store → nothing to skip; the prompt is already the plain KB one.
   if (!storeConfigured(config.commerce)) return 'fast'

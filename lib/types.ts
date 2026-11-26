@@ -335,7 +335,7 @@ export interface BotConfig {
     /** Runtime-only server policy; never trusted from saved/client config. */
     orderLookupAllowed?: boolean
     enabled: boolean
-    provider: 'woocommerce' | 'woocommerce_legacy' | 'shopify' | 'magento' | 'verskis' | 'feed' | 'travelline'
+    provider: 'woocommerce' | 'woocommerce_legacy' | 'shopify' | 'magento' | 'verskis' | 'feed' | 'travelline' | 'travelline_webpms'
     storeUrl: string
     /** WooCommerce REST consumer key/secret — server-only, for order lookups. */
     restKey?: string
@@ -347,6 +347,8 @@ export interface BotConfig {
     magentoToken?: string
     /** Product feed URL (JSON/XML/CSV) for the 'feed' provider. */
     feedUrl?: string
+    /** Hotel-scoped WebPMS key for read-only room inventory. */
+    tlWebPmsKey?: string
     /** TravelLine Partner API credentials (server-only) + hotel property id. */
     tlClientId?: string
     tlClientSecret?: string

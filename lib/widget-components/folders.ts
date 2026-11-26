@@ -12,6 +12,7 @@ const PROVIDER_LABELS = {
   verskis: 'Verskis',
   feed: 'Product feed',
   travelline: 'TravelLine',
+  travelline_webpms: 'TravelLine WebPMS',
 } satisfies Record<CommerceProvider, string>
 
 export interface ComponentFolder {

@@ -22,12 +22,19 @@ export interface CommerceConfig {
   magentoToken?: string
   /** Product feed URL (JSON/XML/CSV) for the 'feed' provider. */
   feedUrl?: string
+  /** Hotel-scoped WebPMS key for read-only room inventory. */
+  tlWebPmsKey?: string
   /** TravelLine Partner API credentials (server-only) + hotel property id. */
   tlClientId?: string
   tlClientSecret?: string
   tlPropertyId?: string
   /** A static discount the agent can offer on discount intent. */
   discount?: { enabled: boolean; code?: string; description?: string }
+}
+
+/** WebPMS inventory is independent of Partner API room search and booking. */
+export function webPmsInventoryEnabled(config: CommerceConfig | undefined): boolean {
+  return Boolean(config?.enabled && config.provider === 'travelline_webpms' && config.tlWebPmsKey?.trim())
 }
 
 /** Whether the active provider has the fields it needs to run a search. */

@@ -10,12 +10,13 @@ export const maxDuration = 20
 const bodySchema = z.object({
   botId: z.string().uuid().optional(),
   provider: z
-    .enum(['woocommerce', 'woocommerce_legacy', 'shopify', 'magento', 'verskis', 'feed', 'travelline'])
+    .enum(['woocommerce', 'woocommerce_legacy', 'shopify', 'magento', 'verskis', 'feed', 'travelline', 'travelline_webpms'])
     .default('woocommerce'),
   storeUrl: z.string().optional(),
   shopifyDomain: z.string().optional(),
   shopifyToken: z.string().optional(),
   feedUrl: z.string().optional(),
+  tlWebPmsKey: z.string().trim().optional(),
   tlClientId: z.string().optional(),
   tlClientSecret: z.string().optional(),
   tlPropertyId: z.string().optional(),
@@ -69,6 +70,7 @@ export async function POST(req: Request) {
     shopifyDomain: parsed.data.shopifyDomain,
     shopifyToken: parsed.data.shopifyToken,
     feedUrl: parsed.data.feedUrl,
+    tlWebPmsKey: parsed.data.tlWebPmsKey,
     tlClientId: parsed.data.tlClientId,
     tlClientSecret: parsed.data.tlClientSecret,
     tlPropertyId: parsed.data.tlPropertyId,
@@ -98,6 +100,7 @@ export async function POST(req: Request) {
       feed: 'Could not read a product feed at that URL (expects JSON, XML, or CSV).',
       woocommerce: 'Could not reach the WooCommerce Store API at that URL.',
       woocommerce_legacy: 'Could not reach the legacy WooCommerce catalogue. Use the canonical store URL (including https).',
+      travelline_webpms: 'Could not read room inventory. Check the TravelLine WebPMS API key.',
       travelline: 'Could not authenticate with TravelLine — check the client ID, secret, and property ID.',
     }
     return NextResponse.json({ ok: false, error: errors[parsed.data.provider] ?? errors.woocommerce })

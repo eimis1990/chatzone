@@ -81,7 +81,7 @@ type LiveConfig = {
   }
   commerce?: {
     enabled?: boolean
-    provider?: 'woocommerce' | 'woocommerce_legacy' | 'shopify' | 'magento' | 'verskis' | 'feed' | 'travelline'
+    provider?: 'woocommerce' | 'woocommerce_legacy' | 'shopify' | 'magento' | 'verskis' | 'feed' | 'travelline' | 'travelline_webpms'
     storeUrl?: string
     restKey?: string
     restSecret?: string
@@ -89,6 +89,7 @@ type LiveConfig = {
     shopifyToken?: string
     magentoToken?: string
     feedUrl?: string
+    tlWebPmsKey?: string
     tlClientId?: string
     tlClientSecret?: string
     tlPropertyId?: string
@@ -768,6 +769,7 @@ function buildFullConfig(config: LiveConfig): BotConfig {
       // it silently loses product search (feed demos showed text lists, no cards).
       magentoToken: config.commerce?.magentoToken,
       feedUrl: config.commerce?.feedUrl,
+      tlWebPmsKey: config.commerce?.tlWebPmsKey,
       tlClientId: config.commerce?.tlClientId,
       tlClientSecret: config.commerce?.tlClientSecret,
       tlPropertyId: config.commerce?.tlPropertyId,

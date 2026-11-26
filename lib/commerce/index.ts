@@ -49,6 +49,7 @@ import {
   validateVerskisStore,
 } from '@/lib/commerce/verskis'
 import { assertPublicUrl } from '@/lib/net/ssrf'
+import { fetchWebPmsInventory } from '@/lib/commerce/travelline-webpms'
 import { storeConfigured } from '@/lib/commerce/capabilities'
 import type { CommerceConfig } from '@/lib/commerce/capabilities'
 
@@ -190,6 +191,7 @@ export async function validateStore(
     shopifyDomain?: string
     shopifyToken?: string
     feedUrl?: string
+    tlWebPmsKey?: string
     tlClientId?: string
     tlClientSecret?: string
     tlPropertyId?: string
@@ -212,6 +214,13 @@ export async function validateStore(
       return config.storeUrl ? validateVerskisStore(config.storeUrl, deps) : { ok: false, total: 0 }
     case 'feed':
       return config.feedUrl ? validateFeed(config.feedUrl, deps) : { ok: false, total: 0 }
+    case 'travelline_webpms':
+      try {
+        const { roomTypeCount } = await fetchWebPmsInventory(config.tlWebPmsKey, deps)
+        return { ok: true, total: roomTypeCount }
+      } catch {
+        return { ok: false, total: 0 }
+      }
     case 'travelline':
       return config.tlClientId && config.tlClientSecret && config.tlPropertyId
         ? validateTravellineStore(

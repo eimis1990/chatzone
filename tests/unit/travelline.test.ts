@@ -1,3 +1,5 @@
+import { fetchWebPmsInventory } from '@/lib/commerce/travelline-webpms'
+import { webPmsInventoryEnabled, storeConfigured } from '@/lib/commerce/capabilities'
 import { describe, it, expect, vi } from 'vitest'
 import {
   searchTravellineRooms,
@@ -258,5 +260,36 @@ describe('validateTravellineStore', () => {
       { fetchImpl: failing },
     )
     expect(res).toEqual({ ok: false, total: 0 })
+  })
+})
+
+describe('WebPMS inventory', () => {
+  it('reads the keyed room list and returns only distinct counts', async () => {
+    const fetchImpl = vi.fn(async () => Response.json([
+      { id: '1', roomTypeId: 'A', name: 'Private room label' },
+      { id: '2', roomTypeId: 'A' },
+      { id: '1', roomTypeId: 'A' },
+      { id: '3', roomTypeId: 'B' },
+    ]))
+    expect(await fetchWebPmsInventory('hotel-key', { fetchImpl })).toEqual({ roomCount: 3, roomTypeCount: 2 })
+    expect(fetchImpl).toHaveBeenCalledWith('https://partner.tlintegration.com/api/webpms/v1/rooms',
+      expect.objectContaining({ headers: { 'X-API-KEY': 'hotel-key', Accept: 'application/json' }, redirect: 'error' }))
+  })
+
+  it('distinguishes empty inventory from malformed data and authentication failure', async () => {
+    expect(await fetchWebPmsInventory('key', { fetchImpl: async () => Response.json([]) }))
+      .toEqual({ roomCount: 0, roomTypeCount: 0 })
+    for (const response of [Response.json([{ id: 1 }]), new Response(null, { status: 401 })]) {
+      await expect(fetchWebPmsInventory('key', { fetchImpl: async () => response })).rejects.toThrow()
+    }
+  })
+
+  it('enables inventory independently of the Partner API and respects the plan gate', () => {
+    const config = { ...CONFIG, provider: 'travelline_webpms' as const, tlWebPmsKey: 'key' }
+    expect(webPmsInventoryEnabled(config)).toBe(true)
+    expect(storeConfigured(config)).toBe(false)
+    expect(webPmsInventoryEnabled({ ...config, enabled: false })).toBe(false)
+    expect(webPmsInventoryEnabled({ ...config, provider: 'travelline' })).toBe(false)
+    expect(storeConfigured(CONFIG)).toBe(true)
   })
 })

@@ -126,3 +126,7 @@ prefer explicit 20-item pagination/load-more over an unbounded display set.
    or provider capabilities change.
 
 _Last verified: 2026-07-17._
+
+WebPMS has a separate inventory-only profile. Text chat registers the room count
+tool independently of catalog search. Partner API room browsing and dated offers
+still use the TravelLine profile. See [room inventory](commerce.md#travelline-room-inventory).

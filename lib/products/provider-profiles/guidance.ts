@@ -34,6 +34,7 @@ const promptGuidance: Readonly<Record<CommerceProvider, CommerceProviderPromptGu
       'preview cards and the rest remain available behind the full-results list.',
   },
   feed: {},
+  travelline_webpms: {},
   travelline: {
     queryGuidance:
       'This is a HOTEL (possibly a chain — offers are then prefixed with the hotel name; if the ' +

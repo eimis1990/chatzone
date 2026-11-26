@@ -446,3 +446,17 @@ Live product search starts at Basic; order lookup requires Starter+. Runtime
 or executing widget/preview/voice requests. Connector support and identity
 checks remain required. Saved credentials survive downgrade. See
 [entitlements](plans-and-entitlements.md) and `lib/commerce/capabilities.ts:78`.
+
+## TravelLine room inventory
+
+Select **TravelLine WebPMS (room inventory)** for a hotel's single WebPMS key.
+The connector calls the fixed WebPMS rooms endpoint and counts distinct physical
+room IDs and distinct room type IDs. Only the two totals reach the text chat
+tool. **Test connection** reports the room type count. Failed reads surface as
+unknown, while an empty inventory returns zero for both totals.
+See `lib/commerce/travelline-webpms.ts:8` and `lib/ai/webpms-inventory-tool.ts:6`.
+
+The key scopes the request to one hotel. The response omits the numeric property
+ID and carries no availability or pricing. Dated offers use the separate
+TravelLine Partner API provider and its client ID and secret.
+[WebPMS reference](https://partner.tlintegration.com/api/webpms/swagger/ui/index).

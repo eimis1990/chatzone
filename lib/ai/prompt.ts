@@ -3,6 +3,7 @@ import type { BotConfig, BotLanguage, LanguageContent } from '@/lib/types'
 import type { CommerceProduct } from '@/lib/commerce/types'
 import {
   storeConfigured,
+  webPmsInventoryEnabled,
   orderLookupEnabled,
   productDetailsSupported,
   shippingInfoSupported,
@@ -46,6 +47,7 @@ export function buildSystemPrompt(
   context: ContextChunk[],
   lang: BotLanguage = defaultLanguage(config),
   shownProducts?: ShownProducts,
+  inventoryToolAvailable = false,
 ): string {
   const contextBlock = context.length
     ? context.map((c) => `[source: ${c.source_id}]\n${c.content}`).join('\n\n')
@@ -327,6 +329,13 @@ export function buildSystemPrompt(
           'your text to WHY they fit; the cards show the rest.',
       )
     }
+  } else if (inventoryToolAvailable) {
+    lines.push(
+      'For questions about the total number of physical rooms or distinct room types, call room_inventory ' +
+      'and answer from the returned counts. If the lookup fails, say you could not verify the count. ' +
+      'These totals describe the entire hotel inventory. They cannot establish availability for a stay or prices. ' +
+      'For other questions, use only the supplied context.',
+    )
   } else {
     lines.push(
       'Answer using ONLY the context below. Do not mention, print, or reference the source ids ' +
@@ -357,7 +366,7 @@ export function buildMessages(
   lang: BotLanguage = defaultLanguage(config),
   shownProducts?: ShownProducts,
 ): ChatMessage[] {
-  const system = buildSystemPrompt(config, context, lang, shownProducts)
+  const system = buildSystemPrompt(config, context, lang, shownProducts, webPmsInventoryEnabled(config.commerce))
   const trimmedHistory = history.slice(-HISTORY_WINDOW)
 
   return [

@@ -28,6 +28,7 @@ export const commerceProviderProfiles = Object.freeze({
   verskis: verskisProductSearchProfile,
   feed: feedProductSearchProfile,
   travelline: travellineProductSearchProfile,
+  travelline_webpms: { provider: 'travelline_webpms' },
 }) satisfies Readonly<Record<CommerceProvider, CommerceProviderProfile>>
 
 export function commerceProviderProfile(config: CommerceConfig): CommerceProviderProfile {

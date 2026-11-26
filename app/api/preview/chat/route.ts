@@ -7,6 +7,8 @@ import { createServiceClient } from '@/lib/supabase/service'
 import { previewChatSchema } from '@/lib/validation/schemas'
 import { retrieveContext, serviceRetrievalDeps } from '@/lib/ai/retrieval'
 import { buildMessages, contentFor, defaultLanguage, type ChatMessage } from '@/lib/ai/prompt'
+import { webPmsInventoryEnabled } from '@/lib/commerce/capabilities'
+import { makeWebPmsInventoryTool } from '@/lib/ai/webpms-inventory-tool'
 import { commerceEnabled, makeProductTools, ndjsonChatResponse, ndjsonText } from '@/lib/ai/commerce-tool'
 import type { BotConfig } from '@/lib/types'
 import type { CommerceProduct, OrderStatus } from '@/lib/commerce/types'
@@ -73,6 +75,7 @@ export async function POST(req: Request) {
     }
   }
   const commerce = commerceEnabled(config)
+  const inventory = webPmsInventoryEnabled(config.commerce)
   // Same weak-retrieval recovery as the live chat route: elliptical follow-ups
   // ("o kur ji yra?") embed poorly on their own — retry once with a condensed
   // standalone query. The client tests in preview; it must behave like live.
@@ -85,7 +88,7 @@ export async function POST(req: Request) {
     }
   }
 
-  if (retrieval.isWeak && !commerce) {
+  if (retrieval.isWeak && !commerce && !inventory) {
     return ndjsonText(contentFor(config, lang).fallbackMessage, { 'x-weak': '1' })
   }
 
@@ -134,7 +137,11 @@ export async function POST(req: Request) {
           allowedComponents,
         )
       : {}
-  const tools = { ...productTools, ...leadTools }
+  const tools = {
+    ...productTools,
+    ...leadTools,
+    ...(inventory ? { room_inventory: makeWebPmsInventoryTool(config.commerce.tlWebPmsKey) } : {}),
+  }
 
   return ndjsonChatResponse(openai(model), messages, {
     temperature: config.temperature ?? DEFAULT_TEMPERATURE,

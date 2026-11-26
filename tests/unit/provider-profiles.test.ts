@@ -20,6 +20,7 @@ describe('commerce provider profiles', () => {
       'magento',
       'shopify',
       'travelline',
+      'travelline_webpms',
       'verskis',
       'woocommerce',
       'woocommerce_legacy',
